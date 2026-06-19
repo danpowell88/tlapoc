@@ -1,6 +1,6 @@
 # PRD-02 — Booking & Scheduling (+ client/CRM basics)
 
-> **▸ Option A alignment (rev 2, 2026-06-19).** Adds **REQ-BOOK-6**: **reschedule (move) & cancel** on the calendar, **VIP / first-time** appointment tags, **per-day & per-treatment-type counts** + utilisation/**quiet-window fill** suggestions, and an **"in-room now"** indicator with quick chart/profile links. The booking wizard (service → practitioner → time → client → confirm, **RN/NP-only for injectables**) is validated by the prototype. See [requirements §12](../02-requirements.md#12-option-a-prototype-alignment--feasibility-register).
+> **▸ Option A alignment (rev 2, 2026-06-19).** Adds **REQ-BOOK-6**: **reschedule (move) & cancel** on the calendar, **VIP / first-time** appointment tags, **per-day & per-treatment-type counts** + utilisation/**quiet-window fill** suggestions, and an **"in-room now"** indicator with quick chart/profile links. The booking wizard (service → practitioner → time → client → confirm, **RN/NP-only for injectables**) is validated by the prototype. Adds the **visit lifecycle** (status state-machine + role hand-offs), **late & no-show** flags (no-show → a follow-up call) and **new-vs-returning / reason / roster** in booking (**REQ-BOOK-7**, ADR-0024). See [requirements §12](../02-requirements.md#12-option-a-prototype-alignment--feasibility-register).
 
 > **Phase:** 1 · **Status:** Draft
 > **Requirements:** REQ-BOOK-1…5, REQ-CLI-1/2/3 · **Compliance:** C4 (scope gating), C6 (under-18 flag feed)

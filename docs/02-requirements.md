@@ -133,6 +133,7 @@ type, ≥1yr non-cosmetic experience flag, training) live on the staff profile a
 - REQ-BOOK-4: Reminders (SMS/app/email) with confirm/decline; reschedule/cancel self-service; waitlist.
 - REQ-BOOK-5 ★: An injectable booking requires a linked **consult** before treatment can be charted (gate, see RX).
 - REQ-BOOK-6: Calendar operations — **reschedule (move)** and **cancel** appointments (with reason + audit); show **client tags** on appointments (VIP/member, **first-time**, at-risk); **per-day & per-treatment-type counts**, utilisation and **quiet-window fill** suggestions; an **"in-room now"** indicator with quick links to the current client's chart/profile.
+- REQ-BOOK-7: **Visit lifecycle & hand-offs** (ADR-0024) — the appointment is a **state machine** (Booked → Confirmed → Late/No-show → In treatment → For checkout → Done → Recall) that surfaces the **next action per responsible role**; **late-attendance** and **no-show** flags (a no-show **auto-creates a follow-up call** job, REQ-NOTIF-7); booking captures **new vs returning** (full intake vs quick re-screen), **reason/notes**, and respects **practitioner roster/availability**. *(Small clinics — no formal check-in; late/missed flags instead.)*
 
 ### 5.4 Clinical charting — `CLIN`
 - REQ-CLIN-1: Treatment note from a configurable template (toxin template for v1); structured + free text; phrases/snippets.
@@ -143,6 +144,7 @@ type, ≥1yr non-cosmetic experience flag, training) live on the staff profile a
 - REQ-CLIN-6 *(deferred — far future)*: AI scribe (dictation/ambient → note draft). **No AI features in v1 or near-term.**
 - REQ-CLIN-7: **Treatment plans & protocols** — a client can have a **multi-session plan** (progress, next-due) and staff can **apply a protocol template** that schedules the sessions into the recall worklist (e.g. anti-ageing maintenance, needling course).
 - REQ-CLIN-8 *(deferred — Phase 2, see ADR-0020, 🔬)*: **advisory auto-detect** of injection points — facial-landmark suggestions the clinician must review/adjust/confirm; never auto-sets units or finalises. **v1 = manual tap-to-add + drag only** (no AI per §2).
+- REQ-CLIN-9: **Guided treatment flow** (ADR-0024) — charting opens with a **pre-treatment review** (allergies/contraindications, BDD flag, consent/consult status, **last-treatment summary** + "copy last map"); the consult→**individual-Rx**→administer chain is surfaced **inline** (prescriber writes the script; the administrator confirms against it); charting is **treatment-type-aware** — toxin **injection map + S4 lot** vs a **non-S4 skin note** for dermal (areas/device/settings/consumables, no lot/Rx); **finalise → close-out** (send aftercare, set recall, schedule a 2-day **wellbeing call**, log any **adverse event**) before handing to checkout.
 
 ### 5.5 Consent & intake — `CONS`
 - REQ-CONS-1 ★: Per-treatment digital consent, **versioned**, e-signed; content meets AHPRA — nature, risks/benefits/alternatives, **practitioner qualifications, costs**, realistic-outcome language (no minimising/overstating), plain language, and complaint mechanisms incl. right to complain to AHPRA despite any NDA. (→ C5/C18)
@@ -204,6 +206,7 @@ type, ≥1yr non-cosmetic experience flag, training) live on the staff profile a
 - REQ-RPT-2: Date-range filtering parity with the current tool.
 - REQ-RPT-3 ★: Compliance dashboards — consent coverage, consult-before-script adherence, S4 register export, **lot-recall lookup**, cooling-off adherence, **registration-expiry watch, records-retention/destruction due, S4 stock discrepancies, and the breach & complaints registers**.
 - REQ-RPT-4: Data-quality/anomaly checks (carry over current logic).
+- REQ-RPT-5: **Owner "needs attention" digest** — one exceptions view (failed payments, expiring stock, registration/accreditation currency, open complaints, overdue recalls, unbilled visits) that links into the relevant module.
 
 ### 5.12 Integrations — `INT`
 - REQ-INT-1: **Xero** — push invoices/payments (+ payouts) on checkout; map services/products to accounts; GST.
@@ -358,6 +361,10 @@ Each becomes a focused PRD (problem, user stories, flows, data, acceptance crite
 | Pricing & what-if simulator (owner) | REQ-MEMB-9 ➕, ADR-0022 | ✅ ➕ |
 | Marketing: omnichannel inbox (IG/FB/SMS/email), categorise, client-link, suggested replies, advertising linter | REQ-NOTIF-6 ➕, ADR-0018/0019 | 🔬 ⏭ (SMS/email in v1) |
 | Follow-ups: unified job queue (merges recall/attention/comms), manual flag from inbox, auto-detect/categorise comms into jobs | REQ-NOTIF-7 ➕, ADR-0023 | ✅ ➕ |
+| Visit lifecycle: status state-machine, late/no-show flags (→ call job), role hand-offs, finalise close-out | REQ-BOOK-7 ➕, REQ-CLIN-9 ➕, ADR-0024 | ✅ ➕ |
+| Guided charting: pre-treatment review, inline consult/Rx, treatment-type-aware (toxin map vs skin note) | REQ-CLIN-9 ➕, RX-1..3 | ✅ ➕ |
+| Booking: new-vs-returning, reason/notes, roster hint | REQ-BOOK-7 ➕ | ✅ ➕ |
+| Owner "needs attention" exceptions digest | REQ-RPT-5 ➕ | ✅ ➕ |
 | Reports dashboard (revenue, mix, top treatments, new vs returning, MRR) | REQ-RPT-1 | ✅ |
 | Responsive back-office (phone/tablet) + client-portal screens | REQ-APP-1/2 (UX validated) | ✅ |
 

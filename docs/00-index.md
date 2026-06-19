@@ -18,7 +18,7 @@ clinics (the modern replacement for Mindbody). This folder holds the full planni
 | PRD | Title | Phase | Key REQ / C IDs | ADRs |
 |-----|-------|:-----:|-----------------|------|
 | [PRD-01](prds/PRD-01-foundations-tenancy.md) | Foundations & tenancy (auth, RBAC, audit, data model) | 0 | TEN, SEC, C10/C19/C21/C22 | 1,2,3,4,5,8,10,16,**17** |
-| [PRD-02](prds/PRD-02-booking-scheduling.md) | Booking & scheduling (+ client/CRM basics) | 1 | BOOK, CLI | 5,8 |
+| [PRD-02](prds/PRD-02-booking-scheduling.md) | Booking & scheduling (+ client/CRM basics) | 1 | BOOK, CLI | 5,8,**24** |
 | [PRD-03](prds/PRD-03-intake-consent-gating.md) | Intake, consent & compliance gating | 1 | CONS, C3/C5/C6/C14 | 8 |
 | [PRD-04](prds/PRD-04-consult-prescribing-s4.md) | Consult, prescribing & S4 medicines governance — *the moat* | 1 | RX, MED, C1/C2/C7/C8/C11/C13/C15–C17 | 8,11,**21** |
 | [PRD-05](prds/PRD-05-clinical-charting.md) | Clinical charting: injection mapping & before/after | 1 | CLIN, C8/C12/C14 | 9,10,15,**20** |

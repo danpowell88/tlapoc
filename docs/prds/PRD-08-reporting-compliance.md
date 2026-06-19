@@ -1,6 +1,6 @@
 # PRD-08 — Reporting & Compliance Dashboards
 
-> **▸ Option A alignment (rev 2, 2026-06-19).** The prototype's **reports dashboard** (revenue trend, **treatment mix**, top treatments, new-vs-returning, retention, membership MRR) validates REQ-RPT-1. The same read models back the owner **pricing what-if** planner (ADR-0022 / REQ-MEMB-9). Compliance dashboards are unchanged. See [requirements §12](../02-requirements.md#12-option-a-prototype-alignment--feasibility-register).
+> **▸ Option A alignment (rev 2, 2026-06-19).** The prototype's **reports dashboard** (revenue trend, **treatment mix**, top treatments, new-vs-returning, retention, membership MRR) validates REQ-RPT-1. The same read models back the owner **pricing what-if** planner (ADR-0022 / REQ-MEMB-9). Compliance dashboards are unchanged. Adds an owner **"needs attention" exceptions digest** (**REQ-RPT-5**). See [requirements §12](../02-requirements.md#12-option-a-prototype-alignment--feasibility-register).
 
 > **Phase:** 1 · **Status:** Draft
 > **Requirements:** REQ-RPT-1…4 · **Compliance:** C10 + evidences C1–C24
