@@ -40,6 +40,11 @@ tailwind.config={theme:{extend:{
     #staffApp #schedule .overflow-hidden{overflow:auto}
     #staffApp [class*="grid-cols-[56px"]{min-width:480px}
   }
+  /* embed mode — for the day-in-the-life guide iframes: hide app chrome, show just the screen */
+  body.embed #sidebar{display:none}
+  body.embed #staffApp header{display:none}
+  body.embed #navOverlay{display:none}
+  body.embed #staffApp main{padding:1rem}
 </style>
 </head>
 <body class="bg-slate-50 text-ink">
@@ -1290,6 +1295,14 @@ function renderDashFollowups(){var el=document.getElementById('dashFollowups');i
 function flagConvo(i,ev){var c=convos[i];if(!c)return;var type=(c.cat==='Complaint')?'callback':'reply';jobs.unshift({id:++jobSeq,t:(type==='callback'?'Callback — ':'Reply — ')+c.name+' ('+c.ch+')',type:type,who:c.cat==='Complaint'?'Lead Nurse':'Reception',cid:(c.cid!=null?c.cid:null),conv:i,src:'manual',status:'open',due:'Today'});renderFollowups();if(ev&&ev.target){var b=ev.target.closest('button');if(b){b.innerHTML='<span class="material-symbols-rounded text-sm">check</span>Flagged';b.disabled=true;b.classList.add('opacity-70');}}}
 function scanInbox(){var added=0;convos.forEach(function(c,i){var last=c.thread[c.thread.length-1];if(last&&last.me)return;if(jobs.some(function(j){return j.conv===i&&j.status!=='done';}))return;var type=(c.cat==='Complaint')?'callback':'reply';var pre=c.cat==='Complaint'?'Callback — ':(c.cat==='Booking'?'Reply & book — ':'Reply — ');jobs.unshift({id:++jobSeq,t:pre+c.name+(c.cat==='Pricing'?' (pricing)':'')+' ('+c.ch+')',type:type,who:c.cat==='Complaint'?'Lead Nurse':'Reception',cid:(c.cid!=null?c.cid:null),conv:i,src:'auto',status:'open',due:'Today'});added++;});jobFilter='open';renderFollowups();}
 renderClients();renderToday();renderChartList();wstep(1);initInj();initBA();renderStock();renderCheckout();renderWeek();renderMarketing();renderMemberships();renderReports();renderChartProduct();setPersona('np');
+/* ---------- deep-link + embed (used by guide.html) ---------- */
+(function(){try{var q=new URLSearchParams(location.search);var p=q.get('p'),s=q.get('s'),v=q.get('view');
+ if(q.get('embed')==='1')document.body.classList.add('embed');
+ if(p&&personas[p])setPersona(p);
+ function goScreen(x){if(!x)return;if(x.indexOf(':')>-1){var a=x.split(':');goSub(a[0],a[1]);}else show(x);}
+ var V={inbox:function(){goSub('marketing','inbox');openConvo(0);},followups:function(){show('followups');},checkout:function(){show('checkout');},pricing:function(){goSub('memberships','pricing');},memberships:function(){goSub('memberships','overview');},reports:function(){show('reports');},stock:function(){show('stock');},schedule:function(){show('schedule');},chartlist:function(){show('chartlist');},booking:function(){show('booking');wstep(1);},'chart-review':function(){apptStart(0);},'chart-skin':function(){apptStart(3);},'client-book':function(){if(typeof cshow==='function')cshow('cbook');},'client-rewards':function(){if(typeof cshow==='function')cshow('cmember');},'client-care':function(){if(typeof cshow==='function')cshow('ccare');}};
+ if(v&&V[v])V[v]();else goScreen(s);
+}catch(e){}})();
 </script>
 </body>
 </html>

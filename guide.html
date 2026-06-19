@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>A day in the life — The Lounge Aesthetics POC</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','system-ui','sans-serif']},colors:{brand:{50:'#f0fdfa',100:'#ccfbf1',500:'#14b8a6',600:'#0d9488',700:'#0f766e',800:'#115e59'}}}}}</script>
+<style>
+  body{font-family:Inter,sans-serif}
+  .material-symbols-rounded{font-variation-settings:'FILL' 0,'wght' 400,'opsz' 24}
+  .frame{border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 8px 24px rgba(16,24,40,.10)}
+  .bar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:12px;color:#94a3b8}
+  .dot{width:10px;height:10px;border-radius:50%}
+  .frame iframe{width:100%;height:540px;border:0;display:block;background:#f8fafc}
+  .rolenav a.on{background:#0f766e;color:#fff}
+  html{scroll-behavior:smooth;scroll-padding-top:72px}
+</style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+<header class="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-slate-200">
+  <div class="max-w-6xl mx-auto px-5 h-14 flex items-center gap-3">
+    <a href="index.html" class="font-bold text-brand-700">Lounge Aesthetics POC</a>
+    <span class="text-slate-300">·</span><span class="text-slate-500 text-sm">A day in the life</span>
+    <nav class="rolenav ml-auto hidden md:flex gap-1 text-sm">
+      <a href="#reception" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100">Reception</a>
+      <a href="#rn" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100">Nurse</a>
+      <a href="#lead" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100">Lead</a>
+      <a href="#np" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100">NP</a>
+      <a href="#dermal" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100">Dermal</a>
+      <a href="#owner" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100">Owner</a>
+      <a href="#client" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100">Client</a>
+    </nav>
+    <a href="prototype.html" class="ml-2 text-sm text-brand-700 font-medium hidden sm:inline">Open app →</a>
+  </div>
+</header>
+
+<section class="max-w-6xl mx-auto px-5 pt-12 pb-6">
+  <div class="text-xs tracking-[0.25em] uppercase text-brand-600 font-semibold mb-2">Walkthrough</div>
+  <h1 class="text-4xl font-extrabold tracking-tight">A day in the life — every role, every job</h1>
+  <p class="text-slate-500 mt-3 max-w-2xl text-lg">For each role we follow what happens in the clinic and exactly what they do in the app. Every screen below is the <b>live prototype</b> embedded at the right place — click <b>Open live</b> to drive it yourself. All data is synthetic.</p>
+  <div class="mt-4 inline-flex items-center gap-2 text-xs text-slate-500 bg-white border border-slate-200 rounded-xl px-3 py-2"><span class="material-symbols-rounded text-brand-500 text-base">touch_app</span>Tip: the embeds are interactive — scroll and click inside them.</div>
+</section>
+
+<!-- =================== RECEPTION =================== -->
+<section id="reception" class="max-w-6xl mx-auto px-5 py-8">
+  <div class="flex items-center gap-3 mb-1"><span class="size-10 rounded-xl bg-brand-600 text-white grid place-items-center"><span class="material-symbols-rounded">support_agent</span></span><h2 class="text-2xl font-bold">Reception / front desk</h2></div>
+  <p class="text-slate-500 mb-6 max-w-3xl">Tess runs the front of house: she's the first and last person a client deals with — enquiries, bookings, the diary, attendance, checkout and chasing everything that's outstanding.</p>
+
+  <div class="space-y-10">
+    <div class="grid lg:grid-cols-5 gap-6 items-start">
+      <div class="lg:col-span-2"><div class="text-xs font-bold text-brand-600 mb-1">1 · An enquiry lands</div><h3 class="text-lg font-semibold mb-2">"How much for lip filler?" on Instagram</h3><p class="text-sm text-slate-600 mb-2"><b>What happens:</b> a DM, a Facebook message, an SMS and an email all arrive in different places.</p><p class="text-sm text-slate-600"><b>In the app:</b> the unified <b>Inbox</b> shows every channel in one list, auto-categorised (Pricing / Booking / Complaint). She taps a <b>suggested reply</b>, tweaks it, and sends — or hits <b>🚩 Follow-up</b> so it can't get lost.</p></div>
+      <div class="lg:col-span-3 frame"><div class="bar"><span class="dot bg-rose-400"></span><span class="dot bg-amber-400"></span><span class="dot bg-emerald-400"></span><span class="ml-2">Marketing · Inbox</span></div><iframe loading="lazy" src="prototype.html?p=reception&view=inbox&embed=1"></iframe><div class="px-3 py-2 text-xs"><a class="text-brand-700 font-medium" href="prototype.html?p=reception&view=inbox" target="_blank">Open live ↗</a></div></div>
+    </div>
+
+    <div class="grid lg:grid-cols-5 gap-6 items-start">
+      <div class="lg:col-span-2"><div class="text-xs font-bold text-brand-600 mb-1">2 · Booking a first-timer</div><h3 class="text-lg font-semibold mb-2">A new client wants in</h3><p class="text-sm text-slate-600 mb-2"><b>What happens:</b> someone books their first anti-wrinkle appointment.</p><p class="text-sm text-slate-600"><b>In the app:</b> the <b>booking wizard</b> walks service → practitioner (only rostered RN/NP for injectables) → time → client, where she marks them <b>New vs Returning</b> and adds a reason. Intake + consent links send automatically.</p></div>
+      <div class="lg:col-span-3 frame"><div class="bar"><span class="dot bg-rose-400"></span><span class="dot bg-amber-400"></span><span class="dot bg-emerald-400"></span><span class="ml-2">New booking</span></div><iframe loading="lazy" src="prototype.html?p=reception&view=booking&embed=1"></iframe><div class="px-3 py-2 text-xs"><a class="text-brand-700 font-medium" href="prototype.html?p=reception&view=booking" target="_blank">Open live ↗</a></div></div>
+    </div>
+
+    <div class="grid lg:grid-cols-5 gap-6 items-start">
+      <div class="lg:col-span-2"><div class="text-xs font-bold text-brand-600 mb-1">3 · Late &amp; no-shows</div><h3 class="text-lg font-semibold mb-2">Someone's late — or didn't turn up</h3><p class="text-sm text-slate-600 mb-2"><b>What happens:</b> a client is running 15 minutes late; another never arrived.</p><p class="text-sm text-slate-600"><b>In the app:</b> on <b>Today</b> she taps <b>Late</b> to flag it, or <b>No-show</b> — which automatically drops a "call the client" job into the Follow-ups queue. (Small clinic = no formal check-in.)</p></div>
+      <div class="lg:col-span-3 frame"><div class="bar"><span class="dot bg-rose-400"></span><span class="dot bg-amber-400"></span><span class="dot bg-emerald-400"></span><span class="ml-2">Today · the visit board</span></div><iframe loading="lazy" src="prototype.html?p=reception&s=dashboard&embed=1"></iframe><div class="px-3 py-2 text-xs"><a class="text-brand-700 font-medium" href="prototype.html?p=reception&s=dashboard" target="_blank">Open live ↗</a></div></div>
+    </div>
+
+    <div class="grid lg:grid-cols-5 gap-6 items-start">
+      <div class="lg:col-span-2"><div class="text-xs font-bold text-brand-600 mb-1">4 · Nothing falls through</div><h3 class="text-lg font-semibold mb-2">Working the to-do queue</h3><p class="text-sm text-slate-600 mb-2"><b>What happens:</b> replies owed, recalls due, a missed-appointment call to make.</p><p class="text-sm text-slate-600"><b>In the app:</b> the <b>Follow-ups</b> queue merges recall, consents, stock alerts and unanswered messages into one list. She filters to <b>Mine</b>, works each, and marks them done.</p></div>
+      <div class="lg:col-span-3 frame"><div class="bar"><span class="dot bg-rose-400"></span><span class="dot bg-amber-400"></span><span class="dot bg-emerald-400"></span><span class="ml-2">Follow-ups</span></div><iframe loading="lazy" src="prototype.html?p=reception&view=followups&embed=1"></iframe><div class="px-3 py-2 text-xs"><a class="text-brand-700 font-medium" href="prototype.html?p=reception&view=followups" target="_blank">Open live ↗</a></div></div>
+    </div>
+
+    <div class="grid lg:grid-cols-5 gap-6 items-start">
+      <div class="lg:col-span-2"><div class="text-xs font-bold text-brand-600 mb-1">5 · Checkout</div><h3 class="text-lg font-semibold mb-2">Taking payment &amp; rebooking</h3><p class="text-sm text-slate-600 mb-2"><b>What happens:</b> the treatment's done; the client comes to pay.</p><p class="text-sm text-slate-600"><b>In the app:</b> <b>Checkout</b> takes the payment, applies member rewards (non-S4 only), shows a quiet <b>upsell cue</b> and a rapport panel — then suggests the <b>next booking</b> based on the treatment interval.</p></div>
+      <div class="lg:col-span-3 frame"><div class="bar"><span class="dot bg-rose-400"></span><span class="dot bg-amber-400"></span><span class="dot bg-emerald-400"></span><span class="ml-2">Checkout</span></div><iframe loading="lazy" src="prototype.html?p=reception&view=checkout&embed=1"></iframe><div class="px-3 py-2 text-xs"><a class="text-brand-700 font-medium" href="prototype.html?p=reception&view=checkout" target="_blank">Open live ↗</a></div></div>
+    </div>
+
+    <div class="grid lg:grid-cols-5 gap-6 items-start">
+      <div class="lg:col-span-2"><div class="text-xs font-bold text-brand-600 mb-1">6 · The diary</div><h3 class="text-lg font-semibold mb-2">Managing the week</h3><p class="text-sm text-slate-600 mb-2"><b>What happens:</b> a client needs to move; another wants the earliest slot.</p><p class="text-sm text-slate-600"><b>In the app:</b> the <b>Schedule</b> shows the week colour-coded by treatment, with <b>per-day &amp; per-type counts</b>, <b>VIP / first-time</b> tags, and <b>quiet windows</b> to fill. Tap any appointment to <b>move or cancel</b>.</p></div>
+      <div class="lg:col-span-3 frame"><div class="bar"><span class="dot bg-rose-400"></span><span class="dot bg-amber-400"></span><span class="dot bg-emerald-400"></span><span class="ml-2">Schedule</span></div><iframe loading="lazy" src="prototype.html?p=reception&s=schedule&embed=1"></iframe><div class="px-3 py-2 text-xs"><a class="text-brand-700 font-medium" href="prototype.html?p=reception&s=schedule" target="_blank">Open live ↗</a></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== RN =================== -->
+<section id="rn" class="max-w-6xl mx-auto px-5 py-8 border-t border-slate-200">
+  <div class="flex items-center gap-3 mb-1"><span class="size-10 rounded-xl bg-brand-600 text-white grid place-items-center"><span class="material-symbols-rounded">vaccines</span></span><h2 class="text-2xl font-bold">Registered Nurse (injector)</h2></div>
+  <p class="text-slate-500 mb-6 max-w-3xl">Chloe administers anti-wrinkle treatments on a valid script. Her day is the clinical loop — see the patient, review safety, treat, finalise.</p>
+  <div class="space-y-10">
+    <div class="grid lg:grid-cols-5 gap-6 items-start">
+      <div class="lg:col-span-2"><div class="text-xs font-bold text-brand-600 mb-1">1 · Who's next?</div><h3 class="text-lg font-semibold mb-2">The day at a glance</h3><p class="text-sm text-slate-600 mb-2"><b>What happens:</b> she needs to know who's in the chair now and who's coming.</p><p class="text-sm text-slate-600"><b>In the app:</b> <b>Charting</b> opens on a "with you now" banner + today's patient list. A patient whose consent isn't done is <b>gated</b> — she can't start until it's complete.</p></div>
+      <div class="lg:col-span-3 frame"><div class="bar"><span class="dot bg-rose-400"></span><span class="dot bg-amber-400"></span><span class="dot bg-emerald-400"></span><span class="ml-2">Charting · today</span></div><iframe loading="lazy" src="prototype.html?p=rn&view=chartlist&embed=1"></iframe><div class="px-3 py-2 text-xs"><a class="text-brand-700 font-medium" href="prototype.html?p=rn&view=chartlist" target="_blank">Open live ↗</a></div></div>
+    </div>
+    <div class="grid lg:grid-cols-5 gap-6 items-start">
+      <div class="lg:col-span-2"><div class="text-xs font-bold text-brand-600 mb-1">2 · Treating safely</div><h3 class="text-lg font-semibold mb-2">Review → product → map → finalise</h3><p class="text-sm text-slate-600 mb-2"><b>What happens:</b> she sits the client down and works through the treatment.</p><p class="text-sm text-slate-600"><b>In the app:</b> the chart opens on a <b>pre-treatment review</b> (allergies, BDD, consent ✓, last treatment, "administering on a valid script") → she confirms the <b>product &amp; batch</b> (only in-date stock) → maps the injection points → <b>Finalise</b> runs a close-out (aftercare, recall, 2-day wellbeing call) and deducts the units from that lot.</p></div>
+      <div class="lg:col-span-3 frame"><div class="bar"><span class="dot bg-rose-400"></span><span class="dot bg-amber-400"></span><span class="dot bg-emerald-400"></span><span class="ml-2">Charting · anti-wrinkle</span></div><iframe loading="lazy" src="prototype.html?p=rn&view=chart-review&embed=1"></iframe><div class="px-3 py-2 text-xs"><a class="text-brand-700 font-medium" href="prototype.html?p=rn&view=chart-review" target="_blank">Open live ↗</a></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== LEAD =================== -->
+<section id="lead" class="max-w-6xl mx-auto px-5 py-8 border-t border-slate-200">
+  <div class="flex items-center gap-3 mb-1"><span class="size-10 rounded-xl bg-brand-600 text-white grid place-items-center"><span class="material-symbols-rounded">medical_services</span></span><h2 class="text-2xl font-bold">Lead Nurse (senior RN)</h2></div>
+  <p class="text-slate-500 mb-6 max-w-3xl">Bella does everything an RN does, <b>plus</b> she owns the stock and the team. Stock-expiry, wastage and reorder are her concern (not every nurse's).</p>
+  <div class="grid lg:grid-cols-5 gap-6 items-start">
+    <div class="lg:col-span-2"><div class="text-xs font-bold text-brand-600 mb-1">Stock &amp; medicines</div><h3 class="text-lg font-semibold mb-2">Keeping the fridge right</h3><p class="text-sm text-slate-600 mb-2"><b>What happens:</b> a delivery arrives; a lot is approaching expiry.</p><p class="text-sm text-slate-600"><b>In the app:</b> <b>Stock</b> shows on-hand <b>per product</b> (toxin in units, filler in syringes), usage-history graphs, expiring lots and vial reconciliation. She <b>receives</b> new stock and the system flags FEFO + below-par.</p></div>
+    <div class="lg:col-span-3 frame"><div class="bar"><span class="dot bg-rose-400"></span><span class="dot bg-amber-400"></span><span class="dot bg-emerald-400"></span><span class="ml-2">Stock &amp; medicines</span></div><iframe loading="lazy" src="prototype.html?p=lead&view=stock&embed=1"></iframe><div class="px-3 py-2 text-xs"><a class="text-brand-700 font-medium" href="prototype.html?p=lead&view=stock" target="_blank">Open live ↗</a></div></div>
+  </div>
+</section>
+
+<!-- =================== NP =================== -->
+<section id="np" class="max-w-6xl mx-auto px-5 py-8 border-t border-slate-200">
+  <div class="flex items-center gap-3 mb-1"><span class="size-10 rounded-xl bg-brand-600 text-white grid place-items-center"><span class="material-symbols-rounded">prescriptions</span></span><h2 class="text-2xl font-bold">Nurse Practitioner (prescriber)</h2></div>
+  <p class="text-slate-500 mb-6 max-w-3xl">Dr Lena Park assesses, <b>prescribes</b> and can hold S4 stock on-site. The compliance moat lives in her flow.</p>
+  <div class="space-y-10">
+    <div class="grid lg:grid-cols-5 gap-6 items-start">
+      <div class="lg:col-span-2"><div class="text-xs font-bold text-brand-600 mb-1">1 · Consult &amp; prescribe</div><h3 class="text-lg font-semibold mb-2">The synchronous consult</h3><p class="text-sm text-slate-600 mb-2"><b>What happens:</b> she assesses the client and decides what to prescribe.</p><p class="text-sm text-slate-600"><b>In the app:</b> the pre-treatment review surfaces <b>Record consult</b> → <b>Write prescription</b> (individual, this client). No script can exist without a consult; no administration without a valid script — enforced, not a checkbox.</p></div>
+      <div class="lg:col-span-3 frame"><div class="bar"><span class="dot bg-rose-400"></span><span class="dot bg-amber-400"></span><span class="dot bg-emerald-400"></span><span class="ml-2">Charting · consult &amp; Rx</span></div><iframe loading="lazy" src="prototype.html?p=np&view=chart-review&embed=1"></iframe><div class="px-3 py-2 text-xs"><a class="text-brand-700 font-medium" href="prototype.html?p=np&view=chart-review" target="_blank">Open live ↗</a></div></div>
+    </div>
+    <div class="grid lg:grid-cols-5 gap-6 items-start">
+      <div class="lg:col-span-2"><div class="text-xs font-bold text-brand-600 mb-1">2 · S4 custody</div><h3 class="text-lg font-semibold mb-2">Stock &amp; the catalogue</h3><p class="text-sm text-slate-600 mb-2"><b>What happens:</b> she orders stock and sets up a new product.</p><p class="text-sm text-slate-600"><b>In the app:</b> she <b>receives</b> S4 stock into custody and manages the <b>product catalogue</b> — adding products and setting the <b>S4 flag</b>, which then drives rewards &amp; advertising rules everywhere.</p></div>
+      <div class="lg:col-span-3 frame"><div class="bar"><span class="dot bg-rose-400"></span><span class="dot bg-amber-400"></span><span class="dot bg-emerald-400"></span><span class="ml-2">Stock · custody &amp; catalogue</span></div><iframe loading="lazy" src="prototype.html?p=np&view=stock&embed=1"></iframe><div class="px-3 py-2 text-xs"><a class="text-brand-700 font-medium" href="prototype.html?p=np&view=stock" target="_blank">Open live ↗</a></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== DERMAL =================== -->
+<section id="dermal" class="max-w-6xl mx-auto px-5 py-8 border-t border-slate-200">
+  <div class="flex items-center gap-3 mb-1"><span class="size-10 rounded-xl bg-brand-600 text-white grid place-items-center"><span class="material-symbols-rounded">spa</span></span><h2 class="text-2xl font-bold">Dermal / laser therapist</h2></div>
+  <p class="text-slate-500 mb-6 max-w-3xl">Priya does skin — needling, hydrafacials, laser. No injectables, no S4, no prescription — so her chart is different.</p>
+  <div class="grid lg:grid-cols-5 gap-6 items-start">
+    <div class="lg:col-span-2"><div class="text-xs font-bold text-brand-600 mb-1">A skin treatment</div><h3 class="text-lg font-semibold mb-2">Charting without a needle map</h3><p class="text-sm text-slate-600 mb-2"><b>What happens:</b> she runs a skin-needling session.</p><p class="text-sm text-slate-600"><b>In the app:</b> charting switches to <b>Skin mode</b> — a non-S4 note (areas treated, device/modality, settings, consumables) and before/after. There's <b>no lot or prescription</b> — it's not a scheduled medicine.</p></div>
+    <div class="lg:col-span-3 frame"><div class="bar"><span class="dot bg-rose-400"></span><span class="dot bg-amber-400"></span><span class="dot bg-emerald-400"></span><span class="ml-2">Charting · skin note</span></div><iframe loading="lazy" src="prototype.html?p=dermal&view=chart-skin&embed=1"></iframe><div class="px-3 py-2 text-xs"><a class="text-brand-700 font-medium" href="prototype.html?p=dermal&view=chart-skin" target="_blank">Open live ↗</a></div></div>
+  </div>
+</section>
+
+<!-- =================== OWNER =================== -->
+<section id="owner" class="max-w-6xl mx-auto px-5 py-8 border-t border-slate-200">
+  <div class="flex items-center gap-3 mb-1"><span class="size-10 rounded-xl bg-brand-600 text-white grid place-items-center"><span class="material-symbols-rounded">insights</span></span><h2 class="text-2xl font-bold">Owner (business)</h2></div>
+  <p class="text-slate-500 mb-6 max-w-3xl">Mark runs the business — he's non-clinical (read-only on clinical/stock) but owns the money. His day is triage, numbers and decisions.</p>
+  <div class="space-y-10">
+    <div class="grid lg:grid-cols-5 gap-6 items-start">
+      <div class="lg:col-span-2"><div class="text-xs font-bold text-brand-600 mb-1">1 · Morning triage</div><h3 class="text-lg font-semibold mb-2">What needs me today?</h3><p class="text-sm text-slate-600 mb-2"><b>What happens:</b> he opens the app first thing.</p><p class="text-sm text-slate-600"><b>In the app:</b> his dashboard leads with a <b>"Needs your attention"</b> digest — a failed membership payment, a lot expiring, an open complaint, overdue recalls — each linking straight into the right place.</p></div>
+      <div class="lg:col-span-3 frame"><div class="bar"><span class="dot bg-rose-400"></span><span class="dot bg-amber-400"></span><span class="dot bg-emerald-400"></span><span class="ml-2">Owner dashboard</span></div><iframe loading="lazy" src="prototype.html?p=owner&s=dashboard&embed=1"></iframe><div class="px-3 py-2 text-xs"><a class="text-brand-700 font-medium" href="prototype.html?p=owner&s=dashboard" target="_blank">Open live ↗</a></div></div>
+    </div>
+    <div class="grid lg:grid-cols-5 gap-6 items-start">
+      <div class="lg:col-span-2"><div class="text-xs font-bold text-brand-600 mb-1">2 · The numbers</div><h3 class="text-lg font-semibold mb-2">Is the business healthy?</h3><p class="text-sm text-slate-600 mb-2"><b>What happens:</b> he reviews how the clinic's tracking.</p><p class="text-sm text-slate-600"><b>In the app:</b> <b>Reports</b> — revenue trend, treatment mix, top treatments, new-vs-returning, retention and membership MRR.</p></div>
+      <div class="lg:col-span-3 frame"><div class="bar"><span class="dot bg-rose-400"></span><span class="dot bg-amber-400"></span><span class="dot bg-emerald-400"></span><span class="ml-2">Reports</span></div><iframe loading="lazy" src="prototype.html?p=owner&view=reports&embed=1"></iframe><div class="px-3 py-2 text-xs"><a class="text-brand-700 font-medium" href="prototype.html?p=owner&view=reports" target="_blank">Open live ↗</a></div></div>
+    </div>
+    <div class="grid lg:grid-cols-5 gap-6 items-start">
+      <div class="lg:col-span-2"><div class="text-xs font-bold text-brand-600 mb-1">3 · A pricing decision</div><h3 class="text-lg font-semibold mb-2">"What if I raise Glow Club?"</h3><p class="text-sm text-slate-600 mb-2"><b>What happens:</b> he's considering a price change.</p><p class="text-sm text-slate-600"><b>In the app:</b> <b>Pricing &amp; what-if</b> lets him edit plan/service prices and see the projected <b>MRR / revenue impact</b> live, with a churn-sensitivity assumption — a proposal until he applies it.</p></div>
+      <div class="lg:col-span-3 frame"><div class="bar"><span class="dot bg-rose-400"></span><span class="dot bg-amber-400"></span><span class="dot bg-emerald-400"></span><span class="ml-2">Memberships · pricing &amp; what-if</span></div><iframe loading="lazy" src="prototype.html?p=owner&view=pricing&embed=1"></iframe><div class="px-3 py-2 text-xs"><a class="text-brand-700 font-medium" href="prototype.html?p=owner&view=pricing" target="_blank">Open live ↗</a></div></div>
+    </div>
+    <div class="grid lg:grid-cols-5 gap-6 items-start">
+      <div class="lg:col-span-2"><div class="text-xs font-bold text-brand-600 mb-1">4 · Recover revenue</div><h3 class="text-lg font-semibold mb-2">A membership payment failed</h3><p class="text-sm text-slate-600 mb-2"><b>What happens:</b> a card-on-file declined overnight.</p><p class="text-sm text-slate-600"><b>In the app:</b> <b>Memberships → Members</b> shows the failed payment with a one-click <b>Retry</b> (dunning), alongside plan mix and recurring revenue.</p></div>
+      <div class="lg:col-span-3 frame"><div class="bar"><span class="dot bg-rose-400"></span><span class="dot bg-amber-400"></span><span class="dot bg-emerald-400"></span><span class="ml-2">Memberships · members &amp; billing</span></div><iframe loading="lazy" src="prototype.html?p=owner&s=memberships:members&embed=1"></iframe><div class="px-3 py-2 text-xs"><a class="text-brand-700 font-medium" href="prototype.html?p=owner&s=memberships:members" target="_blank">Open live ↗</a></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== CLIENT =================== -->
+<section id="client" class="max-w-6xl mx-auto px-5 py-8 border-t border-slate-200">
+  <div class="flex items-center gap-3 mb-1"><span class="size-10 rounded-xl bg-brand-600 text-white grid place-items-center"><span class="material-symbols-rounded">phone_iphone</span></span><h2 class="text-2xl font-bold">The client (their phone app)</h2></div>
+  <p class="text-slate-500 mb-6 max-w-3xl">Sarah is a Glow Club member. She books, completes her forms before arriving, and tracks her care and rewards from her phone.</p>
+  <div class="space-y-10">
+    <div class="grid lg:grid-cols-5 gap-6 items-start">
+      <div class="lg:col-span-2"><div class="text-xs font-bold text-brand-600 mb-1">1 · Book &amp; pre-visit</div><h3 class="text-lg font-semibold mb-2">Book and complete forms</h3><p class="text-sm text-slate-600 mb-2"><b>What happens:</b> she books and the clinic needs her intake + consent done first.</p><p class="text-sm text-slate-600"><b>In the app:</b> she requests a time and completes <b>medical history → screening → consent</b> on her phone — treatment can't start until it's done.</p></div>
+      <div class="lg:col-span-3 frame"><div class="bar"><span class="dot bg-rose-400"></span><span class="dot bg-amber-400"></span><span class="dot bg-emerald-400"></span><span class="ml-2">Client app · book</span></div><iframe loading="lazy" src="prototype.html?p=client&view=client-book&embed=1"></iframe><div class="px-3 py-2 text-xs"><a class="text-brand-700 font-medium" href="prototype.html?p=client&view=client-book" target="_blank">Open live ↗</a></div></div>
+    </div>
+    <div class="grid lg:grid-cols-5 gap-6 items-start">
+      <div class="lg:col-span-2"><div class="text-xs font-bold text-brand-600 mb-1">2 · Care &amp; rewards</div><h3 class="text-lg font-semibold mb-2">Her history &amp; perks</h3><p class="text-sm text-slate-600 mb-2"><b>What happens:</b> between visits she checks her progress and points.</p><p class="text-sm text-slate-600"><b>In the app:</b> <b>My care</b> shows her before/after photos and visit history; <b>Rewards</b> shows membership + points (redeemable on non-S4 only).</p></div>
+      <div class="lg:col-span-3 frame"><div class="bar"><span class="dot bg-rose-400"></span><span class="dot bg-amber-400"></span><span class="dot bg-emerald-400"></span><span class="ml-2">Client app · rewards</span></div><iframe loading="lazy" src="prototype.html?p=client&view=client-rewards&embed=1"></iframe><div class="px-3 py-2 text-xs"><a class="text-brand-700 font-medium" href="prototype.html?p=client&view=client-rewards" target="_blank">Open live ↗</a></div></div>
+    </div>
+  </div>
+</section>
+
+<footer class="max-w-6xl mx-auto px-5 py-10 border-t border-slate-200 text-sm text-slate-500">
+  Every screen above is the live prototype — all names, figures and records are <b>synthetic</b>. <a class="text-brand-700 font-medium" href="prototype.html">Open the full app →</a> · <a class="text-brand-700 font-medium" href="docs.html">Read the docs →</a>
+</footer>
+
+<script>
+// highlight the role nav as you scroll
+var ids=['reception','rn','lead','np','dermal','owner','client'];
+var obs=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){document.querySelectorAll('.rolenav a').forEach(function(a){a.classList.toggle('on',a.getAttribute('href')==='#'+e.target.id);});}});},{rootMargin:'-40% 0px -55% 0px'});
+ids.forEach(function(id){var el=document.getElementById(id);if(el)obs.observe(el);});
+</script>
+</body>
+</html>
