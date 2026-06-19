@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Documentation — The Lounge Aesthetics POC</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+  :root{--brand:#0d9488;--ink:#0f172a;--mute:#64748b;--line:#e2e8f0;--bg:#f8fafc}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,sans-serif;color:var(--ink);background:var(--bg)}
+  .top{height:56px;display:flex;align-items:center;gap:16px;padding:0 18px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+  .top .brand{font-weight:700}.top a{color:var(--mute);text-decoration:none;font-size:14px;font-weight:500}.top a:hover{color:var(--brand)}
+  .wrap{display:flex;max-width:1200px;margin:0 auto;min-height:calc(100vh - 56px)}
+  .side{width:280px;flex:none;border-right:1px solid var(--line);background:#fff;padding:18px 12px;overflow:auto}
+  .side .grp{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);margin:16px 10px 6px}
+  .side a{display:block;padding:7px 10px;border-radius:8px;color:#334155;text-decoration:none;font-size:14px;line-height:1.3}
+  .side a:hover{background:var(--bg)}.side a.on{background:#f0fdfa;color:var(--brand);font-weight:600}
+  .content{flex:1;min-width:0;padding:34px 44px 80px;max-width:820px}
+  .content h1{font-size:30px;margin:.2em 0 .5em;line-height:1.2}
+  .content h2{font-size:22px;margin:1.5em 0 .5em;padding-bottom:.2em;border-bottom:1px solid var(--line)}
+  .content h3{font-size:17px;margin:1.3em 0 .4em}
+  .content p,.content li{line-height:1.7;color:#1e293b}
+  .content code{font-family:'JetBrains Mono',monospace;font-size:.88em;background:#eef2f6;padding:.12em .4em;border-radius:5px}
+  .content pre{background:#0f172a;color:#e2e8f0;padding:14px 16px;border-radius:10px;overflow:auto}
+  .content pre code{background:none;color:inherit;padding:0}
+  .content table{border-collapse:collapse;width:100%;margin:1em 0;font-size:14px}
+  .content th,.content td{border:1px solid var(--line);padding:8px 10px;text-align:left}
+  .content th{background:var(--bg)}
+  .content blockquote{margin:1em 0;padding:.4em 1em;border-left:3px solid var(--brand);background:#f0fdfa;color:#334155;border-radius:0 8px 8px 0}
+  .content a{color:var(--brand)}
+  .content hr{border:none;border-top:1px solid var(--line);margin:2em 0}
+  @media(max-width:760px){.side{display:none}.content{padding:24px 18px 60px}}
+</style>
+</head>
+<body>
+<div class="top">
+  <span class="brand">Lounge Aesthetics POC</span>
+  <span style="color:var(--mute)">· Documentation</span>
+  <span style="flex:1"></span>
+  <a href="index.html">Home</a>
+  <a href="prototype.html">Open prototype →</a>
+</div>
+<div class="wrap">
+  <nav class="side" id="side"></nav>
+  <article class="content" id="content">Loading…</article>
+</div>
+<script>
+const DOCS=[
+ {p:"docs/00-index.md",t:"Overview & index",g:"Start here"},
+ {p:"docs/01-market-research.md",t:"Market research",g:"Research"},
+ {p:"docs/02-requirements.md",t:"Requirements & compliance",g:"Requirements"},
+ {p:"docs/adr/decision-log.md",t:"Architecture decisions (ADRs)",g:"Architecture"},
+ {p:"docs/prds/PRD-01-foundations-tenancy.md",t:"PRD-01 · Foundations & tenancy",g:"Product requirements"},
+ {p:"docs/prds/PRD-02-booking-scheduling.md",t:"PRD-02 · Booking & scheduling",g:"Product requirements"},
+ {p:"docs/prds/PRD-03-intake-consent-gating.md",t:"PRD-03 · Intake & consent gating",g:"Product requirements"},
+ {p:"docs/prds/PRD-04-consult-prescribing-s4.md",t:"PRD-04 · Consult, prescribing & S4",g:"Product requirements"},
+ {p:"docs/prds/PRD-05-clinical-charting.md",t:"PRD-05 · Clinical charting",g:"Product requirements"},
+ {p:"docs/prds/PRD-06-payments-memberships-rewards.md",t:"PRD-06 · Payments, memberships & rewards",g:"Product requirements"},
+ {p:"docs/prds/PRD-07-comms-reminders-recall.md",t:"PRD-07 · Comms, reminders & recall",g:"Product requirements"},
+ {p:"docs/prds/PRD-08-reporting-compliance.md",t:"PRD-08 · Reporting & compliance",g:"Product requirements"},
+ {p:"docs/prds/PRD-09-apps-client-provider.md",t:"PRD-09 · Client & provider apps",g:"Product requirements"},
+ {p:"docs/prds/PRD-10-integrations.md",t:"PRD-10 · Integrations",g:"Product requirements"},
+ {p:"docs/prds/PRD-11-facility-complaints.md",t:"PRD-11 · Facility & complaints",g:"Product requirements"},
+ {p:"docs/ux/README.md",t:"UX overview",g:"UX"},
+ {p:"docs/ux/flows.md",t:"UX flows",g:"UX"},
+];
+marked.setOptions({gfm:true,breaks:false});
+const side=document.getElementById("side"),content=document.getElementById("content");
+(function buildSide(){let g=null;DOCS.forEach(d=>{if(d.g!==g){g=d.g;const h=document.createElement("div");h.className="grp";h.textContent=g;side.appendChild(h);}const a=document.createElement("a");a.textContent=d.t;a.href="#"+d.p;a.dataset.p=d.p;side.appendChild(a);});})();
+function active(p){side.querySelectorAll("a").forEach(a=>a.classList.toggle("on",a.dataset.p===p));}
+async function show(p){
+  active(p);content.innerHTML="Loading…";
+  try{const md=await fetch(p).then(r=>{if(!r.ok)throw r.status;return r.text();});content.innerHTML=marked.parse(md);window.scrollTo(0,0);}
+  catch(e){content.innerHTML="<h1>Couldn't load document</h1><p>"+p+" ("+e+")</p>";}
+}
+function current(){const h=decodeURIComponent(location.hash.slice(1));return DOCS.find(d=>d.p===h)?h:DOCS[0].p;}
+function render(){show(current());}
+window.addEventListener("hashchange",render);
+// follow .md links inside rendered docs
+content.addEventListener("click",e=>{const a=e.target.closest("a");if(!a)return;const href=a.getAttribute("href")||"";if(/\.md(#|$)/.test(href)){e.preventDefault();const fn=href.split("/").pop().split("#")[0];const hit=DOCS.find(d=>d.p.endsWith("/"+fn)||d.p.endsWith(fn));if(hit)location.hash=hit.p;}});
+render();
+</script>
+</body>
+</html>

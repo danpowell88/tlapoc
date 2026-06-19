@@ -1,0 +1,1140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Option A — Clinical Calm (Material 3) · deep demo</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<script>
+tailwind.config={theme:{extend:{
+  fontFamily:{sans:['Inter','system-ui','sans-serif']},
+  colors:{brand:{50:'#f0fdfa',100:'#ccfbf1',200:'#99f6e4',400:'#2dd4bf',500:'#14b8a6',600:'#0d9488',700:'#0f766e',800:'#115e59'},ink:'#0f172a',mute:'#64748b'},
+  boxShadow:{soft:'0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.10)',card:'0 6px 20px rgba(16,24,40,.08)'}
+}}}
+</script>
+<style>
+  body{font-family:Inter,sans-serif}
+  .material-symbols-rounded{font-variation-settings:'FILL' 0,'wght' 400,'opsz' 24;font-size:22px}
+  .nav.active{background:#f0fdfa;color:#0f766e}.nav.active .material-symbols-rounded{font-variation-settings:'FILL' 1}
+  .tab.active{color:#0f766e;border-color:#0d9488;font-weight:600}
+  [data-screen]{animation:f .25s ease}@keyframes f{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .pin{position:absolute;width:18px;height:18px;border-radius:9999px;background:#0d9488;border:2px solid #fff;box-shadow:0 0 0 2px rgba(13,148,136,.35);transform:translate(-50%,-50%);cursor:grab;transition:transform .1s;z-index:5;touch-action:none}
+  .pin:hover{transform:translate(-50%,-50%) scale(1.2)}.pin.sel{background:#0f766e;transform:translate(-50%,-50%) scale(1.3)}.pin:active{cursor:grabbing}
+  /* ---- responsive: phone (on-the-go) + tablet (clinic rooms) ---- */
+  #sidebar{position:fixed;top:0;bottom:0;left:0;z-index:40;transform:translateX(-100%);transition:transform .2s ease;box-shadow:0 10px 40px rgba(0,0,0,.18)}
+  #sidebar.open{transform:translateX(0)}
+  @media(min-width:1024px){#sidebar{position:static;transform:none;box-shadow:none}}
+  @media (max-width:767px){
+    #staffApp main{padding:.875rem!important}
+    #staffApp main .grid-cols-2,#staffApp main .grid-cols-3,#staffApp main .grid-cols-4,#staffApp main .grid-cols-5,#staffApp main .grid-cols-6{grid-template-columns:1fr!important}
+    #staffApp main .col-span-2,#staffApp main .col-span-3{grid-column:auto!important}
+    #staffApp main .flex.gap-6,#staffApp main .flex.gap-7{flex-direction:column}
+  }
+  @media (min-width:768px) and (max-width:1023px){
+    #staffApp main .grid-cols-3,#staffApp main .grid-cols-4{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  }
+  @media (max-width:1023px){
+    #staffApp main table{display:block;overflow-x:auto;white-space:nowrap;max-width:100%}
+    #staffApp #schedule .overflow-hidden{overflow:auto}
+    #staffApp [class*="grid-cols-[56px"]{min-width:480px}
+  }
+</style>
+</head>
+<body class="bg-slate-50 text-ink">
+<div id="staffApp" class="flex min-h-screen">
+  <aside id="sidebar" class="w-60 shrink-0 bg-white border-r border-slate-200 flex flex-col">
+    <div class="px-3 py-3 border-b border-slate-100 relative">
+      <button onclick="toggleClinicMenu()" class="w-full flex items-center gap-2 px-2 py-2 rounded-xl hover:bg-slate-50">
+        <div id="clinicBadge" class="size-9 rounded-xl bg-brand-600 text-white grid place-items-center font-bold">L</div>
+        <div class="text-left flex-1 min-w-0"><div id="clinicName" class="font-semibold leading-tight truncate">The Lounge</div><div id="clinicLoc" class="text-xs text-mute truncate">Aesthetics · Brisbane</div></div>
+        <span class="material-symbols-rounded text-mute text-lg">unfold_more</span>
+      </button>
+      <div id="clinicMenu" class="hidden absolute left-3 right-3 mt-1 bg-white border border-slate-200 rounded-xl shadow-card z-50 p-1 text-sm">
+        <div class="px-3 py-1 text-[11px] text-mute uppercase tracking-wide">Switch clinic</div>
+        <button onclick="setClinic(0)" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50">The Lounge — Brisbane</button>
+        <button onclick="setClinic(1)" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50">The Lounge — Gold Coast</button>
+        <button onclick="setClinic(2)" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50">Skin &amp; Co (locum)</button>
+      </div>
+    </div>
+    <nav class="p-3 space-y-1 text-sm font-medium text-slate-600">
+      <a onclick="show('dashboard')" data-nav="dashboard" class="nav active flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">today</span>Today</a>
+      <a onclick="show('schedule')" data-nav="schedule" class="nav flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">calendar_month</span>Schedule</a>
+      <a onclick="show('clients')" data-nav="clients" class="nav flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">groups</span>Clients</a>
+      <a onclick="show('chartlist')" data-nav="chart" class="nav flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">medical_services</span>Charting</a>
+      <a onclick="show('forms')" data-nav="forms" class="nav flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">assignment</span>Forms</a>
+      <a onclick="show('stock')" data-nav="stock" class="nav flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">vaccines</span>Stock</a>
+      <a onclick="show('checkout')" data-nav="checkout" class="nav flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">point_of_sale</span>Checkout</a>
+      <button data-nav="memberships" onclick="toggleGroup('memberships')" class="nav w-full flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">loyalty</span>Memberships<span class="material-symbols-rounded ml-auto text-base transition-transform" data-chev="memberships">expand_more</span></button>
+      <div data-gsub="memberships" class="hidden mt-0.5 space-y-0.5">
+        <a onclick="goSub('memberships','overview')" data-sub="memberships:overview" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Overview</a>
+        <a onclick="goSub('memberships','plans')" data-sub="memberships:plans" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Plans &amp; packages</a>
+        <a onclick="goSub('memberships','members')" data-sub="memberships:members" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Members &amp; billing</a>
+        <a onclick="goSub('memberships','loyalty')" data-sub="memberships:loyalty" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Loyalty</a>
+        <a onclick="goSub('memberships','referrals')" data-sub="memberships:referrals" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Referrals</a>
+        <a onclick="goSub('memberships','gifts')" data-sub="memberships:gifts" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Gift cards</a>
+        <a onclick="goSub('memberships','pricing')" data-sub="memberships:pricing" class="subnav fin block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Pricing &amp; what-if</a>
+      </div>
+      <button data-nav="marketing" onclick="toggleGroup('marketing')" class="nav w-full flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">campaign</span>Marketing<span class="material-symbols-rounded ml-auto text-base transition-transform" data-chev="marketing">expand_more</span></button>
+      <div data-gsub="marketing" class="hidden mt-0.5 space-y-0.5">
+        <a onclick="goSub('marketing','overview')" data-sub="marketing:overview" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Overview</a>
+        <a onclick="goSub('marketing','inbox')" data-sub="marketing:inbox" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Inbox</a>
+        <a onclick="goSub('marketing','auto')" data-sub="marketing:auto" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Automations</a>
+        <a onclick="goSub('marketing','camp')" data-sub="marketing:camp" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Campaigns</a>
+      </div>
+      <a onclick="show('reports')" data-nav="reports" class="nav flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">monitoring</span>Reports</a>
+    </nav>
+    <div class="mt-auto p-3"><a href="index.html" class="flex items-center gap-2 text-xs text-mute hover:text-brand-700"><span class="material-symbols-rounded text-base">arrow_back</span>Prototype gallery</a></div>
+  </aside>
+  <div id="navOverlay" onclick="toggleNav(false)" class="hidden fixed inset-0 bg-black/30 z-30 lg:hidden"></div>
+
+  <div class="flex-1 flex flex-col min-w-0">
+    <header class="h-16 bg-white border-b border-slate-200 flex items-center gap-3 sm:gap-4 px-4 sm:px-6">
+      <button class="lg:hidden size-10 -ml-1 grid place-items-center rounded-full hover:bg-slate-100 text-slate-600 shrink-0" onclick="toggleNav(true)"><span class="material-symbols-rounded">menu</span></button>
+      <div class="relative flex-1 max-w-md hidden md:block"><span class="material-symbols-rounded absolute left-3 top-2.5 text-mute">search</span><input placeholder="Search clients, appointments, invoices…" class="w-full pl-10 pr-4 py-2 bg-slate-100 rounded-xl text-sm focus:outline-none focus:ring-2 ring-brand-500"/></div>
+      <div class="flex-1 md:hidden"></div>
+      <button onclick="show('booking');wstep(1)" class="px-3 sm:px-4 py-2 rounded-xl bg-brand-600 text-white text-sm font-medium flex items-center gap-1 shrink-0"><span class="material-symbols-rounded text-lg">add</span><span class="hidden sm:inline">New booking</span></button>
+      <button class="size-10 grid place-items-center rounded-full hover:bg-slate-100 text-slate-600 relative"><span class="material-symbols-rounded">notifications</span><span class="absolute top-2 right-2 size-2 bg-rose-500 rounded-full"></span></button>      <label class="flex items-center gap-1 text-xs text-mute whitespace-nowrap"><span class="hidden lg:inline">View as</span><select id="personaSel" onchange="setPersona(this.value)" class="text-sm border border-slate-200 rounded-xl px-2 py-1.5 bg-white focus:outline-none focus:ring-2 ring-brand-500"><option value="np">Nurse Practitioner</option><option value="lead">Lead Nurse</option><option value="rn">Nurse (RN)</option><option value="dermal">Dermal / Laser tech</option><option value="reception">Reception</option><option value="owner">Owner (business)</option><option value="client">Client</option><option disabled>── combined / small-clinic ──</option><option value="solo">Solo NP — all roles</option><option value="nurseled">Nurse-led RN (+ reception)</option><option disabled>＋ Custom roles — coming soon</option></select></label>
+      <div class="group relative flex items-center gap-2 cursor-help">
+        <img id="hdrAvatar" src="https://i.pravatar.cc/64?img=47" class="size-9 rounded-full object-cover"/>
+        <div class="text-sm leading-tight hidden sm:block"><div id="hdrName" class="font-medium">Bella L.</div><div class="text-xs text-mute flex items-center gap-1"><span id="hdrRole">Nurse · RN</span><span class="material-symbols-rounded text-[15px] text-slate-400">info</span></div></div>
+        <div id="scopeNote" class="pointer-events-none absolute right-0 top-full mt-2 w-64 rounded-xl bg-ink text-white text-xs p-3 shadow-card opacity-0 group-hover:opacity-100 transition-opacity z-50 leading-snug"></div>
+      </div>
+    </header>
+
+    <main class="p-6 overflow-auto">
+      <!-- DASHBOARD -->
+      <section data-screen id="dashboard">
+        <h1 class="text-2xl font-semibold" id="greet">Good morning, Bella</h1>
+        <p class="text-mute mb-6">Thursday, 19 June · 14 appointments · 3 checked in</p>
+        <div class="grid grid-cols-4 gap-4 mb-6">
+          <div class="bg-white rounded-2xl shadow-soft p-5"><div class="flex items-center justify-between text-mute text-sm">Appointments<span class="material-symbols-rounded text-brand-500">event</span></div><div class="text-3xl font-semibold mt-1">14</div><div class="text-xs text-emerald-600 mt-1">3 checked in · 1 waiting</div></div>
+          <div data-concern="fin" class="bg-white rounded-2xl shadow-soft p-5"><div class="flex items-center justify-between text-mute text-sm">Revenue today<span class="material-symbols-rounded text-brand-500">payments</span></div><div class="text-3xl font-semibold mt-1">$4,820</div><div class="text-xs text-emerald-600 mt-1">▲ 12% vs daily avg</div></div>
+          <div data-concern="ops" class="bg-white rounded-2xl shadow-soft p-5"><div class="flex items-center justify-between text-mute text-sm">Checked in<span class="material-symbols-rounded text-emerald-500">how_to_reg</span></div><div class="text-3xl font-semibold mt-1">3</div><div class="text-xs text-mute mt-1">of 14 · 1 waiting</div></div>
+          <div data-concern="clin" class="bg-white rounded-2xl shadow-soft p-5"><div class="flex items-center justify-between text-mute text-sm">Awaiting consent<span class="material-symbols-rounded text-amber-500">assignment_late</span></div><div class="text-3xl font-semibold mt-1">2</div><div class="text-xs text-amber-600 mt-1">treatment gated until done</div></div>
+          <div data-concern="biz" class="bg-white rounded-2xl shadow-soft p-5"><div class="flex items-center justify-between text-mute text-sm">Active members<span class="material-symbols-rounded text-brand-500">loyalty</span></div><div class="text-3xl font-semibold mt-1">634</div><div class="text-xs text-mute mt-1"><span class="fin">$74.3k MRR · </span>+5 this wk</div></div>
+          <div data-concern="stock" onclick="show('stock')" class="bg-white rounded-2xl shadow-soft p-5 cursor-pointer hover:shadow-card"><div class="flex items-center justify-between text-mute text-sm">Stock on hand<span class="material-symbols-rounded text-brand-500">vaccines</span></div><div id="dashStock" class="mt-2 space-y-1 text-sm"></div><div class="text-xs text-amber-600 mt-2">1 lot expiring soon →</div></div>
+          <div data-concern="recall" class="bg-white rounded-2xl shadow-soft p-5"><div class="flex items-center justify-between text-mute text-sm">Recall due<span class="material-symbols-rounded text-amber-500">notifications_active</span></div><div class="text-3xl font-semibold mt-1">28</div><div class="text-xs text-amber-600 mt-1">worklist ready</div></div>
+        </div>
+        <div class="grid grid-cols-3 gap-6">
+          <div class="col-span-2 bg-white rounded-2xl shadow-soft p-5">
+            <div class="flex items-center justify-between mb-4"><h2 class="font-semibold">Today's schedule</h2><button onclick="show('schedule')" class="text-sm text-brand-700 font-medium">Open calendar</button></div>
+            <div id="nowStrip"></div>
+            <ul id="todaylist" class="divide-y divide-slate-100 text-sm"></ul>
+          </div>
+          <div class="space-y-6">
+            <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Recall & follow-up</h2>
+              <ul class="space-y-3 text-sm">
+                <li class="flex items-center gap-3"><img src="https://i.pravatar.cc/48?img=32" class="size-8 rounded-full"/><div class="flex-1"><div class="font-medium">Olivia Brown</div><div class="text-mute text-xs">Toxin · due 14 wks ago</div></div><button class="text-brand-700 text-xs font-medium">Rebook</button></li>
+                <li class="flex items-center gap-3"><img src="https://i.pravatar.cc/48?img=20" class="size-8 rounded-full"/><div class="flex-1"><div class="font-medium">Mia Chen</div><div class="text-mute text-xs">Lapsed · 5 mo</div></div><button class="text-brand-700 text-xs font-medium">SMS</button></li>
+              </ul>
+            </div>
+            <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Needs attention</h2>
+              <ul class="space-y-2.5 text-sm">
+                <li data-concern="consent" class="flex items-center gap-2"><span class="material-symbols-rounded text-amber-600">draft</span>2 intake/consents pending today</li>
+                <li data-concern="stockalert" onclick="show('stock')" class="flex items-center gap-2 cursor-pointer"><span class="material-symbols-rounded text-amber-600">schedule</span>Lot B2188 expiring soon — 40u</li>
+                <li data-concern="stockalert" class="flex items-center gap-2"><span class="material-symbols-rounded text-emerald-600">thermostat</span>Fridge 4.2°C · in range</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- BOOKING WIZARD -->
+      <section data-screen id="booking" class="hidden max-w-4xl">
+        <h1 class="text-2xl font-semibold mb-1">New booking</h1>
+        <p class="text-mute mb-6">Public service names stay generic · injectables offer RN/NP only</p>
+        <div class="flex items-center gap-2 mb-6 text-sm">
+          <div id="st1" class="flex items-center gap-2"><span class="step size-7 rounded-full bg-brand-600 text-white grid place-items-center text-xs">1</span>Service</div><div class="flex-1 h-px bg-slate-200"></div>
+          <div id="st2" class="flex items-center gap-2 text-mute"><span class="step size-7 rounded-full bg-slate-200 grid place-items-center text-xs">2</span>Practitioner</div><div class="flex-1 h-px bg-slate-200"></div>
+          <div id="st3" class="flex items-center gap-2 text-mute"><span class="step size-7 rounded-full bg-slate-200 grid place-items-center text-xs">3</span>Time</div><div class="flex-1 h-px bg-slate-200"></div>
+          <div id="st4" class="flex items-center gap-2 text-mute"><span class="step size-7 rounded-full bg-slate-200 grid place-items-center text-xs">4</span>Client</div><div class="flex-1 h-px bg-slate-200"></div>
+          <div id="st5" class="flex items-center gap-2 text-mute"><span class="step size-7 rounded-full bg-slate-200 grid place-items-center text-xs">5</span>Confirm</div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-soft p-6 min-h-[320px]">
+          <div data-wiz="1"><h2 class="font-semibold mb-4">Choose a service</h2><div class="grid grid-cols-3 gap-3">
+            <button onclick="wsel(this,'Anti-wrinkle treatment')" class="wopt text-left p-4 rounded-xl border-2 border-slate-200 hover:border-brand-500"><div class="font-medium">Anti-wrinkle treatment</div><div class="text-mute text-xs mt-1">45 min · from $11/unit · S4</div></button>
+            <button onclick="wsel(this,'Cosmetic consultation')" class="wopt text-left p-4 rounded-xl border-2 border-slate-200 hover:border-brand-500"><div class="font-medium">Cosmetic consultation</div><div class="text-mute text-xs mt-1">30 min · $50 (redeemable)</div></button>
+            <button onclick="wsel(this,'Skin treatment')" class="wopt text-left p-4 rounded-xl border-2 border-slate-200 hover:border-brand-500"><div class="font-medium">Skin treatment</div><div class="text-mute text-xs mt-1">60 min · from $180 · non-S4</div></button>
+          </div></div>
+          <div data-wiz="2" class="hidden"><h2 class="font-semibold mb-4">Choose a practitioner <span class="text-xs text-mute font-normal">(RN/NP only — injectable)</span></h2><div class="grid grid-cols-3 gap-3">
+            <button onclick="wsel(this,'Bella (RN)')" class="wopt text-left p-4 rounded-xl border-2 border-slate-200 hover:border-brand-500 flex items-center gap-3"><img src="https://i.pravatar.cc/64?img=47" class="size-10 rounded-full"/><div><div class="font-medium">Bella L.</div><div class="text-mute text-xs">RN · injector</div></div></button>
+            <button onclick="wsel(this,'Dr Lee (NP)')" class="wopt text-left p-4 rounded-xl border-2 border-slate-200 hover:border-brand-500 flex items-center gap-3"><img src="https://i.pravatar.cc/64?img=12" class="size-10 rounded-full"/><div><div class="font-medium">Dr Lee</div><div class="text-mute text-xs">NP · prescriber</div></div></button>
+            <button onclick="wsel(this,'Next available')" class="wopt text-left p-4 rounded-xl border-2 border-slate-200 hover:border-brand-500 flex items-center gap-3"><span class="material-symbols-rounded text-brand-500">bolt</span><div><div class="font-medium">Next available</div><div class="text-mute text-xs">soonest RN/NP</div></div></button>
+          </div></div>
+          <div data-wiz="3" class="hidden"><h2 class="font-semibold mb-4">Pick a time · Thu 19 Jun</h2><div class="grid grid-cols-6 gap-2">
+            <button onclick="wsel(this,'9:00')" class="wopt p-2.5 rounded-lg border-2 border-slate-200 hover:border-brand-500 text-sm">9:00</button><button onclick="wsel(this,'9:45')" class="wopt p-2.5 rounded-lg border-2 border-slate-200 hover:border-brand-500 text-sm">9:45</button><button onclick="wsel(this,'10:30')" class="wopt p-2.5 rounded-lg border-2 border-slate-200 hover:border-brand-500 text-sm">10:30</button><button class="p-2.5 rounded-lg border-2 border-slate-100 text-slate-300 text-sm line-through">11:15</button><button onclick="wsel(this,'1:00')" class="wopt p-2.5 rounded-lg border-2 border-slate-200 hover:border-brand-500 text-sm">1:00</button><button onclick="wsel(this,'2:30')" class="wopt p-2.5 rounded-lg border-2 border-slate-200 hover:border-brand-500 text-sm">2:30</button>
+          </div></div>
+          <div data-wiz="4" class="hidden"><h2 class="font-semibold mb-4">Client</h2><input value="Sarah Mitchell" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 mb-3"/><label class="flex items-center gap-2 text-sm text-mute"><input type="checkbox" checked class="accent-brand-600"/> Send intake + consent links now (treatment can't start until complete)</label></div>
+          <div data-wiz="5" class="hidden text-center py-6"><span class="material-symbols-rounded text-6xl text-emerald-500">check_circle</span><h2 class="text-xl font-semibold mt-3">Booking created</h2><p class="text-mute mt-1" id="wsummary">Anti-wrinkle · Bella (RN) · 9:00</p><p class="text-sm text-mute mt-3">Intake + consent SMS sent to Sarah. Reminder scheduled for 24h prior.</p><button onclick="show('clients')" class="mt-5 px-5 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-medium">Done</button></div>
+          <div class="flex justify-between mt-8 pt-4 border-t border-slate-100"><button id="wback" onclick="wstep(W-1)" class="px-4 py-2 rounded-xl text-mute hover:bg-slate-50 text-sm">‹ Back</button><button id="wnext" onclick="wstep(W+1)" class="px-5 py-2 rounded-xl bg-brand-600 text-white text-sm font-medium">Continue ›</button></div>
+        </div>
+      </section>
+
+      <!-- CLIENTS -->
+      <section data-screen id="clients" class="hidden">
+        <div class="flex items-center justify-between mb-4"><h1 class="text-2xl font-semibold">Clients</h1><div class="text-mute text-sm">2,760 total · 634 members</div></div>
+        <div class="flex gap-2 mb-4 text-sm"><div class="relative flex-1 max-w-sm"><span class="material-symbols-rounded absolute left-3 top-2 text-mute">search</span><input placeholder="Search by name, phone, email…" class="w-full pl-10 pr-3 py-2 bg-white rounded-xl shadow-soft focus:outline-none"/></div>
+          <button class="px-3 py-2 rounded-xl bg-brand-50 text-brand-700 font-medium">All</button><button class="px-3 py-2 rounded-xl bg-white shadow-soft text-mute">Members</button><button class="px-3 py-2 rounded-xl bg-white shadow-soft text-mute">At-risk</button><button class="px-3 py-2 rounded-xl bg-white shadow-soft text-mute">New</button></div>
+        <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
+          <table class="w-full text-sm"><thead class="text-mute border-b border-slate-100"><tr><th class="text-left font-medium px-4 py-3">Client</th><th class="text-left font-medium px-4 py-3">Status</th><th class="text-left font-medium px-4 py-3">Last visit</th><th class="text-left font-medium px-4 py-3 fin">Lifetime</th><th class="text-left font-medium px-4 py-3">Membership</th><th class="text-left font-medium px-4 py-3">Next</th></tr></thead>
+          <tbody id="clienttbody" class="divide-y divide-slate-100"></tbody></table>
+        </div>
+      </section>
+
+      <!-- CLIENT PROFILE -->
+      <section data-screen id="profile" class="hidden">
+        <button onclick="show('clients')" class="text-sm text-mute mb-3 flex items-center gap-1"><span class="material-symbols-rounded text-base">arrow_back</span>All clients</button>
+        <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
+          <div class="p-6 flex items-start gap-4 border-b border-slate-100">
+            <img id="pavatar" src="https://i.pravatar.cc/120?img=45" class="size-16 rounded-full object-cover"/>
+            <div class="flex-1">
+              <div class="flex items-center gap-3"><h1 id="pname" class="text-xl font-semibold">Sarah Mitchell</h1><span id="ptag" class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-xs font-medium">VIP member</span></div>
+              <p id="pmeta" class="text-mute text-sm">34 · Brisbane · 0412 345 678 · Client since 2023</p>
+              <div class="flex gap-2 mt-3 text-xs">
+                <span class="px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 flex items-center gap-1"><span class="material-symbols-rounded text-sm">check</span>Consent current</span>
+                <span class="px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 flex items-center gap-1"><span class="material-symbols-rounded text-sm">photo_camera</span>Image use ✓</span>
+                <span class="px-2 py-1 rounded-lg bg-slate-100 text-slate-600">Balance $0</span>
+                <span class="px-2 py-1 rounded-lg bg-rose-50 text-rose-600">Allergy: none</span>
+              </div>
+            </div>
+            <div class="flex flex-col gap-2"><button onclick="openChartFor(curClientIdx)" class="act-chart px-4 py-2 rounded-xl bg-brand-600 text-white text-sm font-medium">Open chart</button><button onclick="show('checkout')" class="px-4 py-2 rounded-xl bg-white border border-slate-200 text-sm font-medium">Checkout</button></div>
+          </div>
+          <div class="flex gap-6 px-6 border-b border-slate-100 text-sm overflow-x-auto">
+            <span onclick="tab('ov')" data-tab="ov" class="tab active py-3 border-b-2 border-transparent cursor-pointer whitespace-nowrap">Overview</span>
+            <span onclick="tab('vi')" data-tab="vi" class="tab py-3 border-b-2 border-transparent text-mute cursor-pointer whitespace-nowrap">Visits</span>
+            <span onclick="tab('tp')" data-tab="tp" class="tab py-3 border-b-2 border-transparent text-mute cursor-pointer whitespace-nowrap">Treatment plan</span>
+            <span onclick="tab('ph')" data-tab="ph" class="tab py-3 border-b-2 border-transparent text-mute cursor-pointer whitespace-nowrap">Photos</span>
+            <span onclick="tab('co')" data-tab="co" class="tab py-3 border-b-2 border-transparent text-mute cursor-pointer whitespace-nowrap">Consents &amp; forms</span>
+            <span onclick="tab('me')" data-tab="me" class="tab py-3 border-b-2 border-transparent text-mute cursor-pointer whitespace-nowrap">Membership &amp; rewards</span>
+            <span onclick="tab('bi')" data-tab="bi" class="fin tab py-3 border-b-2 border-transparent text-mute cursor-pointer whitespace-nowrap">Billing</span>
+            <span onclick="tab('no')" data-tab="no" class="tab py-3 border-b-2 border-transparent text-mute cursor-pointer whitespace-nowrap">Notes &amp; comms</span>
+          </div>
+          <div class="p-6">
+            <div data-pane="ov" class="grid grid-cols-3 gap-6">
+              <div class="col-span-2"><h3 class="font-semibold mb-3">Recent activity</h3>
+                <ul class="text-sm divide-y divide-slate-100">
+                  <li class="py-2.5 flex items-center gap-3"><span class="material-symbols-rounded text-brand-500">vaccines</span><div class="flex-1">Anti-wrinkle — forehead, glabella · 24u</div><span class="text-mute">12 Mar</span></li>
+                  <li class="py-2.5 flex items-center gap-3"><span class="material-symbols-rounded text-emerald-500">spa</span><div class="flex-1">Skin treatment — hydrafacial</div><span class="text-mute">02 Feb</span></li>
+                  <li class="py-2.5 flex items-center gap-3"><span class="material-symbols-rounded text-amber-500">loyalty</span><div class="flex-1">Earned 80 reward pts (non-S4)</div><span class="text-mute">02 Feb</span></li>
+                </ul>
+              </div>
+              <div><h3 class="font-semibold mb-3">At a glance</h3><div class="space-y-2 text-sm"><div class="fin flex justify-between"><span class="text-mute">Lifetime spend</span><span class="font-medium">$6,240</span></div><div class="flex justify-between"><span class="text-mute">Visits</span><span class="font-medium">23</span></div><div class="fin flex justify-between"><span class="text-mute">Avg / visit</span><span class="font-medium">$271</span></div><div class="flex justify-between"><span class="text-mute">Last seen</span><span class="font-medium">98 days ago</span></div><div class="flex justify-between"><span class="text-mute">Referred by</span><span class="font-medium">Instagram</span></div></div></div>
+            </div>
+            <div data-pane="vi" class="hidden"><table class="w-full text-sm"><thead class="text-mute border-b border-slate-100"><tr><th class="text-left font-medium py-2">Date</th><th class="text-left font-medium py-2">Treatment</th><th class="text-left font-medium py-2">Practitioner</th><th class="text-left font-medium py-2">Units/Lot</th><th class="text-right font-medium py-2">Amount</th></tr></thead><tbody class="divide-y divide-slate-100">
+              <tr><td class="py-2.5">12 Mar 2026</td><td>Anti-wrinkle (forehead, glabella)</td><td>Bella RN</td><td>24u · B2245</td><td class="text-right">$420</td></tr>
+              <tr><td class="py-2.5">18 Dec 2025</td><td>Anti-wrinkle (upper face)</td><td>Bella RN</td><td>30u · B2101</td><td class="text-right">$520</td></tr>
+              <tr><td class="py-2.5">02 Oct 2025</td><td>Cosmetic consultation</td><td>Dr Lee NP</td><td>—</td><td class="text-right">$50</td></tr>
+              <tr><td class="py-2.5">02 Feb 2026</td><td>Skin treatment (hydrafacial)</td><td>Dermal therapist</td><td>non-S4</td><td class="text-right">$210</td></tr>
+            </tbody></table></div>
+            <div data-pane="tp" class="hidden space-y-6">
+              <div class="grid grid-cols-3 gap-6">
+                <div class="col-span-2 bg-slate-50 rounded-2xl p-5">
+                  <div class="flex items-center justify-between mb-1"><h3 class="font-semibold">Active plan · Anti-ageing maintenance</h3><span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">On track</span></div>
+                  <p class="text-mute text-sm mb-4">Toxin every ~12 weeks + a quarterly skin treatment · started Jan 2026</p>
+                  <ol class="relative border-l-2 border-slate-200 ml-1 space-y-4 text-sm pl-5">
+                    <li class="relative"><span class="absolute -left-[26px] top-0.5 size-4 rounded-full bg-brand-500 border-2 border-white"></span><div class="font-medium">Session 1 · Anti-wrinkle 24u</div><div class="text-mute text-xs">18 Dec 2025 · Bella RN · done</div></li>
+                    <li class="relative"><span class="absolute -left-[26px] top-0.5 size-4 rounded-full bg-brand-500 border-2 border-white"></span><div class="font-medium">Session 2 · Anti-wrinkle 24u</div><div class="text-mute text-xs">12 Mar 2026 · Bella RN · done</div></li>
+                    <li class="relative"><span class="absolute -left-[26px] top-0.5 size-4 rounded-full bg-amber-400 border-2 border-white"></span><div class="flex items-center gap-2 flex-wrap"><div class="font-medium">Session 3 · Anti-wrinkle top-up</div><span class="px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 text-xs">due ~11 Sep</span><button onclick="show('booking');wstep(1)" class="text-brand-700 text-xs font-medium">Book</button></div><div class="text-mute text-xs">recommended 12-week interval</div></li>
+                    <li class="relative"><span class="absolute -left-[26px] top-0.5 size-4 rounded-full bg-slate-300 border-2 border-white"></span><div class="font-medium text-mute">Session 4 · Skin treatment</div><div class="text-mute text-xs">~Oct 2026 · quarterly</div></li>
+                  </ol>
+                  <div class="mt-5 flex items-center gap-3"><div class="flex-1 h-2 bg-slate-200 rounded-full"><div class="h-2 bg-brand-500 rounded-full" style="width:50%"></div></div><span class="text-xs text-mute whitespace-nowrap">2 of 4 done</span></div>
+                </div>
+                <div>
+                  <h3 class="font-semibold mb-2 text-sm">Progress</h3>
+                  <div class="grid grid-cols-2 gap-2"><figure><img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=380&fit=crop&crop=faces&q=80" class="rounded-xl aspect-[3/4] object-cover w-full"/><figcaption class="text-xs text-mute mt-1">Dec · start</figcaption></figure><figure><img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=380&fit=crop&crop=faces&q=80" style="filter:brightness(1.05) saturate(1.08)" class="rounded-xl aspect-[3/4] object-cover w-full"/><figcaption class="text-xs text-mute mt-1">Mar · latest</figcaption></figure></div>
+                  <div class="mt-3 text-sm space-y-1"><div class="flex justify-between"><span class="text-mute">Adherence</span><b>100%</b></div><div class="flex justify-between"><span class="text-mute">Next due</span><b>~11 Sep</b></div><div class="fin flex justify-between"><span class="text-mute">Plan value</span><b>$1,680</b></div></div>
+                </div>
+              </div>
+              <div>
+                <h3 class="font-semibold mb-1">Apply a protocol</h3>
+                <p class="text-mute text-sm mb-3">Pre-built multi-session templates — applying one schedules the sessions into recalls automatically.</p>
+                <div class="grid grid-cols-3 gap-3">
+                  <button onclick="applyProtocol('Anti-ageing maintenance')" class="text-left p-4 rounded-xl border-2 border-slate-200 hover:border-brand-500 bg-white"><div class="font-medium text-sm">Anti-ageing maintenance</div><div class="text-mute text-xs mt-0.5">Toxin q12w + skin each quarter · ongoing</div></button>
+                  <button onclick="applyProtocol('Acne clearing')" class="text-left p-4 rounded-xl border-2 border-slate-200 hover:border-brand-500 bg-white"><div class="font-medium text-sm">Acne clearing</div><div class="text-mute text-xs mt-0.5">6× skin needling, every 4 weeks · non-S4</div></button>
+                  <button onclick="applyProtocol('Bridal glow')" class="text-left p-4 rounded-xl border-2 border-slate-200 hover:border-brand-500 bg-white"><div class="font-medium text-sm">Bridal glow</div><div class="text-mute text-xs mt-0.5">3 visits across 8 weeks · timed to the date</div></button>
+                </div>
+                <div id="protoMsg" class="hidden mt-3 text-sm text-emerald-700 bg-emerald-50 rounded-xl px-3 py-2 flex items-center gap-2"><span class="material-symbols-rounded text-base">check_circle</span><span id="protoMsgTxt"></span></div>
+              </div>
+            </div>
+            <div data-pane="ph" class="hidden"><h3 class="font-semibold mb-3">Before / after gallery <span class="text-xs text-mute font-normal">(image-use consent on file)</span></h3><div class="grid grid-cols-4 gap-3">
+              <figure><img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=380&fit=crop&crop=faces&q=80" class="rounded-xl aspect-[3/4] object-cover w-full"/><figcaption class="text-xs text-mute mt-1">Dec 2025 · before</figcaption></figure>
+              <figure><img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=380&fit=crop&crop=faces&q=80" style="filter:brightness(1.05) contrast(1.03) saturate(1.08)" class="rounded-xl aspect-[3/4] object-cover w-full"/><figcaption class="text-xs text-mute mt-1">Mar 2026 · after</figcaption></figure>
+              <figure><img src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=300&h=380&fit=crop&crop=faces&q=80" class="rounded-xl aspect-[3/4] object-cover w-full"/><figcaption class="text-xs text-mute mt-1">Profile · before</figcaption></figure>
+              <figure><img src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=300&h=380&fit=crop&crop=faces&q=80" style="filter:brightness(1.05) saturate(1.08)" class="rounded-xl aspect-[3/4] object-cover w-full"/><figcaption class="text-xs text-mute mt-1">Profile · after</figcaption></figure>
+            </div></div>
+            <div data-pane="co" class="hidden"><ul class="text-sm divide-y divide-slate-100">
+              <li class="py-3 flex items-center gap-3"><span class="material-symbols-rounded text-emerald-600">task</span><div class="flex-1"><div class="font-medium">Anti-wrinkle consent v3.2</div><div class="text-mute text-xs">e-signed 12 Mar 2026</div></div><span class="text-emerald-700 text-xs">Current</span></li>
+              <li class="py-3 flex items-center gap-3"><span class="material-symbols-rounded text-emerald-600">task</span><div class="flex-1"><div class="font-medium">Medical history & screening</div><div class="text-mute text-xs">completed 12 Mar 2026 · no flags</div></div><span class="text-emerald-700 text-xs">Complete</span></li>
+              <li class="py-3 flex items-center gap-3"><span class="material-symbols-rounded text-emerald-600">photo_camera</span><div class="flex-1"><div class="font-medium">Image-use consent</div><div class="text-mute text-xs">granted · withdrawable</div></div><span class="text-emerald-700 text-xs">Active</span></li>
+            </ul></div>
+            <div data-pane="me" class="hidden grid grid-cols-2 gap-6">
+              <div class="rounded-2xl bg-gradient-to-br from-brand-600 to-brand-800 text-white p-5"><div class="text-sm opacity-90">Glow Club · Monthly</div><div class="text-3xl font-semibold mt-1">$89<span class="text-base font-normal">/mo</span></div><div class="text-xs opacity-80 mt-3">Automatic autopay ✓ · card •••• 4242</div><div class="text-xs opacity-80">Member since Jan 2023 · 41 mo</div></div>
+              <div><h3 class="font-semibold mb-3">Rewards <span class="text-xs text-mute font-normal">(non-S4 only)</span></h3><div class="text-3xl font-semibold">320 pts</div><div class="text-sm text-mute mb-3">≈ $32 off skincare/non-S4</div><div class="text-sm space-y-1"><div class="flex justify-between"><span class="text-mute">Visit milestone</span><span>8 / 10 → free facial add-on</span></div><div class="h-2 bg-slate-100 rounded-full"><div class="h-2 bg-brand-500 rounded-full w-4/5"></div></div></div></div>
+            </div>
+            <div data-pane="bi" class="hidden"><div class="flex gap-4 mb-4 text-sm"><div class="bg-slate-50 rounded-xl p-4 flex-1"><div class="text-mute">Account balance</div><div class="text-2xl font-semibold">$0.00</div></div><div class="bg-slate-50 rounded-xl p-4 flex-1"><div class="text-mute">Store credit</div><div class="text-2xl font-semibold">$15.00</div></div><div class="bg-slate-50 rounded-xl p-4 flex-1"><div class="text-mute">Package: visits left</div><div class="text-2xl font-semibold">2</div></div></div>
+              <table class="w-full text-sm"><thead class="text-mute border-b border-slate-100"><tr><th class="text-left font-medium py-2">Invoice</th><th class="text-left font-medium py-2">Date</th><th class="text-left font-medium py-2">Method</th><th class="text-right font-medium py-2">Total</th></tr></thead><tbody class="divide-y divide-slate-100"><tr><td class="py-2.5">#10428</td><td>12 Mar</td><td>Square ···· 4242</td><td class="text-right">$420.00</td></tr><tr><td class="py-2.5">#10311</td><td>02 Feb</td><td>Cash</td><td class="text-right">$210.00</td></tr></tbody></table></div>
+            <div data-pane="no" class="hidden"><div class="space-y-3 text-sm">
+              <div class="bg-slate-50 rounded-xl p-3"><div class="text-mute text-xs mb-1">Bella · 12 Mar</div>Prefers natural finish. Slightly heavy R brow — adjust dosing next visit.</div>
+              <div class="bg-slate-50 rounded-xl p-3"><div class="text-mute text-xs mb-1">SMS · 10 Mar</div>Reminder sent · confirmed.</div>
+              <textarea class="w-full border border-slate-200 rounded-xl p-3" rows="2" placeholder="Add a note…"></textarea>
+            </div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCHEDULE (week view) -->
+      <section data-screen id="schedule" class="hidden">
+        <div class="flex items-center justify-between mb-4 flex-wrap gap-2"><h1 class="text-2xl font-semibold">Schedule</h1><div class="flex items-center gap-2"><div class="flex rounded-xl bg-white shadow-soft text-sm overflow-hidden"><button class="px-3 py-2 text-mute">Day</button><button class="px-3 py-2 bg-brand-50 text-brand-700 font-medium">Week</button></div><button class="px-3 py-2 rounded-xl bg-white shadow-soft text-sm">‹ 15–19 Jun ›</button><button onclick="show('booking');wstep(1)" class="px-3 py-2 rounded-xl bg-brand-600 text-white text-sm font-medium">+ New</button></div></div>
+        <div class="bg-white rounded-2xl shadow-soft p-4 mb-4">
+          <div class="flex flex-wrap items-center gap-x-6 gap-y-3">
+            <div><div class="text-2xl font-semibold leading-none" id="weekTotal">14</div><div class="text-mute text-xs mt-0.5">appointments</div></div>
+            <div><div class="text-2xl font-semibold leading-none">68%</div><div class="text-mute text-xs mt-0.5">chairs booked</div></div>
+            <div><div class="text-2xl font-semibold leading-none text-amber-600">~12h</div><div class="text-mute text-xs mt-0.5">idle chair time</div></div>
+            <div class="hidden sm:block h-9 w-px bg-slate-200"></div>
+            <div class="flex-1 min-w-0"><div class="text-mute text-xs mb-1">Treatments booked this week</div><div id="typeCounts" class="flex flex-wrap gap-2"></div></div>
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-soft p-4 overflow-x-auto">
+          <div id="moveBanner"></div>
+          <div class="flex items-center gap-3 mb-3 text-xs text-mute flex-wrap"><span class="font-medium text-slate-700 text-sm mr-1">Mon 15 – Fri 19 Jun</span><span class="text-mute">· tap an appointment to move or cancel</span><span class="flex items-center gap-1"><span class="inline-block size-3 rounded bg-slate-50 border border-slate-200"></span>open</span><span class="flex items-center gap-1"><span class="inline-block size-3 rounded bg-amber-50 border border-dashed border-amber-300"></span>quiet — fill</span><span class="ml-auto">cell colour = treatment type (key above)</span></div>
+          <div id="weekgrid"></div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-soft p-4 mt-4">
+          <div class="flex items-center gap-2 mb-3 flex-wrap"><span class="material-symbols-rounded text-amber-500">savings</span><h2 class="font-semibold">Quiet windows to fill</h2><span class="text-mute text-xs">— filling idle chairs cuts staff cost-per-treatment</span></div>
+          <div id="quietlist" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
+        </div>
+      </section>
+
+      <!-- CHARTING OVERVIEW -->
+      <section data-screen id="chartlist" class="hidden">
+        <div class="mb-4"><h1 class="text-2xl font-semibold">Charting</h1><p class="text-mute text-sm">Today's patients — open a chart to begin</p></div>
+        <div id="chartNow"></div>
+        <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
+          <div class="px-4 py-3 border-b border-slate-100 font-semibold text-sm flex items-center justify-between">Today<span id="chartCount" class="text-xs text-mute font-normal"></span></div>
+          <div id="chartTodayList"></div>
+        </div>
+      </section>
+
+      <!-- CHARTING -->
+      <section data-screen id="chart" class="hidden">
+        <div class="flex items-center gap-3 mb-4 flex-wrap"><button onclick="show('chartlist')" class="text-mute"><span class="material-symbols-rounded">arrow_back</span></button><h1 class="text-2xl font-semibold">Charting — <span id="chartName">Sarah Mitchell</span></h1><span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">Consult ✓ · Consent ✓ · screening clear</span><span class="chart-view px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 text-xs">Read-only view</span></div>
+        <div class="grid grid-cols-3 gap-6">
+          <div class="col-span-2 bg-white rounded-2xl shadow-soft p-5">
+            <div class="flex items-center justify-between mb-3"><h2 class="font-semibold">Injection map</h2><div class="chart-edit flex gap-2"><button id="autobtn" onclick="autoDetect()" class="px-3 py-1.5 rounded-lg bg-brand-600 text-white text-xs font-medium flex items-center gap-1"><span class="material-symbols-rounded text-base">auto_fix_high</span>Auto-detect</button><button onclick="clearPts()" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs">Clear</button></div></div>
+            <div class="flex gap-6">
+              <div id="facewrap" onclick="faceClick(event)" class="relative w-64 shrink-0 rounded-xl overflow-hidden bg-slate-100 cursor-crosshair">
+                <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=500&fit=crop&crop=faces&q=80" class="w-full h-[320px] object-cover pointer-events-none" onerror="this.style.display='none'"/>
+                <div id="detecting" class="hidden absolute inset-0 bg-slate-900/40 grid place-items-center text-white text-sm font-medium gap-2"><span class="material-symbols-rounded animate-pulse">face_retouching_natural</span>Detecting landmarks…</div>
+              </div>
+              <div class="flex-1">
+                <div id="editor" class="rounded-xl border border-slate-200 p-4 text-sm bg-slate-50 min-h-[88px]"></div>
+                <div id="ptlist" class="mt-3 text-sm border border-slate-200 rounded-xl divide-y divide-slate-100 overflow-hidden"></div>
+                <div class="mt-3 flex justify-between text-sm font-medium"><span>Total units</span><span id="totalu">0u</span></div>
+                <div class="mt-1 flex justify-between text-xs text-mute"><span>Product · lot (from stock)</span><span>Botulinum toxin · B2245 · exp 09/26</span></div>
+                <p class="chart-edit text-xs text-mute mt-3 flex items-center gap-1"><span class="material-symbols-rounded text-sm">touch_app</span>Tap the face to add · drag a point to fine-tune</p>
+                <p class="chart-view text-xs text-mute mt-3 flex items-center gap-1" style="display:none"><span class="material-symbols-rounded text-sm">visibility</span>Read-only view — owner oversight</p>
+              </div>
+            </div>
+          </div>
+          <div class="space-y-5">
+            <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Before / after <span class="text-xs text-mute font-normal">· drag to compare</span></h2>
+              <div id="ba" class="relative rounded-xl overflow-hidden select-none cursor-ew-resize" style="aspect-ratio:3/4;touch-action:none">
+                <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=520&fit=crop&crop=faces&q=80" class="absolute inset-0 w-full h-full object-cover pointer-events-none" style="filter:saturate(.85) brightness(.94) contrast(.97)"/>
+                <img id="baAfter" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=520&fit=crop&crop=faces&q=80" class="absolute inset-0 w-full h-full object-cover pointer-events-none" style="filter:saturate(1.2) brightness(1.1) contrast(1.06);clip-path:inset(0 50% 0 0)"/>
+                <div id="baDiv" class="absolute top-0 bottom-0 w-0.5 bg-white pointer-events-none" style="left:50%"><div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-8 rounded-full bg-white shadow grid place-items-center text-slate-500"><span class="material-symbols-rounded text-lg">swap_horiz</span></div></div>
+                <div class="absolute top-2 left-2 text-xs bg-black/50 text-white px-2 py-0.5 rounded pointer-events-none">After</div><div class="absolute top-2 right-2 text-xs bg-black/50 text-white px-2 py-0.5 rounded pointer-events-none">Before</div>
+              </div>
+              <p class="text-xs text-mute mt-2">12 weeks apart · stored securely, never on device</p>
+            </div>
+            <button onclick="finaliseChart()" class="chart-edit w-full py-3 rounded-xl bg-brand-600 text-white font-medium">Finalise &amp; checkout</button>
+            <p class="chart-edit text-xs text-mute text-center">Finalising locks the note and deducts the units used from lot B2245 in Stock.</p>
+            <p class="chart-view text-xs text-mute text-center" style="display:none">Read-only — the owner can review charts but not edit or finalise.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- STOCK -->
+      <section data-screen id="stock" class="hidden">
+        <div class="flex items-center justify-between mb-5">
+          <div><h1 class="text-2xl font-semibold">Medicines &amp; stock</h1><p class="text-mute text-sm">On-site stock · custody Dr Lee NP · locked fridge</p></div>
+          <div class="flex gap-2">
+            <button onclick="openCatalog()" class="catadmin px-4 py-2 rounded-xl bg-white shadow-soft text-sm font-medium flex items-center gap-1"><span class="material-symbols-rounded text-lg">category</span>Products</button>
+            <button id="receiveBtn" onclick="openReceive()" class="px-4 py-2 rounded-xl bg-brand-600 text-white text-sm font-medium flex items-center gap-1"><span class="material-symbols-rounded text-lg">add</span>Receive stock</button>
+          </div>
+        </div>
+        <div id="prodCards" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5"></div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+          <div class="bg-white rounded-2xl shadow-soft p-5"><div class="text-mute text-sm">Products tracked</div><div id="kProducts" class="text-3xl font-semibold mt-1">—</div><div class="text-xs text-mute mt-1">toxin &amp; filler</div></div>
+          <div class="bg-white rounded-2xl shadow-soft p-5"><div class="text-mute text-sm">Active lots</div><div id="kLots" class="text-3xl font-semibold mt-1">—</div><div class="text-xs text-mute mt-1">in fridge</div></div>
+          <div class="bg-white rounded-2xl shadow-soft p-5"><div class="text-mute text-sm">Expiring soon</div><div id="kExpLots" class="text-3xl font-semibold mt-1 text-amber-600">—</div><div id="kExpDetail" class="text-xs text-amber-600 mt-1 truncate">—</div></div>
+          <div class="bg-white rounded-2xl shadow-soft p-5"><div class="text-mute text-sm">Below par</div><div id="kReorder" class="text-3xl font-semibold mt-1 text-amber-600">—</div><div class="text-xs text-mute mt-1">reorder</div></div>
+        </div>
+        <div class="rounded-2xl border border-amber-200/70 bg-amber-50/50 p-5 mb-5">
+          <h2 class="font-semibold text-sm flex items-center gap-2"><span class="material-symbols-rounded text-amber-500">savings</span>Reduce waste &amp; lift margin</h2>
+          <div class="grid grid-cols-3 gap-3 mt-3 text-sm">
+            <div class="rounded-xl bg-white border border-amber-200/60 p-3"><div class="font-medium">Lot B2188 expiring (~6 wks · 40u)</div><div class="text-mute text-xs mt-0.5">Avoid a ~$440 write-off. It's first in line (FEFO) — and 3 quiet windows this week could absorb it.</div><button onclick="show('schedule')" class="mt-2 text-brand-700 text-xs font-medium">See quiet windows →</button></div>
+            <div class="rounded-xl bg-white border border-amber-200/60 p-3"><div class="font-medium">Pull bookings into the window</div><div class="text-mute text-xs mt-0.5">Message due/recall clients a <b>non-S4</b> add-on bundle (skincare + treatment) privately — brings them in to use the lot.</div><button class="mt-2 text-brand-700 text-xs font-medium">Draft member offer →</button></div>
+            <div class="rounded-xl bg-white border border-amber-200/60 p-3"><div class="font-medium">Slow-moving retail</div><div class="text-mute text-xs mt-0.5">SPF 50 — 12 units aging. Bundle with facials (non-S4 can be discounted) to clear it.</div><button class="mt-2 text-brand-700 text-xs font-medium">Create bundle →</button></div>
+          </div>
+          <p class="text-xs text-mute mt-3 flex items-center gap-1"><span class="material-symbols-rounded text-sm">gavel</span>S4 medicines can't be discounted or advertised (TGA). These levers use FEFO + <b>non-S4</b> incentives sent privately to consented clients.</p>
+        </div>
+        <div class="grid grid-cols-3 gap-6">
+          <div class="col-span-2 space-y-6">
+            <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
+              <div class="px-5 py-3 border-b border-slate-100 font-semibold">Stock by lot</div>
+              <table class="w-full text-sm"><thead class="text-mute border-b border-slate-100"><tr><th class="text-left font-medium px-4 py-2">Product</th><th class="text-left font-medium px-4 py-2">Lot</th><th class="text-left font-medium px-4 py-2">Expiry</th><th class="text-left font-medium px-4 py-2">On hand</th><th class="text-left font-medium px-4 py-2">Used</th><th class="text-left font-medium px-4 py-2">Wasted</th><th class="text-left font-medium px-4 py-2">Status</th></tr></thead><tbody id="lottbody" class="divide-y divide-slate-100"></tbody></table>
+            </div>
+            <div class="bg-white rounded-2xl shadow-soft p-5"><div class="flex items-center justify-between mb-3 flex-wrap gap-2"><h2 class="font-semibold">Usage history <span class="text-mute text-xs font-normal">· units used / week</span></h2><div id="stockTypeToggle" class="flex gap-1 text-xs"></div></div>
+              <svg viewBox="0 0 480 120" class="w-full" id="usagechart"></svg>
+              <div id="usageLabels" class="flex justify-between text-[10px] text-mute mt-1"></div>
+            </div>
+          </div>
+          <div id="lotdetail" class="bg-white rounded-2xl shadow-soft p-5"></div>
+        </div>
+      </section>
+
+      <!-- CHECKOUT -->
+      <section data-screen id="checkout" class="hidden">
+        <h1 class="text-2xl font-semibold mb-5">Checkout — Sarah Mitchell</h1>
+        <div class="grid grid-cols-3 gap-6">
+          <div class="col-span-2 space-y-5">
+            <div class="bg-white rounded-2xl shadow-soft p-5">
+              <div class="flex items-start gap-4">
+                <img src="https://i.pravatar.cc/120?img=45" class="size-14 rounded-full object-cover"/>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap"><h2 class="text-lg font-semibold">Sarah Mitchell</h2><span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-xs font-medium">VIP · Glow Club</span></div>
+                  <div class="text-mute text-sm">34 · client since 2023 · 23 visits · last seen 98 days ago</div>
+                  <div class="text-mute text-sm flex flex-wrap gap-x-4 gap-y-0.5 mt-0.5"><span class="flex items-center gap-1"><span class="material-symbols-rounded text-sm">call</span>0412 345 678</span><span class="flex items-center gap-1"><span class="material-symbols-rounded text-sm">mail</span>sarah.m@email.com</span></div>
+                </div>
+                <button onclick="show('profile')" class="shrink-0 text-brand-700 text-sm font-medium">View profile</button>
+              </div>
+              <div class="mt-4 grid grid-cols-3 gap-3 text-sm">
+                <div class="rounded-xl bg-slate-50 p-3"><div class="text-mute text-xs mb-1 flex items-center gap-1"><span class="material-symbols-rounded text-sm">favorite</span>Prefers</div>Natural finish · a chamomile tea on arrival</div>
+                <div class="rounded-xl bg-slate-50 p-3"><div class="text-mute text-xs mb-1 flex items-center gap-1"><span class="material-symbols-rounded text-sm">history</span>Recent treatments</div>Anti-wrinkle 24u · Mar<br>Hydrafacial · Feb</div>
+                <div class="rounded-xl bg-amber-50 p-3"><div class="text-amber-800 text-xs mb-1 flex items-center gap-1"><span class="material-symbols-rounded text-sm">cake</span>Connect</div>Birthday in 12 days · referred by Hannah L.</div>
+              </div>
+            </div>
+            <div class="bg-white rounded-2xl shadow-soft p-5">
+              <ul id="cartlines" class="divide-y divide-slate-100 text-sm"></ul>
+              <div class="border-t border-slate-200 mt-3 pt-3 space-y-1 text-sm"><div class="flex justify-between text-mute"><span>Subtotal</span><span id="cartSub">—</span></div><div class="flex justify-between text-mute"><span>GST incl.</span><span id="cartGst">—</span></div><div class="flex justify-between font-semibold text-base"><span>Total</span><span id="cartTotal">—</span></div></div>
+            </div>
+          </div>
+          <div class="space-y-4">
+            <div class="rounded-2xl border border-amber-200/70 bg-amber-50/50 p-4">
+              <div class="flex items-center gap-2 mb-1"><span class="material-symbols-rounded text-amber-500 text-xl">lightbulb</span><h2 class="font-semibold text-sm">Worth mentioning</h2><button onclick="toggleMember()" class="ml-auto text-[11px] text-mute hover:text-brand-700">preview: <span id="memState">member</span> ↻</button></div>
+              <p class="text-xs text-mute mb-2">Private staff cue from Sarah's history — suggest, don't push.</p>
+              <div id="suggestions"></div>
+            </div>
+            <div class="space-y-3">
+              <h2 class="font-semibold">Take payment (in person)</h2>
+              <button onclick="pay()" class="w-full py-3 rounded-xl bg-brand-600 text-white font-medium flex items-center justify-center gap-2"><span class="material-symbols-rounded">contactless</span>Square card</button>
+              <button onclick="pay()" class="w-full py-3 rounded-xl bg-white shadow-soft font-medium flex items-center justify-center gap-2"><span class="material-symbols-rounded">payments</span>Record cash</button>
+              <button onclick="pay()" class="w-full py-3 rounded-xl bg-white shadow-soft font-medium flex items-center justify-center gap-2"><span class="material-symbols-rounded">card_giftcard</span>Gift card</button>
+              <div class="text-xs text-mute mt-2 p-3 bg-slate-50 rounded-xl">Membership autopay runs automatically on the card on file. Invoice posts to Xero on completion.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- REBOOK SUGGESTION (after checkout) -->
+      <section data-screen id="rebook" class="hidden">
+        <div class="flex items-center gap-3 mb-1"><span class="material-symbols-rounded text-emerald-500">check_circle</span><h1 class="text-2xl font-semibold">Payment complete — book Sarah's next visit</h1></div>
+        <p class="text-mute mb-5">Rebooking before she leaves is the biggest lever on retention. Here's when she's next due.</p>
+        <div id="rebookBody" class="max-w-3xl space-y-4"></div>
+      </section>
+
+      <!-- MEMBERSHIPS / PACKAGES / LOYALTY -->
+      <section data-screen id="memberships" class="hidden">
+        <div class="flex items-center justify-between mb-4 flex-wrap gap-2"><div><h1 class="text-2xl font-semibold">Memberships &amp; loyalty</h1><p class="text-mute text-sm">Recurring revenue, packages, points, referrals &amp; gift cards</p></div><button class="px-3 py-2 rounded-xl bg-white shadow-soft text-sm font-medium">+ New plan</button></div>
+        <div class="flex gap-2 mb-5 text-sm flex-wrap">
+          <button onclick="mtab('overview')" data-mtab="overview" class="mtab px-3 py-1.5 rounded-full bg-brand-600 text-white font-medium">Overview</button>
+          <button onclick="mtab('plans')" data-mtab="plans" class="mtab px-3 py-1.5 rounded-full bg-white shadow-soft text-mute">Plans</button>
+          <button onclick="mtab('pkgs')" data-mtab="pkgs" class="mtab px-3 py-1.5 rounded-full bg-white shadow-soft text-mute">Packages</button>
+          <button onclick="mtab('members')" data-mtab="members" class="mtab px-3 py-1.5 rounded-full bg-white shadow-soft text-mute">Members</button>
+          <button onclick="mtab('loyalty')" data-mtab="loyalty" class="mtab px-3 py-1.5 rounded-full bg-white shadow-soft text-mute">Loyalty</button>
+          <button onclick="mtab('referrals')" data-mtab="referrals" class="mtab px-3 py-1.5 rounded-full bg-white shadow-soft text-mute">Referrals</button>
+          <button onclick="mtab('gifts')" data-mtab="gifts" class="mtab px-3 py-1.5 rounded-full bg-white shadow-soft text-mute">Gift cards</button>
+        </div>
+        <div data-mtpane="overview">
+          <div class="grid grid-cols-4 gap-4 mb-5">
+            <div class="bg-white rounded-2xl shadow-soft p-5"><div class="text-mute text-sm">Active members</div><div class="text-3xl font-semibold mt-1">634</div><div class="text-xs text-emerald-600 mt-1">+5 this week</div></div>
+            <div class="fin bg-white rounded-2xl shadow-soft p-5"><div class="text-mute text-sm">Recurring / mo</div><div class="text-3xl font-semibold mt-1">$74.3k</div><div class="text-xs text-emerald-600 mt-1">▲ 6%</div></div>
+            <div class="bg-white rounded-2xl shadow-soft p-5"><div class="text-mute text-sm">Avg tenure</div><div class="text-3xl font-semibold mt-1">14<span class="text-base text-mute"> mo</span></div></div>
+            <div class="bg-white rounded-2xl shadow-soft p-5"><div class="text-mute text-sm">Failed payments</div><div class="text-3xl font-semibold mt-1 text-rose-600">1</div><button onclick="mtab('members')" class="text-xs text-brand-700 font-medium mt-1">Action →</button></div>
+          </div>
+          <div class="grid grid-cols-3 gap-6">
+            <div class="col-span-2 bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Plan mix</h2><div class="space-y-3 text-sm">
+              <div class="flex items-center gap-3"><span class="w-20">Glow Club</span><div class="flex-1 h-2 bg-slate-100 rounded-full"><div class="h-2 bg-brand-500 rounded-full" style="width:65%"></div></div><span class="text-mute w-12 text-right">412</span></div>
+              <div class="flex items-center gap-3"><span class="w-20">Radiance</span><div class="flex-1 h-2 bg-slate-100 rounded-full"><div class="h-2 bg-brand-500 rounded-full" style="width:28%"></div></div><span class="text-mute w-12 text-right">176</span></div>
+              <div class="flex items-center gap-3"><span class="w-20">Platinum</span><div class="flex-1 h-2 bg-slate-100 rounded-full"><div class="h-2 bg-brand-500 rounded-full" style="width:7%"></div></div><span class="text-mute w-12 text-right">46</span></div>
+            </div></div>
+            <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3 text-sm">Needs action</h2><ul class="text-sm space-y-2.5"><li class="flex items-center gap-2"><span class="material-symbols-rounded text-rose-500">error</span>1 failed payment<button onclick="mtab('members')" class="ml-auto text-brand-700 text-xs font-medium">Fix</button></li><li class="flex items-center gap-2"><span class="material-symbols-rounded text-amber-500">event_upcoming</span>23 renewals this week</li><li class="flex items-center gap-2"><span class="material-symbols-rounded text-emerald-500">trending_up</span>38 referrals → 29 joined</li></ul></div>
+          </div>
+        </div>
+        <div data-mtpane="plans" class="hidden"><div id="planlist" class="grid grid-cols-3 gap-4"></div><p class="text-xs text-mute mt-3 flex items-center gap-1"><span class="material-symbols-rounded text-sm">gavel</span>Autopay is card-on-file recurring (added online/in-app, never in person). Member rewards apply to non-S4 only.</p></div>
+        <div data-mtpane="pkgs" class="hidden bg-white rounded-2xl shadow-soft overflow-hidden"><table class="w-full text-sm"><thead class="text-mute border-b border-slate-100"><tr><th class="text-left font-medium px-4 py-2">Package</th><th class="text-left font-medium px-4 py-2">Price</th><th class="text-left font-medium px-4 py-2">Sold</th><th class="text-left font-medium px-4 py-2">Sessions used</th><th class="text-left font-medium px-4 py-2">Status</th></tr></thead><tbody id="pkglist" class="divide-y divide-slate-100"></tbody></table></div>
+        <div data-mtpane="members" class="hidden bg-white rounded-2xl shadow-soft overflow-hidden"><table class="w-full text-sm"><thead class="text-mute border-b border-slate-100"><tr><th class="text-left font-medium px-4 py-2">Member</th><th class="text-left font-medium px-4 py-2">Plan</th><th class="text-left font-medium px-4 py-2">Since</th><th class="text-left font-medium px-4 py-2">Autopay</th><th class="text-left font-medium px-4 py-2">Next charge</th><th class="text-left font-medium px-4 py-2">Status</th></tr></thead><tbody id="memberlist" class="divide-y divide-slate-100"></tbody></table></div>
+        <div data-mtpane="loyalty" class="hidden grid grid-cols-3 gap-6">
+          <div class="col-span-2 bg-white rounded-2xl shadow-soft p-5"><h3 class="font-semibold mb-3">Points program</h3><div class="grid grid-cols-3 gap-3 text-sm"><div class="rounded-xl bg-slate-50 p-3"><div class="text-mute text-xs">Earn</div><div class="font-medium mt-1">1 pt / $1 on non-S4</div></div><div class="rounded-xl bg-slate-50 p-3"><div class="text-mute text-xs">Redeem</div><div class="font-medium mt-1">200 pts = $20 off non-S4</div></div><div class="rounded-xl bg-slate-50 p-3"><div class="text-mute text-xs">Tiers</div><div class="font-medium mt-1">Silver · Gold · Platinum</div></div></div><p class="text-xs text-mute mt-3 flex items-center gap-1"><span class="material-symbols-rounded text-sm">gavel</span>Points never earn or redeem on S4 medicines — enforced at checkout.</p></div>
+          <div class="bg-white rounded-2xl shadow-soft p-5"><h3 class="font-semibold mb-3 text-sm">Top balances</h3><ul class="text-sm space-y-2"><li class="flex justify-between"><span>Amelia Ross</span><b>1,240 pts</b></li><li class="flex justify-between"><span>Sarah Mitchell</span><b>980 pts</b></li><li class="flex justify-between"><span>Grace Tan</span><b>760 pts</b></li></ul></div>
+        </div>
+        <div data-mtpane="referrals" class="hidden grid grid-cols-3 gap-6">
+          <div class="col-span-2 bg-white rounded-2xl shadow-soft p-5"><h3 class="font-semibold mb-1">Referral program</h3><p class="text-mute text-sm mb-3">Give $25, get $25 — as non-S4 account credit when a friend's first visit completes.</p><div class="rounded-xl bg-brand-50 p-4 text-sm"><div class="font-medium">This quarter</div><div class="flex gap-6 mt-2"><div><div class="text-2xl font-semibold">38</div><div class="text-mute text-xs">referrals</div></div><div><div class="text-2xl font-semibold">29</div><div class="text-mute text-xs">converted</div></div><div class="fin"><div class="text-2xl font-semibold">$7.3k</div><div class="text-mute text-xs">new revenue</div></div></div></div></div>
+          <div class="bg-white rounded-2xl shadow-soft p-5"><h3 class="font-semibold mb-3 text-sm">Top referrers</h3><ul class="text-sm space-y-2"><li class="flex justify-between"><span>Hannah Lawson</span><b>6</b></li><li class="flex justify-between"><span>Sarah Mitchell</span><b>4</b></li><li class="flex justify-between"><span>Mia Chen</span><b>3</b></li></ul></div>
+        </div>
+        <div data-mtpane="gifts" class="hidden">
+          <div class="flex items-center justify-between mb-3 flex-wrap gap-2"><p class="text-mute text-sm">Sell, track &amp; redeem gift cards. Balances sync to checkout.</p><button onclick="issueGift()" class="px-3 py-2 rounded-xl bg-brand-600 text-white text-sm font-medium">Issue gift card</button></div>
+          <div id="giftlist" class="grid grid-cols-3 gap-3"></div>
+        </div>
+        <div data-mtpane="pricing" class="hidden fin">
+          <div class="grid grid-cols-3 gap-6 items-start">
+            <div class="col-span-2 space-y-6">
+              <div class="bg-white rounded-2xl shadow-soft p-5">
+                <h2 class="font-semibold mb-1">Membership plans &amp; levels</h2>
+                <p class="text-mute text-xs mb-3">Adjust monthly price — projected members &amp; MRR update live.</p>
+                <div id="planEditRows"></div>
+                <div class="flex items-center gap-3 mt-4 text-sm"><span class="text-mute whitespace-nowrap">Churn sensitivity</span><input type="range" min="0" max="20" value="6" oninput="setChurn(this.value)" class="flex-1 accent-brand-600"/><span id="churnVal" class="w-10 text-right font-medium">6%</span><span class="text-mute text-xs whitespace-nowrap">leave / +$10</span></div>
+              </div>
+              <div class="bg-white rounded-2xl shadow-soft p-5">
+                <h2 class="font-semibold mb-1">Service pricing</h2>
+                <p class="text-mute text-xs mb-3">Per-treatment price · assumes volume holds.</p>
+                <div id="svcEditRows"></div>
+              </div>
+            </div>
+            <div class="bg-white rounded-2xl shadow-soft p-5">
+              <div class="flex items-center justify-between mb-3"><h2 class="font-semibold">Projected impact</h2><button onclick="resetPricing()" class="text-mute text-xs hover:text-brand-700">Reset</button></div>
+              <div id="impactBody"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FORMS & CONSENT -->
+      <section data-screen id="forms" class="hidden">
+        <div class="flex items-center justify-between mb-4 flex-wrap gap-2"><div><h1 class="text-2xl font-semibold">Forms &amp; consent</h1><p class="text-mute text-sm">Intake, screening &amp; consent — versioned, e-signed, AHPRA-aligned</p></div><button class="px-3 py-2 rounded-xl bg-white shadow-soft text-sm font-medium">+ New template</button></div>
+        <div class="rounded-2xl bg-gradient-to-br from-brand-600 to-brand-800 text-white p-5 mb-5 flex items-center gap-4">
+          <span class="material-symbols-rounded text-3xl">smartphone</span>
+          <div class="flex-1"><div class="font-semibold">Client pre-visit flow</div><div class="text-sm opacity-90">Medical history → screening (BDD) → consent → image use. Sent on booking, completed on the client's phone, auto-attached to the chart.</div></div>
+          <button onclick="openIntake()" class="shrink-0 px-4 py-2 rounded-xl bg-white text-brand-700 text-sm font-medium">Preview the client flow</button>
+        </div>
+        <div class="grid grid-cols-3 gap-6">
+          <div class="col-span-2 bg-white rounded-2xl shadow-soft overflow-hidden">
+            <div class="px-4 py-3 border-b border-slate-100 font-semibold text-sm">Templates</div>
+            <table class="w-full text-sm"><thead class="text-mute border-b border-slate-100"><tr><th class="text-left font-medium px-4 py-2">Form</th><th class="text-left font-medium px-4 py-2">Type</th><th class="text-left font-medium px-4 py-2">Version</th><th class="text-left font-medium px-4 py-2">Status</th></tr></thead><tbody class="divide-y divide-slate-100">
+              <tr><td class="px-4 py-2.5 font-medium">Anti-wrinkle consent</td><td>Consent</td><td>v3.2</td><td><span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 text-xs">Current</span></td></tr>
+              <tr><td class="px-4 py-2.5 font-medium">Dermal filler consent</td><td>Consent</td><td>v2.1</td><td><span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 text-xs">Current</span></td></tr>
+              <tr><td class="px-4 py-2.5 font-medium">Medical history &amp; screening</td><td>Intake</td><td>v4.0</td><td><span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 text-xs">Current</span></td></tr>
+              <tr><td class="px-4 py-2.5 font-medium">Image-use consent</td><td>Consent</td><td>v1.3</td><td><span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 text-xs">Current</span></td></tr>
+              <tr><td class="px-4 py-2.5 font-medium">Under-18 consent (+ guardian)</td><td>Consent</td><td>v1.0</td><td><span class="px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 text-xs">7-day cool-off</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
+            <div class="px-4 py-3 border-b border-slate-100 font-semibold text-sm">Recent submissions</div>
+            <ul class="text-sm divide-y divide-slate-100">
+              <li class="px-4 py-3"><div class="font-medium">Sarah Mitchell</div><div class="text-mute text-xs">Anti-wrinkle consent v3.2 · signed 12 Mar <span class="text-emerald-600">✓</span></div></li>
+              <li class="px-4 py-3"><div class="font-medium">Jess Tan</div><div class="text-mute text-xs">Medical history · <span class="text-amber-600">pending — link sent</span></div></li>
+              <li class="px-4 py-3"><div class="font-medium">Amelia Ross</div><div class="text-mute text-xs">Anti-wrinkle consent v3.2 · signed 10 May <span class="text-emerald-600">✓</span></div></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- MARKETING & CONVERSATIONS -->
+      <section data-screen id="marketing" class="hidden">
+        <div class="mb-4"><h1 class="text-2xl font-semibold">Marketing &amp; conversations</h1><p class="text-mute text-sm">Recall, win-back &amp; two-way messaging — opt-in and advertising-safe</p></div>
+        <div class="flex gap-2 mb-5 text-sm flex-wrap">
+          <button onclick="msub('overview')" data-msub="overview" class="msub px-3 py-1.5 rounded-full bg-brand-600 text-white font-medium">Overview</button>
+          <button onclick="msub('inbox')" data-msub="inbox" class="msub px-3 py-1.5 rounded-full bg-white shadow-soft text-mute">Inbox</button>
+          <button onclick="msub('auto')" data-msub="auto" class="msub px-3 py-1.5 rounded-full bg-white shadow-soft text-mute">Automations</button>
+          <button onclick="msub('camp')" data-msub="camp" class="msub px-3 py-1.5 rounded-full bg-white shadow-soft text-mute">Campaigns</button>
+        </div>
+        <div data-mpane="overview">
+          <div class="grid grid-cols-4 gap-4 mb-5">
+            <div class="bg-white rounded-2xl shadow-soft p-5"><div class="text-mute text-sm">Unread messages</div><div id="ovUnread" class="text-3xl font-semibold mt-1">—</div><div class="text-xs text-mute mt-1">IG · FB · SMS · email</div></div>
+            <div class="bg-white rounded-2xl shadow-soft p-5"><div class="text-mute text-sm">Avg response</div><div class="text-3xl font-semibold mt-1">8<span class="text-base text-mute"> min</span></div><div class="text-xs text-emerald-600 mt-1">▼ faster this week</div></div>
+            <div class="bg-white rounded-2xl shadow-soft p-5"><div class="text-mute text-sm">Automations</div><div class="text-3xl font-semibold mt-1">5 <span class="text-base text-mute">on</span></div><div class="text-xs text-mute mt-1">recall · win-back · more</div></div>
+            <div class="bg-white rounded-2xl shadow-soft p-5"><div class="text-mute text-sm">Campaigns</div><div class="text-3xl font-semibold mt-1">1 <span class="text-base text-mute">live</span></div><div class="text-xs text-mute mt-1">1 draft</div></div>
+          </div>
+          <div class="grid grid-cols-3 gap-6">
+            <div class="col-span-2 bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Open conversations by channel</h2><div id="ovChannels" class="space-y-3 text-sm"></div></div>
+            <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Quick actions</h2><div class="space-y-2 text-sm">
+              <button onclick="goSub('marketing','inbox')" class="w-full text-left px-3 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 flex items-center gap-2"><span class="material-symbols-rounded text-brand-600">forum</span>Open unified inbox</button>
+              <button onclick="goSub('marketing','auto')" class="w-full text-left px-3 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 flex items-center gap-2"><span class="material-symbols-rounded text-brand-600">bolt</span>Manage automations</button>
+              <button onclick="goSub('marketing','camp')" class="w-full text-left px-3 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 flex items-center gap-2"><span class="material-symbols-rounded text-brand-600">add</span>New campaign</button>
+            </div></div>
+          </div>
+        </div>
+        <div data-mpane="inbox" class="hidden">
+          <div class="flex flex-wrap items-center gap-2 mb-4 text-sm">
+            <button onclick="filterCh('all')" data-chf="all" class="chf px-3 py-1.5 rounded-full bg-brand-600 text-white font-medium">All</button>
+            <button onclick="filterCh('Instagram')" data-chf="Instagram" class="chf px-3 py-1.5 rounded-full bg-white shadow-soft text-mute flex items-center gap-1"><span class="material-symbols-rounded text-base text-pink-500">photo_camera</span>Instagram</button>
+            <button onclick="filterCh('Facebook')" data-chf="Facebook" class="chf px-3 py-1.5 rounded-full bg-white shadow-soft text-mute flex items-center gap-1"><span class="material-symbols-rounded text-base text-blue-600">thumb_up</span>Facebook</button>
+            <button onclick="filterCh('SMS')" data-chf="SMS" class="chf px-3 py-1.5 rounded-full bg-white shadow-soft text-mute flex items-center gap-1"><span class="material-symbols-rounded text-base text-emerald-600">sms</span>SMS</button>
+            <button onclick="filterCh('Email')" data-chf="Email" class="chf px-3 py-1.5 rounded-full bg-white shadow-soft text-mute flex items-center gap-1"><span class="material-symbols-rounded text-base text-amber-600">mail</span>Email</button>
+            <select onchange="filterCat(this.value)" class="ml-auto text-sm border border-slate-200 rounded-xl px-2 py-1.5 bg-white"><option value="all">All categories</option><option value="Booking">Booking</option><option value="Pricing">Pricing</option><option value="Aftercare">Aftercare</option><option value="Complaint">Complaint</option><option value="General">General</option></select>
+          </div>
+          <div class="grid grid-cols-3 gap-6">
+            <div class="bg-white rounded-2xl shadow-soft overflow-hidden"><div class="px-4 py-3 border-b border-slate-100 font-semibold text-sm flex items-center justify-between">Conversations<span id="convoCount" class="text-xs text-mute font-normal"></span></div><div id="convolist" class="max-h-[460px] overflow-auto"></div></div>
+            <div class="col-span-2 bg-white rounded-2xl shadow-soft flex flex-col" style="min-height:460px">
+              <div id="threadhead" class="px-4 py-3 border-b border-slate-100 flex items-center gap-2 flex-wrap"></div>
+              <div id="convoctx" class="px-4 py-2 border-b border-slate-100 text-sm"></div>
+              <div id="linkpanel" class="hidden px-4 py-3 border-b border-slate-100 bg-slate-50"><input id="linksearch" oninput="renderLinkList()" placeholder="Search clients to link…" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm mb-2"/><div id="linklist" class="max-h-40 overflow-auto space-y-1"></div></div>
+              <div id="thread" class="flex-1 p-4 space-y-3 overflow-auto" style="max-height:300px"></div>
+              <div id="suggrow" class="px-3 pt-2 flex flex-wrap gap-2"></div>
+              <div class="p-3 pt-2">
+                <div id="lintwarn" class="hidden mb-2 text-xs text-rose-600 bg-rose-50 rounded-lg px-3 py-2 flex items-center gap-1"><span class="material-symbols-rounded text-sm">gavel</span><span id="lintmsg"></span></div>
+                <div class="flex gap-2 items-end">
+                  <select onchange="tmpl(this.value)" class="text-xs border border-slate-200 rounded-lg px-2 py-2 bg-white shrink-0"><option value="">Template…</option><option value="recall">Recall nudge</option><option value="aftercare">Aftercare</option><option value="rebook">Rebook offer</option></select>
+                  <textarea id="composer" oninput="lintMsg()" rows="1" placeholder="Write a reply…" class="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm resize-none"></textarea>
+                  <button id="sendbtn" onclick="sendMsg()" class="px-4 py-2 rounded-xl bg-brand-600 text-white text-sm font-medium shrink-0">Send</button>
+                </div>
+                <p class="text-[11px] text-mute mt-1">Replies post back to the original channel · opted-in · advertising-safe (try "Botox").</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div data-mpane="auto" class="hidden">
+          <p class="text-mute text-sm mb-3">Flows run automatically on the right trigger. All respect opt-in &amp; unsubscribe (Spam Act).</p>
+          <div id="autolist" class="grid grid-cols-2 gap-4"></div>
+        </div>
+        <div data-mpane="camp" class="hidden grid grid-cols-3 gap-6">
+          <div class="col-span-2 bg-white rounded-2xl shadow-soft overflow-hidden"><div class="px-4 py-3 border-b border-slate-100 font-semibold text-sm">Campaigns</div><div id="camplist"></div></div>
+          <div class="bg-white rounded-2xl shadow-soft p-5">
+            <h2 class="font-semibold mb-3 text-sm">New campaign</h2>
+            <label class="text-xs text-mute">Audience</label>
+            <select class="w-full mt-1 mb-3 px-3 py-2 border border-slate-200 rounded-xl text-sm"><option>Lapsed members (128)</option><option>Glow Club (634)</option><option>No visit in 6 mo (310)</option></select>
+            <label class="text-xs text-mute">Message</label>
+            <textarea id="campmsg" oninput="lintCamp()" rows="3" class="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-sm" placeholder="Promote the service (not the medicine)…"></textarea>
+            <div id="camplint" class="hidden mt-2 text-xs text-rose-600 bg-rose-50 rounded-lg px-3 py-2"></div>
+            <button class="w-full mt-3 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-medium">Schedule send</button>
+            <p class="text-[11px] text-mute mt-2">Advertising linter blocks S4 brand/term references (TGA). Sends only to opted-in clients.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- REPORTS -->
+      <section data-screen id="reports" class="hidden">
+        <div class="flex items-center justify-between mb-4 flex-wrap gap-2"><div><h1 class="text-2xl font-semibold">Reports</h1><p class="text-mute text-sm">The Lounge — Brisbane · last 30 days</p></div><div class="flex rounded-xl bg-white shadow-soft text-sm overflow-hidden"><button class="px-3 py-2 text-mute">7d</button><button class="px-3 py-2 bg-brand-50 text-brand-700 font-medium">30d</button><button class="px-3 py-2 text-mute">90d</button></div></div>
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+          <div class="bg-white rounded-2xl shadow-soft p-5"><div class="text-mute text-sm">Revenue</div><div class="text-3xl font-semibold mt-1">$128k</div><div class="text-xs text-emerald-600 mt-1">▲ 9% vs prev</div></div>
+          <div class="bg-white rounded-2xl shadow-soft p-5"><div class="text-mute text-sm">Avg / visit</div><div class="text-3xl font-semibold mt-1">$271</div><div class="text-xs text-mute mt-1">240 visits</div></div>
+          <div class="bg-white rounded-2xl shadow-soft p-5"><div class="text-mute text-sm">New clients</div><div class="text-3xl font-semibold mt-1">42</div><div class="text-xs text-emerald-600 mt-1">▲ 6</div></div>
+          <div class="bg-white rounded-2xl shadow-soft p-5"><div class="text-mute text-sm">Rebooking rate</div><div class="text-3xl font-semibold mt-1">68%</div><div class="text-xs text-emerald-600 mt-1">▲ 3pts</div></div>
+          <div class="bg-white rounded-2xl shadow-soft p-5"><div class="text-mute text-sm">Membership MRR</div><div class="text-3xl font-semibold mt-1">$74.3k</div><div class="text-xs text-mute mt-1">634 members</div></div>
+        </div>
+        <div class="grid grid-cols-3 gap-6 mb-6">
+          <div class="col-span-2 bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Revenue (6 months)</h2><svg viewBox="0 0 480 160" class="w-full"><polyline fill="none" stroke="#0d9488" stroke-width="3" points="0,130 80,108 160,114 240,72 320,66 400,40 480,28"/><polygon fill="#0d9488" opacity=".12" points="0,130 80,108 160,114 240,72 320,66 400,40 480,28 480,160 0,160"/></svg><div class="flex justify-between text-xs text-mute mt-1"><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span></div></div>
+          <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Treatment mix <span class="text-mute text-xs font-normal">· by revenue</span></h2><div id="repMix"></div></div>
+        </div>
+        <div class="grid grid-cols-3 gap-6">
+          <div class="col-span-2 bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Top treatments</h2><table class="w-full text-sm"><thead class="text-mute border-b border-slate-100"><tr><th class="text-left font-medium py-2">Treatment</th><th class="text-left font-medium py-2">Done</th><th class="text-right font-medium py-2">Revenue</th><th class="text-right font-medium py-2">Share</th></tr></thead><tbody id="repTopBody" class="divide-y divide-slate-100"></tbody></table></div>
+          <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">New vs returning</h2><div class="flex items-end gap-6 mb-3"><div><div class="text-3xl font-semibold">42</div><div class="text-mute text-xs">new</div></div><div><div class="text-3xl font-semibold">198</div><div class="text-mute text-xs">returning</div></div></div><div class="h-3 rounded-full overflow-hidden flex bg-brand-100"><div class="bg-brand-500" style="width:17.5%"></div></div><div class="mt-4 pt-3 border-t border-slate-100 text-sm flex justify-between"><span class="text-mute">Retention</span><span class="font-semibold">82% <span class="text-emerald-600 text-xs">▲ 4pts</span></span></div></div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- ============ CLIENT APP (persona: Client) ============ -->
+<div id="clientApp" class="hidden min-h-screen bg-slate-50">
+  <header class="h-16 bg-white border-b border-slate-200 flex items-center px-5 gap-3 sticky top-0 z-10">
+    <div class="size-9 rounded-xl bg-brand-600 text-white grid place-items-center font-bold">L</div>
+    <div class="font-semibold">The Lounge</div>
+    <label class="ml-auto flex items-center gap-1 text-xs text-mute whitespace-nowrap"><span class="hidden lg:inline">View as</span><select id="personaSelC" onchange="setPersona(this.value)" class="text-sm border border-slate-200 rounded-xl px-2 py-1.5 bg-white"><option value="np">Nurse Practitioner</option><option value="lead">Lead Nurse</option><option value="rn">Nurse (RN)</option><option value="dermal">Dermal / Laser tech</option><option value="reception">Reception</option><option value="owner">Owner (business)</option><option value="client">Client</option><option disabled>── combined / small-clinic ──</option><option value="solo">Solo NP — all roles</option><option value="nurseled">Nurse-led RN (+ reception)</option><option disabled>＋ Custom roles — coming soon</option></select></label>
+    <img id="cAvatar" src="https://i.pravatar.cc/96?img=45" class="size-9 rounded-full object-cover"/>
+  </header>
+  <main class="max-w-md mx-auto px-4 pt-5 pb-28">
+    <section data-cscreen id="chome">
+      <h1 class="text-2xl font-semibold">Hi <span id="cName">Sarah</span></h1>
+      <p class="text-mute text-sm mb-5">Welcome back to The Lounge.</p>
+      <div class="rounded-2xl bg-gradient-to-br from-brand-600 to-brand-800 text-white p-5 mb-4">
+        <div class="text-xs uppercase tracking-wide opacity-80">Next appointment</div>
+        <div class="text-lg font-semibold mt-1">Anti-wrinkle top-up</div>
+        <div class="text-sm opacity-90">Thu 19 Jun · 9:00 · with Bella (RN)</div>
+        <div class="flex gap-2 mt-4"><button class="px-3 py-1.5 rounded-lg bg-white/20 text-sm">Reschedule</button><button class="px-3 py-1.5 rounded-lg bg-white text-brand-700 text-sm font-medium">Add to calendar</button></div>
+      </div>
+      <div class="rounded-2xl border border-amber-200 bg-amber-50 p-4 mb-4 flex items-start gap-3"><span class="material-symbols-rounded text-amber-600">assignment</span><div class="flex-1"><div class="font-medium text-amber-900">Finish your pre-visit forms</div><div class="text-amber-700 text-xs">Medical history, screening &amp; consent · 3 min. Your treatment can't start until these are done.</div></div></div>
+      <div class="grid grid-cols-2 gap-3">
+        <button onclick="cshow('cbook')" class="rounded-2xl bg-white shadow-soft p-4 text-left"><span class="material-symbols-rounded text-brand-600">add</span><div class="font-medium mt-1">Book again</div><div class="text-mute text-xs">find a time</div></button>
+        <button onclick="cshow('cmember')" class="rounded-2xl bg-white shadow-soft p-4 text-left"><span class="material-symbols-rounded text-amber-500">loyalty</span><div class="font-medium mt-1">320 points</div><div class="text-mute text-xs">2 to a perk</div></button>
+      </div>
+    </section>
+    <section data-cscreen id="cbook" class="hidden">
+      <h1 class="text-2xl font-semibold mb-4">Book a treatment</h1>
+      <div class="space-y-3">
+        <button onclick="cbook(this)" class="cbk w-full text-left p-4 rounded-2xl bg-white shadow-soft border-2 border-transparent"><div class="font-medium">Anti-wrinkle treatment</div><div class="text-mute text-xs">45 min · performed by an RN or NP</div></button>
+        <button onclick="cbook(this)" class="cbk w-full text-left p-4 rounded-2xl bg-white shadow-soft border-2 border-transparent"><div class="font-medium">Cosmetic consultation</div><div class="text-mute text-xs">30 min · $50, redeemable</div></button>
+        <button onclick="cbook(this)" class="cbk w-full text-left p-4 rounded-2xl bg-white shadow-soft border-2 border-transparent"><div class="font-medium">Skin treatment</div><div class="text-mute text-xs">60 min · from $180</div></button>
+      </div>
+      <button class="w-full mt-5 py-3 rounded-xl bg-brand-600 text-white font-medium">Request times</button>
+      <p class="text-xs text-mute text-center mt-2">We'll text you the next available times to confirm.</p>
+    </section>
+    <section data-cscreen id="ccare" class="hidden">
+      <h1 class="text-2xl font-semibold">My care</h1>
+      <p class="text-mute text-sm mb-4">Your before/after photos &amp; history · image consent on file</p>
+      <div class="grid grid-cols-2 gap-3 mb-5">
+        <figure><img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=380&fit=crop&crop=faces&q=80" class="rounded-2xl aspect-[3/4] object-cover w-full"/><figcaption class="text-xs text-mute mt-1">Dec · before</figcaption></figure>
+        <figure><img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=380&fit=crop&crop=faces&q=80" style="filter:brightness(1.05) saturate(1.08)" class="rounded-2xl aspect-[3/4] object-cover w-full"/><figcaption class="text-xs text-mute mt-1">Mar · after</figcaption></figure>
+      </div>
+      <h2 class="font-semibold mb-2">Visit history</h2>
+      <ul class="text-sm bg-white rounded-2xl shadow-soft divide-y divide-slate-100">
+        <li class="flex justify-between px-4 py-3">Anti-wrinkle · 24u<span class="text-mute">12 Mar</span></li>
+        <li class="flex justify-between px-4 py-3">Skin treatment<span class="text-mute">02 Feb</span></li>
+        <li class="flex justify-between px-4 py-3">Anti-wrinkle · 30u<span class="text-mute">18 Dec</span></li>
+      </ul>
+    </section>
+    <section data-cscreen id="cmember" class="hidden">
+      <h1 class="text-2xl font-semibold mb-4">Membership &amp; rewards</h1>
+      <div class="rounded-2xl bg-gradient-to-br from-brand-600 to-brand-800 text-white p-5 mb-4"><div class="text-xs uppercase tracking-wide opacity-80">Glow Club</div><div class="text-3xl font-semibold mt-1">$89<span class="text-base font-normal">/mo</span></div><div class="text-xs opacity-80 mt-2">Autopay ✓ · card ····4242 · renews 1 Jul</div></div>
+      <div class="rounded-2xl bg-white shadow-soft p-5 mb-4"><div class="text-3xl font-semibold">320 pts</div><div class="text-mute text-sm mb-3">≈ $32 off skincare &amp; non-injectable treatments</div><div class="flex justify-between text-sm mb-1"><span class="text-mute">Visit milestone</span><span>8 / 10 → free facial add-on</span></div><div class="h-2 bg-slate-100 rounded-full"><div class="h-2 bg-brand-500 rounded-full w-4/5"></div></div></div>
+      <div class="rounded-2xl bg-white shadow-soft p-4 text-sm text-mute flex items-start gap-2"><span class="material-symbols-rounded text-brand-500 text-base">info</span>Rewards apply to skincare &amp; non-injectable treatments only.</div>
+    </section>
+    <section data-cscreen id="caccount" class="hidden">
+      <h1 class="text-2xl font-semibold mb-4">Account</h1>
+      <div class="rounded-2xl bg-white shadow-soft p-5 mb-4 flex items-center gap-4"><img src="https://i.pravatar.cc/96?img=45" class="size-14 rounded-full object-cover"/><div><div class="font-semibold">Sarah Mitchell</div><div class="text-mute text-sm">34 · 0412 345 678</div><div class="text-mute text-sm">sarah.m@email.com</div></div></div>
+      <div class="grid grid-cols-2 gap-3 mb-4"><div class="rounded-2xl bg-white shadow-soft p-4"><div class="text-mute text-sm">Balance</div><div class="text-xl font-semibold">$0.00</div></div><div class="rounded-2xl bg-white shadow-soft p-4"><div class="text-mute text-sm">Store credit</div><div class="text-xl font-semibold">$15.00</div></div></div>
+      <div class="rounded-2xl bg-white shadow-soft p-4 mb-4 flex items-center gap-3"><span class="material-symbols-rounded text-mute">credit_card</span><div class="flex-1"><div class="font-medium text-sm">Card on file</div><div class="text-mute text-xs">Visa ····4242 · used for autopay</div></div><button class="text-brand-700 text-xs font-medium">Update</button></div>
+      <div class="rounded-2xl bg-white shadow-soft p-5"><h2 class="font-semibold mb-2 flex items-center gap-2"><span class="material-symbols-rounded text-brand-600">shield</span>Your data &amp; privacy</h2><ul class="text-sm text-mute space-y-2.5"><li class="flex items-center gap-2"><span class="material-symbols-rounded text-emerald-600 text-base">check</span>Stored securely in Australia</li><li class="flex items-center justify-between cursor-pointer">Download a copy of my data<span class="material-symbols-rounded text-base">chevron_right</span></li><li class="flex items-center justify-between cursor-pointer">Manage my consents<span class="material-symbols-rounded text-base">chevron_right</span></li></ul></div>
+    </section>
+  </main>
+  <nav class="fixed bottom-0 inset-x-0 max-w-md mx-auto bg-white border-t border-slate-200 grid grid-cols-5 text-[11px] text-mute">
+    <button onclick="cshow('chome')" data-cnav="chome" class="cnav text-brand-700 py-2.5 grid place-items-center"><span class="material-symbols-rounded">home</span>Home</button>
+    <button onclick="cshow('cbook')" data-cnav="cbook" class="cnav py-2.5 grid place-items-center"><span class="material-symbols-rounded">event</span>Book</button>
+    <button onclick="cshow('ccare')" data-cnav="ccare" class="cnav py-2.5 grid place-items-center"><span class="material-symbols-rounded">photo_library</span>My care</button>
+    <button onclick="cshow('cmember')" data-cnav="cmember" class="cnav py-2.5 grid place-items-center"><span class="material-symbols-rounded">loyalty</span>Rewards</button>
+    <button onclick="cshow('caccount')" data-cnav="caccount" class="cnav py-2.5 grid place-items-center"><span class="material-symbols-rounded">person</span>Account</button>
+  </nav>
+</div>
+
+<!-- intake & consent preview modal -->
+<div id="intakemodal" class="hidden fixed inset-0 bg-black/40 grid place-items-center z-40 p-4">
+  <div class="bg-white rounded-2xl shadow-card w-full max-w-md max-h-[92vh] flex flex-col">
+    <div class="px-5 py-3 border-b border-slate-100 flex items-center gap-2"><span class="material-symbols-rounded text-brand-600">smartphone</span><div class="font-semibold text-sm">Client pre-visit · preview</div><button onclick="closeIntake()" class="ml-auto text-mute"><span class="material-symbols-rounded">close</span></button></div>
+    <div class="px-5 pt-4 flex items-center gap-1"><div id="idot1" class="flex-1 h-1 rounded-full bg-brand-500"></div><div id="idot2" class="flex-1 h-1 rounded-full bg-slate-200"></div><div id="idot3" class="flex-1 h-1 rounded-full bg-slate-200"></div><div id="idot4" class="flex-1 h-1 rounded-full bg-slate-200"></div><div id="idot5" class="flex-1 h-1 rounded-full bg-slate-200"></div><div id="idot6" class="flex-1 h-1 rounded-full bg-slate-200"></div></div>
+    <div class="p-5 overflow-auto flex-1">
+      <div data-istep="1"><h3 class="font-semibold mb-1">Your medical history</h3><p class="text-mute text-xs mb-3">Helps us keep you safe — a nurse reviews this before treatment.</p><div class="space-y-2 text-sm">
+        <label class="flex items-center gap-2"><input type="checkbox" class="accent-brand-600"/> Currently pregnant or breastfeeding</label>
+        <label class="flex items-center gap-2"><input type="checkbox" class="accent-brand-600"/> Taking blood thinners</label>
+        <label class="flex items-center gap-2"><input type="checkbox" class="accent-brand-600"/> History of cold sores</label>
+        <label class="flex items-center gap-2"><input type="checkbox" class="accent-brand-600"/> Any allergies (latex, lidocaine…)</label>
+        <label class="flex items-center gap-2"><input type="checkbox" checked class="accent-brand-600"/> None of the above</label>
+      </div></div>
+      <div data-istep="2" class="hidden"><h3 class="font-semibold mb-1">Quick safety check</h3><div class="rounded-xl bg-emerald-50 border border-emerald-100 p-4 text-sm"><div class="flex items-center gap-2 font-medium text-emerald-800"><span class="material-symbols-rounded">verified</span>No contraindications flagged</div><div class="text-emerald-700 text-xs mt-1">Your nurse will confirm everything at your visit.</div></div></div>
+      <div data-istep="3" class="hidden"><h3 class="font-semibold mb-1">A few wellbeing questions</h3><p class="text-mute text-xs mb-3">Routine for all cosmetic treatments.</p><div class="space-y-3 text-sm">
+        <div><div class="mb-1">How often do you think about the concern you'd like treated?</div><div class="flex gap-2 text-xs"><label class="flex-1 text-center border border-slate-200 rounded-lg py-1.5 cursor-pointer"><input type="radio" name="bdd1" class="hidden" checked/>Rarely</label><label class="flex-1 text-center border border-slate-200 rounded-lg py-1.5 cursor-pointer"><input type="radio" name="bdd1" class="hidden"/>Sometimes</label><label class="flex-1 text-center border border-slate-200 rounded-lg py-1.5 cursor-pointer"><input type="radio" name="bdd1" class="hidden"/>A lot</label></div></div>
+        <div><div class="mb-1">Does it affect your daily life or relationships?</div><div class="flex gap-2 text-xs"><label class="flex-1 text-center border border-slate-200 rounded-lg py-1.5 cursor-pointer"><input type="radio" name="bdd2" class="hidden" checked/>No</label><label class="flex-1 text-center border border-slate-200 rounded-lg py-1.5 cursor-pointer"><input type="radio" name="bdd2" class="hidden"/>A little</label><label class="flex-1 text-center border border-slate-200 rounded-lg py-1.5 cursor-pointer"><input type="radio" name="bdd2" class="hidden"/>A lot</label></div></div>
+        <div><div class="mb-1">Are your expectations of the result…</div><div class="flex gap-2 text-xs"><label class="flex-1 text-center border border-slate-200 rounded-lg py-1.5 cursor-pointer"><input type="radio" name="bdd3" class="hidden" checked/>Realistic</label><label class="flex-1 text-center border border-slate-200 rounded-lg py-1.5 cursor-pointer"><input type="radio" name="bdd3" class="hidden"/>Unsure</label></div></div>
+      </div></div>
+      <div data-istep="4" class="hidden"><h3 class="font-semibold mb-1">Consent · Anti-wrinkle treatment</h3><div class="rounded-xl bg-slate-50 p-3 text-xs text-mute max-h-36 overflow-auto mb-3">A prescriber will assess you and, if suitable, prescribe a Schedule 4 medicine administered by a registered nurse. Possible effects include bruising, swelling, headache, asymmetry or, rarely, drooping. Results are temporary (~3–4 months). Alternatives include doing nothing or non-injectable options. Costs are quoted before treatment. You can complain to us or to AHPRA at any time — a confidentiality agreement does not remove that right.</div>
+        <label class="flex items-start gap-2 text-sm mb-3"><input type="checkbox" class="accent-brand-600 mt-0.5"/> I've read and understood the risks, benefits, alternatives and costs.</label>
+        <label class="text-xs text-mute">Type your full name to sign</label><input value="Sarah Mitchell" class="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-sm"/></div>
+      <div data-istep="5" class="hidden"><h3 class="font-semibold mb-1">Photos (optional)</h3><p class="text-mute text-xs mb-3">For your clinical record &amp; progress. Separate from treatment consent — withdraw any time.</p><label class="flex items-start gap-2 text-sm"><input type="checkbox" checked class="accent-brand-600 mt-0.5"/> I consent to before/after photos stored securely in my record (never on personal devices, never shared without my permission).</label></div>
+      <div data-istep="6" class="hidden text-center py-4"><span class="material-symbols-rounded text-6xl text-emerald-500">check_circle</span><h3 class="text-lg font-semibold mt-2">All set — thank you</h3><p class="text-mute text-sm mt-1">Your nurse has everything they need. See you soon!</p><p class="text-xs text-amber-600 mt-3">If under 18: a mandatory 7-day cooling-off applies before any treatment.</p></div>
+    </div>
+    <div class="px-5 py-3 border-t border-slate-100 flex justify-between"><button id="iback" onclick="istep(IW-1)" class="px-4 py-2 rounded-xl text-mute hover:bg-slate-50 text-sm">‹ Back</button><button id="inext" onclick="inext()" class="px-5 py-2 rounded-xl bg-brand-600 text-white text-sm font-medium">Continue ›</button></div>
+  </div>
+</div>
+
+<!-- appointment move/cancel modal -->
+<div id="apptmodal" class="hidden fixed inset-0 bg-black/40 grid place-items-center z-40 p-4">
+  <div class="bg-white rounded-2xl shadow-card w-full max-w-sm">
+    <div class="p-5" id="apptmBody"></div>
+    <div class="px-5 py-3 border-t border-slate-100 flex gap-2">
+      <button onclick="startMove()" class="flex-1 px-3 py-2 rounded-xl bg-brand-600 text-white text-sm font-medium flex items-center justify-center gap-1"><span class="material-symbols-rounded text-base">event_repeat</span>Reschedule</button>
+      <button onclick="cancelAppt()" class="px-3 py-2 rounded-xl bg-rose-50 text-rose-600 text-sm font-medium">Cancel</button>
+      <button onclick="closeApptMenu()" class="px-3 py-2 rounded-xl bg-white border border-slate-200 text-sm">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- product catalogue modal -->
+<div id="catmodal" class="hidden fixed inset-0 bg-black/40 grid place-items-center z-40 p-4">
+  <div class="bg-white rounded-2xl shadow-card w-full max-w-2xl max-h-[90vh] flex flex-col">
+    <div class="px-5 py-3 border-b border-slate-100 flex items-center gap-2"><span class="material-symbols-rounded text-brand-600">category</span><div class="font-semibold text-sm">Product catalogue</div><button onclick="closeCatalog()" class="ml-auto text-mute"><span class="material-symbols-rounded">close</span></button></div>
+    <div class="p-5 overflow-auto flex-1">
+      <table class="w-full text-sm"><thead class="text-mute border-b border-slate-100"><tr><th class="py-2 pr-2 text-left font-medium">Product</th><th class="pr-2 text-left font-medium">Type</th><th class="pr-2 text-left font-medium">Unit</th><th class="pr-2 text-left font-medium">Par</th><th class="pr-2 text-left font-medium">Schedule</th><th class="pr-2 text-left font-medium">On hand</th><th></th></tr></thead><tbody id="catBody"></tbody></table>
+      <div class="mt-4 rounded-xl bg-slate-50 p-3">
+        <div class="font-medium text-sm mb-2">Add a product</div>
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+          <input id="npName" placeholder="Name (e.g. Xeomin)" class="px-3 py-2 border border-slate-200 rounded-lg text-sm"/>
+          <select id="npType" class="px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white"><option>Toxin</option><option>Filler</option><option>Skin booster</option><option>Skincare</option><option>Other</option></select>
+          <input id="npUnit" placeholder="Unit (U / syr)" class="px-3 py-2 border border-slate-200 rounded-lg text-sm"/>
+          <input id="npPar" type="number" placeholder="Par level" class="px-3 py-2 border border-slate-200 rounded-lg text-sm"/>
+          <label class="flex items-center gap-2 text-sm px-2"><input id="npS4" type="checkbox" class="accent-brand-600"/> S4 / Rx</label>
+        </div>
+        <button onclick="addProduct()" class="mt-2 px-4 py-2 rounded-xl bg-brand-600 text-white text-sm font-medium">Add product</button>
+      </div>
+      <p class="text-xs text-mute mt-3 flex items-start gap-1"><span class="material-symbols-rounded text-sm">gavel</span>Marking a product <b>S4 (Schedule 4)</b> makes it prescription-only and automatically excludes it from rewards and advertising across the app. Set this correctly.</p>
+    </div>
+  </div>
+</div>
+
+<!-- payment modal -->
+<div id="paymodal" class="hidden fixed inset-0 bg-black/40 grid place-items-center z-30">
+  <div class="bg-white rounded-2xl shadow-card p-8 w-80 text-center">
+    <div id="payspin" class="size-14 mx-auto rounded-full border-4 border-brand-100 border-t-brand-600 animate-spin"></div>
+    <div id="paydone" class="hidden"><span class="material-symbols-rounded text-6xl text-emerald-500">check_circle</span></div>
+    <h3 id="paymsg" class="text-lg font-semibold mt-4">Processing on Square terminal…</h3>
+    <p class="text-mute text-sm mt-1"><span id="payAmt">$476.10</span> · tap or insert card</p>
+    <button id="payclose" onclick="closePay()" class="hidden mt-5 px-5 py-2 rounded-xl bg-brand-600 text-white text-sm font-medium">Done</button>
+  </div>
+</div>
+
+<!-- receive stock modal -->
+<div id="recvmodal" class="hidden fixed inset-0 bg-black/40 grid place-items-center z-30">
+  <div class="bg-white rounded-2xl shadow-card p-6 w-96">
+    <div class="flex items-center justify-between mb-4"><h3 class="font-semibold">Receive stock</h3><button onclick="closeReceive()" class="text-mute"><span class="material-symbols-rounded">close</span></button></div>
+    <label class="text-sm text-mute">Product</label><select class="w-full mt-1 mb-3 px-3 py-2 border border-slate-200 rounded-xl text-sm"><option>Botulinum toxin (ARTG)</option><option>Dermal filler (ARTG)</option></select>
+    <div class="grid grid-cols-2 gap-3"><div><label class="text-sm text-mute">Lot</label><input id="rlot" class="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-sm" placeholder="B2290"/></div><div><label class="text-sm text-mute">Expiry</label><input id="rexp" class="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-sm" placeholder="Dec 2026"/></div></div>
+    <label class="text-sm text-mute mt-3 block">Units received</label><input id="runits" type="number" class="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-sm" placeholder="300"/>
+    <label class="text-sm text-mute mt-3 block">Supplier</label><input class="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-sm" value="Allergan AU (approved wholesaler)"/>
+    <button onclick="doReceive()" class="w-full mt-4 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-medium">Receive into Fridge 1</button>
+    <p class="text-xs text-mute mt-2">Ordered by an authorised prescriber. Auto-checks the product is ARTG-listed.</p>
+  </div>
+</div>
+
+<script>
+const clients=[
+ {n:'Sarah Mitchell',img:45,st:'VIP member',stc:'amber',last:'12 Mar 2026',life:'$6,240',mem:'Glow Club',next:'19 Jun · 9:00'},
+ {n:'Amelia Ross',img:31,st:'Member',stc:'brand',last:'10 May 2026',life:'$3,120',mem:'Glow Club',next:'19 Jun · 10:30'},
+ {n:'Jess Tan',img:5,st:'New',stc:'violet',last:'—',life:'$0',mem:'—',next:'19 Jun · 9:45'},
+ {n:'Olivia Brown',img:32,st:'At-risk',stc:'rose',last:'06 Mar 2026',life:'$2,480',mem:'Glow Club',next:'19 Jun · 1:00'},
+ {n:'Mia Chen',img:20,st:'Lapsed',stc:'slate',last:'18 Jan 2026',life:'$1,050',mem:'—',next:'19 Jun · 10:30'},
+ {n:'Chloe Nguyen',img:16,st:'Member',stc:'brand',last:'28 May 2026',life:'$4,690',mem:'Radiance',next:'—'},
+ {n:'Hannah Lee',img:9,st:'VIP member',stc:'amber',last:'02 Jun 2026',life:'$8,910',mem:'Radiance',next:'02 Jul'},
+ {n:'Grace Taylor',img:25,st:'Member',stc:'brand',last:'15 Apr 2026',life:'$2,015',mem:'Glow Club',next:'—'},
+ {n:'Ruby Wilson',img:49,st:'New',stc:'violet',last:'12 Jun 2026',life:'$330',mem:'—',next:'—'},
+ {n:'Isla Cooper',img:24,st:'Member',stc:'brand',last:'30 May 2026',life:'$3,770',mem:'Glow Club',next:'—'}];
+const cc={amber:'bg-amber-50 text-amber-700',brand:'bg-brand-50 text-brand-700',violet:'bg-violet-50 text-violet-700',rose:'bg-rose-50 text-rose-600',slate:'bg-slate-100 text-slate-600'};
+function renderClients(){document.getElementById('clienttbody').innerHTML=clients.map((c,i)=>`<tr onclick="openClient(${i})" class="hover:bg-brand-50/40 cursor-pointer"><td class="px-4 py-3 flex items-center gap-3"><img src="https://i.pravatar.cc/64?img=${c.img}" class="size-8 rounded-full"/><span class="font-medium">${c.n}</span></td><td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-xs ${cc[c.stc]}">${c.st}</span></td><td class="px-4 py-3 text-mute">${c.last}</td><td class="px-4 py-3 fin">${c.life}</td><td class="px-4 py-3 text-mute">${c.mem}</td><td class="px-4 py-3 text-mute">${c.next}</td></tr>`).join('');}
+var todayAppts=[
+ {time:'9:00',name:'Sarah Mitchell',svc:'Anti-wrinkle · Rm 2',img:45,status:'In room now',tone:'emerald',cid:0,now:true,consent:'ready'},
+ {time:'9:45',name:'Jess Tan',svc:'Consultation · Rm 1',img:5,status:'Consent pending',tone:'amber',cid:2,consent:'pending'},
+ {time:'10:30',name:'Amelia Ross',svc:'Anti-wrinkle · Rm 2',img:31,status:'Checked in',tone:'emerald',cid:1,consent:'ready'},
+ {time:'1:00',name:'Olivia Brown',svc:'Anti-wrinkle · Rm 2',img:32,status:'Booked',tone:'slate',cid:3,consent:'ready'}
+];
+var curClientIdx=0;
+function nowAppt(){for(var i=0;i<todayAppts.length;i++){if(todayAppts[i].now)return todayAppts[i];}return null;}
+function renderToday(){var ul=document.getElementById('todaylist');if(ul)ul.innerHTML=todayAppts.map(function(a){return '<li class="flex items-center gap-3 py-3 '+(a.now?'bg-brand-50/40 -mx-2 px-2 rounded-lg':'')+'"><span class="text-mute w-14">'+a.time+'</span><img src="https://i.pravatar.cc/48?img='+a.img+'" class="size-8 rounded-full"/><div class="flex-1 min-w-0"><div class="font-medium">'+a.name+'</div><div class="text-mute text-xs truncate">'+a.svc+'</div></div><span class="px-2 py-0.5 rounded-full bg-'+a.tone+'-50 text-'+a.tone+'-700 text-xs hidden sm:inline">'+a.status+'</span><button onclick="openClient('+a.cid+')" class="px-2 py-1 rounded-lg bg-white border border-slate-200 text-xs shrink-0">Profile</button></li>';}).join('');
+ var ns=document.getElementById('nowStrip'),now=nowAppt();if(ns)ns.innerHTML=now?'<div class="rounded-xl bg-brand-50 border border-brand-100 p-3 mb-3 flex items-center gap-3"><span class="material-symbols-rounded text-brand-600">play_circle</span><div class="flex-1 min-w-0"><div class="text-[11px] uppercase tracking-wide text-brand-700 font-medium">With you now · '+now.time+'</div><div class="font-medium text-sm truncate">'+now.name+' · '+now.svc+'</div></div><button onclick="openChartFor('+now.cid+')" class="act-chart px-3 py-1.5 rounded-lg bg-brand-600 text-white text-xs font-medium shrink-0">Open chart</button><button onclick="openClient('+now.cid+')" class="px-3 py-1.5 rounded-lg bg-white border border-brand-200 text-xs font-medium shrink-0">Profile</button></div>':'';}
+function renderChartList(){var box=document.getElementById('chartTodayList');if(!box)return;var now=nowAppt(),nb=document.getElementById('chartNow');if(nb)nb.innerHTML=now?'<div class="rounded-2xl bg-gradient-to-br from-brand-600 to-brand-800 text-white p-5 mb-4 flex items-center gap-4 flex-wrap"><img src="https://i.pravatar.cc/96?img='+now.img+'" class="size-12 rounded-full ring-2 ring-white/50"/><div class="flex-1 min-w-0"><div class="text-xs uppercase tracking-wide opacity-80">With you now · '+now.time+'</div><div class="text-lg font-semibold">'+now.name+'</div><div class="text-sm opacity-90">'+now.svc+'</div></div><div class="flex gap-2 shrink-0"><button onclick="openChartFor('+now.cid+')" class="px-4 py-2 rounded-xl bg-white text-brand-700 text-sm font-medium">Open chart</button><button onclick="openClient('+now.cid+')" class="px-4 py-2 rounded-xl bg-white/20 text-sm font-medium">Profile</button></div></div>':'';
+ var cnt=document.getElementById('chartCount');if(cnt)cnt.textContent=todayAppts.length+' patients';
+ box.innerHTML=todayAppts.map(function(a){var act=a.consent==='pending'?'<span class="px-2 py-1 rounded-lg bg-amber-50 text-amber-700 text-xs flex items-center gap-1 shrink-0"><span class="material-symbols-rounded text-sm">lock</span>Consent pending</span>':'<button onclick="openChartFor('+a.cid+')" class="px-3 py-1.5 rounded-lg bg-brand-600 text-white text-xs font-medium shrink-0">Open chart</button>';return '<div class="flex items-center gap-3 px-4 py-3 border-b border-slate-50 '+(a.now?'bg-brand-50/50':'')+'"><span class="text-mute text-xs w-12 shrink-0">'+a.time+'</span><img src="https://i.pravatar.cc/64?img='+a.img+'" class="size-9 rounded-full"/><div class="flex-1 min-w-0"><div class="font-medium text-sm flex items-center gap-2">'+a.name+(a.now?'<span class="px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px]">now</span>':'')+'</div><div class="text-mute text-xs truncate">'+a.svc+'</div></div><span class="px-2 py-0.5 rounded-full bg-'+a.tone+'-50 text-'+a.tone+'-700 text-xs hidden md:inline shrink-0">'+a.status+'</span>'+act+'<button onclick="openClient('+a.cid+')" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs shrink-0">Profile</button></div>';}).join('');}
+function openChartFor(i){curClientIdx=i;var c=clients[i];var nm=document.getElementById('chartName');if(nm)nm.textContent=c.n;show('chart');}
+function openClient(i){const c=clients[i];curClientIdx=i;document.getElementById('pname').textContent=c.n;document.getElementById('pavatar').src='https://i.pravatar.cc/120?img='+c.img;document.getElementById('ptag').textContent=c.st;document.getElementById('ptag').className='px-2 py-0.5 rounded-full text-xs font-medium '+cc[c.stc];tab('ov');show('profile');}
+function toggleNav(open){var sb=document.getElementById('sidebar'),ov=document.getElementById('navOverlay');if(!sb)return;if(open){sb.classList.add('open');if(ov)ov.classList.remove('hidden');}else{sb.classList.remove('open');if(ov)ov.classList.add('hidden');}}
+function show(id){document.querySelectorAll('[data-screen]').forEach(s=>s.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));document.querySelector('[data-nav="'+id+'"]')?.classList.add('active');if(id==='chart'||id==='chartlist')document.querySelector('[data-nav="chart"]')?.classList.add('active');document.querySelectorAll('[data-gsub]').forEach(s=>s.classList.add('hidden'));document.querySelectorAll('[data-chev]').forEach(c=>c.style.transform='');document.querySelectorAll('.subnav').forEach(a=>{a.classList.remove('text-brand-700','bg-brand-50','font-medium');a.classList.add('text-slate-500');});window.scrollTo(0,0);toggleNav(false);}
+function toggleGroup(g){goSub(g,'overview');}
+function goSub(section,sub){show(section);var s=document.querySelector('[data-gsub="'+section+'"]');if(s)s.classList.remove('hidden');var chev=document.querySelector('[data-chev="'+section+'"]');if(chev)chev.style.transform='rotate(180deg)';if(section==='marketing')msub(sub);else if(section==='memberships')mtab(sub);var act=document.querySelector('[data-sub="'+section+':'+sub+'"]');if(act){act.classList.add('text-brand-700','bg-brand-50','font-medium');act.classList.remove('text-slate-500');}}
+function tab(t){document.querySelectorAll('[data-pane]').forEach(p=>p.classList.add('hidden'));document.querySelector('[data-pane="'+t+'"]').classList.remove('hidden');document.querySelectorAll('.tab').forEach(x=>{x.classList.remove('active');x.classList.add('text-mute');});const el=document.querySelector('[data-tab="'+t+'"]');el.classList.add('active');el.classList.remove('text-mute');}
+let W=1;function wstep(n){W=Math.max(1,Math.min(5,n));for(let i=1;i<=5;i++){document.querySelector('[data-wiz="'+i+'"]').classList.toggle('hidden',i!==W);const s=document.getElementById('st'+i);s.classList.toggle('text-mute',i>W);s.querySelector('.step').className='step size-7 rounded-full grid place-items-center text-xs '+(i<=W?'bg-brand-600 text-white':'bg-slate-200');}document.getElementById('wback').style.visibility=W===1?'hidden':'visible';document.getElementById('wnext').style.display=W>=5?'none':'block';}
+function wsel(el,v){el.parentElement.querySelectorAll('.wopt').forEach(o=>o.classList.remove('border-brand-500','bg-brand-50'));el.classList.add('border-brand-500','bg-brand-50');document.getElementById('wsummary').textContent='Anti-wrinkle · Bella (RN) · '+(v.match(/^\d/)?v:'9:00');}
+function selAppt(n,s,st){document.getElementById('apptpanel').className='bg-white rounded-2xl shadow-soft p-5';document.getElementById('apptpanel').innerHTML=`<div class="flex items-center gap-3 mb-4"><div class="size-10 rounded-full bg-brand-100 text-brand-700 grid place-items-center font-semibold">${n.split(' ').map(x=>x[0]).join('')}</div><div><div class="font-semibold">${n}</div><div class="text-mute text-xs">${s}</div></div></div><div class="text-sm space-y-2"><div class="flex justify-between"><span class="text-mute">Status</span><span class="font-medium">${st}</span></div><div class="flex justify-between"><span class="text-mute">Room</span><span class="font-medium">2</span></div><div class="flex justify-between"><span class="text-mute">Duration</span><span class="font-medium">45 min</span></div></div><div class="grid grid-cols-2 gap-2 mt-4"><button onclick="show('chart')" class="act-chart py-2 rounded-xl bg-brand-600 text-white text-sm font-medium">Open chart</button><button onclick="show('profile')" class="py-2 rounded-xl bg-white border border-slate-200 text-sm">Profile</button></div>`;document.querySelectorAll('#apptpanel .act-chart').forEach(b=>{b.style.display=(personas[persona]&&personas[persona].caps&&personas[persona].caps.chart)?'':'none';});}
+function pay(){var pa=document.getElementById('payAmt'),ct=document.getElementById('cartTotal');if(pa&&ct)pa.textContent=ct.textContent;document.getElementById('paymodal').classList.remove('hidden');document.getElementById('payspin').classList.remove('hidden');document.getElementById('paydone').classList.add('hidden');document.getElementById('paymsg').textContent='Processing on Square terminal…';document.getElementById('payclose').classList.add('hidden');setTimeout(()=>{document.getElementById('payspin').classList.add('hidden');document.getElementById('paydone').classList.remove('hidden');document.getElementById('paymsg').textContent='Payment approved';document.getElementById('payclose').classList.remove('hidden');},1500);}
+function closePay(){document.getElementById('paymodal').classList.add('hidden');renderRebook();show('rebook');}
+function renderRebook(){var el=document.getElementById('rebookBody');if(!el)return;var hasToxin=cart.some(function(i){return i.s4;});var hasRetail=cart.some(function(i){return !i.s4&&!i.membership&&/serum|skin|retinol|spf/i.test(i.name);});var h='';
+ if(hasToxin){h+='<div class="bg-white rounded-2xl shadow-soft p-5"><div class="flex items-center gap-2 mb-1"><span class="material-symbols-rounded text-brand-500">event_repeat</span><h2 class="font-semibold">Anti-wrinkle — book the next visit</h2></div><p class="text-mute text-sm mb-4">Toxin holds best with a top-up about every <b>12 weeks</b>. Sarah is next due around <b>Thu 11 Sep</b> — offer to lock it in while she\'s here.</p><div class="grid grid-cols-3 gap-3 mb-4"><button onclick="pickSlot(this)" class="rbslot p-3 rounded-xl border-2 border-slate-200 hover:border-brand-500 text-left"><div class="font-medium">Thu 11 Sep · 9:00</div><div class="text-mute text-xs">Bella (RN)</div></button><button onclick="pickSlot(this)" class="rbslot p-3 rounded-xl border-2 border-slate-200 hover:border-brand-500 text-left"><div class="font-medium">Wed 10 Sep · 1:00</div><div class="text-mute text-xs">Bella (RN)</div></button><button onclick="pickSlot(this)" class="rbslot p-3 rounded-xl border-2 border-slate-200 hover:border-brand-500 text-left"><div class="font-medium">Fri 12 Sep · 2:30</div><div class="text-mute text-xs">Dr Lee (NP)</div></button></div><div class="flex flex-wrap gap-2"><button id="rbConfirm" onclick="confirmRebook()" class="px-5 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-medium opacity-40 pointer-events-none">Book selected slot</button><button onclick="confirmRebook(true)" class="px-5 py-2.5 rounded-xl bg-white border border-slate-200 text-sm">Text her the options</button></div></div>';}
+ if(hasRetail){h+='<div class="bg-white rounded-2xl shadow-soft p-5 flex items-center gap-3"><span class="material-symbols-rounded text-amber-500">inventory_2</span><div class="flex-1"><div class="font-medium text-sm">Skincare restock reminder</div><div class="text-mute text-xs">A tube lasts ~8 weeks — we\'ll nudge her around 14 Aug.</div></div><label class="flex items-center gap-2 text-sm text-mute"><input type="checkbox" checked class="accent-brand-600"/>On</label></div>';}
+ if(!hasToxin&&!hasRetail){h+='<div class="bg-white rounded-2xl shadow-soft p-5 text-mute text-sm">No follow-up treatment needed from today\'s visit.</div>';}
+ h+='<button onclick="show(\'dashboard\')" class="text-sm text-mute hover:text-brand-700">Skip — back to today →</button>';
+ el.innerHTML=h;window._rbSlot=null;}
+function pickSlot(b){document.querySelectorAll('.rbslot').forEach(function(s){s.classList.remove('border-brand-500','bg-brand-50');});b.classList.add('border-brand-500','bg-brand-50');window._rbSlot=b.querySelector('.font-medium').textContent;var c=document.getElementById('rbConfirm');if(c){c.classList.remove('opacity-40','pointer-events-none');}}
+function confirmRebook(viaText){var slot=window._rbSlot||'Thu 11 Sep · 9:00';document.getElementById('rebookBody').innerHTML='<div class="bg-white rounded-2xl shadow-soft p-8 text-center max-w-md mx-auto"><span class="material-symbols-rounded text-6xl text-emerald-500">'+(viaText?'sms':'event_available')+'</span><h2 class="text-xl font-semibold mt-3">'+(viaText?'Options texted to Sarah':'Next visit booked')+'</h2><p class="text-mute mt-1">'+(viaText?'She can tap to confirm a time that suits.':slot+' · with the chosen injector')+'</p><p class="text-sm text-mute mt-2">Confirmation &amp; reminders set. Serum restock reminder on.</p><button onclick="show(\'dashboard\')" class="mt-5 px-5 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-medium">Done</button></div>';}
+
+/* ---------- checkout cart + upsell cue card ---------- */
+let coClient={name:'Sarah Mitchell',member:true,credit:15};
+let cart=[{name:'Anti-wrinkle treatment',sub:'24u · B2245',price:420,s4:true},{name:'Vitamin C serum',sub:'Retail',price:79,s4:false}];
+function renderCheckout(){if(!document.getElementById('cartlines'))return;var sub=cart.reduce((s,i)=>s+i.price,0);var nonS4=cart.filter(i=>!i.s4&&!i.membership).reduce((s,i)=>s+i.price,0);var reward=coClient.member?+(nonS4*0.10).toFixed(2):0;var credit=coClient.member?(coClient.credit||0):0;var total=sub-reward-credit;
+ document.getElementById('cartlines').innerHTML=cart.map((i,idx)=>`<li class="py-3 flex items-center justify-between"><div><div class="font-medium">${i.name} ${i.s4?'<span class="ml-2 px-1.5 py-0.5 rounded bg-rose-50 text-rose-600 text-xs">S4 · no rewards</span>':(i.membership?'<span class="ml-2 px-1.5 py-0.5 rounded bg-brand-50 text-brand-700 text-xs">membership</span>':'<span class="ml-2 px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 text-xs">non-S4</span>')}</div><div class="text-mute text-xs">${i.sub||''}</div></div><div class="flex items-center gap-3"><span>$${i.price.toFixed(2)}</span><button onclick="removeItem(${idx})" class="text-slate-300 hover:text-rose-500"><span class="material-symbols-rounded text-base">close</span></button></div></li>`).join('')
+ +(reward>0?`<li class="py-3 flex items-center justify-between text-emerald-700"><div>Member reward — 10% off non-S4</div><span>−$${reward.toFixed(2)}</span></li>`:'')
+ +(credit>0?`<li class="py-3 flex items-center justify-between text-mute"><div>Store credit applied</div><span>−$${credit.toFixed(2)}</span></li>`:'');
+ document.getElementById('cartSub').textContent='$'+sub.toFixed(2);
+ document.getElementById('cartGst').textContent='$'+(total/11).toFixed(2);
+ document.getElementById('cartTotal').textContent='$'+total.toFixed(2);
+ renderSuggestions();}
+function addItem(name,price,s4,sub){cart.push({name:name,price:price,s4:!!s4,sub:sub||'Retail'});renderCheckout();}
+function removeItem(i){cart.splice(i,1);renderCheckout();}
+function addMembership(){if(!cart.some(i=>i.membership)){cart.push({name:'Glow Club membership — first month',price:89,s4:false,membership:true,sub:'autopay $89/mo on card-on-file'});}coClient.member=true;renderCheckout();}
+function toggleMember(){coClient.member=!coClient.member;if(!coClient.member){cart=cart.filter(i=>!i.membership);}renderCheckout();}
+function renderSuggestions(){var el=document.getElementById('suggestions');if(!el)return;var ms=document.getElementById('memState');if(ms)ms.textContent=coClient.member?'member':'non-member';var s=[];
+ if(!coClient.member){s.push({icon:'card_membership',tone:'brand',t:'Not a member — offer Glow Club',d:'$89/mo · member pricing + rewards. Regulars save ~10% and rebook more often.',a:'Add to sale',f:'addMembership()'});}
+ else{s.push({icon:'verified',tone:'emerald',t:'Glow Club member ✓',d:'2 visits from a free facial add-on — worth a quick mention.'});}
+ s.push({icon:'inventory_2',tone:'amber',t:'Likely low on retinol serum',d:'Bought 10 wks ago · a tube lasts ~8 wks. Ask if she\'d like a restock.',a:'Add restock',f:"addItem('Retinol serum (restock)',95,false)"});
+ s.push({icon:'event_repeat',tone:'slate',t:'Toxin due ~now',d:'Last treatment 12 wks ago — offer to book her next visit before she leaves.'});
+ el.innerHTML=s.map(x=>`<div class="flex items-start gap-3 py-2 border-t border-amber-200/40 first:border-0"><span class="material-symbols-rounded text-${x.tone}-500 text-xl mt-0.5">${x.icon}</span><div class="flex-1 min-w-0"><div class="font-medium text-sm">${x.t}</div><div class="text-mute text-xs">${x.d}</div></div>${x.a?`<button onclick="${x.f}" class="shrink-0 px-2 py-1 rounded-lg bg-white border border-amber-200 text-brand-700 text-xs font-medium mt-0.5">${x.a}</button>`:''}</div>`).join('');}
+function finaliseChart(){const x=stock.find(s=>s.lot==='B2245');const u=(typeof pts!=='undefined')?pts.reduce((s,p)=>s+(+p.u||0),0):24;if(x&&u<=x.onhand){x.onhand-=u;x.uses.unshift(['Sarah Mitchell',u,'19 Jun']);renderStock();}show('checkout');}
+
+/* ---------- injection map: auto-detect, drag, add, edit ---------- */
+let pts=[],sel=null,dragId=null,moved=false,justDragged=false,canEditChart=true;
+const PRESET=[{name:'Forehead centre',u:4,x:50,y:15},{name:'Forehead L',u:4,x:37,y:18},{name:'Forehead R',u:4,x:63,y:18},{name:'Glabella',u:8,x:50,y:29},{name:"Crow's feet L",u:4,x:23,y:40},{name:"Crow's feet R",u:4,x:77,y:40}];
+function initInj(){pts=PRESET.map((p,i)=>({id:i+1,...p}));sel=4;renderInj();}
+function autoDetect(){const d=document.getElementById('detecting'),b=document.getElementById('autobtn');pts=[];sel=null;renderInj();d.classList.remove('hidden');b.style.opacity=.6;const seq=PRESET.map((p,i)=>({id:i+1,...p}));let i=0;const t=setInterval(()=>{pts.push(seq[i]);sel=seq[i].id;i++;renderInj();if(i>=seq.length){clearInterval(t);d.classList.add('hidden');b.style.opacity=1;}},150);}
+function clearPts(){pts=[];sel=null;renderInj();}
+function faceClick(e){if(!canEditChart||justDragged||e.target.classList.contains('pin'))return;const r=document.getElementById('facewrap').getBoundingClientRect();const x=(e.clientX-r.left)/r.width*100,y=(e.clientY-r.top)/r.height*100;const id=(pts.length?Math.max(...pts.map(p=>p.id)):0)+1;pts.push({id,name:'New point',u:4,x,y});sel=id;renderInj();}
+function renderInj(){const w=document.getElementById('facewrap');if(!w)return;w.querySelectorAll('.pin').forEach(p=>p.remove());pts.forEach(p=>{const b=document.createElement('button');b.className='pin'+(p.id===sel?' sel':'');b.dataset.id=p.id;b.style.left=p.x+'%';b.style.top=p.y+'%';b.addEventListener('pointerdown',ev=>startDrag(ev,p.id));w.appendChild(b);});
+  document.getElementById('ptlist').innerHTML=pts.length?pts.map(p=>`<div onclick="selectPt(${p.id})" class="flex items-center justify-between px-3 py-1.5 cursor-pointer ${p.id===sel?'bg-brand-50':'hover:bg-slate-50'}"><span class="${p.id===sel?'font-medium':''}">${p.name}</span><span class="text-mute">${p.u}u</span></div>`).join(''):'<div class="text-mute text-xs px-3 py-3">No points — Auto-detect, or tap the face to add.</div>';
+  document.getElementById('totalu').textContent=pts.reduce((s,p)=>s+(+p.u||0),0)+'u';
+  const e=document.getElementById('editor'),p=pts.find(x=>x.id===sel);
+  if(!p){e.innerHTML='<div class="text-mute">'+(canEditChart?'No point selected — tap the face to add.':'Select a point to view its detail.')+'</div>';}
+  else if(canEditChart){e.innerHTML=`<div class="text-mute text-xs">Editing point</div><input value="${p.name}" oninput="updPt('name',this.value)" class="w-full mt-1 font-semibold text-base bg-transparent border-b border-slate-200 focus:outline-none focus:border-brand-500"/><div class="flex items-center gap-2 mt-2"><span class="text-mute">Units</span><input type="number" min="0" value="${p.u}" oninput="updPt('u',this.value)" class="w-16 border border-slate-200 rounded px-2 py-1"/><span class="text-mute text-xs ml-auto">Lot B2245 · exp 09/26</span></div>`;}
+  else{e.innerHTML=`<div class="text-mute text-xs">Point detail</div><div class="font-semibold text-base mt-1">${p.name}</div><div class="mt-1 text-sm">${p.u} units · Botulinum toxin</div><div class="text-mute text-xs mt-1">Lot B2245 · exp 09/26</div>`;}}
+function selectPt(id){sel=id;renderInj();}
+function updPt(k,v){const p=pts.find(x=>x.id===sel);if(!p)return;p[k]=k==='u'?(+v||0):v;document.getElementById('totalu').textContent=pts.reduce((s,q)=>s+(+q.u||0),0)+'u';document.querySelectorAll('#ptlist > div').forEach((d,i)=>{if(pts[i]){d.firstElementChild.textContent=pts[i].name;d.lastElementChild.textContent=pts[i].u+'u';}});}
+function startDrag(ev,id){ev.stopPropagation();sel=id;if(!canEditChart){renderInj();return;}ev.preventDefault();dragId=id;moved=false;renderInj();}
+document.addEventListener('pointermove',ev=>{if(dragId==null)return;const w=document.getElementById('facewrap');const r=w.getBoundingClientRect();const p=pts.find(x=>x.id===dragId);if(!p)return;p.x=Math.max(2,Math.min(98,(ev.clientX-r.left)/r.width*100));p.y=Math.max(2,Math.min(98,(ev.clientY-r.top)/r.height*100));const el=w.querySelector('.pin[data-id="'+dragId+'"]');if(el){el.style.left=p.x+'%';el.style.top=p.y+'%';}moved=true;});
+document.addEventListener('pointerup',()=>{if(dragId!=null){if(moved){justDragged=true;setTimeout(()=>justDragged=false,80);}dragId=null;}});
+
+/* ---------- before/after slider ---------- */
+function initBA(){const ba=document.getElementById('ba');if(!ba)return;let down=false;function set(x){const r=ba.getBoundingClientRect();let p=Math.max(0,Math.min(100,(x-r.left)/r.width*100));document.getElementById('baAfter').style.clipPath='inset(0 '+(100-p)+'% 0 0)';document.getElementById('baDiv').style.left=p+'%';}ba.addEventListener('pointerdown',e=>{down=true;set(e.clientX);});window.addEventListener('pointermove',e=>{if(down)set(e.clientX);});window.addEventListener('pointerup',()=>down=false);}
+
+/* ---------- stock / medicines ---------- */
+var products=[
+ {id:'botox',name:'Botox',type:'Toxin',unit:'U',par:250,s4:true,color:'#0d9488',hist:[88,72,95,80,102,90,110,96]},
+ {id:'dysport',name:'Dysport',type:'Toxin',unit:'U',par:150,s4:true,color:'#0ea5e9',hist:[40,55,48,60,52,58,50,62]},
+ {id:'voluma',name:'Juvéderm Voluma',type:'Filler',unit:'syr',par:12,s4:false,color:'#8b5cf6',hist:[3,4,2,5,3,4,3,5]}
+];
+var stock=[
+ {pid:'botox',prod:'Botox',type:'Toxin',unit:'U',lot:'B2245',exp:'Sep 2026',rec:300,onhand:176,wasted:4,loc:'Fridge 1',temp:'4.2°C',supplier:'Allergan AU',artg:true,status:'OK',uses:[['Sarah Mitchell',24,'12 Mar'],['Amelia Ross',20,'11 Mar'],['Grace Taylor',16,'09 Mar'],['Chloe Nguyen',24,'05 Mar'],['Earlier top-ups',36,'Feb–Mar']]},
+ {pid:'botox',prod:'Botox',type:'Toxin',unit:'U',lot:'B2188',exp:'Jul 2026',rec:180,onhand:40,wasted:8,loc:'Fridge 1',temp:'4.2°C',supplier:'Allergan AU',artg:true,status:'Expiring',uses:[['Hannah Lee',32,'11 Mar'],['Isla Cooper',12,'07 Mar'],['Earlier',88,'Feb']]},
+ {pid:'dysport',prod:'Dysport',type:'Toxin',unit:'U',lot:'D1120',exp:'Nov 2026',rec:300,onhand:120,wasted:2,loc:'Fridge 1',temp:'4.1°C',supplier:'Galderma AU',artg:true,status:'OK',uses:[['Olivia Brown',50,'10 Mar'],['Ruby Wilson',40,'08 Mar'],['Earlier',88,'Feb']]},
+ {pid:'voluma',prod:'Juvéderm Voluma',type:'Filler',unit:'syr',lot:'JV887',exp:'Aug 2026',rec:20,onhand:12,wasted:1,loc:'Fridge 2',temp:'4.0°C',supplier:'Allergan AU',artg:true,status:'OK',uses:[['Hannah Lee',1,'11 Mar'],['Amelia Ross',2,'09 Mar'],['Earlier',4,'Feb']]},
+ {pid:'botox',prod:'Botox',type:'Toxin',unit:'U',lot:'B2101',exp:'Mar 2026',rec:200,onhand:0,wasted:6,loc:'—',temp:'—',supplier:'Allergan AU',artg:true,status:'Depleted',uses:[['Earlier (Dec–Feb)',194,'Dec–Feb']]}
+];
+var curLot='B2245';
+var stockType='botox';
+const stcc={OK:'bg-emerald-50 text-emerald-700',Expiring:'bg-amber-50 text-amber-700',Depleted:'bg-slate-100 text-slate-500',Expired:'bg-rose-50 text-rose-600'};
+function spark(arr,color){var mx=Math.max.apply(null,arr)||1,w=arr.length,bw=100/w,b='';for(var i=0;i<w;i++){var hh=Math.round(arr[i]/mx*24);b+='<rect x="'+(i*bw+1).toFixed(1)+'" y="'+(28-hh)+'" width="'+(bw-2).toFixed(1)+'" height="'+hh+'" rx="1" fill="'+color+'"/>';}return '<svg viewBox="0 0 100 28" preserveAspectRatio="none" class="w-full" style="height:28px">'+b+'</svg>';}
+function setStockType(t){stockType=t;renderStock();}
+function prodAgg(pid){var l=stock.filter(function(s){return s.pid===pid;});return {onhand:l.reduce(function(a,s){return a+s.onhand;},0),used:l.reduce(function(a,s){return a+(s.rec-s.onhand-s.wasted);},0),wasted:l.reduce(function(a,s){return a+s.wasted;},0)};}
+function openCatalog(){renderCatalog();document.getElementById('catmodal').classList.remove('hidden');}
+function closeCatalog(){document.getElementById('catmodal').classList.add('hidden');}
+function renderCatalog(){var tb=document.getElementById('catBody');if(!tb)return;tb.innerHTML=products.map(function(p){var ag=prodAgg(p.id);return '<tr class="border-b border-slate-50"><td class="py-2 pr-2 font-medium">'+p.name+'</td><td class="pr-2 text-mute">'+p.type+'</td><td class="pr-2 text-mute">'+p.unit+'</td><td class="pr-2 text-mute">'+p.par+'</td><td class="pr-2"><button onclick="toggleS4(\''+p.id+'\')" class="px-2 py-0.5 rounded-full text-xs '+(p.s4?'bg-rose-50 text-rose-600':'bg-slate-100 text-slate-500')+'">'+(p.s4?'S4 ✓':'non-S4')+'</button></td><td class="pr-2 text-mute">'+ag.onhand+p.unit+'</td><td class="text-right"><button onclick="removeProduct(\''+p.id+'\')" class="text-rose-500 text-xs font-medium">Remove</button></td></tr>';}).join('');}
+function toggleS4(id){var p=null;products.forEach(function(x){if(x.id===id)p=x;});if(p){p.s4=!p.s4;renderCatalog();renderStock();}}
+function addProduct(){var name=(document.getElementById('npName').value||'').trim();if(!name)return;var type=document.getElementById('npType').value,unit=(document.getElementById('npUnit').value||'').trim()||'U',par=+document.getElementById('npPar').value||0,s4=document.getElementById('npS4').checked;var colors=['#0d9488','#0ea5e9','#8b5cf6','#f59e0b','#ec4899','#10b981','#ef4444'];products.push({id:'p'+Date.now(),name:name,type:type,unit:unit,par:par,s4:s4,color:colors[products.length%colors.length],hist:[0,0,0,0,0,0,0,0]});document.getElementById('npName').value='';document.getElementById('npPar').value='';document.getElementById('npUnit').value='';document.getElementById('npS4').checked=false;renderCatalog();renderStock();}
+function removeProduct(id){products=products.filter(function(p){return p.id!==id;});stock=stock.filter(function(s){return s.pid!==id;});if(stockType===id)stockType=products[0]?products[0].id:'';renderCatalog();renderStock();}
+function renderStock(){var e;
+  var pc=document.getElementById('prodCards');if(pc)pc.innerHTML=products.map(function(p){var ag=prodAgg(p.id),below=ag.onhand<p.par;return '<div class="bg-white rounded-2xl shadow-soft p-4"><div class="flex items-center justify-between"><div class="font-semibold">'+p.name+(p.s4?' <span class="px-1 rounded bg-rose-50 text-rose-600 text-[10px] font-semibold align-middle">S4</span>':'')+' <span class="text-mute text-xs font-normal">· '+p.type+'</span></div><span class="size-2.5 rounded-full" style="background:'+p.color+'"></span></div><div class="flex items-end gap-1 mt-2"><div class="text-3xl font-semibold">'+ag.onhand+'</div><div class="text-mute text-sm mb-1">'+p.unit+' on hand</div></div><div class="text-xs mt-1 '+(below?'text-amber-600':'text-mute')+'">used '+ag.used+p.unit+' · wasted '+ag.wasted+p.unit+' · 90d'+(below?' · below par':'')+'</div><div class="mt-2">'+spark(p.hist,p.color)+'</div></div>';}).join('');
+  var ds=document.getElementById('dashStock');if(ds)ds.innerHTML=products.map(function(p){var ag=prodAgg(p.id);return '<div class="flex items-center justify-between"><span class="flex items-center gap-1.5 truncate"><span class="size-2 rounded-full shrink-0" style="background:'+p.color+'"></span>'+p.name+'</span><span class="font-medium shrink-0">'+ag.onhand+' '+p.unit+'</span></div>';}).join('');
+  if(e=document.getElementById('kProducts'))e.textContent=products.length;
+  var active=stock.filter(function(x){return x.onhand>0;}).length;if(e=document.getElementById('kLots'))e.textContent=active;
+  var expLots=stock.filter(function(x){return x.status==='Expiring'||x.status==='Expired';});if(e=document.getElementById('kExpLots'))e.textContent=expLots.length+' lot'+(expLots.length===1?'':'s');if(e=document.getElementById('kExpDetail'))e.textContent=expLots.map(function(x){return x.prod+' '+x.lot+' · '+x.onhand+x.unit;}).join(' · ')||'none';
+  var below=products.filter(function(p){return prodAgg(p.id).onhand<p.par;});if(e=document.getElementById('kReorder'))e.textContent=below.length;
+  var tb=document.getElementById('lottbody');if(tb)tb.innerHTML=stock.map(function(x){var u=x.rec-x.onhand-x.wasted;return '<tr onclick="selectLot(\''+x.lot+'\')" class="cursor-pointer hover:bg-brand-50/40 '+(x.lot===curLot?'bg-brand-50':'')+'"><td class="px-4 py-2.5 font-medium">'+x.prod+'</td><td class="px-4 py-2.5">'+x.lot+'</td><td class="px-4 py-2.5">'+x.exp+'</td><td class="px-4 py-2.5">'+x.onhand+x.unit+'</td><td class="px-4 py-2.5 text-mute">'+u+x.unit+'</td><td class="px-4 py-2.5 text-mute">'+x.wasted+x.unit+'</td><td class="px-4 py-2.5"><span class="px-1.5 py-0.5 rounded text-xs '+stcc[x.status]+'">'+x.status+'</span></td></tr>';}).join('');
+  var tg=document.getElementById('stockTypeToggle');if(tg)tg.innerHTML=products.map(function(p){var on=p.id===stockType;return '<button onclick="setStockType(\''+p.id+'\')" class="px-2.5 py-1 rounded-lg '+(on?'bg-brand-600 text-white':'bg-slate-100 text-mute')+'">'+p.name+'</button>';}).join('');
+  var pp=null;for(var k=0;k<products.length;k++){if(products[k].id===stockType)pp=products[k];}if(!pp)pp=products[0];
+  var ch=document.getElementById('usagechart');if(ch&&pp){var hist=pp.hist,mx=Math.max.apply(null,hist)||1,bw=(480-20)/hist.length;ch.innerHTML=hist.map(function(v,i){var hh=Math.round(v/mx*92),x=14+i*bw;return '<rect x="'+x+'" y="'+(108-hh)+'" width="'+(bw-10)+'" height="'+hh+'" rx="3" fill="'+pp.color+'" opacity="0.9"/><text x="'+(x+(bw-10)/2)+'" y="'+(106-hh)+'" font-size="9" fill="#64748b" text-anchor="middle">'+v+'</text>';}).join('')+'<line x1="0" y1="108" x2="480" y2="108" stroke="#e2e8f0"/>';}
+  var ul=document.getElementById('usageLabels');if(ul&&pp)ul.innerHTML='<span>8 weeks ago</span><span>'+pp.name+' · '+pp.unit+'/week</span><span>this week</span>';
+  renderLotDetail();}
+function selectLot(l){curLot=l;renderStock();}
+function renderLotDetail(){const d=document.getElementById('lotdetail');if(!d)return;const x=stock.find(s=>s.lot===curLot);if(!x){d.innerHTML='<div class="text-mute text-sm">Select a lot.</div>';return;}const u=x.rec-x.onhand-x.wasted;
+  const un=x.unit||'U',pr=products.find(function(p){return p.id===x.pid;}),isS4=pr?pr.s4:(x.type==='Toxin');d.innerHTML=`<div class="flex items-center justify-between mb-1"><h2 class="font-semibold">Lot ${x.lot}</h2><span class="px-1.5 py-0.5 rounded text-xs ${stcc[x.status]}">${x.status}</span></div>
+  <div class="text-mute text-sm">${x.prod} <span class="ml-1 px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 text-xs">${x.type}</span> ${isS4?'<span class="px-1.5 py-0.5 rounded bg-rose-50 text-rose-600 text-xs">S4</span>':'<span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 text-xs">non-S4</span>'} <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 text-xs">${x.artg?'ARTG ✓':'unapproved'}</span></div>
+  <div class="mt-3 text-sm space-y-1"><div class="flex justify-between"><span class="text-mute">Expiry</span><span>${x.exp}</span></div><div class="flex justify-between"><span class="text-mute">Supplier</span><span>${x.supplier}</span></div><div class="flex justify-between"><span class="text-mute">Storage</span><span>${x.loc} · ${x.temp}</span></div><div class="flex justify-between"><span class="text-mute">Custody</span><span>Dr Lee NP</span></div></div>
+  <div class="mt-4 rounded-xl bg-slate-50 p-3 text-sm"><div class="font-medium mb-2 flex items-center gap-1"><span class="material-symbols-rounded text-base text-brand-600">balance</span>${x.type==='Filler'?'Syringe':'Vial'} reconciliation</div><div class="flex justify-between"><span class="text-mute">Received</span><span>${x.rec}${un}</span></div><div class="flex justify-between"><span class="text-mute">Used</span><span>${u}${un}</span></div><div class="flex justify-between"><span class="text-mute">Wasted</span><span>${x.wasted}${un}</span></div><div class="flex justify-between font-medium border-t border-slate-200 mt-1 pt-1"><span>On hand</span><span>${x.onhand}${un}</span></div></div>
+  <div class="mt-4"><div class="font-medium text-sm mb-2">Used by</div><ul class="text-sm divide-y divide-slate-100 max-h-44 overflow-auto">${x.uses.map(z=>`<li class="flex justify-between py-1.5"><span>${z[0]}</span><span class="text-mute">${z[1]}${un} · ${z[2]}</span></li>`).join('')||'<li class="text-mute py-1.5">No usage yet</li>'}</ul></div>
+  <div id="wasteRow" class="mt-4 flex items-center gap-2"><input id="wasteinput" type="number" min="1" placeholder="${un}" class="w-20 border border-slate-200 rounded-lg px-2 py-1.5 text-sm"/><button onclick="recordWastage()" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-sm">Record wastage</button>${(x.status==='Expiring'||x.status==='Expired')&&x.onhand>0?'<button onclick="destroyLot()" class="px-3 py-1.5 rounded-lg bg-rose-50 text-rose-600 text-sm ml-auto">Destroy</button>':''}</div>`;if(!(personas[persona]&&personas[persona].caps&&personas[persona].caps.chart)){var wr=document.getElementById('wasteRow');if(wr)wr.style.display='none';}}
+function recordWastage(){const x=stock.find(s=>s.lot===curLot);const n=+document.getElementById('wasteinput').value||0;if(n>0&&n<=x.onhand){x.wasted+=n;x.onhand-=n;renderStock();}}
+function destroyLot(){const x=stock.find(s=>s.lot===curLot);if(x&&x.onhand>0){x.wasted+=x.onhand;x.onhand=0;x.status='Depleted';renderStock();}}
+function openReceive(){document.getElementById('recvmodal').classList.remove('hidden');}
+function closeReceive(){document.getElementById('recvmodal').classList.add('hidden');}
+function doReceive(){const lot=document.getElementById('rlot').value||('B'+Math.floor(Math.random()*9000+1000));const exp=document.getElementById('rexp').value||'Dec 2026';const u=+document.getElementById('runits').value||100;stock.unshift({pid:'botox',prod:'Botox',type:'Toxin',unit:'U',lot,exp,rec:u,onhand:u,wasted:0,loc:'Fridge 1',temp:'4.2°C',supplier:'Allergan AU',artg:true,status:'OK',uses:[]});curLot=lot;closeReceive();show('stock');renderStock();}
+
+/* ---------- memberships / loyalty ---------- */
+var plans=[
+ {name:'Glow Club',price:89,active:412,benefits:['10% off non-S4 retail & facials','Priority booking','Birthday treat']},
+ {name:'Radiance',price:149,active:176,benefits:['15% off non-S4','1 facial / month','Member-only events']},
+ {name:'Platinum',price:249,active:46,benefits:['20% off non-S4','2 facials / month','Dedicated nurse']}
+];
+var pkgs=[
+ {name:'Anti-wrinkle ×3',price:1140,sold:88,used:'61 / 264'},
+ {name:'Skin needling ×6',price:1290,sold:34,used:'120 / 204'},
+ {name:'Lip refresh ×2',price:1180,sold:22,used:'15 / 44'}
+];
+var members=[
+ {name:'Sarah Mitchell',img:45,plan:'Glow Club',since:'2023',autopay:'•••• 4242',next:'1 Jul',status:'Active'},
+ {name:'Amelia Ross',img:32,plan:'Radiance',since:'2022',autopay:'•••• 1881',next:'3 Jul',status:'Active'},
+ {name:'Mia Chen',img:20,plan:'Glow Club',since:'2024',autopay:'•••• 0007',next:'—',status:'Failed'},
+ {name:'Olivia Brown',img:60,plan:'Platinum',since:'2021',autopay:'•••• 5309',next:'5 Jul',status:'Active'}
+];
+var gifts=[
+ {code:'GC-4471',bal:120,of:150,to:'H. Lawson'},
+ {code:'GC-3320',bal:0,of:100,to:'redeemed'},
+ {code:'GC-2207',bal:200,of:200,to:'gift — unassigned'}
+];
+function applyFin(){var pp=personas[persona];document.querySelectorAll('#staffApp .fin').forEach(function(e){e.style.display=(pp&&pp.caps&&pp.caps.financials)?'':'none';});}
+function renderMemberships(){renderPlans();renderPkgs();renderMembers();renderGifts();renderPricing();applyFin();}
+var pricePlans=[{name:'Glow Club',members:412,base:89,price:89},{name:'Radiance',members:176,base:149,price:149},{name:'Platinum',members:46,base:249,price:249}];
+var priceSvcs=[{name:'Anti-wrinkle (avg 25u)',vol:90,base:275,price:275},{name:'Dermal filler',vol:34,base:680,price:680},{name:'Skin treatment',vol:120,base:180,price:180},{name:'Consultation',vol:48,base:50,price:50}];
+var churnPer10=6;
+function setPlanPrice(i,v){pricePlans[i].price=Math.max(0,+v||0);renderPricing();}
+function setSvcPrice(i,v){priceSvcs[i].price=Math.max(0,+v||0);renderPricing();}
+function setChurn(v){churnPer10=+v;renderPricing();}
+function resetPricing(){pricePlans.forEach(function(p){p.price=p.base;});priceSvcs.forEach(function(s){s.price=s.base;});renderPricing();}
+function priceRow(label,now,proj,d){return '<div class="flex items-center justify-between"><span class="text-mute">'+label+'</span><span>'+now+' → <span class="font-medium">'+proj+'</span> <span class="text-xs '+(d>=0?'text-emerald-600':'text-rose-600')+'">'+(d>=0?'+':'−')+'$'+Math.abs(Math.round(d)).toLocaleString()+'</span></span></div>';}
+function renderPricing(){var pe=document.getElementById('planEditRows');if(!pe)return;var cv=document.getElementById('churnVal');if(cv)cv.textContent=churnPer10+'%';
+ var mrrNow=0,mrrProj=0,lostTot=0;
+ pe.innerHTML=pricePlans.map(function(p,i){var inc=Math.max(0,p.price-p.base);var lost=Math.round(p.members*(churnPer10/100)*(inc/10));var proj=Math.max(0,p.members-lost);mrrNow+=p.base*p.members;mrrProj+=p.price*proj;lostTot+=lost;return '<div class="flex items-center gap-3 py-2 border-b border-slate-50 text-sm"><div class="flex-1 min-w-0"><div class="font-medium">'+p.name+'</div><div class="text-mute text-xs">'+p.members+' members'+(lost>0?' · est −'+lost+' churn':'')+'</div></div><div class="flex items-center gap-1 shrink-0">$<input type="number" value="'+p.price+'" onchange="setPlanPrice('+i+',this.value)" class="w-20 border border-slate-200 rounded-lg px-2 py-1"/><span class="text-mute text-xs">/mo</span></div><div class="w-24 text-right font-medium shrink-0">$'+(p.price*proj).toLocaleString()+'</div></div>';}).join('');
+ var se=document.getElementById('svcEditRows'),svcNow=0,svcProj=0;if(se)se.innerHTML=priceSvcs.map(function(s,i){svcNow+=s.base*s.vol;svcProj+=s.price*s.vol;return '<div class="flex items-center gap-3 py-2 border-b border-slate-50 text-sm"><div class="flex-1 min-w-0"><div class="font-medium">'+s.name+'</div><div class="text-mute text-xs">~'+s.vol+'/mo</div></div><div class="flex items-center gap-1 shrink-0">$<input type="number" value="'+s.price+'" onchange="setSvcPrice('+i+',this.value)" class="w-20 border border-slate-200 rounded-lg px-2 py-1"/></div><div class="w-24 text-right font-medium shrink-0">$'+(s.price*s.vol).toLocaleString()+'</div></div>';}).join('');
+ var dMrr=mrrProj-mrrNow,dSvc=svcProj-svcNow,dMo=dMrr+dSvc,dYr=dMo*12,ib=document.getElementById('impactBody');if(ib)ib.innerHTML='<div class="space-y-3 text-sm">'+priceRow('Membership MRR','$'+Math.round(mrrNow).toLocaleString(),'$'+Math.round(mrrProj).toLocaleString(),dMrr)+priceRow('Service rev / mo','$'+Math.round(svcNow).toLocaleString(),'$'+Math.round(svcProj).toLocaleString(),dSvc)+'<div class="border-t border-slate-100 my-2"></div><div class="flex items-center justify-between"><span class="text-mute">Net / month</span><span class="font-semibold '+(dMo>=0?'text-emerald-600':'text-rose-600')+'">'+(dMo>=0?'+':'−')+'$'+Math.abs(Math.round(dMo)).toLocaleString()+'</span></div></div><div class="rounded-xl bg-slate-50 p-3 mt-3"><div class="text-mute text-xs">Projected annual impact</div><div class="text-2xl font-semibold '+(dYr>=0?'text-emerald-600':'text-rose-600')+'">'+(dYr>=0?'+':'−')+'$'+Math.abs(Math.round(dYr)).toLocaleString()+'</div>'+(lostTot>0?'<div class="text-xs text-amber-600 mt-1">assumes ~'+lostTot+' members leave from increases</div>':'<div class="text-xs text-mute mt-1">no membership increase applied</div>')+'</div>';}
+function renderPlans(){var el=document.getElementById('planlist');if(!el)return;el.innerHTML=plans.map(function(p){return '<div class="bg-white rounded-2xl shadow-soft p-5"><div class="flex items-baseline justify-between"><h3 class="font-semibold">'+p.name+'</h3><div class="fin text-xl font-semibold">$'+p.price+'<span class="text-xs text-mute font-normal">/mo</span></div></div><ul class="text-sm text-mute mt-3 space-y-1">'+p.benefits.map(function(b){return '<li class="flex items-center gap-1"><span class="material-symbols-rounded text-base text-brand-500">check</span>'+b+'</li>';}).join('')+'</ul><div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-sm"><span class="text-mute">'+p.active+' active</span><span class="fin font-medium text-emerald-600">$'+(p.active*p.price).toLocaleString()+'/mo</span></div></div>';}).join('');}
+function renderPkgs(){var el=document.getElementById('pkglist');if(!el)return;el.innerHTML=pkgs.map(function(p){return '<tr><td class="px-4 py-2.5 font-medium">'+p.name+'</td><td class="fin">$'+p.price.toLocaleString()+'</td><td>'+p.sold+'</td><td class="text-mute">'+p.used+'</td><td><span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 text-xs">Active</span></td></tr>';}).join('');}
+function renderMembers(){var el=document.getElementById('memberlist');if(!el)return;el.innerHTML=members.map(function(m,i){var st=m.status==='Failed'?'<span class="px-1.5 py-0.5 rounded bg-rose-50 text-rose-700 text-xs">Payment failed</span> <button onclick="retryPay('+i+')" class="text-brand-700 text-xs font-medium">Retry</button>':'<span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 text-xs">'+m.status+'</span>';return '<tr><td class="px-4 py-2.5"><div class="flex items-center gap-2"><img src="https://i.pravatar.cc/48?img='+m.img+'" class="size-7 rounded-full"/>'+m.name+'</div></td><td>'+m.plan+'</td><td class="text-mute">since '+m.since+'</td><td class="text-mute">'+m.autopay+'</td><td class="text-mute">'+m.next+'</td><td>'+st+'</td></tr>';}).join('');}
+function retryPay(i){members[i].status='Active';members[i].next='retried ✓';renderMembers();}
+function renderGifts(){var el=document.getElementById('giftlist');if(!el)return;el.innerHTML=gifts.map(function(g){return '<div class="bg-white rounded-xl shadow-soft p-4 flex items-center gap-3"><span class="material-symbols-rounded text-brand-500">card_giftcard</span><div class="flex-1 min-w-0"><div class="font-medium text-sm">'+g.code+'</div><div class="text-mute text-xs truncate">'+g.to+'</div></div><div class="text-right fin"><div class="font-semibold">$'+g.bal+'</div><div class="text-mute text-xs">of $'+g.of+'</div></div></div>';}).join('');applyFin();}
+function issueGift(){gifts.unshift({code:'GC-'+(1000+Math.floor(Math.random()*8999)),bal:100,of:100,to:'new — unassigned'});renderGifts();}
+function mtab(t){var pane=document.querySelector('[data-mtpane="'+t+'"]');if(!pane)return;document.querySelectorAll('[data-mtpane]').forEach(function(p){p.classList.add('hidden');});pane.classList.remove('hidden');document.querySelectorAll('.mtab').forEach(function(b){b.className='mtab px-3 py-1.5 rounded-full bg-white shadow-soft text-mute';});var pill=document.querySelector('[data-mtab="'+t+'"]');if(pill)pill.className='mtab px-3 py-1.5 rounded-full bg-brand-600 text-white font-medium';if(t==='pricing'&&typeof renderPricing==='function')renderPricing();}
+/* ---------- intake & consent preview ---------- */
+var IW=1;
+function openIntake(){document.getElementById('intakemodal').classList.remove('hidden');istep(1);}
+function closeIntake(){document.getElementById('intakemodal').classList.add('hidden');}
+function inext(){if(IW>=6){closeIntake();}else{istep(IW+1);}}
+function istep(n){IW=Math.max(1,Math.min(6,n));for(var i=1;i<=6;i++){var s=document.querySelector('[data-istep="'+i+'"]');if(s)s.classList.toggle('hidden',i!==IW);var d=document.getElementById('idot'+i);if(d)d.className='flex-1 h-1 rounded-full '+(i<=IW?'bg-brand-500':'bg-slate-200');}var bk=document.getElementById('iback');if(bk)bk.style.visibility=IW===1?'hidden':'visible';var nx=document.getElementById('inext');if(nx)nx.textContent=IW>=6?'Done':(IW===5?'Submit':'Continue ›');}
+/* ---------- marketing & conversations ---------- */
+var CH={Instagram:{i:'photo_camera',c:'text-pink-500'},Facebook:{i:'thumb_up',c:'text-blue-600'},SMS:{i:'sms',c:'text-emerald-600'},Email:{i:'mail',c:'text-amber-600'}};
+var CAT={Booking:'bg-brand-50 text-brand-700',Pricing:'bg-violet-50 text-violet-700',Aftercare:'bg-emerald-50 text-emerald-700',Complaint:'bg-rose-50 text-rose-700',General:'bg-slate-100 text-slate-600'};
+var chFilter='all',catFilter='all';
+var convos=[
+ {name:'New lead',handle:'@bella.glows',img:60,ch:'Instagram',cat:'Pricing',cid:null,last:'how much for lip filler? 👀',ti:'9:42',unread:1,thread:[{me:0,t:'hey! how much for lip filler? 👀',ti:'9:42'}]},
+ {name:'Jordan Blake',handle:'Messenger',img:13,ch:'Facebook',cat:'Booking',cid:null,last:'anything Friday arvo?',ti:'9:20',unread:1,thread:[{me:0,t:'Hi, do you have anything Friday arvo for a consult?',ti:'9:20'}]},
+ {name:'Sarah Mitchell',handle:'0412 345 678',img:45,ch:'SMS',cat:'Aftercare',cid:0,last:'is bruising normal?',ti:'8:55',unread:1,thread:[{me:0,t:'Morning! Bit of bruising where I had the injections — is that normal?',ti:'8:55'}]},
+ {name:'Mia Chen',handle:'mia@email.com',img:20,ch:'Email',cat:'General',cid:4,last:'do you sell the serum?',ti:'Yest',unread:0,thread:[{me:0,t:'Hi, do you sell that vitamin C serum online or is it in-clinic only?',ti:'Yesterday'}]},
+ {name:'Olivia Brown',handle:'@liv.brown',img:32,ch:'Instagram',cat:'Booking',cid:3,last:'can I rebook a top-up?',ti:'Yest',unread:0,thread:[{me:0,t:'Hi! I think I\'m due for a top-up — can I rebook?',ti:'Yesterday'}]},
+ {name:'Unknown',handle:'0400 000 142',img:7,ch:'SMS',cat:'Complaint',cid:null,last:'not happy, please call',ti:'Mon',unread:0,thread:[{me:0,t:'I\'m not happy with how my last appointment went. Can someone call me?',ti:'Mon'}]},
+ {name:'Hannah Lee',handle:'Messenger',img:9,ch:'Facebook',cat:'General',cid:6,last:'thank you!!',ti:'Mon',unread:0,thread:[{me:1,t:'So glad you loved it, Hannah! See you next visit 💛',ti:'Mon'},{me:0,t:'thank you!!',ti:'Mon'}]}
+];
+var curConvo=0;
+var BLOCK=/botox|dysport|anti-?wrinkle|wrinkle injection|dermal filler|#botox|babytox/i;
+var autos=[
+ {icon:'event_repeat',name:'Recall — anti-wrinkle (~12 wks)',desc:'Nudges due clients with a rebook link.',ch:'SMS + email',aud:'Toxin clients',on:1,stat:'42 sent · 18 booked'},
+ {icon:'healing',name:'Aftercare sequence',desc:'Day 0 + day 3 care tips after each visit.',ch:'SMS',aud:'Post-treatment',on:1,stat:'96 sent (30d)'},
+ {icon:'history',name:'Win-back — lapsed 90d',desc:'Re-engage members not seen in 90 days (non-S4 offer).',ch:'Email',aud:'Lapsed',on:1,stat:'128 sent · 11 returned'},
+ {icon:'cake',name:'Birthday offer',desc:'A non-S4 treat in their birthday month.',ch:'SMS',aud:'All members',on:1,stat:'31 sent (30d)'},
+ {icon:'event_busy',name:'No-show follow-up',desc:'Reschedule prompt after a missed appointment.',ch:'SMS',aud:'No-shows',on:1,stat:'9 sent · 5 rebooked'},
+ {icon:'star',name:'Review request',desc:'Asks happy clients for a Google review a day after.',ch:'SMS',aud:'Post-visit',on:0,stat:'off'}
+];
+var camps=[
+ {name:'Winter skin refresh',aud:'Glow Club · skincare buyers',status:'Sent',cls:'bg-slate-100 text-slate-600',stat:'48% open · 14 booked'},
+ {name:'We miss you — 15% facial',aud:'Lapsed members (128)',status:'Sending',cls:'bg-amber-50 text-amber-700',stat:'128 recipients'},
+ {name:'New skin range launch',aud:'All consented (2,210)',status:'Draft',cls:'bg-brand-50 text-brand-700',stat:'—'}
+];
+function renderMarketing(){renderConvoList();openConvoThread(curConvo);renderAuto();renderCamp();renderMktOverview();}
+function renderConvoList(){var l=document.getElementById('convolist');if(!l)return;var list=[];convos.forEach(function(c,i){if((chFilter==='all'||c.ch===chFilter)&&(catFilter==='all'||c.cat===catFilter))list.push({c:c,i:i});});var cnt=document.getElementById('convoCount');if(cnt)cnt.textContent=list.length+' shown';l.innerHTML=list.map(function(o){var c=o.c,i=o.i,m=CH[c.ch]||{i:'chat',c:'text-slate-500'};return '<div onclick="openConvo('+i+')" class="px-4 py-3 flex items-center gap-3 cursor-pointer border-b border-slate-50 '+(i===curConvo?'bg-brand-50':'hover:bg-slate-50')+'"><div class="relative shrink-0"><img src="https://i.pravatar.cc/64?img='+c.img+'" class="size-9 rounded-full"/><span class="absolute -bottom-1 -right-1 size-4 rounded-full bg-white grid place-items-center shadow-soft"><span class="material-symbols-rounded '+m.c+'" style="font-size:13px">'+m.i+'</span></span></div><div class="flex-1 min-w-0"><div class="font-medium text-sm truncate">'+c.name+'</div><div class="text-mute text-xs truncate">'+c.last+'</div><span class="inline-block mt-1 px-1.5 py-0.5 rounded text-[10px] '+(CAT[c.cat]||'bg-slate-100 text-slate-600')+'">'+c.cat+'</span></div><div class="text-right whitespace-nowrap"><div class="text-[10px] text-mute">'+c.ti+'</div>'+(c.unread?'<div class="size-2 bg-brand-500 rounded-full ml-auto mt-1"></div>':'')+'</div></div>';}).join('')||'<div class="p-4 text-mute text-sm">No conversations in this filter.</div>';}
+function openConvo(i){curConvo=i;convos[i].unread=0;renderConvoList();openConvoThread(i);}
+function openConvoThread(i){var c=convos[i];var th=document.getElementById('thread'),hd=document.getElementById('threadhead');if(!th||!c)return;var m=CH[c.ch]||{i:'chat',c:'text-slate-500'};hd.innerHTML='<img src="https://i.pravatar.cc/64?img='+c.img+'" class="size-8 rounded-full"/><div class="min-w-0"><div class="font-semibold text-sm leading-tight truncate">'+c.name+'</div><div class="text-mute text-[11px] flex items-center gap-1"><span class="material-symbols-rounded text-sm '+m.c+'">'+m.i+'</span>'+c.ch+' · '+c.handle+'</div></div><select onchange="setCat(this.value)" class="ml-auto text-xs border border-slate-200 rounded-lg px-2 py-1 bg-white">'+['Booking','Pricing','Aftercare','Complaint','General'].map(function(k){return '<option'+(k===c.cat?' selected':'')+'>'+k+'</option>';}).join('')+'</select>';th.innerHTML=c.thread.map(function(mm){return mm.me?'<div class="flex justify-end"><div class="max-w-[75%] bg-brand-600 text-white rounded-2xl rounded-br-sm px-3 py-2 text-sm">'+mm.t+'<div class="text-[10px] opacity-70 mt-0.5 text-right">'+mm.ti+'</div></div></div>':'<div class="flex justify-start"><div class="max-w-[75%] bg-slate-100 rounded-2xl rounded-bl-sm px-3 py-2 text-sm">'+mm.t+'<div class="text-[10px] text-mute mt-0.5">'+mm.ti+'</div></div></div>';}).join('');th.scrollTop=th.scrollHeight;renderClientCtx(c);renderSugg(c);}
+function setCat(v){convos[curConvo].cat=v;renderConvoList();}
+function filterCh(ch){chFilter=ch;document.querySelectorAll('.chf').forEach(function(b){var on=b.getAttribute('data-chf')===ch;if(on){b.classList.add('bg-brand-600','text-white','font-medium');b.classList.remove('bg-white','shadow-soft','text-mute');}else{b.classList.remove('bg-brand-600','text-white','font-medium');b.classList.add('bg-white','shadow-soft','text-mute');}});renderConvoList();}
+function filterCat(v){catFilter=v;renderConvoList();}
+function suggestReplies(c){var last=null;for(var k=c.thread.length-1;k>=0;k--){if(!c.thread[k].me){last=c.thread[k];break;}}var t=(last?last.t:'').toLowerCase();var o=[];var cl=(c.cid!=null)?clients[c.cid]:null,fn=cl?cl.n.split(' ')[0]:'';
+ if(cl){if(/at-risk|lapsed/i.test(cl.st))o.push({l:'Win-back '+fn,x:'We\'d love to see you back, '+fn+'! Here\'s a complimentary skin add-on on your next visit as a welcome-back — want me to find you a time?'});else o.push({l:'Rebook '+fn,x:'Hi '+fn+'! Lovely to hear from you — you\'re about due for your next visit. I can offer Thu 11 Sep 9:00 or Fri 12 Sep 2:30, want me to lock one in?'});}
+ if(/not happy|complain|refund|disappoint|call me|unhappy/.test(t))o.push({l:'Escalate to lead',x:'I\'m really sorry to hear that'+(fn?', '+fn:'')+' — your experience matters to us. I\'ve flagged this to our clinic lead, who will call you today. Is this the best number to reach you?'});
+ if(/price|cost|how much|\$|quote|afford/.test(t))o.push({l:'Pricing',x:'Great question! Pricing depends on the plan our nurse recommends at a quick consult, so you only pay for what you need. Want me to find you a consult time?'});
+ if(/brus|swell|sore|pain|normal|redness|lump|after/.test(t))o.push({l:'Aftercare',x:'That\'s very common in the first few days and usually settles on its own — a cool pack helps, and avoid heat/exercise for 24h. If it worsens or you\'re worried, reply here and a nurse will call you.'});
+ if(/book|appointment|friday|monday|available|time|rebook|due|top.?up|consult/.test(t))o.push({l:'Offer a time',x:'Of course'+(fn?', '+fn:'')+'! I can offer Thu 11 Sep 9:00 or Fri 12 Sep 2:30 — want me to lock one in for you?'});
+ if(/serum|buy|sell|product|stock|online|cream|spf/.test(t))o.push({l:'Product',x:'Yes! We keep it in-clinic'+(cl&&/member|glow|radiance|platinum/i.test(cl.mem)?' and your '+cl.mem+' membership gets you 10% off':' and members get 10% off')+'. Want me to set one aside for your next visit?'});
+ if(cl&&/member|glow|radiance|platinum/i.test(cl.mem))o.push({l:'Member perk',x:'As a '+cl.mem+' member you\'ve got perks waiting — I\'ll apply your member pricing when you come in 💛'});
+ if(!o.length)o.push({l:'Friendly reply',x:'Thanks so much for reaching out! How can we help today? 💛'});
+ o.push({l:'Send booking link',x:'You can grab a time that suits here: [your booking link]. Can\'t wait to see you!'});
+ return o.slice(0,3);}
+function renderClientCtx(c){var el=document.getElementById('convoctx');if(!el)return;if(c.cid!=null){var cl=clients[c.cid];el.innerHTML='<div class="flex items-center gap-2 flex-wrap"><img src="https://i.pravatar.cc/48?img='+cl.img+'" class="size-7 rounded-full"/><div class="min-w-0 flex-1"><span class="font-medium">'+cl.n+'</span> <span class="text-mute text-xs">· '+cl.mem+' · last '+cl.last+' · '+cl.life+' · next '+(cl.next||'—')+'</span></div><button onclick="openClient('+c.cid+')" class="text-brand-700 text-xs font-medium shrink-0">Profile</button><span class="text-slate-300">·</span><button onclick="openChartFor('+c.cid+')" class="text-brand-700 text-xs font-medium shrink-0">Chart</button></div>';}else{el.innerHTML='<div class="flex items-center gap-2"><span class="material-symbols-rounded text-amber-500 text-base">link_off</span><span class="text-mute text-xs flex-1">Not linked — link to personalise replies &amp; save their '+c.ch+' handle</span><button onclick="toggleLinkPanel()" class="px-2 py-1 rounded-lg bg-brand-600 text-white text-xs font-medium shrink-0">Link client</button></div>';}}
+function toggleLinkPanel(){var p=document.getElementById('linkpanel');if(!p)return;p.classList.toggle('hidden');if(!p.classList.contains('hidden'))renderLinkList();}
+function renderLinkList(){var el=document.getElementById('linklist');if(!el)return;var q=(document.getElementById('linksearch').value||'').toLowerCase();el.innerHTML=clients.map(function(cl,idx){return {cl:cl,idx:idx};}).filter(function(o){return o.cl.n.toLowerCase().indexOf(q)>-1;}).map(function(o){return '<button onclick="linkConvo(curConvo,'+o.idx+')" class="w-full text-left px-3 py-2 rounded-lg bg-white hover:bg-brand-50 flex items-center gap-2 text-sm"><img src="https://i.pravatar.cc/48?img='+o.cl.img+'" class="size-6 rounded-full"/>'+o.cl.n+'<span class="ml-auto text-mute text-xs">'+o.cl.mem+'</span></button>';}).join('')||'<div class="text-mute text-xs px-2 py-2">No matches.</div>';}
+function linkConvo(i,cid){convos[i].cid=cid;convos[i].name=clients[cid].n;clients[cid].social=(clients[cid].social||[]);clients[cid].social.push(convos[i].ch+': '+convos[i].handle);var p=document.getElementById('linkpanel');if(p)p.classList.add('hidden');renderConvoList();openConvoThread(i);}
+function renderSugg(c){var r=document.getElementById('suggrow');if(!r)return;var s=suggestReplies(c);window._sugg=s;r.innerHTML='<span class="text-[11px] text-mute self-center mr-1">Suggested — tap to edit:</span>'+s.map(function(x,i){return '<button onclick="useSugg('+i+')" class="px-2.5 py-1 rounded-full bg-brand-50 text-brand-700 text-xs hover:bg-brand-100 border border-brand-100">'+x.l+'</button>';}).join('');}
+function useSugg(i){var s=window._sugg&&window._sugg[i];if(!s)return;var c=document.getElementById('composer');c.value=s.x;lintMsg();c.focus();}
+function renderMktOverview(){var u=document.getElementById('ovUnread');if(!u)return;u.textContent=convos.filter(function(c){return c.unread;}).length;var chs=['Instagram','Facebook','SMS','Email'],mx=1;chs.forEach(function(ch){var n=convos.filter(function(c){return c.ch===ch;}).length;if(n>mx)mx=n;});var el=document.getElementById('ovChannels');if(el)el.innerHTML=chs.map(function(ch){var mm=CH[ch],n=convos.filter(function(c){return c.ch===ch;}).length,unr=convos.filter(function(c){return c.ch===ch&&c.unread;}).length;return '<div class="flex items-center gap-3"><span class="material-symbols-rounded '+mm.c+'">'+mm.i+'</span><span class="w-20">'+ch+'</span><div class="flex-1 h-2 bg-slate-100 rounded-full"><div class="h-2 bg-brand-500 rounded-full" style="width:'+(n/mx*100)+'%"></div></div><span class="text-xs text-mute w-24 text-right">'+n+' open · '+unr+' unread</span></div>';}).join('');}
+function tmpl(v){if(!v)return;var t={recall:'Hi {n}, you\'re due for your next visit — want me to hold a time this week?',aftercare:'Hope you\'re feeling great! Avoid heat & exercise for 24h. Any questions, just reply.',rebook:'Lovely to see you today! Shall I pop your next visit in for ~12 weeks?'}[v]||'';document.getElementById('composer').value=t.replace('{n}',convos[curConvo].name.split(' ')[0]);lintMsg();}
+function lintMsg(){var v=document.getElementById('composer').value,bad=BLOCK.test(v),w=document.getElementById('lintwarn'),b=document.getElementById('sendbtn');if(bad){w.classList.remove('hidden');document.getElementById('lintmsg').textContent='Can\'t name an S4 product/term in client messaging (TGA). Promote the service, not the medicine.';b.classList.add('opacity-40','pointer-events-none');}else{w.classList.add('hidden');b.classList.remove('opacity-40','pointer-events-none');}}
+function sendMsg(){var ta=document.getElementById('composer'),v=ta.value.trim();if(!v||BLOCK.test(v))return;convos[curConvo].thread.push({me:1,t:v,ti:'now'});convos[curConvo].last=v;ta.value='';lintMsg();openConvoThread(curConvo);renderConvoList();}
+function renderAuto(){var el=document.getElementById('autolist');if(!el)return;el.innerHTML=autos.map(function(a,i){return '<div class="bg-white rounded-2xl shadow-soft p-4"><div class="flex items-start gap-3"><span class="material-symbols-rounded text-brand-500">'+a.icon+'</span><div class="flex-1"><div class="font-medium text-sm">'+a.name+'</div><div class="text-mute text-xs">'+a.desc+'</div></div><button onclick="toggleAuto('+i+')" class="shrink-0 leading-none"><span class="material-symbols-rounded text-3xl '+(a.on?'text-brand-600':'text-slate-300')+'">'+(a.on?'toggle_on':'toggle_off')+'</span></button></div><div class="flex items-center gap-2 mt-3 text-xs text-mute"><span>'+a.ch+'</span><span>·</span><span>'+a.aud+'</span><span class="ml-auto '+(a.on?'text-emerald-600':'')+'">'+a.stat+'</span></div></div>';}).join('');}
+function toggleAuto(i){autos[i].on=autos[i].on?0:1;if(!autos[i].on&&autos[i].stat!=='off')autos[i]._s=autos[i].stat;autos[i].stat=autos[i].on?(autos[i]._s||'live'):'off';renderAuto();}
+function renderCamp(){var el=document.getElementById('camplist');if(!el)return;el.innerHTML=camps.map(function(c){return '<div class="px-4 py-3 border-b border-slate-50 flex items-center gap-3"><div class="flex-1 min-w-0"><div class="font-medium text-sm">'+c.name+'</div><div class="text-mute text-xs truncate">'+c.aud+'</div></div><span class="px-2 py-0.5 rounded-full text-xs '+c.cls+'">'+c.status+'</span><div class="text-right text-xs text-mute w-28">'+c.stat+'</div></div>';}).join('');}
+function lintCamp(){var v=document.getElementById('campmsg').value,el=document.getElementById('camplint');if(BLOCK.test(v)){el.classList.remove('hidden');el.textContent='Blocked: can\'t name or allude to an S4 product in advertising (TGA). Promote the service, not the medicine.';}else{el.classList.add('hidden');}}
+function msub(t){var pane=document.querySelector('[data-mpane="'+t+'"]');if(!pane)return;document.querySelectorAll('[data-mpane]').forEach(function(p){p.classList.add('hidden');});pane.classList.remove('hidden');document.querySelectorAll('.msub').forEach(function(b){b.className='msub px-3 py-1.5 rounded-full bg-white shadow-soft text-mute';});var pill=document.querySelector('[data-msub="'+t+'"]');if(pill)pill.className='msub px-3 py-1.5 rounded-full bg-brand-600 text-white font-medium';if(t==='overview'&&typeof renderMktOverview==='function')renderMktOverview();}
+/* ---------- clinic switcher ---------- */
+const clinics=[{name:'The Lounge',loc:'Aesthetics · Brisbane',badge:'L'},{name:'The Lounge',loc:'Aesthetics · Gold Coast',badge:'L'},{name:'Skin & Co',loc:'Locum · Southport',badge:'S'}];
+function toggleClinicMenu(){var m=document.getElementById('clinicMenu');if(m)m.classList.toggle('hidden');}
+function setClinic(i){var c=clinics[i];if(!c)return;document.getElementById('clinicName').textContent=c.name;document.getElementById('clinicLoc').textContent=c.loc;document.getElementById('clinicBadge').textContent=c.badge;var m=document.getElementById('clinicMenu');if(m)m.classList.add('hidden');}
+/* ---------- schedule week view ---------- */
+var TYPES={'Anti-wrinkle':{cell:'bg-brand-50 border-brand-500',dot:'bg-brand-500'},'Filler':{cell:'bg-violet-50 border-violet-400',dot:'bg-violet-500'},'Skin':{cell:'bg-emerald-50 border-emerald-400',dot:'bg-emerald-500'},'Consult':{cell:'bg-amber-50 border-amber-400',dot:'bg-amber-500'}};
+var weekAppts=[
+ {di:0,hi:0,n:'Sarah M',t:'Anti-wrinkle',tag:'VIP'},
+ {di:0,hi:1,n:'Jess T',t:'Consult',tag:'New'},
+ {di:0,hi:4,n:'Olivia B',t:'Anti-wrinkle',tag:''},
+ {di:0,hi:5,n:'Mia C',t:'Skin',tag:''},
+ {di:0,hi:6,n:'Amelia R',t:'Filler',tag:''},
+ {di:1,hi:0,n:'Amelia R',t:'Anti-wrinkle',tag:''},
+ {di:1,hi:2,n:'Hannah L',t:'Filler',tag:'VIP'},
+ {di:1,hi:5,n:'Grace T',t:'Skin',tag:''},
+ {di:2,hi:1,n:'Chloe N',t:'Anti-wrinkle',tag:''},
+ {di:3,hi:0,n:'Isla C',t:'Anti-wrinkle',tag:''},
+ {di:3,hi:2,n:'Ruby W',t:'Consult',tag:'New'},
+ {di:3,hi:4,n:'Sarah M',t:'Skin',tag:'VIP'},
+ {di:3,hi:7,n:'Walk-in',t:'Skin',tag:'New'},
+ {di:4,hi:5,n:'Sarah M',t:'Anti-wrinkle',tag:'VIP'}
+];
+var moveMode=false,moveIdx=-1,curApptIdx=-1;
+var WK_DAYS=['Mon 15','Tue 16','Wed 17','Thu 18','Fri 19'],WK_HRS=[9,10,11,12,1,2,3,4];
+function renderWeek(){var g=document.getElementById('weekgrid');if(!g)return;var days=WK_DAYS,hrs=WK_HRS;
+ var quiet={2:[0,2,3,4,5,6,7],4:[0,1,2,3,4,6,7]};
+ var occ={};weekAppts.forEach(function(a,idx){occ[a.di+'-'+a.hi]=idx;});
+ var dayCount=[0,0,0,0,0],typeTot={'Anti-wrinkle':0,'Filler':0,'Skin':0,'Consult':0},total=0;
+ weekAppts.forEach(function(a){dayCount[a.di]++;total++;typeTot[a.t]=(typeTot[a.t]||0)+1;});
+ var mb=document.getElementById('moveBanner');if(mb)mb.innerHTML=moveMode?'<div class="rounded-xl bg-brand-50 border border-brand-200 p-3 mb-3 flex items-center gap-2 text-sm"><span class="material-symbols-rounded text-brand-600">open_with</span>Moving <b>'+(weekAppts[moveIdx]?weekAppts[moveIdx].n:'')+'</b> — tap an open slot<button onclick="cancelMove()" class="ml-auto text-mute hover:text-rose-600 text-xs font-medium">Cancel move</button></div>':'';
+ var h='<div class="grid grid-cols-[44px_repeat(5,1fr)] gap-1 min-w-[680px] text-xs"><div></div>'+days.map(function(d,i){return '<div class="text-center pb-2 border-b border-slate-100"><div class="font-medium text-slate-700 text-sm">'+d+'</div><div class="text-[11px] text-mute">'+dayCount[i]+' appt'+(dayCount[i]===1?'':'s')+'</div></div>';}).join('');
+ hrs.forEach(function(hr,hi){h+='<div class="text-right pr-2 text-mute py-1">'+hr+':00</div>';for(var di=0;di<5;di++){var idx=occ[di+'-'+hi];var iq=quiet[di]&&quiet[di].indexOf(hi)>-1;
+   if(idx!==undefined){var a=weekAppts[idx];var ty=TYPES[a.t]||{cell:'bg-slate-50 border-slate-300'};var badge=a.tag==='VIP'?'<span class="material-symbols-rounded text-amber-500 shrink-0" style="font-size:13px" title="VIP member">star</span>':(a.tag==='New'?'<span class="px-1 rounded bg-violet-100 text-violet-700 text-[9px] font-semibold leading-none shrink-0" title="First-time client">NEW</span>':'');var moving=(moveMode&&idx===moveIdx);h+='<div '+(moveMode?'':'onclick="openApptMenu('+idx+')"')+' class="rounded-md border-l-[3px] px-1.5 py-1 leading-tight min-h-[42px] '+ty.cell+(moveMode?' opacity-50':' cursor-pointer hover:shadow-soft')+(moving?' ring-2 ring-brand-500':'')+'" title="'+a.n+' · '+a.t+'"><div class="font-medium truncate flex items-center gap-1">'+a.n+badge+'</div><div class="text-[10px] text-mute truncate">'+a.t+'</div></div>';}
+   else if(moveMode){h+='<button onclick="placeAppt('+di+','+hi+')" class="rounded-md bg-brand-50 border-2 border-dashed border-brand-400 text-brand-600 grid place-items-center hover:bg-brand-100 min-h-[42px]"><span class="material-symbols-rounded text-base">add_location_alt</span></button>';}
+   else if(iq){h+='<button onclick="show(\'booking\');wstep(1)" class="rounded-md bg-amber-50 border border-dashed border-amber-300 text-amber-500 grid place-items-center hover:bg-amber-100 min-h-[42px]"><span class="material-symbols-rounded text-base">add</span></button>';}
+   else{h+='<div class="rounded-md bg-slate-50/70 border border-slate-100 min-h-[42px]"></div>';}}});
+ h+='</div>';g.innerHTML=h;
+ var tc=document.getElementById('typeCounts');if(tc)tc.innerHTML=Object.keys(typeTot).map(function(k){var ty=TYPES[k];return '<span class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 text-sm"><span class="size-2.5 rounded-full '+ty.dot+'"></span><span class="font-semibold">'+typeTot[k]+'</span><span class="text-mute">'+k+'</span></span>';}).join('');
+ var tt=document.getElementById('weekTotal');if(tt)tt.textContent=total;
+ var ql=document.getElementById('quietlist');if(ql){ql.innerHTML=[{t:'Wed 9:00–12:00',d:'3 chairs open · 2 staff rostered',c:'Offer recall'},{t:'Fri 9:00–1:00',d:'4 chairs open · ideal to use Lot B2188 before expiry',c:'Offer recall'},{t:'Tue 12:00',d:'1 chair open',c:'Fill'}].map(function(x){return '<div class="rounded-xl border border-slate-200 p-3"><div class="flex items-center justify-between gap-2"><span class="font-medium text-sm">'+x.t+'</span><button onclick="show(\'booking\');wstep(1)" class="shrink-0 text-brand-700 text-xs font-medium">'+x.c+'</button></div><div class="text-mute text-xs mt-0.5">'+x.d+'</div></div>';}).join('');}}
+function openApptMenu(idx){curApptIdx=idx;var a=weekAppts[idx];if(!a)return;var tagTxt=a.tag==='VIP'?'<span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-xs font-medium inline-flex items-center gap-1"><span class="material-symbols-rounded text-sm">star</span>VIP member</span>':(a.tag==='New'?'<span class="px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 text-xs font-medium">First-time client</span>':'<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs">Returning client</span>');document.getElementById('apptmBody').innerHTML='<div class="mb-2">'+tagTxt+'</div><h3 class="text-lg font-semibold">'+a.n+'</h3><div class="text-mute text-sm">'+a.t+'</div><div class="text-sm mt-3 space-y-1"><div class="flex justify-between"><span class="text-mute">When</span><span class="font-medium">'+WK_DAYS[a.di]+' · '+WK_HRS[a.hi]+':00</span></div><div class="flex justify-between"><span class="text-mute">Room</span><span class="font-medium">2</span></div></div>';document.getElementById('apptmodal').classList.remove('hidden');}
+function closeApptMenu(){document.getElementById('apptmodal').classList.add('hidden');}
+function cancelAppt(){if(curApptIdx<0)return;weekAppts.splice(curApptIdx,1);curApptIdx=-1;closeApptMenu();renderWeek();}
+function startMove(){if(curApptIdx<0)return;moveMode=true;moveIdx=curApptIdx;closeApptMenu();renderWeek();}
+function cancelMove(){moveMode=false;moveIdx=-1;renderWeek();}
+function placeAppt(di,hi){if(!moveMode||moveIdx<0)return;weekAppts[moveIdx].di=di;weekAppts[moveIdx].hi=hi;moveMode=false;moveIdx=-1;renderWeek();}
+/* ---------- persona switcher ---------- */
+const personas={
+ np:{name:'Dr Lena Park',role:'Nurse Practitioner',img:12,mode:'staff',caps:{chart:1,chartView:1,stock:1,receive:1,financials:0},concerns:['ops','clin','stock','consent','stockalert'],note:'Full clinical scope · prescribes & holds S4 stock · no business financials'},
+ lead:{name:'Bella L.',role:'Lead Nurse · RN',img:47,mode:'staff',caps:{chart:1,chartView:1,stock:1,receive:0,financials:0},concerns:['ops','clin','stock','consent','stockalert'],note:'Senior RN · administers on script, oversees stock & team · no prescribing, custody or financials'},
+ rn:{name:'Chloe Adams',role:'Registered Nurse',img:20,mode:'staff',caps:{chart:1,chartView:1,stock:0,receive:0,financials:0},concerns:['ops','clin','recall','consent'],note:'Administers on a valid script · focuses on her patients · stock & financials handled by lead/NP/owner'},
+ dermal:{name:'Priya Raman',role:'Dermal / laser therapist',img:26,mode:'staff',caps:{chart:1,chartView:1,stock:0,receive:0,financials:0},concerns:['ops','clin','recall','consent'],note:'Non-S4 skin & laser only · no injectables, stock or financials'},
+ reception:{name:'Tess Moreau',role:'Front desk',img:30,mode:'staff',caps:{chart:0,chartView:0,stock:0,receive:0,financials:0},concerns:['ops','biz','recall','consent'],note:'Scheduling, check-in, recall & taking payment · no clinical records, stock or financials'},
+ owner:{name:'Mark Davis',role:'Owner (business)',img:51,mode:'staff',caps:{chart:0,chartView:1,stock:1,receive:0,financials:1},concerns:['fin','biz','stock','stockalert'],note:'Business owner · full financials, reports & read-only oversight of clinical records & stock · cannot prescribe, chart or hold S4'},
+ solo:{name:'Dr Lena Park',role:'Solo NP — all roles',img:12,mode:'staff',caps:{chart:1,chartView:1,stock:1,receive:1,financials:1},concerns:['fin','ops','clin','stock','consent','stockalert','recall','biz'],note:'Single-handed clinic — covers reception, clinical, prescribing, stock & the books'},
+ nurseled:{name:'Bella L.',role:'Nurse-led RN (+ reception)',img:47,mode:'staff',caps:{chart:1,chartView:1,stock:1,receive:0,financials:0},concerns:['ops','clin','stock','consent','stockalert','recall','biz'],note:'Runs a nurse-led clinic — clinical + front desk; prescriber is remote (telehealth)'},
+ client:{name:'Sarah Mitchell',role:'Glow Club member',img:45,mode:'client'}};
+let persona='np';
+function setPersona(k){persona=k;const p=personas[k];var sa=document.getElementById('personaSel');if(sa)sa.value=k;var sc=document.getElementById('personaSelC');if(sc)sc.value=k;
+ if(p.mode==='client'){document.getElementById('staffApp').classList.add('hidden');document.getElementById('clientApp').classList.remove('hidden');document.getElementById('cName').textContent=p.name.split(' ')[0];document.getElementById('cAvatar').src='https://i.pravatar.cc/96?img='+p.img;cshow('chome');return;}
+ document.getElementById('clientApp').classList.add('hidden');document.getElementById('staffApp').classList.remove('hidden');
+ document.getElementById('hdrName').textContent=p.name;document.getElementById('hdrRole').textContent=p.role;document.getElementById('hdrAvatar').src='https://i.pravatar.cc/64?img='+p.img;document.getElementById('scopeNote').textContent=p.note;var gf=p.name.replace(/^Dr\.?\s+/,'').split(' ')[0];var gg=document.getElementById('greet');if(gg)gg.textContent='Good morning, '+gf;
+ var canChartNav=p.caps.chart||p.caps.chartView;
+ const allow={dashboard:1,schedule:1,clients:1,checkout:1,chart:canChartNav,stock:p.caps.stock,reports:p.caps.financials,marketing:(p.concerns||[]).indexOf('biz')>-1,forms:1,memberships:(p.concerns||[]).indexOf('biz')>-1};
+ document.querySelectorAll('.nav').forEach(n=>{n.style.display=allow[n.getAttribute('data-nav')]?'':'none';});
+ var rb=document.getElementById('receiveBtn');if(rb)rb.style.display=p.caps.receive?'':'none';
+ document.querySelectorAll('#staffApp .catadmin').forEach(function(e){e.style.display=(p.caps.receive||p.caps.financials)?'':'none';});
+ document.querySelectorAll('.act-chart').forEach(b=>b.style.display=canChartNav?'':'none');
+ canEditChart=!!p.caps.chart;
+ document.querySelectorAll('#staffApp .chart-edit').forEach(e=>e.style.display=p.caps.chart?'':'none');
+ document.querySelectorAll('#staffApp .chart-view').forEach(e=>e.style.display=(!p.caps.chart&&p.caps.chartView)?'':'none');
+ if(typeof renderInj==='function')renderInj();
+ applyFin();
+ var con=p.concerns||[];
+ document.querySelectorAll('#staffApp [data-concern]').forEach(e=>{e.style.display=con.includes(e.getAttribute('data-concern'))?'':'none';});
+ show('dashboard');}
+function cshow(id){document.querySelectorAll('[data-cscreen]').forEach(s=>s.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');document.querySelectorAll('.cnav').forEach(n=>n.classList.remove('text-brand-700'));document.querySelector('[data-cnav="'+id+'"]')?.classList.add('text-brand-700');window.scrollTo(0,0);}
+function cbook(el){document.querySelectorAll('.cbk').forEach(b=>b.classList.remove('border-brand-500'));el.classList.add('border-brand-500');}
+function applyProtocol(name){var m=document.getElementById('protoMsg'),t=document.getElementById('protoMsgTxt');if(!m)return;t.textContent=name+' applied — sessions scheduled into Sarah\'s plan & recall worklist.';m.classList.remove('hidden');}
+
+var repTx=[{t:'Anti-wrinkle',n:96,rev:26400},{t:'Filler',n:34,rev:23120},{t:'Skin',n:120,rev:21600},{t:'Consult',n:48,rev:2400}];
+function renderReports(){var mx=document.getElementById('repMix');if(!mx)return;var maxRev=0,totRev=0;repTx.forEach(function(x){if(x.rev>maxRev)maxRev=x.rev;totRev+=x.rev;});mx.innerHTML=repTx.map(function(x){var ty=TYPES[x.t]||{dot:'bg-slate-400'};return '<div class="mb-3"><div class="flex justify-between text-sm mb-1"><span class="flex items-center gap-1.5"><span class="size-2.5 rounded-full '+ty.dot+'"></span>'+x.t+'</span><span class="text-mute">$'+x.rev.toLocaleString()+'</span></div><div class="h-2 bg-slate-100 rounded-full"><div class="h-2 rounded-full '+ty.dot+'" style="width:'+(x.rev/maxRev*100)+'%"></div></div></div>';}).join('');var tb=document.getElementById('repTopBody');if(tb)tb.innerHTML=repTx.slice().sort(function(a,b){return b.rev-a.rev;}).map(function(x){return '<tr><td class="py-2.5 font-medium">'+x.t+'</td><td>'+x.n+'</td><td class="text-right">$'+x.rev.toLocaleString()+'</td><td class="text-right text-mute">'+Math.round(x.rev/totRev*100)+'%</td></tr>';}).join('');}
+renderClients();renderToday();renderChartList();wstep(1);initInj();initBA();renderStock();renderCheckout();renderWeek();renderMarketing();renderMemberships();renderReports();setPersona('np');
+</script>
+</body>
+</html>

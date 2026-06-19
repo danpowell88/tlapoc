@@ -1,0 +1,317 @@
+# Product Requirements — Aesthetic Clinic Platform
+
+> A purpose-built operating platform for aesthetic injectable & cosmetic clinics — the
+> modern, compliance-native replacement for Mindbody. This document turns the
+> [market research](01-market-research.md) and the scoping decisions into a v1 requirements
+> spec, and ends with the **PRD breakdown** we'll write next.
+>
+> _Status: DRAFT for review, 2026-06-18 (rev 2). Working title only — no product name chosen yet._
+
+---
+
+## 1. Vision & positioning
+
+**The wedge (from research §5):** no product today combines (a) modern UX (Mangomint/Boulevard),
+(b) true injectable clinical depth (Aesthetic Record/Pabau), and (c) native **Australian
+TGA / QLD-S4 / AHPRA-2025 compliance**. The platform sits in the middle of all three and makes the
+**compliant path the default path**.
+
+**Design principles**
+1. **Compliance by construction** — you can't record an S4 administration without the consult, consent, prescription and batch/lot it legally requires. Guardrails > checklists.
+2. **One loop, done well** — v1 nails a single treatment end-to-end before going wide.
+3. **Lean & cheap** — cloud-native managed services, near-zero fixed cost until real volume; AU-hosted.
+4. **Reporting is a feature, not an afterthought** — the analytics already prototyped become a first-class in-app module (fixes a top Mindbody pain).
+5. **SaaS-ready, single-clinic-feeling** — multi-tenant under the hood (RLS), but day-one UX is tuned for one clinic.
+
+---
+
+## 2. Decisions locked (scoping Q&A, 2026-06-18)
+
+| Decision | Choice | Implication |
+|---|---|---|
+| Audience | Internal-first, **SaaS-ready** | Multi-tenant data model + Row-Level-Security from day one; no customer billing/onboarding UI in v1 |
+| Hosting / data | AU cloud, **Azure/AWS native** (no Supabase), cheapest first | AU data residency (Sydney); managed services only |
+| v1 shape | **Thin end-to-end slice** | One treatment, full loop; depth-limited elsewhere |
+| v1 treatment | **Anti-wrinkle (botulinum toxin)** | Highest volume, clear S4 profile, ~3–4mo recall |
+| Charting depth | **Injection mapping + before/after** | On-image/diagram mapping w/ product·units·**batch-lot** per site |
+| Auth | **Staff: Office 365 / Entra ID SSO**; **Clients: social + email/password + OTP** | Workforce SSO via Entra ID (reuse existing org accounts); customer identity via Entra External ID [Cognito]; MFA throughout |
+| Apps | **Two apps in v1 — client + provider** | Built in **Flutter** (cross-platform, *not* native) |
+| Web & backend API | **Angular SPA + .NET (ASP.NET Core) API** | TypeScript/Angular web · C#/.NET backend on Azure · Flutter apps share the same API |
+| Payments | **In-person first** for POS — Square (card) + recorded **cash**; pluggable; **gift cards** | `IPaymentProvider`; one-off online checkout later (membership autopay excepted) |
+| Memberships & rewards | **Inside v1** | **Automatic recurring autopay** (card-on-file, *not* in person) + **visit/membership rewards on non-S4 items only**, margin-aware |
+| Migration | **None — greenfield** | Assume no Mindbody account and no existing data to import |
+| AI features | **None now (far future)** | No AI scribe / AI in v1 or near-term |
+| Webhooks / public API | **Much later** | Not in v1; internal events only as needed |
+| Build team | **Lean (owner + Claude Code)** | Ruthless scope; managed/cheap services over custom infra |
+| S4 model | **Configurable; v1 = on-site stock (Mode A)** | Mode B (nurse-led + pharmacy) deferred — no pharmacy partner yet |
+| Team mix | RNs + NP(s) + dermal/admin | Scope-of-practice role gating required |
+| Prescriber | On-site NP and/or remote telehealth (varies) | Both consult paths supported |
+| Mindbody pains to fix | **All four**: no clinical/compliance, clunky UX, reporting gaps, cost | Product must be deep, compliant, fast *and* cheap |
+| Timeline | No fixed date | Phase for quality |
+| Integrations (v1) | **Xero, M365/Google calendar, SMS** | Each behind an adapter |
+| Telehealth | **External app** | Platform records consult metadata/notes only; no video built |
+| Booking deposits | **None in v1** | No deposit/card-on-file enforced for bookings |
+
+---
+
+## 3. Users, roles & scope-of-practice
+
+### Personas
+- **Client / patient** — books, completes intake/consent, views history, photos, memberships, balances (web + app).
+- **Front desk / admin** — scheduling, check-in, payments, comms; limited clinical visibility.
+- **Dermal therapist** — non-S4 skin services + their charting; **cannot** assess for or administer injectables.
+- **Registered Nurse (RN)** — assesses, administers S4 **on a valid individual prescription**; may hold only **individually-dispensed** S4 (QLD); cannot prescribe or hold bulk stock.
+- **Nurse Practitioner (NP) / on-site prescriber** — assesses, **prescribes**, may hold S4 stock on-site, administers.
+- **Remote prescriber (doctor/NP via telehealth)** — synchronous consult + prescribe only; no on-site stock.
+- **Clinic owner / manager** — all of the above + reporting, configuration, audit.
+
+### Scope-of-practice matrix (enforced defaults; configurable per tenant)
+
+| Capability | Client | Admin | Dermal | RN | NP/On-site Rx | Remote Rx | Owner |
+|---|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| Book / reschedule | ● (self) | ● | ● | ● | ● | – | ● |
+| Take payment / POS | – | ● | ● | ● | ● | – | ● |
+| Holistic assessment + BDD screen | – | – | – | ● | ● | ● | ●* |
+| Prescribe S4 (per synchronous consult) | – | – | – | – | ● | ● | ●* |
+| Administer S4 (on valid Rx) | – | – | – | ● | ● | – | ●* |
+| Hold S4 stock (custody) | – | – | – | dispensed-only | ● | – | – |
+| Chart / injection map | – | – | ●(skin) | ● | ● | – | ●* |
+| View full clinical record | – | restricted | own scope | ● | ● | ● | ● |
+| Configure clinic / view audit | – | – | – | – | – | – | ● |
+
+`●* = only if the owner also holds that clinical credential.` Credentials (registration #, AHPRA
+type, ≥1yr non-cosmetic experience flag, training) live on the staff profile and gate the actions.
+
+---
+
+## 4. v1 scope — the toxin slice
+
+**In scope (the loop):**
+1. **Book** a toxin consult/treatment (web + client app), with a cancellation policy (no deposit in v1).
+2. **Pre-visit intake & consent** sent ahead, completed on phone, incl. **medical history, contraindications, BDD screen**; **under-18 cooling-off** enforced.
+3. **Synchronous consult** (in-person, or telehealth conducted in an external app) → record the consult (prescriber, datetime, modality, reference/notes) and the linked **individual prescription**. No batch/async scripts.
+4. **Treatment charting** — injection mapping on a facial diagram + photo, **product · units · depth · batch-lot · expiry per site**; before/after photo capture & compare.
+5. **S4 governance** — **Mode A on-site stock ledger** in v1 (mode abstraction retained for future pharmacy/Mode B); records custody and decrements stock on administration.
+6. **Payment** — in-person POS via **Square** (card-present) or **recorded cash**; **gift cards**; package/series redemption; **membership sign-up with automatic recurring autopay** (card-on-file; can be added online/in-app, not required in person); apply member/visit **rewards (non-S4 items only)**.
+7. **Recall** — automated ~12-week rebooking/recare prompt (SMS/app), aftercare sequence.
+8. **Reporting** — rebuild the analytics (revenue, retention, no-shows, conversion, at-risk, membership MRR/churn) on live data, **plus compliance reports** (consent coverage, S4 ledger, lot-recall lookup).
+9. **Both apps (Flutter)** — client (book/intake/consent/photos/balances/memberships/rewards) + provider (room-side mapping + photo capture + consult/Rx).
+10. **Integrations** — Xero (invoices/payments), M365/Google calendar sync, SMS provider.
+
+**Explicitly NOT in v1 (fast-follows / later — see §9):** dermal filler & other treatment types, laser/device scheduling, **customer-facing online checkout for one-off purchases** (membership card-on-file capture *is* in v1), **AI features (scribe etc.)**, **webhooks / public API**, **advanced loyalty campaigns & referrals**, telehealth video (handled by your existing external app), **Mode B pharmacy dispensing**, **booking deposits/card-on-file**, full retail inventory & POS hardware fleet, marketplace listing, marketing campaign builder, commission/payroll, multi-location switching UI, customer-facing SaaS onboarding/billing, e-prescribing via official ETP networks (structured script records + PDF for now). *(No Mindbody migration — greenfield build.)*
+
+---
+
+## 5. Functional requirements by module
+
+> IDs (`REQ-XXX-n`) trace forward into the PRDs. ★ marks compliance-critical requirements.
+
+### 5.1 Tenancy, identity & roles — `TEN`
+- REQ-TEN-1: Every record is scoped to a `tenant_id`; isolation enforced by Postgres **Row-Level-Security**.
+- REQ-TEN-2: Auth via managed identity, split by audience — **Staff: Office 365 / Entra ID (workforce) SSO + MFA**, reusing the org accounts most clinics already have (and, for SaaS, each tenant can federate its own Entra tenant); **Clients: Entra External ID** [AWS Cognito] with **social login (Google/Apple)**, **email/username + password**, and **email/SMS OTP**. *(No Supabase.)*
+- REQ-TEN-3: Role-based access with the §3 scope matrix; roles & permissions configurable per tenant.
+- REQ-TEN-4 ★: Staff profiles store credentials (AHPRA reg #, type, **registration status/expiry, conditions/endorsements**, ≥1yr-non-cosmetic flag, training records, scope); the system **blocks** actions outside scope **or when registration is lapsed/restricted**, and alerts before expiry. (→ C19)
+
+### 5.2 Clients & CRM — `CLI`
+- REQ-CLI-1: 360° client profile: demographics, contacts, medical history, allergies/contraindications, tags, comms log, consents, photos, memberships, balances, visit history.
+- REQ-CLI-2: Search/filter directory; merge duplicates; soft-delete with audit.
+- REQ-CLI-3 ★: Capture & store **date of birth**; flag **under-18** to drive cooling-off and advertising rules.
+- REQ-CLI-4 ★: **Complaints register** — log complaints/adverse outcomes against client/treatment; surface complaint pathways incl. AHPRA. (→ C24)
+
+### 5.3 Booking & scheduling — `BOOK`
+- REQ-BOOK-1: Multi-resource calendar (practitioner + room); service durations w/ buffer/processing time.
+- REQ-BOOK-2: Online booking (web + app): service → practitioner → slot; respects practitioner scope (e.g., only RN/NP for injectables).
+- REQ-BOOK-3: Configurable cancellation/no-show policy. *(No deposits or card-on-file for bookings in v1; deferred.)*
+- REQ-BOOK-4: Reminders (SMS/app/email) with confirm/decline; reschedule/cancel self-service; waitlist.
+- REQ-BOOK-5 ★: An injectable booking requires a linked **consult** before treatment can be charted (gate, see RX).
+
+### 5.4 Clinical charting — `CLIN`
+- REQ-CLIN-1: Treatment note from a configurable template (toxin template for v1); structured + free text; phrases/snippets.
+- REQ-CLIN-2 ★: **Injection mapping** — annotate a facial diagram (and/or uploaded photo) with points; each point records **product, units, depth, technique, and batch-lot + expiry**.
+- REQ-CLIN-3: **Before/after photos** — capture (provider app camera) or upload; standardized framing guide; side-by-side compare across visits; annotation; **secure central storage (signed URLs; never on personal devices)**, gated by image-use consent (→ C14).
+- REQ-CLIN-4 ★: Chart entries are **immutable once finalised**; amendments are appended and audit-logged.
+- REQ-CLIN-5 ★: Adverse-event / complication logging linked to the treatment, product and batch-lot, feeding the **TGA DAEN reporting pathway** (→ C12).
+- REQ-CLIN-6 *(deferred — far future)*: AI scribe (dictation/ambient → note draft). **No AI features in v1 or near-term.**
+
+### 5.5 Consent & intake — `CONS`
+- REQ-CONS-1 ★: Per-treatment digital consent, **versioned**, e-signed; content meets AHPRA — nature, risks/benefits/alternatives, **practitioner qualifications, costs**, realistic-outcome language (no minimising/overstating), plain language, and complaint mechanisms incl. right to complain to AHPRA despite any NDA. (→ C5/C18)
+- REQ-CONS-2 ★: Consent + intake completable pre-visit on the client app; auto-linked to the chart; **block treatment** if required consent/intake incomplete.
+- REQ-CONS-3 ★: **BDD / psychological screening** instrument in intake; flag for prescriber review.
+- REQ-CONS-4 ★: **Cooling-off** — enforce ≥7 days (under-18) between consent and procedure and **block payment** (except initial consult) until elapsed; **offer/record a second consultation** and a **configurable cooling-off for all patients**. (→ C6)
+- REQ-CONS-5 ★: **Separate image-use consent** for any use of photos beyond the clinical record; track scope, **withdrawal at any time** (stop downstream use); never stored on personal devices. (→ C14)
+
+### 5.6 Consult & prescribing — `RX`
+- REQ-RX-1 ★: Record a **synchronous consult** (in-person, or telehealth held in an external app) — timestamp, practitioner/prescriber, modality, optional reference/notes; required before any S4 prescription.
+- REQ-RX-2 ★: **Individual prescription** per client per consult — product, dose, quantity, prescriber; **no batch/bulk/standing-order scripts** and **no async (text/email/online-only) prescribing**.
+- REQ-RX-3 ★: Administration of S4 must reference a valid, unexpired, unconsumed prescription for **that** client.
+- REQ-RX-4: Remote-prescriber path: telehealth conducted externally; record that the consult occurred and link the resulting script to the client/treatment.
+- REQ-RX-5 ★: Flag **off-label use** on the prescription and ensure the linked consent covers it (the prescriber assumes TGA-equivalent responsibility for off-label safety/efficacy + informed consent). (→ C5)
+
+### 5.7 Medicines governance & S4 inventory — `MED`
+- REQ-MED-1 ★: Architecture supports a tenant **mode switch** — **(A) on-site prescriber stock** vs **(B) nurse-led + pharmacy per-patient dispensing**. **v1 implements Mode A only** (no pharmacy partner yet); Mode B deferred.
+- REQ-MED-2 ★ (Mode A): S4 **stock ledger** — receipt, custodian, storage location, administration (decrement), wastage, disposal, expiry alerts; custody limited to NP/prescriber.
+- REQ-MED-3 ★ (Mode B — *deferred, not in v1*): **Per-patient dispensed-item** records (from pharmacy) tied to the client; RN may only hold/administer dispensed items, never bulk stock.
+- REQ-MED-4 ★: Every administration writes batch-lot, quantity, prescriber, administrator, client, datetime — producing an **audit-ready medicine register** and a **lot → clients** recall lookup.
+- REQ-MED-5 ★: Track **vial/unit reconciliation** — units drawn per patient vs vial size, plus wastage — so stock, billing units and the medicine register reconcile (supports the "named-patient / no-aliquoting" rules emerging in some states). (→ C8)
+- REQ-MED-6 ★: Record each product's **ARTG status, brand, sponsor and lawful supply source**; warn on non-ARTG/unverified-source items. (→ C11)
+- REQ-MED-7 ★: Support **storage temperature logging** (toxin 2–8°C) with excursion alerts. (→ C13)
+- REQ-MED-8 ★: **Secure storage** — assign stock to a locked cabinet/secure room; restrict + log access. (→ C15)
+- REQ-MED-9 ★: **Disposal/destruction & wastage records** — witnessed destruction (incl. partial vials), licensed/RUM disposal pathway, retained certificates. (→ C16)
+- REQ-MED-10 ★: **Stocktake & discrepancy** — periodic reconciliation; flag discrepancies; loss/theft reporting workflow. (→ C17)
+
+### 5.8 Payments & POS — `PAY`
+- REQ-PAY-1: `PaymentProvider` interface (charge, refund, void, **card-on-file/token, recurring**); **Square adapter** first; **cash** recorded as a tender (no processor).
+- REQ-PAY-2: **In-person POS payments in v1** — Square card-present + recorded cash; receipts; partial/split; tips; surcharge config. **Membership autopay is automatic recurring (card-on-file)** — see MEMB. *(Customer-facing online checkout for one-off purchases deferred; no booking deposits.)*
+- REQ-PAY-3: Package/series sale & redemption ("visits remaining"); client account balance & credit; AR ageing.
+- REQ-PAY-4: Daily closeout/reconciliation (card + cash).
+- REQ-PAY-5: **Gift cards** — sell, redeem and track balances (Square Gift Cards or internal); usable at checkout.
+
+### 5.9 Memberships, rewards & loyalty — `MEMB`
+- REQ-MEMB-1: Membership plans (tiers) with **automatic recurring billing** (monthly/annual); card stored (card-on-file) for autopay, **added online/in-app or in person (not required in person)**; failed-payment dunning & recovery.
+- REQ-MEMB-2: Auto-apply member benefits/credits at checkout; expirations.
+- REQ-MEMB-3: Membership lifecycle (join/pause/cancel/win-back) feeding the churn/MRR reporting.
+- REQ-MEMB-4: **Visit-based rewards** — milestones / every-Nth-visit perks to drive return frequency.
+- REQ-MEMB-5: **Membership & frequency perks** — tiered benefits and return-cadence incentives (e.g. discounted/complimentary **non-S4** items — skincare/retail, non-S4 add-ons — or gift-card credit) designed to bring clients back more often.
+- REQ-MEMB-6: **Margin-aware reward rules** — configurable value caps, eligible (preferably high-margin/low-cost) items, and **reward-cost vs retention** reporting, so incentives don't erode profit. Reward/incentive *communications* must respect advertising rules — no public S4 price promotion; deliver to consented, logged-in clients (→ C9/C23).
+- REQ-MEMB-7 ★: **Rewards on non-S4 items only** — the catalog classifies every service/product as **S4 vs non-S4** (with category); the rewards engine **blocks** earning, redeeming or discounting against **S4** items (botox/filler). This both protects margin and reinforces C9 (no S4 price promotion). (→ C9)
+
+### 5.10 Communications, reminders & recall — `NOTIF`
+- REQ-NOTIF-1: `Notifier` interface; SMS (AU provider) + email + app push; per-tenant templates.
+- REQ-NOTIF-2: Appointment reminders/confirmations; pre-care & **aftercare** sequences (multi-touch, timed per treatment).
+- REQ-NOTIF-3: **Recall/recare** at the treatment interval (toxin ~12 weeks) + unbooked-rebook prompts.
+- REQ-NOTIF-4 ★: **Advertising-compliance linter** on all platform-generated public content (campaigns **and the public booking page's service names/prices**) — blocks direct/indirect S4 references (brands, nicknames, generic "anti-wrinkle"/"dermal filler" terms), price promotions, banned hashtags and promotional S4 imagery; inserts mandatory warnings where permitted. (→ C9)
+- REQ-NOTIF-5 ★: **Marketing consent & Spam Act** — opt-in consent to receive commercial electronic messages, sender identification, functional unsubscribe; suppress on withdrawal. (→ C23)
+
+### 5.11 Reporting & analytics — `RPT`
+- REQ-RPT-1: Rebuild the prototyped dashboards on live data: revenue, retention/churn, no-shows, cancellations, conversion funnel, at-risk, big spenders, membership MRR/churn, per-practitioner.
+- REQ-RPT-2: Date-range filtering parity with the current tool.
+- REQ-RPT-3 ★: Compliance dashboards — consent coverage, consult-before-script adherence, S4 register export, **lot-recall lookup**, cooling-off adherence, **registration-expiry watch, records-retention/destruction due, S4 stock discrepancies, and the breach & complaints registers**.
+- REQ-RPT-4: Data-quality/anomaly checks (carry over current logic).
+
+### 5.12 Integrations — `INT`
+- REQ-INT-1: **Xero** — push invoices/payments (+ payouts) on checkout; map services/products to accounts; GST.
+- REQ-INT-2: **Calendar sync** — two-way with M365 (Graph) and Google Calendar, behind a `CalendarProvider` adapter.
+- REQ-INT-3 *(deferred — much later)*: Webhooks / event bus / public API for third-party integrations.
+
+### 5.13 Apps (Flutter) — `APP`
+- REQ-APP-1: **Client app** (Flutter) — book/reschedule, intake/consent, view/upload photos, memberships, **rewards/perks**, balances, reminders, recall.
+- REQ-APP-2: **Provider app** (Flutter) — schedule, room-side injection mapping, **camera photo capture**, consult/Rx, finalize chart; resilient to flaky connectivity (offline queue & sync) for the treatment-room reality.
+- REQ-APP-3: Both apps share the backend API and auth with web; store-distributed, with code-push for fast iteration where feasible (e.g. Shorebird).
+
+### 5.14 Security, privacy & audit — `SEC`
+- REQ-SEC-1 ★: **AU data residency** (Sydney region) for all PII/PHI incl. photos.
+- REQ-SEC-2 ★: Encryption in transit + at rest; signed URLs for media; least-privilege access.
+- REQ-SEC-3 ★: **Comprehensive audit log** (who viewed/changed what, when) for clinical, medicines and PII access — retained and exportable for QLD Health / AHPRA scrutiny.
+- REQ-SEC-4: Backups + restore; **retention policy engine** (adults ≥7 yrs from last contact; minors to age 25; indefinite on complaint/litigation), **destruction register** + certificates. (→ C18)
+- REQ-SEC-5 ★: **Patient access & correction** of their own health information (APP 12/13); collection notice + consent at sign-up. (→ C21)
+- REQ-SEC-6 ★: **Cross-border disclosure controls** — sub-processors (payments, SMS, accounting) kept AU-resident or assessed/consented (APP 8). (→ C21)
+- REQ-SEC-7 ★: **Data-breach handling** — detect/assess eligible breaches, notify OAIC + individuals, maintain a breach register. (→ C22)
+
+### 5.15 Facility, infection control & emergency — `FAC`
+- REQ-FAC-1 ★: Record **facility accreditation** (ACSQHC/NSQHS) status & expiry per location. (→ C20)
+- REQ-FAC-2 ★: **Infection-control logs** — sterilisation/single-use, sharps & clinical-waste disposal. (→ C20)
+- REQ-FAC-3 ★: **Emergency preparedness** — emergency/complication protocol links + **emergency kit** (e.g. hyaluronidase, anaphylaxis) availability/expiry; **continuity-of-care** contact when the treating practitioner/prescriber is unavailable. (→ C20)
+> v1: lightweight record-keeping (accreditation ref, kit expiry, simple logs); full workflows later.
+
+---
+
+## 6. Compliance requirements (AU/QLD) — restated as acceptance criteria
+
+These are the differentiator; each must be demonstrably testable. (Detail & sources: research §4.)
+
+- ★ **C1 — Consult-gated scripts:** system prevents recording an S4 prescription without a linked synchronous consult (in-person, or a telehealth consult held in the external app and recorded here) at prescription time. *No async, no batch.* (AHPRA)
+- ★ **C2 — Individual scripts only:** one prescription per client per consult; standing orders cannot authorise RN administration of S4 cosmetics. (QLD MPMR)
+- ★ **C3 — Assessment authorship:** holistic assessment incl. BDD screen recorded by an **RN or NP** before procedure. (AHPRA)
+- ★ **C4 — Credential gating:** RN actions require the ≥1yr-non-cosmetic-experience + training flags; EN region/supervision limits enforceable (config for future EN use). (AHPRA)
+- ★ **C5 — Consent content & capture:** versioned, e-signed, **verbal + written** plain-language consent covering nature, **risks/benefits/alternatives, the practitioner's qualifications, and costs**, without minimising complexity or overstating outcomes; includes complaint info (incl. right to complain to AHPRA despite any NDA); treatment blocked without it. (AHPRA)
+- ★ **C6 — Cooling-off & no-pressure:** under-18 — mandatory **7-day cooling-off** (payment blocked except the consult) and no advertising to minors; all patients — **offer a second consultation**/time to consider and avoid pressure, with a **configurable cooling-off** (some guidance extends the 7 days to adults). (AHPRA)
+- ★ **C7 — Medicines custody:** v1 enforces **Mode A** (on-site prescriber stock ledger; RNs never hold bulk S4). Mode B (pharmacy per-patient) deferred. (QLD MPA/MPMR)
+- ★ **C8 — Traceability & recall:** batch-lot + expiry recorded at every administration; lot→clients lookup for adverse events/recalls. (TGA/clinical)
+- ★ **C9 — Advertising guardrails (broad):** all platform-generated public content — campaigns **and the public booking page (service names & price displays)** — must avoid **direct *or indirect*** references to the S4: no brand names, nicknames or blurred logos (Botox/"babytox"), no generic substance/service terms a consumer would read as promoting the medicine ("anti-wrinkle injections", "wrinkle-reducing injections", "dermal fillers"), no price promotions, no banned hashtags (#botox), no promotional before/after or syringe/treatment imagery referencing the S4; insert mandatory health warnings where ads are permitted; applies to historical content too. No influencer testimonials; no under-18 targeting. (TGA + AHPRA)
+- ★ **C10 — Residency, audit & retention:** AU-hosted PHI; full audit trail; retention configured to obligations. (Privacy Act / record-keeping)
+- ★ **C11 — Approved products & lawful supply (TGA):** every S4 product records its **ARTG registration/approval status**, brand/sponsor, and **lawful supply source** (ordered by an authorised prescriber from a TGA-approved wholesaler); the system flags/limits non-ARTG or unverified-source stock. (Importing/using unapproved or counterfeit injectables is a top TGA enforcement target — penalties to $1.65M/breach for individuals.)
+- ★ **C12 — Adverse-event reporting pathway (TGA DAEN):** adverse-event records capture the data a TGA report needs, classify **seriousness**, route to the correct database (**DAEN-medicines** for toxin vs **DAEN-medical devices** for device-class fillers), and support a **prefilled export/submission**. Reporting is *voluntary but strongly encouraged* for injectors in most cosmetic settings, and **mandatory** in defined cases (unapproved goods supplied under authority; serious device events at hospital/day-hospital facilities from 21 Mar 2026) — the system flags those.
+- ★ **C13 — Cold-chain & storage (TGA/PI):** Mode-A stock storage supports **temperature logging** (botulinum toxin **2–8°C**) with excursion flags, alongside expiry/disposal records.
+- ★ **C14 — Image-use consent (separate):** distinct, documented consent for any use of photos/images beyond the clinical record; images held centrally, **never on personal devices**; **withdrawable at any time** with downstream stop-use. (AHPRA)
+- ★ **C15 — Secure S4 storage:** stock kept in a locked cabinet/secure room, access limited to authorised personnel and access events logged; associated records held securely. (state poisons law)
+- ★ **C16 — S4 disposal & destruction records:** witnessed destruction/wastage logged (including partial vials/ampoules), disposal via a licensed / Return-Unwanted-Medicines pathway, with retained certificates of destruction. (state poisons law / NSQHS)
+- ★ **C17 — Stocktake, discrepancy & loss/theft:** periodic S4 reconciliation; discrepancies flagged; a loss/theft reporting workflow.
+- ★ **C18 — Records standard & retention:** detailed consultation, assessment, rationale, risk and consent records; retention **adults ≥7 yrs from last contact; minors until age 25 (or 7 yrs from last entry, whichever is later)**; **indefinite** where a complaint/adverse outcome/litigation exists; Medicare claims ≥2 yrs; plus a **destruction register** (patient, period covered, disposal date) and transfer log. (state law + Privacy Act)
+- ★ **C19 — Registration currency & scope:** track AHPRA registration status/expiry, conditions/endorsements and training/experience; **block** clinical actions for lapsed/conditioned registration or work outside scope. (AHPRA)
+- ★ **C20 — Facility, infection control & emergency:** record facility accreditation (ACSQHC/NSQHS), infection-control/sterilisation/single-use and sharps & clinical-waste logs; **emergency/complication protocols + kit** (e.g. hyaluronidase, anaphylaxis) with availability/expiry; a **continuity-of-care arrangement** when the treating practitioner/prescriber is unavailable. (AHPRA/ACSQHC) — *lightweight record-keeping in v1.*
+- ★ **C21 — Privacy (APPs):** collection notice + consent; purpose limitation; **patient access & correction** (APP 12/13); **cross-border disclosure** controls (APP 8) — sub-processors kept AU-resident or assessed. (Privacy Act)
+- ★ **C22 — Notifiable Data Breaches:** detect/assess eligible breaches; notify **OAIC + affected individuals**; maintain a breach register. (NDB scheme)
+- ★ **C23 — Marketing consent (Spam Act):** opt-in consent for commercial electronic messages, sender identification and a **functional unsubscribe**; suppress on withdrawal. (Spam Act)
+- ★ **C24 — Complaints register & pathways:** record complaints/adverse outcomes and surface complaint mechanisms incl. **AHPRA** (and that an NDA does not remove that right). (AHPRA)
+
+---
+
+## 7. Architecture & tech stack
+
+**Stack (lean, cloud-native, AU — no Supabase). Lean toward Azure for M365/Entra fit; AWS equivalents in brackets:**
+- **Database:** managed **PostgreSQL** — Azure Database for PostgreSQL Flexible Server [AWS RDS/Aurora PostgreSQL]; **Row-Level-Security** for tenancy (EF Core / Npgsql). *(Azure SQL is an equally-native alternative; both support RLS — pick at Phase 0.)*
+- **Identity / Auth:** **Entra External ID** [AWS Cognito] — social login (Google/Apple), email/username + password, email/SMS **OTP**, MFA.
+- **Media storage:** **Azure Blob** [S3] with signed URLs.
+- **API / compute:** **.NET (ASP.NET Core) Web API** on **Azure App Service / Container Apps** [AWS App Runner / ECS]; scheduled/background jobs via **Functions** [Lambda].
+- **Web:** **Angular** SPA (front-desk/admin + client web booking) on **Azure Static Web Apps** [S3 + CloudFront].
+- **Apps:** **Flutter** (Dart) — client + provider apps, sharing the backend API; native camera for photos.
+- **Secrets/keys:** **Key Vault** [Secrets Manager].
+- **Domain services (.NET interfaces, swappable & cheap):** `IPaymentProvider` (Square card + cash), `INotifier` (AU SMS + email), `ICalendarProvider` (Graph + Google), `IAccountingExport` (Xero).
+- **Compliance/data integrity:** Postgres constraints + RLS + append-only audit tables; immutable finalized chart entries; signed-URL media.
+
+**Multi-tenancy:** single Postgres database, `tenant_id` on every table, RLS policies per role; "single-clinic-feeling" UX with tenant config — flip to multi-tenant SaaS later without schema rework.
+
+**Core data model (sketch):** `Tenant` › `Location`, `StaffProfile`(role, credentials, scope), `Client`(dob, flags), `Service`/`TreatmentType`(+**schedule: S4|non-S4**, category), `Appointment`, `Consult`, `Consent`(version), `Prescription`(+off-label flag), `MedicineMode`, `Product`(type: **medicine|device**, ARTG#, sponsor, supply-source), `StockItem`/`StockLedger`/`DispensedItem`(lot, expiry, storage-temp), `ChartEntry`›`InjectionPoint`, `Photo`, `AdverseEvent`, `Invoice`/`Payment`(card|cash), `GiftCard`, `MembershipPlan`/`Membership`, `Package`/`Series`, `RewardRule`/`RewardLedger`, `Notification`, `ImageConsent`, `Complaint`, `MarketingConsent`, `Stocktake`/`StockDestruction`, `DataBreach`, `FacilityAccreditation`, `AuditEvent`.
+
+---
+
+## 8. Non-functional requirements
+- **Cost:** ~$0 fixed until real volume; prefer free/cheap managed tiers; no per-seat SaaS where avoidable.
+- **Performance:** calendar & charting feel instant on clinic wifi/4G; provider app usable on flaky connectivity (offline queue + sync).
+- **Reliability:** photos/notes never silently lost (a known Aesthetic Record failure mode) — explicit save-state + retry.
+- **Accessibility & polish:** modern, fast UI (directly addresses the "clunky Mindbody" pain).
+- **Maintainability:** three focused layers — **Dart/Flutter** apps, **Angular/TypeScript** web, and a single **.NET/C#** API — over one shared backend; keep services minimal to suit a lean team.
+
+---
+
+## 9. Phasing / roadmap (no fixed date → quality-first)
+
+- **Phase 0 — Foundations:** tenancy/auth (social/password/OTP)/roles, data model, design system.
+- **Phase 1 — v1 toxin slice (this spec §4):** booking → intake/consent → consult/Rx → mapping/photos → S4 governance → in-person payment (Square + cash) + gift cards → memberships + rewards → recall → core + compliance reporting → both Flutter apps → Xero/calendar/SMS.
+- **Phase 2 — Fast-follows:** dermal filler + more treatment types, **customer-facing online payments/checkout**, **Mode B pharmacy dispensing**, **booking deposits/card-on-file**, **advanced loyalty campaigns & referrals**, retail inventory & POS hardware, marketing/campaigns, commission/payroll.
+- **Phase 3 — Scale:** multi-location UX; **webhooks/events & public API**; then SaaS commercialization (self-serve onboarding, subscription billing, white-label); **AI features (far future)**.
+
+---
+
+## 10. Open items / assumptions to confirm
+1. **Product name** — none chosen; generic "Aesthetic Clinic Platform" used as working title.
+2. **AWS vs Azure** — pick the cheaper native landing zone at Phase 0; M365/Entra presence leans **Azure** (Entra External ID + Azure Database for PostgreSQL + Blob + Container Apps/Functions + Static Web Apps).
+3. **Membership plans & reward rules** — define exact tiers/prices/benefits **and reward rules** (visit milestones, perks, margin caps); no data import needed.
+4. **e-Prescribing** — v1 records a structured script + PDF; official ETP-network integration deferred — confirm acceptable.
+5. ★ **Remote-prescriber + on-site-stock custody (QLD nuance)** — with telehealth external and **Mode A** only in v1, note that QLD permits on-site S4 stock only under an on-site doctor/NP's custody. The platform records consult, prescriber and custodian faithfully; the lawful custody arrangement itself is an operational/legal decision for the clinic.
+6. **Public booking-page naming (TGA advertising)** — because the public booking page is itself "advertising", injectable services likely must be listed **generically** (e.g. "Cosmetic consultation") with **prices withheld publicly**. Default assumption unless you say otherwise.
+7. **Database** — Postgres (cheap, RLS) vs Azure SQL (native to .NET, RLS) — pick at Phase 0; both meet tenancy/residency needs.
+
+_Resolved this round (2026-06-18):_ **web = Angular + .NET API** · apps in **Flutter** (not native) · **autopay = automatic recurring** (card-on-file, not in person) · **rewards on non-S4 items only** (catalog classifies S4 vs non-S4) · **greenfield** (no Mindbody/data import) · **no AI** (far future) · **in-person POS payments first** (Square + cash) + **gift cards** · **webhooks/public API much later** · **Azure/AWS native, no Supabase** · auth = **social + password + OTP**. _(Earlier: telehealth external · Mode A only · no booking deposits · no product name.)_
+
+---
+
+## 11. Proposed PRD breakdown (the next step)
+
+Each becomes a focused PRD (problem, user stories, flows, data, acceptance criteria incl. the relevant `C#`/`REQ` IDs, out-of-scope). Suggested order:
+
+1. **PRD-01 Foundations & tenancy** (TEN incl. social/password/OTP auth, SEC, data model)
+2. **PRD-02 Booking & scheduling** (BOOK + client/CRM basics CLI)
+3. **PRD-03 Intake, consent & compliance gating** (CONS, C1–C6)
+4. **PRD-04 Consult, prescribing & S4 medicines governance** (RX, MED, C1–C2, C7–C8) — *the moat*
+5. **PRD-05 Clinical charting: injection mapping & before/after** (CLIN)
+6. **PRD-06 Payments (in-person POS: Square + cash + gift cards), automatic membership autopay, packages & non-S4 rewards** (PAY, MEMB)
+7. **PRD-07 Comms, reminders & recall** (NOTIF, C9)
+8. **PRD-08 Reporting & compliance dashboards** (RPT, C10)
+9. **PRD-09 Apps (Flutter): client & provider** (APP)
+10. **PRD-10 Integrations: Xero & calendar** (INT)
+11. **PRD-11 Facility, infection-control, emergency & complaints** (FAC, C20, C24) — lower priority; record-keeping support
+
+> The expanded privacy/records/registration criteria (C18–C23) thread mainly through **PRD-01** (SEC/TEN); S4 storage/disposal (C15–C17) through **PRD-04**; consent/image/cooling-off (C5/C6/C14) through **PRD-03**.
+
+> Recommend writing **PRD-01 → PRD-04** first (they unblock everything and contain the compliance moat), then the rest.
