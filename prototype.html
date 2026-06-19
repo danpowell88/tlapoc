@@ -323,9 +323,19 @@ tailwind.config={theme:{extend:{
       <!-- CHARTING -->
       <section data-screen id="chart" class="hidden">
         <div class="flex items-center gap-3 mb-4 flex-wrap"><button onclick="show('chartlist')" class="text-mute"><span class="material-symbols-rounded">arrow_back</span></button><h1 class="text-2xl font-semibold">Charting — <span id="chartName">Sarah Mitchell</span></h1><span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs">Consult ✓ · Consent ✓ · screening clear</span><span class="chart-view px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 text-xs">Read-only view</span></div>
+        <div class="bg-white rounded-2xl shadow-soft p-5 mb-6">
+          <div class="flex items-center gap-2 mb-3"><span class="size-6 rounded-full bg-brand-600 text-white grid place-items-center text-xs font-semibold">1</span><h2 class="font-semibold">Product &amp; batch</h2><span class="text-mute text-xs">— confirm the vial you're drawing from before charting points</span></div>
+          <div class="chart-edit flex flex-wrap gap-4 items-end">
+            <label class="text-sm"><div class="text-mute text-xs mb-1">Product</div><select id="chartProdSel" onchange="setChartProd(this.value)" class="px-3 py-2 border border-slate-200 rounded-xl text-sm bg-white min-w-[160px]"></select></label>
+            <label class="text-sm"><div class="text-mute text-xs mb-1">Batch / lot</div><select id="chartLotSel" onchange="setChartLot(this.value)" class="px-3 py-2 border border-slate-200 rounded-xl text-sm bg-white min-w-[200px]"></select></label>
+            <div id="chartLotInfo" class="text-xs text-mute pb-2.5"></div>
+          </div>
+          <div id="chartProdStatic" class="chart-view text-sm" style="display:none"></div>
+          <p class="chart-edit text-[11px] text-mute mt-3 flex items-center gap-1"><span class="material-symbols-rounded text-sm">vaccines</span>Units charted below deduct from this lot on finalise · only in-date, in-custody stock is selectable (ARTG-checked).</p>
+        </div>
         <div class="grid grid-cols-3 gap-6">
           <div class="col-span-2 bg-white rounded-2xl shadow-soft p-5">
-            <div class="flex items-center justify-between mb-3"><h2 class="font-semibold">Injection map</h2><div class="chart-edit flex gap-2"><button id="autobtn" onclick="autoDetect()" class="px-3 py-1.5 rounded-lg bg-brand-600 text-white text-xs font-medium flex items-center gap-1"><span class="material-symbols-rounded text-base">auto_fix_high</span>Auto-detect</button><button onclick="clearPts()" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs">Clear</button></div></div>
+            <div class="flex items-center justify-between mb-3"><h2 class="font-semibold">2 · Injection map</h2><div class="chart-edit flex gap-2"><button id="autobtn" onclick="autoDetect()" class="px-3 py-1.5 rounded-lg bg-brand-600 text-white text-xs font-medium flex items-center gap-1"><span class="material-symbols-rounded text-base">auto_fix_high</span>Auto-detect</button><button onclick="clearPts()" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs">Clear</button></div></div>
             <div class="flex gap-6">
               <div id="facewrap" onclick="faceClick(event)" class="relative w-64 shrink-0 rounded-xl overflow-hidden bg-slate-100 cursor-crosshair">
                 <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=500&fit=crop&crop=faces&q=80" class="w-full h-[320px] object-cover pointer-events-none" onerror="this.style.display='none'"/>
@@ -335,7 +345,7 @@ tailwind.config={theme:{extend:{
                 <div id="editor" class="rounded-xl border border-slate-200 p-4 text-sm bg-slate-50 min-h-[88px]"></div>
                 <div id="ptlist" class="mt-3 text-sm border border-slate-200 rounded-xl divide-y divide-slate-100 overflow-hidden"></div>
                 <div class="mt-3 flex justify-between text-sm font-medium"><span>Total units</span><span id="totalu">0u</span></div>
-                <div class="mt-1 flex justify-between text-xs text-mute"><span>Product · lot (from stock)</span><span>Botulinum toxin · B2245 · exp 09/26</span></div>
+                <div class="mt-1 flex justify-between text-xs text-mute"><span>Product · lot (from step 1)</span><span id="chartLotLabel" class="font-medium text-slate-600">Botox · B2245 · exp Sep 2026</span></div>
                 <p class="chart-edit text-xs text-mute mt-3 flex items-center gap-1"><span class="material-symbols-rounded text-sm">touch_app</span>Tap the face to add · drag a point to fine-tune</p>
                 <p class="chart-view text-xs text-mute mt-3 flex items-center gap-1" style="display:none"><span class="material-symbols-rounded text-sm">visibility</span>Read-only view — owner oversight</p>
               </div>
@@ -352,7 +362,7 @@ tailwind.config={theme:{extend:{
               <p class="text-xs text-mute mt-2">12 weeks apart · stored securely, never on device</p>
             </div>
             <button onclick="finaliseChart()" class="chart-edit w-full py-3 rounded-xl bg-brand-600 text-white font-medium">Finalise &amp; checkout</button>
-            <p class="chart-edit text-xs text-mute text-center">Finalising locks the note and deducts the units used from lot B2245 in Stock.</p>
+            <p class="chart-edit text-xs text-mute text-center">Finalising locks the note and deducts the units used from the selected lot in Stock.</p>
             <p class="chart-view text-xs text-mute text-center" style="display:none">Read-only — the owner can review charts but not edit or finalise.</p>
           </div>
         </div>
@@ -825,7 +835,7 @@ function renderToday(){var ul=document.getElementById('todaylist');if(ul)ul.inne
 function renderChartList(){var box=document.getElementById('chartTodayList');if(!box)return;var now=nowAppt(),nb=document.getElementById('chartNow');if(nb)nb.innerHTML=now?'<div class="rounded-2xl bg-gradient-to-br from-brand-600 to-brand-800 text-white p-5 mb-4 flex items-center gap-4 flex-wrap"><img src="https://i.pravatar.cc/96?img='+now.img+'" class="size-12 rounded-full ring-2 ring-white/50"/><div class="flex-1 min-w-0"><div class="text-xs uppercase tracking-wide opacity-80">With you now · '+now.time+'</div><div class="text-lg font-semibold">'+now.name+'</div><div class="text-sm opacity-90">'+now.svc+'</div></div><div class="flex gap-2 shrink-0"><button onclick="openChartFor('+now.cid+')" class="px-4 py-2 rounded-xl bg-white text-brand-700 text-sm font-medium">Open chart</button><button onclick="openClient('+now.cid+')" class="px-4 py-2 rounded-xl bg-white/20 text-sm font-medium">Profile</button></div></div>':'';
  var cnt=document.getElementById('chartCount');if(cnt)cnt.textContent=todayAppts.length+' patients';
  box.innerHTML=todayAppts.map(function(a){var act=a.consent==='pending'?'<span class="px-2 py-1 rounded-lg bg-amber-50 text-amber-700 text-xs flex items-center gap-1 shrink-0"><span class="material-symbols-rounded text-sm">lock</span>Consent pending</span>':'<button onclick="openChartFor('+a.cid+')" class="px-3 py-1.5 rounded-lg bg-brand-600 text-white text-xs font-medium shrink-0">Open chart</button>';return '<div class="flex items-center gap-3 px-4 py-3 border-b border-slate-50 '+(a.now?'bg-brand-50/50':'')+'"><span class="text-mute text-xs w-12 shrink-0">'+a.time+'</span><img src="https://i.pravatar.cc/64?img='+a.img+'" class="size-9 rounded-full"/><div class="flex-1 min-w-0"><div class="font-medium text-sm flex items-center gap-2">'+a.name+(a.now?'<span class="px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px]">now</span>':'')+'</div><div class="text-mute text-xs truncate">'+a.svc+'</div></div><span class="px-2 py-0.5 rounded-full bg-'+a.tone+'-50 text-'+a.tone+'-700 text-xs hidden md:inline shrink-0">'+a.status+'</span>'+act+'<button onclick="openClient('+a.cid+')" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs shrink-0">Profile</button></div>';}).join('');}
-function openChartFor(i){curClientIdx=i;var c=clients[i];var nm=document.getElementById('chartName');if(nm)nm.textContent=c.n;show('chart');}
+function openChartFor(i){curClientIdx=i;var c=clients[i];var nm=document.getElementById('chartName');if(nm)nm.textContent=c.n;if(typeof renderChartProduct==='function')renderChartProduct();show('chart');}
 function openClient(i){const c=clients[i];curClientIdx=i;document.getElementById('pname').textContent=c.n;document.getElementById('pavatar').src='https://i.pravatar.cc/120?img='+c.img;document.getElementById('ptag').textContent=c.st;document.getElementById('ptag').className='px-2 py-0.5 rounded-full text-xs font-medium '+cc[c.stc];tab('ov');show('profile');}
 function toggleNav(open){var sb=document.getElementById('sidebar'),ov=document.getElementById('navOverlay');if(!sb)return;if(open){sb.classList.add('open');if(ov)ov.classList.remove('hidden');}else{sb.classList.remove('open');if(ov)ov.classList.add('hidden');}}
 function show(id){document.querySelectorAll('[data-screen]').forEach(s=>s.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));document.querySelector('[data-nav="'+id+'"]')?.classList.add('active');if(id==='chart'||id==='chartlist')document.querySelector('[data-nav="chart"]')?.classList.add('active');document.querySelectorAll('[data-gsub]').forEach(s=>s.classList.add('hidden'));document.querySelectorAll('[data-chev]').forEach(c=>c.style.transform='');document.querySelectorAll('.subnav').forEach(a=>{a.classList.remove('text-brand-700','bg-brand-50','font-medium');a.classList.add('text-slate-500');});window.scrollTo(0,0);toggleNav(false);}
@@ -867,7 +877,26 @@ function renderSuggestions(){var el=document.getElementById('suggestions');if(!e
  s.push({icon:'inventory_2',tone:'amber',t:'Likely low on retinol serum',d:'Bought 10 wks ago · a tube lasts ~8 wks. Ask if she\'d like a restock.',a:'Add restock',f:"addItem('Retinol serum (restock)',95,false)"});
  s.push({icon:'event_repeat',tone:'slate',t:'Toxin due ~now',d:'Last treatment 12 wks ago — offer to book her next visit before she leaves.'});
  el.innerHTML=s.map(x=>`<div class="flex items-start gap-3 py-2 border-t border-amber-200/40 first:border-0"><span class="material-symbols-rounded text-${x.tone}-500 text-xl mt-0.5">${x.icon}</span><div class="flex-1 min-w-0"><div class="font-medium text-sm">${x.t}</div><div class="text-mute text-xs">${x.d}</div></div>${x.a?`<button onclick="${x.f}" class="shrink-0 px-2 py-1 rounded-lg bg-white border border-amber-200 text-brand-700 text-xs font-medium mt-0.5">${x.a}</button>`:''}</div>`).join('');}
-function finaliseChart(){const x=stock.find(s=>s.lot==='B2245');const u=(typeof pts!=='undefined')?pts.reduce((s,p)=>s+(+p.u||0),0):24;if(x&&u<=x.onhand){x.onhand-=u;x.uses.unshift(['Sarah Mitchell',u,'19 Jun']);renderStock();}show('checkout');}
+/* ---------- charting: product & batch (step 1) ---------- */
+var chartProd='botox',chartLot='B2245';
+function chLotObj(){return stock.find(function(s){return s.lot===chartLot;});}
+function curLotExp(){var l=chLotObj();return l?l.exp:'';}
+function curProdName(){var p=products.find(function(x){return x.id===chartProd;});return p?p.name:'Product';}
+function curProdUnit(){var p=products.find(function(x){return x.id===chartProd;});return p?p.unit:'U';}
+function renderChartProduct(){var ps=document.getElementById('chartProdSel');if(!ps)return;
+ var toxins=products.filter(function(p){return p.type==='Toxin';});
+ if(!toxins.some(function(p){return p.id===chartProd;}))chartProd=(toxins[0]?toxins[0].id:chartProd);
+ ps.innerHTML=toxins.map(function(p){return '<option value="'+p.id+'"'+(p.id===chartProd?' selected':'')+'>'+p.name+'</option>';}).join('');
+ var lots=stock.filter(function(s){return s.pid===chartProd&&s.onhand>0&&s.status!=='Depleted'&&s.status!=='Expired';});
+ if(!lots.some(function(l){return l.lot===chartLot;}))chartLot=lots[0]?lots[0].lot:'';
+ var ls=document.getElementById('chartLotSel');if(ls)ls.innerHTML=lots.length?lots.map(function(l){return '<option value="'+l.lot+'"'+(l.lot===chartLot?' selected':'')+'>'+l.lot+' · exp '+l.exp+(l.status==='Expiring'?' ⚠':'')+'</option>';}).join(''):'<option value="">no in-date stock</option>';
+ var lot=chLotObj(),p=products.find(function(x){return x.id===chartProd;}),un=curProdUnit();
+ var info=document.getElementById('chartLotInfo');if(info)info.innerHTML=lot?('on hand '+lot.onhand+un+' · '+lot.loc+' · '+(lot.status==='Expiring'?'<span class="text-amber-600 font-medium">expiring soon</span>':'<span class="text-emerald-600">in date</span>')+' · '+(p&&p.s4?'<span class="text-rose-600">S4</span>':'non-S4')):'<span class="text-rose-600">no in-date stock — receive or pick another product</span>';
+ var st=document.getElementById('chartProdStatic');if(st)st.innerHTML='<span class="text-mute">Product · batch:</span> '+(p?p.name:'')+' · lot '+chartLot+(lot?' · exp '+lot.exp:'');
+ var ml=document.getElementById('chartLotLabel');if(ml)ml.textContent=(p?p.name:'')+' · '+chartLot+(lot?' · exp '+lot.exp:'');}
+function setChartProd(v){chartProd=v;var lots=stock.filter(function(s){return s.pid===v&&s.onhand>0;});chartLot=lots[0]?lots[0].lot:'';renderChartProduct();if(typeof renderInj==='function')renderInj();}
+function setChartLot(v){chartLot=v;renderChartProduct();if(typeof renderInj==='function')renderInj();}
+function finaliseChart(){const x=stock.find(s=>s.lot===chartLot);const u=(typeof pts!=='undefined')?pts.reduce((s,p)=>s+(+p.u||0),0):24;if(x&&u<=x.onhand){x.onhand-=u;x.uses.unshift([(clients[curClientIdx]?clients[curClientIdx].n:'Client'),u,'19 Jun']);renderStock();}show('checkout');}
 
 /* ---------- injection map: auto-detect, drag, add, edit ---------- */
 let pts=[],sel=null,dragId=null,moved=false,justDragged=false,canEditChart=true;
@@ -881,8 +910,8 @@ function renderInj(){const w=document.getElementById('facewrap');if(!w)return;w.
   document.getElementById('totalu').textContent=pts.reduce((s,p)=>s+(+p.u||0),0)+'u';
   const e=document.getElementById('editor'),p=pts.find(x=>x.id===sel);
   if(!p){e.innerHTML='<div class="text-mute">'+(canEditChart?'No point selected — tap the face to add.':'Select a point to view its detail.')+'</div>';}
-  else if(canEditChart){e.innerHTML=`<div class="text-mute text-xs">Editing point</div><input value="${p.name}" oninput="updPt('name',this.value)" class="w-full mt-1 font-semibold text-base bg-transparent border-b border-slate-200 focus:outline-none focus:border-brand-500"/><div class="flex items-center gap-2 mt-2"><span class="text-mute">Units</span><input type="number" min="0" value="${p.u}" oninput="updPt('u',this.value)" class="w-16 border border-slate-200 rounded px-2 py-1"/><span class="text-mute text-xs ml-auto">Lot B2245 · exp 09/26</span></div>`;}
-  else{e.innerHTML=`<div class="text-mute text-xs">Point detail</div><div class="font-semibold text-base mt-1">${p.name}</div><div class="mt-1 text-sm">${p.u} units · Botulinum toxin</div><div class="text-mute text-xs mt-1">Lot B2245 · exp 09/26</div>`;}}
+  else if(canEditChart){e.innerHTML=`<div class="text-mute text-xs">Editing point</div><input value="${p.name}" oninput="updPt('name',this.value)" class="w-full mt-1 font-semibold text-base bg-transparent border-b border-slate-200 focus:outline-none focus:border-brand-500"/><div class="flex items-center gap-2 mt-2"><span class="text-mute">Units</span><input type="number" min="0" value="${p.u}" oninput="updPt('u',this.value)" class="w-16 border border-slate-200 rounded px-2 py-1"/><span class="text-mute text-xs ml-auto">Lot ${chartLot} · exp ${curLotExp()}</span></div>`;}
+  else{e.innerHTML=`<div class="text-mute text-xs">Point detail</div><div class="font-semibold text-base mt-1">${p.name}</div><div class="mt-1 text-sm">${p.u} units · ${curProdName()}</div><div class="text-mute text-xs mt-1">Lot ${chartLot} · exp ${curLotExp()}</div>`;}}
 function selectPt(id){sel=id;renderInj();}
 function updPt(k,v){const p=pts.find(x=>x.id===sel);if(!p)return;p[k]=k==='u'?(+v||0):v;document.getElementById('totalu').textContent=pts.reduce((s,q)=>s+(+q.u||0),0)+'u';document.querySelectorAll('#ptlist > div').forEach((d,i)=>{if(pts[i]){d.firstElementChild.textContent=pts[i].name;d.lastElementChild.textContent=pts[i].u+'u';}});}
 function startDrag(ev,id){ev.stopPropagation();sel=id;if(!canEditChart){renderInj();return;}ev.preventDefault();dragId=id;moved=false;renderInj();}
@@ -1176,7 +1205,7 @@ function jobOpen(id){var j=jobs.find(function(x){return x.id===id;});if(!j)retur
 function renderDashFollowups(){var el=document.getElementById('dashFollowups');if(!el)return;var open=jobs.filter(function(j){return j.status==='open';}).slice(0,4);el.innerHTML=open.map(function(j){var ty=JT[j.type]||JT.admin;return '<li class="flex items-center gap-2"><span class="material-symbols-rounded text-amber-600 text-base">'+ty.i+'</span><span class="flex-1 min-w-0 truncate">'+j.t+'</span><span class="text-mute text-xs shrink-0">'+j.who+'</span></li>';}).join('')||'<li class="text-mute">All clear ✨</li>';}
 function flagConvo(i,ev){var c=convos[i];if(!c)return;var type=(c.cat==='Complaint')?'callback':'reply';jobs.unshift({id:++jobSeq,t:(type==='callback'?'Callback — ':'Reply — ')+c.name+' ('+c.ch+')',type:type,who:c.cat==='Complaint'?'Lead Nurse':'Reception',cid:(c.cid!=null?c.cid:null),conv:i,src:'manual',status:'open',due:'Today'});renderFollowups();if(ev&&ev.target){var b=ev.target.closest('button');if(b){b.innerHTML='<span class="material-symbols-rounded text-sm">check</span>Flagged';b.disabled=true;b.classList.add('opacity-70');}}}
 function scanInbox(){var added=0;convos.forEach(function(c,i){var last=c.thread[c.thread.length-1];if(last&&last.me)return;if(jobs.some(function(j){return j.conv===i&&j.status!=='done';}))return;var type=(c.cat==='Complaint')?'callback':'reply';var pre=c.cat==='Complaint'?'Callback — ':(c.cat==='Booking'?'Reply & book — ':'Reply — ');jobs.unshift({id:++jobSeq,t:pre+c.name+(c.cat==='Pricing'?' (pricing)':'')+' ('+c.ch+')',type:type,who:c.cat==='Complaint'?'Lead Nurse':'Reception',cid:(c.cid!=null?c.cid:null),conv:i,src:'auto',status:'open',due:'Today'});added++;});jobFilter='open';renderFollowups();}
-renderClients();renderToday();renderChartList();wstep(1);initInj();initBA();renderStock();renderCheckout();renderWeek();renderMarketing();renderMemberships();renderReports();setPersona('np');
+renderClients();renderToday();renderChartList();wstep(1);initInj();initBA();renderStock();renderCheckout();renderWeek();renderMarketing();renderMemberships();renderReports();renderChartProduct();setPersona('np');
 </script>
 </body>
 </html>

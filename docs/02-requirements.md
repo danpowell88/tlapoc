@@ -348,7 +348,7 @@ Each becomes a focused PRD (problem, user stories, flows, data, acceptance crite
 | Booking wizard, scope-limited to RN/NP for injectables | REQ-BOOK-2/5 | ✅ |
 | Week schedule: move/cancel, VIP/first-time tags, per-day & per-type counts, utilisation/quiet-window fill, "in-room now" links | REQ-BOOK-6 ➕ | ✅ ➕ |
 | Client 360 + treatment-plan tab with protocols | REQ-CLI-1, REQ-CLIN-7 ➕ | ✅ ➕ |
-| Charting: injection map (tap-to-add + drag), before/after compare, finalise→deduct lot | REQ-CLIN-2/3/4 | ✅ |
+| Charting: **product & batch (lot) selected first**, injection map (tap-to-add + drag), before/after compare, finalise→deduct selected lot | REQ-CLIN-2/3/4, REQ-MED-4 | ✅ |
 | Charting: "auto-detect" injection points | REQ-CLIN-8 ➕, ADR-0020 | 🔬 ⏭ |
 | Stock: multi-product/multi-unit, per-type usage history, par/expiry, vial reconciliation, receive | REQ-MED-11 ➕, ADR-0021 | ✅ ➕ |
 | Stock: product-catalogue admin (add/remove, set S4 flag, par) | REQ-MED-11 ➕, ADR-0014/0021 | ✅ ➕ |
