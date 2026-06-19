@@ -173,3 +173,10 @@ into individual `ADR-NNNN-*.md` files later; kept as one log for a lean team.
 **Decision:** A **read-only planning tool** computed over the reporting read models (ADR-0013) + configurable elasticity/churn assumptions; it **proposes** changes and projects impact but does **not** mutate live pricing until explicitly **applied** through the normal catalogue/membership admin (capability-gated, audited — ADR-0010).
 **Consequences:** Owners plan price/membership changes safely; reuses analytics; clean apply/audit path.
 **Alternatives:** Off-platform spreadsheet (loses live data); auto-apply (unsafe).
+
+## ADR-0023 — Unified follow-up / task queue ("Jobs")
+**Status:** Accepted
+**Context:** Follow-ups were scattered (recall worklist, dashboard "needs attention", unanswered inbox messages) and could be **lost if no one replied**. The prototype adds one **Follow-ups** queue.
+**Decision:** A single **`Job`** entity — `type` (reply/callback/recall/consent/stock/restock/admin), title, **linked** client/conversation/appointment, **assignee** (role/person), `due`, **`status`** (open/snoozed/done), **`source`** (manual/auto/recall/system). Existing signals (recall due, consent pending, stock/expiry alerts, unanswered conversations) **project into** the same queue rather than living in separate UIs. Staff can **manually flag** any message/client → a Job. Inbound comms are **auto-categorised into Jobs by rules/keywords** (reuse the inbox categoriser) — **no AI in v1**; LLM-assisted triage is a later option. Role-scoped **"my queue"** (concerns model, ADR-0017); all status changes audited (ADR-0010).
+**Consequences:** Nothing falls through; one place to work the day. Auto-categorisation accuracy is a **UX, not safety**, concern — jobs are advisory and human-actioned.
+**Alternatives:** Keep separate recall/attention lists (status quo — things get lost); a full ticketing system (overkill for v1).

@@ -62,6 +62,7 @@ tailwind.config={theme:{extend:{
       <a onclick="show('dashboard')" data-nav="dashboard" class="nav active flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">today</span>Today</a>
       <a onclick="show('schedule')" data-nav="schedule" class="nav flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">calendar_month</span>Schedule</a>
       <a onclick="show('clients')" data-nav="clients" class="nav flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">groups</span>Clients</a>
+      <a onclick="show('followups')" data-nav="followups" class="nav flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">checklist</span>Follow-ups<span id="navJobCount" class="ml-auto text-[11px] bg-rose-500 text-white rounded-full px-1.5 leading-5"></span></a>
       <a onclick="show('chartlist')" data-nav="chart" class="nav flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">medical_services</span>Charting</a>
       <a onclick="show('forms')" data-nav="forms" class="nav flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">assignment</span>Forms</a>
       <a onclick="show('stock')" data-nav="stock" class="nav flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">vaccines</span>Stock</a>
@@ -115,7 +116,7 @@ tailwind.config={theme:{extend:{
           <div data-concern="clin" class="bg-white rounded-2xl shadow-soft p-5"><div class="flex items-center justify-between text-mute text-sm">Awaiting consent<span class="material-symbols-rounded text-amber-500">assignment_late</span></div><div class="text-3xl font-semibold mt-1">2</div><div class="text-xs text-amber-600 mt-1">treatment gated until done</div></div>
           <div data-concern="biz" class="bg-white rounded-2xl shadow-soft p-5"><div class="flex items-center justify-between text-mute text-sm">Active members<span class="material-symbols-rounded text-brand-500">loyalty</span></div><div class="text-3xl font-semibold mt-1">634</div><div class="text-xs text-mute mt-1"><span class="fin">$74.3k MRR · </span>+5 this wk</div></div>
           <div data-concern="stock" onclick="show('stock')" class="bg-white rounded-2xl shadow-soft p-5 cursor-pointer hover:shadow-card"><div class="flex items-center justify-between text-mute text-sm">Stock on hand<span class="material-symbols-rounded text-brand-500">vaccines</span></div><div id="dashStock" class="mt-2 space-y-1 text-sm"></div><div class="text-xs text-amber-600 mt-2">1 lot expiring soon →</div></div>
-          <div data-concern="recall" class="bg-white rounded-2xl shadow-soft p-5"><div class="flex items-center justify-between text-mute text-sm">Recall due<span class="material-symbols-rounded text-amber-500">notifications_active</span></div><div class="text-3xl font-semibold mt-1">28</div><div class="text-xs text-amber-600 mt-1">worklist ready</div></div>
+          <div data-concern="recall" onclick="show('followups')" class="bg-white rounded-2xl shadow-soft p-5 cursor-pointer hover:shadow-card"><div class="flex items-center justify-between text-mute text-sm">Recall due<span class="material-symbols-rounded text-amber-500">notifications_active</span></div><div class="text-3xl font-semibold mt-1">28</div><div class="text-xs text-amber-600 mt-1">in follow-ups →</div></div>
         </div>
         <div class="grid grid-cols-3 gap-6">
           <div class="col-span-2 bg-white rounded-2xl shadow-soft p-5">
@@ -124,21 +125,23 @@ tailwind.config={theme:{extend:{
             <ul id="todaylist" class="divide-y divide-slate-100 text-sm"></ul>
           </div>
           <div class="space-y-6">
-            <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Recall & follow-up</h2>
-              <ul class="space-y-3 text-sm">
-                <li class="flex items-center gap-3"><img src="https://i.pravatar.cc/48?img=32" class="size-8 rounded-full"/><div class="flex-1"><div class="font-medium">Olivia Brown</div><div class="text-mute text-xs">Toxin · due 14 wks ago</div></div><button class="text-brand-700 text-xs font-medium">Rebook</button></li>
-                <li class="flex items-center gap-3"><img src="https://i.pravatar.cc/48?img=20" class="size-8 rounded-full"/><div class="flex-1"><div class="font-medium">Mia Chen</div><div class="text-mute text-xs">Lapsed · 5 mo</div></div><button class="text-brand-700 text-xs font-medium">SMS</button></li>
-              </ul>
-            </div>
-            <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Needs attention</h2>
-              <ul class="space-y-2.5 text-sm">
-                <li data-concern="consent" class="flex items-center gap-2"><span class="material-symbols-rounded text-amber-600">draft</span>2 intake/consents pending today</li>
-                <li data-concern="stockalert" onclick="show('stock')" class="flex items-center gap-2 cursor-pointer"><span class="material-symbols-rounded text-amber-600">schedule</span>Lot B2188 expiring soon — 40u</li>
-                <li data-concern="stockalert" class="flex items-center gap-2"><span class="material-symbols-rounded text-emerald-600">thermostat</span>Fridge 4.2°C · in range</li>
-              </ul>
+            <div class="bg-white rounded-2xl shadow-soft p-5">
+              <div class="flex items-center justify-between mb-3"><h2 class="font-semibold flex items-center gap-2">Follow-ups<span id="dashJobBadge" class="text-[11px] bg-rose-500 text-white rounded-full px-1.5 leading-5"></span></h2><button onclick="show('followups')" class="text-sm text-brand-700 font-medium">Open queue →</button></div>
+              <ul id="dashFollowups" class="space-y-2.5 text-sm"></ul>
+              <p class="text-[11px] text-mute mt-3 flex items-center gap-1"><span class="material-symbols-rounded text-sm">merge</span>Recall, replies, consents &amp; stock — one queue, nothing lost.</p>
             </div>
           </div>
         </div>
+      </section>
+
+      <!-- FOLLOW-UPS / JOBS QUEUE -->
+      <section data-screen id="followups" class="hidden">
+        <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+          <div><h1 class="text-2xl font-semibold">Follow-ups</h1><p class="text-mute text-sm">One queue for everything that needs a human — recall, replies, consents &amp; stock. Flag a message and it can't get lost.</p></div>
+          <button onclick="scanInbox()" class="px-3 py-2 rounded-xl bg-white shadow-soft text-sm font-medium flex items-center gap-1"><span class="material-symbols-rounded text-lg">bolt</span>Auto-detect from inbox</button>
+        </div>
+        <div id="jobFilters" class="flex gap-2 mb-4 text-sm flex-wrap"></div>
+        <div id="joblist" class="space-y-2"></div>
       </section>
 
       <!-- BOOKING WIZARD -->
@@ -1022,7 +1025,7 @@ var camps=[
 function renderMarketing(){renderConvoList();openConvoThread(curConvo);renderAuto();renderCamp();renderMktOverview();}
 function renderConvoList(){var l=document.getElementById('convolist');if(!l)return;var list=[];convos.forEach(function(c,i){if((chFilter==='all'||c.ch===chFilter)&&(catFilter==='all'||c.cat===catFilter))list.push({c:c,i:i});});var cnt=document.getElementById('convoCount');if(cnt)cnt.textContent=list.length+' shown';l.innerHTML=list.map(function(o){var c=o.c,i=o.i,m=CH[c.ch]||{i:'chat',c:'text-slate-500'};return '<div onclick="openConvo('+i+')" class="px-4 py-3 flex items-center gap-3 cursor-pointer border-b border-slate-50 '+(i===curConvo?'bg-brand-50':'hover:bg-slate-50')+'"><div class="relative shrink-0"><img src="https://i.pravatar.cc/64?img='+c.img+'" class="size-9 rounded-full"/><span class="absolute -bottom-1 -right-1 size-4 rounded-full bg-white grid place-items-center shadow-soft"><span class="material-symbols-rounded '+m.c+'" style="font-size:13px">'+m.i+'</span></span></div><div class="flex-1 min-w-0"><div class="font-medium text-sm truncate">'+c.name+'</div><div class="text-mute text-xs truncate">'+c.last+'</div><span class="inline-block mt-1 px-1.5 py-0.5 rounded text-[10px] '+(CAT[c.cat]||'bg-slate-100 text-slate-600')+'">'+c.cat+'</span></div><div class="text-right whitespace-nowrap"><div class="text-[10px] text-mute">'+c.ti+'</div>'+(c.unread?'<div class="size-2 bg-brand-500 rounded-full ml-auto mt-1"></div>':'')+'</div></div>';}).join('')||'<div class="p-4 text-mute text-sm">No conversations in this filter.</div>';}
 function openConvo(i){curConvo=i;convos[i].unread=0;renderConvoList();openConvoThread(i);}
-function openConvoThread(i){var c=convos[i];var th=document.getElementById('thread'),hd=document.getElementById('threadhead');if(!th||!c)return;var m=CH[c.ch]||{i:'chat',c:'text-slate-500'};hd.innerHTML='<img src="https://i.pravatar.cc/64?img='+c.img+'" class="size-8 rounded-full"/><div class="min-w-0"><div class="font-semibold text-sm leading-tight truncate">'+c.name+'</div><div class="text-mute text-[11px] flex items-center gap-1"><span class="material-symbols-rounded text-sm '+m.c+'">'+m.i+'</span>'+c.ch+' · '+c.handle+'</div></div><select onchange="setCat(this.value)" class="ml-auto text-xs border border-slate-200 rounded-lg px-2 py-1 bg-white">'+['Booking','Pricing','Aftercare','Complaint','General'].map(function(k){return '<option'+(k===c.cat?' selected':'')+'>'+k+'</option>';}).join('')+'</select>';th.innerHTML=c.thread.map(function(mm){return mm.me?'<div class="flex justify-end"><div class="max-w-[75%] bg-brand-600 text-white rounded-2xl rounded-br-sm px-3 py-2 text-sm">'+mm.t+'<div class="text-[10px] opacity-70 mt-0.5 text-right">'+mm.ti+'</div></div></div>':'<div class="flex justify-start"><div class="max-w-[75%] bg-slate-100 rounded-2xl rounded-bl-sm px-3 py-2 text-sm">'+mm.t+'<div class="text-[10px] text-mute mt-0.5">'+mm.ti+'</div></div></div>';}).join('');th.scrollTop=th.scrollHeight;renderClientCtx(c);renderSugg(c);}
+function openConvoThread(i){var c=convos[i];var th=document.getElementById('thread'),hd=document.getElementById('threadhead');if(!th||!c)return;var m=CH[c.ch]||{i:'chat',c:'text-slate-500'};hd.innerHTML='<img src="https://i.pravatar.cc/64?img='+c.img+'" class="size-8 rounded-full"/><div class="min-w-0"><div class="font-semibold text-sm leading-tight truncate">'+c.name+'</div><div class="text-mute text-[11px] flex items-center gap-1"><span class="material-symbols-rounded text-sm '+m.c+'">'+m.i+'</span>'+c.ch+' · '+c.handle+'</div></div><button onclick="flagConvo(curConvo,event)" class="ml-auto shrink-0 px-2 py-1 rounded-lg bg-amber-50 text-amber-700 text-xs font-medium flex items-center gap-1"><span class="material-symbols-rounded text-sm">flag</span>Follow-up</button><select onchange="setCat(this.value)" class="text-xs border border-slate-200 rounded-lg px-2 py-1 bg-white">'+['Booking','Pricing','Aftercare','Complaint','General'].map(function(k){return '<option'+(k===c.cat?' selected':'')+'>'+k+'</option>';}).join('')+'</select>';th.innerHTML=c.thread.map(function(mm){return mm.me?'<div class="flex justify-end"><div class="max-w-[75%] bg-brand-600 text-white rounded-2xl rounded-br-sm px-3 py-2 text-sm">'+mm.t+'<div class="text-[10px] opacity-70 mt-0.5 text-right">'+mm.ti+'</div></div></div>':'<div class="flex justify-start"><div class="max-w-[75%] bg-slate-100 rounded-2xl rounded-bl-sm px-3 py-2 text-sm">'+mm.t+'<div class="text-[10px] text-mute mt-0.5">'+mm.ti+'</div></div></div>';}).join('');th.scrollTop=th.scrollHeight;renderClientCtx(c);renderSugg(c);}
 function setCat(v){convos[curConvo].cat=v;renderConvoList();}
 function filterCh(ch){chFilter=ch;document.querySelectorAll('.chf').forEach(function(b){var on=b.getAttribute('data-chf')===ch;if(on){b.classList.add('bg-brand-600','text-white','font-medium');b.classList.remove('bg-white','shadow-soft','text-mute');}else{b.classList.remove('bg-brand-600','text-white','font-medium');b.classList.add('bg-white','shadow-soft','text-mute');}});renderConvoList();}
 function filterCat(v){catFilter=v;renderConvoList();}
@@ -1115,7 +1118,7 @@ function setPersona(k){persona=k;const p=personas[k];var sa=document.getElementB
  document.getElementById('clientApp').classList.add('hidden');document.getElementById('staffApp').classList.remove('hidden');
  document.getElementById('hdrName').textContent=p.name;document.getElementById('hdrRole').textContent=p.role;document.getElementById('hdrAvatar').src='https://i.pravatar.cc/64?img='+p.img;document.getElementById('scopeNote').textContent=p.note;var gf=p.name.replace(/^Dr\.?\s+/,'').split(' ')[0];var gg=document.getElementById('greet');if(gg)gg.textContent='Good morning, '+gf;
  var canChartNav=p.caps.chart||p.caps.chartView;
- const allow={dashboard:1,schedule:1,clients:1,checkout:1,chart:canChartNav,stock:p.caps.stock,reports:p.caps.financials,marketing:(p.concerns||[]).indexOf('biz')>-1,forms:1,memberships:(p.concerns||[]).indexOf('biz')>-1};
+ const allow={dashboard:1,schedule:1,clients:1,followups:1,checkout:1,chart:canChartNav,stock:p.caps.stock,reports:p.caps.financials,marketing:(p.concerns||[]).indexOf('biz')>-1,forms:1,memberships:(p.concerns||[]).indexOf('biz')>-1};
  document.querySelectorAll('.nav').forEach(n=>{n.style.display=allow[n.getAttribute('data-nav')]?'':'none';});
  var rb=document.getElementById('receiveBtn');if(rb)rb.style.display=p.caps.receive?'':'none';
  document.querySelectorAll('#staffApp .catadmin').forEach(function(e){e.style.display=(p.caps.receive||p.caps.financials)?'':'none';});
@@ -1127,6 +1130,7 @@ function setPersona(k){persona=k;const p=personas[k];var sa=document.getElementB
  applyFin();
  var con=p.concerns||[];
  document.querySelectorAll('#staffApp [data-concern]').forEach(e=>{e.style.display=con.includes(e.getAttribute('data-concern'))?'':'none';});
+ if(typeof renderFollowups==='function')renderFollowups();
  show('dashboard');}
 function cshow(id){document.querySelectorAll('[data-cscreen]').forEach(s=>s.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');document.querySelectorAll('.cnav').forEach(n=>n.classList.remove('text-brand-700'));document.querySelector('[data-cnav="'+id+'"]')?.classList.add('text-brand-700');window.scrollTo(0,0);}
 function cbook(el){document.querySelectorAll('.cbk').forEach(b=>b.classList.remove('border-brand-500'));el.classList.add('border-brand-500');}
@@ -1134,6 +1138,44 @@ function applyProtocol(name){var m=document.getElementById('protoMsg'),t=documen
 
 var repTx=[{t:'Anti-wrinkle',n:96,rev:26400},{t:'Filler',n:34,rev:23120},{t:'Skin',n:120,rev:21600},{t:'Consult',n:48,rev:2400}];
 function renderReports(){var mx=document.getElementById('repMix');if(!mx)return;var maxRev=0,totRev=0;repTx.forEach(function(x){if(x.rev>maxRev)maxRev=x.rev;totRev+=x.rev;});mx.innerHTML=repTx.map(function(x){var ty=TYPES[x.t]||{dot:'bg-slate-400'};return '<div class="mb-3"><div class="flex justify-between text-sm mb-1"><span class="flex items-center gap-1.5"><span class="size-2.5 rounded-full '+ty.dot+'"></span>'+x.t+'</span><span class="text-mute">$'+x.rev.toLocaleString()+'</span></div><div class="h-2 bg-slate-100 rounded-full"><div class="h-2 rounded-full '+ty.dot+'" style="width:'+(x.rev/maxRev*100)+'%"></div></div></div>';}).join('');var tb=document.getElementById('repTopBody');if(tb)tb.innerHTML=repTx.slice().sort(function(a,b){return b.rev-a.rev;}).map(function(x){return '<tr><td class="py-2.5 font-medium">'+x.t+'</td><td>'+x.n+'</td><td class="text-right">$'+x.rev.toLocaleString()+'</td><td class="text-right text-mute">'+Math.round(x.rev/totRev*100)+'%</td></tr>';}).join('');}
+/* ---------- follow-ups / jobs queue ---------- */
+var JT={reply:{i:'reply',c:'bg-brand-50 text-brand-700',lab:'Reply'},callback:{i:'call',c:'bg-rose-50 text-rose-700',lab:'Callback'},recall:{i:'event_repeat',c:'bg-amber-50 text-amber-700',lab:'Recall'},consent:{i:'draft',c:'bg-violet-50 text-violet-700',lab:'Consent'},stock:{i:'vaccines',c:'bg-amber-50 text-amber-700',lab:'Stock'},restock:{i:'inventory_2',c:'bg-emerald-50 text-emerald-700',lab:'Restock'},admin:{i:'task_alt',c:'bg-slate-100 text-slate-600',lab:'Task'}};
+var SRC={auto:{t:'auto-detected',c:'bg-violet-50 text-violet-600'},manual:{t:'flagged',c:'bg-amber-50 text-amber-700'},system:{t:'system',c:'bg-slate-100 text-slate-500'},recall:{t:'recall',c:'bg-slate-100 text-slate-500'}};
+var jobs=[
+ {id:1,t:'Reply — lip-filler pricing enquiry',type:'reply',who:'Reception',cid:null,conv:0,src:'auto',status:'open',due:'Today'},
+ {id:2,t:'Callback — unhappy client (SMS)',type:'callback',who:'Lead Nurse',cid:null,conv:5,src:'auto',status:'open',due:'Today'},
+ {id:3,t:'Reply & book — Friday consult',type:'reply',who:'Reception',cid:null,conv:1,src:'auto',status:'open',due:'Today'},
+ {id:4,t:'Rebook Olivia Brown — toxin 14 wks overdue',type:'recall',who:'Reception',cid:3,conv:null,src:'recall',status:'open',due:'This week'},
+ {id:5,t:'Win-back Mia Chen — lapsed 5 mo',type:'recall',who:'Reception',cid:4,conv:null,src:'recall',status:'open',due:'This week'},
+ {id:6,t:'Chase intake/consent — Jess Tan',type:'consent',who:'Reception',cid:2,conv:null,src:'system',status:'open',due:'Today'},
+ {id:7,t:'Lot B2188 expiring (~6 wks · 40U) — use or destroy',type:'stock',who:'Lead Nurse',cid:null,conv:null,src:'system',status:'open',due:'This week'},
+ {id:8,t:'Restock offer — Sarah (retinol due)',type:'restock',who:'Reception',cid:0,conv:null,src:'auto',status:'snoozed',due:'14 Aug'}
+];
+var jobSeq=100,jobFilter='open',ROLES=['Reception','Nurse','Lead Nurse','NP','Owner'];
+var ROLEMAP={np:'NP',lead:'Lead Nurse',rn:'Nurse',dermal:'Dermal',reception:'Reception',owner:'Owner',solo:'*',nurseled:'Nurse'};
+function myRole(){return ROLEMAP[persona]||'';}
+function jobMineMatch(j){var r=myRole();if(r==='*'||persona==='owner')return true;if(persona==='nurseled')return j.who==='Nurse'||j.who==='Reception'||j.who==='Lead Nurse';return j.who===r;}
+function jobCounts(){var c={open:0,mine:0,snoozed:0,done:0};jobs.forEach(function(j){if(j.status==='done')c.done++;else if(j.status==='snoozed')c.snoozed++;else{c.open++;if(jobMineMatch(j))c.mine++;}});return c;}
+function setJobFilter(f){jobFilter=f;renderFollowups();}
+function renderFollowups(){var c=jobCounts();
+ var nb=document.getElementById('navJobCount');if(nb){nb.textContent=c.open||'';nb.style.display=c.open?'':'none';}
+ var db=document.getElementById('dashJobBadge');if(db){db.textContent=c.open;db.style.display=c.open?'':'none';}
+ renderDashFollowups();
+ var fb=document.getElementById('jobFilters');if(fb){var pills=[['open','Open',c.open],['mine','Mine',c.mine],['snoozed','Snoozed',c.snoozed],['done','Done',c.done]];fb.innerHTML=pills.map(function(p){var on=jobFilter===p[0];return '<button onclick="setJobFilter(\''+p[0]+'\')" class="px-3 py-1.5 rounded-full '+(on?'bg-brand-600 text-white font-medium':'bg-white shadow-soft text-mute')+'">'+p[1]+' <span class="opacity-70">'+p[2]+'</span></button>';}).join('');}
+ var box=document.getElementById('joblist');if(!box)return;
+ var list=jobs.filter(function(j){if(jobFilter==='open')return j.status==='open';if(jobFilter==='mine')return j.status==='open'&&jobMineMatch(j);if(jobFilter==='snoozed')return j.status==='snoozed';if(jobFilter==='done')return j.status==='done';return true;});
+ box.innerHTML=list.length?list.map(function(j){var ty=JT[j.type]||JT.admin,sr=SRC[j.src]||SRC.system,cl=(j.cid!=null)?clients[j.cid]:null,done=j.status==='done';
+  var link=(j.conv!=null)?'<button onclick="jobOpen('+j.id+')" class="text-brand-700 text-xs font-medium whitespace-nowrap">Open chat</button>':(j.cid!=null?'<button onclick="jobOpen('+j.id+')" class="text-brand-700 text-xs font-medium whitespace-nowrap">Open client</button>':'');
+  var acts=done?'<button onclick="jobReopen('+j.id+')" class="hover:text-brand-700">Reopen</button>':'<button onclick="jobSnooze('+j.id+')" class="hover:text-amber-700">Snooze</button><button onclick="jobReassign('+j.id+')" class="hover:text-brand-700">Reassign</button>';
+  return '<div class="bg-white rounded-2xl shadow-soft p-4 flex items-start gap-3'+(done?' opacity-60':'')+'"><button onclick="jobDone('+j.id+')" title="Mark done" class="mt-0.5 size-5 rounded-full border-2 '+(done?'bg-brand-600 border-brand-600 text-white':'border-slate-300 hover:border-brand-500')+' grid place-items-center shrink-0">'+(done?'<span class="material-symbols-rounded text-sm">check</span>':'')+'</button><div class="flex-1 min-w-0"><div class="font-medium '+(done?'line-through text-mute':'')+'">'+j.t+'</div><div class="flex items-center gap-2 mt-1 flex-wrap text-xs"><span class="px-1.5 py-0.5 rounded '+ty.c+' inline-flex items-center gap-1"><span class="material-symbols-rounded text-sm">'+ty.i+'</span>'+ty.lab+'</span><span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">'+j.who+'</span><span class="px-1.5 py-0.5 rounded '+sr.c+'">'+sr.t+'</span><span class="text-mute">· due '+j.due+'</span>'+(cl?'<span class="text-mute">· '+cl.n+'</span>':'')+'</div></div><div class="flex flex-col items-end gap-1 shrink-0">'+link+'<div class="flex gap-2 text-xs text-mute">'+acts+'</div></div></div>';}).join(''):'<div class="bg-white rounded-2xl shadow-soft p-6 text-mute text-sm text-center">Nothing here — queue clear ✨</div>';}
+function jobDone(id){var j=jobs.find(function(x){return x.id===id;});if(j)j.status=(j.status==='done')?'open':'done';renderFollowups();}
+function jobSnooze(id){var j=jobs.find(function(x){return x.id===id;});if(j)j.status='snoozed';renderFollowups();}
+function jobReopen(id){var j=jobs.find(function(x){return x.id===id;});if(j)j.status='open';renderFollowups();}
+function jobReassign(id){var j=jobs.find(function(x){return x.id===id;});if(j){var i=ROLES.indexOf(j.who);j.who=ROLES[(i+1)%ROLES.length];}renderFollowups();}
+function jobOpen(id){var j=jobs.find(function(x){return x.id===id;});if(!j)return;if(j.conv!=null){goSub('marketing','inbox');openConvo(j.conv);}else if(j.cid!=null){openClient(j.cid);}}
+function renderDashFollowups(){var el=document.getElementById('dashFollowups');if(!el)return;var open=jobs.filter(function(j){return j.status==='open';}).slice(0,4);el.innerHTML=open.map(function(j){var ty=JT[j.type]||JT.admin;return '<li class="flex items-center gap-2"><span class="material-symbols-rounded text-amber-600 text-base">'+ty.i+'</span><span class="flex-1 min-w-0 truncate">'+j.t+'</span><span class="text-mute text-xs shrink-0">'+j.who+'</span></li>';}).join('')||'<li class="text-mute">All clear ✨</li>';}
+function flagConvo(i,ev){var c=convos[i];if(!c)return;var type=(c.cat==='Complaint')?'callback':'reply';jobs.unshift({id:++jobSeq,t:(type==='callback'?'Callback — ':'Reply — ')+c.name+' ('+c.ch+')',type:type,who:c.cat==='Complaint'?'Lead Nurse':'Reception',cid:(c.cid!=null?c.cid:null),conv:i,src:'manual',status:'open',due:'Today'});renderFollowups();if(ev&&ev.target){var b=ev.target.closest('button');if(b){b.innerHTML='<span class="material-symbols-rounded text-sm">check</span>Flagged';b.disabled=true;b.classList.add('opacity-70');}}}
+function scanInbox(){var added=0;convos.forEach(function(c,i){var last=c.thread[c.thread.length-1];if(last&&last.me)return;if(jobs.some(function(j){return j.conv===i&&j.status!=='done';}))return;var type=(c.cat==='Complaint')?'callback':'reply';var pre=c.cat==='Complaint'?'Callback — ':(c.cat==='Booking'?'Reply & book — ':'Reply — ');jobs.unshift({id:++jobSeq,t:pre+c.name+(c.cat==='Pricing'?' (pricing)':'')+' ('+c.ch+')',type:type,who:c.cat==='Complaint'?'Lead Nurse':'Reception',cid:(c.cid!=null?c.cid:null),conv:i,src:'auto',status:'open',due:'Today'});added++;});jobFilter='open';renderFollowups();}
 renderClients();renderToday();renderChartList();wstep(1);initInj();initBA();renderStock();renderCheckout();renderWeek();renderMarketing();renderMemberships();renderReports();setPersona('np');
 </script>
 </body>

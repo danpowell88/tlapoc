@@ -197,6 +197,7 @@ type, ≥1yr non-cosmetic experience flag, training) live on the staff profile a
 - REQ-NOTIF-4 ★: **Advertising-compliance linter** on all platform-generated public content (campaigns **and the public booking page's service names/prices**) — blocks direct/indirect S4 references (brands, nicknames, generic "anti-wrinkle"/"dermal filler" terms), price promotions, banned hashtags and promotional S4 imagery; inserts mandatory warnings where permitted. (→ C9)
 - REQ-NOTIF-5 ★: **Marketing consent & Spam Act** — opt-in consent to receive commercial electronic messages, sender identification, functional unsubscribe; suppress on withdrawal. (→ C23)
 - REQ-NOTIF-6 *(social channels Phase 2 — see ADR-0018/0019, 🔬)*: **Omnichannel conversation inbox** — unified two-way threads across **Instagram, Facebook/Messenger, SMS, email** (WhatsApp candidate), with **categorisation**, **client linking** (capture the handle on the client), **templated/keyword suggested replies** (editable; **no AI** in v1), and the **advertising linter** at send time; honour the **24-h messaging window/tags**, opt-in, message **echoes** and **Handover-Protocol** sync so history stays faithful even when staff reply natively. **v1 = SMS/email + recall** (NOTIF-1..5); **IG/FB/WhatsApp are reactive/service channels — proactive marketing stays on SMS/email.**
+- REQ-NOTIF-7: **Unified follow-up / task queue** (ADR-0023) — a single queue of **jobs** (reply, callback, recall, consent-chase, stock, restock, admin) that **merges** today's scattered follow-ups (recall worklist, "needs attention", unanswered comms) so nothing is lost. Staff can **manually flag** any message/client; jobs carry **assignee** (role/person), **due**, **status** (open/snoozed/done) and a **source** (manual/auto/recall/system), with a role-scoped **"my queue"**. Inbound comms **auto-categorise into jobs** by **rules/keyword** (*no AI in v1*; LLM-assisted triage later) so an unanswered message becomes a tracked job.
 
 ### 5.11 Reporting & analytics — `RPT`
 - REQ-RPT-1: Rebuild the prototyped dashboards on live data: revenue, retention/churn, no-shows, cancellations, conversion funnel, at-risk, big spenders, membership MRR/churn, per-practitioner.
@@ -356,6 +357,7 @@ Each becomes a focused PRD (problem, user stories, flows, data, acceptance crite
 | Memberships/packages/loyalty/referrals/gift cards (+ dunning retry) | REQ-MEMB-8 ➕ | ✅ ➕ (full loyalty/referrals ⏭) |
 | Pricing & what-if simulator (owner) | REQ-MEMB-9 ➕, ADR-0022 | ✅ ➕ |
 | Marketing: omnichannel inbox (IG/FB/SMS/email), categorise, client-link, suggested replies, advertising linter | REQ-NOTIF-6 ➕, ADR-0018/0019 | 🔬 ⏭ (SMS/email in v1) |
+| Follow-ups: unified job queue (merges recall/attention/comms), manual flag from inbox, auto-detect/categorise comms into jobs | REQ-NOTIF-7 ➕, ADR-0023 | ✅ ➕ |
 | Reports dashboard (revenue, mix, top treatments, new vs returning, MRR) | REQ-RPT-1 | ✅ |
 | Responsive back-office (phone/tablet) + client-portal screens | REQ-APP-1/2 (UX validated) | ✅ |
 
@@ -369,6 +371,7 @@ Each becomes a focused PRD (problem, user stories, flows, data, acceptance crite
 | **F5** | **WhatsApp Business** | Add as a service + templated-marketing channel? | Assess Cloud API, opt-in/template rules; strong AU recall fit. 🔬 ⏭ |
 | **F6** | **Pricing what-if model** | Is the impact projection meaningful? | Needs real COGS/margin + a defensible churn/elasticity assumption; ship as a **planning estimate**, apply via audited admin. (ADR-0022) 🔬 |
 | **F7** | **Conversation↔client identity resolution** | Auto-match handles to clients safely? | Auto-match phone/email; manual link/merge for handles; treat the handle as personal data. (ADR-0019) ✅ |
+| **F8** | **Comms auto-categorisation → jobs** | Rules/keyword vs ML triage? | **v1 = rules/keyword** (reuse the inbox categoriser; no AI); LLM-assisted triage later. Jobs are advisory + human-actioned, so accuracy is UX not safety. (ADR-0023) ✅/⏭ |
 
 > **Net:** v1 stays as specified (manual charting; SMS/email comms + recall). The prototype's **social inbox,
 > auto-detect, full loyalty/referrals and any LLM assistance are Phase 2+** pending F1/F2/F4/F5. Everything

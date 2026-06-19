@@ -23,7 +23,7 @@ clinics (the modern replacement for Mindbody). This folder holds the full planni
 | [PRD-04](prds/PRD-04-consult-prescribing-s4.md) | Consult, prescribing & S4 medicines governance — *the moat* | 1 | RX, MED, C1/C2/C7/C8/C11/C13/C15–C17 | 8,11,**21** |
 | [PRD-05](prds/PRD-05-clinical-charting.md) | Clinical charting: injection mapping & before/after | 1 | CLIN, C8/C12/C14 | 9,10,15,**20** |
 | [PRD-06](prds/PRD-06-payments-memberships-rewards.md) | Payments (in-person POS + autopay), memberships & non-S4 rewards | 1 | PAY, MEMB, C9/C23 | 7,14,**22** |
-| [PRD-07](prds/PRD-07-comms-reminders-recall.md) | Comms, reminders & recall | 1 | NOTIF, C9/C23 | 12,**18,19** |
+| [PRD-07](prds/PRD-07-comms-reminders-recall.md) | Comms, reminders & recall | 1 | NOTIF, C9/C23 | 12,**18,19,23** |
 | [PRD-08](prds/PRD-08-reporting-compliance.md) | Reporting & compliance dashboards | 1 | RPT, C10 + all | 13 |
 | [PRD-09](prds/PRD-09-apps-client-provider.md) | Apps (Flutter): client & provider | 1 | APP | 6,9,15 |
 | [PRD-10](prds/PRD-10-integrations.md) | Integrations: Xero & calendar | 1 | INT | 12 |
