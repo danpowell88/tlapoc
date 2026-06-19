@@ -1,5 +1,7 @@
 # PRD-04 — Consult, Prescribing & S4 Medicines Governance  *(the moat)*
 
+> **▸ Option A alignment (rev 2, 2026-06-19).** Medicines is now a **multi-product, multi-unit catalogue** (ADR-0021, **REQ-MED-11**): typed products (toxin/filler/skin) each with their own **unit** (units vs syringes), per-product **on-hand / usage-history / par / expiry**, **vial reconciliation**, and a capability-gated **product admin** that sets the **S4 flag** (the single classification driving rewards & advertising, ADR-0014). The consult-gated-script + individual-Rx moat (C1/C2) is unchanged. See [requirements §12](../02-requirements.md#12-option-a-prototype-alignment--feasibility-register).
+
 > **Phase:** 1 · **Status:** Draft
 > **Requirements:** REQ-RX-1…5, REQ-MED-1…10 · **Compliance:** C1, C2, C7, C8, C11, C13, C15, C16, C17
 > **ADRs:** 0008 (compliance-by-construction), 0011 (telehealth external), 0010 (immutability)

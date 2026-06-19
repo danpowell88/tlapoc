@@ -1,5 +1,7 @@
 # PRD-06 — Payments, Memberships & Non-S4 Rewards
 
+> **▸ Option A alignment (rev 2, 2026-06-19).** Adds **REQ-PAY-6 checkout assist** (subtle membership/restock upsell + **client rapport** panel + **post-checkout rebooking** on the treatment interval), **REQ-MEMB-8** loyalty/referrals/gift-cards + **dunning retry** (full campaigns/referrals stay Phase 2), and **REQ-MEMB-9 pricing & what-if planning** for the owner (ADR-0022). Square AU card-on-file **recurring autopay** remains a de-risk spike (🔬 F3). See [requirements §12](../02-requirements.md#12-option-a-prototype-alignment--feasibility-register).
+
 > **Phase:** 1 · **Status:** Draft
 > **Requirements:** REQ-PAY-1…5, REQ-MEMB-1…7 · **Compliance:** C9, C23 (reward comms), C18 (records)
 > **ADRs:** 0007 (payments abstraction), 0014 (catalog S4 classification)

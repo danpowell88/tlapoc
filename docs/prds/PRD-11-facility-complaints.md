@@ -1,5 +1,7 @@
 # PRD-11 — Facility, Infection Control, Emergency & Complaints
 
+> **▸ Option A alignment (rev 2, 2026-06-19).** No material change — facility/infection-control/emergency stay **lightweight record-keeping** in v1. One linkage worth noting: a **complaint** raised from a conversation (inbox, ADR-0019) should surface the **AHPRA** complaint pathway (C24). See [requirements §12](../02-requirements.md#12-option-a-prototype-alignment--feasibility-register).
+
 > **Phase:** 1–2 (lightweight in v1) · **Status:** Draft
 > **Requirements:** REQ-FAC-1…3, REQ-CLI-4 (complaints) · **Compliance:** C20, C24
 > **ADRs:** 0008 (compliance-by-construction), 0010 (audit) · **Depends on:** PRD-01

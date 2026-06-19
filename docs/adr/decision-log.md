@@ -123,3 +123,53 @@ into individual `ADR-NNNN-*.md` files later; kept as one log for a lean team.
 **Decision:** Pin all storage + compute to **Australia East**. Payment/SMS/accounting sub-processors must be AU-resident or covered by a documented APP-8 cross-border assessment + client consent.
 **Consequences:** Compliant residency; constrains provider selection (acceptable).
 **Alternatives:** Global/multi-region (rejected for v1).
+
+---
+
+> **ADRs 0017–0022 added rev 2 (2026-06-19)** after building the **Option A** clickable prototype.
+> They record decisions the prototype surfaced and flag items that **need feasibility research**
+> before commit (🔬). See `02-requirements.md` §12 for the full alignment & feasibility register.
+
+## ADR-0017 — Access model: **capability flags + "concerns"**, with custom roles (future)
+**Status:** Accepted
+**Context:** Option A prototyped a richer role set than the original §3 matrix — **NP, Lead Nurse (RN), RN, Dermal/laser tech, Reception, Owner (non-clinical business owner)**, plus combined **Solo-NP** and **Nurse-led-RN** presets. The owner is non-clinical (read-only clinical/stock oversight, full financials); clinical staff should mostly see information *concerning them* (e.g. stock-expiry matters to Lead/NP/owner, not every RN). (REQ-TEN-3/4, §3.)
+**Decision:** Model access on two orthogonal axes: **capabilities** (atomic permissions — `chart`, `chartView`, `prescribe`, `stock`, `receiveStock`, `financials`, `takePayment`, `configure`…) and **concerns** (relevance tags that drive what a role sees first — `ops, clinical, stock, stockAlert, financial, business, recall, consent`). Built-in roles are presets of (capabilities × concerns); a future **custom-role builder** lets a tenant compose roles by ticking capabilities + concern tiles. **Owner = business role:** financials + read-only clinical/stock, no prescribe/chart/custody.
+**Consequences:** Implements the §3 scope matrix while supporting per-tenant roles and role-tailored dashboards. Enforcement stays server-side (ADR-0008): **capabilities gate API actions; concerns only affect presentation.**
+**Alternatives:** Fixed role enum (less flexible); full ABAC/policy engine (overkill for v1).
+
+## ADR-0018 — Omnichannel conversations: unified-inbox **sync model** — 🔬 *feasibility research required*
+**Status:** Proposed (Phase 2 for social channels; v1 stays SMS/email — see PRD-07)
+**Context:** Option A prototypes a **unified inbox** across **Instagram, Facebook/Messenger, SMS and email** with categorisation and suggested replies. Real platform support — especially Meta — is constrained, and staff often reply on the native platform too.
+**Decision:** Model conversations channel-agnostically — `Conversation`/`Message` with `channel`, `direction`, `sentVia` — behind an **`IMessagingChannel`** adapter per channel (extends the `INotifier` port, ADR-0012). **Inbound** via provider **webhooks**; **outbound** via each provider's Send API; **reconcile/backfill** (incl. replies staff send natively + pre-connection history) via the provider **Conversations/history API**; capture native-sent replies via **message echoes**; coexist with the platform's own inbox via Meta's **Handover Protocol** (secondary receiver + standby). Enforce **send-time guardrails**: messaging window, message tags, opt-in, and the advertising linter (ADR-0014, C9). **Suggested replies are templated/keyword-based in v1 (no AI, decision §2); LLM-assisted drafting deferred.**
+**🔬 Feasibility / research (validate before commit):** Meta requires **Professional accounts**, (often) a linked Page, **App Review + Business Verification**; a **24-hour messaging window** limits outbound to specific tags — **promotional/marketing DMs are largely *not* permitted** outside it; you can't cold-DM; IG echo/standby support is weaker than Messenger and changes often. **Implication:** treat **IG/FB/WhatsApp as reactive/service** channels; do **proactive marketing (recall/promos) via SMS/email (consented)** or **WhatsApp templates**. Assess WhatsApp Business Cloud API, per-channel rate limits, and validate scopes against current Meta docs.
+**Consequences:** A faithful "mirror" inbox is achievable for *service* conversations; *marketing* automation stays on SMS/email. Adds per-clinic OAuth onboarding, token lifecycle and webhook infra.
+**Alternatives:** SMS/email only (loses the social-inbox value); rely on Meta's native inbox (no unification/automation).
+
+## ADR-0019 — Conversation ↔ client **identity resolution**
+**Status:** Accepted
+**Context:** Inbound messages arrive with a channel handle (IG @handle, Messenger PSID, phone, email) often **not yet linked** to a `Client`; the prototype lets staff link a conversation to a client and **capture the handle** so replies/suggestions use client history.
+**Decision:** A **`ChannelIdentity`** (channel, external id/handle, `client_id?`) joins conversations to clients. **Auto-match** on phone/email; otherwise offer a **link/merge** action that, on confirm, **stores the handle on the client** for future auto-routing. Personalised (templated) suggestions read client history only **after** linking.
+**Consequences:** Better service + personalised suggestions; captured handles are **personal data** (consent/retention, APP — C21).
+**Alternatives:** Never link (loses context); auto-link on fuzzy name (false-merge risk).
+
+## ADR-0020 — Injection-point **auto-detect: advisory ML, human-confirmed** — 🔬 *feasibility research required*
+**Status:** Proposed (Phase 2; v1 ships manual mapping only)
+**Context:** The charting prototype offers "auto-detect" of injection points with manual fine-tune/add — implying facial-landmark detection. Decision §2 says **no AI in v1**.
+**Decision:** If built, auto-detect is **advisory only** — it proposes candidate points from facial landmarks that the clinician **must review, adjust and confirm**; it never sets product/units, never auto-finalises, never auto-administers. Prefer **on-device/edge** landmarking (privacy, latency); if server-side, stay within AU residency (ADR-0016) and image-use consent (ADR-0009). **v1 = manual tap-to-add + drag only.**
+**🔬 Feasibility / research:** landmark accuracy on real treatment angles/lighting; on-device libraries (MediaPipe / ML Kit face mesh) vs server; keep firmly **advisory** to avoid SaMD/medical-device classification; confirm it saves time without adding clinical risk.
+**Consequences:** A later time-saver with no clinical-safety/regulatory exposure; v1 unaffected.
+**Alternatives:** Always-manual (fine for v1); fully-automatic placement (**rejected** — clinical risk).
+
+## ADR-0021 — Stock as a **multi-product, multi-unit catalogue** (extends ADR-0014)
+**Status:** Accepted
+**Context:** The stock prototype tracks several distinct products (two toxin brands + a filler) with **different units** (toxin "units" vs filler "syringes/mL") — a single aggregate "units on hand" is meaningless. Prescriber/owner add/remove products and set the **S4 flag** + par levels.
+**Decision:** `Product` carries `type` (toxin/filler/skin/other), `unit`, `par`, **`schedule` (S4|non-S4)** and ARTG fields; **lots** belong to a product; all on-hand/usage/wastage/expiry aggregate **per product + unit**, never across units. A **catalogue admin** (capability-gated to prescriber/owner) manages products and the S4 flag — the single source of truth that drives rewards/advertising (ADR-0014) everywhere. Usage history, reorder and par signals are **per product**.
+**Consequences:** Correct, unit-safe stock and reporting; one S4 classification point.
+**Alternatives:** Single product/unit model (wrong for real formularies).
+
+## ADR-0022 — **Pricing & "what-if" planning** on read models
+**Status:** Accepted
+**Context:** The Option A owner view includes a **pricing & what-if simulator** — edit plan/service prices and see projected MRR/revenue impact under a churn-sensitivity assumption.
+**Decision:** A **read-only planning tool** computed over the reporting read models (ADR-0013) + configurable elasticity/churn assumptions; it **proposes** changes and projects impact but does **not** mutate live pricing until explicitly **applied** through the normal catalogue/membership admin (capability-gated, audited — ADR-0010).
+**Consequences:** Owners plan price/membership changes safely; reuses analytics; clean apply/audit path.
+**Alternatives:** Off-platform spreadsheet (loses live data); auto-apply (unsafe).

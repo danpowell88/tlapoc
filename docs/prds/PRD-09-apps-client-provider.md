@@ -1,5 +1,7 @@
 # PRD-09 — Apps (Flutter): Client & Provider
 
+> **▸ Option A alignment (rev 2, 2026-06-19).** The prototype is a **responsive web** back-office (phone on-the-go + tablet in-room) plus **client-portal** screens — it validates the layouts and flows the **Flutter** client & provider apps will implement (REQ-APP-1/2): role-tailored views, charting, checkout and the conversation inbox. See [requirements §12](../02-requirements.md#12-option-a-prototype-alignment--feasibility-register).
+
 > **Phase:** 1 · **Status:** Draft
 > **Requirements:** REQ-APP-1…3 (surfaces features from PRD-02…07) · **Compliance:** C14 (media), C21 (privacy)
 > **ADRs:** 0006 (Flutter), 0009 (media/signed URLs), 0015 (offline sync), 0004 (auth)

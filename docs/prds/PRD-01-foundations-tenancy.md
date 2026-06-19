@@ -1,5 +1,7 @@
 # PRD-01 — Foundations & Tenancy
 
+> **▸ Option A alignment (rev 2, 2026-06-19).** RBAC is implemented as **capabilities × concerns** (ADR-0017): capabilities gate API actions, concerns drive role-tailored dashboards. The prototype's persona switcher — NP, **Lead RN**, RN, dermal, reception, **owner-business** (read-only clinical/stock) + Solo/Nurse-led presets — validates the model; a **custom-role builder** is a future addition (**REQ-TEN-5**). See [requirements §12](../02-requirements.md#12-option-a-prototype-alignment--feasibility-register).
+
 > **Phase:** 0 · **Status:** Draft · **Owner:** —
 > **Requirements:** REQ-TEN-1…4, REQ-SEC-1…7, REQ-CLI-3 · **Compliance:** C4, C10, C18, C19, C21, C22
 > **ADRs:** 0001 (Azure), 0002 (Postgres), 0003 (RLS multi-tenancy), 0004 (Entra), 0005 (Angular/.NET), 0008 (compliance-by-construction), 0010 (audit/immutability), 0016 (residency)

@@ -61,9 +61,10 @@ TGA / QLD-S4 / AHPRA-2025 compliance**. The platform sits in the middle of all t
 - **Front desk / admin** — scheduling, check-in, payments, comms; limited clinical visibility.
 - **Dermal therapist** — non-S4 skin services + their charting; **cannot** assess for or administer injectables.
 - **Registered Nurse (RN)** — assesses, administers S4 **on a valid individual prescription**; may hold only **individually-dispensed** S4 (QLD); cannot prescribe or hold bulk stock.
+- **Lead Nurse (senior RN)** — an RN who additionally **oversees stock & the clinical team**; same clinical scope as RN (administers on a valid script; no prescribing/custody), plus stock oversight and stock-expiry concerns.
 - **Nurse Practitioner (NP) / on-site prescriber** — assesses, **prescribes**, may hold S4 stock on-site, administers.
 - **Remote prescriber (doctor/NP via telehealth)** — synchronous consult + prescribe only; no on-site stock.
-- **Clinic owner / manager** — all of the above + reporting, configuration, audit.
+- **Clinic owner (business)** — runs the business: **financials, reporting, configuration & audit**, plus **read-only** oversight of clinical records & stock; **non-clinical by default** (cannot prescribe, chart or hold S4) unless they personally hold the credential (`●*`).
 
 ### Scope-of-practice matrix (enforced defaults; configurable per tenant)
 
@@ -81,6 +82,12 @@ TGA / QLD-S4 / AHPRA-2025 compliance**. The platform sits in the middle of all t
 
 `●* = only if the owner also holds that clinical credential.` Credentials (registration #, AHPRA
 type, ≥1yr non-cosmetic experience flag, training) live on the staff profile and gate the actions.
+
+> **Access model (rev 3 — see ADR-0017).** Implemented as **capabilities** (atomic permissions that gate
+> API actions) × **concerns** (relevance tags that decide what a role sees first). Built-in roles —
+> **NP, Lead Nurse, RN, dermal, reception, owner(business)**, plus combined **Solo-NP** and **Nurse-led-RN**
+> presets — are compositions of the two; a **custom-role builder** (tick capabilities + concern tiles) is a
+> future addition. The matrix above is the default capability set per role.
 
 ---
 
@@ -111,6 +118,7 @@ type, ≥1yr non-cosmetic experience flag, training) live on the staff profile a
 - REQ-TEN-2: Auth via managed identity, split by audience — **Staff: Office 365 / Entra ID (workforce) SSO + MFA**, reusing the org accounts most clinics already have (and, for SaaS, each tenant can federate its own Entra tenant); **Clients: Entra External ID** [AWS Cognito] with **social login (Google/Apple)**, **email/username + password**, and **email/SMS OTP**. *(No Supabase.)*
 - REQ-TEN-3: Role-based access with the §3 scope matrix; roles & permissions configurable per tenant.
 - REQ-TEN-4 ★: Staff profiles store credentials (AHPRA reg #, type, **registration status/expiry, conditions/endorsements**, ≥1yr-non-cosmetic flag, training records, scope); the system **blocks** actions outside scope **or when registration is lapsed/restricted**, and alerts before expiry. (→ C19)
+- REQ-TEN-5: **Access model = capabilities × concerns** (ADR-0017). **Capabilities** gate API actions; **concerns** drive role-tailored dashboards (each role mostly sees info concerning it). Ship the built-in roles (incl. **Lead Nurse**, **owner-business**, and **Solo-NP**/**Nurse-led** presets); a **custom-role builder** is a future addition.
 
 ### 5.2 Clients & CRM — `CLI`
 - REQ-CLI-1: 360° client profile: demographics, contacts, medical history, allergies/contraindications, tags, comms log, consents, photos, memberships, balances, visit history.
@@ -124,6 +132,7 @@ type, ≥1yr non-cosmetic experience flag, training) live on the staff profile a
 - REQ-BOOK-3: Configurable cancellation/no-show policy. *(No deposits or card-on-file for bookings in v1; deferred.)*
 - REQ-BOOK-4: Reminders (SMS/app/email) with confirm/decline; reschedule/cancel self-service; waitlist.
 - REQ-BOOK-5 ★: An injectable booking requires a linked **consult** before treatment can be charted (gate, see RX).
+- REQ-BOOK-6: Calendar operations — **reschedule (move)** and **cancel** appointments (with reason + audit); show **client tags** on appointments (VIP/member, **first-time**, at-risk); **per-day & per-treatment-type counts**, utilisation and **quiet-window fill** suggestions; an **"in-room now"** indicator with quick links to the current client's chart/profile.
 
 ### 5.4 Clinical charting — `CLIN`
 - REQ-CLIN-1: Treatment note from a configurable template (toxin template for v1); structured + free text; phrases/snippets.
@@ -132,6 +141,8 @@ type, ≥1yr non-cosmetic experience flag, training) live on the staff profile a
 - REQ-CLIN-4 ★: Chart entries are **immutable once finalised**; amendments are appended and audit-logged.
 - REQ-CLIN-5 ★: Adverse-event / complication logging linked to the treatment, product and batch-lot, feeding the **TGA DAEN reporting pathway** (→ C12).
 - REQ-CLIN-6 *(deferred — far future)*: AI scribe (dictation/ambient → note draft). **No AI features in v1 or near-term.**
+- REQ-CLIN-7: **Treatment plans & protocols** — a client can have a **multi-session plan** (progress, next-due) and staff can **apply a protocol template** that schedules the sessions into the recall worklist (e.g. anti-ageing maintenance, needling course).
+- REQ-CLIN-8 *(deferred — Phase 2, see ADR-0020, 🔬)*: **advisory auto-detect** of injection points — facial-landmark suggestions the clinician must review/adjust/confirm; never auto-sets units or finalises. **v1 = manual tap-to-add + drag only** (no AI per §2).
 
 ### 5.5 Consent & intake — `CONS`
 - REQ-CONS-1 ★: Per-treatment digital consent, **versioned**, e-signed; content meets AHPRA — nature, risks/benefits/alternatives, **practitioner qualifications, costs**, realistic-outcome language (no minimising/overstating), plain language, and complaint mechanisms incl. right to complain to AHPRA despite any NDA. (→ C5/C18)
@@ -158,6 +169,7 @@ type, ≥1yr non-cosmetic experience flag, training) live on the staff profile a
 - REQ-MED-8 ★: **Secure storage** — assign stock to a locked cabinet/secure room; restrict + log access. (→ C15)
 - REQ-MED-9 ★: **Disposal/destruction & wastage records** — witnessed destruction (incl. partial vials), licensed/RUM disposal pathway, retained certificates. (→ C16)
 - REQ-MED-10 ★: **Stocktake & discrepancy** — periodic reconciliation; flag discrepancies; loss/theft reporting workflow. (→ C17)
+- REQ-MED-11 ★: **Product catalogue & multi-product stock** (ADR-0021/0014) — products are **typed** (toxin/filler/skin) with their own **unit** (units vs syringes/mL) and **par level**; on-hand/usage/wastage/expiry aggregate **per product+unit** (no single "units on hand"); usage history is per product. A capability-gated **catalogue admin** can **add/remove products** and set the **S4 flag** (the single classification that drives rewards & advertising everywhere).
 
 ### 5.8 Payments & POS — `PAY`
 - REQ-PAY-1: `PaymentProvider` interface (charge, refund, void, **card-on-file/token, recurring**); **Square adapter** first; **cash** recorded as a tender (no processor).
@@ -165,6 +177,7 @@ type, ≥1yr non-cosmetic experience flag, training) live on the staff profile a
 - REQ-PAY-3: Package/series sale & redemption ("visits remaining"); client account balance & credit; AR ageing.
 - REQ-PAY-4: Daily closeout/reconciliation (card + cash).
 - REQ-PAY-5: **Gift cards** — sell, redeem and track balances (Square Gift Cards or internal); usable at checkout.
+- REQ-PAY-6: **Checkout assist** — subtle, **staff-facing** prompts at checkout: a **membership** offer if non-member, a **restock** suggestion from purchase history, and a **client rapport/context** panel; on completion, a **post-checkout rebooking** suggestion based on the treatment interval (toxin ~12 wks) feeding the booking flow/recall. Non-intrusive; never auto-charges.
 
 ### 5.9 Memberships, rewards & loyalty — `MEMB`
 - REQ-MEMB-1: Membership plans (tiers) with **automatic recurring billing** (monthly/annual); card stored (card-on-file) for autopay, **added online/in-app or in person (not required in person)**; failed-payment dunning & recovery.
@@ -174,6 +187,8 @@ type, ≥1yr non-cosmetic experience flag, training) live on the staff profile a
 - REQ-MEMB-5: **Membership & frequency perks** — tiered benefits and return-cadence incentives (e.g. discounted/complimentary **non-S4** items — skincare/retail, non-S4 add-ons — or gift-card credit) designed to bring clients back more often.
 - REQ-MEMB-6: **Margin-aware reward rules** — configurable value caps, eligible (preferably high-margin/low-cost) items, and **reward-cost vs retention** reporting, so incentives don't erode profit. Reward/incentive *communications* must respect advertising rules — no public S4 price promotion; deliver to consented, logged-in clients (→ C9/C23).
 - REQ-MEMB-7 ★: **Rewards on non-S4 items only** — the catalog classifies every service/product as **S4 vs non-S4** (with category); the rewards engine **blocks** earning, redeeming or discounting against **S4** items (botox/filler). This both protects margin and reinforces C9 (no S4 price promotion). (→ C9)
+- REQ-MEMB-8: **Loyalty, referrals & gift cards** — non-S4 **points**, a **referral** program (give/get **non-S4** credit), gift-card balances and **failed-payment dunning** with retry. *(Full loyalty **campaigns** & referral automation stay Phase 2 — the prototype shows the concept; v1 ships the core ledgers + dunning.)*
+- REQ-MEMB-9: **Pricing & what-if planning** (owner; ADR-0022) — model plan/service price changes and see the projected **MRR/revenue impact** under a churn-sensitivity assumption; a change is a **proposal** until applied through the audited catalogue/membership admin.
 
 ### 5.10 Communications, reminders & recall — `NOTIF`
 - REQ-NOTIF-1: `Notifier` interface; SMS (AU provider) + email + app push; per-tenant templates.
@@ -181,6 +196,7 @@ type, ≥1yr non-cosmetic experience flag, training) live on the staff profile a
 - REQ-NOTIF-3: **Recall/recare** at the treatment interval (toxin ~12 weeks) + unbooked-rebook prompts.
 - REQ-NOTIF-4 ★: **Advertising-compliance linter** on all platform-generated public content (campaigns **and the public booking page's service names/prices**) — blocks direct/indirect S4 references (brands, nicknames, generic "anti-wrinkle"/"dermal filler" terms), price promotions, banned hashtags and promotional S4 imagery; inserts mandatory warnings where permitted. (→ C9)
 - REQ-NOTIF-5 ★: **Marketing consent & Spam Act** — opt-in consent to receive commercial electronic messages, sender identification, functional unsubscribe; suppress on withdrawal. (→ C23)
+- REQ-NOTIF-6 *(social channels Phase 2 — see ADR-0018/0019, 🔬)*: **Omnichannel conversation inbox** — unified two-way threads across **Instagram, Facebook/Messenger, SMS, email** (WhatsApp candidate), with **categorisation**, **client linking** (capture the handle on the client), **templated/keyword suggested replies** (editable; **no AI** in v1), and the **advertising linter** at send time; honour the **24-h messaging window/tags**, opt-in, message **echoes** and **Handover-Protocol** sync so history stays faithful even when staff reply natively. **v1 = SMS/email + recall** (NOTIF-1..5); **IG/FB/WhatsApp are reactive/service channels — proactive marketing stays on SMS/email.**
 
 ### 5.11 Reporting & analytics — `RPT`
 - REQ-RPT-1: Rebuild the prototyped dashboards on live data: revenue, retention/churn, no-shows, cancellations, conversion funnel, at-risk, big spenders, membership MRR/churn, per-practitioner.
@@ -315,3 +331,45 @@ Each becomes a focused PRD (problem, user stories, flows, data, acceptance crite
 > The expanded privacy/records/registration criteria (C18–C23) thread mainly through **PRD-01** (SEC/TEN); S4 storage/disposal (C15–C17) through **PRD-04**; consent/image/cooling-off (C5/C6/C14) through **PRD-03**.
 
 > Recommend writing **PRD-01 → PRD-04** first (they unblock everything and contain the compliance moat), then the rest.
+
+---
+
+## 12. Option A prototype alignment & feasibility register
+
+> Added rev 3 (2026-06-19) after building the **Option A — "Clinical Calm"** clickable prototype
+> (`prototype.html`). Reconciles this spec with what the prototype demonstrates and lists the items that
+> **need feasibility research** before commit. Legend: ✅ aligned/spec'd · ➕ new (this rev) · 🔬 needs research · ⏭ Phase 2+ (prototype shows the concept).
+
+### 12.1 Feature → requirement / ADR map
+| Option A prototype feature | Maps to | Status |
+|---|---|---|
+| Persona switcher (NP, Lead RN, RN, dermal, reception, owner-business + Solo/Nurse-led); role-tailored dashboards | REQ-TEN-3/5, ADR-0017 | ✅ ➕ |
+| Booking wizard, scope-limited to RN/NP for injectables | REQ-BOOK-2/5 | ✅ |
+| Week schedule: move/cancel, VIP/first-time tags, per-day & per-type counts, utilisation/quiet-window fill, "in-room now" links | REQ-BOOK-6 ➕ | ✅ ➕ |
+| Client 360 + treatment-plan tab with protocols | REQ-CLI-1, REQ-CLIN-7 ➕ | ✅ ➕ |
+| Charting: injection map (tap-to-add + drag), before/after compare, finalise→deduct lot | REQ-CLIN-2/3/4 | ✅ |
+| Charting: "auto-detect" injection points | REQ-CLIN-8 ➕, ADR-0020 | 🔬 ⏭ |
+| Stock: multi-product/multi-unit, per-type usage history, par/expiry, vial reconciliation, receive | REQ-MED-11 ➕, ADR-0021 | ✅ ➕ |
+| Stock: product-catalogue admin (add/remove, set S4 flag, par) | REQ-MED-11 ➕, ADR-0014/0021 | ✅ ➕ |
+| Forms/consent: pre-visit intake wizard (history→BDD→consent→image-use), under-18 cooling-off | REQ-CONS-1..5 | ✅ |
+| Checkout: in-person POS, member reward (non-S4), upsell cues + rapport, post-pay rebooking | REQ-PAY-6 ➕, MEMB | ✅ ➕ |
+| Memberships/packages/loyalty/referrals/gift cards (+ dunning retry) | REQ-MEMB-8 ➕ | ✅ ➕ (full loyalty/referrals ⏭) |
+| Pricing & what-if simulator (owner) | REQ-MEMB-9 ➕, ADR-0022 | ✅ ➕ |
+| Marketing: omnichannel inbox (IG/FB/SMS/email), categorise, client-link, suggested replies, advertising linter | REQ-NOTIF-6 ➕, ADR-0018/0019 | 🔬 ⏭ (SMS/email in v1) |
+| Reports dashboard (revenue, mix, top treatments, new vs returning, MRR) | REQ-RPT-1 | ✅ |
+| Responsive back-office (phone/tablet) + client-portal screens | REQ-APP-1/2 (UX validated) | ✅ |
+
+### 12.2 Feasibility / research register
+| # | Item | Question | Disposition |
+|---|------|----------|-------------|
+| **F1** | **Meta (IG/FB) messaging** | Receive/send DMs and keep faithful history incl. native-sent replies? | **Feasible for *service* conversations** via webhooks + Send API + **echoes** + Conversations-API reconcile + Handover Protocol — **but the 24-h window, App Review/Business Verification and no-cold-DM mean *marketing DMs are out*** → proactive marketing via **SMS/email/WhatsApp templates**. Validate scopes vs current Meta docs. (ADR-0018) ⏭ Phase 2 |
+| **F2** | **Injection-point auto-detect** | Reliable facial-landmark placement, on-device, without regulatory exposure? | **Advisory + human-confirmed** only; on-device preferred; keep out of SaMD classification. Conflicts with "no AI v1" → **Phase 2**; v1 = manual mapping. (ADR-0020) 🔬 |
+| **F3** | **Square AU card-on-file recurring** | Does Square AU support tokenised automatic membership autopay + dunning? | De-risk spike; confirm AU capability or fall back to another `IPaymentProvider`. (ADR-0007) 🔬 |
+| **F4** | **Suggested replies** | Keyword/template vs LLM? | **v1 = templated/keyword** (no AI per §2); LLM-assisted drafting Phase 2. ✅/⏭ |
+| **F5** | **WhatsApp Business** | Add as a service + templated-marketing channel? | Assess Cloud API, opt-in/template rules; strong AU recall fit. 🔬 ⏭ |
+| **F6** | **Pricing what-if model** | Is the impact projection meaningful? | Needs real COGS/margin + a defensible churn/elasticity assumption; ship as a **planning estimate**, apply via audited admin. (ADR-0022) 🔬 |
+| **F7** | **Conversation↔client identity resolution** | Auto-match handles to clients safely? | Auto-match phone/email; manual link/merge for handles; treat the handle as personal data. (ADR-0019) ✅ |
+
+> **Net:** v1 stays as specified (manual charting; SMS/email comms + recall). The prototype's **social inbox,
+> auto-detect, full loyalty/referrals and any LLM assistance are Phase 2+** pending F1/F2/F4/F5. Everything
+> else the prototype shows is already spec'd or added as a `REQ`/`ADR` this rev.

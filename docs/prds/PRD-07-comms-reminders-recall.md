@@ -1,5 +1,7 @@
 # PRD-07 — Communications, Reminders & Recall
 
+> **▸ Option A alignment (rev 2, 2026-06-19).** The prototype builds the **omnichannel inbox** (IG/FB/SMS/email) with categorisation, **client linking**, **templated/keyword suggested replies** (no AI) and the advertising linter — previously a §2 non-goal, now **scoped as Phase 2** under **REQ-NOTIF-6 / ADR-0018/0019**. **🔬 Feasibility:** Meta's **24-h window**, **App Review/Business Verification** and **no cold-DM** mean **marketing DMs are out** — IG/FB/WhatsApp are **reactive/service** channels while **proactive marketing stays on SMS/email**. The **v1 scope here is unchanged** (reminders, aftercare, recall + linter + Spam-Act consent). See [requirements §12](../02-requirements.md#12-option-a-prototype-alignment--feasibility-register).
+
 > **Phase:** 1 · **Status:** Draft
 > **Requirements:** REQ-NOTIF-1…5 · **Compliance:** C9 (advertising), C23 (Spam Act)
 > **ADRs:** 0012 (integration adapters) · **Depends on:** PRD-01, PRD-02

@@ -1,5 +1,7 @@
 # PRD-10 — Integrations: Xero & Calendar
 
+> **▸ Option A alignment (rev 2, 2026-06-19).** Comms is no longer outbound-only: the omnichannel inbox adds **inbound webhooks + provider Send/Conversations APIs** (Meta Messenger/IG, SMS, email) behind an **`IMessagingChannel`** port extending ADR-0012 (see **ADR-0018**, **REQ-NOTIF-6**, 🔬). Xero and calendar adapters are unchanged. See [requirements §12](../02-requirements.md#12-option-a-prototype-alignment--feasibility-register).
+
 > **Phase:** 1 · **Status:** Draft
 > **Requirements:** REQ-INT-1…3 · **Compliance:** C10/C21 (cross-border sub-processors)
 > **ADRs:** 0012 (ports-and-adapters), 0016 (residency) · **Depends on:** PRD-01; consumes PRD-06 (payments), PRD-02 (appointments)

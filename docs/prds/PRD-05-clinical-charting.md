@@ -1,5 +1,7 @@
 # PRD-05 — Clinical Charting: Injection Mapping & Before/After
 
+> **▸ Option A alignment (rev 2, 2026-06-19).** Injection mapping (**tap-to-add + drag**) and **before/after drag-compare** are validated. Adds **REQ-CLIN-7 treatment plans & protocols** (multi-session plans + applyable protocol templates feeding recall) and a **charting overview / "in-room now"** entry point. **"Auto-detect" injection points is advisory + human-confirmed only and deferred to Phase 2** (ADR-0020, 🔬 — *no AI in v1*; v1 ships manual mapping). See [requirements §12](../02-requirements.md#12-option-a-prototype-alignment--feasibility-register).
+
 > **Phase:** 1 · **Status:** Draft
 > **Requirements:** REQ-CLIN-1…6 · **Compliance:** C8, C12, C14
 > **ADRs:** 0009 (media/signed URLs), 0010 (immutability), 0015 (offline sync)
