@@ -4,14 +4,21 @@
 > into a business view — *what competitors charge*, *what we should charge*, *how many Queensland
 > clinics could buy*, *what revenue/income that implies*, and *what it costs us to run the platform*.
 >
-> **Context:** the platform is **internal-first but SaaS-ready** (multi-tenant + RLS from day one;
+> **Context:** the platform is **internal-first but SaaS-ready** (*SaaS = Software-as-a-Service —
+> software sold as an ongoing subscription*; built multi-tenant with **RLS** — *Row-Level Security,
+> a database rule that keeps each clinic's data invisible to every other clinic* — from day one;
 > see [requirements §2](02-requirements.md) and the Phase-3 *SaaS commercialization* line). This doc
 > sizes that Phase-3 opportunity **for Queensland first**, then notes the national upside.
 >
 > _Compiled 2026-06-20. **All figures are indicative planning estimates, not quotes or forecasts.**
-> FX assumption: **1 USD ≈ A$1.55** (mid-2026). Competitor SaaS is mostly priced in USD; AUD shown
-> is converted and rounded. **Prices are ex-GST.** This is a strategy document — it does not change
-> the rule that the prototype's synthetic clinic revenue/MRR stays owner-gated behind `.fin`._
+> **FX** *(foreign-exchange / currency-conversion)* assumption: **1 USD ≈ A$1.55** (mid-2026).
+> Competitor SaaS is mostly priced in USD; AUD shown is converted and rounded. **Prices are ex-GST**
+> *(GST = the 10% Goods & Services Tax)*. This is a strategy document — it does not change the rule
+> that the prototype's synthetic clinic revenue/**MRR** *(Monthly Recurring Revenue)* stays
+> owner-gated behind `.fin`._
+>
+> 👉 **New to the abbreviations?** Every acronym in this document is expanded on first use and
+> collected in plain English in the **§9 Glossary** at the end.
 
 ---
 
@@ -20,7 +27,7 @@
 Pulled from the [§2 platform deep-dives](01-market-research.md) and refreshed June 2026. Three camps,
 three very different price points and billing models.
 
-### Horizontal booking / POS (salon-grade, no AU clinical/compliance layer)
+### Horizontal booking / POS *(point-of-sale)* (salon-grade, no AU clinical/compliance layer)
 
 | Platform | Headline price (USD unless noted) | ≈ AUD/mo | Model | Notes |
 |---|---|---|---|---|
@@ -31,7 +38,7 @@ three very different price points and billing models.
 | **Fresha** | $0 subscription | $0 + fees | Takes payment % + new-client fees | No clinical charting |
 | **Zenoti** | Custom / enterprise | $$$ | Quote-only | Overkill for single-site |
 
-### Aesthetic / medical-EMR specialists (clinical depth, US/HIPAA-framed)
+### Aesthetic / medical-EMR specialists *(EMR = electronic medical record)* (clinical depth, US/HIPAA-framed)
 
 | Platform | Headline price (USD) | ≈ AUD | Model | Notes |
 |---|---|---|---|---|
@@ -99,13 +106,19 @@ exports, **free onboarding + free data export** (the anti-AR promise).
 - **Optional white-glove migration** from Mindbody/AR — *free* as an acquisition lever.
 - Future (Phase 2+): retail-inventory module, advanced campaigns/referrals, online checkout.
 
-**Blended ARPU target ≈ A$300–350/clinic/mo** (most clinics land in the 2–5 band). This sits **below**
+**Blended ARPU target ≈ A$300–350/clinic/mo** — *ARPU = Average Revenue Per Unit, here the average
+monthly fee across all clinics* (most clinics land in the 2–5 band). This sits **below**
 Boulevard Aesthetics and Mangomint-top, **above** Cliniko's mid bands — defensible because we carry the
 compliance + clinical load they don't.
 
 ---
 
 ## 4. Queensland market size (TAM / SAM / SOM)
+
+> **The three market layers, in plain English:** **TAM** *(Total Addressable Market)* = everyone who
+> could conceivably buy. **SAM** *(Serviceable Addressable Market)* = the slice we actually build for
+> and could realistically sell to. **SOM** *(Serviceable Obtainable Market)* = the slice we expect to
+> actually win in a given timeframe. Think of three shrinking circles: *everyone → a good fit → we land them.*
 
 **Clinic universe.** Hard counts are scarce, so triangulate:
 - **~560 nurse-led cosmetic clinics in QLD** (May 2025), employing **800–900 cosmetic nurses** — the
@@ -116,7 +129,8 @@ compliance + clinical load they don't.
 
 > ⚠ **Regulatory consolidation is a two-way sensitivity.** The S4 clarification may *shrink* clinic
 > count (some nurse-led closures/mergers) — but it *sharpens* the pain for survivors, lifting
-> willingness-to-pay for a compliance-native tool. Net effect on our ARR is plausibly positive.
+> willingness-to-pay for a compliance-native tool. Net effect on our **ARR** *(Annual Recurring
+> Revenue — the yearly value of all active subscriptions)* is plausibly positive.
 
 | Layer | Definition | Clinics | × ARPU (A$325/mo) | **Annual value** |
 |---|---|---:|---:|---:|
@@ -140,7 +154,7 @@ Assumes the §3 pricing, blended **ARPU A$325/mo (~A$3,900/yr)**, and steady SOM
 | Avg active clinics in year | ~15 | ~45 | ~90 |
 | **Revenue (ARR run-rate, EOY)** | **~A$98k** | **~A$254k** | **~A$449k** |
 | Recognised revenue (in-year) | ~A$59k | ~A$176k | ~A$351k |
-| COGS — infra + comms (§6, ~10%) | ~A$6k | ~A$18k | ~A$35k |
+| COGS *(cost of serving customers: infra + comms, §6, ~10%)* | ~A$6k | ~A$18k | ~A$35k |
 | **Gross profit** | **~A$53k** | **~A$158k** | **~A$316k** |
 | Gross margin | ~90% | ~90% | ~90% |
 | Cash opex (tools, fees, light support) | ~A$10–20k | ~A$20–35k | ~A$40–70k |
@@ -159,6 +173,94 @@ Assumes the §3 pricing, blended **ARPU A$325/mo (~A$3,900/yr)**, and steady SOM
 > ~break-even-to-modest; the model turns strongly positive in Yr 2–3 as fixed effort amortises across
 > tenants. CAC is low (no paid sales team; community + referral led), which is what makes a lean solo
 > build viable here.
+
+### Profit over time — the simple version
+
+Forget the jargon for a moment. Here is the whole money story in one picture and one table.
+
+**The shape to expect (a "J-curve").** You spend time building first (money goes *out*, slowly), then a
+handful of clinics sign on, then word of mouth compounds. So profit starts slightly negative, crosses
+into the black, and then climbs faster each year as the same software serves more clinics for almost no
+extra cost. It looks like the letter **J**.
+
+<div class="fig">
+<svg viewBox="0 0 720 380" xmlns="http://www.w3.org/2000/svg" font-family="Inter, system-ui, sans-serif">
+  <!-- gridlines + y labels (A$ thousands) -->
+  <g stroke="#e2e8f0" stroke-width="1">
+    <line x1="70" y1="46" x2="680" y2="46"/>
+    <line x1="70" y1="97" x2="680" y2="97"/>
+    <line x1="70" y1="149" x2="680" y2="149"/>
+    <line x1="70" y1="201" x2="680" y2="201"/>
+    <line x1="70" y1="304" x2="680" y2="304"/>
+  </g>
+  <g fill="#94a3b8" font-size="11" text-anchor="end">
+    <text x="60" y="50">$400k</text>
+    <text x="60" y="101">$300k</text>
+    <text x="60" y="153">$200k</text>
+    <text x="60" y="205">$100k</text>
+    <text x="60" y="257">$0</text>
+    <text x="60" y="308">–$100k</text>
+  </g>
+  <!-- zero line -->
+  <line x1="70" y1="253" x2="680" y2="253" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <!-- x axis labels -->
+  <g fill="#334155" font-size="13" text-anchor="middle" font-weight="600">
+    <text x="70" y="362">Year 0</text>
+    <text x="273" y="362">Year 1</text>
+    <text x="476" y="362">Year 2</text>
+    <text x="680" y="362">Year 3</text>
+  </g>
+  <text x="70" y="344" fill="#94a3b8" font-size="11" text-anchor="middle">(build)</text>
+  <!-- economic line (counting a wage) -->
+  <polyline points="70,276 273,317 476,312 680,240" fill="none" stroke="#b45309" stroke-width="3" stroke-dasharray="6 4"/>
+  <g fill="#b45309"><circle cx="70" cy="276" r="4"/><circle cx="273" cy="317" r="4"/><circle cx="476" cy="312" r="4"/><circle cx="680" cy="240" r="4"/></g>
+  <!-- cash line (no wage) -->
+  <polyline points="70,255 273,235 476,167 680,33" fill="none" stroke="#0d9488" stroke-width="3"/>
+  <g fill="#0d9488"><circle cx="70" cy="255" r="4"/><circle cx="273" cy="235" r="4"/><circle cx="476" cy="167" r="4"/><circle cx="680" cy="33" r="4"/></g>
+  <!-- value callouts on cash line -->
+  <g fill="#0f766e" font-size="11" font-weight="600" text-anchor="middle">
+    <text x="273" y="226">+$35k</text>
+    <text x="476" y="158">+$165k</text>
+    <text x="660" y="26">+$425k</text>
+  </g>
+  <!-- legend -->
+  <g font-size="12" fill="#334155">
+    <line x1="80" y1="48" x2="112" y2="48" stroke="#0d9488" stroke-width="3"/>
+    <text x="118" y="52">Cumulative profit — <tspan font-weight="600">if you don't pay yourself a wage</tspan></text>
+    <line x1="80" y1="70" x2="112" y2="70" stroke="#b45309" stroke-width="3" stroke-dasharray="6 4"/>
+    <text x="118" y="74">Cumulative profit — <tspan font-weight="600">counting a full-time wage for yourself</tspan></text>
+  </g>
+</svg>
+<div class="cap"><b>Cumulative profit over time (QLD, base case).</b> The teal line is cash in the bank if the
+owner draws no salary; the amber line subtracts a market wage for the owner's time. Both trend up — they
+just cross zero at different moments.</div>
+</div>
+
+**Year-by-year (base case, cash view — owner takes no wage yet):**
+
+| Year | What's happening | Money in | Money out | Profit that year | **Running total** |
+|---|---|---:|---:|---:|---:|
+| **0** | Building it (the cost is mostly *your time*) | $0 | ~$5k | **−$5k** | **−$5k** |
+| **1** | First clinics sign on (~15 active) | ~$60k | ~$20k | **+$40k** | **+$35k** |
+| **2** | Word of mouth (~45 active) | ~$175k | ~$45k | **+$130k** | **+$165k** |
+| **3** | Momentum (~90 active) | ~$350k | ~$90k | **+$260k** | **+$425k** |
+
+**Two honest ways to read it:**
+
+1. **If you don't pay yourself a wage** (typical for a solo founder) → you are **cash-positive from Year 1**,
+   and the business has put **roughly A$425k** in the bank by the end of Year 3.
+2. **If you *do* count your time** at a normal full-time salary (~A$120k/yr) → you're investing your
+   "sweat equity" up front; the running total dips to about **−A$125k late in Year 1**, then climbs and
+   **breaks even around the end of Year 3** — after which every extra clinic is almost pure profit.
+
+**The floor (worst realistic case).** Even if *no other clinic ever buys it*, running the platform just
+for The Lounge **costs less than the Mindbody subscription it replaces** (§7) — so the downside is roughly
+"you built a better tool for about what you were already paying," and everything in the tables above is
+upside on top of that.
+
+> **In one sentence:** small money out at first (mostly time), profit from Year 1 if you don't pay
+> yourself, comfortably six figures of cumulative profit by Year 3 in the base case — with a near-zero
+> downside because internal use alone already pays for itself.
 
 ---
 
@@ -239,6 +341,67 @@ internal use — the external revenue in §5 is upside on an already-positive in
 | **Competition** | Fresh Clinics is the AU incumbent | but its remote-prescriber model is the very thing QLD S4 undercut — our on-site/designated-RN model is better-aligned |
 | **CAC** | community + referral, ~A$0 paid | scaling interstate later needs real go-to-market spend (modelled only as upside) |
 | **Regulatory drift** | AHPRA/TGA/QLD settling 2025→late-2026 | both a risk (rework) and the moat's source — keep the medicines module configurable |
+
+---
+
+## 9. Glossary — every acronym in this doc
+
+Plain-English definitions for every abbreviation and piece of jargon used above.
+
+### Money & market terms
+
+| Term | Stands for | In plain English |
+|---|---|---|
+| **ARR** | Annual Recurring Revenue | The yearly value of all active subscriptions added up. The headline "size of the business" number. |
+| **MRR** | Monthly Recurring Revenue | The same idea, per month (ARR ÷ 12). |
+| **ARPU** | Average Revenue Per Unit | The average monthly fee across all clinics — total revenue ÷ number of clinics. |
+| **COGS** | Cost of Goods Sold | What it costs *to serve a paying customer* — here, hosting + texts/emails. (Not the cost of building it.) |
+| **Gross margin** | — | The share of each dollar left after COGS. ~90% here means serving a clinic costs ~10¢ of every dollar it pays. |
+| **Opex** | Operating expenses | Day-to-day running costs (tools, fees, support) that aren't tied to a single customer. |
+| **CAC** | Customer Acquisition Cost | What it costs to win one new clinic. Near-zero here because growth is word-of-mouth. |
+| **TCO** | Total Cost of Ownership | The *all-in* cost of using a product — subscription **plus** add-ons, fees, setup, etc. |
+| **ROI** | Return on Investment | What you get back versus what you put in. |
+| **TAM** | Total Addressable Market | Everyone who could conceivably buy (all QLD injectable clinics). |
+| **SAM** | Serviceable Addressable Market | The realistic-fit slice we build for and could sell to. |
+| **SOM** | Serviceable Obtainable Market | The slice we expect to actually win in a given timeframe. |
+| **FX** | Foreign Exchange | Currency-conversion rate — here, US dollars → Australian dollars. |
+| **GST** | Goods & Services Tax | Australia's 10% sales tax. "Ex-GST" = before tax is added. |
+| **J-curve** | — | The dip-then-rise shape of cumulative profit: spend first, earn later. |
+| **EOY** | End Of Year | The figure as it stands on the last day of that year. |
+| **USD / AUD (A$)** | US / Australian Dollars | The two currencies used; **A$** = Australian dollars. |
+
+### Product, tech & cost terms
+
+| Term | Stands for | In plain English |
+|---|---|---|
+| **SaaS** | Software-as-a-Service | Software you rent by subscription over the internet, rather than buy and install. |
+| **POC** | Proof of Concept | A throwaway demo built to show an idea works — this repo's current site. |
+| **RLS** | Row-Level Security | A database rule that keeps each clinic's data invisible to every other clinic on the shared system. |
+| **Multi-tenant** | — | One shared system safely serving many separate clinics ("tenants") at once. |
+| **UX** | User Experience | How easy and pleasant the software is to use. |
+| **EMR** | Electronic Medical Record | The digital clinical file — history, notes, photos, consents. |
+| **PM** | Practice Management | Software for the business side — bookings, payments, clients. |
+| **POS** | Point of Sale | The checkout / card-payment part of the system. |
+| **EMV** | Europay, Mastercard, Visa | The global chip-and-tap card-payment standard. |
+| **API** | Application Programming Interface | The behind-the-scenes connection that lets the apps and other software talk to the system. |
+| **MAU** | Monthly Active Users | Count of distinct people who log in within a month — how some services bill. |
+| **MFA** | Multi-Factor Authentication | A second login check (e.g. a texted code) on top of a password. |
+| **SMS** | Short Message Service | A standard text message. |
+| **TLS** | Transport Layer Security | The encryption behind the padlock/"https" in a web address. |
+| **SES** | (Amazon) Simple Email Service | A cheap service for sending automated emails. |
+| **SKU** | Stock Keeping Unit | Here, a named size/plan of a cloud service (e.g. the "B1ms" database size). |
+| **vCore / GiB / GB / TB** | virtual CPU core / gibibyte / gigabyte / terabyte | Units of computing power (vCore) and storage/memory (GiB ≈ GB; 1 TB = 1,000 GB). |
+| **HIPAA** | (US) Health Insurance Portability & Accountability Act | The US health-privacy law — why US tools are "US-framed", not built for Australian rules. |
+
+### Clinical & regulatory terms
+
+| Term | Stands for | In plain English |
+|---|---|---|
+| **S4** | Schedule 4 (medicine) | Prescription-only medicines — including cosmetic injectables like anti-wrinkle toxin and fillers. |
+| **AHPRA** | Australian Health Practitioner Regulation Agency | The national body that registers and sets rules for nurses, doctors, etc. |
+| **TGA** | Therapeutic Goods Administration | The national regulator for medicines, devices and how they're advertised. |
+| **QLD** | Queensland | The Australian state this market sizing focuses on. (AU = Australia, NZ = New Zealand, NSW/VIC = neighbouring states.) |
+| **RN / NP** | Registered Nurse / Nurse Practitioner | An RN administers on a valid script; an **NP** is a senior nurse who (like a doctor) can prescribe. |
 
 ---
 
