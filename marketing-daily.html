@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Lumea · Daily — your clinic day, sorted</title>
+<meta name="description" content="Walk through a day in your clinic with Lumea: from the first booking to closing the till. Friendly all-in-one software for aesthetic clinics and nurses — no tech skills needed."/>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<script>
+tailwind.config={theme:{extend:{
+  fontFamily:{sans:['Inter','system-ui','sans-serif'],display:['Plus Jakarta Sans','system-ui','sans-serif']},
+  colors:{mint:{50:'#ecfdf5',100:'#d1fae5',200:'#a7f3d0',300:'#6ee7b7',400:'#34d399',500:'#10b981',600:'#059669',700:'#047857'},
+    sky:{300:'#7dd3fc',400:'#38bdf8',500:'#0ea5e9',600:'#0284c7'},
+    ink:'#0f291f'},
+  boxShadow:{soft:'0 2px 10px rgba(5,150,105,.08)',card:'0 20px 45px -14px rgba(5,150,105,.25)',lift:'0 34px 64px -20px rgba(5,150,105,.34)'}
+}}}
+</script>
+<script>document.documentElement.classList.add('js')</script>
+<style>
+  html{scroll-behavior:smooth}
+  body{font-family:Inter,sans-serif;-webkit-font-smoothing:antialiased}
+  .font-display{font-family:'Plus Jakarta Sans',sans-serif}
+  .material-symbols-rounded{font-variation-settings:'FILL' 0,'wght' 400,'opsz' 24}
+  ::selection{background:#a7f3d0;color:#065f46}
+
+  .grad-text{background:linear-gradient(110deg,#10b981,#0ea5e9);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+  .js .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+  .js .reveal.in{opacity:1;transform:none}
+
+  .blob{filter:blur(44px);border-radius:9999px;position:absolute;opacity:.55}
+
+  /* 3D tablet */
+  .scene{perspective:1300px}
+  .tablet{transform-style:preserve-3d;transition:transform .6s cubic-bezier(.2,.7,.2,1);will-change:transform}
+  .tablet-screen{transition:opacity .4s}
+
+  /* step states */
+  .step{transition:all .35s;opacity:.5}
+  .step.active{opacity:1}
+  .step.active .step-dot{background:#10b981;color:#fff;box-shadow:0 0 0 6px rgba(16,185,129,.15)}
+  .step.active .step-card{border-color:#6ee7b7;box-shadow:0 20px 45px -18px rgba(5,150,105,.3);transform:translateX(4px)}
+
+  /* checklist */
+  .task{cursor:pointer;transition:all .2s}
+  .task.done .task-box{background:#10b981;border-color:#10b981;color:#fff}
+  .task.done .task-label{text-decoration:line-through;color:#9ca3af}
+
+  .lift{transition:transform .35s,box-shadow .35s}.lift:hover{transform:translateY(-5px)}
+  details>summary{list-style:none;cursor:pointer}details>summary::-webkit-details-marker{display:none}
+  details[open] .faq-ico{transform:rotate(45deg)}.faq-ico{transition:transform .25s}
+  #nav{transition:background .3s,box-shadow .3s,backdrop-filter .3s}
+  #nav.scrolled{background:rgba(255,255,255,.85);backdrop-filter:saturate(180%) blur(12px);box-shadow:0 10px 30px -18px rgba(5,150,105,.3)}
+  #barfill{transition:width .3s}
+
+  @media (prefers-reduced-motion:reduce){
+    .js .reveal{opacity:1!important;transform:none!important;transition:none}
+    .tablet{transition:none}html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body class="bg-white text-ink overflow-x-hidden">
+
+<div class="bg-mint-500 text-white text-center text-xs py-1.5 font-medium">Marketing concept <b>D · “Daily”</b> — a walk through your day · <a href="index.html" class="underline">see all concepts</a></div>
+
+<!-- ===== NAV ===== -->
+<header id="nav" class="sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-5 sm:px-8 h-16 flex items-center gap-4">
+    <a href="#home" class="flex items-center gap-2.5">
+      <span class="size-9 rounded-2xl bg-gradient-to-br from-mint-400 to-sky-400 text-white grid place-items-center font-bold shadow-soft">L</span>
+      <span class="font-display text-xl font-extrabold">Lumea</span>
+    </a>
+    <nav class="hidden lg:flex items-center gap-7 text-sm font-semibold text-slate-500 mx-auto">
+      <a href="#day" class="hover:text-mint-600 transition">Your day</a>
+      <a href="#checklist" class="hover:text-mint-600 transition">Try it</a>
+      <a href="#features" class="hover:text-mint-600 transition">What's inside</a>
+      <a href="#safe" class="hover:text-mint-600 transition">Staying safe</a>
+      <a href="#pricing" class="hover:text-mint-600 transition">Pricing</a>
+    </nav>
+    <a href="#pricing" class="ml-auto lg:ml-0 px-4 py-2 rounded-full text-sm font-semibold text-white bg-gradient-to-br from-mint-500 to-sky-500 shadow-soft hover:shadow-card transition">Book a demo</a>
+  </div>
+</header>
+
+<!-- ===== HERO ===== -->
+<section id="home" class="relative overflow-hidden pt-14 pb-20 bg-gradient-to-b from-mint-50 to-white">
+  <div class="blob bg-mint-200 size-[28rem] -top-32 -left-20"></div>
+  <div class="blob bg-sky-200 size-[24rem] top-6 -right-16" style="opacity:.5"></div>
+  <div class="relative max-w-7xl mx-auto px-5 sm:px-8 grid lg:grid-cols-2 gap-12 items-center">
+    <div>
+      <div class="reveal inline-flex items-center gap-2 text-sm font-semibold text-mint-700 bg-white rounded-full px-3.5 py-1.5 shadow-soft">
+        <span class="material-symbols-rounded text-mint-500">wb_twilight</span> From first booking to closing the till
+      </div>
+      <h1 class="reveal font-display text-5xl sm:text-6xl font-extrabold leading-[1.05] mt-5">
+        Here's your Tuesday, <span class="grad-text">sorted</span>.
+      </h1>
+      <p class="reveal text-lg text-slate-500 mt-5 max-w-xl leading-relaxed">
+        Lumea quietly runs the admin behind every appointment — bookings, consent, notes, payments and reminders — so the day flows and you can focus on your clients.
+      </p>
+      <div class="reveal flex flex-wrap gap-3 mt-8">
+        <a href="#day" class="inline-flex items-center gap-2 px-6 py-3.5 rounded-full font-semibold text-white bg-gradient-to-br from-mint-500 to-sky-500 shadow-card hover:-translate-y-0.5 transition"><span class="material-symbols-rounded">play_arrow</span> Walk through a day</a>
+        <a href="prototype.html" class="inline-flex items-center gap-2 px-6 py-3.5 rounded-full font-semibold text-mint-700 bg-white shadow-soft hover:shadow-card transition"><span class="material-symbols-rounded">visibility</span> See it live</a>
+      </div>
+      <div class="reveal flex items-center gap-6 mt-8 text-sm text-slate-400">
+        <span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-mint-400">check_circle</span> No tech skills needed</span>
+        <span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-mint-400">schedule</span> Up and running in a day</span>
+      </div>
+    </div>
+    <div class="reveal scene hidden sm:flex justify-center">
+      <div class="tablet relative w-[20rem]" style="transform:rotateY(-12deg) rotateX(5deg)">
+        <div class="rounded-[1.8rem] bg-white border-[6px] border-ink/90 shadow-lift p-3">
+          <div class="rounded-2xl bg-mint-50 p-4">
+            <div class="flex items-center justify-between"><div class="font-display font-bold">Good morning ☀️</div><span class="material-symbols-rounded text-mint-500">today</span></div>
+            <div class="text-xs text-slate-400">Tuesday · 6 clients booked</div>
+            <div class="mt-3 space-y-2">
+              <div class="bg-white rounded-xl p-2.5 flex items-center gap-2 shadow-soft"><span class="size-7 rounded-full bg-mint-200 text-mint-700 grid place-items-center text-[10px] font-bold">EM</span><div class="flex-1 text-xs font-semibold">Emma · 9:00</div><span class="material-symbols-rounded text-emerald-500 text-base">check_circle</span></div>
+              <div class="bg-white rounded-xl p-2.5 flex items-center gap-2 shadow-soft"><span class="size-7 rounded-full bg-sky-200 text-sky-700 grid place-items-center text-[10px] font-bold">JD</span><div class="flex-1 text-xs font-semibold">Jo · 10:30</div></div>
+            </div>
+            <div class="mt-3 rounded-xl bg-gradient-to-br from-mint-400 to-sky-400 text-white p-3"><div class="text-[11px] opacity-90">Today's takings tidy themselves into your accounts ✨</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SCROLLY DAY ===== -->
+<section id="day" class="max-w-7xl mx-auto px-5 sm:px-8 py-16">
+  <div class="text-center max-w-2xl mx-auto reveal mb-4">
+    <h2 class="font-display text-4xl font-extrabold">A day in your clinic 👇</h2>
+    <p class="text-slate-500 mt-3 text-lg">Tap a moment in the day — watch the screen change to match.</p>
+  </div>
+  <!-- progress bar -->
+  <div class="max-w-md mx-auto h-1.5 rounded-full bg-mint-100 overflow-hidden mb-10"><div id="barfill" class="h-full w-1/5 bg-gradient-to-r from-mint-400 to-sky-400"></div></div>
+
+  <div class="grid lg:grid-cols-2 gap-10 items-start">
+    <!-- steps -->
+    <ol id="steps" class="space-y-4 order-2 lg:order-1">
+      <li class="step active" data-step="0"><button class="w-full text-left flex gap-4"><span class="step-dot shrink-0 size-11 rounded-2xl bg-mint-100 text-mint-700 grid place-items-center font-bold"><span class="material-symbols-rounded">wb_sunny</span></span><span class="step-card flex-1 bg-white rounded-2xl border border-slate-200 p-5 shadow-soft"><span class="font-display font-bold block">Before the doors open</span><span class="text-slate-500 text-sm">You glance at today: who's coming, who's confirmed, who to call. Reminders already went out last night.</span></span></button></li>
+      <li class="step" data-step="1"><button class="w-full text-left flex gap-4"><span class="step-dot shrink-0 size-11 rounded-2xl bg-mint-100 text-mint-700 grid place-items-center font-bold"><span class="material-symbols-rounded">co_present</span></span><span class="step-card flex-1 bg-white rounded-2xl border border-slate-200 p-5 shadow-soft"><span class="font-display font-bold block">Emma arrives</span><span class="text-slate-500 text-sm">A tap to check her in. Her consent is signed on the tablet before you start — no paper, no chasing.</span></span></button></li>
+      <li class="step" data-step="2"><button class="w-full text-left flex gap-4"><span class="step-dot shrink-0 size-11 rounded-2xl bg-mint-100 text-mint-700 grid place-items-center font-bold"><span class="material-symbols-rounded">edit_note</span></span><span class="step-card flex-1 bg-white rounded-2xl border border-slate-200 p-5 shadow-soft"><span class="font-display font-bold block">In the treatment room</span><span class="text-slate-500 text-sm">You map where you treated, snap before/after photos, and it all saves to Emma's record on its own.</span></span></button></li>
+      <li class="step" data-step="3"><button class="w-full text-left flex gap-4"><span class="step-dot shrink-0 size-11 rounded-2xl bg-mint-100 text-mint-700 grid place-items-center font-bold"><span class="material-symbols-rounded">contactless</span></span><span class="step-card flex-1 bg-white rounded-2xl border border-slate-200 p-5 shadow-soft"><span class="font-display font-bold block">On the way out</span><span class="text-slate-500 text-sm">Tap to pay, renew her membership, and rebook her next visit — all in a few seconds at the desk.</span></span></button></li>
+      <li class="step" data-step="4"><button class="w-full text-left flex gap-4"><span class="step-dot shrink-0 size-11 rounded-2xl bg-mint-100 text-mint-700 grid place-items-center font-bold"><span class="material-symbols-rounded">nightlight</span></span><span class="step-card flex-1 bg-white rounded-2xl border border-slate-200 p-5 shadow-soft"><span class="font-display font-bold block">Closing up</span><span class="text-slate-500 text-sm">The day's takings add up and tidy themselves into your accounts. You lock up and head home calm.</span></span></button></li>
+    </ol>
+
+    <!-- sticky 3D tablet -->
+    <div class="order-1 lg:order-2 lg:sticky lg:top-24 scene">
+      <div id="dayTablet" class="tablet mx-auto w-[20rem] sm:w-[22rem]" style="transform:rotateY(-12deg) rotateX(5deg)">
+        <div class="rounded-[1.8rem] bg-white border-[6px] border-ink/90 shadow-lift p-3">
+          <div id="dayScreen" class="tablet-screen rounded-2xl bg-mint-50 p-5 min-h-[300px]"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== INTERACTIVE CHECKLIST ===== -->
+<section id="checklist" class="py-16 bg-mint-50">
+  <div class="max-w-3xl mx-auto px-5 sm:px-8">
+    <div class="text-center reveal">
+      <h2 class="font-display text-4xl font-extrabold">Your morning, in a few taps.</h2>
+      <p class="text-slate-500 mt-3 text-lg">Try ticking these off — that's genuinely all it takes.</p>
+    </div>
+    <div class="bg-white rounded-3xl shadow-card p-6 sm:p-8 mt-8">
+      <div class="flex items-center justify-between mb-4">
+        <div class="font-display font-bold">Open the clinic</div>
+        <div id="taskProgress" class="text-sm font-semibold text-mint-600">0 of 4 done</div>
+      </div>
+      <ul id="tasks" class="space-y-2.5">
+        <li class="task flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50"><span class="task-box size-7 rounded-lg border-2 border-slate-300 grid place-items-center shrink-0"><span class="material-symbols-rounded text-base">check</span></span><span class="task-label font-medium">Check who's coming today</span></li>
+        <li class="task flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50"><span class="task-box size-7 rounded-lg border-2 border-slate-300 grid place-items-center shrink-0"><span class="material-symbols-rounded text-base">check</span></span><span class="task-label font-medium">Confirm reminders went out</span></li>
+        <li class="task flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50"><span class="task-box size-7 rounded-lg border-2 border-slate-300 grid place-items-center shrink-0"><span class="material-symbols-rounded text-base">check</span></span><span class="task-label font-medium">Check the fridge is happy</span></li>
+        <li class="task flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50"><span class="task-box size-7 rounded-lg border-2 border-slate-300 grid place-items-center shrink-0"><span class="material-symbols-rounded text-base">check</span></span><span class="task-label font-medium">Pour a coffee ☕</span></li>
+      </ul>
+      <div id="taskDone" class="hidden mt-5 rounded-2xl bg-gradient-to-br from-mint-400 to-sky-400 text-white p-5 text-center font-semibold">🎉 That's it — you're open. Lumea handles the rest of the day.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FEATURES RECAP ===== -->
+<section id="features" class="max-w-7xl mx-auto px-5 sm:px-8 py-16">
+  <div class="text-center max-w-2xl mx-auto reveal">
+    <h2 class="font-display text-4xl font-extrabold">Everything from that day, in one app.</h2>
+    <p class="text-slate-500 mt-3 text-lg">No juggling tabs, spreadsheets or sticky notes.</p>
+  </div>
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-10">
+    <div class="lift bg-white rounded-3xl p-7 border border-slate-100 shadow-soft"><span class="material-symbols-rounded text-mint-500 text-3xl">calendar_month</span><h3 class="font-display font-bold text-lg mt-3">Bookings &amp; reminders</h3><p class="text-slate-500 text-sm mt-1.5">A clear diary and automatic nudges that cut no-shows.</p></div>
+    <div class="lift bg-white rounded-3xl p-7 border border-slate-100 shadow-soft"><span class="material-symbols-rounded text-sky-500 text-3xl">how_to_reg</span><h3 class="font-display font-bold text-lg mt-3">Consent &amp; notes</h3><p class="text-slate-500 text-sm mt-1.5">Forms signed on the tablet; treatment notes that save themselves.</p></div>
+    <div class="lift bg-white rounded-3xl p-7 border border-slate-100 shadow-soft"><span class="material-symbols-rounded text-mint-500 text-3xl">photo_library</span><h3 class="font-display font-bold text-lg mt-3">Before &amp; after</h3><p class="text-slate-500 text-sm mt-1.5">Photos kept neatly with each client, ready to compare.</p></div>
+    <div class="lift bg-white rounded-3xl p-7 border border-slate-100 shadow-soft"><span class="material-symbols-rounded text-sky-500 text-3xl">contactless</span><h3 class="font-display font-bold text-lg mt-3">Payments &amp; memberships</h3><p class="text-slate-500 text-sm mt-1.5">Tap to pay and memberships that renew on their own.</p></div>
+    <div class="lift bg-white rounded-3xl p-7 border border-slate-100 shadow-soft"><span class="material-symbols-rounded text-mint-500 text-3xl">inventory_2</span><h3 class="font-display font-bold text-lg mt-3">Stock &amp; fridge</h3><p class="text-slate-500 text-sm mt-1.5">Know what's low and that your fridge stayed cold all night.</p></div>
+    <div class="lift bg-white rounded-3xl p-7 border border-slate-100 shadow-soft"><span class="material-symbols-rounded text-sky-500 text-3xl">insights</span><h3 class="font-display font-bold text-lg mt-3">Simple reports</h3><p class="text-slate-500 text-sm mt-1.5">A clear picture of how the clinic's doing — owner only.</p></div>
+  </div>
+</section>
+
+<!-- ===== SAFE ===== -->
+<section id="safe" class="max-w-7xl mx-auto px-5 sm:px-8 py-16">
+  <div class="rounded-[2rem] bg-gradient-to-br from-mint-500 to-sky-500 text-white p-8 sm:p-12">
+    <div class="max-w-2xl reveal">
+      <h2 class="font-display text-4xl font-extrabold">The rules, looked after for you.</h2>
+      <p class="text-white/90 mt-4 text-lg leading-relaxed">Lumea keeps the paperwork that keeps a cosmetic clinic safe — so the right boxes are always ticked, without you having to memorise a rulebook.</p>
+    </div>
+    <div class="grid sm:grid-cols-3 gap-5 mt-8">
+      <div class="reveal bg-white/15 rounded-2xl p-6 backdrop-blur"><span class="material-symbols-rounded text-3xl">verified_user</span><h3 class="font-display font-bold mt-3">Consent comes first</h3><p class="text-white/85 text-sm mt-1.5">A treatment can't start until the right form is signed.</p></div>
+      <div class="reveal bg-white/15 rounded-2xl p-6 backdrop-blur"><span class="material-symbols-rounded text-3xl">history_edu</span><h3 class="font-display font-bold mt-3">A tidy record</h3><p class="text-white/85 text-sm mt-1.5">Everything logged quietly, ready if you're ever asked.</p></div>
+      <div class="reveal bg-white/15 rounded-2xl p-6 backdrop-blur"><span class="material-symbols-rounded text-3xl">campaign</span><h3 class="font-display font-bold mt-3">Safer posts</h3><p class="text-white/85 text-sm mt-1.5">A heads-up before you publish wording that isn't allowed.</p></div>
+    </div>
+    <p class="reveal text-white/80 text-sm mt-6">Built around Australian rules for cosmetic clinics — TGA, AHPRA, S4 medicines &amp; privacy.</p>
+  </div>
+</section>
+
+<!-- ===== TESTIMONIAL ===== -->
+<section class="max-w-3xl mx-auto px-5 sm:px-8 py-16 text-center reveal">
+  <div class="text-5xl">💬</div>
+  <blockquote class="font-display text-2xl sm:text-3xl font-extrabold mt-5 leading-snug">“By close, everything's just… done. I used to do the books at home — now I don't.”</blockquote>
+  <div class="mt-5 text-slate-500">— Mel, clinic owner · <span class="italic">illustrative example</span></div>
+</section>
+
+<!-- ===== PRICING ===== -->
+<section id="pricing" class="max-w-3xl mx-auto px-5 sm:px-8 py-12">
+  <div class="bg-white rounded-[2rem] border border-mint-100 shadow-card p-10 sm:p-14 text-center reveal">
+    <div class="text-5xl">📅</div>
+    <h2 class="font-display text-4xl font-extrabold mt-4">See your day on Lumea.</h2>
+    <p class="text-slate-500 mt-3 max-w-lg mx-auto">Book a relaxed walkthrough — we'll show you around and tailor pricing to your clinic. No jargon, no pressure.</p>
+    <a href="#contact" class="inline-flex items-center gap-2 mt-7 px-7 py-4 rounded-full font-semibold text-white bg-gradient-to-br from-mint-500 to-sky-500 shadow-card hover:-translate-y-0.5 transition"><span class="material-symbols-rounded">event</span> Book a demo</a>
+    <p class="text-slate-400 text-xs mt-4">Concept pricing — tailored per clinic during onboarding.</p>
+  </div>
+</section>
+
+<!-- ===== FAQ ===== -->
+<section class="max-w-3xl mx-auto px-5 sm:px-8 pb-16">
+  <h2 class="font-display text-3xl font-extrabold text-center reveal mb-8">Questions</h2>
+  <div class="space-y-3">
+    <details class="reveal bg-white rounded-2xl p-5 border border-slate-100 shadow-soft" open><summary class="flex items-center justify-between font-display font-bold">Is it really that easy?<span class="faq-ico material-symbols-rounded text-mint-500">add</span></summary><p class="text-slate-500 mt-3">Yes — the app follows your day, so it feels natural. Most teams are confident within a morning.</p></details>
+    <details class="reveal bg-white rounded-2xl p-5 border border-slate-100 shadow-soft"><summary class="flex items-center justify-between font-display font-bold">Who sees the money side?<span class="faq-ico material-symbols-rounded text-mint-500">add</span></summary><p class="text-slate-500 mt-3">Only the owner. Everyone else sees the screens that fit their role.</p></details>
+    <details class="reveal bg-white rounded-2xl p-5 border border-slate-100 shadow-soft"><summary class="flex items-center justify-between font-display font-bold">Does it replace my paperwork?<span class="faq-ico material-symbols-rounded text-mint-500">add</span></summary><p class="text-slate-500 mt-3">Most of it — consent, notes and records live in one place, kept tidy automatically.</p></details>
+    <details class="reveal bg-white rounded-2xl p-5 border border-slate-100 shadow-soft"><summary class="flex items-center justify-between font-display font-bold">Can I look first?<span class="faq-ico material-symbols-rounded text-mint-500">add</span></summary><p class="text-slate-500 mt-3">Please do — <a href="prototype.html" class="text-mint-600 font-semibold underline">explore the live demo</a> any time.</p></details>
+  </div>
+</section>
+
+<footer id="contact" class="bg-ink text-mint-50">
+  <div class="max-w-5xl mx-auto px-5 sm:px-8 py-14 text-center">
+    <div class="text-4xl">🌿</div>
+    <h2 class="font-display text-4xl font-extrabold mt-3">Calmer days start here.</h2>
+    <div class="flex flex-wrap justify-center gap-3 mt-6">
+      <a href="prototype.html" class="px-6 py-3.5 rounded-full font-semibold text-mint-700 bg-white hover:-translate-y-0.5 transition shadow-card">See it live</a>
+      <a href="index.html" class="px-6 py-3.5 rounded-full font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition">See other concepts</a>
+    </div>
+  </div>
+  <div class="border-t border-white/10 text-center py-5 text-xs text-mint-100/60">© 2026 Lumea (concept) · Marketing concept D “Daily” · All names &amp; data are made up.</div>
+</footer>
+
+<script>
+(function(){
+  var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var nav=document.getElementById('nav');
+  function onNav(){ if(scrollY>16)nav.classList.add('scrolled');else nav.classList.remove('scrolled'); }
+
+  var reveals=[].slice.call(document.querySelectorAll('.reveal'));
+  reveals.forEach(function(el,i){ el.style.transitionDelay=((i%6)*55)+'ms'; });
+  function inView(el,m){ var r=el.getBoundingClientRect(); var vh=innerHeight||document.documentElement.clientHeight; return r.top<(vh-(m||0))&&r.bottom>0; }
+  function checkReveals(){ for(var i=reveals.length-1;i>=0;i--){ if(reduce||inView(reveals[i],50)){ reveals[i].classList.add('in'); reveals.splice(i,1);} } }
+
+  /* day scrollytelling */
+  var screens=[
+    {bg:'bg-mint-50',title:'Before the doors open ☀️',rows:[['groups','6 clients booked today'],['sms','Reminders sent last night'],['call','2 follow-ups to call']]},
+    {bg:'bg-sky-50',title:'Emma checks in',rows:[['how_to_reg','Checked in · 9:00'],['verified','Consent signed ✓'],['lock_open','Ready to start']]},
+    {bg:'bg-mint-50',title:'In the room',rows:[['draw','5 sites mapped'],['photo_camera','Before & after saved'],['save','Added to Emma’s record']]},
+    {bg:'bg-sky-50',title:'On the way out',rows:[['contactless','Tap to pay'],['favorite','Membership renewed'],['event_repeat','Rebooked in 6 weeks']]},
+    {bg:'bg-mint-50',title:'Closing up 🌙',rows:[['calculate','Takings added up'],['sync','Synced to accounts'],['bedtime','Lock up & home calm']]}
+  ];
+  var screenEl=document.getElementById('dayScreen');
+  var tablet=document.getElementById('dayTablet');
+  var bar=document.getElementById('barfill');
+  var stepEls=[].slice.call(document.querySelectorAll('#steps .step'));
+  var rots=['rotateY(-12deg) rotateX(5deg)','rotateY(-4deg) rotateX(3deg)','rotateY(4deg) rotateX(4deg)','rotateY(-8deg) rotateX(6deg)','rotateY(8deg) rotateX(3deg)'];
+  var current=-1;
+  function setStep(n){
+    if(n===current) return; current=n;
+    var s=screens[n]; if(!s) return;
+    screenEl.className='tablet-screen rounded-2xl p-5 min-h-[300px] '+s.bg;
+    screenEl.innerHTML='<div class="flex items-center justify-between"><div class="font-display font-bold">'+s.title+'</div><span class="material-symbols-rounded text-mint-500">smartphone</span></div>'+
+      '<div class="mt-4 space-y-2.5">'+s.rows.map(function(r,i){return '<div class="bg-white rounded-xl p-3 flex items-center gap-3 shadow-soft"><span class="size-8 rounded-lg bg-mint-100 text-mint-700 grid place-items-center"><span class="material-symbols-rounded text-base">'+r[0]+'</span></span><span class="text-sm font-medium">'+r[1]+'</span></div>';}).join('')+'</div>'+
+      '<div class="mt-4 h-1.5 rounded-full bg-white/60 overflow-hidden"><div class="h-full bg-gradient-to-r from-mint-400 to-sky-400" style="width:'+((n+1)/screens.length*100)+'%"></div></div>';
+    if(!reduce) tablet.style.transform=rots[n];
+    stepEls.forEach(function(el,i){ el.classList.toggle('active', i===n); });
+    if(bar) bar.style.width=((n+1)/screens.length*100)+'%';
+  }
+  // click steps
+  stepEls.forEach(function(el){ el.querySelector('button').addEventListener('click',function(){ setStep(parseInt(el.getAttribute('data-step'),10)); el.scrollIntoView({block:'center',behavior:'smooth'}); }); });
+  // scroll-driven: pick the step nearest viewport centre
+  function checkDay(){
+    var vhc=innerHeight/2, best=0, bestD=1e9;
+    stepEls.forEach(function(el,i){ var r=el.getBoundingClientRect(); var d=Math.abs((r.top+r.height/2)-vhc); if(d<bestD){bestD=d;best=i;} });
+    setStep(best);
+  }
+  setStep(0);
+
+  /* checklist */
+  var tasks=[].slice.call(document.querySelectorAll('#tasks .task'));
+  var prog=document.getElementById('taskProgress');
+  var doneMsg=document.getElementById('taskDone');
+  function refresh(){
+    var n=tasks.filter(function(t){return t.classList.contains('done');}).length;
+    prog.textContent=n+' of '+tasks.length+' done';
+    doneMsg.classList.toggle('hidden', n!==tasks.length);
+  }
+  tasks.forEach(function(t){ t.addEventListener('click',function(){ t.classList.toggle('done'); refresh(); }); });
+
+  var ticking=false;
+  function frame(){ onNav(); checkReveals(); checkDay(); ticking=false; }
+  function pump(){ if(!ticking){ticking=true;requestAnimationFrame(frame);} }
+  addEventListener('scroll',pump,{passive:true});
+  addEventListener('resize',pump,{passive:true});
+  frame();
+  addEventListener('load',checkReveals);
+})();
+</script>
+</body>
+</html>

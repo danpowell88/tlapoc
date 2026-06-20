@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Lumea · Halo — beautiful, simple clinic software</title>
+<meta name="description" content="Lumea looks high-end and works simple. All-in-one software for aesthetic clinics: bookings, consent, charts, payments and reminders — designed for clinic teams, not techies."/>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<script>
+tailwind.config={theme:{extend:{
+  fontFamily:{sans:['Inter','system-ui','sans-serif'],display:['Space Grotesk','system-ui','sans-serif']},
+  colors:{plum:{900:'#0b0716',800:'#140a26',700:'#1d1138',600:'#2a1a4f'},
+    glow:{300:'#f0abfc',400:'#c084fc',500:'#a855f7',600:'#9333ea'},
+    iris:{400:'#818cf8',500:'#6366f1'}},
+  boxShadow:{glow:'0 0 40px -6px rgba(192,132,252,.5)',card:'0 24px 60px -20px rgba(0,0,0,.7)'}
+}}}
+</script>
+<script>document.documentElement.classList.add('js')</script>
+<style>
+  html{scroll-behavior:smooth}
+  body{font-family:Inter,sans-serif;-webkit-font-smoothing:antialiased;background:#0b0716}
+  .font-display{font-family:'Space Grotesk',sans-serif}
+  .material-symbols-rounded{font-variation-settings:'FILL' 0,'wght' 400,'opsz' 24}
+  ::selection{background:#a855f7;color:#fff}
+
+  .grad-text{background:linear-gradient(110deg,#f0abfc,#a855f7 45%,#818cf8);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+  .js .reveal{opacity:0;transform:translateY(28px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
+  .js .reveal.in{opacity:1;transform:none}
+
+  /* glass */
+  .glass{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+  .glass-strong{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(18px)}
+
+  .orb{position:absolute;border-radius:9999px;filter:blur(8px);opacity:.85;will-change:transform}
+  .orb-blur{filter:blur(60px);opacity:.5}
+
+  /* 3D phone */
+  .scene{perspective:1200px}
+  .phone3d{transform-style:preserve-3d;will-change:transform;cursor:grab}
+  .phone3d:active{cursor:grabbing}
+  .phone-face{backface-visibility:hidden}
+  @keyframes spin{from{transform:rotateY(-22deg) rotateX(6deg)}50%{transform:rotateY(22deg) rotateX(6deg)}to{transform:rotateY(-22deg) rotateX(6deg)}}
+  .autospin{animation:spin 12s ease-in-out infinite}
+
+  /* flip card */
+  .flip{transform-style:preserve-3d;transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+  .flip.flipped{transform:rotateY(180deg)}
+  .flip .back{transform:rotateY(180deg)}
+  .flip .face{backface-visibility:hidden;-webkit-backface-visibility:hidden}
+
+  .lift{transition:transform .35s,box-shadow .35s}
+  .lift:hover{transform:translateY(-6px)}
+  .pill{transition:all .2s}
+  .pill.on{background:linear-gradient(110deg,#a855f7,#6366f1);color:#fff;box-shadow:0 0 30px -6px rgba(168,85,247,.7)}
+
+  details>summary{list-style:none;cursor:pointer}details>summary::-webkit-details-marker{display:none}
+  details[open] .faq-ico{transform:rotate(45deg)}.faq-ico{transition:transform .25s}
+  #nav{transition:background .3s,backdrop-filter .3s,border-color .3s}
+  #nav.scrolled{background:rgba(11,7,22,.7);backdrop-filter:blur(14px);border-color:rgba(255,255,255,.08)}
+
+  @media (prefers-reduced-motion:reduce){
+    .js .reveal{opacity:1!important;transform:none!important;transition:none}
+    .autospin{animation:none}html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body class="text-white overflow-x-hidden">
+
+<div class="bg-glow-500/20 text-glow-300 text-center text-xs py-1.5 font-medium border-b border-white/5">Marketing concept <b class="text-white">C · “Halo”</b> — premium &amp; bold · <a href="index.html" class="underline">see all concepts</a></div>
+
+<!-- ===== NAV ===== -->
+<header id="nav" class="sticky top-0 z-50 border-b border-transparent">
+  <div class="max-w-7xl mx-auto px-5 sm:px-8 h-16 flex items-center gap-4">
+    <a href="#home" class="flex items-center gap-2.5">
+      <span class="size-9 rounded-xl bg-gradient-to-br from-glow-400 to-iris-500 grid place-items-center font-bold shadow-glow">L</span>
+      <span class="font-display text-xl font-bold">Lumea</span>
+    </a>
+    <nav class="hidden lg:flex items-center gap-7 text-sm font-medium text-white/60 mx-auto">
+      <a href="#features" class="hover:text-white transition">Features</a>
+      <a href="#explore" class="hover:text-white transition">Explore</a>
+      <a href="#simple" class="hover:text-white transition">Why it's simple</a>
+      <a href="#safe" class="hover:text-white transition">Staying safe</a>
+      <a href="#pricing" class="hover:text-white transition">Pricing</a>
+    </nav>
+    <a href="#pricing" class="ml-auto lg:ml-0 px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-br from-glow-400 to-iris-500 shadow-glow hover:brightness-110 transition">Book a demo</a>
+  </div>
+</header>
+
+<!-- ===== HERO ===== -->
+<section id="home" class="relative overflow-hidden pt-16 pb-24">
+  <div class="orb orb-blur bg-glow-500 size-[32rem] -top-40 -left-20"></div>
+  <div class="orb orb-blur bg-iris-500 size-[28rem] top-20 -right-24"></div>
+  <div class="relative max-w-7xl mx-auto px-5 sm:px-8 grid lg:grid-cols-[1.05fr_1fr] gap-12 items-center">
+    <div>
+      <div class="reveal inline-flex items-center gap-2 text-xs font-semibold tracking-wide uppercase text-glow-300 glass rounded-full px-3 py-1.5">
+        <span class="size-1.5 rounded-full bg-glow-400 animate-pulse"></span> Looks high-end. Works simple.
+      </div>
+      <h1 class="reveal font-display text-5xl sm:text-6xl xl:text-7xl font-bold leading-[1.04] mt-5">
+        Run your clinic like the <span class="grad-text">premium brand</span> it is.
+      </h1>
+      <p class="reveal text-lg text-white/70 mt-6 max-w-xl leading-relaxed">
+        Lumea brings bookings, consent, charts, payments and reminders into one beautiful place. It feels effortless for your team — and looks like the boutique you've built.
+      </p>
+      <div class="reveal flex flex-wrap gap-3 mt-8">
+        <a href="#pricing" class="inline-flex items-center gap-2 px-6 py-3.5 rounded-full font-semibold bg-gradient-to-br from-glow-400 to-iris-500 shadow-glow hover:-translate-y-0.5 transition"><span class="material-symbols-rounded">auto_awesome</span> Book a demo</a>
+        <a href="prototype.html" class="inline-flex items-center gap-2 px-6 py-3.5 rounded-full font-semibold glass hover:glass-strong transition"><span class="material-symbols-rounded">play_circle</span> See it live</a>
+      </div>
+      <div class="reveal flex items-center gap-6 mt-8 text-sm text-white/50">
+        <span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-glow-400">bolt</span> Set up in a day</span>
+        <span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-glow-400">touch_app</span> Drag the phone →</span>
+      </div>
+    </div>
+
+    <!-- 3D draggable phone -->
+    <div class="scene hidden sm:flex justify-center">
+      <div id="phone" class="phone3d autospin relative" style="width:230px;height:460px">
+        <!-- floating glass chips orbit -->
+        <div class="orb bg-glow-400 size-4 -left-6 top-10" style="transform:translateZ(70px)"></div>
+        <div class="orb bg-iris-400 size-3 right-0 top-24" style="transform:translateZ(90px)"></div>
+        <div class="orb bg-glow-300 size-2.5 left-2 bottom-16" style="transform:translateZ(60px)"></div>
+        <!-- phone body -->
+        <div class="phone-face absolute inset-0 rounded-[2.4rem] bg-gradient-to-b from-plum-600 to-plum-800 border border-white/15 shadow-card p-3">
+          <div class="h-full rounded-[1.9rem] bg-plum-900/80 border border-white/10 p-3 overflow-hidden">
+            <div class="flex items-center justify-between text-[10px] text-white/50 px-1"><span>9:41</span><span class="material-symbols-rounded text-sm">signal_cellular_alt</span></div>
+            <div class="mt-2 flex items-center gap-2"><span class="size-8 rounded-xl bg-gradient-to-br from-glow-400 to-iris-500 grid place-items-center font-bold text-sm">L</span><div><div class="text-xs font-semibold">Good morning, Steph ✨</div><div class="text-[10px] text-white/40">3 clients today</div></div></div>
+            <div class="mt-3 space-y-2">
+              <div class="glass rounded-2xl p-2.5"><div class="flex items-center gap-2"><span class="size-7 rounded-full bg-glow-500/40 grid place-items-center text-[10px] font-bold">EM</span><div class="flex-1"><div class="text-[11px] font-semibold">Emma · anti-wrinkle</div><div class="text-[9px] text-white/40">9:00 · consent ✓</div></div></div></div>
+              <div class="glass rounded-2xl p-2.5"><div class="flex items-center gap-2"><span class="size-7 rounded-full bg-iris-500/40 grid place-items-center text-[10px] font-bold">JD</span><div class="flex-1"><div class="text-[11px] font-semibold">Jo · skin consult</div><div class="text-[9px] text-white/40">10:30</div></div></div></div>
+              <div class="rounded-2xl p-2.5 bg-gradient-to-br from-glow-500/30 to-iris-500/30 border border-white/10"><div class="text-[10px] text-white/60">This week</div><div class="text-lg font-display font-bold">38 booked</div><div class="mt-1 h-1.5 rounded-full bg-white/15 overflow-hidden"><div class="h-full w-4/5 bg-gradient-to-r from-glow-400 to-iris-400 rounded-full"></div></div></div>
+            </div>
+            <div class="mt-3 grid grid-cols-4 gap-1.5 text-center text-white/60">
+              <div class="glass rounded-xl py-2"><span class="material-symbols-rounded text-base text-glow-300">calendar_month</span></div>
+              <div class="glass rounded-xl py-2"><span class="material-symbols-rounded text-base text-glow-300">groups</span></div>
+              <div class="glass rounded-xl py-2"><span class="material-symbols-rounded text-base text-glow-300">edit_note</span></div>
+              <div class="glass rounded-xl py-2"><span class="material-symbols-rounded text-base text-glow-300">payments</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== STATS ===== -->
+<section class="max-w-6xl mx-auto px-5 sm:px-8 py-10">
+  <div class="glass-strong rounded-3xl grid grid-cols-2 md:grid-cols-4 divide-x divide-white/10">
+    <div class="reveal p-6 text-center"><div class="font-display text-4xl font-bold grad-text" data-count="1">1</div><div class="text-white/50 text-sm mt-1">place for everything</div></div>
+    <div class="reveal p-6 text-center"><div class="font-display text-4xl font-bold grad-text" data-count="0">0</div><div class="text-white/50 text-sm mt-1">paper forms</div></div>
+    <div class="reveal p-6 text-center"><div class="font-display text-4xl font-bold grad-text" data-count="6">0</div><div class="text-white/50 text-sm mt-1">roles, each their own view</div></div>
+    <div class="reveal p-6 text-center"><div class="font-display text-4xl font-bold grad-text"><span data-count="5">0</span>min</div><div class="text-white/50 text-sm mt-1">to learn the basics</div></div>
+  </div>
+</section>
+
+<!-- ===== INTERACTIVE FLIP FEATURES ===== -->
+<section id="features" class="max-w-7xl mx-auto px-5 sm:px-8 py-16">
+  <div class="text-center max-w-2xl mx-auto reveal">
+    <h2 class="font-display text-4xl sm:text-5xl font-bold">Tap a card to see how it helps.</h2>
+    <p class="text-white/60 mt-3 text-lg">The whole clinic, broken into simple, friendly pieces.</p>
+  </div>
+  <div class="scene grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-10">
+    <!-- each card flips -->
+    <div class="flip-host h-52" data-flip><div class="flip relative w-full h-full">
+      <div class="face absolute inset-0 glass rounded-3xl p-6 flex flex-col justify-between"><span class="material-symbols-rounded text-glow-300 text-3xl">calendar_month</span><div><h3 class="font-display font-bold text-lg">Bookings</h3><p class="text-white/50 text-sm">Tap to flip →</p></div></div>
+      <div class="back absolute inset-0 glass-strong rounded-3xl p-6 flex items-center"><p class="text-white/80 text-sm">A clear diary with walk-ins and a waitlist that quietly fills your empty slots.</p></div>
+    </div></div>
+    <div class="flip-host h-52" data-flip><div class="flip relative w-full h-full">
+      <div class="face absolute inset-0 glass rounded-3xl p-6 flex flex-col justify-between"><span class="material-symbols-rounded text-glow-300 text-3xl">how_to_reg</span><div><h3 class="font-display font-bold text-lg">Consent</h3><p class="text-white/50 text-sm">Tap to flip →</p></div></div>
+      <div class="back absolute inset-0 glass-strong rounded-3xl p-6 flex items-center"><p class="text-white/80 text-sm">The right form, signed on a tablet before you start — so you're always covered.</p></div>
+    </div></div>
+    <div class="flip-host h-52" data-flip><div class="flip relative w-full h-full">
+      <div class="face absolute inset-0 glass rounded-3xl p-6 flex flex-col justify-between"><span class="material-symbols-rounded text-glow-300 text-3xl">edit_note</span><div><h3 class="font-display font-bold text-lg">Charting</h3><p class="text-white/50 text-sm">Tap to flip →</p></div></div>
+      <div class="back absolute inset-0 glass-strong rounded-3xl p-6 flex items-center"><p class="text-white/80 text-sm">Map your treatment, add before/after photos, and it remembers it all next time.</p></div>
+    </div></div>
+    <div class="flip-host h-52" data-flip><div class="flip relative w-full h-full">
+      <div class="face absolute inset-0 glass rounded-3xl p-6 flex flex-col justify-between"><span class="material-symbols-rounded text-glow-300 text-3xl">payments</span><div><h3 class="font-display font-bold text-lg">Payments &amp; memberships</h3><p class="text-white/50 text-sm">Tap to flip →</p></div></div>
+      <div class="back absolute inset-0 glass-strong rounded-3xl p-6 flex items-center"><p class="text-white/80 text-sm">Tap to pay at the chair, and set up memberships that renew on their own.</p></div>
+    </div></div>
+    <div class="flip-host h-52" data-flip><div class="flip relative w-full h-full">
+      <div class="face absolute inset-0 glass rounded-3xl p-6 flex flex-col justify-between"><span class="material-symbols-rounded text-glow-300 text-3xl">forum</span><div><h3 class="font-display font-bold text-lg">Reminders</h3><p class="text-white/50 text-sm">Tap to flip →</p></div></div>
+      <div class="back absolute inset-0 glass-strong rounded-3xl p-6 flex items-center"><p class="text-white/80 text-sm">Texts and emails go out on their own, so far fewer people forget to show up.</p></div>
+    </div></div>
+    <div class="flip-host h-52" data-flip><div class="flip relative w-full h-full">
+      <div class="face absolute inset-0 glass rounded-3xl p-6 flex flex-col justify-between"><span class="material-symbols-rounded text-glow-300 text-3xl">inventory_2</span><div><h3 class="font-display font-bold text-lg">Stock &amp; fridge</h3><p class="text-white/50 text-sm">Tap to flip →</p></div></div>
+      <div class="back absolute inset-0 glass-strong rounded-3xl p-6 flex items-center"><p class="text-white/80 text-sm">Know what's in stock and that your fridge stayed cold — no clipboard required.</p></div>
+    </div></div>
+  </div>
+</section>
+
+<!-- ===== EXPLORE: interactive pill switcher with 3D preview ===== -->
+<section id="explore" class="py-16 bg-plum-800/40">
+  <div class="max-w-7xl mx-auto px-5 sm:px-8">
+    <div class="text-center max-w-2xl mx-auto reveal">
+      <h2 class="font-display text-4xl font-bold">Take a peek inside.</h2>
+      <p class="text-white/60 mt-3 text-lg">Choose a part of the app to see what it looks like.</p>
+    </div>
+    <div class="flex flex-wrap justify-center gap-2 mt-8">
+      <button data-view="today" class="pill on px-5 py-2.5 rounded-full font-semibold text-white/70">Today</button>
+      <button data-view="client" class="pill px-5 py-2.5 rounded-full font-semibold text-white/70">Client</button>
+      <button data-view="chart" class="pill px-5 py-2.5 rounded-full font-semibold text-white/70">Charting</button>
+      <button data-view="pay" class="pill px-5 py-2.5 rounded-full font-semibold text-white/70">Checkout</button>
+    </div>
+    <div class="scene mt-8 max-w-3xl mx-auto">
+      <div id="exploreCard" class="glass-strong rounded-[2rem] p-6 sm:p-8 shadow-card" style="transition:transform .4s"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== WHY SIMPLE ===== -->
+<section id="simple" class="max-w-7xl mx-auto px-5 sm:px-8 py-16">
+  <div class="grid lg:grid-cols-2 gap-12 items-center">
+    <div class="reveal">
+      <h2 class="font-display text-4xl font-bold">Built for clinic teams, not techies.</h2>
+      <p class="text-white/70 mt-4 text-lg leading-relaxed">No training manuals. No “admin mode”. Big buttons, plain words, and a layout that follows the way your day actually flows.</p>
+      <ul class="mt-6 space-y-4">
+        <li class="flex gap-3"><span class="material-symbols-rounded text-glow-400">touch_app</span><div><b>If you can use a phone, you can use this.</b><div class="text-white/60 text-sm">Most people get the basics in about five minutes.</div></div></li>
+        <li class="flex gap-3"><span class="material-symbols-rounded text-glow-400">visibility_off</span><div><b>Only see what you need.</b><div class="text-white/60 text-sm">Reception never sees the takings; nurses get the clinical screens.</div></div></li>
+        <li class="flex gap-3"><span class="material-symbols-rounded text-glow-400">devices</span><div><b>Works where you work.</b><div class="text-white/60 text-sm">On the desk, on a tablet in the room, or on your phone.</div></div></li>
+      </ul>
+    </div>
+    <div class="reveal scene">
+      <div data-tiltcard class="glass-strong rounded-[2rem] p-8" style="transform-style:preserve-3d;transition:transform .15s">
+        <div class="text-6xl">✨</div>
+        <blockquote class="font-display text-2xl font-bold mt-4 leading-snug">“It's the first system my whole team actually <span class="grad-text">enjoys</span> using.”</blockquote>
+        <div class="mt-4 text-white/60 text-sm">— Mel, clinic owner · <span class="italic">illustrative</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== STAYING SAFE ===== -->
+<section id="safe" class="max-w-7xl mx-auto px-5 sm:px-8 py-16">
+  <div class="glass-strong rounded-[2rem] p-8 sm:p-12 relative overflow-hidden">
+    <div class="orb orb-blur bg-glow-500 size-72 -right-10 -top-10"></div>
+    <div class="relative">
+      <div class="max-w-2xl reveal">
+        <h2 class="font-display text-4xl font-bold">The rules, handled quietly.</h2>
+        <p class="text-white/70 mt-4 text-lg">The paperwork that keeps a cosmetic clinic safe is built in — so you can focus on your clients, not the fine print.</p>
+      </div>
+      <div class="grid sm:grid-cols-3 gap-5 mt-8">
+        <div class="reveal glass rounded-2xl p-6"><span class="material-symbols-rounded text-glow-300 text-3xl">verified_user</span><h3 class="font-display font-bold mt-3">Can't-skip checklist</h3><p class="text-white/60 text-sm mt-1.5">Consent and sign-offs come before treatment, every time.</p></div>
+        <div class="reveal glass rounded-2xl p-6"><span class="material-symbols-rounded text-glow-300 text-3xl">history_edu</span><h3 class="font-display font-bold mt-3">A neat record</h3><p class="text-white/60 text-sm mt-1.5">Who did what, and when — kept tidy and ready if asked.</p></div>
+        <div class="reveal glass rounded-2xl p-6"><span class="material-symbols-rounded text-glow-300 text-3xl">campaign</span><h3 class="font-display font-bold mt-3">Safer marketing</h3><p class="text-white/60 text-sm mt-1.5">A friendly nudge if a post uses wording that isn't allowed.</p></div>
+      </div>
+      <p class="reveal text-white/50 text-sm mt-6">Designed around Australian rules for cosmetic clinics — TGA, AHPRA, S4 medicines and privacy.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PRICING ===== -->
+<section id="pricing" class="max-w-3xl mx-auto px-5 sm:px-8 py-16 text-center">
+  <div class="reveal scene">
+    <div data-tiltcard class="glass-strong rounded-[2rem] p-10 sm:p-14" style="transform-style:preserve-3d;transition:transform .15s">
+      <div class="text-5xl">🌙</div>
+      <h2 class="font-display text-4xl font-bold mt-4">See it on your own clinic.</h2>
+      <p class="text-white/70 mt-3 max-w-lg mx-auto">Book a relaxed walkthrough and we'll tailor pricing to your sites and team. No commitment, no jargon.</p>
+      <a href="#contact" class="inline-flex items-center gap-2 mt-7 px-7 py-4 rounded-full font-semibold bg-gradient-to-br from-glow-400 to-iris-500 shadow-glow hover:-translate-y-0.5 transition"><span class="material-symbols-rounded">auto_awesome</span> Book a demo</a>
+      <p class="text-white/40 text-xs mt-4">Concept pricing — tailored per clinic during onboarding.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FAQ ===== -->
+<section class="max-w-3xl mx-auto px-5 sm:px-8 pb-16">
+  <h2 class="font-display text-3xl font-bold text-center reveal mb-8">Good to know</h2>
+  <div class="space-y-3">
+    <details class="reveal glass rounded-2xl p-5" open><summary class="flex items-center justify-between font-display font-bold">Will my team find it easy?<span class="faq-ico material-symbols-rounded text-glow-300">add</span></summary><p class="text-white/70 mt-3">Yes — it's designed for clinic staff, not IT. Most people learn the basics in minutes.</p></details>
+    <details class="reveal glass rounded-2xl p-5"><summary class="flex items-center justify-between font-display font-bold">Can everyone see the money?<span class="faq-ico material-symbols-rounded text-glow-300">add</span></summary><p class="text-white/70 mt-3">No — only the owner sees the takings. Everyone else gets the screens that suit their job.</p></details>
+    <details class="reveal glass rounded-2xl p-5"><summary class="flex items-center justify-between font-display font-bold">Is there an app?<span class="faq-ico material-symbols-rounded text-glow-300">add</span></summary><p class="text-white/70 mt-3">Yes — apps for your team and your clients, plus a tablet-friendly web app for the clinic.</p></details>
+    <details class="reveal glass rounded-2xl p-5"><summary class="flex items-center justify-between font-display font-bold">Can I try it first?<span class="faq-ico material-symbols-rounded text-glow-300">add</span></summary><p class="text-white/70 mt-3">Absolutely — <a href="prototype.html" class="text-glow-300 underline font-semibold">explore the live demo</a> any time.</p></details>
+  </div>
+</section>
+
+<footer id="contact" class="border-t border-white/10">
+  <div class="max-w-5xl mx-auto px-5 sm:px-8 py-14 text-center">
+    <h2 class="font-display text-4xl font-bold">Ready to glow up your admin?</h2>
+    <div class="flex flex-wrap justify-center gap-3 mt-6">
+      <a href="prototype.html" class="px-6 py-3.5 rounded-full font-semibold bg-gradient-to-br from-glow-400 to-iris-500 shadow-glow hover:-translate-y-0.5 transition">See it live</a>
+      <a href="index.html" class="px-6 py-3.5 rounded-full font-semibold glass hover:glass-strong transition">See other concepts</a>
+    </div>
+  </div>
+  <div class="border-t border-white/10 text-center py-5 text-xs text-white/40">© 2026 Lumea (concept) · Marketing concept C “Halo” · All names &amp; data are synthetic.</div>
+</footer>
+
+<script>
+(function(){
+  var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var nav=document.getElementById('nav');
+  function onNav(){ if(scrollY>16)nav.classList.add('scrolled');else nav.classList.remove('scrolled'); }
+
+  var reveals=[].slice.call(document.querySelectorAll('.reveal'));
+  reveals.forEach(function(el,i){ el.style.transitionDelay=((i%6)*55)+'ms'; });
+  function inView(el,m){ var r=el.getBoundingClientRect(); var vh=innerHeight||document.documentElement.clientHeight; return r.top<(vh-(m||0))&&r.bottom>0; }
+  function checkReveals(){ for(var i=reveals.length-1;i>=0;i--){ if(reduce||inView(reveals[i],50)){ reveals[i].classList.add('in'); reveals.splice(i,1);} } }
+
+  /* count-up */
+  var counters=[].slice.call(document.querySelectorAll('[data-count]'));
+  function countUp(el){ var t=parseInt(el.getAttribute('data-count'),10)||0; if(reduce){el.textContent=t;return;} var s=null; function step(ts){ if(!s)s=ts; var k=Math.min((ts-s)/1100,1); el.textContent=Math.round((1-Math.pow(1-k,3))*t); if(k<1)requestAnimationFrame(step);} requestAnimationFrame(step); }
+  function checkCounters(){ for(var i=counters.length-1;i>=0;i--){ if(reduce||inView(counters[i],60)){ countUp(counters[i]); counters.splice(i,1);} } }
+
+  /* 3D phone: drag to rotate, auto-spin until touched */
+  var phone=document.getElementById('phone');
+  if(phone && !reduce){
+    var rx=6, ry=-18, down=false, lx=0, ly=0;
+    function apply(){ phone.style.transform='rotateX('+rx+'deg) rotateY('+ry+'deg)'; }
+    phone.addEventListener('pointerdown',function(e){ down=true; phone.classList.remove('autospin'); lx=e.clientX; ly=e.clientY; phone.setPointerCapture(e.pointerId); });
+    phone.addEventListener('pointermove',function(e){ if(!down)return; ry+=(e.clientX-lx)*0.5; rx-=(e.clientY-ly)*0.4; rx=Math.max(-30,Math.min(30,rx)); lx=e.clientX; ly=e.clientY; apply(); });
+    phone.addEventListener('pointerup',function(){ down=false; });
+  }
+
+  /* flip cards */
+  document.querySelectorAll('[data-flip]').forEach(function(host){
+    var card=host.querySelector('.flip');
+    host.addEventListener('click',function(){ card.classList.toggle('flipped'); });
+    host.style.cursor='pointer';
+  });
+
+  /* explore switcher */
+  var views={
+    today:{t:'Today',rows:[['calendar_today','Emma · anti-wrinkle · 9:00'],['groups','Jo · skin consult · 10:30'],['checklist','2 follow-ups to call']]},
+    client:{t:'Emma — client profile',rows:[['history','Last visit: 6 weeks ago'],['photo_library','Before/after photos'],['favorite','Glow Membership · active']]},
+    chart:{t:'Charting',rows:[['draw','5 injection sites mapped'],['vaccines','Botulinum · 32 units'],['photo_camera','Before & after captured']]},
+    pay:{t:'Checkout',rows:[['spa','Anti-wrinkle treatment'],['loyalty','Member discount applied'],['contactless','Tap to pay']]}
+  };
+  var card=document.getElementById('exploreCard');
+  function setView(k){
+    var v=views[k]; if(!v||!card) return;
+    card.innerHTML='<div class="flex items-center justify-between mb-4"><div class="font-display font-bold text-lg">'+v.t+'</div><span class="material-symbols-rounded text-glow-300">smartphone</span></div>'+
+      v.rows.map(function(r,i){return '<div class="glass rounded-2xl p-3.5 mb-2.5 flex items-center gap-3"><span class="size-9 rounded-xl bg-gradient-to-br from-glow-500/40 to-iris-500/40 grid place-items-center"><span class="material-symbols-rounded text-glow-200">'+r[0]+'</span></span><span class="text-sm text-white/85">'+r[1]+'</span></div>';}).join('');
+  }
+  document.querySelectorAll('[data-view]').forEach(function(b){
+    b.addEventListener('click',function(){ document.querySelectorAll('[data-view]').forEach(function(x){x.classList.remove('on');}); b.classList.add('on'); setView(b.getAttribute('data-view')); });
+  });
+  setView('today');
+
+  /* light tilt on a few cards */
+  if(!reduce){
+    document.querySelectorAll('[data-tiltcard]').forEach(function(el){
+      el.addEventListener('pointermove',function(e){ var r=el.getBoundingClientRect(); var x=(e.clientX-r.left)/r.width-0.5,y=(e.clientY-r.top)/r.height-0.5; el.style.transform='perspective(900px) rotateY('+(x*8)+'deg) rotateX('+(-y*8)+'deg)'; });
+      el.addEventListener('pointerleave',function(){ el.style.transform=''; });
+    });
+  }
+
+  var ticking=false;
+  function frame(){ onNav(); checkReveals(); checkCounters(); ticking=false; }
+  function pump(){ if(!ticking){ticking=true;requestAnimationFrame(frame);} }
+  addEventListener('scroll',pump,{passive:true});
+  addEventListener('resize',pump,{passive:true});
+  frame();
+  addEventListener('load',function(){ checkReveals(); checkCounters(); });
+})();
+</script>
+</body>
+</html>

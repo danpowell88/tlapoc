@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Lumea · Bloom — soft, friendly clinic software for nurses</title>
+<meta name="description" content="Lumea is friendly, all-in-one software for aesthetic clinics. Bookings, consent, charts, payments and reminders — designed so your team can use it on day one. No tech skills needed."/>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<script>
+tailwind.config={theme:{extend:{
+  fontFamily:{sans:['Inter','system-ui','sans-serif'],display:['Poppins','system-ui','sans-serif']},
+  colors:{rose:{50:'#fff1f2',100:'#ffe4e6',200:'#fecdd2',300:'#fda4af',400:'#fb7185',500:'#f43f5e',600:'#e11d48'},
+    coral:{400:'#fb923c',500:'#f97316'},
+    cream:'#fff8f3', warm:'#43302b', soft:'#8b6f66'},
+  boxShadow:{soft:'0 2px 8px rgba(180,83,60,.08)',card:'0 18px 40px -12px rgba(225,29,72,.22)',lift:'0 30px 60px -18px rgba(225,29,72,.30)'}
+}}}
+</script>
+<script>document.documentElement.classList.add('js')</script>
+<style>
+  html{scroll-behavior:smooth}
+  body{font-family:Inter,sans-serif;-webkit-font-smoothing:antialiased}
+  .font-display{font-family:Poppins,sans-serif}
+  .material-symbols-rounded{font-variation-settings:'FILL' 0,'wght' 400,'opsz' 24}
+  ::selection{background:#fecdd2;color:#9f1239}
+
+  /* reveal (gated on .js, synchronous first pass — never gets stuck hidden) */
+  .js .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+  .js .reveal.in{opacity:1;transform:none}
+
+  /* 3D stage + tilt */
+  .stage{perspective:1100px}
+  .tilt{transform-style:preserve-3d;transition:transform .15s ease-out;will-change:transform}
+  .layer{transform:translateZ(var(--z,0))}
+
+  .blob{filter:blur(40px);border-radius:9999px;position:absolute;opacity:.6}
+  .float{animation:float 6.5s ease-in-out infinite}
+  .float.d1{animation-delay:-2.2s}.float.d2{animation-delay:-4.4s}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+
+  /* friendly squiggle underline */
+  .squiggle{background:linear-gradient(transparent 62%, #fecdd2 62%)}
+
+  /* role tab buttons */
+  .rtab{transition:all .2s}
+  .rtab.on{background:#fff;color:#e11d48;box-shadow:0 8px 20px -8px rgba(225,29,72,.35)}
+
+  /* before/after slider */
+  .ba-wrap{position:relative;overflow:hidden;border-radius:1.25rem;cursor:ew-resize;touch-action:none}
+  .ba-after{position:absolute;inset:0;clip-path:inset(0 0 0 var(--split,50%))}
+  .ba-handle{position:absolute;top:0;bottom:0;left:var(--split,50%);width:2px;background:#fff;box-shadow:0 0 0 1px rgba(225,29,72,.25)}
+  .ba-knob{position:absolute;top:50%;left:var(--split,50%);transform:translate(-50%,-50%);width:42px;height:42px;border-radius:9999px;background:#fff;display:grid;place-items:center;color:#e11d48;box-shadow:0 8px 20px -6px rgba(225,29,72,.45)}
+
+  .lift{transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s}
+  .lift:hover{transform:translateY(-6px)}
+  details>summary{list-style:none;cursor:pointer}details>summary::-webkit-details-marker{display:none}
+  details[open] .faq-ico{transform:rotate(45deg)}.faq-ico{transition:transform .25s}
+  #nav{transition:background .3s,box-shadow .3s,backdrop-filter .3s}
+  #nav.scrolled{background:rgba(255,248,243,.85);backdrop-filter:saturate(180%) blur(12px);box-shadow:0 10px 30px -18px rgba(180,83,60,.4)}
+
+  @media (prefers-reduced-motion:reduce){
+    .js .reveal{opacity:1!important;transform:none!important;transition:none}
+    .float{animation:none}.tilt{transition:none}html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body class="bg-cream text-warm overflow-x-hidden">
+
+<!-- concept ribbon -->
+<div class="bg-rose-500 text-white text-center text-xs py-1.5 font-medium">Marketing concept <b>B · “Bloom”</b> — warm &amp; friendly · <a href="index.html" class="underline">see all concepts</a></div>
+
+<!-- ===== NAV ===== -->
+<header id="nav" class="sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-5 sm:px-8 h-16 flex items-center gap-4">
+    <a href="#home" class="flex items-center gap-2.5">
+      <span class="size-9 rounded-2xl bg-gradient-to-br from-rose-400 to-coral-500 text-white grid place-items-center font-bold shadow-soft">L</span>
+      <span class="font-display text-xl font-bold">Lumea</span>
+    </a>
+    <nav class="hidden lg:flex items-center gap-7 text-sm font-medium text-soft mx-auto">
+      <a href="#how" class="hover:text-rose-600 transition">How it helps</a>
+      <a href="#roles" class="hover:text-rose-600 transition">For your team</a>
+      <a href="#features" class="hover:text-rose-600 transition">What's inside</a>
+      <a href="#care" class="hover:text-rose-600 transition">Staying safe</a>
+      <a href="#pricing" class="hover:text-rose-600 transition">Pricing</a>
+    </nav>
+    <a href="#pricing" class="ml-auto lg:ml-0 px-4 py-2 rounded-full text-sm font-semibold text-white bg-gradient-to-br from-rose-500 to-coral-500 shadow-soft hover:shadow-card transition">Book a friendly demo</a>
+  </div>
+</header>
+
+<!-- ===== HERO ===== -->
+<section id="home" class="relative overflow-hidden pt-12 pb-20">
+  <div class="blob bg-rose-200 size-[30rem] -top-32 -left-24"></div>
+  <div class="blob bg-orange-200 size-[26rem] top-10 -right-24" style="opacity:.5"></div>
+  <div class="relative max-w-7xl mx-auto px-5 sm:px-8 grid lg:grid-cols-2 gap-12 items-center">
+    <div>
+      <div class="reveal inline-flex items-center gap-2 text-sm font-semibold text-rose-600 bg-white rounded-full px-3.5 py-1.5 shadow-soft">
+        <span class="material-symbols-rounded text-rose-400">favorite</span> Made for clinic teams, not IT departments
+      </div>
+      <h1 class="reveal font-display text-5xl sm:text-6xl font-extrabold leading-[1.05] mt-5">
+        Software that feels like <span class="squiggle">a deep breath</span>.
+      </h1>
+      <p class="reveal text-lg text-soft mt-5 max-w-xl leading-relaxed">
+        Lumea brings your bookings, consent forms, treatment notes, payments and reminders into one calm, friendly place — so you can spend less time clicking and more time with the people in your chair.
+      </p>
+      <div class="reveal flex flex-wrap gap-3 mt-8">
+        <a href="#pricing" class="inline-flex items-center gap-2 px-6 py-3.5 rounded-full font-semibold text-white bg-gradient-to-br from-rose-500 to-coral-500 shadow-card hover:-translate-y-0.5 transition">
+          <span class="material-symbols-rounded">waving_hand</span> Book a friendly demo
+        </a>
+        <a href="prototype.html" class="inline-flex items-center gap-2 px-6 py-3.5 rounded-full font-semibold text-rose-700 bg-white shadow-soft hover:shadow-card transition">
+          <span class="material-symbols-rounded">visibility</span> Take a look around
+        </a>
+      </div>
+      <div class="reveal flex items-center gap-6 mt-8 text-sm text-soft">
+        <span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-rose-400">schedule</span> Ready in a morning</span>
+        <span class="inline-flex items-center gap-1.5"><span class="material-symbols-rounded text-rose-400">touch_app</span> If you can use a phone, you can use this</span>
+      </div>
+    </div>
+
+    <!-- 3D tilt card stack -->
+    <div class="stage hidden sm:block">
+      <div id="heroTilt" class="tilt relative h-[28rem] mx-auto max-w-md">
+        <!-- back plate -->
+        <div class="layer absolute inset-4 rounded-[2rem] bg-gradient-to-br from-rose-400 to-coral-500 shadow-lift" style="--z:-60px"></div>
+        <!-- main 'phone' card -->
+        <div class="layer absolute left-1/2 top-6 -translate-x-1/2 w-64 bg-white rounded-[2rem] shadow-card p-4 border-4 border-white" style="--z:10px">
+          <div class="flex items-center justify-between px-1 mb-3"><div class="text-xs font-semibold text-soft">Today</div><span class="material-symbols-rounded text-rose-400 text-lg">wb_sunny</span></div>
+          <div class="space-y-2">
+            <div class="flex items-center gap-2 p-2.5 rounded-2xl bg-rose-50"><span class="size-8 rounded-full bg-rose-200 grid place-items-center text-rose-600 text-xs font-bold">EM</span><div class="flex-1"><div class="text-xs font-semibold">Emma — anti-wrinkle</div><div class="text-[11px] text-soft">9:00 · Room 1</div></div><span class="material-symbols-rounded text-emerald-500 text-base">check_circle</span></div>
+            <div class="flex items-center gap-2 p-2.5 rounded-2xl bg-stone-50"><span class="size-8 rounded-full bg-orange-200 grid place-items-center text-coral-500 text-xs font-bold">JD</span><div class="flex-1"><div class="text-xs font-semibold">Jo — skin consult</div><div class="text-[11px] text-soft">10:30 · Room 2</div></div></div>
+            <div class="flex items-center gap-2 p-2.5 rounded-2xl bg-stone-50"><span class="size-8 rounded-full bg-rose-200 grid place-items-center text-rose-600 text-xs font-bold">AL</span><div class="flex-1"><div class="text-xs font-semibold">Ana — review</div><div class="text-[11px] text-soft">11:15 · Room 1</div></div></div>
+          </div>
+        </div>
+        <!-- floating 'consent done' chip -->
+        <div class="layer float absolute -left-2 top-24 bg-white rounded-2xl shadow-card px-3 py-2.5 flex items-center gap-2" style="--z:80px">
+          <span class="size-8 rounded-full bg-emerald-100 text-emerald-600 grid place-items-center"><span class="material-symbols-rounded text-lg">verified</span></span>
+          <div><div class="text-xs font-bold leading-tight">Consent signed</div><div class="text-[10px] text-soft">no paper today 🎉</div></div>
+        </div>
+        <!-- floating 'paid' chip -->
+        <div class="layer float d1 absolute right-0 bottom-20 bg-white rounded-2xl shadow-card px-3 py-2.5 flex items-center gap-2" style="--z:110px">
+          <span class="size-8 rounded-full bg-rose-100 text-rose-600 grid place-items-center"><span class="material-symbols-rounded text-lg">favorite</span></span>
+          <div><div class="text-xs font-bold leading-tight">Membership renewed</div><div class="text-[10px] text-soft">Emma · auto</div></div>
+        </div>
+        <!-- floating reminder chip -->
+        <div class="layer float d2 absolute left-6 bottom-2 bg-white rounded-2xl shadow-card px-3 py-2.5 flex items-center gap-2" style="--z:60px">
+          <span class="size-8 rounded-full bg-orange-100 text-coral-500 grid place-items-center"><span class="material-symbols-rounded text-lg">sms</span></span>
+          <div><div class="text-xs font-bold leading-tight">Reminders sent</div><div class="text-[10px] text-soft">3 for tomorrow</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== BENEFITS ===== -->
+<section id="how" class="max-w-7xl mx-auto px-5 sm:px-8 py-12">
+  <div class="text-center max-w-2xl mx-auto reveal">
+    <h2 class="font-display text-4xl font-extrabold">Less clicking. More caring.</h2>
+    <p class="text-soft mt-3 text-lg">The boring admin runs quietly in the background, so your day feels lighter.</p>
+  </div>
+  <div class="stage grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-10">
+    <div data-tiltcard class="tilt lift bg-white rounded-3xl p-6 shadow-soft text-center"><span class="size-14 mx-auto rounded-2xl bg-rose-100 text-rose-500 grid place-items-center"><span class="material-symbols-rounded text-3xl">event_available</span></span><h3 class="font-display font-bold text-lg mt-4">Fewer no-shows</h3><p class="text-soft text-sm mt-1">Friendly reminders go out on their own, by text and email.</p></div>
+    <div data-tiltcard class="tilt lift bg-white rounded-3xl p-6 shadow-soft text-center"><span class="size-14 mx-auto rounded-2xl bg-orange-100 text-coral-500 grid place-items-center"><span class="material-symbols-rounded text-3xl">draw</span></span><h3 class="font-display font-bold text-lg mt-4">No more paper</h3><p class="text-soft text-sm mt-1">Consent and forms are signed on a tablet and filed for you.</p></div>
+    <div data-tiltcard class="tilt lift bg-white rounded-3xl p-6 shadow-soft text-center"><span class="size-14 mx-auto rounded-2xl bg-rose-100 text-rose-500 grid place-items-center"><span class="material-symbols-rounded text-3xl">favorite</span></span><h3 class="font-display font-bold text-lg mt-4">Clients come back</h3><p class="text-soft text-sm mt-1">Memberships and gentle nudges keep your regulars glowing.</p></div>
+    <div data-tiltcard class="tilt lift bg-white rounded-3xl p-6 shadow-soft text-center"><span class="size-14 mx-auto rounded-2xl bg-orange-100 text-coral-500 grid place-items-center"><span class="material-symbols-rounded text-3xl">self_improvement</span></span><h3 class="font-display font-bold text-lg mt-4">Calmer evenings</h3><p class="text-soft text-sm mt-1">The books add up and tidy themselves at close.</p></div>
+  </div>
+</section>
+
+<!-- ===== INTERACTIVE ROLE SWITCHER ===== -->
+<section id="roles" class="py-16 bg-white/60">
+  <div class="max-w-7xl mx-auto px-5 sm:px-8">
+    <div class="text-center max-w-2xl mx-auto reveal">
+      <h2 class="font-display text-4xl font-extrabold">Pick who you are 👇</h2>
+      <p class="text-soft mt-3 text-lg">Everyone gets a screen that fits their day — and only sees what they need.</p>
+    </div>
+
+    <div class="flex flex-wrap justify-center gap-2 mt-8">
+      <button data-role="reception" class="rtab on px-5 py-2.5 rounded-full font-semibold text-soft">🤗 Reception</button>
+      <button data-role="nurse" class="rtab px-5 py-2.5 rounded-full font-semibold text-soft">💉 Nurse</button>
+      <button data-role="owner" class="rtab px-5 py-2.5 rounded-full font-semibold text-soft">📊 Owner</button>
+    </div>
+
+    <div class="stage mt-8 max-w-4xl mx-auto">
+      <div class="tilt" data-tiltcard>
+        <div id="rolePanel" class="bg-gradient-to-br from-rose-50 to-orange-50 rounded-[2rem] p-7 sm:p-10 shadow-card grid sm:grid-cols-[1.1fr_1fr] gap-8 items-center">
+          <div>
+            <div id="roleEmoji" class="text-4xl">🤗</div>
+            <h3 id="roleTitle" class="font-display text-2xl font-extrabold mt-3">At the front desk</h3>
+            <p id="roleText" class="text-soft mt-2 leading-relaxed">Check people in with a tap, rebook on the spot, take payment and sell memberships — all without ever touching a number you're not meant to see.</p>
+            <ul id="roleList" class="mt-4 space-y-2 text-sm"></ul>
+          </div>
+          <div id="roleScreen" class="bg-white rounded-2xl shadow-soft p-4 min-h-[200px]"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FEATURES ===== -->
+<section id="features" class="max-w-7xl mx-auto px-5 sm:px-8 py-16">
+  <div class="text-center max-w-2xl mx-auto reveal">
+    <h2 class="font-display text-4xl font-extrabold">Everything your clinic needs, in plain English.</h2>
+    <p class="text-soft mt-3 text-lg">One tidy place for the whole day — from the first hello to the final tap to pay.</p>
+  </div>
+  <div class="stage grid md:grid-cols-3 gap-5 mt-10">
+    <div data-tiltcard class="tilt lift bg-white rounded-3xl p-7 shadow-soft"><span class="material-symbols-rounded text-rose-500 text-3xl">calendar_month</span><h3 class="font-display font-bold text-lg mt-3">Easy booking</h3><p class="text-soft text-sm mt-1.5">A clear diary, walk-ins and a waitlist that fills your gaps for you.</p></div>
+    <div data-tiltcard class="tilt lift bg-white rounded-3xl p-7 shadow-soft"><span class="material-symbols-rounded text-coral-500 text-3xl">how_to_reg</span><h3 class="font-display font-bold text-lg mt-3">Consent, sorted</h3><p class="text-soft text-sm mt-1.5">The right form, signed before you start — so you're always covered.</p></div>
+    <div data-tiltcard class="tilt lift bg-white rounded-3xl p-7 shadow-soft"><span class="material-symbols-rounded text-rose-500 text-3xl">edit_note</span><h3 class="font-display font-bold text-lg mt-3">Treatment notes</h3><p class="text-soft text-sm mt-1.5">Map where you treated, add photos, and it remembers it next visit.</p></div>
+    <div data-tiltcard class="tilt lift bg-white rounded-3xl p-7 shadow-soft"><span class="material-symbols-rounded text-coral-500 text-3xl">inventory_2</span><h3 class="font-display font-bold text-lg mt-3">Stock that counts itself</h3><p class="text-soft text-sm mt-1.5">Know what's in the fridge and what's running low, without a clipboard.</p></div>
+    <div data-tiltcard class="tilt lift bg-white rounded-3xl p-7 shadow-soft"><span class="material-symbols-rounded text-rose-500 text-3xl">contactless</span><h3 class="font-display font-bold text-lg mt-3">Tap to pay</h3><p class="text-soft text-sm mt-1.5">Take payment at the chair and offer memberships in a couple of taps.</p></div>
+    <div data-tiltcard class="tilt lift bg-white rounded-3xl p-7 shadow-soft"><span class="material-symbols-rounded text-coral-500 text-3xl">forum</span><h3 class="font-display font-bold text-lg mt-3">Messages in one inbox</h3><p class="text-soft text-sm mt-1.5">Texts, emails and reminders together — nothing slips through.</p></div>
+  </div>
+</section>
+
+<!-- ===== BEFORE / AFTER INTERACTIVE ===== -->
+<section class="max-w-7xl mx-auto px-5 sm:px-8 py-16">
+  <div class="grid lg:grid-cols-2 gap-12 items-center">
+    <div class="reveal">
+      <h2 class="font-display text-4xl font-extrabold">Show off your beautiful work.</h2>
+      <p class="text-soft mt-4 text-lg leading-relaxed">Snap a photo before and after, right inside the client's record. Slide to compare — your clients will love seeing the difference, and it's all kept neatly together.</p>
+      <p class="text-soft mt-3 text-sm">👇 Give the slider a drag.</p>
+    </div>
+    <div class="reveal stage">
+      <div id="ba" class="ba-wrap shadow-card h-72 select-none">
+        <div class="absolute inset-0 bg-gradient-to-br from-stone-300 to-stone-200 grid place-items-center text-stone-500"><div class="text-center"><span class="material-symbols-rounded text-4xl">face_4</span><div class="text-xs font-semibold mt-1">Before</div></div></div>
+        <div class="ba-after bg-gradient-to-br from-rose-200 to-orange-100 grid place-items-center text-rose-500"><div class="text-center"><span class="material-symbols-rounded text-4xl">face_4</span><div class="text-xs font-semibold mt-1">After ✨</div></div></div>
+        <div class="ba-handle"></div>
+        <div class="ba-knob"><span class="material-symbols-rounded">drag_indicator</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== STAYING SAFE (compliance, plain words) ===== -->
+<section id="care" class="py-16 bg-gradient-to-br from-rose-500 to-coral-500 text-white">
+  <div class="max-w-7xl mx-auto px-5 sm:px-8">
+    <div class="max-w-2xl reveal">
+      <h2 class="font-display text-4xl font-extrabold">We help you stay on the right side of the rules.</h2>
+      <p class="text-white/90 mt-4 text-lg leading-relaxed">The paperwork that keeps a nurse-led clinic safe is built right in. You don't need to remember every rule — Lumea gently checks the boxes for you.</p>
+    </div>
+    <div class="grid sm:grid-cols-3 gap-5 mt-10">
+      <div class="reveal bg-white/15 rounded-3xl p-6 backdrop-blur"><span class="material-symbols-rounded text-3xl">shield</span><h3 class="font-display font-bold text-lg mt-3">A checklist that can't be skipped</h3><p class="text-white/85 text-sm mt-1.5">Consent and the right sign-offs come first, so a treatment can't start without them.</p></div>
+      <div class="reveal bg-white/15 rounded-3xl p-6 backdrop-blur"><span class="material-symbols-rounded text-3xl">history_edu</span><h3 class="font-display font-bold text-lg mt-3">A tidy record of everything</h3><p class="text-white/85 text-sm mt-1.5">Who did what, and when — quietly kept, ready if you're ever asked.</p></div>
+      <div class="reveal bg-white/15 rounded-3xl p-6 backdrop-blur"><span class="material-symbols-rounded text-3xl">campaign</span><h3 class="font-display font-bold text-lg mt-3">Safer social posts</h3><p class="text-white/85 text-sm mt-1.5">A gentle heads-up if a post uses wording that isn't allowed.</p></div>
+    </div>
+    <p class="reveal text-white/80 text-sm mt-6">Built around Australian rules for cosmetic clinics (TGA, AHPRA, S4 medicines &amp; privacy) — in language your team actually understands.</p>
+  </div>
+</section>
+
+<!-- ===== TESTIMONIALS ===== -->
+<section class="max-w-7xl mx-auto px-5 sm:px-8 py-16">
+  <div class="text-center reveal mb-10"><h2 class="font-display text-3xl font-extrabold">Loved by the people who use it every day.</h2><p class="text-soft mt-2">Illustrative — this is a concept with made-up names.</p></div>
+  <div class="stage grid md:grid-cols-3 gap-6">
+    <figure data-tiltcard class="tilt bg-white rounded-3xl p-7 shadow-soft"><div class="text-rose-400 text-2xl">★★★★★</div><blockquote class="mt-3 leading-relaxed">“I'm not techy at all and I had it figured out before lunch. It just makes sense.”</blockquote><figcaption class="mt-4 flex items-center gap-3"><span class="size-10 rounded-full bg-rose-100 text-rose-600 grid place-items-center font-bold">K</span><div class="text-sm"><div class="font-bold">Kim</div><div class="text-soft">Reception</div></div></figcaption></figure>
+    <figure data-tiltcard class="tilt bg-white rounded-3xl p-7 shadow-soft"><div class="text-rose-400 text-2xl">★★★★★</div><blockquote class="mt-3 leading-relaxed">“Charting on the tablet is so quick. My notes and photos are all in one spot now.”</blockquote><figcaption class="mt-4 flex items-center gap-3"><span class="size-10 rounded-full bg-orange-100 text-coral-500 grid place-items-center font-bold">S</span><div class="text-sm"><div class="font-bold">Steph</div><div class="text-soft">Registered Nurse</div></div></figcaption></figure>
+    <figure data-tiltcard class="tilt bg-white rounded-3xl p-7 shadow-soft"><div class="text-rose-400 text-2xl">★★★★★</div><blockquote class="mt-3 leading-relaxed">“The reminders alone paid for it. We barely get no-shows anymore.”</blockquote><figcaption class="mt-4 flex items-center gap-3"><span class="size-10 rounded-full bg-rose-100 text-rose-600 grid place-items-center font-bold">M</span><div class="text-sm"><div class="font-bold">Mel</div><div class="text-soft">Clinic owner</div></div></figcaption></figure>
+  </div>
+</section>
+
+<!-- ===== PRICING ===== -->
+<section id="pricing" class="max-w-5xl mx-auto px-5 sm:px-8 py-16">
+  <div class="text-center reveal"><h2 class="font-display text-4xl font-extrabold">Let's find what fits you.</h2><p class="text-soft mt-3 text-lg">No pressure and no jargon. We'll show you around and put together pricing for your clinic.</p></div>
+  <div class="stage mt-10">
+    <div data-tiltcard class="tilt bg-gradient-to-br from-rose-500 to-coral-500 text-white rounded-[2rem] p-8 sm:p-12 shadow-lift text-center">
+      <div class="text-5xl">☕</div>
+      <h3 class="font-display text-3xl font-extrabold mt-4">A friendly demo, on us</h3>
+      <p class="text-white/90 mt-3 max-w-lg mx-auto">Grab a cuppa and we'll walk you through it — no slides, just your clinic's day, sorted. Pricing is tailored to your sites and team.</p>
+      <a href="#contact" class="inline-flex items-center gap-2 mt-7 px-7 py-4 rounded-full font-semibold text-rose-600 bg-white shadow-card hover:-translate-y-0.5 transition"><span class="material-symbols-rounded">waving_hand</span> Book my demo</a>
+      <p class="text-white/75 text-xs mt-4">Concept pricing — figures are tailored per clinic during onboarding.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FAQ ===== -->
+<section class="max-w-3xl mx-auto px-5 sm:px-8 pb-16">
+  <h2 class="font-display text-3xl font-extrabold text-center reveal mb-8">Questions you might have</h2>
+  <div class="space-y-3">
+    <details class="reveal bg-white rounded-2xl p-5 shadow-soft" open><summary class="flex items-center justify-between font-display font-bold">Is it hard to learn?<span class="faq-ico material-symbols-rounded text-rose-500">add</span></summary><p class="text-soft mt-3">Not at all — most teams are comfortable within a morning. If you can use a phone, you can use Lumea.</p></details>
+    <details class="reveal bg-white rounded-2xl p-5 shadow-soft"><summary class="flex items-center justify-between font-display font-bold">Will my whole team see the money side?<span class="faq-ico material-symbols-rounded text-rose-500">add</span></summary><p class="text-soft mt-3">No. Each person sees only what fits their role — reception can take payments without seeing the clinic's takings.</p></details>
+    <details class="reveal bg-white rounded-2xl p-5 shadow-soft"><summary class="flex items-center justify-between font-display font-bold">Does it work on a tablet?<span class="faq-ico material-symbols-rounded text-rose-500">add</span></summary><p class="text-soft mt-3">Yes — it's lovely on a tablet in the room, and there are apps for you and your clients too.</p></details>
+    <details class="reveal bg-white rounded-2xl p-5 shadow-soft"><summary class="flex items-center justify-between font-display font-bold">Can I see it first?<span class="faq-ico material-symbols-rounded text-rose-500">add</span></summary><p class="text-soft mt-3">Of course — <a href="prototype.html" class="text-rose-600 font-semibold underline">click through the demo</a> or <a href="#contact" class="text-rose-600 font-semibold underline">book a friendly walkthrough</a>.</p></details>
+  </div>
+</section>
+
+<!-- ===== CTA / FOOTER ===== -->
+<footer id="contact" class="bg-warm text-rose-50">
+  <div class="max-w-5xl mx-auto px-5 sm:px-8 py-16 text-center">
+    <div class="text-4xl">🌸</div>
+    <h2 class="font-display text-4xl font-extrabold mt-4">Ready for calmer days?</h2>
+    <p class="text-rose-100/80 mt-3 max-w-xl mx-auto">See how Lumea fits your clinic — no signup needed to look around.</p>
+    <div class="flex flex-wrap justify-center gap-3 mt-7">
+      <a href="prototype.html" class="px-6 py-3.5 rounded-full font-semibold text-rose-600 bg-white hover:-translate-y-0.5 transition shadow-card">Take a look around</a>
+      <a href="index.html" class="px-6 py-3.5 rounded-full font-semibold text-white bg-white/10 border border-white/20 hover:bg-white/20 transition">See other concepts</a>
+    </div>
+  </div>
+  <div class="border-t border-white/10 text-center py-5 text-xs text-rose-100/60">© 2026 Lumea (concept) · Marketing concept B “Bloom” · All names &amp; data are made up.</div>
+</footer>
+
+<script>
+(function(){
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* nav scrolled */
+  var nav=document.getElementById('nav');
+  function onNav(){ if(scrollY>16)nav.classList.add('scrolled');else nav.classList.remove('scrolled'); }
+
+  /* reveals — layout based, synchronous first pass */
+  var reveals=[].slice.call(document.querySelectorAll('.reveal'));
+  reveals.forEach(function(el,i){ el.style.transitionDelay=((i%6)*60)+'ms'; });
+  function inView(el,m){ var r=el.getBoundingClientRect(); var vh=innerHeight||document.documentElement.clientHeight; return r.top<(vh-(m||0))&&r.bottom>0; }
+  function checkReveals(){ for(var i=reveals.length-1;i>=0;i--){ if(reduce||inView(reveals[i],50)){ reveals[i].classList.add('in'); reveals.splice(i,1);} } }
+
+  /* 3D tilt — hero stack + cards (pointer driven = synchronous) */
+  function bindTilt(el, max){
+    if(reduce) return;
+    el.addEventListener('pointermove', function(e){
+      var r=el.getBoundingClientRect();
+      var x=(e.clientX-r.left)/r.width-0.5, y=(e.clientY-r.top)/r.height-0.5;
+      el.style.transform='rotateY('+(x*max)+'deg) rotateX('+(-y*max)+'deg)';
+    });
+    el.addEventListener('pointerleave', function(){ el.style.transform=''; });
+  }
+  var hero=document.getElementById('heroTilt'); if(hero) bindTilt(hero,12);
+  document.querySelectorAll('[data-tiltcard]').forEach(function(el){ bindTilt(el,7); });
+
+  /* role switcher */
+  var roleData={
+    reception:{emoji:'🤗',title:'At the front desk',text:"Check people in with a tap, rebook on the spot, take payment and sell memberships — all without ever touching a number you're not meant to see.",list:['Check-in &amp; rebooking','Take payments &amp; memberships','Send a quick message'],screen:['Check-in','Rebook','Payment']},
+    nurse:{emoji:'💉',title:'In the treatment room',text:'Open the client, see their history, map your treatment and snap before/after photos — then it all saves itself to their record.',list:['Treatment notes &amp; mapping','Before/after photos','History at a glance'],screen:['Client 360','Injection map','Photos']},
+    owner:{emoji:'📊',title:'Running the clinic',text:'See how the clinic is doing at a glance, keep your team’s paperwork in order, and watch the numbers tidy themselves into your accounts.',list:['Simple dashboards','Team &amp; compliance board','Books that match your accountant'],screen:['Overview','Compliance','Reports']}
+  };
+  var panel={emoji:document.getElementById('roleEmoji'),title:document.getElementById('roleTitle'),text:document.getElementById('roleText'),list:document.getElementById('roleList'),screen:document.getElementById('roleScreen')};
+  function setRole(key){
+    var d=roleData[key]; if(!d) return;
+    panel.emoji.textContent=d.emoji; panel.title.textContent=d.title; panel.text.textContent=d.text;
+    panel.list.innerHTML=d.list.map(function(t){return '<li class="flex items-center gap-2"><span class="material-symbols-rounded text-rose-500 text-lg">check_circle</span>'+t+'</li>';}).join('');
+    panel.screen.innerHTML='<div class="text-xs font-semibold text-soft mb-2">'+d.title+'</div>'+d.screen.map(function(t,i){var bg=i===0?'bg-rose-50':'bg-stone-50';return '<div class="flex items-center gap-2 p-2.5 rounded-xl '+bg+' mb-2"><span class="size-7 rounded-lg bg-rose-200 text-rose-600 grid place-items-center"><span class="material-symbols-rounded text-base">chevron_right</span></span><div class="h-2.5 rounded bg-stone-300" style="width:'+(70-i*12)+'%"></div></div>';}).join('');
+  }
+  document.querySelectorAll('[data-role]').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('[data-role]').forEach(function(x){x.classList.remove('on');});
+      b.classList.add('on'); setRole(b.getAttribute('data-role'));
+    });
+  });
+  setRole('reception');
+
+  /* before/after slider */
+  var ba=document.getElementById('ba');
+  if(ba){
+    var dragging=false;
+    function setSplit(clientX){ var r=ba.getBoundingClientRect(); var p=Math.max(0,Math.min(100,((clientX-r.left)/r.width)*100)); ba.style.setProperty('--split',p+'%'); }
+    ba.addEventListener('pointerdown',function(e){dragging=true;setSplit(e.clientX);ba.setPointerCapture(e.pointerId);});
+    ba.addEventListener('pointermove',function(e){if(dragging)setSplit(e.clientX);});
+    ba.addEventListener('pointerup',function(){dragging=false;});
+    ba.style.setProperty('--split','50%');
+  }
+
+  /* pump */
+  var ticking=false;
+  function frame(){ onNav(); checkReveals(); ticking=false; }
+  function pump(){ if(!ticking){ticking=true;requestAnimationFrame(frame);} }
+  addEventListener('scroll',pump,{passive:true});
+  addEventListener('resize',pump,{passive:true});
+  frame();
+  addEventListener('load',checkReveals);
+})();
+</script>
+</body>
+</html>
