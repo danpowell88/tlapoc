@@ -62,6 +62,7 @@ TGA / QLD-S4 / AHPRA-2025 compliance**. The platform sits in the middle of all t
 - **Dermal therapist** — non-S4 skin services + their charting; **cannot** assess for or administer injectables.
 - **Registered Nurse (RN)** — assesses, administers S4 **on a valid individual prescription**; may hold only **individually-dispensed** S4 (QLD); cannot prescribe or hold bulk stock.
 - **Lead Nurse (senior RN)** — an RN who additionally **oversees stock & the clinical team**; same clinical scope as RN (administers on a valid script; no prescribing/custody), plus stock oversight and stock-expiry concerns.
+- **Designated RN prescriber** *(new role — QLD endorsement available from Sept 2025; see §6.1)* — an RN holding the AHPRA *endorsement for scheduled medicines — designated registered nurse prescriber*, who may **prescribe S2–S4 (incl. cosmetic injectables) in partnership with an authorised prescriber** (doctor/NP), administer on that script, but **not hold bulk S4 stock** unless they are also the on-site custodian. A middle tier between administer-only RN and NP; the `prescribe-S4` capability is gated by the verified endorsement **and** a recorded partnered prescriber.
 - **Nurse Practitioner (NP) / on-site prescriber** — assesses, **prescribes**, may hold S4 stock on-site, administers.
 - **Remote prescriber (doctor/NP via telehealth)** — synchronous consult + prescribe only; no on-site stock.
 - **Clinic owner (business)** — runs the business: **financials, reporting, configuration & audit**, plus **read-only** oversight of clinical records & stock; **non-clinical by default** (cannot prescribe, chart or hold S4) unless they personally hold the credential (`●*`).
@@ -85,9 +86,12 @@ type, ≥1yr non-cosmetic experience flag, training) live on the staff profile a
 
 > **Access model (rev 3 — see ADR-0017).** Implemented as **capabilities** (atomic permissions that gate
 > API actions) × **concerns** (relevance tags that decide what a role sees first). Built-in roles —
-> **NP, Lead Nurse, RN, dermal, reception, owner(business)**, plus combined **Solo-NP** and **Nurse-led-RN**
-> presets — are compositions of the two; a **custom-role builder** (tick capabilities + concern tiles) is a
-> future addition. The matrix above is the default capability set per role.
+> **NP, Lead Nurse, RN, dermal, reception, owner(business)**, plus combined **Solo-NP**, **Nurse-led-RN**
+> and **Designated-RN-prescriber** presets — are compositions of the two; a **custom-role builder** (tick
+> capabilities + concern tiles) is a future addition. The matrix above is the default capability set per role.
+> The **Designated-RN-prescriber** preset = the RN row **plus** the `prescribe-S4` capability, but that
+> capability stays gated on (a) a verified AHPRA *designated RN prescriber* endorsement and (b) a recorded
+> **partnered authorised prescriber** — without both, it behaves as a plain RN (see §6.1).
 
 ---
 
@@ -244,8 +248,8 @@ These are the differentiator; each must be demonstrably testable. (Detail & sour
 - ★ **C3 — Assessment authorship:** holistic assessment incl. BDD screen recorded by an **RN or NP** before procedure. (AHPRA)
 - ★ **C4 — Credential gating:** RN actions require the ≥1yr-non-cosmetic-experience + training flags; EN region/supervision limits enforceable (config for future EN use). (AHPRA)
 - ★ **C5 — Consent content & capture:** versioned, e-signed, **verbal + written** plain-language consent covering nature, **risks/benefits/alternatives, the practitioner's qualifications, and costs**, without minimising complexity or overstating outcomes; includes complaint info (incl. right to complain to AHPRA despite any NDA); treatment blocked without it. (AHPRA)
-- ★ **C6 — Cooling-off & no-pressure:** under-18 — mandatory **7-day cooling-off** (payment blocked except the consult) and no advertising to minors; all patients — **offer a second consultation**/time to consider and avoid pressure, with a **configurable cooling-off** (some guidance extends the 7 days to adults). (AHPRA)
-- ★ **C7 — Medicines custody:** v1 enforces **Mode A** (on-site prescriber stock ledger; RNs never hold bulk S4). Mode B (pharmacy per-patient) deferred. (QLD MPA/MPMR)
+- ★ **C6 — Cooling-off & no-pressure:** under-18 — mandatory **7-day cooling-off** (payment blocked except the consult) and no advertising to minors; **adults — there is *no* mandatory 7-day cooling-off** (a 2025-rev correction; see §6.1), but the practitioner must give **adequate time to consider** and avoid pressure, and the platform offers a **configurable** cool-off/second-consult for adults as a *clinic policy* setting (not a regulatory mandate). (AHPRA, *Guidelines for registered health practitioners who perform non-surgical cosmetic procedures*, eff. 2 Sept 2025)
+- ★ **C7 — Medicines custody:** v1 enforces **Mode A** (on-site prescriber stock ledger; RNs never hold bulk S4). Mode B (pharmacy per-patient) deferred. Per the QLD clarification (§6.1), Mode A requires the custodian to be a **prescriber who physically works at the clinic and holds *exclusive* custody and control** of the stock (a remote prescriber consigning stock to a nurse-led clinic is **non-compliant**); record the **custodian + exclusive-custody attestation** and the appointed **designated medicine store/management contact**. (QLD MPA 2019 / Medicines Regulation 2021)
 - ★ **C8 — Traceability & recall:** batch-lot + expiry recorded at every administration; lot→clients lookup for adverse events/recalls. (TGA/clinical)
 - ★ **C9 — Advertising guardrails (broad):** all platform-generated public content — campaigns **and the public booking page (service names & price displays)** — must avoid **direct *or indirect*** references to the S4: no brand names, nicknames or blurred logos (Botox/"babytox"), no generic substance/service terms a consumer would read as promoting the medicine ("anti-wrinkle injections", "wrinkle-reducing injections", "dermal fillers"), no price promotions, no banned hashtags (#botox), no promotional before/after or syringe/treatment imagery referencing the S4; insert mandatory health warnings where ads are permitted; applies to historical content too. No influencer testimonials; no under-18 targeting. (TGA + AHPRA)
 - ★ **C10 — Residency, audit & retention:** AU-hosted PHI; full audit trail; retention configured to obligations. (Privacy Act / record-keeping)
@@ -263,6 +267,92 @@ These are the differentiator; each must be demonstrably testable. (Detail & sour
 - ★ **C22 — Notifiable Data Breaches:** detect/assess eligible breaches; notify **OAIC + affected individuals**; maintain a breach register. (NDB scheme)
 - ★ **C23 — Marketing consent (Spam Act):** opt-in consent for commercial electronic messages, sender identification and a **functional unsubscribe**; suppress on withdrawal. (Spam Act)
 - ★ **C24 — Complaints register & pathways:** record complaints/adverse outcomes and surface complaint mechanisms incl. **AHPRA** (and that an NDA does not remove that right). (AHPRA)
+
+---
+
+## 6.1 QLD / national regulatory re-review — gaps & corrections (2026-06-20)
+
+> A fresh re-read of the live Queensland & national standards (not the earlier captured summary) against
+> C1–C24. The framework held up well; the items below are the **deltas** — one new role, four corrections,
+> and two scoping reconciliations — each traced to the criterion/REQ it changes. Sources are in
+> [market research §4 (Regulatory & compliance) + Sources](01-market-research.md).
+
+**Primary instruments checked:** AHPRA *Guidelines for registered health practitioners who perform
+non-surgical cosmetic procedures* and *Guidelines for advertising higher-risk non-surgical cosmetic
+procedures* (**both effective 2 Sept 2025**, replacing the NMBA *Nurses and cosmetic medical procedures*
+position statement); Medical Board *cosmetic surgery & procedures* guidelines (separate, for **doctors**);
+QLD *Medicines and Poisons Act 2019* + *Medicines and Poisons (Medicines) Regulation 2021* and the QLD
+Health **cosmetic-injectables fact sheet** (Dec 2024; clarified Apr 2025); TGA advertising guidance
+(2024 → June 2025 → Nov 2025 social-media update → **2026–27 Compliance Principles**); TGA device
+adverse-event reporting (**ASDER, mandatory 21 Mar 2026**); compounded-GLP-1 prohibition (1 Oct 2024).
+
+### GAP-1 ★ NEW ROLE — Designated RN prescriber (QLD endorsement, from Sept 2025)
+QLD now recognises a **third** prescriber path between administer-only RN and NP: an RN with the AHPRA
+*endorsement for scheduled medicines — designated registered nurse prescriber* may **prescribe S2–S4
+(incl. cosmetic injectables) in partnership with an authorised prescriber** (doctor/NP). Eligibility ≈
+general RN registration with no relevant conditions + **5,000 hrs clinical experience in 6 yrs** + approved
+education; verified on the AHPRA register.
+*Impact:* add to §3 personas + scope presets (done); the credential engine (REQ-TEN-4/7, C4/C19) must
+store/verify this endorsement and a **partnered prescriber** before unlocking `prescribe-S4`; the consult/Rx
+model (RX, C1–C2) gains this as a compliant prescriber identity; the operating-model switch (REQ-MED-1,
+C7) gains a third mode. **Recommend a new ADR** ("designated RN prescriber as a gated capability over the
+RN role"). *(This is the single biggest gap — the rest of the doc assumed only RN-administer / NP / remote
+telehealth prescribers.)*
+
+### GAP-2 — Correction: **no mandatory adult cooling-off** (fixes C6)
+The finalised AHPRA guidelines mandate the **7-day cooling-off for under-18s only**. For adults there is
+**no** regulatory 7-day mandate — only an obligation to allow adequate time and avoid pressure. The old C6
+phrasing ("some guidance extends the 7 days to adults") was wrong and is corrected; adult cool-off is a
+**clinic-policy setting**, not a compliance gate.
+
+### GAP-3 — Sharper QLD custody rule (fixes C7 / REQ-MED-2)
+The custodian must be a **prescriber who physically works at the clinic and holds *exclusive* custody &
+control** of stock; a prescriber **cannot consign/supply stock** to a clinic where they lack that exclusive
+custody — this **breaks the legacy "remote telehealth doctor + nurse-held stock" model** (~600 QLD clinics
+affected). RNs/ENs/admin **cannot buy** S4 at all; an RN may only **possess** S4 *to administer it*. Also:
+appoint a **designated medicine store/management contact**, and hold an **infection-control management plan**
+under the QLD *Public Health Act 2005*. (Wording "exclusive/joint custody" → **exclusive**.)
+
+### GAP-4 — Practitioner thresholds + exclusions made explicit (extends C4 / REQ-TEN-4/7)
+Encode precisely: **RN** ≥1 yr FT general/specialist nursing (excluding cosmetic injectables) *before*
+entering cosmetics + specialised training + **ongoing cosmetic-specific CPD**; **EN** entry level deemed
+inadequate — if practising, ≥1 yr FTE post-registration + ≥1 yr FTE in a related area + training +
+**ongoing RN supervision**; **midwives cannot** perform cosmetic procedures; **doctors are governed by the
+Medical Board guidelines, not these** (the scope model must distinguish prescriber *type*).
+
+### GAP-5 — Advertising: newer prohibited content & reach (extends C9 / REQ-NOTIF-4)
+Add to the linter: **facial-mapping / treatment-animation imagery** is promotional (June 2025);
+**disguised "educational" content carrying a call-to-action** is still advertising; the **Nov 2025 TGA
+social-media update** targets influencer-style promotion (cosmetic injectables *and* Ozempic); permitted
+social ads must be flagged **adult content**; the AHPRA advertising guideline binds **marketing agencies and
+influencers**, not just the practitioner. Carve-out: advertising **exclusively to health professionals**
+(s42AA) is permitted. Cosmetic injectables remain a **named TGA enforcement priority for 2026–27**.
+
+### RECON-1 — Device adverse-event mandatory reporting (ASDER) scoped out for v1 (clarifies C12)
+Mandatory device-AE reporting via **ASDER (from 21 Mar 2026)** applies **only to public/private hospitals
+and licensed *day hospitals*** — **not** to a non-surgical injectables clinic. For our target clinic, device
+AE reporting (DAEN) stays **voluntary but strongly encouraged**; the mandatory-ASDER flag fires **only** if
+the tenant is a licensed day hospital. (Reconciles the prototype's earlier removal of "ASDER mandatory
+reporting" with C12 — C12 stays, gated behind a tenant facility-type flag, default off.)
+
+### RECON-2 — NSQHS / cosmetic-surgery facility accreditation **not required** for non-surgical (clarifies C20 / REQ-FAC-1)
+The **National Safety & Quality Cosmetic Surgery Standards** and **private-health-facility licensing**
+(QLD, since 2018) apply to **cosmetic *surgery*** in licensed facilities — **not** to a non-surgical
+injectables clinic. So C20/REQ-FAC-1 should treat ACSQHC/NSQHS accreditation as **optional / conditional**
+(only if the clinic also performs licensed surgical procedures). What **is** required for our clinic:
+the **infection-control management plan** (QLD *Public Health Act 2005*), emergency kit/continuity-of-care,
+and the general clinical-governance/record-keeping already specified.
+
+### WATCH-1 ★ — Single-product telehealth prescribing under national review
+The Sept-2025 Health Ministers' Meeting tasked the Commonwealth/TGA to **review single-product telehealth
+prescribing** of cosmetic injectables and report back **Dec 2025**, with QLD pushing for nationally
+consistent rules. The **remote-telehealth-prescriber path (REQ-RX-4) is a regulatory risk, not a stable
+assumption** — keep the prescriber model configurable; a national restriction would elevate the on-site-NP
+and designated-RN-prescriber models (GAP-1).
+
+### Confirmed still-current (no change): compounded-GLP-1 prohibition (1 Oct 2024) remains in force →
+REQ-MED-12 stands; ARTG/lawful-supply (C11), cold-chain 2–8 °C (C13) and consult-gating/individual-scripts
+(C1–C2) all align with the live standards.
 
 ---
 
