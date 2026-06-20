@@ -52,6 +52,34 @@
       </div>
     </div>
 
+    <div>
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-semibold text-slate-600">Palette</span>
+        <button id="resetPalette" class="text-[11px] text-slate-400 hover:text-slate-600">Reset to theme</button>
+      </div>
+      <div class="mt-1.5 grid grid-cols-5 gap-2">
+        <label class="flex flex-col items-center gap-1 text-[10px] text-slate-500">Page<input id="c-bg" type="color" class="w-full h-8 rounded-lg border border-slate-200 bg-white p-0.5 cursor-pointer"></label>
+        <label class="flex flex-col items-center gap-1 text-[10px] text-slate-500">Cards<input id="c-surface" type="color" class="w-full h-8 rounded-lg border border-slate-200 bg-white p-0.5 cursor-pointer"></label>
+        <label class="flex flex-col items-center gap-1 text-[10px] text-slate-500">Text<input id="c-text" type="color" class="w-full h-8 rounded-lg border border-slate-200 bg-white p-0.5 cursor-pointer"></label>
+        <label class="flex flex-col items-center gap-1 text-[10px] text-slate-500">Muted<input id="c-muted" type="color" class="w-full h-8 rounded-lg border border-slate-200 bg-white p-0.5 cursor-pointer"></label>
+        <label class="flex flex-col items-center gap-1 text-[10px] text-slate-500">Border<input id="c-border" type="color" class="w-full h-8 rounded-lg border border-slate-200 bg-white p-0.5 cursor-pointer"></label>
+      </div>
+    </div>
+
+    <label class="block">
+      <span class="text-xs font-semibold text-slate-600">Font</span>
+      <select id="c-font" class="mt-1 w-full px-2.5 py-2 rounded-xl border border-slate-200 text-sm bg-white">
+        <option value="">System default</option>
+        <option value="Inter" selected>Inter</option>
+        <option value="Poppins">Poppins</option>
+        <option value="Montserrat">Montserrat</option>
+        <option value="Nunito">Nunito</option>
+        <option value="DM Sans">DM Sans</option>
+        <option value="Playfair Display">Playfair Display (serif)</option>
+        <option value="Lora">Lora (serif)</option>
+      </select>
+    </label>
+
     <label class="block">
       <span class="text-xs font-semibold text-slate-600 flex justify-between">Corner radius <span id="c-radius-v" class="text-slate-400 font-normal">18px</span></span>
       <input id="c-radius" type="range" min="0" max="26" value="18" class="mt-1 w-full accent-brand-600">
@@ -186,6 +214,26 @@ let services = [
   { name:'Signature facial',          dur:60, s4:false }
 ];
 
+// theme default palettes (mirror the widget's :root / [data-theme=dark])
+const PALETTES = {
+  light:{bg:'#f6f7f9',surface:'#ffffff',text:'#0f172a',muted:'#64748b',border:'#e2e8f0'},
+  dark :{bg:'#0b1220',surface:'#111a2b',text:'#e8edf5',muted:'#94a3b8',border:'#243149'}
+};
+const COLORKEYS = ['bg','surface','text','muted','border'];
+function setPaletteInputs(theme){ const b=PALETTES[theme]||PALETTES.light; COLORKEYS.forEach(k=> $('#c-'+k).value=b[k]); }
+function curColors(){ const o={}; COLORKEYS.forEach(k=> o[k]=$('#c-'+k).value); return o; }
+function liveColors(){ // page bg only when changed from default -> '' keeps the widget transparent (host bg shows through)
+  const base=PALETTES[$('#c-theme').value]||PALETTES.light, cur=curColors(), o={};
+  ['surface','text','muted','border'].forEach(k=> o[k]=cur[k]);
+  o.bg = cur.bg.toLowerCase()===base.bg.toLowerCase() ? '' : cur.bg;
+  return o;
+}
+function nonDefaultColors(){ // only colours that differ from the current theme default (keeps snippets minimal)
+  const base=PALETTES[$('#c-theme').value]||PALETTES.light, cur=curColors(), out={};
+  COLORKEYS.forEach(k=>{ if(cur[k].toLowerCase()!==base[k].toLowerCase()) out[k]=cur[k]; });
+  return out;
+}
+
 const swatchColors = ['#7c3aed','#0d9488','#e11d48','#2563eb','#d97706','#0f172a'];
 $('#swatches').innerHTML = swatchColors.map(c=>`<button data-c="${c}" class="w-7 h-7 rounded-lg border border-slate-200" style="background:${c}"></button>`).join('');
 $('#swatches').onclick = e => { const b=e.target.closest('[data-c]'); if(!b) return; $('#c-primary').value=b.dataset.c; sync(); };
@@ -222,7 +270,8 @@ function opts(){
     theme:   $('#c-theme').value,
     header:  $('#c-header').checked,
     cta:     $('#c-cta').value || 'Request appointment',
-    mode:    $('#c-mode').value
+    mode:    $('#c-mode').value,
+    font:    $('#c-font').value
   };
 }
 function svcObjects(){
@@ -238,13 +287,18 @@ function svcObjects(){
 let ready=false;
 function pushConfig(){
   if(!ready) return;
-  widget.contentWindow.postMessage({type:'tla:config', config:Object.assign(opts(),{services:svcObjects()})}, '*');
+  widget.contentWindow.postMessage({type:'tla:config', config:Object.assign(opts(), liveColors(), {services:svcObjects()})}, '*');
 }
 
 /* ---- snippet generation ---- */
 function attr(o){ // shared data-* attributes
-  return `data-clinic="${esc(o.clinic)}" data-primary="${o.primary}" data-radius="${o.radius}"`+
-         ` data-theme="${o.theme}" data-mode="${o.mode}" data-cta="${esc(o.cta)}"${o.header?'':' data-header="0"'}`;
+  let a = `data-clinic="${esc(o.clinic)}" data-primary="${o.primary}" data-radius="${o.radius}"`+
+          ` data-theme="${o.theme}" data-mode="${o.mode}" data-cta="${esc(o.cta)}"`;
+  if(!o.header) a += ` data-header="0"`;
+  if(o.font)    a += ` data-font="${esc(o.font)}"`;
+  const nd = nonDefaultColors();
+  Object.keys(nd).forEach(k=> a += ` data-${k}="${nd[k]}"`);
+  return a;
 }
 function configAttr(){ return `data-config='${JSON.stringify({services:svcObjects()})}'`; }
 function iframeURL(o){
@@ -252,6 +306,9 @@ function iframeURL(o){
   const p = new URLSearchParams({clinic:o.clinic, primary:o.primary.replace('#',''), radius:o.radius,
     theme:o.theme, mode:o.mode, cta:o.cta, svc});
   if(!o.header) p.set('header','0');
+  if(o.font)    p.set('font', o.font);
+  const nd = nonDefaultColors();
+  Object.keys(nd).forEach(k=> p.set(k, nd[k].replace('#','')));
   return PROD+'booking-widget.html?'+p.toString();
 }
 function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
@@ -288,11 +345,15 @@ function sync(reRows=true){
 }
 
 /* ---- wire controls ---- */
-['c-clinic','c-primary','c-radius','c-theme','c-mode','c-cta','c-header'].forEach(id=>{
+['c-clinic','c-primary','c-radius','c-mode','c-cta','c-header','c-font',
+ 'c-bg','c-surface','c-text','c-muted','c-border'].forEach(id=>{
   const el=document.getElementById(id);
   el.addEventListener('input', ()=>sync(false));
   el.addEventListener('change', ()=>sync(false));
 });
+// switching theme re-seeds the palette pickers to that theme's defaults
+$('#c-theme').addEventListener('change', ()=>{ setPaletteInputs($('#c-theme').value); sync(false); });
+$('#resetPalette').onclick = ()=>{ setPaletteInputs($('#c-theme').value); sync(false); };
 
 $('#tabs').addEventListener('click', e=>{
   const b=e.target.closest('.tab'); if(!b) return; tab=b.dataset.tab;
@@ -323,7 +384,7 @@ window.addEventListener('message', e=>{
 });
 
 /* ---- boot ---- */
-renderSvc(); renderSnippet();
+setPaletteInputs('light'); renderSvc(); renderSnippet();
 </script>
 </body>
 </html>

@@ -30,15 +30,16 @@
   var WIDGET = BASE + 'booking-widget.html';
 
   // Keys that travel as URL params (simple theming knobs the iframe understands directly).
-  var URL_KEYS = ['clinic','primary','radius','theme','header','cta','mode','font'];
+  var URL_KEYS = ['clinic','primary','radius','theme','header','cta','mode','font','bg','surface','text','muted','border'];
+  var COLOR_KEYS = ['primary','bg','surface','text','muted','border'];
 
   function buildSrc(opts, src){
     var u = new URL(src || WIDGET, location.href);
     URL_KEYS.forEach(function(k){
       if(opts[k]==null || opts[k]==='') return;
       var v = opts[k];
-      if(k==='primary') v = String(v).replace(/^#/,'');
-      if(k==='header')  v = (v===false||v==='false'||v==='0') ? '0' : '1';
+      if(COLOR_KEYS.indexOf(k)>-1) v = String(v).replace(/^#/,'');   // hex without the #
+      if(k==='header') v = (v===false||v==='false'||v==='0') ? '0' : '1';
       u.searchParams.set(k, v);
     });
     return u.toString();

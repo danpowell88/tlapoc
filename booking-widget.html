@@ -4,6 +4,8 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Book an appointment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <!--
   The Lounge Aesthetics — embeddable PUBLIC booking widget (POC).
   Self-contained: scoped CSS (theme via CSS variables), vanilla JS, synthetic data, no network.
@@ -26,26 +28,26 @@
 -->
 <style>
   :root{
+    /* base palette — every one of these can be overridden individually (URL param / config) */
     --p:#0d9488; --on-p:#ffffff;
-    --p-soft:color-mix(in srgb, var(--p) 12%, #fff);
-    --p-line:color-mix(in srgb, var(--p) 38%, #fff);
-    --bg:#f6f7f9; --surface:#ffffff; --surface-2:#f1f5f9;
-    --text:#0f172a; --muted:#64748b; --border:#e2e8f0;
+    /* --bg is intentionally unset by default => body stays transparent and blends into the host page */
+    --surface:#ffffff; --text:#0f172a; --muted:#64748b; --border:#e2e8f0;
+    /* derived — defined once with var() refs so they track any override of the base colours above */
+    --surface-2:color-mix(in srgb, var(--surface) 93%, var(--text));
+    --p-soft:color-mix(in srgb, var(--p) 12%, var(--surface));
+    --p-line:color-mix(in srgb, var(--p) 36%, var(--surface));
     --radius:16px;
-    --font:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --font:system-ui,-apple-system,'Segoe UI',Roboto,Inter,sans-serif;
     --shadow:0 1px 2px rgba(16,24,40,.06),0 6px 22px rgba(16,24,40,.07);
   }
   html[data-theme="dark"]{
-    --on-p:#ffffff;
-    --p-soft:color-mix(in srgb, var(--p) 22%, #0b1220);
-    --p-line:color-mix(in srgb, var(--p) 46%, #0b1220);
-    --bg:#0b1220; --surface:#111a2b; --surface-2:#0e1626;
-    --text:#e8edf5; --muted:#94a3b8; --border:#243149;
+    --surface:#111a2b; --text:#e8edf5; --muted:#94a3b8; --border:#243149;
     --shadow:0 1px 2px rgba(0,0,0,.35),0 14px 34px rgba(0,0,0,.4);
   }
   *{box-sizing:border-box}
-  html,body{margin:0;background:transparent}
-  body{font-family:var(--font);color:var(--text);-webkit-font-smoothing:antialiased;line-height:1.45}
+  button,input,textarea,select{font-family:inherit}   /* form controls don't inherit the font by default */
+  html,body{margin:0}
+  body{font-family:var(--font);color:var(--text);background:var(--bg,transparent);-webkit-font-smoothing:antialiased;line-height:1.45}
   .wrap{max-width:560px;margin:0 auto;background:var(--surface);border:1px solid var(--border);
         border-radius:calc(var(--radius) + 4px);box-shadow:var(--shadow);overflow:hidden}
   /* header */
@@ -205,6 +207,9 @@
     if(q.has('cta'))     c.cta     = q.get('cta');
     if(q.has('mode'))    c.mode    = q.get('mode');
     if(q.has('font'))    c.font    = q.get('font');
+    // individual palette overrides (hex, with or without leading #)
+    ['bg','surface','text','muted','border'].forEach(k=>{ if(q.has(k)) c[k] = '#'+q.get(k).replace(/^#/,''); });
+    if(q.has('onp')) c.onPrimary = '#'+q.get('onp').replace(/^#/,'');
     // compact services:  svc=Name~dur~s4,Name~dur~ns   (clinic-customised public names)
     if(q.has('svc')){
       c.services = q.get('svc').split(',').filter(Boolean).map((s,i)=>{
@@ -227,13 +232,24 @@
     const [r,g,b] = m.map(h=>{ const v=parseInt(h,16)/255; return v<=.03928? v/12.92 : Math.pow((v+.055)/1.055,2.4); });
     return .2126*r + .7152*g + .0722*b;
   }
+  const loadedFonts = {};
+  function loadFont(name){            // inject a Google Fonts stylesheet on demand
+    if(!name || loadedFonts[name]) return; loadedFonts[name] = 1;
+    const l = document.createElement('link'); l.rel = 'stylesheet';
+    l.href = 'https://fonts.googleapis.com/css2?family=' + encodeURIComponent(name).replace(/%20/g,'+') + ':wght@400;500;600;700;800&display=swap';
+    document.head.appendChild(l);
+  }
   function applyTheme(){
     const root = document.documentElement, s = root.style;
     root.setAttribute('data-theme', CFG.theme==='dark'?'dark':'light');
     s.setProperty('--p', CFG.primary);
-    s.setProperty('--on-p', luminance(CFG.primary) > .55 ? '#0f172a' : '#ffffff');
-    s.setProperty('--radius', (Math.max(0,Math.min(28, CFG.radius))||16)+'px');
-    if(CFG.font) s.setProperty('--font', CFG.font + ", 'Inter', system-ui, sans-serif");
+    s.setProperty('--on-p', CFG.onPrimary || (luminance(CFG.primary) > .55 ? '#0f172a' : '#ffffff'));
+    // per-colour overrides — set when provided, else fall back to the theme palette
+    [['bg','--bg'],['surface','--surface'],['text','--text'],['muted','--muted'],['border','--border']]
+      .forEach(([k,v])=>{ CFG[k] ? s.setProperty(v, CFG[k]) : s.removeProperty(v); });
+    s.setProperty('--radius', (Math.max(0,Math.min(28, +CFG.radius))||16)+'px');
+    if(CFG.font && !/^system/i.test(CFG.font)){ loadFont(CFG.font); s.setProperty('--font', "'"+CFG.font+"', 'Inter', system-ui, sans-serif"); }
+    else s.removeProperty('--font');
     document.getElementById('clinicName').textContent = CFG.clinic;
     document.getElementById('logo').textContent = (CFG.clinic.trim()[0]||'·').toUpperCase();
     document.getElementById('head').style.display = CFG.header ? '' : 'none';
