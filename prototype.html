@@ -664,7 +664,7 @@ tailwind.config={theme:{extend:{
 
       <!-- MARKETING & CONVERSATIONS -->
       <section data-screen id="marketing" class="hidden">
-        <div class="mb-4"><h1 class="text-2xl font-semibold">Marketing &amp; conversations</h1><p class="text-mute text-sm">Recall, win-back &amp; two-way messaging — opt-in and advertising-safe</p></div>
+        <div class="mb-4"><h1 class="text-2xl font-semibold">Marketing &amp; conversations</h1><p class="text-mute text-sm">Recall, win-back &amp; two-way messaging — sent to opted-in clients</p></div>
         <div class="flex gap-2 mb-5 text-sm flex-wrap">
           <button onclick="msub('overview')" data-msub="overview" class="msub px-3 py-1.5 rounded-full bg-brand-600 text-white font-medium">Overview</button>
           <button onclick="msub('inbox')" data-msub="inbox" class="msub px-3 py-1.5 rounded-full bg-white shadow-soft text-mute">Inbox</button>
@@ -705,13 +705,12 @@ tailwind.config={theme:{extend:{
               <div id="thread" class="flex-1 p-4 space-y-3 overflow-auto" style="max-height:300px"></div>
               <div id="suggrow" class="px-3 pt-2 flex flex-wrap gap-2"></div>
               <div class="p-3 pt-2">
-                <div id="lintwarn" class="hidden mb-2 text-xs text-rose-600 bg-rose-50 rounded-lg px-3 py-2 flex items-center gap-1"><span class="material-symbols-rounded text-sm">gavel</span><span id="lintmsg"></span></div>
                 <div class="flex gap-2 items-end">
                   <select onchange="tmpl(this.value)" class="text-xs border border-slate-200 rounded-lg px-2 py-2 bg-white shrink-0"><option value="">Template…</option><option value="recall">Recall nudge</option><option value="aftercare">Aftercare</option><option value="rebook">Rebook offer</option></select>
-                  <textarea id="composer" oninput="lintMsg()" rows="1" placeholder="Write a reply…" class="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm resize-none"></textarea>
+                  <textarea id="composer" rows="1" placeholder="Write a reply…" class="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm resize-none"></textarea>
                   <button id="sendbtn" onclick="sendMsg()" class="px-4 py-2 rounded-xl bg-brand-600 text-white text-sm font-medium shrink-0">Send</button>
                 </div>
-                <p class="text-[11px] text-mute mt-1">Replies post back to the original channel · opted-in · advertising-safe (try "Botox").</p>
+                <p class="text-[11px] text-mute mt-1">Replies post back to the original channel · sent to opted-in clients.</p>
               </div>
             </div>
           </div>
@@ -727,31 +726,65 @@ tailwind.config={theme:{extend:{
             <label class="text-xs text-mute">Audience</label>
             <select class="w-full mt-1 mb-3 px-3 py-2 border border-slate-200 rounded-xl text-sm"><option>Lapsed members (128)</option><option>Glow Club (634)</option><option>No visit in 6 mo (310)</option></select>
             <label class="text-xs text-mute">Message</label>
-            <textarea id="campmsg" oninput="lintCamp()" rows="3" class="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-sm" placeholder="Promote the service (not the medicine)…"></textarea>
-            <div id="camplint" class="hidden mt-2 text-xs text-rose-600 bg-rose-50 rounded-lg px-3 py-2"></div>
+            <textarea id="campmsg" rows="3" class="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl text-sm" placeholder="Write your campaign message…"></textarea>
             <button class="w-full mt-3 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-medium">Schedule send</button>
-            <p class="text-[11px] text-mute mt-2">Advertising linter blocks S4 brand/term references (TGA). Sends only to opted-in clients.</p>
+            <p class="text-[11px] text-mute mt-2">Sends only to opted-in clients.</p>
           </div>
         </div>
       </section>
 
       <!-- REPORTS -->
       <section data-screen id="reports" class="hidden">
-        <div class="flex items-center justify-between mb-4 flex-wrap gap-2"><div><h1 class="text-2xl font-semibold">Reports</h1><p class="text-mute text-sm">The Lounge — Brisbane · last 30 days</p></div><div class="flex rounded-xl bg-white shadow-soft text-sm overflow-hidden"><button class="px-3 py-2 text-mute">7d</button><button class="px-3 py-2 bg-brand-50 text-brand-700 font-medium">30d</button><button class="px-3 py-2 text-mute">90d</button></div></div>
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-          <div class="bg-white rounded-2xl shadow-soft p-5"><div class="text-mute text-sm">Revenue</div><div class="text-3xl font-semibold mt-1">$128k</div><div class="text-xs text-emerald-600 mt-1">▲ 9% vs prev</div></div>
-          <div class="bg-white rounded-2xl shadow-soft p-5"><div class="text-mute text-sm">Avg / visit</div><div class="text-3xl font-semibold mt-1">$271</div><div class="text-xs text-mute mt-1">240 visits</div></div>
-          <div class="bg-white rounded-2xl shadow-soft p-5"><div class="text-mute text-sm">New clients</div><div class="text-3xl font-semibold mt-1">42</div><div class="text-xs text-emerald-600 mt-1">▲ 6</div></div>
-          <div class="bg-white rounded-2xl shadow-soft p-5"><div class="text-mute text-sm">Rebooking rate</div><div class="text-3xl font-semibold mt-1">68%</div><div class="text-xs text-emerald-600 mt-1">▲ 3pts</div></div>
-          <div class="bg-white rounded-2xl shadow-soft p-5"><div class="text-mute text-sm">Membership MRR</div><div class="text-3xl font-semibold mt-1">$74.3k</div><div class="text-xs text-mute mt-1">634 members</div></div>
+        <div class="flex items-center justify-between mb-4 flex-wrap gap-2"><div><h1 class="text-2xl font-semibold">Reports</h1><p class="text-mute text-sm">The Lounge — Brisbane · <span id="repPeriodLbl">last 30 days</span> · <span class="text-slate-400">figures synthetic</span></p></div><div id="repPeriod" class="flex rounded-xl bg-white shadow-soft text-sm overflow-hidden"><button onclick="setRepPeriod('7d')" data-rper="7d" class="px-3 py-2 text-mute">7d</button><button onclick="setRepPeriod('30d')" data-rper="30d" class="px-3 py-2 bg-brand-50 text-brand-700 font-medium">30d</button><button onclick="setRepPeriod('90d')" data-rper="90d" class="px-3 py-2 text-mute">90d</button></div></div>
+        <div class="flex items-center gap-2 mb-5 flex-wrap text-sm">
+          <button onclick="goRep('scorecard')" data-rpill="scorecard" class="px-3 py-1.5 rounded-full bg-brand-600 text-white font-medium">Scorecard</button>
+          <button onclick="goRep('revenue')" data-rpill="revenue" class="px-3 py-1.5 rounded-full bg-white shadow-soft text-mute">Revenue</button>
+          <button onclick="goRep('retention')" data-rpill="retention" class="px-3 py-1.5 rounded-full bg-white shadow-soft text-mute">Retention &amp; rebooking</button>
+          <button onclick="goRep('memberships')" data-rpill="memberships" class="px-3 py-1.5 rounded-full bg-white shadow-soft text-mute">Memberships</button>
         </div>
-        <div class="grid grid-cols-3 gap-6 mb-6">
-          <div class="col-span-2 bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Revenue (6 months)</h2><svg viewBox="0 0 480 160" class="w-full"><polyline fill="none" stroke="#0d9488" stroke-width="3" points="0,130 80,108 160,114 240,72 320,66 400,40 480,28"/><polygon fill="#0d9488" opacity=".12" points="0,130 80,108 160,114 240,72 320,66 400,40 480,28 480,160 0,160"/></svg><div class="flex justify-between text-xs text-mute mt-1"><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span></div></div>
-          <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Treatment mix <span class="text-mute text-xs font-normal">· by revenue</span></h2><div id="repMix"></div></div>
+
+        <!-- SCORECARD -->
+        <div data-rp="scorecard">
+          <p class="text-mute text-sm mb-4 max-w-3xl">The numbers that decide how the business is doing — grouped <b>Growth</b>, <b>Performance</b> and <b>Finance</b>. Each tile is measured against last month or a target you set, and turns green when the target is hit.</p>
+          <div class="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-2">Growth</div>
+          <div id="repScGrowth" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5"></div>
+          <div class="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-2">Performance</div>
+          <div id="repScPerf" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5"></div>
+          <div class="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-2">Finance</div>
+          <div id="repScFin" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5"></div>
+          <div id="repTargets" class="bg-white rounded-2xl shadow-soft p-5"></div>
         </div>
-        <div class="grid grid-cols-3 gap-6">
-          <div class="col-span-2 bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Top treatments</h2><table class="w-full text-sm"><thead class="text-mute border-b border-slate-100"><tr><th class="text-left font-medium py-2">Treatment</th><th class="text-left font-medium py-2">Done</th><th class="text-right font-medium py-2">Revenue</th><th class="text-right font-medium py-2">Share</th></tr></thead><tbody id="repTopBody" class="divide-y divide-slate-100"></tbody></table></div>
-          <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">New vs returning</h2><div class="flex items-end gap-6 mb-3"><div><div class="text-3xl font-semibold">42</div><div class="text-mute text-xs">new</div></div><div><div class="text-3xl font-semibold">198</div><div class="text-mute text-xs">returning</div></div></div><div class="h-3 rounded-full overflow-hidden flex bg-brand-100"><div class="bg-brand-500" style="width:17.5%"></div></div><div class="mt-4 pt-3 border-t border-slate-100 text-sm flex justify-between"><span class="text-mute">Retention</span><span class="font-semibold">82% <span class="text-emerald-600 text-xs">▲ 4pts</span></span></div></div>
+
+        <!-- REVENUE -->
+        <div data-rp="revenue" class="hidden">
+          <div id="repRevKpi" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
+          <div class="grid lg:grid-cols-3 gap-6 mb-6">
+            <div class="lg:col-span-2 bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Revenue <span class="text-mute text-xs font-normal">· last 6 months</span></h2><div id="repRevTrend"></div><div id="repRevTrendLbl" class="flex justify-between text-xs text-mute mt-1"></div></div>
+            <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Treatment mix <span class="text-mute text-xs font-normal">· by revenue</span></h2><div id="repMix2"></div></div>
+          </div>
+          <div class="grid lg:grid-cols-2 gap-6">
+            <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Revenue by practitioner</h2><div id="repByPrac"></div></div>
+            <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Top clients <span class="text-mute text-xs font-normal">· by lifetime spend</span></h2><table class="w-full text-sm"><thead class="text-mute border-b border-slate-100"><tr><th class="text-left font-medium py-2">Client</th><th class="text-left font-medium py-2">Membership</th><th class="text-right font-medium py-2">Lifetime</th></tr></thead><tbody id="repTopClients" class="divide-y divide-slate-100"></tbody></table></div>
+          </div>
+        </div>
+
+        <!-- RETENTION -->
+        <div data-rp="retention" class="hidden">
+          <div id="repRetKpi" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
+          <div class="grid lg:grid-cols-3 gap-6">
+            <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">New vs returning</h2><div id="repNvR"></div></div>
+            <div class="lg:col-span-2 bg-white rounded-2xl shadow-soft p-5"><div class="flex items-center justify-between mb-3"><h2 class="font-semibold">At-risk &amp; lapsed clients</h2><button onclick="show('followups')" class="text-brand-700 text-xs font-medium">Open follow-ups &rarr;</button></div><div id="repAtRisk"></div></div>
+          </div>
+        </div>
+
+        <!-- MEMBERSHIPS -->
+        <div data-rp="memberships" class="hidden">
+          <div id="repMemKpi" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
+          <div class="grid lg:grid-cols-2 gap-6 mb-6">
+            <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Plan mix <span class="text-mute text-xs font-normal">· members &amp; MRR</span></h2><div id="repPlanMix"></div></div>
+            <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Net member movement <span class="text-mute text-xs font-normal">· this month</span></h2><div id="repChurn"></div></div>
+          </div>
+          <div class="bg-white rounded-2xl shadow-soft p-5"><div class="flex items-center justify-between mb-1"><h2 class="font-semibold">Prepaid liability <span class="text-mute text-xs font-normal">· service owed on packages</span></h2><button onclick="goSub('memberships','plans')" class="text-brand-700 text-xs font-medium">Open packages &rarr;</button></div><p class="text-mute text-sm mb-3">Money taken for treatments not yet delivered — a liability until redeemed. Expiring packages are a recall opportunity (and revenue at risk of refund).</p><table class="w-full text-sm"><thead class="text-mute border-b border-slate-100"><tr><th class="text-left font-medium py-2">Package</th><th class="text-right font-medium py-2">Sold</th><th class="text-right font-medium py-2">Redeemed</th><th class="text-right font-medium py-2">Liability</th></tr></thead><tbody id="repDeferred" class="divide-y divide-slate-100"></tbody></table></div>
         </div>
       </section>
 
@@ -897,7 +930,7 @@ tailwind.config={theme:{extend:{
           <div class="bg-white rounded-2xl shadow-soft overflow-hidden"><table class="w-full text-sm"><thead class="text-mute border-b border-slate-100"><tr><th class="text-left font-medium px-4 py-3">Case</th><th class="text-left font-medium px-4 py-3">Product / lot</th><th class="text-left font-medium px-4 py-3">Route</th><th class="text-left font-medium px-4 py-3">Severity</th><th class="text-left font-medium px-4 py-3">Status</th><th class="text-left font-medium px-4 py-3"></th></tr></thead><tbody id="govAE" class="divide-y divide-slate-100"></tbody></table></div>
         </div>
         <div data-gp="governance:recalls" class="hidden">
-          <p class="text-mute text-sm mb-3">From a lot → exact client list (instant), run the recall safety campaign and track acknowledgements — the evidence a reviewer asks for. Recall messages bypass the advertising linter.</p>
+          <p class="text-mute text-sm mb-3">From a lot → exact client list (instant), run the recall safety campaign and track acknowledgements — the evidence a reviewer asks for. Safety/recall messages send to affected clients regardless of marketing opt-in.</p>
           <div id="govRecalls" class="space-y-3"></div>
         </div>
         <div data-gp="governance:policies" class="hidden">
@@ -928,7 +961,7 @@ tailwind.config={theme:{extend:{
         <div data-gp="settings:integrations"><div id="setIntegrations" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div></div>
         <div data-gp="settings:booking" class="hidden">
           <div class="grid lg:grid-cols-2 gap-5">
-            <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-2">Public booking widget</h2><p class="text-mute text-sm">Service names stay generic, S4 prices withheld, no S4 imagery — the advertising linter governs the page &amp; its SEO metadata.</p></div>
+            <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-2">Public booking widget</h2><p class="text-mute text-sm">Service names stay generic, S4 prices withheld and no S4 imagery — set by clinic policy when configuring the page &amp; its SEO metadata.</p></div>
             <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="text-mute text-sm font-semibold mb-3">Preview</h2>
               <div class="rounded-xl border border-slate-200 p-4 space-y-2 text-sm">
                 <div class="flex justify-between"><span>Cosmetic consultation</span><span class="text-mute">$50 · 30 min</span></div>
@@ -1123,7 +1156,7 @@ tailwind.config={theme:{extend:{
         </div>
         <button onclick="addProduct()" class="mt-2 px-4 py-2 rounded-xl bg-brand-600 text-white text-sm font-medium">Add product</button>
       </div>
-      <p class="text-xs text-mute mt-3 flex items-start gap-1"><span class="material-symbols-rounded text-sm">gavel</span>Marking a product <b>S4 (Schedule 4)</b> makes it prescription-only and automatically excludes it from rewards and advertising across the app. Set this correctly.</p>
+      <p class="text-xs text-mute mt-3 flex items-start gap-1"><span class="material-symbols-rounded text-sm">gavel</span>Marking a product <b>S4 (Schedule 4)</b> makes it prescription-only and automatically excludes it from rewards across the app (and it must never be named or priced on the public booking page). Set this correctly.</p>
     </div>
   </div>
 </div>
@@ -1437,7 +1470,6 @@ var convos=[
  {name:'Hannah Lee',handle:'Messenger',img:9,ch:'Facebook',cat:'General',cid:6,last:'thank you!!',ti:'Mon',unread:0,thread:[{me:1,t:'So glad you loved it, Hannah! See you next visit 💛',ti:'Mon'},{me:0,t:'thank you!!',ti:'Mon'}]}
 ];
 var curConvo=0;
-var BLOCK=/botox|dysport|anti-?wrinkle|wrinkle injection|dermal filler|#botox|babytox/i;
 var autos=[
  {icon:'event_repeat',name:'Recall — anti-wrinkle (~12 wks)',desc:'Nudges due clients with a rebook link.',ch:'SMS + email',aud:'Toxin clients',on:1,stat:'42 sent · 18 booked'},
  {icon:'healing',name:'Aftercare sequence',desc:'Day 0 + day 3 care tips after each visit.',ch:'SMS',aud:'Post-treatment',on:1,stat:'96 sent (30d)'},
@@ -1474,15 +1506,13 @@ function toggleLinkPanel(){var p=document.getElementById('linkpanel');if(!p)retu
 function renderLinkList(){var el=document.getElementById('linklist');if(!el)return;var q=(document.getElementById('linksearch').value||'').toLowerCase();el.innerHTML=clients.map(function(cl,idx){return {cl:cl,idx:idx};}).filter(function(o){return o.cl.n.toLowerCase().indexOf(q)>-1;}).map(function(o){return '<button onclick="linkConvo(curConvo,'+o.idx+')" class="w-full text-left px-3 py-2 rounded-lg bg-white hover:bg-brand-50 flex items-center gap-2 text-sm"><img src="https://i.pravatar.cc/48?img='+o.cl.img+'" class="size-6 rounded-full"/>'+o.cl.n+'<span class="ml-auto text-mute text-xs">'+o.cl.mem+'</span></button>';}).join('')||'<div class="text-mute text-xs px-2 py-2">No matches.</div>';}
 function linkConvo(i,cid){convos[i].cid=cid;convos[i].name=clients[cid].n;clients[cid].social=(clients[cid].social||[]);clients[cid].social.push(convos[i].ch+': '+convos[i].handle);var p=document.getElementById('linkpanel');if(p)p.classList.add('hidden');renderConvoList();openConvoThread(i);}
 function renderSugg(c){var r=document.getElementById('suggrow');if(!r)return;var s=suggestReplies(c);window._sugg=s;r.innerHTML='<span class="text-[11px] text-mute self-center mr-1">Suggested — tap to edit:</span>'+s.map(function(x,i){return '<button onclick="useSugg('+i+')" class="px-2.5 py-1 rounded-full bg-brand-50 text-brand-700 text-xs hover:bg-brand-100 border border-brand-100">'+x.l+'</button>';}).join('');}
-function useSugg(i){var s=window._sugg&&window._sugg[i];if(!s)return;var c=document.getElementById('composer');c.value=s.x;lintMsg();c.focus();}
+function useSugg(i){var s=window._sugg&&window._sugg[i];if(!s)return;var c=document.getElementById('composer');c.value=s.x;c.focus();}
 function renderMktOverview(){var u=document.getElementById('ovUnread');if(!u)return;u.textContent=convos.filter(function(c){return c.unread;}).length;var chs=['Instagram','Facebook','SMS','Email'],mx=1;chs.forEach(function(ch){var n=convos.filter(function(c){return c.ch===ch;}).length;if(n>mx)mx=n;});var el=document.getElementById('ovChannels');if(el)el.innerHTML=chs.map(function(ch){var mm=CH[ch],n=convos.filter(function(c){return c.ch===ch;}).length,unr=convos.filter(function(c){return c.ch===ch&&c.unread;}).length;return '<div class="flex items-center gap-3"><span class="material-symbols-rounded '+mm.c+'">'+mm.i+'</span><span class="w-20">'+ch+'</span><div class="flex-1 h-2 bg-slate-100 rounded-full"><div class="h-2 bg-brand-500 rounded-full" style="width:'+(n/mx*100)+'%"></div></div><span class="text-xs text-mute w-24 text-right">'+n+' open · '+unr+' unread</span></div>';}).join('');}
-function tmpl(v){if(!v)return;var t={recall:'Hi {n}, you\'re due for your next visit — want me to hold a time this week?',aftercare:'Hope you\'re feeling great! Avoid heat & exercise for 24h. Any questions, just reply.',rebook:'Lovely to see you today! Shall I pop your next visit in for ~12 weeks?'}[v]||'';document.getElementById('composer').value=t.replace('{n}',convos[curConvo].name.split(' ')[0]);lintMsg();}
-function lintMsg(){var v=document.getElementById('composer').value,bad=BLOCK.test(v),w=document.getElementById('lintwarn'),b=document.getElementById('sendbtn');if(bad){w.classList.remove('hidden');document.getElementById('lintmsg').textContent='Can\'t name an S4 product/term in client messaging (TGA). Promote the service, not the medicine.';b.classList.add('opacity-40','pointer-events-none');}else{w.classList.add('hidden');b.classList.remove('opacity-40','pointer-events-none');}}
-function sendMsg(){var ta=document.getElementById('composer'),v=ta.value.trim();if(!v||BLOCK.test(v))return;convos[curConvo].thread.push({me:1,t:v,ti:'now'});convos[curConvo].last=v;ta.value='';lintMsg();openConvoThread(curConvo);renderConvoList();}
+function tmpl(v){if(!v)return;var t={recall:'Hi {n}, you\'re due for your next visit — want me to hold a time this week?',aftercare:'Hope you\'re feeling great! Avoid heat & exercise for 24h. Any questions, just reply.',rebook:'Lovely to see you today! Shall I pop your next visit in for ~12 weeks?'}[v]||'';document.getElementById('composer').value=t.replace('{n}',convos[curConvo].name.split(' ')[0]);}
+function sendMsg(){var ta=document.getElementById('composer'),v=ta.value.trim();if(!v)return;convos[curConvo].thread.push({me:1,t:v,ti:'now'});convos[curConvo].last=v;ta.value='';openConvoThread(curConvo);renderConvoList();}
 function renderAuto(){var el=document.getElementById('autolist');if(!el)return;el.innerHTML=autos.map(function(a,i){return '<div class="bg-white rounded-2xl shadow-soft p-4"><div class="flex items-start gap-3"><span class="material-symbols-rounded text-brand-500">'+a.icon+'</span><div class="flex-1"><div class="font-medium text-sm">'+a.name+'</div><div class="text-mute text-xs">'+a.desc+'</div></div><button onclick="toggleAuto('+i+')" class="shrink-0 leading-none"><span class="material-symbols-rounded text-3xl '+(a.on?'text-brand-600':'text-slate-300')+'">'+(a.on?'toggle_on':'toggle_off')+'</span></button></div><div class="flex items-center gap-2 mt-3 text-xs text-mute"><span>'+a.ch+'</span><span>·</span><span>'+a.aud+'</span><span class="ml-auto '+(a.on?'text-emerald-600':'')+'">'+a.stat+'</span></div></div>';}).join('');}
 function toggleAuto(i){autos[i].on=autos[i].on?0:1;if(!autos[i].on&&autos[i].stat!=='off')autos[i]._s=autos[i].stat;autos[i].stat=autos[i].on?(autos[i]._s||'live'):'off';renderAuto();}
 function renderCamp(){var el=document.getElementById('camplist');if(!el)return;el.innerHTML=camps.map(function(c){return '<div class="px-4 py-3 border-b border-slate-50 flex items-center gap-3"><div class="flex-1 min-w-0"><div class="font-medium text-sm">'+c.name+'</div><div class="text-mute text-xs truncate">'+c.aud+'</div></div><span class="px-2 py-0.5 rounded-full text-xs '+c.cls+'">'+c.status+'</span><div class="text-right text-xs text-mute w-28">'+c.stat+'</div></div>';}).join('');}
-function lintCamp(){var v=document.getElementById('campmsg').value,el=document.getElementById('camplint');if(BLOCK.test(v)){el.classList.remove('hidden');el.textContent='Blocked: can\'t name or allude to an S4 product in advertising (TGA). Promote the service, not the medicine.';}else{el.classList.add('hidden');}}
 function msub(t){var pane=document.querySelector('[data-mpane="'+t+'"]');if(!pane)return;document.querySelectorAll('[data-mpane]').forEach(function(p){p.classList.add('hidden');});pane.classList.remove('hidden');document.querySelectorAll('.msub').forEach(function(b){b.className='msub px-3 py-1.5 rounded-full bg-white shadow-soft text-mute';});var pill=document.querySelector('[data-msub="'+t+'"]');if(pill)pill.className='msub px-3 py-1.5 rounded-full bg-brand-600 text-white font-medium';if(t==='overview'&&typeof renderMktOverview==='function')renderMktOverview();}
 /* ---------- clinic switcher ---------- */
 const clinics=[{name:'The Lounge',loc:'Aesthetics · Brisbane',badge:'L'},{name:'The Lounge',loc:'Aesthetics · Gold Coast',badge:'L'},{name:'Skin & Co',loc:'Locum · Southport',badge:'S'}];
@@ -1596,7 +1626,115 @@ function cbook(el){document.querySelectorAll('.cbk').forEach(b=>b.classList.remo
 function applyProtocol(name){var m=document.getElementById('protoMsg'),t=document.getElementById('protoMsgTxt');if(!m)return;t.textContent=name+' applied — sessions scheduled into Sarah\'s plan & recall worklist.';m.classList.remove('hidden');}
 
 var repTx=[{t:'Anti-wrinkle',n:96,rev:26400},{t:'Filler',n:34,rev:23120},{t:'Skin',n:120,rev:21600},{t:'Consult',n:48,rev:2400}];
-function renderReports(){var mx=document.getElementById('repMix');if(!mx)return;var maxRev=0,totRev=0;repTx.forEach(function(x){if(x.rev>maxRev)maxRev=x.rev;totRev+=x.rev;});mx.innerHTML=repTx.map(function(x){var ty=TYPES[x.t]||{dot:'bg-slate-400'};return '<div class="mb-3"><div class="flex justify-between text-sm mb-1"><span class="flex items-center gap-1.5"><span class="size-2.5 rounded-full '+ty.dot+'"></span>'+x.t+'</span><span class="text-mute">$'+x.rev.toLocaleString()+'</span></div><div class="h-2 bg-slate-100 rounded-full"><div class="h-2 rounded-full '+ty.dot+'" style="width:'+(x.rev/maxRev*100)+'%"></div></div></div>';}).join('');var tb=document.getElementById('repTopBody');if(tb)tb.innerHTML=repTx.slice().sort(function(a,b){return b.rev-a.rev;}).map(function(x){return '<tr><td class="py-2.5 font-medium">'+x.t+'</td><td>'+x.n+'</td><td class="text-right">$'+x.rev.toLocaleString()+'</td><td class="text-right text-mute">'+Math.round(x.rev/totRev*100)+'%</td></tr>';}).join('');}
+/* ---------- Reports: executive analytics, distilled from the analytics suite ----------
+   4 tabs — Scorecard / Revenue / Retention / Memberships. Owner-only (gated with the
+   rest of Reports behind caps.financials). All figures synthetic & internally consistent. */
+var REP={period:'30d',
+ periods:{'7d':{lbl:'last 7 days',k:0.25},'30d':{lbl:'last 30 days',k:1},'90d':{lbl:'last 90 days',k:2.7}},
+ revMonths:[['Jan',96000],['Feb',103000],['Mar',99000],['Apr',112000],['May',117000],['Jun',128000]],
+ byPrac:[['Dr Lena Park','NP',46000,'bg-brand-500'],['Bella L.','Lead RN',38000,'bg-emerald-500'],['Chloe Adams','RN',25000,'bg-violet-500'],['Priya Raman','Dermal',19000,'bg-amber-500']],
+ revenue:128000,visits:240,avgVisit:271,newClients:42,returning:198,
+ rebooking:68,rebookingD:3,retention:82,retentionD:4,noShow:4.6,conversion:38,
+ mrr:74346,members:634,newMembers:19,churnedMembers:7,churnRate:1.1,autopay:96.5,
+ deferredExp60:18400,atRisk:18,lapsed:34,atRiskValue:42600,
+ targets:{mrr:80000,members:680,conversion:40,retention:80,rebooking:70,noshow:5}};
+var REP_TKEY='tla_rep_targets';
+(function(){try{var s=JSON.parse(localStorage.getItem(REP_TKEY));if(s)Object.assign(REP.targets,s);}catch(e){}})();
+function repk(){return REP.periods[REP.period].k;}
+function repNum(v){return Math.round(v).toLocaleString();}
+function repMoney(v){return '$'+Math.round(v).toLocaleString();}
+function repMoneyK(v){var a=Math.abs(v),s=v<0?'-':'';if(a>=1e6)return s+'$'+(a/1e6).toFixed(2)+'M';if(a>=1e3)return s+'$'+(a/1e3).toFixed(a>=1e5?0:1)+'k';return s+'$'+Math.round(a);}
+function repBar(label,dot,right,pct,bar){return '<div class="mb-3"><div class="flex justify-between text-sm mb-1"><span class="flex items-center gap-1.5 min-w-0">'+(dot||'')+'<span class="truncate">'+label+'</span></span><span class="text-mute shrink-0 ml-2">'+right+'</span></div><div class="h-2 bg-slate-100 rounded-full"><div class="h-2 rounded-full '+(bar||'bg-brand-500')+'" style="width:'+pct+'%"></div></div></div>';}
+function repTopClients(){return clients.map(function(c){return {n:c.n,img:c.img,mem:c.mem,life:+((c.life||'0').replace(/[^0-9.]/g,''))};}).filter(function(c){return c.life>0;}).sort(function(a,b){return b.life-a.life;}).slice(0,7);}
+function repDeferredRow(p){var m=/(\d+)\s*\/\s*(\d+)/.exec(p.used)||[0,0,1];var usedN=+m[1],totS=+m[2]||1;return {usedN:usedN,totS:totS,liab:p.price*p.sold*(totS-usedN)/totS};}
+function repDeferredTotal(){return pkgs.reduce(function(s,p){return s+repDeferredRow(p).liab;},0);}
+/* KPI tile with target / trend state */
+function repTile(label,value,o){o=o||{};var state=o.state,badge='';
+ if(o.target!=null&&o.tval!=null){var hit=o.higher?o.tval>=o.target:o.tval<=o.target;state=hit?'good':(o.higher?o.tval>=0.9*o.target:o.tval<=1.1*o.target)?'warn':'bad';badge='<span class="px-1.5 py-0.5 rounded text-[11px] '+(hit?'bg-emerald-50 text-emerald-700':'bg-amber-50 text-amber-700')+'">'+(hit?'✓ ':'')+'target '+o.tfmt(o.target)+'</span>';}
+ if(o.trend!=null){var up=o.trend>=0;badge='<span class="px-1.5 py-0.5 rounded text-[11px] '+(up?'bg-emerald-50 text-emerald-700':'bg-rose-50 text-rose-700')+'">'+(up?'▲ ':'▼ ')+Math.abs(o.trend).toFixed(1)+'% MoM</span>';state=up?'good':'bad';}
+ var c={good:'#10b981',warn:'#f59e0b',bad:'#ef4444'}[state]||'#e2e8f0';
+ return '<div class="bg-white rounded-2xl shadow-soft p-4" style="border-left:3px solid '+c+'"><div class="text-mute text-xs flex items-center gap-1">'+(o.icon?'<span class="material-symbols-rounded text-[15px]">'+o.icon+'</span>':'')+label+'</div><div class="text-2xl font-semibold mt-1">'+value+'</div><div class="mt-1 flex items-center gap-2 flex-wrap text-xs text-mute min-h-[18px]">'+(o.sub?'<span>'+o.sub+'</span>':'')+badge+'</div></div>';}
+function repPct(v){return v+'%';}
+/* tab + period switching */
+var repTab='scorecard';
+function goRep(t){repTab=t;document.querySelectorAll('[data-rp]').forEach(function(p){p.classList.toggle('hidden',p.getAttribute('data-rp')!==t);});document.querySelectorAll('[data-rpill]').forEach(function(b){var on=b.getAttribute('data-rpill')===t;b.className='px-3 py-1.5 rounded-full '+(on?'bg-brand-600 text-white font-medium':'bg-white shadow-soft text-mute');});window.scrollTo(0,0);}
+function setRepPeriod(p){REP.period=p;var l=document.getElementById('repPeriodLbl');if(l)l.textContent=REP.periods[p].lbl;document.querySelectorAll('#repPeriod button').forEach(function(b){var on=b.getAttribute('data-rper')===p;b.className='px-3 py-2 '+(on?'bg-brand-50 text-brand-700 font-medium':'text-mute');});renderReports();}
+/* targets */
+function setRepTarget(k,v){REP.targets[k]=parseFloat(v)||0;}
+function applyRepTargets(){try{localStorage.setItem(REP_TKEY,JSON.stringify(REP.targets));}catch(e){}renderScorecard();toast('Targets saved (this browser)');}
+function resetRepTargets(){REP.targets={mrr:80000,members:680,conversion:40,retention:80,rebooking:70,noshow:5};try{localStorage.removeItem(REP_TKEY);}catch(e){}renderScorecard();}
+function renderRepTargets(){var b=document.getElementById('repTargets');if(!b)return;var f=[['mrr','MRR target ($)'],['members','Active members'],['conversion','Conversion %'],['retention','Retention %'],['rebooking','Rebooking %'],['noshow','No-show % (max)']];
+ b.innerHTML='<div class="flex items-center gap-2 mb-3"><span class="material-symbols-rounded text-brand-500">flag</span><h2 class="font-semibold">Targets</h2><span class="text-mute text-xs">— tiles turn green when hit · saved in this browser only</span></div><div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">'+f.map(function(x){return '<label class="flex items-center justify-between gap-2 text-sm"><span class="text-mute">'+x[1]+'</span><input type="number" min="0" value="'+REP.targets[x[0]]+'" onchange="setRepTarget(\''+x[0]+'\',this.value)" class="w-28 border border-slate-200 rounded-lg px-2 py-1"/></label>';}).join('')+'</div><div class="flex gap-2"><button onclick="applyRepTargets()" class="px-4 py-2 rounded-xl bg-brand-600 text-white text-sm font-medium">Apply targets</button><button onclick="resetRepTargets()" class="px-4 py-2 rounded-xl bg-white border border-slate-200 text-sm">Reset</button></div>';}
+/* scorecard */
+function renderScorecard(){var g=document.getElementById('repScGrowth');if(!g)return;var t=REP.targets,net=REP.newMembers-REP.churnedMembers;
+ var lastRev=REP.revMonths[REP.revMonths.length-1][1],prevRev=REP.revMonths[REP.revMonths.length-2][1],revTrend=(lastRev-prevRev)/prevRev*100;
+ var seen=Math.round(REP.newClients/(REP.conversion/100));
+ g.innerHTML=[
+  repTile('MRR',repMoneyK(REP.mrr),{icon:'subscriptions',sub:'ARR '+repMoneyK(REP.mrr*12),target:t.mrr,tval:REP.mrr,higher:true,tfmt:repMoneyK}),
+  repTile('Active members',repNum(REP.members),{icon:'loyalty',target:t.members,tval:REP.members,higher:true,tfmt:repNum}),
+  repTile('Net member change',(net>=0?'+':'')+net,{icon:'group_add',sub:REP.newMembers+' new − '+REP.churnedMembers+' churned',state:net>=0?'good':'bad'}),
+  repTile('New members (MTD)',repNum(REP.newMembers),{icon:'person_add',sub:'this month'})
+ ].join('');
+ document.getElementById('repScPerf').innerHTML=[
+  repTile('Conversion',repPct(REP.conversion),{icon:'conversion_path',sub:REP.newClients+' of '+seen+' new clients',target:t.conversion,tval:REP.conversion,higher:true,tfmt:repPct}),
+  repTile('Retention',repPct(REP.retention),{icon:'cycle',target:t.retention,tval:REP.retention,higher:true,tfmt:repPct}),
+  repTile('Rebooking',repPct(REP.rebooking),{icon:'event_repeat',target:t.rebooking,tval:REP.rebooking,higher:true,tfmt:repPct}),
+  repTile('No-show',repPct(REP.noShow),{icon:'event_busy',sub:'ceiling',target:t.noshow,tval:REP.noShow,higher:false,tfmt:repPct})
+ ].join('');
+ document.getElementById('repScFin').innerHTML=[
+  repTile('Revenue last month',repMoneyK(lastRev),{icon:'payments',sub:'Jun',trend:revTrend}),
+  repTile('Prepaid liability',repMoneyK(repDeferredTotal()),{icon:'hourglass_top',sub:repMoneyK(REP.deferredExp60)+' expiring 60d',state:'warn'}),
+  repTile('To reactivate',repNum(REP.atRisk+REP.lapsed),{icon:'call',sub:repMoneyK(REP.atRiskValue)+' at stake',state:(REP.atRisk+REP.lapsed)>40?'bad':'warn'}),
+  repTile('Autopay success',repPct(REP.autopay),{icon:'autorenew',sub:'recurring billing',state:REP.autopay>=97?'good':'warn'})
+ ].join('');
+ renderRepTargets();}
+/* revenue */
+function repLineSVG(series,color){var n=series.length,vals=series.map(function(s){return s[1];});var mn=Math.min.apply(null,vals)*0.92,mx=Math.max.apply(null,vals)*1.04,W=480,H=160;
+ var pts=series.map(function(s,i){var x=n>1?Math.round(i/(n-1)*W):0;var y=Math.round(H-12-((s[1]-mn)/(mx-mn||1))*(H-30));return x+','+y;}).join(' ');
+ return '<svg viewBox="0 0 '+W+' '+H+'" class="w-full"><polygon fill="'+color+'" opacity=".12" points="'+pts+' '+W+','+H+' 0,'+H+'"/><polyline fill="none" stroke="'+color+'" stroke-width="3" points="'+pts+'"/></svg>';}
+function renderRepRevenue(){var kp=document.getElementById('repRevKpi');if(!kp)return;var k=repk();
+ kp.innerHTML=[
+  ['Revenue',repMoneyK(REP.revenue*k),'▲ 9% vs prev','text-emerald-600'],
+  ['Avg / visit','$'+REP.avgVisit,Math.round(REP.visits*k)+' visits','text-mute'],
+  ['New clients',repNum(REP.newClients*k),'▲ 6','text-emerald-600'],
+  ['Returning',repNum(REP.returning*k),Math.round(REP.returning/(REP.newClients+REP.returning)*100)+'% of visits','text-mute']
+ ].map(function(x){return '<div class="bg-white rounded-2xl shadow-soft p-5"><div class="text-mute text-sm">'+x[0]+'</div><div class="text-3xl font-semibold mt-1">'+x[1]+'</div><div class="text-xs '+x[3]+' mt-1">'+x[2]+'</div></div>';}).join('');
+ document.getElementById('repRevTrend').innerHTML=repLineSVG(REP.revMonths,'#0d9488');
+ document.getElementById('repRevTrendLbl').innerHTML=REP.revMonths.map(function(m){return '<span>'+m[0]+'</span>';}).join('');
+ var mixMax=Math.max.apply(null,repTx.map(function(x){return x.rev;}));
+ document.getElementById('repMix2').innerHTML=repTx.map(function(x){var ty=TYPES[x.t]||{dot:'bg-slate-400'};return repBar(x.t,'<span class="size-2.5 rounded-full '+ty.dot+'"></span>',repMoneyK(x.rev*k),x.rev/mixMax*100,ty.dot);}).join('');
+ var pMax=Math.max.apply(null,REP.byPrac.map(function(p){return p[2];}));
+ document.getElementById('repByPrac').innerHTML=REP.byPrac.map(function(p){return repBar(p[0]+' <span class="text-mute font-normal">· '+p[1]+'</span>','',repMoneyK(p[2]*k),p[2]/pMax*100,p[3]);}).join('');
+ document.getElementById('repTopClients').innerHTML=repTopClients().map(function(c){return '<tr><td class="py-2.5"><div class="flex items-center gap-2"><img src="https://i.pravatar.cc/40?img='+c.img+'" class="size-6 rounded-full"/><span class="font-medium">'+c.n+'</span></div></td><td class="text-mute">'+(c.mem||'—')+'</td><td class="text-right font-medium">$'+c.life.toLocaleString()+'</td></tr>';}).join('');}
+/* retention */
+function renderRepRetention(){var kp=document.getElementById('repRetKpi');if(!kp)return;var k=repk();
+ kp.innerHTML=[
+  repTile('Rebooking rate',repPct(REP.rebooking),{icon:'event_repeat',sub:'▲ '+REP.rebookingD+'pts vs prev',state:'good'}),
+  repTile('Retention rate',repPct(REP.retention),{icon:'cycle',sub:'▲ '+REP.retentionD+'pts vs prev',state:'good'}),
+  repTile('No-show rate',repPct(REP.noShow),{icon:'event_busy',sub:'target 5% ceiling',state:REP.noShow<=5?'good':'bad'}),
+  repTile('Conversion',repPct(REP.conversion),{icon:'conversion_path',sub:'new → member',state:'warn'})
+ ].join('');
+ var nw=Math.round(REP.newClients*k),rt=Math.round(REP.returning*k),tot=nw+rt||1;
+ document.getElementById('repNvR').innerHTML='<div class="flex items-end gap-6 mb-3"><div><div class="text-3xl font-semibold">'+nw+'</div><div class="text-mute text-xs">new</div></div><div><div class="text-3xl font-semibold">'+rt+'</div><div class="text-mute text-xs">returning</div></div></div><div class="h-3 rounded-full overflow-hidden flex bg-brand-100"><div class="bg-brand-500" style="width:'+(nw/tot*100)+'%"></div></div><div class="mt-3 text-xs text-mute">'+Math.round(rt/tot*100)+'% of visits are returning clients — the membership &amp; recall engine at work.</div>';
+ var risky=clients.filter(function(c){return c.st==='At-risk'||c.st==='Lapsed';});
+ var head='<div class="grid grid-cols-3 gap-3 mb-4">'+[['At-risk',REP.atRisk,'text-amber-600'],['Lapsed',REP.lapsed,'text-rose-600'],['At stake',repMoneyK(REP.atRiskValue),'text-ink']].map(function(x){return '<div class="rounded-xl bg-slate-50 p-3"><div class="text-mute text-xs">'+x[0]+'</div><div class="text-xl font-semibold '+x[2]+'">'+x[1]+'</div></div>';}).join('')+'</div>';
+ var rows=risky.map(function(c){var rose=c.st==='Lapsed';return '<div class="flex items-center justify-between py-2 border-b border-slate-50"><div class="flex items-center gap-2"><img src="https://i.pravatar.cc/40?img='+c.img+'" class="size-7 rounded-full"/><div><div class="font-medium text-sm">'+c.n+'</div><div class="text-mute text-xs">last visit '+c.last+' · '+c.life+' lifetime</div></div></div><span class="px-1.5 py-0.5 rounded text-xs '+(rose?'bg-rose-50 text-rose-600':'bg-amber-50 text-amber-700')+'">'+c.st+'</span></div>';}).join('');
+ document.getElementById('repAtRisk').innerHTML=head+rows+'<div class="text-mute text-xs mt-3">Flagged clients in this demo dataset — clinic totals above. Reactivation calls are queued in <button onclick="show(\'followups\')" class="text-brand-700 font-medium">Follow-ups</button>.</div>';}
+/* memberships */
+function renderRepMemberships(){var kp=document.getElementById('repMemKpi');if(!kp)return;var net=REP.newMembers-REP.churnedMembers;
+ kp.innerHTML=[
+  repTile('Membership MRR',repMoneyK(REP.mrr),{icon:'subscriptions',sub:'ARR '+repMoneyK(REP.mrr*12),state:'good'}),
+  repTile('Active members',repNum(REP.members),{icon:'loyalty',sub:'across '+plans.length+' plans'}),
+  repTile('Net change',(net>=0?'+':'')+net,{icon:'group_add',sub:'this month',state:net>=0?'good':'bad'}),
+  repTile('Autopay success',repPct(REP.autopay),{icon:'autorenew',sub:'recurring billing',state:REP.autopay>=97?'good':'warn'})
+ ].join('');
+ var pMax=Math.max.apply(null,plans.map(function(p){return p.active;})),dots=['bg-brand-500','bg-violet-500','bg-amber-500'];
+ document.getElementById('repPlanMix').innerHTML=plans.map(function(p,i){return repBar(p.name,'<span class="size-2.5 rounded-full '+dots[i%3]+'"></span>',p.active+' · '+repMoneyK(p.active*p.price)+'/mo',p.active/pMax*100,dots[i%3]);}).join('');
+ document.getElementById('repChurn').innerHTML='<div class="flex items-end gap-6 mb-3"><div><div class="text-3xl font-semibold text-emerald-600">+'+REP.newMembers+'</div><div class="text-mute text-xs">joined</div></div><div><div class="text-3xl font-semibold text-rose-600">−'+REP.churnedMembers+'</div><div class="text-mute text-xs">churned</div></div><div><div class="text-3xl font-semibold">'+REP.churnRate+'%</div><div class="text-mute text-xs">monthly churn</div></div></div><div class="rounded-xl bg-emerald-50 text-emerald-800 text-sm px-4 py-3 flex items-start gap-2"><span class="material-symbols-rounded text-base">trending_up</span><div>Net <b>'+(net>=0?'+':'')+net+' members</b> this month. At '+REP.churnRate+'% monthly churn, retention is healthy for an aesthetics membership base.</div></div>';
+ var rows=pkgs.map(function(p){var d=repDeferredRow(p);return '<tr><td class="py-2.5 font-medium">'+p.name+'</td><td class="text-right text-mute">'+p.sold+'</td><td class="text-right text-mute">'+d.usedN+' / '+d.totS+'</td><td class="text-right font-medium">'+repMoney(d.liab)+'</td></tr>';}).join('');
+ rows+='<tr class="font-semibold"><td class="py-2.5">Total liability</td><td></td><td class="text-right text-mute">'+repMoneyK(REP.deferredExp60)+' exp. 60d</td><td class="text-right">'+repMoney(repDeferredTotal())+'</td></tr>';
+ document.getElementById('repDeferred').innerHTML=rows;}
+function renderReports(){renderScorecard();renderRepRevenue();renderRepRetention();renderRepMemberships();}
 /* ---------- follow-ups / jobs queue ---------- */
 var JT={reply:{i:'reply',c:'bg-brand-50 text-brand-700',lab:'Reply'},callback:{i:'call',c:'bg-rose-50 text-rose-700',lab:'Callback'},recall:{i:'event_repeat',c:'bg-amber-50 text-amber-700',lab:'Recall'},consent:{i:'draft',c:'bg-violet-50 text-violet-700',lab:'Consent'},stock:{i:'vaccines',c:'bg-amber-50 text-amber-700',lab:'Stock'},restock:{i:'inventory_2',c:'bg-emerald-50 text-emerald-700',lab:'Restock'},admin:{i:'task_alt',c:'bg-slate-100 text-slate-600',lab:'Task'},lead:{i:'person_add',c:'bg-brand-50 text-brand-700',lab:'Lead'},review:{i:'star',c:'bg-amber-50 text-amber-700',lab:'Review'},facility:{i:'ac_unit',c:'bg-sky-50 text-sky-700',lab:'Facility'},cred:{i:'verified_user',c:'bg-violet-50 text-violet-700',lab:'Credential'},cpd:{i:'school',c:'bg-amber-50 text-amber-700',lab:'CPD'},insurance:{i:'policy',c:'bg-rose-50 text-rose-700',lab:'Insurance'},policy:{i:'verified',c:'bg-violet-50 text-violet-700',lab:'Policy'},dsar:{i:'badge',c:'bg-brand-50 text-brand-700',lab:'DSAR'},ae:{i:'release_alert',c:'bg-rose-50 text-rose-700',lab:'Adverse event'}};
 var SRC={auto:{t:'auto-detected',c:'bg-violet-50 text-violet-600'},manual:{t:'flagged',c:'bg-amber-50 text-amber-700'},system:{t:'system',c:'bg-slate-100 text-slate-500'},recall:{t:'recall',c:'bg-slate-100 text-slate-500'}};
@@ -1669,7 +1807,7 @@ function renderClinMenu(){var b=document.getElementById('clinMenu');if(!b)return
   var scPill='<span class="px-1.5 py-0.5 rounded '+(s4?'bg-rose-50 text-rose-700':'bg-emerald-50 text-emerald-700')+' text-xs">'+c.sch+'</span>';
   var req=tReq(t.cat).map(function(r){return '<span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[11px]">'+r+'</span>';}).join(' ');
   var perf=t.perf.length?t.perf.map(function(p){return '<span class="px-1.5 py-0.5 rounded bg-brand-50 text-brand-700 text-[11px]">'+p+'</span>';}).join(' '):'<span class="text-rose-600 text-[11px]">none set</span>';
-  var rew=tRewards(t.cat)?'<span class="text-emerald-600">rewards + advertisable</span>':'<span class="text-rose-600">no rewards · no ads (S4)</span>';
+  var rew=tRewards(t.cat)?'<span class="text-emerald-600">rewards-eligible</span>':'<span class="text-rose-600">no rewards (S4)</span>';
   return '<div class="bg-white rounded-2xl shadow-soft p-4'+(t.active?'':' opacity-60')+'">'
    +'<div class="flex items-start justify-between gap-2"><div><div class="font-medium">'+t.name+'</div><div class="text-xs text-mute flex items-center gap-1"><span class="material-symbols-rounded text-sm text-brand-500">'+(c.icon||'medical_services')+'</span>'+c.label+'</div></div>'+(t.active?'':'<span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 text-[11px] shrink-0">archived</span>')+'</div>'
    +'<div class="flex flex-wrap gap-1.5 mt-2">'+scPill+'<span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-xs">'+c.cls+'</span><span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-xs">'+c.unit+'</span></div>'
@@ -1808,7 +1946,7 @@ function renderTeamLeave(){var b=document.getElementById('teamLeave');if(!b)retu
 function renderTeamPeople(){var b=document.getElementById('teamPeople');if(!b)return;b.innerHTML=staffTeam.map(function(s){var st=staffStatus(s);return '<div class="bg-white rounded-2xl shadow-soft p-4"><div class="flex items-center gap-3"><img src="https://i.pravatar.cc/64?img='+s.img+'" class="size-10 rounded-full"/><div class="min-w-0"><div class="font-medium truncate">'+s.name+'</div><div class="text-xs text-mute truncate">'+s.role+'</div></div></div><div class="flex items-center justify-between mt-3"><span class="px-1.5 py-0.5 rounded '+st.t+' text-xs">'+st.l+'</span><span class="text-xs text-mute">'+s.type+'</span></div></div>';}).join('');}
 function renderTeamCompliance(){var b=document.getElementById('teamCompliance');if(!b)return;var blocked=staffTeam.filter(function(s){return s.scope==='inject'&&!canInject(s);}).length;var bn=document.getElementById('teamCompBanner');if(bn)bn.innerHTML=blocked?'<div class="rounded-xl bg-rose-50 text-rose-700 text-sm px-4 py-3 flex items-center gap-2"><span class="material-symbols-rounded text-base">block</span>'+blocked+' injector flagged not-bookable for S4 — registration &amp; cosmetic-cover status gate who can be scheduled.</div>':'<div class="rounded-xl bg-emerald-50 text-emerald-700 text-sm px-4 py-3 flex items-center gap-2"><span class="material-symbols-rounded text-base">verified</span>All injectors compliant to operate today.</div>';b.innerHTML=staffTeam.filter(function(s){return s.scope!=='none';}).map(function(s){var reg=s.regExp?(daysTo(s.regExp)>0?'<span class="text-emerald-600">current · '+s.regExp+'</span>':'<span class="text-rose-600">expired</span>'):'<span class="text-mute">'+s.reg+'</span>';var cpd=s.cpdNeed?(s.cpdDone>=s.cpdNeed*0.6?'<span class="text-emerald-600">'+s.cpdDone+'/'+s.cpdNeed+'h</span>':'<span class="text-amber-600">'+s.cpdDone+'/'+s.cpdNeed+'h behind</span>'):'<span class="text-mute">n/a</span>';var ins=s.scope==='inject'?(s.insCosmetic?'<span class="text-emerald-600">covers cosmetic</span>':'<span class="text-rose-600">EXCLUDES cosmetic</span>'):'<span class="text-mute">—</span>';var ok=s.scope==='inject'?(canInject(s)?'<span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 text-xs">Yes</span>':'<span class="px-1.5 py-0.5 rounded bg-rose-50 text-rose-700 text-xs">Blocked</span>'):'<span class="text-mute text-xs">n/a</span>';return '<tr><td class="px-4 py-3 font-medium">'+s.name+'</td><td class="px-4 py-3">'+reg+'</td><td class="px-4 py-3">'+cpd+'</td><td class="px-4 py-3">'+ins+'</td><td class="px-4 py-3">'+ok+'</td></tr>';}).join('');}
 
-/* ---- Growth (leads, reviews, newsletter, social) ---- */
+/* ---- Growth (leads, reviews) ---- */
 var LEAD_STAGES=[['new','New enquiry'],['consult','Consult booked'],['won','Converted'],['lost','Lost']];
 var leads=[{id:1,name:'Tahlia W.',src:'Instagram DM',interest:'Anti-wrinkle (consult)',stage:'new',consent:0},{id:2,name:'Priya N.',src:'Website widget',interest:'Cosmetic consultation',stage:'consult',consent:1},{id:3,name:'Jess Tan',src:'Facebook',interest:'Lip filler enquiry',stage:'consult',consent:1},{id:4,name:'Mia Chen',src:'Referral',interest:'Skin treatment',stage:'won',consent:1},{id:5,name:'Unknown',src:'Google',interest:'Pricing',stage:'lost',consent:0}];
 function renderLeads(){var k=document.getElementById('growthLeads');if(!k)return;k.innerHTML=LEAD_STAGES.map(function(st){var col=leads.filter(function(l){return l.stage===st[0];});return '<div class="bg-slate-50 rounded-2xl p-3"><div class="text-xs font-semibold text-mute mb-2">'+st[1]+' · '+col.length+'</div>'+col.map(function(l){return '<div class="bg-white rounded-xl shadow-soft p-3 mb-2"><div class="font-medium text-sm">'+l.name+'</div><div class="text-xs text-mute">'+l.interest+'</div><div class="flex items-center justify-between mt-2"><span class="text-[11px] px-1.5 py-0.5 rounded bg-brand-50 text-brand-700">'+l.src+'</span><span class="size-2 rounded-full '+(l.consent?'bg-emerald-500':'bg-slate-300')+'" title="'+(l.consent?'opted in':'no consent yet')+'"></span></div></div>';}).join('')+'</div>';}).join('');var kpi=document.getElementById('growthLeadKPI');if(kpi){var open=leads.filter(function(l){return l.stage==='new'||l.stage==='consult';}).length;var conv=Math.round(leads.filter(function(l){return l.stage==='won';}).length/leads.length*100);kpi.innerHTML=[['Open leads',open],['Consults booked',leads.filter(function(l){return l.stage==='consult';}).length],['Conversion',conv+'%'],['Avg days',2.4]].map(function(s){return '<div class="bg-white rounded-2xl shadow-soft p-4"><div class="text-mute text-xs">'+s[0]+'</div><div class="text-2xl font-semibold mt-1">'+s[1]+'</div></div>';}).join('');}}
@@ -1825,7 +1963,7 @@ function renderReviews(){var need=reviews.filter(function(r){return reviewNeedsF
  b.innerHTML=reviews.map(function(r,i){var stars='★★★★★'.slice(0,r.stars)+'☆☆☆☆☆'.slice(0,5-r.stars);
   var flag=reviewNeedsFollowup(r);
   var flagBadge=flag?'<span class="px-1.5 py-0.5 rounded bg-rose-50 text-rose-700 text-[11px] self-center">needs follow-up</span>':'';
-  var s4Banner=r.s4?'<div class="mt-2 rounded-lg bg-amber-50 text-amber-800 text-xs px-3 py-2 flex items-start gap-1"><span class="material-symbols-rounded text-sm">warning</span>Names an S4 result — reply is fine, but resharing is blocked (would be a prohibited testimonial).</div>':'';
+  var s4Banner=r.s4?'<div class="mt-2 rounded-lg bg-amber-50 text-amber-800 text-xs px-3 py-2 flex items-start gap-1"><span class="material-symbols-rounded text-sm">warning</span>Names an S4 result — replying is fine, but don\'t reshare it publicly (would be a prohibited testimonial).</div>':'';
   var reply=r.replied?'<span class="text-xs text-emerald-600 self-center">Replied</span>':'<button onclick="reviewReply('+i+')" class="px-2 py-1 rounded-lg bg-brand-600 text-white text-xs">Reply</button>';
   var ack=r.ack?'<span class="text-xs text-emerald-600 self-center flex items-center gap-0.5"><span class="material-symbols-rounded text-sm">check</span>Acknowledged</span>':'<button onclick="reviewAck('+i+')" class="px-2 py-1 rounded-lg bg-white border border-slate-200 text-xs">Acknowledge</button>';
   var flagBtn=r.flagged?'<span class="text-xs text-amber-600 self-center flex items-center gap-0.5"><span class="material-symbols-rounded text-sm">flag</span>Flagged</span>':'<button onclick="reviewFlag('+i+')" class="px-2 py-1 rounded-lg '+(flag?'bg-rose-600 text-white':'bg-white border border-slate-200')+' text-xs">Flag follow-up</button>';
@@ -1847,7 +1985,7 @@ function submitDaen(){var a=aeCases.find(function(x){return x.id===daenCur;});if
 var recallsData=[{id:'RC-12',lot:'B2188',product:'Botulinum toxin',reason:'Sponsor field-safety notice',clients:14,acked:9,status:'In progress'}];
 function renderGovRecalls(){var b=document.getElementById('govRecalls');if(!b)return;b.innerHTML=recallsData.map(function(r){return '<div class="bg-white rounded-2xl shadow-soft p-5"><div class="flex items-center justify-between flex-wrap gap-2"><div><div class="font-medium">'+r.id+' · Lot '+r.lot+' ('+r.product+')</div><div class="text-xs text-mute">'+r.reason+'</div></div><button onclick="openRecall(\''+r.id+'\')" class="px-3 py-1.5 rounded-xl bg-brand-600 text-white text-xs font-medium">Run recall</button></div><div class="mt-3"><div class="flex justify-between text-xs text-mute mb-1"><span>'+r.acked+' of '+r.clients+' acknowledged</span><span>'+Math.round(r.acked/r.clients*100)+'%</span></div><div class="h-2 bg-slate-100 rounded-full"><div class="h-2 bg-brand-500 rounded-full" style="width:'+(r.acked/r.clients*100)+'%"></div></div></div></div>';}).join('');}
 var recallCur=null;
-function openRecall(id){recallCur=id;var r=recallsData.find(function(x){return x.id===id;});document.getElementById('recallBody').innerHTML='Lot <b>'+r.lot+'</b> reached <b>'+r.clients+' clients</b>. Send a safety notice (SMS + call) and track acknowledgements. Recall messages bypass the advertising linter.';openModal('recallModal');}
+function openRecall(id){recallCur=id;var r=recallsData.find(function(x){return x.id===id;});document.getElementById('recallBody').innerHTML='Lot <b>'+r.lot+'</b> reached <b>'+r.clients+' clients</b>. Send a safety notice (SMS + call) and track acknowledgements. Safety/recall messages send to affected clients regardless of marketing opt-in.';openModal('recallModal');}
 function startRecall(){var r=recallsData.find(function(x){return x.id===recallCur;});closeModal('recallModal');jobs.unshift({id:++jobSeq,t:'Work recall '+r.id+' — contact remaining '+(r.clients-r.acked)+' clients',type:'recall',who:'Reception',cid:null,conv:null,src:'system',status:'open',due:'Today'});renderFollowups();toast('Recall campaign started · '+r.clients+' clients · job created');}
 var policies=[{n:'Infection prevention & control',v:'v2.1',u:'May 2026',signed:5,staff:6},{n:'Consent & cooling-off',v:'v3.0',u:'Sep 2025',signed:6,staff:6},{n:'Emergency & complication (incl. hyaluronidase)',v:'v1.4',u:'Apr 2026',signed:4,staff:6},{n:'Privacy & data breach response',v:'v1.2',u:'Jun 2026',signed:5,staff:6}];
 function renderGovPolicies(){var b=document.getElementById('govPolicies');if(!b)return;b.innerHTML=policies.map(function(p,i){var full=p.signed>=p.staff;return '<tr><td class="px-4 py-3 font-medium">'+p.n+'</td><td class="px-4 py-3 text-mute">'+p.v+'</td><td class="px-4 py-3 text-mute">'+p.u+'</td><td class="px-4 py-3"><span class="px-1.5 py-0.5 rounded '+(full?'bg-emerald-50 text-emerald-700':'bg-amber-50 text-amber-700')+' text-xs">'+p.signed+'/'+p.staff+' signed</span></td><td class="px-4 py-3 text-right">'+(full?'<span class="text-emerald-600 text-xs">complete</span>':'<button onclick="signPolicy('+i+')" class="text-brand-700 text-xs font-medium">Sign</button>')+'</td></tr>';}).join('');}
