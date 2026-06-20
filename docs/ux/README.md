@@ -11,7 +11,7 @@ The end-to-end journeys live in [flows.md](flows.md).
 2. **Room-side is thumb-first.** The provider app is usable one-handed, gloves-on, in minimal taps; the injection-mapping canvas is the hero screen.
 3. **Fast and modern.** Instant calendar/charting; no Mindbody-era clutter. Directly answers the "clunky/slow" pain.
 4. **Never lose work.** Explicit save-state + offline queue; a visible sync indicator on the provider app (ADR-0015).
-5. **Plain, honest language.** Consent and risk content in plain English; no hype; advertising-safe copy everywhere public (C9).
+5. **Plain, honest language.** Consent and risk content in plain English; no hype; the public booking page uses generic, non-S4 service names by policy (C9 — advertising itself is produced in the clinic's external tools, not the platform).
 6. **Trust signals.** Clear "your data stays in Australia", visible audit of who saw what, easy access/correction for clients (C10/C21).
 
 ## 2. Information architecture

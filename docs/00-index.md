@@ -3,6 +3,11 @@
 A purpose-built, compliance-native operating platform for aesthetic injectable & cosmetic
 clinics (the modern replacement for Mindbody). This folder holds the full planning set.
 
+> **Not technical? Start with the [Plain-language review](review/00-start-here.md).** It's a
+> jargon-free, chaptered walk-through of *everything* the platform does — what each feature is, why it
+> exists and who it's for — with a glossary and a coverage checklist, written so a clinic operator can
+> judge whether anything needed to run a clinic is missing.
+
 ## Reading order
 
 | # | Doc | What it is |
@@ -29,7 +34,7 @@ which role does each step. Start at the [overviews index](overviews/00-overviews
 | [Finance & reporting](overviews/05-finance-reporting.md) | Snapshot + reporting; what lives in Xero vs the app |
 | [Team & HR](overviews/06-team-hr.md) | Roster, credentials, CPD, indemnity, the compliance board |
 | [Governance & compliance](overviews/07-governance-compliance.md) | Adverse events/DAEN, recalls, policies, waste, privacy, audit |
-| [Growth & communications](overviews/08-growth-communications.md) | Inbox, lead CRM, reviews, reminders/recall, advertising linter |
+| [Growth & communications](overviews/08-growth-communications.md) | Inbox, lead CRM, reviews, reminders/recall, public booking page |
 
 ## Hardware
 

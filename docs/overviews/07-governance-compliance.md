@@ -42,7 +42,7 @@ flowchart TD
 flowchart LR
   A[Lot flagged for recall] --> B[Exact client list]
   B --> C[Authorise + choose channel<br/>SMS + call]
-  C --> D[Send safety notice<br/>bypasses advertising linter]
+  C --> D[Send safety notice<br/>sent regardless of marketing opt-in]
   D --> E[Track acknowledgements]
   E --> F[Evidence retained for review]
 ```

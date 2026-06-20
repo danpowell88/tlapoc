@@ -104,11 +104,11 @@ into individual `ADR-NNNN-*.md` files later; kept as one log for a lean team.
 **Consequences:** Fast dashboards, OLTP isolation; eventual consistency is acceptable for reporting.<br>
 **Alternatives:** Query OLTP directly (won't scale, risks locks); external warehouse (overkill for v1).
 
-## ADR-0014 — **Catalog with S4 classification** governs rewards eligibility and advertising
+## ADR-0014 — **Catalog with S4 classification** governs rewards eligibility and public-naming policy
 **Status:** Accepted<br>
-**Context:** Rewards must apply to **non-S4 only**; advertising must avoid S4 references (REQ-MEMB-7, C9).<br>
-**Decision:** Every `Service`/`Product` carries **`schedule` (S4 | non-S4)** + category. `RewardRule` eligibility and redemption are constrained to non-S4 items; the advertising linter and public booking-page naming reuse the same flag.<br>
-**Consequences:** One classification enforces both the rewards rule and the advertising guardrail; auditable.<br>
+**Context:** Rewards must apply to **non-S4 only**; the public booking page must avoid S4 references (REQ-MEMB-7, C9).<br>
+**Decision:** Every `Service`/`Product` carries **`schedule` (S4 | non-S4)** + category. `RewardRule` eligibility and redemption are constrained to non-S4 items; the **public booking-page naming policy** reuses the same flag. *(There is no advertising linter — advertising is out of product scope; see ADR-0034 withdrawn.)*<br>
+**Consequences:** One classification drives the rewards rule and the public-naming policy; auditable.<br>
 **Alternatives:** Manual per-offer exclusion (error-prone, non-auditable).
 
 ## ADR-0015 — Provider app: **offline-tolerant local queue + sync**
@@ -164,7 +164,7 @@ into individual `ADR-NNNN-*.md` files later; kept as one log for a lean team.
 ## ADR-0021 — Stock as a **multi-product, multi-unit catalogue** (extends ADR-0014)
 **Status:** Accepted<br>
 **Context:** The stock prototype tracks several distinct products (two toxin brands + a filler) with **different units** (toxin "units" vs filler "syringes/mL") — a single aggregate "units on hand" is meaningless. Prescriber/owner add/remove products and set the **S4 flag** + par levels.<br>
-**Decision:** `Product` carries `type` (toxin/filler/skin/other), `unit`, `par`, **`schedule` (S4|non-S4)** and ARTG fields; **lots** belong to a product; all on-hand/usage/wastage/expiry aggregate **per product + unit**, never across units. A **catalogue admin** (capability-gated to prescriber/owner) manages products and the S4 flag — the single source of truth that drives rewards/advertising (ADR-0014) everywhere. Usage history, reorder and par signals are **per product**.<br>
+**Decision:** `Product` carries `type` (toxin/filler/skin/other), `unit`, `par`, **`schedule` (S4|non-S4)** and ARTG fields; **lots** belong to a product; all on-hand/usage/wastage/expiry aggregate **per product + unit**, never across units. A **catalogue admin** (capability-gated to prescriber/owner) manages products and the S4 flag — the single source of truth that drives rewards/public-naming (ADR-0014) everywhere. Usage history, reorder and par signals are **per product**.<br>
 **Consequences:** Correct, unit-safe stock and reporting; one S4 classification point.<br>
 **Alternatives:** Single product/unit model (wrong for real formularies).
 
@@ -197,7 +197,7 @@ into individual `ADR-NNNN-*.md` files later; kept as one log for a lean team.
 **Status:** Proposed (Phase 2; v1 ships toxin + non-S4 skin only)<br>
 **Context:** Beyond the toxin slice, real clinics run dermal filler, energy devices (laser/IPL/RF), threads/PRP/boosters/fat-dissolving/IV, and weight-loss (GLP-1) programs. Each differs on four axes the toxin spine doesn't capture: **schedule** (S4 vs non-S4), **regulatory class** (medicine vs Class III device vs autologous/consumable), **adverse-event routing** (DAEN-medicines vs DAEN-devices vs none) and **who may legally perform it** — filler is **dual-natured** (S4 for prescribing/custody/advertising but device-class for DAEN); energy devices need a **state radiation/laser licence** (QLD/WA/TAS only; IPL only TAS) not an S4 capability; pharmacy-**compounded GLP-1 is prohibited (1 Oct 2024)** so only ARTG brands may be supplied.<br>
 **Decision:** Model treatment as a typed **modality** carrying `{schedule, regClass, daenRoute, unit, advertisable, requires:[consult|rx|s4Lot|laserLicence|patchTest]}`. Charting becomes **modality-aware** (extends ADR-0024): filler = multi-area / multi-syringe / per-area lot + **VO/blindness consent gate**; energy device = **settings/fluence logbook** + safety checks + **licence gate** (no S4); weight-loss = **titration protocol** + ARTG/compounded enforcement. The catalogue **`s4` flag (ADR-0014/0021) is extended**, not replaced, with `regClass`, `artg`, `compounded`, `daenRoute`. A new **`laserLicence` credential** (per state/class) gates energy-device booking/charting.<br>
-**Consequences:** One classification record drives charting surface, consent clauses, custody, rewards/advertising and AE routing — no per-modality bespoke logic. v1 unaffected (toxin + skin only).<br>
+**Consequences:** One classification record drives charting surface, consent clauses, custody, rewards/public-naming and AE routing — no per-modality bespoke logic. v1 unaffected (toxin + skin only).<br>
 **Alternatives:** Per-treatment bespoke screens (unmaintainable, drifts on compliance); treat all injectables as "S4 like toxin" (wrong DAEN routing, misses device class & laser-licence gate & the GLP-1 ban).
 
 ## ADR-0026 — Front-desk **operations** & opt-in booking deposits
@@ -246,7 +246,7 @@ into individual `ADR-NNNN-*.md` files later; kept as one log for a lean team.
 ## ADR-0032 — Reviews & reputation: **request-all (no gating), reply-yes, repost-S4-no**
 **Status:** Accepted<br>
 **Context:** Patients posting organic reviews is fine, but (a) reposting/embedding a review that endorses an S4 outcome becomes a prohibited **testimonial** (National Law s133; TGA Code Part 6) and (b) **review gating** — soliciting only happy clients — is **misleading conduct under the ACL** (ACCC).<br>
-**Decision:** Post-visit review requests go to **all** eligible clients with no sentiment pre-screen. Staff may **reply** to any review. The platform **prevents** surfacing/reposting a review as marketing when it references an S4 outcome — the `s4` flag (ADR-0014) + advertising linter (REQ-NOTIF-4) drive the block.<br>
+**Decision:** Post-visit review requests go to **all** eligible clients with no sentiment pre-screen. Staff may **reply** to any review. The platform has **no feature that reposts or embeds a review as marketing**, so an S4-endorsing review can't be turned into a prohibited testimonial; where a review names an S4 result, staff are shown a **caution** against resharing it publicly. *(The earlier `s4`-flag advertising linter is withdrawn — 2026-06-20 scope cut, ADR-0034.)*<br>
 **Consequences:** Defensible under both AHPRA and ACL; the reputation feature can't be weaponised into non-compliant testimonials.<br>
 **Alternatives:** Gated review requests (illegal); free reposting (prohibited testimonials).
 > **Extended 2026-06-20:** reviews can be **acknowledged** and **flagged for follow-up**; negative reviews (≤3★) and complaint-keyword matches are **auto-detected** and raised as review jobs in the Follow-ups queue (Lead Nurse for unhappy/clinical, Reception otherwise) — closing the loop between a public review and the action it needs.
@@ -254,17 +254,16 @@ into individual `ADR-NNNN-*.md` files later; kept as one log for a lean team.
 ## ADR-0033 — Lead / prospect **CRM as a projection over conversations**
 **Status:** Accepted<br>
 **Context:** Most enquiries arrive via IG/FB DM, website and phone asking the one thing clinics can't answer publicly ("how much is Botox?"). A pipeline lets reception convert privately — 1:1 service replies are out of scope of public-advertising rules.<br>
-**Decision:** A `Lead` (stage, source, interest, `client_id?`, `conversation_id?`, consent) is a thin pipeline layer over the inbox (ADR-0018/0019); stage transitions feed conversion read models (ADR-0013). Outbound nudges gate on marketing consent (C23) + the linter (C9).<br>
+**Decision:** A `Lead` (stage, source, interest, `client_id?`, `conversation_id?`, consent) is a thin pipeline layer over the inbox (ADR-0018/0019); stage transitions feed conversion read models (ADR-0013). Outbound nudges gate on **marketing consent (C23)**; advertising compliance (C9) is the clinic's responsibility in its external tools (no platform linter).<br>
 **Consequences:** Enquiries don't get lost; conversion is measurable; the consent gate keeps outreach Spam-Act-safe.<br>
 **Alternatives:** Work enquiries only in the inbox (no pipeline/conversion view).
 
-## ADR-0034 — **One advertising linter** for all public/outbound content
-**Status:** Accepted<br>
-**Context:** Newsletter builder, social scheduler, public booking page/SEO and review replies are all public advertising of a clinic that can't promote an S4 good (no Botox brand/price, no testimonials, no under-18 targeting).<br>
-**Decision:** Every public-content surface reuses the single advertising-linter service (REQ-NOTIF-4) + the `s4` flag (ADR-0014), **per-block / per-field** (server-side, not just UI); a mandatory Spam-Act footer (sender ID + unsubscribe) is injected and non-removable; cosmetic posts auto-label 18+.<br>
-**Consequences:** Consistent, hard-to-bypass compliance across growth surfaces; the linter is the choke-point.<br>
-**Alternatives:** Per-surface ad-hoc checks (drift, gaps, accidental breaches).
-> **Revised 2026-06-20 (scope cut):** the **newsletter builder and social scheduler are out of scope** — email campaigns and social posting are handled in the clinic's existing tools (Mailchimp, Meta Business Suite), not rebuilt here. The single advertising linter now governs the surfaces the app **does** own: **review replies, 1:1 inbox replies, and the public booking page / SEO**. (REQ-NOTIF-10 newsletter & REQ-NOTIF-11 social → withdrawn; the linter requirement REQ-NOTIF-4 stands.)
+## ADR-0034 — ~~One advertising linter for all public/outbound content~~ — **Withdrawn**
+**Status:** **Withdrawn (2026-06-20)** — advertising tooling removed from scope.<br>
+**Context:** Originally, every public surface (newsletter builder, social scheduler, public booking page/SEO, review/inbox replies) was to reuse a single advertising-linter service so a clinic couldn't accidentally promote an S4 good.<br>
+**Decision (withdrawn):** The platform now provides **no advertising linter and no ad-material production tooling**. Email campaigns, social posting and all advertising live in the clinic's **external tools** (Mailchimp, Meta Business Suite), and TGA/AHPRA advertising compliance is the **clinic's responsibility** (C9, reframed as clinic-owned). The only public surface the app owns — the **public booking page / SEO** — uses generic service names + withheld S4 prices **by configuration**, not an automated linter.<br>
+**Consequences:** Smaller scope and no false confidence in an automated check; advertising risk sits with the clinic, where the content is actually produced. **REQ-NOTIF-4 withdrawn**; REQ-NOTIF-10/11 already withdrawn. Reviews/inbox keep a passive staff *caution* (ADR-0032) but no blocking linter.<br>
+**Alternatives:** Keep a reduced linter on the surfaces the app owns (the prior 'revised' position) — rejected: still builds advertising-checking tooling the clinic didn't want.
 
 ## ADR-0035 — **e-Prescribing** via `IPrescribingProvider` adapter (eRx/ETP) — 🔬 *feasibility research required*
 **Status:** Proposed (deferred; research)<br>

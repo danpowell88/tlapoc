@@ -12,7 +12,7 @@ A function-by-function tour of the platform, one page per area. Each page lists 
 | [Finance & reporting](05-finance-reporting.md) | Finance snapshot, reporting, and what lives in Xero vs the app |
 | [Team & HR](06-team-hr.md) | Roster/leave, credentials, CPD, indemnity, the `canInject` compliance board |
 | [Governance & compliance](07-governance-compliance.md) | Adverse events/DAEN, recalls, policies, waste, privacy, audit packs |
-| [Growth & communications](08-growth-communications.md) | Unified inbox, lead CRM, reviews, reminders/recall, advertising linter |
+| [Growth & communications](08-growth-communications.md) | Unified inbox, lead CRM, reviews, reminders/recall, public booking page |
 
 > Flowcharts render with Mermaid. Roles are called out in each diagram and summarised in a
 > "Roles at a glance" table per page. The canonical detail sits in the [requirements](../02-requirements.md),

@@ -45,7 +45,7 @@ flowchart LR
   D --> E[Pre-care instructions]
   E --> F[Reminders + confirm/decline]
 ```
-Recall/marketing respects **opt-in + unsubscribe** (**→ C23**) and the **advertising linter** (**→ C9**); transactional reminders/pre-care always send.
+Recall/marketing respects **opt-in + unsubscribe** (**→ C23**); transactional reminders/pre-care always send. *(Advertising compliance (C9) is clinic-owned — handled in the clinic's external marketing tools; the platform has no advertising linter.)*
 
 ---
 
@@ -170,7 +170,7 @@ Dashboards read from **materialized read models** (**ADR-0013**); compliance vie
 | Consent completeness | Treatment blocked until current consent signed | C5 |
 | Cooling-off (U18) | Timer + payment block on the booking/checkout | C6 |
 | Lot/recall | Mandatory lot per injection point | C8 |
-| Advertising-safe | Generic public names; linter on comms; S4 reward controls disabled | C9 |
+| Advertising-safe | Generic public booking-page names (by config); S4 reward controls disabled (no platform ad linter) | C9 |
 | Image-use consent | Separate toggle; withdraw any time | C14 |
 | Secure/cold-chain stock | Storage + temp screens in Medicines | C13, C15 |
 | Privacy rights | Client "Your data & privacy" | C21 |

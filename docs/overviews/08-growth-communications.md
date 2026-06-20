@@ -10,7 +10,6 @@
 | Function | What it does | When it's used | Primary role(s) |
 |---|---|---|---|
 | Unified inbox | IG/FB/SMS/email in one list, categorised, client-linked, suggested replies | All day | Reception |
-| Advertising linter | Blocks naming/pricing an S4 product on any public/outbound text | Every outbound | system + Reception |
 | Lead / prospect CRM | Pipeline: enquiry → consult booked → converted/lost | On enquiries | Reception, Owner |
 | Reviews / reputation | Request-all (no gating), reply, **acknowledge**, **flag / auto-detect** follow-up | Ongoing | Reception, Owner |
 | Reminders & recall | Appointment reminders, aftercare, recall worklist | Scheduled | system, Reception |
@@ -25,7 +24,7 @@
 flowchart TD
   A[Message arrives in inbox] --> B[Auto-categorise: pricing / booking / complaint]
   B --> C{Pricing question?}
-  C -->|Yes| D[Reply privately - 1:1 not public ad<br/>linter blocks S4 price in public text]
+  C -->|Yes| D[Reply privately - 1:1 not public advertising]
   C -->|No| E[Handle / suggested reply]
   D --> F[Convert to lead]
   E --> F
@@ -43,7 +42,7 @@ flowchart TD
   A[Review arrives] --> B{Sentiment}
   B -->|Positive| C[Reply + acknowledge]
   C --> D{Names an S4 result?}
-  D -->|Yes| E[Reply ok - resharing blocked<br/>prohibited testimonial]
+  D -->|Yes| E[Reply ok - don't reshare<br/>prohibited testimonial]
   D -->|No| F[May reshare]
   B -->|Negative or complaint <=3 stars| G[Auto-flag for follow-up]
   G --> H[Review job to Lead Nurse - unhappy<br/>or Reception]
@@ -88,7 +87,7 @@ flowchart LR
 
 ## Related
 
-- Requirements: `REQ-NOTIF-4/8/9/12`, `REQ-MEMB-10`, compliance `C9` (advertising), `C23` (consent)
-- ADRs: **ADR-0018/0019** (omnichannel + identity), **ADR-0023** (jobs), **ADR-0032** (reviews — *extended: ack/flag/auto-detect*), **ADR-0033** (lead CRM), **ADR-0034** (one advertising linter — *revised: newsletter/social removed*)
+- Requirements: `REQ-NOTIF-8/9/12`, `REQ-MEMB-10`, compliance `C9` (advertising — clinic-owned, no platform linter), `C23` (consent)
+- ADRs: **ADR-0018/0019** (omnichannel + identity), **ADR-0023** (jobs), **ADR-0032** (reviews — *extended: ack/flag/auto-detect*), **ADR-0033** (lead CRM), **ADR-0034** (advertising linter — *withdrawn 2026-06-20*)
 - PRDs: [PRD-07](../prds/PRD-07-comms-reminders-recall.md)
 - Feasibility: **F1** (Meta messaging — 🔬)
