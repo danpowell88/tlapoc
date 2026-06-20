@@ -64,71 +64,80 @@ tailwind.config={theme:{extend:{
       </div>
     </div>
     <nav class="p-3 space-y-1 text-sm font-medium text-slate-600">
-      <a onclick="show('dashboard')" data-nav="dashboard" class="nav active flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">today</span>Today</a>
-      <a onclick="show('schedule')" data-nav="schedule" class="nav flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">calendar_month</span>Schedule</a>
-      <a onclick="show('clients')" data-nav="clients" class="nav flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">groups</span>Clients</a>
-      <a onclick="show('followups')" data-nav="followups" class="nav flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">checklist</span>Follow-ups<span id="navJobCount" class="ml-auto text-[11px] bg-rose-500 text-white rounded-full px-1.5 leading-5"></span></a>
-      <a onclick="show('chartlist')" data-nav="chart" class="nav flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">medical_services</span>Charting</a>
-      <a onclick="show('forms')" data-nav="forms" class="nav flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">assignment</span>Forms</a>
-      <a onclick="show('stock')" data-nav="stock" class="nav flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">vaccines</span>Stock</a>
-      <a onclick="show('checkout')" data-nav="checkout" class="nav flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">point_of_sale</span>Checkout</a>
-      <button data-nav="memberships" onclick="toggleGroup('memberships')" class="nav w-full flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">loyalty</span>Memberships<span class="material-symbols-rounded ml-auto text-base transition-transform" data-chev="memberships">expand_more</span></button>
-      <div data-gsub="memberships" class="hidden mt-0.5 space-y-0.5">
-        <a onclick="goSub('memberships','overview')" data-sub="memberships:overview" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Overview</a>
-        <a onclick="goSub('memberships','plans')" data-sub="memberships:plans" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Plans &amp; packages</a>
-        <a onclick="goSub('memberships','members')" data-sub="memberships:members" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Members &amp; billing</a>
-        <a onclick="goSub('memberships','loyalty')" data-sub="memberships:loyalty" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Loyalty</a>
-        <a onclick="goSub('memberships','referrals')" data-sub="memberships:referrals" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Referrals</a>
-        <a onclick="goSub('memberships','gifts')" data-sub="memberships:gifts" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Gift cards</a>
-        <a onclick="goSub('memberships','pricing')" data-sub="memberships:pricing" class="subnav fin block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Pricing &amp; what-if</a>
+      <a onclick="show('dashboard')" data-nav="dashboard" data-allow="dashboard" class="nav active flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">today</span>Today</a>
+      <a onclick="show('schedule')" data-nav="schedule" data-allow="schedule" class="nav flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">calendar_month</span>Schedule</a>
+      <a onclick="show('clients')" data-nav="clients" data-allow="clients" class="nav flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">groups</span>Clients</a>
+      <a onclick="show('followups')" data-nav="followups" data-allow="followups" class="nav flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">checklist</span>Follow-ups<span id="navJobCount" class="ml-auto text-[11px] bg-rose-500 text-white rounded-full px-1.5 leading-5"></span></a>
+      <a onclick="show('checkout')" data-nav="checkout" data-allow="checkout" class="nav flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">point_of_sale</span>Checkout</a>
+
+      <div class="px-3 pt-3 pb-1 text-[11px] uppercase tracking-wide text-slate-400">Workspaces</div>
+
+      <button data-secthead="care" onclick="toggleSect('care')" class="nav w-full flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">stethoscope</span>Clinical<span class="material-symbols-rounded ml-auto text-base transition-transform" data-sectchev="care">expand_more</span></button>
+      <div data-sect="care" class="hidden mt-0.5 space-y-0.5">
+        <a onclick="show('chartlist')" data-nav="chart" data-allow="chart" class="nav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Charting</a>
+        <a onclick="show('stock')" data-nav="stock" data-allow="stock" class="nav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Stock &amp; medicines</a>
+        <a onclick="show('forms')" data-nav="forms" data-allow="forms" class="nav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Forms &amp; consent</a>
+        <a onclick="goSub('clinical','menu')" data-sub="clinical:menu" data-allow="clinical" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Treatment menu</a>
+        <a onclick="goSub('clinical','safety')" data-sub="clinical:safety" data-allow="clinical" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Complication protocols</a>
+        <a onclick="goSub('clinical','imaging')" data-sub="clinical:imaging" data-allow="clinical" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Photography &amp; outcomes</a>
       </div>
-      <button data-nav="marketing" onclick="toggleGroup('marketing')" class="nav w-full flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">campaign</span>Marketing<span class="material-symbols-rounded ml-auto text-base transition-transform" data-chev="marketing">expand_more</span></button>
-      <div data-gsub="marketing" class="hidden mt-0.5 space-y-0.5">
-        <a onclick="goSub('marketing','overview')" data-sub="marketing:overview" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Overview</a>
-        <a onclick="goSub('marketing','inbox')" data-sub="marketing:inbox" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Inbox</a>
-        <a onclick="goSub('marketing','auto')" data-sub="marketing:auto" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Automations</a>
-        <a onclick="goSub('marketing','camp')" data-sub="marketing:camp" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Campaigns</a>
+
+      <button data-secthead="frontdesk" onclick="toggleSect('frontdesk')" class="nav w-full flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">home_repair_service</span>Front desk<span class="material-symbols-rounded ml-auto text-base transition-transform" data-sectchev="frontdesk">expand_more</span></button>
+      <div data-sect="frontdesk" class="hidden mt-0.5 space-y-0.5">
+        <a onclick="goSub('operations','openclose')" data-sub="operations:openclose" data-allow="operations" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Open / close &amp; fridge log</a>
+        <a onclick="goSub('operations','resources')" data-sub="operations:resources" data-allow="operations" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Rooms &amp; devices</a>
+        <a onclick="goSub('operations','equipment')" data-sub="operations:equipment" data-allow="operations" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Equipment &amp; maintenance</a>
+        <a onclick="goSub('operations','phone')" data-sub="operations:phone" data-allow="operations" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Call log</a>
       </div>
-      <a onclick="show('reports')" data-nav="reports" class="nav flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">monitoring</span>Reports</a>
-      <button data-nav="clinical" onclick="toggleGroup('clinical')" class="nav w-full flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">clinical_notes</span>Clinical<span class="material-symbols-rounded ml-auto text-base transition-transform" data-chev="clinical">expand_more</span></button>
-      <div data-gsub="clinical" class="hidden mt-0.5 space-y-0.5">
-        <a onclick="goSub('clinical','menu')" data-sub="clinical:menu" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Treatment menu</a>
-        <a onclick="goSub('clinical','safety')" data-sub="clinical:safety" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Complication protocols</a>
-        <a onclick="goSub('clinical','imaging')" data-sub="clinical:imaging" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Photography &amp; outcomes</a>
+
+      <button data-secthead="engage" onclick="toggleSect('engage')" class="nav w-full flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">campaign</span>Comms &amp; growth<span class="material-symbols-rounded ml-auto text-base transition-transform" data-sectchev="engage">expand_more</span></button>
+      <div data-sect="engage" class="hidden mt-0.5 space-y-0.5">
+        <a onclick="goSub('marketing','inbox')" data-sub="marketing:inbox" data-allow="marketing" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Inbox</a>
+        <a onclick="goSub('marketing','auto')" data-sub="marketing:auto" data-allow="marketing" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Automations</a>
+        <a onclick="goSub('marketing','camp')" data-sub="marketing:camp" data-allow="marketing" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Campaigns</a>
+        <a onclick="goSub('growth','leads')" data-sub="growth:leads" data-allow="growth" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Leads (CRM)</a>
+        <a onclick="goSub('growth','reviews')" data-sub="growth:reviews" data-allow="growth" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Reviews</a>
       </div>
-      <button data-nav="operations" onclick="toggleGroup('operations')" class="nav w-full flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">home_repair_service</span>Operations<span class="material-symbols-rounded ml-auto text-base transition-transform" data-chev="operations">expand_more</span></button>
-      <div data-gsub="operations" class="hidden mt-0.5 space-y-0.5">
-        <a onclick="goSub('operations','openclose')" data-sub="operations:openclose" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Open / close &amp; fridge log</a>
-        <a onclick="goSub('operations','resources')" data-sub="operations:resources" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Rooms &amp; devices</a>
-        <a onclick="goSub('operations','equipment')" data-sub="operations:equipment" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Equipment &amp; maintenance</a>
-        <a onclick="goSub('operations','phone')" data-sub="operations:phone" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Call log</a>
+
+      <button data-secthead="memberships" onclick="toggleSect('memberships')" class="nav w-full flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">loyalty</span>Memberships<span class="material-symbols-rounded ml-auto text-base transition-transform" data-sectchev="memberships">expand_more</span></button>
+      <div data-sect="memberships" class="hidden mt-0.5 space-y-0.5">
+        <a onclick="goSub('memberships','overview')" data-sub="memberships:overview" data-allow="memberships" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Overview</a>
+        <a onclick="goSub('memberships','plans')" data-sub="memberships:plans" data-allow="memberships" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Plans &amp; packages</a>
+        <a onclick="goSub('memberships','members')" data-sub="memberships:members" data-allow="memberships" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Members &amp; billing</a>
+        <a onclick="goSub('memberships','loyalty')" data-sub="memberships:loyalty" data-allow="memberships" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Loyalty</a>
+        <a onclick="goSub('memberships','referrals')" data-sub="memberships:referrals" data-allow="memberships" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Referrals</a>
+        <a onclick="goSub('memberships','gifts')" data-sub="memberships:gifts" data-allow="memberships" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Gift cards</a>
+        <a onclick="goSub('memberships','pricing')" data-sub="memberships:pricing" data-allow="memberships" class="subnav fin block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Pricing &amp; what-if</a>
       </div>
-      <a onclick="show('finance')" data-nav="finance" class="nav flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">account_balance</span>Finance</a>
-      <button data-nav="team" onclick="toggleGroup('team')" class="nav w-full flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">badge</span>Team<span class="material-symbols-rounded ml-auto text-base transition-transform" data-chev="team">expand_more</span></button>
-      <div data-gsub="team" class="hidden mt-0.5 space-y-0.5">
-        <a onclick="goSub('team','roster')" data-sub="team:roster" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Roster &amp; leave</a>
-        <a onclick="goSub('team','people')" data-sub="team:people" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">People &amp; credentials</a>
-        <a onclick="goSub('team','compliance')" data-sub="team:compliance" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Compliance board</a>
+
+      <button data-secthead="business" onclick="toggleSect('business')" class="nav w-full flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">monitoring</span>Business<span class="material-symbols-rounded ml-auto text-base transition-transform" data-sectchev="business">expand_more</span></button>
+      <div data-sect="business" class="hidden mt-0.5 space-y-0.5">
+        <a onclick="show('reports')" data-nav="reports" data-allow="reports" class="nav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Reports</a>
+        <a onclick="show('finance')" data-nav="finance" data-allow="finance" class="nav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Finance</a>
       </div>
-      <button data-nav="growth" onclick="toggleGroup('growth')" class="nav w-full flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">trending_up</span>Growth<span class="material-symbols-rounded ml-auto text-base transition-transform" data-chev="growth">expand_more</span></button>
-      <div data-gsub="growth" class="hidden mt-0.5 space-y-0.5">
-        <a onclick="goSub('growth','leads')" data-sub="growth:leads" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Leads (CRM)</a>
-        <a onclick="goSub('growth','reviews')" data-sub="growth:reviews" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Reviews</a>
+
+      <button data-secthead="team" onclick="toggleSect('team')" class="nav w-full flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">badge</span>Team<span class="material-symbols-rounded ml-auto text-base transition-transform" data-sectchev="team">expand_more</span></button>
+      <div data-sect="team" class="hidden mt-0.5 space-y-0.5">
+        <a onclick="goSub('team','roster')" data-sub="team:roster" data-allow="team" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Roster &amp; leave</a>
+        <a onclick="goSub('team','people')" data-sub="team:people" data-allow="team" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">People &amp; credentials</a>
+        <a onclick="goSub('team','compliance')" data-sub="team:compliance" data-allow="team" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Compliance board</a>
       </div>
-      <button data-nav="governance" onclick="toggleGroup('governance')" class="nav w-full flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">verified_user</span>Governance<span id="navGovCount" class="text-[11px] bg-rose-500 text-white rounded-full px-1.5 leading-5"></span><span class="material-symbols-rounded ml-auto text-base transition-transform" data-chev="governance">expand_more</span></button>
-      <div data-gsub="governance" class="hidden mt-0.5 space-y-0.5">
-        <a onclick="goSub('governance','overview')" data-sub="governance:overview" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Overview</a>
-        <a onclick="goSub('governance','ae')" data-sub="governance:ae" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Adverse events &amp; DAEN</a>
-        <a onclick="goSub('governance','recalls')" data-sub="governance:recalls" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Recalls</a>
-        <a onclick="goSub('governance','policies')" data-sub="governance:policies" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Policies</a>
-        <a onclick="goSub('governance','waste')" data-sub="governance:waste" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Infection &amp; waste</a>
-        <a onclick="goSub('governance','privacy')" data-sub="governance:privacy" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Privacy</a>
-        <a onclick="goSub('governance','audit')" data-sub="governance:audit" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Audit pack</a>
+
+      <button data-secthead="governance" onclick="toggleSect('governance')" class="nav w-full flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">verified_user</span>Governance<span id="navGovCount" class="text-[11px] bg-rose-500 text-white rounded-full px-1.5 leading-5"></span><span class="material-symbols-rounded ml-auto text-base transition-transform" data-sectchev="governance">expand_more</span></button>
+      <div data-sect="governance" class="hidden mt-0.5 space-y-0.5">
+        <a onclick="goSub('governance','overview')" data-sub="governance:overview" data-allow="governance" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Overview</a>
+        <a onclick="goSub('governance','ae')" data-sub="governance:ae" data-allow="governance" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Adverse events &amp; DAEN</a>
+        <a onclick="goSub('governance','recalls')" data-sub="governance:recalls" data-allow="governance" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Recalls</a>
+        <a onclick="goSub('governance','policies')" data-sub="governance:policies" data-allow="governance" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Policies</a>
+        <a onclick="goSub('governance','waste')" data-sub="governance:waste" data-allow="governance" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Infection &amp; waste</a>
+        <a onclick="goSub('governance','privacy')" data-sub="governance:privacy" data-allow="governance" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Privacy</a>
+        <a onclick="goSub('governance','audit')" data-sub="governance:audit" data-allow="governance" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Audit pack</a>
       </div>
-      <button data-nav="settings" onclick="toggleGroup('settings')" class="nav w-full flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">settings</span>Settings<span class="material-symbols-rounded ml-auto text-base transition-transform" data-chev="settings">expand_more</span></button>
-      <div data-gsub="settings" class="hidden mt-0.5 space-y-0.5">
-        <a onclick="goSub('settings','integrations')" data-sub="settings:integrations" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Integrations</a>
-        <a onclick="goSub('settings','booking')" data-sub="settings:booking" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Public booking page</a>
+
+      <button data-secthead="settings" onclick="toggleSect('settings')" class="nav w-full flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer hover:bg-slate-50"><span class="material-symbols-rounded">settings</span>Settings<span class="material-symbols-rounded ml-auto text-base transition-transform" data-sectchev="settings">expand_more</span></button>
+      <div data-sect="settings" class="hidden mt-0.5 space-y-0.5">
+        <a onclick="goSub('settings','integrations')" data-sub="settings:integrations" data-allow="settings" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Integrations</a>
+        <a onclick="goSub('settings','booking')" data-sub="settings:booking" data-allow="settings" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Public booking page</a>
       </div>
     </nav>
     <div class="mt-auto p-3"><a href="index.html" class="flex items-center gap-2 text-xs text-mute hover:text-brand-700"><span class="material-symbols-rounded text-base">arrow_back</span>Prototype gallery</a></div>
@@ -1162,13 +1171,15 @@ function apptCheckout(i){curApptForChart=i;openClient(todayAppts[i].cid);show('c
 function openChartFor(i){curClientIdx=i;var c=clients[i];var nm=document.getElementById('chartName');if(nm)nm.textContent=c.n;if(typeof applyChartType==='function')applyChartType();if(typeof renderChartReview==='function')renderChartReview();if(typeof renderChartProduct==='function')renderChartProduct();show('chart');}
 function openClient(i){const c=clients[i];curClientIdx=i;document.getElementById('pname').textContent=c.n;document.getElementById('pavatar').src='https://i.pravatar.cc/120?img='+c.img;document.getElementById('ptag').textContent=c.st;document.getElementById('ptag').className='px-2 py-0.5 rounded-full text-xs font-medium '+cc[c.stc];tab('ov');show('profile');}
 function toggleNav(open){var sb=document.getElementById('sidebar'),ov=document.getElementById('navOverlay');if(!sb)return;if(open){sb.classList.add('open');if(ov)ov.classList.remove('hidden');}else{sb.classList.remove('open');if(ov)ov.classList.add('hidden');}}
-function show(id){document.querySelectorAll('[data-screen]').forEach(s=>s.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));document.querySelector('[data-nav="'+id+'"]')?.classList.add('active');if(id==='chart'||id==='chartlist')document.querySelector('[data-nav="chart"]')?.classList.add('active');document.querySelectorAll('[data-gsub]').forEach(s=>s.classList.add('hidden'));document.querySelectorAll('[data-chev]').forEach(c=>c.style.transform='');document.querySelectorAll('.subnav').forEach(a=>{a.classList.remove('text-brand-700','bg-brand-50','font-medium');a.classList.add('text-slate-500');});window.scrollTo(0,0);toggleNav(false);}
+function show(id){document.querySelectorAll('[data-screen]').forEach(s=>s.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));document.querySelector('[data-nav="'+id+'"]')?.classList.add('active');if(id==='chart'||id==='chartlist')document.querySelector('[data-nav="chart"]')?.classList.add('active');document.querySelectorAll('[data-gsub]').forEach(s=>s.classList.add('hidden'));document.querySelectorAll('[data-chev]').forEach(c=>c.style.transform='');document.querySelectorAll('.subnav').forEach(a=>{a.classList.remove('text-brand-700','bg-brand-50','font-medium');a.classList.add('text-slate-500');});var _an=document.querySelector('[data-nav="'+id+'"]');if(!_an&&(id==='chartlist'||id==='chart'))_an=document.querySelector('[data-nav="chart"]');revealSect(_an);window.scrollTo(0,0);toggleNav(false);}
+function toggleSect(name){var body=document.querySelector('[data-sect="'+name+'"]');if(!body)return;var willOpen=body.classList.contains('hidden');document.querySelectorAll('[data-sect]').forEach(function(s){s.classList.add('hidden');});document.querySelectorAll('[data-sectchev]').forEach(function(c){c.style.transform='';});if(willOpen){body.classList.remove('hidden');var ch=document.querySelector('[data-sectchev="'+name+'"]');if(ch)ch.style.transform='rotate(180deg)';}}
+function revealSect(el){var sec=(el&&el.closest)?el.closest('[data-sect]'):null;document.querySelectorAll('[data-sect]').forEach(function(s){if(s!==sec)s.classList.add('hidden');});document.querySelectorAll('[data-sectchev]').forEach(function(c){c.style.transform='';});if(sec){sec.classList.remove('hidden');var nm=sec.getAttribute('data-sect');var ch=document.querySelector('[data-sectchev="'+nm+'"]');if(ch)ch.style.transform='rotate(180deg)';}}
 var GDEF={memberships:'overview',marketing:'overview',clinical:'menu',operations:'openclose',team:'roster',growth:'leads',governance:'overview',settings:'integrations'};
 function toggleGroup(g){goSub(g,GDEF[g]||'overview');}
 function goSub(section,sub){show(section);var s=document.querySelector('[data-gsub="'+section+'"]');if(s)s.classList.remove('hidden');var chev=document.querySelector('[data-chev="'+section+'"]');if(chev)chev.style.transform='rotate(180deg)';
  if(section==='marketing')msub(sub);else if(section==='memberships')mtab(sub);else gpane(section,sub);
  document.querySelectorAll('[data-sub^="'+section+':"]').forEach(function(a){a.classList.remove('text-brand-700','bg-brand-50','font-medium');a.classList.add('text-slate-500');});
- var act=document.querySelector('[data-sub="'+section+':'+sub+'"]');if(act){act.classList.add('text-brand-700','bg-brand-50','font-medium');act.classList.remove('text-slate-500');}}
+ var act=document.querySelector('[data-sub="'+section+':'+sub+'"]');if(act){act.classList.add('text-brand-700','bg-brand-50','font-medium');act.classList.remove('text-slate-500');}revealSect(act);}
 function gpane(section,sub){document.querySelectorAll('[data-gp^="'+section+':"]').forEach(function(p){p.classList.add('hidden');});var el=document.querySelector('[data-gp="'+section+':'+sub+'"]');if(el)el.classList.remove('hidden');
  document.querySelectorAll('[data-pill^="'+section+':"]').forEach(function(b){var on=b.getAttribute('data-pill')===section+':'+sub;b.classList.toggle('bg-brand-600',on);b.classList.toggle('text-white',on);b.classList.toggle('font-medium',on);b.classList.toggle('bg-white',!on);b.classList.toggle('shadow-soft',!on);b.classList.toggle('text-mute',!on);});}
 function tab(t){document.querySelectorAll('[data-pane]').forEach(p=>p.classList.add('hidden'));document.querySelector('[data-pane="'+t+'"]').classList.remove('hidden');document.querySelectorAll('.tab').forEach(x=>{x.classList.remove('active');x.classList.add('text-mute');});const el=document.querySelector('[data-tab="'+t+'"]');el.classList.add('active');el.classList.remove('text-mute');}
@@ -1491,15 +1502,17 @@ function setPersona(k){persona=k;const p=personas[k];var sa=document.getElementB
  document.getElementById('hdrName').textContent=p.name;document.getElementById('hdrRole').textContent=p.role;document.getElementById('hdrAvatar').src='https://i.pravatar.cc/64?img='+p.img;document.getElementById('scopeNote').textContent=p.note;var gf=p.name.replace(/^Dr\.?\s+/,'').split(' ')[0];var gg=document.getElementById('greet');if(gg)gg.textContent='Good morning, '+gf;
  var canChartNav=p.caps.chart||p.caps.chartView;
  var con0=p.concerns||[];
- const allow={dashboard:1,schedule:1,clients:1,followups:1,checkout:1,chart:canChartNav,stock:p.caps.stock,reports:p.caps.financials,marketing:con0.indexOf('biz')>-1,forms:1,memberships:con0.indexOf('biz')>-1,
-   clinical:con0.indexOf('clin')>-1,
+ const allow={dashboard:1,schedule:1,clients:1,followups:1,checkout:1,chart:canChartNav,stock:p.caps.stock,reports:p.caps.financials,marketing:con0.indexOf('biz')>-1,memberships:con0.indexOf('biz')>-1,
+   forms:canChartNav||!!p.caps.stock||con0.indexOf('clin')>-1,
+   clinical:con0.indexOf('clin')>-1||canChartNav,
    operations:con0.indexOf('frontdesk')>-1||con0.indexOf('facility')>-1,
    finance:!!p.caps.financials,
-   team:!!p.caps.team,
+   team:p.caps.team==='manage',
    growth:con0.indexOf('biz')>-1,
    governance:!!p.caps.financials||con0.indexOf('compliance')>-1,
    settings:!!p.caps.integrations};
- document.querySelectorAll('.nav').forEach(n=>{n.style.display=allow[n.getAttribute('data-nav')]?'':'none';});
+ document.querySelectorAll('#sidebar [data-allow]').forEach(function(el){el.style.display=allow[el.getAttribute('data-allow')]?'':'none';});
+ document.querySelectorAll('#sidebar [data-sect]').forEach(function(sec){var nm=sec.getAttribute('data-sect');var any=Array.prototype.some.call(sec.querySelectorAll('[data-allow]'),function(el){return el.style.display!=='none';});var head=document.querySelector('[data-secthead="'+nm+'"]');if(head)head.style.display=any?'':'none';if(!any){sec.classList.add('hidden');var ch=document.querySelector('[data-sectchev="'+nm+'"]');if(ch)ch.style.transform='';}});
  var rb=document.getElementById('receiveBtn');if(rb)rb.style.display=p.caps.receive?'':'none';
  document.querySelectorAll('#staffApp .catadmin').forEach(function(e){e.style.display=(p.caps.receive||p.caps.financials)?'':'none';});
  document.querySelectorAll('.act-chart').forEach(b=>b.style.display=canChartNav?'':'none');
