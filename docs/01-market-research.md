@@ -99,7 +99,9 @@ modern UX, (b) Aesthetic Record/Pabau-grade injectable clinical depth, and (c) n
 ### AU health / allied-health (data-residency + claiming)
 
 **14. Cliniko** — AU-made (Melbourne), strong AU compliance, online booking, central records, treatment notes, telehealth, invoicing, SMS, Medicare/health-fund claiming, Xero/Stripe/Mailchimp integrations. **No injection plotting / aesthetic consent workflows.**
+
 **15. Power Diary / Halaxy** — affordable allied-health PM; scheduling, billing, online bookings, native claiming; not aesthetic-specific.
+
 **16. Fresh Clinics** — **AU option built around the regulatory environment**: cosmetic clinic management *plus* on-demand doctors for prescribing & professional support. The most direct AU-compliance-aware competitor; worth studying closely (and noting they bundle prescriber access — a service, not just software).
 
 ---
