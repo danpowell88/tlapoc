@@ -184,8 +184,7 @@ into the black, and then climbs faster each year as the same software serves mor
 extra cost. It looks like the letter **J**.
 
 <div class="fig">
-<svg viewBox="0 0 720 380" xmlns="http://www.w3.org/2000/svg" font-family="Inter, system-ui, sans-serif">
-  <!-- gridlines + y labels (A$ thousands) -->
+<svg viewBox="0 0 720 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Line chart of cumulative profit over Years 0 to 3. The cash line (no owner wage) rises from minus 5k to plus 425k. The economic line (counting a full-time owner wage) dips to about minus 125k late in Year 1 then breaks even around the end of Year 3.">
   <g stroke="#e2e8f0" stroke-width="1">
     <line x1="70" y1="46" x2="680" y2="46"/>
     <line x1="70" y1="97" x2="680" y2="97"/>
@@ -199,11 +198,9 @@ extra cost. It looks like the letter **J**.
     <text x="60" y="153">$200k</text>
     <text x="60" y="205">$100k</text>
     <text x="60" y="257">$0</text>
-    <text x="60" y="308">–$100k</text>
+    <text x="60" y="308">-$100k</text>
   </g>
-  <!-- zero line -->
   <line x1="70" y1="253" x2="680" y2="253" stroke="#64748b" stroke-width="1.5" stroke-dasharray="5 4"/>
-  <!-- x axis labels -->
   <g fill="#334155" font-size="13" text-anchor="middle" font-weight="600">
     <text x="70" y="362">Year 0</text>
     <text x="273" y="362">Year 1</text>
@@ -211,29 +208,23 @@ extra cost. It looks like the letter **J**.
     <text x="680" y="362">Year 3</text>
   </g>
   <text x="70" y="344" fill="#94a3b8" font-size="11" text-anchor="middle">(build)</text>
-  <!-- economic line (counting a wage) -->
   <polyline points="70,276 273,317 476,312 680,240" fill="none" stroke="#b45309" stroke-width="3" stroke-dasharray="6 4"/>
   <g fill="#b45309"><circle cx="70" cy="276" r="4"/><circle cx="273" cy="317" r="4"/><circle cx="476" cy="312" r="4"/><circle cx="680" cy="240" r="4"/></g>
-  <!-- cash line (no wage) -->
   <polyline points="70,255 273,235 476,167 680,33" fill="none" stroke="#0d9488" stroke-width="3"/>
   <g fill="#0d9488"><circle cx="70" cy="255" r="4"/><circle cx="273" cy="235" r="4"/><circle cx="476" cy="167" r="4"/><circle cx="680" cy="33" r="4"/></g>
-  <!-- value callouts on cash line -->
   <g fill="#0f766e" font-size="11" font-weight="600" text-anchor="middle">
     <text x="273" y="226">+$35k</text>
     <text x="476" y="158">+$165k</text>
     <text x="660" y="26">+$425k</text>
   </g>
-  <!-- legend -->
   <g font-size="12" fill="#334155">
     <line x1="80" y1="48" x2="112" y2="48" stroke="#0d9488" stroke-width="3"/>
-    <text x="118" y="52">Cumulative profit — <tspan font-weight="600">if you don't pay yourself a wage</tspan></text>
+    <text x="118" y="52">Cumulative profit if you do NOT pay yourself a wage</text>
     <line x1="80" y1="70" x2="112" y2="70" stroke="#b45309" stroke-width="3" stroke-dasharray="6 4"/>
-    <text x="118" y="74">Cumulative profit — <tspan font-weight="600">counting a full-time wage for yourself</tspan></text>
+    <text x="118" y="74">Cumulative profit counting a full-time wage for yourself</text>
   </g>
 </svg>
-<div class="cap"><b>Cumulative profit over time (QLD, base case).</b> The teal line is cash in the bank if the
-owner draws no salary; the amber line subtracts a market wage for the owner's time. Both trend up — they
-just cross zero at different moments.</div>
+<p class="cap"><b>Cumulative profit over time (QLD, base case).</b> The teal line is cash in the bank if the owner draws no salary; the amber line subtracts a market wage for the owner's time. Both trend up &mdash; they just cross zero at different moments.</p>
 </div>
 
 **Year-by-year (base case, cash view — owner takes no wage yet):**
