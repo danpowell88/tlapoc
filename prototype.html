@@ -148,7 +148,7 @@ tailwind.config={theme:{extend:{
         <a onclick="goSub('governance','overview')" data-sub="governance:overview" data-allow="governance" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Overview</a>
         <a onclick="goSub('governance','ae')" data-sub="governance:ae" data-allow="governance" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Adverse events &amp; DAEN</a>
         <a onclick="goSub('governance','recalls')" data-sub="governance:recalls" data-allow="governance" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Recalls</a>
-        <a onclick="goSub('governance','policies')" data-sub="governance:policies" data-allow="governance" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Policies</a>        <a onclick="goSub('governance','privacy')" data-sub="governance:privacy" data-allow="governance" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Privacy</a>
+        <a onclick="goSub('governance','policies')" data-sub="governance:policies" data-allow="governance" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Policies</a>
         <a onclick="goSub('governance','audit')" data-sub="governance:audit" data-allow="governance" class="subnav block pl-11 pr-3 py-1.5 rounded-lg text-[13px] text-slate-500 hover:bg-slate-50 cursor-pointer">Audit pack</a>
       </div>
 
@@ -923,6 +923,15 @@ tailwind.config={theme:{extend:{
         </div>
         <div data-gp="team:people" class="hidden"><div id="teamPeople" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div></div>
         <div data-gp="team:compliance" class="hidden">
+          <div class="rounded-2xl border border-brand-100 bg-brand-50/60 p-4 mb-4">
+            <div class="flex items-start gap-3 text-sm leading-relaxed">
+              <span class="material-symbols-rounded text-brand-600 shrink-0">badge</span>
+              <div>
+                <p class="text-slate-700">Who is cleared to inject today. An injector is bookable for <b>S4</b> treatments only when <b>all</b> of these hold: current AHPRA <b>registration</b>, enough <b>CPD</b> hours, and <b>indemnity insurance that covers cosmetic</b> work. If any lapses, the system blocks them automatically &mdash; they stop appearing as bookable.</p>
+                <p class="mt-2 text-slate-600"><span class="font-semibold text-ink">What to do &rarr;</span> Resolve anything <span class="text-amber-700 font-medium">amber</span> (renewing soon &mdash; your early warning) or <span class="text-rose-700 font-medium">red</span> (blocked &mdash; cannot be scheduled for S4 until fixed).</p>
+              </div>
+            </div>
+          </div>
           <div id="teamCompBanner" class="mb-4"></div>
           <div class="bg-white rounded-2xl shadow-soft overflow-hidden"><table class="w-full text-sm"><thead class="text-mute border-b border-slate-100"><tr><th class="text-left font-medium px-4 py-3">Practitioner</th><th class="text-left font-medium px-4 py-3">Registration</th><th class="text-left font-medium px-4 py-3">CPD</th><th class="text-left font-medium px-4 py-3">Indemnity (cosmetic)</th><th class="text-left font-medium px-4 py-3">Bookable for S4</th></tr></thead><tbody id="teamCompliance" class="divide-y divide-slate-100"></tbody></table></div>
         </div>
@@ -958,35 +967,85 @@ tailwind.config={theme:{extend:{
           <button onclick="goSub('governance','overview')" data-pill="governance:overview" class="px-3 py-1.5 rounded-full bg-brand-600 text-white font-medium">Overview</button>
           <button onclick="goSub('governance','ae')" data-pill="governance:ae" class="px-3 py-1.5 rounded-full bg-white shadow-soft text-mute">Adverse events</button>
           <button onclick="goSub('governance','recalls')" data-pill="governance:recalls" class="px-3 py-1.5 rounded-full bg-white shadow-soft text-mute">Recalls</button>
-          <button onclick="goSub('governance','policies')" data-pill="governance:policies" class="px-3 py-1.5 rounded-full bg-white shadow-soft text-mute">Policies</button>          <button onclick="goSub('governance','privacy')" data-pill="governance:privacy" class="px-3 py-1.5 rounded-full bg-white shadow-soft text-mute">Privacy</button>
+          <button onclick="goSub('governance','policies')" data-pill="governance:policies" class="px-3 py-1.5 rounded-full bg-white shadow-soft text-mute">Policies</button>
           <button onclick="goSub('governance','audit')" data-pill="governance:audit" class="px-3 py-1.5 rounded-full bg-white shadow-soft text-mute">Audit pack</button>
         </div>
         <div data-gp="governance:overview">
+          <div class="rounded-2xl border border-brand-100 bg-brand-50/60 p-4 mb-5">
+            <div class="flex items-start gap-3 text-sm leading-relaxed">
+              <span class="material-symbols-rounded text-brand-600 shrink-0">verified_user</span>
+              <div>
+                <p class="text-slate-700">This is your <b>compliance command centre</b> — everything a regulator (AHPRA, the TGA or state Health) might ask to see, kept in one place. Most rules are enforced quietly inside everyday work; the tabs here are for the compliance jobs that need a home of their own.</p>
+                <p class="mt-2 text-slate-600"><span class="font-semibold text-ink">What to do &rarr;</span> Clear anything under <b>Needs attention</b> below. The red number on the sidebar &ldquo;Governance&rdquo; item is a live count of open items &mdash; aim to keep it at zero.</p>
+              </div>
+            </div>
+          </div>
           <div id="govStats" class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5"></div>
+          <details class="bg-white rounded-2xl shadow-soft p-4 mb-5 text-sm">
+            <summary class="font-semibold cursor-pointer flex items-center gap-2 select-none"><span class="material-symbols-rounded text-brand-600">menu_book</span>Key terms &mdash; what the acronyms mean</summary>
+            <dl class="grid sm:grid-cols-2 gap-x-8 gap-y-2 mt-4 text-slate-600 leading-relaxed">
+              <div><dt class="font-semibold text-ink inline">AHPRA</dt> &mdash; the national board that registers nurses &amp; doctors. Treating with a lapsed registration is illegal.</div>
+              <div><dt class="font-semibold text-ink inline">TGA</dt> &mdash; the regulator for medicines &amp; medical devices; runs the DAEN and issues recalls.</div>
+              <div><dt class="font-semibold text-ink inline">S4</dt> &mdash; a &ldquo;prescription-only&rdquo; medicine (e.g. anti-wrinkle toxins). Strict rules on who holds, prescribes &amp; advertises it.</div>
+              <div><dt class="font-semibold text-ink inline">DAEN</dt> &mdash; the TGA&rsquo;s national database of adverse-event reports &mdash; Medicines for toxins, Devices for filler/threads/RF.</div>
+              <div><dt class="font-semibold text-ink inline">CPD</dt> &mdash; Continuing Professional Development; the annual training hours a practitioner must log to stay registered.</div>
+              <div><dt class="font-semibold text-ink inline">Indemnity</dt> &mdash; professional insurance. Cover must explicitly include <b>cosmetic</b> work, or the practitioner can&rsquo;t inject.</div>
+              <div><dt class="font-semibold text-ink inline">Cold-chain</dt> &mdash; keeping fridge stock within 2&ndash;8&deg;C and logging it; a breach can spoil product.</div>
+              <div><dt class="font-semibold text-ink inline">Recall</dt> &mdash; a supplier/TGA safety notice for a specific batch (&ldquo;lot&rdquo;) that must be traced to the clients who received it.</div>
+            </dl>
+          </details>
           <div class="grid lg:grid-cols-2 gap-5">
-            <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3 flex items-center gap-2"><span class="material-symbols-rounded text-rose-500">priority_high</span>Needs attention — compliance</h2><ul id="govAttention" class="space-y-2.5 text-sm"></ul></div>
-            <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Current status</h2><ul id="govStatus" class="space-y-2 text-sm"></ul><button onclick="goSub('governance','audit')" class="mt-4 px-4 py-2 rounded-xl bg-brand-600 text-white text-sm font-medium flex items-center gap-1"><span class="material-symbols-rounded text-lg">inventory</span>Build inspection pack</button></div>
+            <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3 flex items-center gap-2"><span class="material-symbols-rounded text-rose-500">priority_high</span>Needs attention</h2><ul id="govAttention" class="space-y-2.5 text-sm"></ul></div>
+            <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-1">Quietly handled for you</h2><p class="text-mute text-xs mb-3">Compliance enforced inside everyday work &mdash; no action needed unless a check fails.</p><ul id="govStatus" class="space-y-2 text-sm"></ul><button onclick="goSub('governance','audit')" class="mt-4 px-4 py-2 rounded-xl bg-brand-600 text-white text-sm font-medium flex items-center gap-1"><span class="material-symbols-rounded text-lg">inventory</span>Build inspection pack</button></div>
           </div>
         </div>
         <div data-gp="governance:ae" class="hidden">
-          <p class="text-mute text-sm mb-3">Adverse events route by product class — toxin &amp; filler-as-medicine → DAEN medicines; device-class filler/PDO/RF → DAEN devices. Reporting is voluntary but strongly encouraged. <span class="text-slate-400">ADR-0031.</span></p>
+          <div class="rounded-2xl border border-brand-100 bg-brand-50/60 p-4 mb-4">
+            <div class="flex items-start gap-3 text-sm leading-relaxed">
+              <span class="material-symbols-rounded text-brand-600 shrink-0">release_alert</span>
+              <div>
+                <p class="text-slate-700">An <b>adverse event</b> is any harm or unexpected reaction after a treatment &mdash; a drooping brow after anti-wrinkle, a blocked vessel after filler. The TGA collects these in a national database (the <b>DAEN</b>) so problems with a product can be spotted across the country.</p>
+                <p class="mt-2 text-slate-600"><span class="font-semibold text-ink">What to do &rarr;</span> Review each case and hit <b>Report</b> &mdash; we pre-fill the right portal (<b>Medicines</b> for toxins &amp; filler-as-medicine, <b>Devices</b> for device-class filler / PDO threads / RF). Reporting is voluntary but expected of a good clinic, and every submission is audit-logged. <span class="text-slate-400">ADR-0031.</span></p>
+              </div>
+            </div>
+          </div>
           <div class="bg-white rounded-2xl shadow-soft overflow-hidden"><table class="w-full text-sm"><thead class="text-mute border-b border-slate-100"><tr><th class="text-left font-medium px-4 py-3">Case</th><th class="text-left font-medium px-4 py-3">Product / lot</th><th class="text-left font-medium px-4 py-3">Route</th><th class="text-left font-medium px-4 py-3">Severity</th><th class="text-left font-medium px-4 py-3">Status</th><th class="text-left font-medium px-4 py-3"></th></tr></thead><tbody id="govAE" class="divide-y divide-slate-100"></tbody></table></div>
         </div>
         <div data-gp="governance:recalls" class="hidden">
-          <p class="text-mute text-sm mb-3">From a lot → exact client list (instant), run the recall safety campaign and track acknowledgements — the evidence a reviewer asks for. Safety/recall messages send to affected clients regardless of marketing opt-in.</p>
+          <div class="rounded-2xl border border-brand-100 bg-brand-50/60 p-4 mb-4">
+            <div class="flex items-start gap-3 text-sm leading-relaxed">
+              <span class="material-symbols-rounded text-brand-600 shrink-0">campaign</span>
+              <div>
+                <p class="text-slate-700">When a supplier or the TGA issues a safety notice for a specific batch (a <b>lot</b>) of product, you must find everyone treated from that lot and tell them &mdash; fast.</p>
+                <p class="mt-2 text-slate-600"><span class="font-semibold text-ink">What to do &rarr;</span> Hit <b>Run recall</b>: we turn the lot number into the exact client list instantly, send an SMS + call, and track who has acknowledged. Safety messages go out even to clients who opted out of marketing &mdash; and that acknowledgement trail is exactly what an inspector asks for.</p>
+              </div>
+            </div>
+          </div>
           <div id="govRecalls" class="space-y-3"></div>
         </div>
         <div data-gp="governance:policies" class="hidden">
-          <p class="text-mute text-sm mb-3">Version-controlled policies with staff read-&amp;-sign-off. Publishing a new version resets sign-off and raises a policy job for each staffer.</p>
-          <div class="bg-white rounded-2xl shadow-soft overflow-hidden"><table class="w-full text-sm"><thead class="text-mute border-b border-slate-100"><tr><th class="text-left font-medium px-4 py-3">Policy</th><th class="text-left font-medium px-4 py-3">Version</th><th class="text-left font-medium px-4 py-3">Updated</th><th class="text-left font-medium px-4 py-3">Signed</th><th class="text-left font-medium px-4 py-3"></th></tr></thead><tbody id="govPolicies" class="divide-y divide-slate-100"></tbody></table></div>
-        </div>        <div data-gp="governance:privacy" class="hidden">
-          <div class="grid lg:grid-cols-2 gap-5">
-            <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Data-subject requests (APP 12/13)</h2><table class="w-full text-sm"><thead class="text-mute border-b border-slate-100"><tr><th class="text-left font-medium py-2">Ref</th><th class="text-left font-medium py-2">Type</th><th class="text-left font-medium py-2">Due</th><th class="text-left font-medium py-2">Status</th></tr></thead><tbody id="govDSAR" class="divide-y divide-slate-100"></tbody></table></div>
-            <div class="bg-white rounded-2xl shadow-soft p-5"><div class="flex items-center justify-between mb-3"><h2 class="font-semibold">Breach register (NDB)</h2><button onclick="breachDrill()" class="px-3 py-1.5 rounded-xl bg-white shadow-soft border border-slate-200 text-xs font-medium">Run breach drill</button></div><p class="text-mute text-sm mb-3">Assess within 30 days; if eligible, notify OAIC + individuals.</p><div id="govBreach" class="space-y-2"></div></div>
+          <div class="rounded-2xl border border-brand-100 bg-brand-50/60 p-4 mb-4">
+            <div class="flex items-start gap-3 text-sm leading-relaxed">
+              <span class="material-symbols-rounded text-brand-600 shrink-0">rule</span>
+              <div>
+                <p class="text-slate-700">Your clinic&rsquo;s written rules &mdash; infection control, consent, emergencies, privacy &amp; data-breach response. Every staff member must read and sign the <b>current</b> version of each.</p>
+                <p class="mt-2 text-slate-600"><span class="font-semibold text-ink">What to do &rarr;</span> Keep each policy current and chase sign-offs. Publishing a new version resets everyone&rsquo;s sign-off and raises a task per staffer. <b>5/6 signed</b> means one person still needs to acknowledge it &mdash; hit <b>Sign</b> to record yours.</p>
+              </div>
+            </div>
           </div>
+          <div class="bg-white rounded-2xl shadow-soft overflow-hidden"><table class="w-full text-sm"><thead class="text-mute border-b border-slate-100"><tr><th class="text-left font-medium px-4 py-3">Policy</th><th class="text-left font-medium px-4 py-3">Version</th><th class="text-left font-medium px-4 py-3">Updated</th><th class="text-left font-medium px-4 py-3">Signed</th><th class="text-left font-medium px-4 py-3"></th></tr></thead><tbody id="govPolicies" class="divide-y divide-slate-100"></tbody></table></div>
         </div>
         <div data-gp="governance:audit" class="hidden">
-          <div class="bg-white rounded-2xl shadow-soft p-5 max-w-2xl"><h2 class="font-semibold mb-1">Inspection-readiness pack</h2><p class="text-mute text-sm mb-4">One dated, scoped bundle of current evidence for AHPRA / TGA / state Health.</p>
+          <div class="rounded-2xl border border-brand-100 bg-brand-50/60 p-4 mb-4 max-w-2xl">
+            <div class="flex items-start gap-3 text-sm leading-relaxed">
+              <span class="material-symbols-rounded text-brand-600 shrink-0">inventory</span>
+              <div>
+                <p class="text-slate-700">If AHPRA, the TGA or your state Health department inspects the clinic, they ask to see <b>evidence</b> &mdash; current registrations, your S4 drug register, consent records, cold-chain logs, signed policies. This bundles all of it into one dated PDF.</p>
+                <p class="mt-2 text-slate-600"><span class="font-semibold text-ink">What to do &rarr;</span> Tick the categories you need and <b>Build pack</b>. Generate a fresh one before any inspection, or on a regular cadence so it&rsquo;s always ready.</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white rounded-2xl shadow-soft p-5 max-w-2xl"><h2 class="font-semibold mb-1">Inspection-readiness pack</h2><p class="text-mute text-sm mb-4">Choose what to include &mdash; each item pulls the current evidence from across the app.</p>
             <div id="auditItems" class="grid sm:grid-cols-2 gap-2 text-sm mb-4"></div>
             <button onclick="buildAuditPack()" class="px-4 py-2 rounded-xl bg-brand-600 text-white text-sm font-medium flex items-center gap-1"><span class="material-symbols-rounded text-lg">inventory</span>Build pack</button>
             <div id="auditResult" class="hidden mt-4 rounded-xl bg-emerald-50 text-emerald-800 text-sm px-4 py-3"></div>
@@ -2130,7 +2189,7 @@ function reviewJob(r,src){jobs.unshift({id:++jobSeq,t:(r.stars<=3?'Callback — 
 function reviewFlag(i){var r=reviews[i];if(r.flagged)return;r.flagged=true;reviewJob(r,'manual');renderReviews();renderFollowups();toast('Flagged for follow-up · job created');}
 function scanReviews(){var added=0;reviews.forEach(function(r){if(reviewNeedsFollowup(r)&&!r.ack&&!r.flagged){r.flagged=true;reviewJob(r,'auto');added++;}});renderReviews();renderFollowups();toast(added?added+' review(s) flagged for follow-up':'No new follow-ups — all addressed');}
 
-/* ---- Governance (AE/DAEN, recalls, policies, waste, privacy, audit) ---- */
+/* ---- Governance (AE/DAEN, recalls, policies, audit) ---- */
 var aeCases=[{id:'AE-204',product:'Botulinum toxin',lot:'B2245',route:'medicine',sev:'Non-serious',desc:'Mild ptosis R brow, onset day 4',status:'Submit due',reported:null},{id:'AE-205',product:'Dermal filler',lot:'F1180',route:'device',sev:'Serious',desc:'Vascular occlusion — hyaluronidase given, resolved',status:'Open',reported:null}];
 var AEROUTE={medicine:{l:'DAEN · Medicines',c:'bg-brand-50 text-brand-700'},device:{l:'DAEN · Devices',c:'bg-violet-50 text-violet-700'}};
 function renderGovAE(){var b=document.getElementById('govAE');if(!b)return;b.innerHTML=aeCases.map(function(a){var r=AEROUTE[a.route]||AEROUTE.medicine;var sc=a.status==='Submitted'?'bg-emerald-50 text-emerald-700':(a.status==='Submit due'?'bg-amber-50 text-amber-700':'bg-slate-100 text-slate-600');return '<tr><td class="px-4 py-3 font-medium">'+a.id+'</td><td class="px-4 py-3 text-mute">'+a.product+' · '+a.lot+'</td><td class="px-4 py-3"><span class="px-1.5 py-0.5 rounded '+r.c+' text-xs">'+r.l+'</span></td><td class="px-4 py-3 text-mute">'+a.sev+'</td><td class="px-4 py-3"><span class="px-1.5 py-0.5 rounded '+sc+' text-xs">'+a.status+'</span></td><td class="px-4 py-3 text-right">'+(a.status==='Submitted'?'<span class="text-emerald-600 text-xs">'+a.reported+'</span>':'<button onclick="openDaen(\''+a.id+'\')" class="text-brand-700 text-xs font-medium">Report</button>')+'</td></tr>';}).join('');}
@@ -2144,22 +2203,21 @@ function openRecall(id){recallCur=id;var r=recallsData.find(function(x){return x
 function startRecall(){var r=recallsData.find(function(x){return x.id===recallCur;});closeModal('recallModal');jobs.unshift({id:++jobSeq,t:'Work recall '+r.id+' — contact remaining '+(r.clients-r.acked)+' clients',type:'recall',who:'Reception',cid:null,conv:null,src:'system',status:'open',due:'Today'});renderFollowups();toast('Recall campaign started · '+r.clients+' clients · job created');}
 var policies=[{n:'Infection prevention & control',v:'v2.1',u:'May 2026',signed:5,staff:6},{n:'Consent & cooling-off',v:'v3.0',u:'Sep 2025',signed:6,staff:6},{n:'Emergency & complication (incl. hyaluronidase)',v:'v1.4',u:'Apr 2026',signed:4,staff:6},{n:'Privacy & data breach response',v:'v1.2',u:'Jun 2026',signed:5,staff:6}];
 function renderGovPolicies(){var b=document.getElementById('govPolicies');if(!b)return;b.innerHTML=policies.map(function(p,i){var full=p.signed>=p.staff;return '<tr><td class="px-4 py-3 font-medium">'+p.n+'</td><td class="px-4 py-3 text-mute">'+p.v+'</td><td class="px-4 py-3 text-mute">'+p.u+'</td><td class="px-4 py-3"><span class="px-1.5 py-0.5 rounded '+(full?'bg-emerald-50 text-emerald-700':'bg-amber-50 text-amber-700')+' text-xs">'+p.signed+'/'+p.staff+' signed</span></td><td class="px-4 py-3 text-right">'+(full?'<span class="text-emerald-600 text-xs">complete</span>':'<button onclick="signPolicy('+i+')" class="text-brand-700 text-xs font-medium">Sign</button>')+'</td></tr>';}).join('');}
-function signPolicy(i){var p=policies[i];if(p.signed<p.staff)p.signed++;renderGovPolicies();renderGovOverview();renderGovBadge();toast('Acknowledged '+p.v+' — '+p.n);}var dsars=[{id:'DSAR-09',type:'Access (APP 12)',due:'14 Jul',st:'In progress'}];
-var breaches=[{id:'NDB-03',what:'Mis-sent SMS w/ name to wrong number',due:'10 Jul',st:'Assessing'}];
-function renderGovPrivacy(){var d=document.getElementById('govDSAR');if(d)d.innerHTML=dsars.map(function(x){return '<tr><td class="py-2.5 font-medium">'+x.id+'</td><td class="text-mute">'+x.type+'</td><td class="text-mute">'+x.due+'</td><td><span class="px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 text-xs">'+x.st+'</span></td></tr>';}).join('');var b=document.getElementById('govBreach');if(b)b.innerHTML=breaches.map(function(x){return '<div class="rounded-xl border border-slate-200 p-3 text-sm"><div class="font-medium">'+x.id+'</div><div class="text-mute text-xs">'+x.what+'</div><div class="flex items-center justify-between mt-1 text-xs"><span class="text-mute">Assess by '+x.due+'</span><span class="px-1.5 py-0.5 rounded bg-amber-50 text-amber-700">'+x.st+'</span></div></div>';}).join('');}
-function breachDrill(){breaches.unshift({id:'NDB-DRILL',what:'Tabletop drill — rehearse 30-day runbook',due:'+30d',st:'Drill'});renderGovPrivacy();toast('Breach drill started — runbook rehearsed');}
+function signPolicy(i){var p=policies[i];if(p.signed<p.staff)p.signed++;renderGovPolicies();renderGovOverview();renderGovBadge();toast('Acknowledged '+p.v+' — '+p.n);}
 var auditCats=['Registration currency','S4 register + reconciliation','Consent coverage','Cold-chain & destruction records','Policies & procedures sign-off','Breach & complaints registers','Records retention / destruction log'];
 function renderAudit(){var b=document.getElementById('auditItems');if(!b)return;b.innerHTML=auditCats.map(function(c){return '<label class="flex items-center gap-2"><input type="checkbox" checked class="accent-brand-600"/> '+c+'</label>';}).join('');}
 function buildAuditPack(){var r=document.getElementById('auditResult');r.classList.remove('hidden');r.innerHTML='<b>Pack ready:</b> inspection-pack-2026-06-20.pdf · '+auditCats.length+' evidence categories bundled.';toast('Inspection pack built');}
 function govCounts(){return {ae:aeCases.filter(function(a){return a.status!=='Submitted';}).length,pol:policies.filter(function(p){return p.signed<p.staff;}).length,rec:recallsData.filter(function(r){return r.status==='In progress';}).length};}
 function renderGovBadge(){var c=govCounts();var n=c.ae+c.pol+c.rec;var b=document.getElementById('navGovCount');if(b){b.textContent=n||'';b.style.display=n?'':'none';}}
-function renderGovOverview(){var c=govCounts();var s=document.getElementById('govStats');if(s)s.innerHTML=[['Open AE cases',c.ae],['Unsigned policies',c.pol],['Active recalls',c.rec]].map(function(x){return '<div class="bg-white rounded-2xl shadow-soft p-4"><div class="text-mute text-xs">'+x[0]+'</div><div class="text-2xl font-semibold mt-1">'+x[1]+'</div></div>';}).join('');var a=document.getElementById('govAttention');if(a)a.innerHTML='<li class="flex items-center gap-2"><span class="material-symbols-rounded text-amber-500 text-base">release_alert</span><span class="flex-1">'+c.ae+' adverse event(s) to submit</span><button onclick="goSub(\'governance\',\'ae\')" class="text-brand-700 text-xs font-medium">Open</button></li><li class="flex items-center gap-2"><span class="material-symbols-rounded text-amber-500 text-base">verified</span><span class="flex-1">'+c.pol+' policy(ies) awaiting sign-off</span><button onclick="goSub(\'governance\',\'policies\')" class="text-brand-700 text-xs font-medium">Open</button></li><li class="flex items-center gap-2"><span class="material-symbols-rounded text-amber-500 text-base">campaign</span><span class="flex-1">'+c.rec+' recall in progress</span><button onclick="goSub(\'governance\',\'recalls\')" class="text-brand-700 text-xs font-medium">Open</button></li>';var st=document.getElementById('govStatus');if(st)st.innerHTML=['Registrations: current','Cold-chain: logged twice daily','Last stocktake: 14 Jun · reconciled'].map(function(x){return '<li class="flex items-center gap-2"><span class="material-symbols-rounded text-emerald-500 text-base">check_circle</span>'+x+'</li>';}).join('');}
+function renderGovOverview(){var c=govCounts();var open=c.ae+c.pol+c.rec;var ready=open===0;var s=document.getElementById('govStats');if(s)s.innerHTML=[['Inspection-ready',ready?'Ready':'Review',ready?'text-emerald-600':'text-amber-600'],['Open AE cases',c.ae,c.ae?'text-amber-600':''],['Unsigned policies',c.pol,c.pol?'text-amber-600':''],['Active recalls',c.rec,c.rec?'text-amber-600':'']].map(function(x){return '<div class="bg-white rounded-2xl shadow-soft p-4"><div class="text-mute text-xs">'+x[0]+'</div><div class="text-2xl font-semibold mt-1 '+(x[2]||'')+'">'+x[1]+'</div></div>';}).join('');
+var a=document.getElementById('govAttention');if(a){var items=[];if(c.ae)items.push(['release_alert',c.ae+' adverse event'+(c.ae>1?'s':'')+' to submit to the DAEN','ae']);if(c.pol)items.push(['verified',c.pol+' polic'+(c.pol>1?'ies':'y')+' awaiting staff sign-off','policies']);if(c.rec)items.push(['campaign',c.rec+' recall'+(c.rec>1?'s':'')+' in progress','recalls']);a.innerHTML=items.length?items.map(function(it){return '<li class="flex items-center gap-2"><span class="material-symbols-rounded text-amber-500 text-base">'+it[0]+'</span><span class="flex-1">'+it[1]+'</span><button onclick="goSub(\'governance\',\''+it[2]+'\')" class="text-brand-700 text-xs font-medium">Open</button></li>';}).join(''):'<li class="flex items-center gap-2 text-emerald-700"><span class="material-symbols-rounded text-emerald-500 text-base">task_alt</span>Nothing needs action — you\'re inspection-ready.</li>';}
+var st=document.getElementById('govStatus');if(st)st.innerHTML=['Registrations &amp; indemnity: current for all injectors','Cold-chain: logged twice daily, in range','Last stocktake: 14 Jun · reconciled','Client privacy: access &amp; deletion self-served in the client app'].map(function(x){return '<li class="flex items-center gap-2"><span class="material-symbols-rounded text-emerald-500 text-base">check_circle</span>'+x+'</li>';}).join('');}
 
 /* ---- Settings (integrations) ---- */
 var integrations=[{n:'Xero',d:'Push invoices & payments on checkout.',st:'Connected',c:'bg-emerald-50 text-emerald-700',ic:'account_balance'},{n:'Calendar sync (M365 / Google)',d:'Two-way — external events block availability.',st:'Outbound only',c:'bg-amber-50 text-amber-700',ic:'calendar_month'},{n:'Online checkout & deposits',d:'Take deposits & pay online. S4 never priced online.',st:'Off · roadmap',c:'bg-slate-100 text-slate-500',ic:'credit_card'},{n:'e-Prescribing (eRx / ETP)',d:'Electronic private S4 scripts — ties to consult & register.',st:'Off · research',c:'bg-slate-100 text-slate-500',ic:'prescriptions'},{n:'Medicare / HICAPS',d:'Cosmetic is non-claimable; therapeutic items only.',st:'Not applicable',c:'bg-slate-100 text-slate-500',ic:'local_hospital'},{n:'Webhooks & public API',d:'Third-party integrations.',st:'Off · phase 3',c:'bg-slate-100 text-slate-500',ic:'webhook'}];
 function renderIntegrations(){var b=document.getElementById('setIntegrations');if(!b)return;b.innerHTML=integrations.map(function(g){var connected=g.st==='Connected';return '<div class="bg-white rounded-2xl shadow-soft p-5"><div class="flex items-center justify-between"><span class="material-symbols-rounded text-brand-500">'+g.ic+'</span><span class="px-1.5 py-0.5 rounded '+g.c+' text-xs">'+g.st+'</span></div><div class="font-medium mt-3">'+g.n+'</div><div class="text-xs text-mute mt-1">'+g.d+'</div><button onclick="toast(\''+(connected?'Configure':'Connect')+' integration\')" class="mt-3 text-brand-700 text-xs font-medium">'+(connected?'Configure':'Connect')+' &rarr;</button></div>';}).join('');}
 
-function renderNewAreas(){renderClinMenu();renderClinSafety();renderClinImaging();renderFridges();renderMonitors();renderChecklist();renderResources();renderEquip();renderCalls();renderFinSnapshot();renderRoster();renderTeamLeave();renderTeamPeople();renderTeamCompliance();renderLeads();renderReviews();renderGovAE();renderGovRecalls();renderGovPolicies();renderGovPrivacy();renderAudit();renderGovOverview();renderGovBadge();renderIntegrations();}
+function renderNewAreas(){renderClinMenu();renderClinSafety();renderClinImaging();renderFridges();renderMonitors();renderChecklist();renderResources();renderEquip();renderCalls();renderFinSnapshot();renderRoster();renderTeamLeave();renderTeamPeople();renderTeamCompliance();renderLeads();renderReviews();renderGovAE();renderGovRecalls();renderGovPolicies();renderAudit();renderGovOverview();renderGovBadge();renderIntegrations();}
 
 renderClients();renderToday();renderChartList();wstep(1);initInj();initBA();renderStock();renderCheckout();renderWeek();renderMarketing();renderMemberships();renderReports();renderChartProduct();renderNewAreas();setPersona('np');renderLogin();
 /* ---------- deep-link + embed (used by guide.html) ---------- */
@@ -2174,7 +2232,7 @@ renderClients();renderToday();renderChartList();wstep(1);initInj();initBA();rend
  finance:function(){show('finance');},'finance-pay':function(){show('finance');},
  roster:function(){goSub('team','roster');},team:function(){goSub('team','people');},compliance:function(){goSub('team','compliance');},
  leads:function(){goSub('growth','leads');},reviews:function(){goSub('growth','reviews');},
- governance:function(){goSub('governance','overview');},'gov-daen':function(){goSub('governance','ae');},'gov-recall':function(){goSub('governance','recalls');},'gov-policies':function(){goSub('governance','policies');},'gov-privacy':function(){goSub('governance','privacy');},'gov-audit':function(){goSub('governance','audit');},
+ governance:function(){goSub('governance','overview');},'gov-daen':function(){goSub('governance','ae');},'gov-recall':function(){goSub('governance','recalls');},'gov-policies':function(){goSub('governance','policies');},'gov-audit':function(){goSub('governance','audit');},
  integrations:function(){goSub('settings','integrations');}};
  if(v&&V[v])V[v]();else goScreen(s);
 }catch(e){}})();

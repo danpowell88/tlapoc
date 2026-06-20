@@ -42,10 +42,13 @@ around — so you can check none are missing.
 - **What it is:** the infection-control log and **clinical/sharps waste manifests** (the records of
   regulated waste being collected and disposed of properly).
 
-### Privacy: access requests & breaches
-- **What it is:** handle a **DSAR** (someone asking to see/correct their data) on a **30-day clock**,
-  and **assess and respond to a suspected data breach** — deciding if it's serious enough to notify the
-  regulator (OAIC) and the affected people.
+### Privacy (handled where it's actionable, not as a hub register)
+- **What it is:** privacy work deliberately **doesn't get its own register tab** in the hub — a static
+  list of requests adds little. Instead it lives where someone can act on it: clients **see, export and
+  request deletion** of their own data in the **client app**, and **data-breach response** is a
+  versioned, signed-off **policy** (above) that's invoked if an incident occurs.
+- **Why it's done this way:** the obligations (DSAR access/correction, NDB breach assessment — C21/C22)
+  are still covered, but as a self-service surface plus a live policy rather than a passive register.
 
 ### The audit / inspection pack
 - **What it is:** a **one-click bundle** of dated evidence for an inspection or review.
@@ -159,7 +162,7 @@ Every rule below is something the system is built to enforce or support. Use thi
 
 | Role | What they do here |
 |------|-------------------|
-| **Owner / compliance officer** | Owns the hub: adverse-event submission tracking, recalls, policy publishing, audit packs, privacy |
+| **Owner / compliance officer** | Owns the hub: adverse-event submission tracking, recalls, policy publishing, audit packs |
 | **Nurse Practitioner** | The clinical "how serious is this?" call on adverse events; authorises recalls |
 | **Lead Nurse** | Infection-control log, waste manifests, emergency-kit currency |
 | **All staff** | Sign policies; the everyday guardrails stay enforced in their normal work |
