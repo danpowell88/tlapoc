@@ -39,6 +39,7 @@ which role does each step. Start at the [overviews index](overviews/00-overviews
 ## Hardware
 
 - [ESP32 fridge temperature monitor](hardware/esp32-temp-monitor.md) — reference design for the clinic's own wireless cold-chain monitor (USB power + WiFi → private per-clinic/fridge API with auth): BOM, wiring, firmware sketch, API contract, security & provisioning, and how the app charts it / raises breach jobs.
+- [ESP32 S4 cabinet access & tamper monitor](hardware/esp32-cabinet-sensor.md) — sealed-inside, somewhat tamper-resistant DIY monitor for a locked S4 cabinet: solves the metal-box RF problem with an external antenna, fuses door/light/motion sensors to resist magnet-spoofing, and makes silent defeat detectable via a dead-man heartbeat. BOM, wiring, firmware sketch, signed-event API, provisioning, and the access log + tamper jobs it drives (`REQ-MED-8`/`C15`).
 
 ## The PRD set
 
