@@ -287,6 +287,12 @@ mounts to the **inside** wall of the cabinet (VHB tape or screws), high and to t
 passes the Hall sensor as it closes. The light sensor faces the interior; the antenna coax exits a small grommet
 toward the door gap. A normally-closed **lid tamper switch** sits under the lid.
 
+> **Interactive 3D model.** Drag to rotate, scroll to zoom. Use **Exploded view** to separate lid / PCB / 18650
+> / base and **Ghost lid** to see the internals — the Hall, light and motion sensors, the battery, the lid
+> tamper switch, and the external antenna + door magnet outside the box.
+
+<div class="viewer3d" data-model="cabinet"></div>
+
 <div class="fig">
 <svg viewBox="0 0 680 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Dimensioned engineering drawing: top view 66 by 46 mm and side view 66 by 34 mm with a U.FL pass-through, USB-C, lid tamper switch and back-wall mount">
 <g transform="translate(40,40)">
