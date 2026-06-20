@@ -34,7 +34,8 @@ tailwind.config={theme:{extend:{
   #homebar{position:absolute;bottom:9px;left:50%;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:#0f172a;opacity:.85;z-index:70;pointer-events:none}
   .sb-light #homebar{background:#fff}
   /* lock screen */
-  #lock{position:absolute;inset:0;z-index:80;border-radius:42px;overflow:hidden;background:linear-gradient(165deg,#0b3b39,#0f766e 42%,#0b1220);display:flex;flex-direction:column}
+  #lock{position:absolute;inset:0;z-index:80;border-radius:42px;overflow:hidden;background:linear-gradient(165deg,#0b3b39,#0f766e 42%,#0b1220);display:none;flex-direction:column}
+  #lock.open{display:flex}
   /* push banner */
   #push{position:absolute;top:8px;left:8px;right:8px;z-index:90;transform:translateY(-130%);transition:transform .35s cubic-bezier(.2,.9,.3,1)}
   #push.in{transform:translateY(0)}
@@ -771,7 +772,7 @@ tailwind.config={theme:{extend:{
             <div id="homebar"></div>
 
             <!-- ============ LOCK SCREEN ============ -->
-            <div id="lock" class="hidden">
+            <div id="lock">
               <div class="flex-1 flex flex-col items-center pt-16 px-5">
                 <div class="text-white/80 text-sm font-medium">Saturday, 21 June</div>
                 <div class="text-white text-7xl font-semibold tracking-tight mt-1">9:41</div>
@@ -1086,8 +1087,8 @@ function renderLockNotifs(){
     return '<button onclick="unlock(\''+i.go+'\')" class="w-full text-left rounded-2xl bg-white/85 backdrop-blur p-3 flex items-start gap-3 shadow"><div class="size-8 rounded-lg bg-brand-600 text-white grid place-items-center shrink-0"><span class="material-symbols-rounded text-[18px]">'+i.ic+'</span></div><div class="flex-1 min-w-0"><div class="flex items-center"><div class="text-[13px] font-semibold text-ink">The Lounge</div><span class="ml-auto text-[10px] text-slate-500">'+i.time+'</span></div><div class="text-[13px] font-medium text-ink leading-tight">'+i.t+'</div><div class="text-[12px] text-slate-600 leading-snug">'+i.d+'</div></div></button>';
   }).join('');
 }
-function lockOn(){renderLockNotifs();document.getElementById('lock').classList.remove('hidden');document.getElementById('device').classList.add('sb-light');document.getElementById('device').classList.remove('sb-dark');setCaption('chome');document.getElementById('capScreen').textContent='Lock screen';document.getElementById('capText').textContent='Push notifications on the lock screen — tap one to deep-link into the app.';}
-function unlock(target){document.getElementById('lock').classList.add('hidden');document.getElementById('device').classList.remove('sb-light');document.getElementById('device').classList.add('sb-dark');go(target||'chome');}
+function lockOn(){renderLockNotifs();document.getElementById('lock').classList.add('open');document.getElementById('device').classList.add('sb-light');document.getElementById('device').classList.remove('sb-dark');setCaption('chome');document.getElementById('capScreen').textContent='Lock screen';document.getElementById('capText').textContent='Push notifications on the lock screen — tap one to deep-link into the app.';}
+function unlock(target){document.getElementById('lock').classList.remove('open');document.getElementById('device').classList.remove('sb-light');document.getElementById('device').classList.add('sb-dark');go(target||'chome');}
 
 var pushSeq=0;
 var pushes=[
