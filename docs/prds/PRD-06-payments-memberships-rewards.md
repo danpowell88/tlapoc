@@ -6,9 +6,9 @@
 >
 > **▸ Scope cut (rev 4.1, 2026-06-20).** Finances move to **Xero & integrations**: the app keeps only **pricing / what-if** (ADR-0022) and **high-level reporting** (PRD-08). In-app **commission pay-run, supplier POs/AP, refund/dispute management and BAS/GST tooling are dropped** (ADR-0027 revised) — the Finance screen is now a light pricing + reporting hub that defers the ledger to Xero, while invoices/payments still sync from checkout.
 
-> **Phase:** 1 · **Status:** Draft
-> **Requirements:** REQ-PAY-1…5, REQ-MEMB-1…7 · **Compliance:** C9, C23 (reward comms), C18 (records)
-> **ADRs:** 0007 (payments abstraction), 0014 (catalog S4 classification)
+> **Phase:** 1 · **Status:** Draft<br>
+> **Requirements:** REQ-PAY-1…5, REQ-MEMB-1…7 · **Compliance:** C9, C23 (reward comms), C18 (records)<br>
+> **ADRs:** 0007 (payments abstraction), 0014 (catalog S4 classification)<br>
 > **Depends on:** PRD-01, PRD-02; integrates with PRD-10 (Xero)
 
 ## 1. Summary
@@ -21,6 +21,7 @@ margin or breaching advertising law.
 **Goals:** in-person checkout (card via Square, cash, gift card); package/series sale + redemption;
 client balances/credit + AR; daily closeout; membership plans with **automatic** recurring autopay
 (card-on-file); visit-based + membership **rewards on non-S4 only**, margin-aware.
+
 **Non-goals (v1):** customer-facing online checkout for one-off purchases; BNPL; commission/payroll;
 advanced loyalty campaigns/referrals (Phase 2).
 
@@ -37,16 +38,16 @@ Front desk (POS), client (joins membership, earns/redeems rewards), owner (plans
 ## 5. Key flow
 ```mermaid
 flowchart TD
-  A[Checkout] --> B[Line items\nservice/retail/package]
+  A[Checkout] --> B[Line items<br/>service/retail/package]
   B --> C{Item schedule}
-  C -- S4 --> C1[No reward/discount\napplied (C9)]
+  C -- S4 --> C1[No reward/discount<br/>applied (C9)]
   C -- non-S4 --> C2[Rewards eligible]
   B --> D[Tender: Square card / cash / gift card]
   D --> E[Receipt + balances]
-  E --> F[Post to Xero\n+ daily closeout]
+  E --> F[Post to Xero<br/>+ daily closeout]
   subgraph Membership
     M1[Join plan] --> M2[Tokenise card-on-file]
-    M2 --> M3[Automatic recurring charge\n+ dunning on failure]
+    M2 --> M3[Automatic recurring charge<br/>+ dunning on failure]
   end
 ```
 

@@ -4,8 +4,8 @@
 >
 > **▸ Option A alignment (rev 4, 2026-06-20).** Promoted from "lightweight record-keeping" to real workflows (mostly surfaced in the **Operations** + **Governance** areas, ADR-0026/0030): a **twice-daily cold-chain log** with a **breach pathway** (quarantine lot · report), a **daily open/close checklist**, a **sterilisation & equipment maintenance register** (autoclave validation + spore testing, AS 5369:2023; laser service/calibration), **clinical & sharps waste manifests** (NSW CA+TC / QLD WTC), a **complication-response workflow** (VO/anaphylaxis → log kit → routed AE + jobs), **incident & mandatory-reporting** case management, and **policies & procedures sign-off** (REQ-FAC-4..10).
 
-> **Phase:** 1–2 (lightweight in v1) · **Status:** Draft
-> **Requirements:** REQ-FAC-1…3, REQ-CLI-4 (complaints) · **Compliance:** C20, C24
+> **Phase:** 1–2 (lightweight in v1) · **Status:** Draft<br>
+> **Requirements:** REQ-FAC-1…3, REQ-CLI-4 (complaints) · **Compliance:** C20, C24<br>
 > **ADRs:** 0008 (compliance-by-construction), 0010 (audit) · **Depends on:** PRD-01
 
 ## 1. Summary
@@ -18,6 +18,7 @@ platform proves it.
 **Goals:** record facility accreditation (ACSQHC/NSQHS) + expiry; infection-control logs
 (sterilisation/single-use, sharps & clinical-waste); emergency-kit (hyaluronidase, anaphylaxis)
 availability/expiry; continuity-of-care contact; complaints register surfacing AHPRA.
+
 **Non-goals (v1):** full IPC workflow/automation; equipment maintenance scheduling; deep incident
 case management (Phase 2).
 
@@ -34,10 +35,10 @@ Owner/manager (accreditation, kit, complaints), clinical staff (logs), complianc
 ```mermaid
 flowchart TD
   A[Facility profile] --> B[Accreditation + expiry alerts]
-  A --> C[Emergency kit register\n(hyaluronidase/anaphylaxis) + expiry]
+  A --> C[Emergency kit register<br/>(hyaluronidase/anaphylaxis) + expiry]
   A --> D[Continuity-of-care contact]
-  E[IPC logs: sterilisation/\nsharps/clinical-waste] --> F[(Audit)]
-  G[Complaint logged] --> H[Link client/treatment\n+ surface AHPRA pathway]
+  E[IPC logs: sterilisation/<br/>sharps/clinical-waste] --> F[(Audit)]
+  G[Complaint logged] --> H[Link client/treatment<br/>+ surface AHPRA pathway]
   H --> F
 ```
 

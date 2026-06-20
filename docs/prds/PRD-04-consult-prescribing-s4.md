@@ -4,9 +4,9 @@
 >
 > **▸ Option A alignment (rev 4, 2026-06-20).** Extends to **filler-as-medicine** and **weight-loss GLP-1** programs: the catalogue carries `regClass`/`artg`/`compounded`, so the system **blocks prohibited compounded GLP-1** (banned 1 Oct 2024) and routes adverse events to the **correct DAEN dataset** (medicine vs device). Adds **supplier purchase orders & receiving** — S4 POs require a **prescriber signer** + TGA-approved wholesaler — and **retail (non-S4) SKUs** (ADR-0025/0027/0031, REQ-MED-12/13/14/15). DAEN routing + recall execution + mandatory-trigger flagging live in the Governance hub (PRD-08/PRD-11).
 
-> **Phase:** 1 · **Status:** Draft
-> **Requirements:** REQ-RX-1…5, REQ-MED-1…10 · **Compliance:** C1, C2, C7, C8, C11, C13, C15, C16, C17
-> **ADRs:** 0008 (compliance-by-construction), 0011 (telehealth external), 0010 (immutability)
+> **Phase:** 1 · **Status:** Draft<br>
+> **Requirements:** REQ-RX-1…5, REQ-MED-1…10 · **Compliance:** C1, C2, C7, C8, C11, C13, C15, C16, C17<br>
+> **ADRs:** 0008 (compliance-by-construction), 0011 (telehealth external), 0010 (immutability)<br>
 > **Depends on:** PRD-01, PRD-03
 
 ## 1. Summary
@@ -20,6 +20,7 @@ ARTG-approved stock held under correct custody. Implements the QLD S4 + TGA medi
 administration gated on script+consent+consent+lot; Mode-A on-site stock ledger with secure storage,
 cold-chain, vial reconciliation, disposal/destruction, stocktake, ARTG/supply provenance; lot→clients
 recall lookup.
+
 **Non-goals (v1):** Mode-B pharmacy dispensing; e-prescribing via ETP networks (structured script +
 PDF only); built-in telehealth video (ADR-0011).
 
@@ -35,15 +36,15 @@ NP/on-site prescriber, remote prescriber, RN (administers), owner (medicines cus
 ## 5. Key flow
 ```mermaid
 flowchart TD
-  A[Consult recorded\nin-person / telehealth-ext] --> B[Individual prescription\nfor this client]
+  A[Consult recorded<br/>in-person / telehealth-ext] --> B[Individual prescription<br/>for this client]
   B --> C{Admin attempt}
-  C --> D{Valid unconsumed Rx\n+ current consent\n+ this client?}
+  C --> D{Valid unconsumed Rx<br/>+ current consent<br/>+ this client?}
   D -- no --> E[BLOCK + reason + audit]
-  D -- yes --> F[Select stock lot\nARTG + in-date + custody OK]
-  F --> G[Record units/site/depth\n+ batch-lot/expiry]
-  G --> H[Decrement stock\n+ vial reconciliation]
-  H --> I[Append to medicine register\n(immutable)]
-  I --> J[Lot ↔ client link\nfor recall]
+  D -- yes --> F[Select stock lot<br/>ARTG + in-date + custody OK]
+  F --> G[Record units/site/depth<br/>+ batch-lot/expiry]
+  G --> H[Decrement stock<br/>+ vial reconciliation]
+  H --> I[Append to medicine register<br/>(immutable)]
+  I --> J[Lot ↔ client link<br/>for recall]
 ```
 
 ## 6. Functional scope

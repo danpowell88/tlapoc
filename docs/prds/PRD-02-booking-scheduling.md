@@ -4,8 +4,8 @@
 >
 > **▸ Option A alignment (rev 4, 2026-06-20).** Adds **walk-ins & same-day add-ons** (gate-respecting — an injectable walk-in still needs a consult first), **waitlist auto-fill** on cancel/no-show, **room/chair/device resources** with conflict-flagging & utilisation, and an **opt-in, ACL-fair booking deposit / card-on-file hold** that is **suppressed during cooling-off** (F14 invariant). Booking availability is now derived from **roster ∩ credential/PII compliance** (ADR-0026/0029, REQ-BOOK-3/8/9/10).
 
-> **Phase:** 1 · **Status:** Draft
-> **Requirements:** REQ-BOOK-1…5, REQ-CLI-1/2/3 · **Compliance:** C4 (scope gating), C6 (under-18 flag feed)
+> **Phase:** 1 · **Status:** Draft<br>
+> **Requirements:** REQ-BOOK-1…5, REQ-CLI-1/2/3 · **Compliance:** C4 (scope gating), C6 (under-18 flag feed)<br>
 > **ADRs:** 0005, 0008 · **Depends on:** PRD-01
 
 ## 1. Summary
@@ -17,6 +17,7 @@ booking is **gated** so it can't proceed to charting without a consult.
 **Goals:** multi-resource calendar (practitioner + room); online self-booking (web + client app);
 reminders + self-service reschedule/cancel; waitlist; cancellation policy (no deposits in v1); a
 searchable client directory with the full profile.
+
 **Non-goals (v1):** deposits/card-on-file holds; marketplace listing; group/class scheduling;
 device/laser resource scheduling; multi-location switching UI.
 
@@ -34,7 +35,7 @@ Client (self-book), front-desk/admin, practitioners (own calendar), owner.
 ```mermaid
 flowchart TD
   A[Client picks service] --> B{Injectable?}
-  B -- yes --> C[Offer RN/NP only\n+ require consult step]
+  B -- yes --> C[Offer RN/NP only<br/>+ require consult step]
   B -- no --> D[Offer eligible staff]
   C --> E[Pick slot]
   D --> E
@@ -42,7 +43,7 @@ flowchart TD
   F --> G[Reminders scheduled]
   G --> H[Check-in on arrival]
   H --> I{Consult linked?}
-  I -- no --> J[Block charting\nuntil consult recorded]
+  I -- no --> J[Block charting<br/>until consult recorded]
   I -- yes --> K[Proceed to PRD-03/04/05]
 ```
 

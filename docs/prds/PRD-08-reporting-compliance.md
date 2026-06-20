@@ -4,8 +4,8 @@
 
 > **▸ Option A alignment (rev 4, 2026-06-20).** Reporting & compliance become a first-class **Governance hub** (ADR-0030) — a cross-case read/manage surface that keeps the per-treatment guardrails woven: **AE/DAEN routing + prefilled submission** (medicine vs device; mandatory-trigger flag — ADR-0031), **recall execution + acknowledgement tracking**, **policies & procedures sign-off**, **clinical/sharps waste manifests + IPC log**, **DSAR (APP 12/13) + breach drill** (REQ-SEC-8/9), and a one-click **inspection-readiness pack** (REQ-RPT-7). Adds **money read models** — commission/pay-run (engagement-risk flag), retail margin, refunds/disputes and a **BAS/GST summary** (REQ-RPT-6) — *attribution & export, not a payroll/tax engine*.
 
-> **Phase:** 1 · **Status:** Draft
-> **Requirements:** REQ-RPT-1…4 · **Compliance:** C10 + evidences C1–C24
+> **Phase:** 1 · **Status:** Draft<br>
+> **Requirements:** REQ-RPT-1…4 · **Compliance:** C10 + evidences C1–C24<br>
 > **ADRs:** 0013 (read models), 0010 (audit) · **Depends on:** PRD-01 (audit), data from PRD-02/04/05/06
 
 ## 1. Summary
@@ -17,6 +17,7 @@ complaints registers. Fixes the "reporting gaps" Mindbody pain.
 ## 2. Goals & non-goals
 **Goals:** operational + financial + retention dashboards with date filters; per-practitioner views;
 compliance dashboards + exports; the TGA **DAEN adverse-event** prefilled export; data-quality checks.
+
 **Non-goals (v1):** custom report builder; external BI warehouse; benchmarking against other clinics.
 
 ## 3. Users
@@ -32,11 +33,11 @@ Owner/manager (business + compliance), prescriber/owner (medicines register), co
 ## 5. Key flow
 ```mermaid
 flowchart LR
-  OLTP[(Transactional DB)] -- domain events --> RM[(Read models /\nmaterialized views)]
+  OLTP[(Transactional DB)] -- domain events --> RM[(Read models /<br/>materialized views)]
   AUD[(Audit stream)] --> RM
   RM --> BIZ[Business dashboards]
   RM --> COMP[Compliance dashboards]
-  COMP --> EXP[Exports: S4 register,\nlot-recall, DAEN prefilled]
+  COMP --> EXP[Exports: S4 register,<br/>lot-recall, DAEN prefilled]
 ```
 
 ## 6. Functional scope

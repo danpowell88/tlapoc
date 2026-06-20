@@ -4,9 +4,9 @@
 >
 > **▸ Option A alignment (rev 4, 2026-06-20).** Charting becomes **modality-aware** (ADR-0025): beyond the toxin map, Phase 2 adds **dermal filler** (multi-area / multi-syringe / per-area lot + a mandatory **vascular-occlusion/blindness consent gate**), **energy-device** charting (per-pass settings/fluence logbook + skin-type/patch-test + safety checks, **gated by a state laser licence**), **weight-loss titration** plans, and **standardised photo capture** with **ghost-overlay** alignment; a **complication-response** flow (VO/anaphylaxis → log hyaluronidase/adrenaline → routed AE + jobs) and **outcome/revision** signal feed reporting (REQ-CLIN-10..13, REQ-FAC-4). The Clinical area in the prototype demonstrates the modality model, complication protocols, photography and outcomes.
 
-> **Phase:** 1 · **Status:** Draft
-> **Requirements:** REQ-CLIN-1…6 · **Compliance:** C8, C12, C14
-> **ADRs:** 0009 (media/signed URLs), 0010 (immutability), 0015 (offline sync)
+> **Phase:** 1 · **Status:** Draft<br>
+> **Requirements:** REQ-CLIN-1…6 · **Compliance:** C8, C12, C14<br>
+> **ADRs:** 0009 (media/signed URLs), 0010 (immutability), 0015 (offline sync)<br>
 > **Depends on:** PRD-01, PRD-03, PRD-04
 
 ## 1. Summary
@@ -19,6 +19,7 @@ all usable room-side on the provider app, even offline.
 **Goals:** templated toxin treatment note; facial-diagram + photo injection mapping with per-point
 product/units/depth/lot; standardised photo capture + side-by-side compare; immutable finalisation
 with audited amendments; adverse-event capture → DAEN pathway.
+
 **Non-goals (v1):** AI scribe (far future, REQ-CLIN-6); 3D imaging; filler/other-treatment templates
 (toxin first); video documentation.
 
@@ -35,15 +36,15 @@ RN/NP (charting + mapping + photos), dermal therapist (non-S4 skin charting), cl
 ## 5. Key flow
 ```mermaid
 flowchart TD
-  A[Open treatment\n(consult+consent verified)] --> B[Pick toxin template]
-  B --> C[Map injection points\nproduct/units/depth/site/lot]
-  C --> D[Capture before/after photos\n(consented; signed-URL upload)]
+  A[Open treatment<br/>(consult+consent verified)] --> B[Pick toxin template]
+  B --> C[Map injection points<br/>product/units/depth/site/lot]
+  C --> D[Capture before/after photos<br/>(consented; signed-URL upload)]
   D --> E{Online?}
   E -- no --> F[Queue locally (encrypted)]
   F --> G[Sync when connected]
   E -- yes --> H[Save draft]
   G --> H
-  H --> I[Finalise → immutable\n+ register link (PRD-04)]
+  H --> I[Finalise → immutable<br/>+ register link (PRD-04)]
   I --> J{Adverse event?}
   J -- yes --> K[Log → DAEN pathway C12]
 ```

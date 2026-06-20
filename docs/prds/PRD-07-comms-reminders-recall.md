@@ -6,8 +6,8 @@
 >
 > **▸ Scope cut (rev 4.1, 2026-06-20).** The **newsletter builder and social scheduler are withdrawn** — email campaigns and social posting belong in the clinic's existing tools (Mailchimp, Meta Business Suite), not rebuilt here (ADR-0034 revised; REQ-NOTIF-10/11 dropped). The advertising linter now governs **review replies + the public booking page**. **Reviews** gain **acknowledge / flag / auto-detect follow-up**: negative reviews (≤3★) and complaint matches auto-raise review jobs into the Follow-ups queue (ADR-0032 extended).
 
-> **Phase:** 1 · **Status:** Draft
-> **Requirements:** REQ-NOTIF-1…5 · **Compliance:** C9 (advertising), C23 (Spam Act)
+> **Phase:** 1 · **Status:** Draft<br>
+> **Requirements:** REQ-NOTIF-1…5 · **Compliance:** C9 (advertising), C23 (Spam Act)<br>
 > **ADRs:** 0012 (integration adapters) · **Depends on:** PRD-01, PRD-02
 
 ## 1. Summary
@@ -20,6 +20,7 @@ with built-in **advertising compliance** (no S4 references in public/marketing c
 **Goals:** appointment reminders/confirmations; pre-care + aftercare sequences (multi-touch, timed
 per treatment); recall/recare + unbooked-rebook prompts; an **advertising-compliance linter**; opt-in
 marketing consent + functional unsubscribe.
+
 **Non-goals (v1):** full campaign builder/segmentation; referrals; unified inbox/missed-call text-back;
 AI message generation (all Phase 2+).
 
@@ -37,10 +38,10 @@ Client (recipient), front desk/owner (templates, recall worklist), system (sched
 ```mermaid
 flowchart TD
   A[Trigger: booking / visit / interval] --> B{Message type}
-  B -- transactional\n(reminder/aftercare) --> C[Send per template\n(SMS/email/push)]
+  B -- transactional<br/>(reminder/aftercare) --> C[Send per template<br/>(SMS/email/push)]
   B -- marketing/recall --> D{Opt-in consent?}
   D -- no --> E[Suppress]
-  D -- yes --> F[Advertising linter\n(block S4 refs C9)]
+  D -- yes --> F[Advertising linter<br/>(block S4 refs C9)]
   F --> G[Send + unsubscribe footer C23]
   C --> H[Log to comms history]
   G --> H

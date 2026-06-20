@@ -2,8 +2,8 @@
 
 > **▸ Option A alignment (rev 2, 2026-06-19).** The prototype's **pre-visit intake wizard** — medical history → **BDD/wellbeing screen** → treatment consent + e-sign → **separate image-use consent** → done, with the **under-18 cooling-off** note — validates REQ-CONS-1..5 (C5/C6/C14) end-to-end. No change to the gating model. See [requirements §12](../02-requirements.md#12-option-a-prototype-alignment--feasibility-register).
 
-> **Phase:** 1 · **Status:** Draft
-> **Requirements:** REQ-CONS-1…5, REQ-CLI-3 · **Compliance:** C3, C5, C6, C14, C18
+> **Phase:** 1 · **Status:** Draft<br>
+> **Requirements:** REQ-CONS-1…5, REQ-CLI-3 · **Compliance:** C3, C5, C6, C14, C18<br>
 > **ADRs:** 0008 (compliance-by-construction) · **Depends on:** PRD-01, PRD-02
 
 ## 1. Summary
@@ -15,6 +15,7 @@ Treatment is **blocked** until required intake/consent is complete.
 ## 2. Goals & non-goals
 **Goals:** digital pre-visit intake on the client app; versioned consent meeting AHPRA content;
 image-use consent (separate, withdrawable); BDD screen; cooling-off enforcement; treatment gating.
+
 **Non-goals (v1):** third-party e-sign integration (built-in is enough); paper-scan fallback;
 per-treatment consent library beyond toxin (templated, extensible).
 
@@ -31,13 +32,13 @@ Client (completes intake/consent), RN/NP (reviews assessment, BDD flag), front d
 ```mermaid
 flowchart TD
   A[Booking made] --> B[Send intake + consent links]
-  B --> C[Client completes\nhistory + BDD screen]
-  C --> D[Client e-signs consent\n+ image-use consent?]
+  B --> C[Client completes<br/>history + BDD screen]
+  C --> D[Client e-signs consent<br/>+ image-use consent?]
   D --> E{Required items complete?}
-  E -- no --> F[Treatment blocked\nprompt to complete]
+  E -- no --> F[Treatment blocked<br/>prompt to complete]
   E -- yes --> G{Under 18?}
-  G -- yes --> H[Enforce 7-day cooling-off\nblock payment\noffer 2nd consult]
-  G -- no --> I[Eligible to proceed\nto consult/Rx PRD-04]
+  G -- yes --> H[Enforce 7-day cooling-off<br/>block payment<br/>offer 2nd consult]
+  G -- no --> I[Eligible to proceed<br/>to consult/Rx PRD-04]
   H --> I
 ```
 

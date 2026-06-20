@@ -6,7 +6,7 @@
 <title>Documentation — The Lounge Aesthetics POC</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js"></script>
 <style>
   :root{--brand:#0d9488;--ink:#0f172a;--mute:#64748b;--line:#e2e8f0;--bg:#f8fafc}
   *{box-sizing:border-box}
@@ -82,8 +82,30 @@ const DOCS=[
 marked.setOptions({gfm:true,breaks:false});
 if(window.mermaid)mermaid.initialize({startOnLoad:false,theme:"neutral",securityLevel:"loose",flowchart:{useMaxWidth:true,htmlLabels:true}});
 const side=document.getElementById("side"),content=document.getElementById("content");
+// Make flowchart node labels Mermaid-11-safe: quote bracket/brace labels so
+// special chars (parens, slashes, arrows) don't break the parser. Edge labels are left alone.
+function mmQuote(src){
+  var lines=src.split("\n");
+  var head=(lines.filter(function(l){return l.trim();})[0]||"");
+  if(!/^\s*(flowchart|graph)\b/.test(head))return src; // only flowcharts; leave sequence/other untouched
+  return lines.map(function(line){
+    if(/^\s*(flowchart|graph)\b/.test(line))return line;
+    var store=[];
+    function stash(s){store.push(s);return ""+(store.length-1)+"";}
+    function q(t){t=t.trim();if(t.charAt(0)==='"')return t;return '"'+t.replace(/"/g,"#quot;")+'"';}
+    var L=line;
+    L=L.replace(/\(\[([^\]]*?)\]\)/g,function(m,t){return stash("(["+q(t)+"])");});
+    L=L.replace(/\[\(([^)]*?)\)\]/g,function(m,t){return stash("[("+q(t)+")]");});
+    L=L.replace(/\[\[([^\]]*?)\]\]/g,function(m,t){return stash("[["+q(t)+"]]");});
+    L=L.replace(/\{\{([^}]*?)\}\}/g,function(m,t){return stash("{{"+q(t)+"}}");});
+    L=L.replace(/\[([^\]]*?)\]/g,function(m,t){return stash("["+q(t)+"]");});
+    L=L.replace(/\{([^}]*?)\}/g,function(m,t){return stash("{"+q(t)+"}");});
+    L=L.replace(/(\d+)/g,function(m,i){return store[+i];});
+    return L;
+  }).join("\n");
+}
 function renderMermaid(){
-  content.querySelectorAll("code.language-mermaid").forEach(function(code){var pre=code.closest("pre")||code;var div=document.createElement("div");div.className="mermaid";div.textContent=code.textContent;pre.replaceWith(div);});
+  content.querySelectorAll("code.language-mermaid").forEach(function(code){var pre=code.closest("pre")||code;var div=document.createElement("div");div.className="mermaid";div.textContent=mmQuote(code.textContent.replace(/\\n/g,"<br/>"));pre.replaceWith(div);});
   if(window.mermaid){try{var r=mermaid.run({querySelector:"#content .mermaid"});if(r&&r.catch)r.catch(function(){});}catch(e){}}
 }
 (function buildSide(){let g=null;DOCS.forEach(d=>{if(d.g!==g){g=d.g;const h=document.createElement("div");h.className="grp";h.textContent=g;side.appendChild(h);}const a=document.createElement("a");a.textContent=d.t;a.href="#"+d.p;a.dataset.p=d.p;side.appendChild(a);});})();

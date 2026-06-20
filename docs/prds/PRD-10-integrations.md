@@ -4,8 +4,8 @@
 >
 > **▸ Option A alignment (rev 4, 2026-06-20).** Adds the growth/integration roadmap (the prototype's **Settings → Integrations** screen, mostly concept cards): **two-way calendar sync** (ADR-0012 → bidirectional under `ICalendarProvider`, F16), **online checkout & deposits** (behind `IPaymentProvider`; **S4 never priced or sold online**), **e-prescribing** (`IPrescribingProvider`, eRx/ETP private S4 scripts — 🔬 F17), **webhooks/public API** (Phase 3), and **Medicare/HICAPS** surfaced as *non-applicable to cosmetic*. Xero export extends to **bills (POs/pay-runs), credit notes (refunds) and a BAS summary** (ADR-0035/0036, REQ-INT-2a/4/5/6/7).
 
-> **Phase:** 1 · **Status:** Draft
-> **Requirements:** REQ-INT-1…3 · **Compliance:** C10/C21 (cross-border sub-processors)
+> **Phase:** 1 · **Status:** Draft<br>
+> **Requirements:** REQ-INT-1…3 · **Compliance:** C10/C21 (cross-border sub-processors)<br>
 > **ADRs:** 0012 (ports-and-adapters), 0016 (residency) · **Depends on:** PRD-01; consumes PRD-06 (payments), PRD-02 (appointments)
 
 ## 1. Summary
@@ -15,6 +15,7 @@ appointments in sync with staff **calendars (M365 / Google)** — each behind a 
 ## 2. Goals & non-goals
 **Goals:** Xero invoice/payment (and payout) sync with account/GST mapping; two-way calendar sync;
 adapter pattern so providers are swappable; AU/APP-8 sub-processor posture.
+
 **Non-goals (v1):** inbound webhooks / public API (deferred); marketing/CRM integrations; PMS-to-PMS
 migration; health-fund/Medicare claiming.
 
@@ -29,9 +30,9 @@ Owner/bookkeeper (Xero), practitioners (calendar), system (sync jobs).
 ## 5. Key flow
 ```mermaid
 flowchart LR
-  PAY[Checkout completed PRD-06] --> XQ[Xero adapter\n(IAccountingExport)]
+  PAY[Checkout completed PRD-06] --> XQ[Xero adapter<br/>(IAccountingExport)]
   XQ --> XERO[(Xero)]
-  BOOK[Appointment PRD-02] <--> CAL[Calendar adapter\n(ICalendarProvider)]
+  BOOK[Appointment PRD-02] <--> CAL[Calendar adapter<br/>(ICalendarProvider)]
   CAL <--> M365[(MS Graph)]
   CAL <--> GCAL[(Google Calendar)]
 ```

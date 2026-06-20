@@ -10,15 +10,15 @@ The core journeys across all three surfaces, with compliance gates called out (`
 
 ```mermaid
 flowchart TD
-  A[Public booking site] --> B[Pick service (generic name)\n→ practitioner (RN/NP) → slot]
-  B --> C[Create account\nsocial / email+pw / OTP]
-  C --> D[Confirm booking\n+ cancellation policy]
+  A[Public booking site] --> B[Pick service (generic name)<br/>→ practitioner (RN/NP) → slot]
+  B --> C[Create account<br/>social / email+pw / OTP]
+  C --> D[Confirm booking<br/>+ cancellation policy]
   D --> E[Receive intake + consent links]
-  E --> F[Complete intake\nhistory · meds · allergies · BDD screen]
-  F --> G[Read + e-sign consent\n(risks/benefits/alts · qualifications · costs)]
+  E --> F[Complete intake<br/>history · meds · allergies · BDD screen]
+  F --> G[Read + e-sign consent<br/>(risks/benefits/alts · qualifications · costs)]
   G --> H[Image-use consent? (separate, optional)]
   H --> I{Under 18?}
-  I -- yes --> J[7-day cooling-off starts\npayment blocked · 2nd consult offered]
+  I -- yes --> J[7-day cooling-off starts<br/>payment blocked · 2nd consult offered]
   I -- no --> K[Ready for visit]
   J --> K
 ```
@@ -29,6 +29,7 @@ flowchart TD
 4. Consent is plain-language, versioned, e-signed, with mandated content + complaint/AHPRA info (**→ C5**).
 5. **Image-use consent is separate** and withdrawable later (**→ C14**).
 6. Under-18 → **cooling-off timer + payment block**, second-consult offered (**→ C6**).
+
 **Edge:** incomplete intake/consent ⇒ visit can't proceed to charting; blocked-action banner explains what's missing.
 
 ---
@@ -39,8 +40,8 @@ flowchart TD
 ```mermaid
 flowchart LR
   A[~12 weeks since toxin] --> B{Future booking?}
-  B -- no --> C[Recall nudge\n(SMS/app, opt-in respected)]
-  C --> D[Tap to rebook\n(pre-filled service/practitioner)]
+  B -- no --> C[Recall nudge<br/>(SMS/app, opt-in respected)]
+  C --> D[Tap to rebook<br/>(pre-filled service/practitioner)]
   D --> E[Pre-care instructions]
   E --> F[Reminders + confirm/decline]
 ```
@@ -53,12 +54,12 @@ Recall/marketing respects **opt-in + unsubscribe** (**→ C23**) and the **adver
 
 ```mermaid
 flowchart TD
-  A[Choose plan] --> B[Add card-on-file\n(in-app/online OR at desk)]
-  B --> C[Automatic recurring charge\n+ dunning on failure]
+  A[Choose plan] --> B[Add card-on-file<br/>(in-app/online OR at desk)]
+  B --> C[Automatic recurring charge<br/>+ dunning on failure]
   A --> D[Earn visit-based rewards]
   D --> E{Redeem against item}
-  E -- S4 (toxin/filler) --> F[Blocked\nreward controls disabled (→C9/MEMB-7)]
-  E -- non-S4 (skincare/add-on/credit) --> G[Reward applied\n(within margin cap)]
+  E -- S4 (toxin/filler) --> F[Blocked<br/>reward controls disabled (→C9/MEMB-7)]
+  E -- non-S4 (skincare/add-on/credit) --> G[Reward applied<br/>(within margin cap)]
 ```
 Autopay is **automatic** (card-not-present recurring); the card can be added by the client online/in-app. Rewards **only ever** apply to **non-S4** items — enforced by the catalog `schedule` flag, not staff discipline (**→ C9, REQ-MEMB-7**).
 
@@ -74,12 +75,12 @@ flowchart TD
   C -- yes --> D[Verify consult + consent + cooling-off]
   D --> E[Provider treats (Flow 5)]
   C -- no --> E
-  E --> F[Checkout: line items\n(item schedule tagged)]
+  E --> F[Checkout: line items<br/>(item schedule tagged)]
   F --> G[Tender: Square card / record cash / gift card]
   G --> H[Redeem package/series · apply non-S4 rewards]
   H --> I[Receipt + balance]
   I --> J[Post to Xero]
-  J --> K[End of day: closeout\n(card + cash reconcile)]
+  J --> K[End of day: closeout<br/>(card + cash reconcile)]
 ```
 Payments are **in-person** in v1 (card-present or recorded cash) (**PRD-06**); membership card-on-file may already be on file for autopay. S4 line items show no reward/discount controls (**→ C9**).
 
@@ -94,9 +95,9 @@ flowchart TD
   B -- no --> X[Blocked banner: what's missing + who resolves]
   B -- yes --> C[Injection-mapping canvas]
   C --> D[Drop points: product·units·depth·site·LOT]
-  D --> E[Capture before/after photos\n(signed-URL upload; consent-gated)]
+  D --> E[Capture before/after photos<br/>(signed-URL upload; consent-gated)]
   E --> F{Connectivity?}
-  F -- offline --> G[Encrypted local queue\n+ sync indicator]
+  F -- offline --> G[Encrypted local queue<br/>+ sync indicator]
   G --> H[Auto-sync on reconnect]
   F -- online --> I[Save draft]
   H --> I
@@ -114,12 +115,12 @@ flowchart TD
 ```mermaid
 flowchart TD
   A{Consult modality} --> B[In-person consult]
-  A --> C[Telehealth in external app\n→ record metadata + reference]
-  B --> D[Record Consult\n(prescriber, time, notes)]
+  A --> C[Telehealth in external app<br/>→ record metadata + reference]
+  B --> D[Record Consult<br/>(prescriber, time, notes)]
   C --> D
-  D --> E[Write INDIVIDUAL prescription\nfor this client]
+  D --> E[Write INDIVIDUAL prescription<br/>for this client]
   E --> F[(No batch / standing-order / async — blocked)]
-  E --> G[Script available to RN\nfor administration (Flow 5/7)]
+  E --> G[Script available to RN<br/>for administration (Flow 5/7)]
 ```
 Every script is **gated on a synchronous consult** and is **individual** (**→ C1, C2**); telehealth video happens in the external app — we record the consult only (**ADR-0011**).
 
@@ -130,11 +131,11 @@ Every script is **gated on a synchronous consult** and is **individual** (**→ 
 
 ```mermaid
 flowchart TD
-  A[Receive stock from\nTGA-approved wholesaler] --> B[Record ARTG + brand + supply source\n(warn if non-ARTG) (→C11)]
-  B --> C[Store: secure locked location\n+ temperature log 2–8°C (→C13,C15)]
-  C --> D[Administer (Flow 5):\nselect in-date lot · decrement · vial reconcile (→C8)]
-  D --> E[Wastage / partial-vial &\ndestruction records (→C16)]
-  C --> F[Periodic stocktake\n→ discrepancy → loss/theft report (→C17)]
+  A[Receive stock from<br/>TGA-approved wholesaler] --> B[Record ARTG + brand + supply source<br/>(warn if non-ARTG) (→C11)]
+  B --> C[Store: secure locked location<br/>+ temperature log 2–8°C (→C13,C15)]
+  C --> D[Administer (Flow 5):<br/>select in-date lot · decrement · vial reconcile (→C8)]
+  D --> E[Wastage / partial-vial &<br/>destruction records (→C16)]
+  C --> F[Periodic stocktake<br/>→ discrepancy → loss/theft report (→C17)]
   D --> G[Lot → clients recall lookup (→C8)]
 ```
 Custody is limited to **NP/prescriber** (Mode A) (**→ C7**); the medicine register is **append-only** (**ADR-0010**).
@@ -146,7 +147,7 @@ Custody is limited to **NP/prescriber** (Mode A) (**→ C7**); the medicine regi
 
 ```mermaid
 flowchart LR
-  A[Dashboards] --> B[Business: revenue · retention ·\nno-shows · MRR/churn · per-practitioner]
+  A[Dashboards] --> B[Business: revenue · retention ·<br/>no-shows · MRR/churn · per-practitioner]
   A --> C[Compliance]
   C --> C1[Consent coverage · consult-before-script (→C1)]
   C --> C2[S4 register export · lot recall (→C8)]

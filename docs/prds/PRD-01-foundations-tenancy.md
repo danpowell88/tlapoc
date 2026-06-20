@@ -4,9 +4,9 @@
 >
 > **▸ Option A alignment (rev 4, 2026-06-20).** Adds the **Team** area: structured **credential + CPD + cosmetic-cover PII** records that derive a single `canInject` **compliance gate** (a practitioner whose PII excludes cosmetic is flagged not-bookable for S4), staff **engagement type** (employee/contractor) and a **roster** that drives booking availability (ADR-0028/0029, REQ-TEN-6..9). AHPRA register **auto-verification (PIE)** is 🔬 with a first-class manual-verify fallback (F13).
 
-> **Phase:** 0 · **Status:** Draft · **Owner:** —
-> **Requirements:** REQ-TEN-1…4, REQ-SEC-1…7, REQ-CLI-3 · **Compliance:** C4, C10, C18, C19, C21, C22
-> **ADRs:** 0001 (Azure), 0002 (Postgres), 0003 (RLS multi-tenancy), 0004 (Entra), 0005 (Angular/.NET), 0008 (compliance-by-construction), 0010 (audit/immutability), 0016 (residency)
+> **Phase:** 0 · **Status:** Draft · **Owner:** —<br>
+> **Requirements:** REQ-TEN-1…4, REQ-SEC-1…7, REQ-CLI-3 · **Compliance:** C4, C10, C18, C19, C21, C22<br>
+> **ADRs:** 0001 (Azure), 0002 (Postgres), 0003 (RLS multi-tenancy), 0004 (Entra), 0005 (Angular/.NET), 0008 (compliance-by-construction), 0010 (audit/immutability), 0016 (residency)<br>
 > **Depends on:** — (unblocks everything)
 
 ## 1. Summary
@@ -17,7 +17,8 @@ data-breach handling, and the shared data model. Everything else builds on this.
 ## 2. Goals & non-goals
 **Goals:** secure auth for staff (M365/Entra) and clients (social/email/OTP); tenant isolation via
 RLS; configurable roles enforcing the §3 scope matrix; comprehensive audit; AU residency; retention
-+ destruction register; breach workflow; patient access/correction.
+and destruction register; breach workflow; patient access/correction.
+
 **Non-goals (v1):** customer-facing SaaS onboarding/billing UI; per-tenant white-label theming;
 SCIM provisioning; public API.
 
@@ -38,13 +39,13 @@ Clinic owner/manager, front-desk/admin, RN, NP/prescriber, dermal therapist, rem
 flowchart LR
   subgraph Staff
     S1[Open web app] --> S2[Entra ID SSO + MFA]
-    S2 --> S3{Credentials current?\nrole in scope?}
-    S3 -- yes --> S4[Authorized session\nscoped to tenant]
-    S3 -- no --> S5[Block + reason\n+ audit event]
+    S2 --> S3{Credentials current?<br/>role in scope?}
+    S3 -- yes --> S4[Authorized session<br/>scoped to tenant]
+    S3 -- no --> S5[Block + reason<br/>+ audit event]
   end
   subgraph Client
-    C1[Open app/web] --> C2[Entra External ID:\nsocial / email+pw / OTP]
-    C2 --> C3[Client profile\ntenant-scoped]
+    C1[Open app/web] --> C2[Entra External ID:<br/>social / email+pw / OTP]
+    C2 --> C3[Client profile<br/>tenant-scoped]
   end
 ```
 
