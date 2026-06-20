@@ -30,6 +30,10 @@ which role does each step. Start at the [overviews index](overviews/00-overviews
 | [Governance & compliance](overviews/07-governance-compliance.md) | Adverse events/DAEN, recalls, policies, waste, privacy, audit |
 | [Growth & communications](overviews/08-growth-communications.md) | Inbox, lead CRM, reviews, reminders/recall, advertising linter |
 
+## Hardware
+
+- [ESP32 fridge temperature monitor](hardware/esp32-temp-monitor.md) — reference design for the clinic's own wireless cold-chain monitor (USB power + WiFi → private per-clinic/fridge API with auth): BOM, wiring, firmware sketch, API contract, security & provisioning, and how the app charts it / raises breach jobs.
+
 ## The PRD set
 
 | PRD | Title | Phase | Key REQ / C IDs | ADRs |
