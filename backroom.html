@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>The Lounge — Back office (concept) · bench tablet</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=block" rel="stylesheet"/>
+<script>
+tailwind.config={theme:{extend:{
+  fontFamily:{sans:['Inter','system-ui','sans-serif']},
+  colors:{brand:{50:'#f0fdfa',100:'#ccfbf1',200:'#99f6e4',300:'#5eead4',400:'#2dd4bf',500:'#14b8a6',600:'#0d9488',700:'#0f766e',800:'#115e59',900:'#134e4a'},ink:'#0f172a',mute:'#64748b'},
+  boxShadow:{soft:'0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.10)',card:'0 6px 20px rgba(16,24,40,.08)'}
+}}}
+</script>
+<style>
+  body{font-family:Inter,sans-serif}
+  .material-symbols-rounded{font-variation-settings:'FILL' 0,'wght' 400,'opsz' 24;line-height:1;user-select:none}
+  #device{width:1194px;height:834px;position:absolute;top:0;left:50%;transform:translateX(-50%);transform-origin:top center}
+  #bezel{position:absolute;inset:0;border-radius:38px;background:#0b1220;padding:14px;box-shadow:0 0 0 2px #2a3344,0 30px 60px -12px rgba(2,6,23,.55),0 12px 24px -8px rgba(2,6,23,.4)}
+  #screen{position:relative;width:100%;height:100%;border-radius:24px;overflow:hidden;background:#f1f5f9;display:flex;flex-direction:column}
+  #cam{position:absolute;top:50%;left:22px;transform:translateY(-50%);width:8px;height:8px;border-radius:50%;background:#05080f;box-shadow:0 0 0 3px #11192a;z-index:60}
+  [data-panel]{animation:f .22s ease}@keyframes f{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .card{background:#fff;border-radius:18px;box-shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.10)}
+  .scrl::-webkit-scrollbar{width:8px}.scrl::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:8px}
+  .rail{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;cursor:pointer;color:#64748b;font-size:14px;font-weight:600;width:100%;border:0;background:none;text-align:left}
+  .rail .material-symbols-rounded{font-size:22px}
+  .rail.on{background:#0d9488;color:#fff}
+  .rail:not(.on):hover{background:#f1f5f9}
+  .ck{cursor:pointer}
+</style>
+</head>
+<body class="bg-gradient-to-br from-slate-100 via-brand-50/40 to-slate-100 text-ink min-h-screen">
+
+<!-- ============ PAGE CHROME ============ -->
+<header class="max-w-7xl mx-auto px-5 sm:px-6 pt-6 flex items-center gap-3">
+  <a href="index.html" class="size-9 rounded-xl bg-brand-600 text-white grid place-items-center font-bold">L</a>
+  <div class="leading-tight"><div class="font-semibold">The Lounge</div><div class="text-[11px] text-mute -mt-0.5">Back office app · concept</div></div>
+  <nav class="ml-auto flex items-center gap-2 text-sm">
+    <a href="index.html" class="px-3 py-1.5 rounded-lg text-mute hover:bg-white hover:text-ink transition flex items-center gap-1"><span class="material-symbols-rounded text-[18px]">arrow_back</span><span class="hidden sm:inline">All prototypes</span></a>
+    <a href="checkin.html" class="px-3 py-1.5 rounded-lg text-mute hover:bg-white hover:text-ink transition flex items-center gap-1"><span class="material-symbols-rounded text-[18px]">how_to_reg</span><span class="hidden sm:inline">Check-in</span></a>
+    <a href="treatment-room.html" class="px-3 py-1.5 rounded-lg text-mute hover:bg-white hover:text-ink transition flex items-center gap-1"><span class="material-symbols-rounded text-[18px]">medical_services</span><span class="hidden sm:inline">Treatment room</span></a>
+    <a href="prototype.html" class="px-3 py-1.5 rounded-lg bg-white shadow-soft text-ink hover:shadow-card transition flex items-center gap-1"><span class="material-symbols-rounded text-[18px]">computer</span><span class="hidden sm:inline">Staff app</span></a>
+  </nav>
+</header>
+
+<main class="max-w-7xl mx-auto px-5 sm:px-6 py-6">
+  <div class="max-w-2xl">
+    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-brand-700 bg-white border border-brand-100 rounded-full px-3 py-1 shadow-soft"><span class="material-symbols-rounded text-[15px]">inventory_2</span>Interactive concept · synthetic data</span>
+    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight mt-4 leading-[1.1]">The bench tablet for everything behind the scenes</h1>
+    <p class="text-mute mt-3 leading-relaxed">The back-of-house companion to the client and in-room apps — for the work that keeps a clinic compliant and stocked, not the work in front of clients. Open and close the clinic with a checklist, log fridge temperatures, receive cold-chain deliveries, reconcile the Schedule&nbsp;4 drug register, record witnessed waste, and run the team’s tasks and shift handover. Every screen is built to <i>do</i> something, not just display a register. Tap around.</p>
+  </div>
+
+  <div class="mt-6 flex flex-wrap items-center gap-2">
+    <div class="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mr-1">Jump to</div>
+    <div id="jumpChips" class="flex flex-wrap gap-2"></div>
+  </div>
+
+  <div id="caption" class="mt-4 rounded-2xl bg-white shadow-soft p-4 max-w-2xl">
+    <div class="text-[11px] uppercase tracking-wide text-brand-700 font-semibold" id="capScreen">Today</div>
+    <div class="text-sm text-mute mt-1" id="capText">The morning hub — everything that needs attention before the first client, in one glance.</div>
+  </div>
+
+  <!-- ============ THE TABLET ============ -->
+  <div class="mt-7 flex justify-center">
+    <div id="stage" class="relative w-[1194px] max-w-full">
+      <div id="device">
+        <div id="bezel">
+          <div id="screen">
+            <div id="cam"></div>
+
+            <!-- ===== TOP BAR ===== -->
+            <div class="h-14 shrink-0 bg-white border-b border-slate-200 flex items-center gap-3 px-5">
+              <div class="size-8 rounded-lg bg-brand-600 text-white grid place-items-center font-bold text-sm">L</div>
+              <div class="font-semibold text-sm">Back office</div>
+              <span class="text-slate-300">·</span>
+              <div class="flex items-center gap-2"><img src="https://i.pravatar.cc/48?img=20" class="size-7 rounded-full"/><div class="text-left leading-tight"><div class="text-sm font-medium">Tessa</div><div class="text-[10px] text-mute -mt-0.5">on shift · opening</div></div></div>
+              <div class="ml-auto flex items-center gap-3 text-mute">
+                <button onclick="panel('register')" class="relative size-9 rounded-full hover:bg-slate-50 grid place-items-center"><span class="material-symbols-rounded text-[22px]">notifications</span><span class="absolute top-1 right-1 size-2 rounded-full bg-rose-500"></span></button>
+                <span class="material-symbols-rounded text-[20px]">wifi</span>
+                <span class="text-sm font-semibold text-ink" id="topClock">9:41</span>
+              </div>
+            </div>
+
+            <!-- ===== BODY: rail + main ===== -->
+            <div class="flex-1 flex min-h-0">
+              <div class="w-[210px] shrink-0 bg-white border-r border-slate-200 p-2.5 flex flex-col gap-1 overflow-y-auto scrl" id="rail"></div>
+              <div class="flex-1 min-w-0 overflow-y-auto scrl bg-slate-50" id="main"></div>
+            </div>
+
+            <!-- toast -->
+            <div id="toast" class="hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-[80] bg-ink text-white px-5 py-3 rounded-2xl text-sm shadow-card flex items-center gap-2"><span class="material-symbols-rounded text-brand-300 text-[20px]">check_circle</span><span id="toastMsg"></span></div>
+
+            <!-- sheet -->
+            <div id="sheetWrap" class="hidden absolute inset-0 z-[70] bg-black/30 grid place-items-center p-8" onclick="if(event.target===this)closeSheet()">
+              <div class="bg-white rounded-3xl shadow-card w-full max-w-md p-6" id="sheet"></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="text-xs text-slate-400 mt-6 max-w-2xl">All names, figures and records are <b>synthetic</b>. Schedule&nbsp;4 stock is tracked by batch and expiry; the drug register reconciles received vs administered vs wasted. Financial figures stay in the owner-only staff app — this is the operational back office.</p>
+</main>
+
+<script>
+/* =================== DATA (all synthetic) =================== */
+var WHO='Tessa';
+function now(){var d=new Date();var h=d.getHours()%12||12;var m=(''+d.getMinutes()).padStart(2,'0');return h+':'+m;}
+
+var openList=[
+ {t:'Disarm alarm & unlock front',done:true,by:'Tessa 8:12'},
+ {t:'Log Fridge 1 & 2 AM temperatures',done:false,link:'coldchain'},
+ {t:'Unlock S4 safe & confirm count vs register',done:false,link:'register'},
+ {t:'Autoclave: run + log sterilisation cycle',done:false,link:'tasks'},
+ {t:'Check treatment rooms stocked & set up',done:false},
+ {t:'Power on reception kiosk & card terminal',done:true,by:'Tessa 8:20'}
+];
+var closeList=[
+ {t:'Reconcile S4 drug register for the day',done:false,link:'register'},
+ {t:'Log Fridge 1 & 2 PM temperatures',done:false,link:'coldchain'},
+ {t:'Lock S4 safe & secure scripts',done:false},
+ {t:'Clear & wipe down all rooms',done:false},
+ {t:'Cash up & settle card terminal',done:false},
+ {t:'Set alarm & lock up',done:false}
+];
+
+var fridges=[
+ {id:'f1',name:'Fridge 1',use:'S4 toxin',min:2,max:8,am:4.1,pm:null,unit:'°C'},
+ {id:'f2',name:'Fridge 2',use:'Dermal filler',min:2,max:8,am:4.0,pm:null,unit:'°C'}
+];
+
+var stock=[
+ {n:'Botox 100U',cat:'S4 toxin',batch:'B2245',exp:'Sep 2026',qty:6,par:4,s4:true},
+ {n:'Dysport 300U',cat:'S4 toxin',batch:'D1180',exp:'Nov 2026',qty:2,par:3,s4:true},
+ {n:'Juvederm filler',cat:'S4 filler',batch:'JV887',exp:'Aug 2026',qty:3,par:3,s4:true},
+ {n:'Hyaluronidase 1500IU',cat:'S4 · reversal',batch:'HY204',exp:'Jul 2026',qty:1,par:2,s4:true,note:'Emergency reversal — never run out'},
+ {n:'Lidocaine 1% (numbing)',cat:'Consumable',batch:'LD556',exp:'Mar 2027',qty:8,par:4,s4:false},
+ {n:'Skin-needling cartridges',cat:'Consumable',batch:'—',exp:'—',qty:5,par:10,s4:false},
+ {n:'Vitamin C serum (retail)',cat:'Retail',batch:'—',exp:'Jan 2027',qty:11,par:6,s4:false}
+];
+
+// S4 drug register — running balance for the day
+var register=[
+ {n:'Botox 100U',batch:'B2245',open:6,recv:0,admin:1,waste:0,counted:null},
+ {n:'Dysport 300U',batch:'D1180',open:2,recv:0,admin:0,waste:0,counted:null},
+ {n:'Juvederm filler',batch:'JV887',open:3,recv:0,admin:1,waste:0,counted:null},
+ {n:'Hyaluronidase 1500IU',batch:'HY204',open:1,recv:0,admin:0,waste:0,counted:null}
+];
+
+var waste=[
+ {n:'Botox 100U',batch:'B2245',amt:'40u (partial vial)',reason:'End of session — reconstituted',by:'Bella L. (RN)',wit:'Tessa',time:'Yesterday 17:40'}
+];
+
+var tasks=[
+ {t:'Order Dysport — below par (2 of 3)',cat:'Stock',done:false,due:'Today',pri:true},
+ {t:'Reorder needling cartridges (5 of 10)',cat:'Stock',done:false,due:'Today',pri:true},
+ {t:'Restock Vitamin C serum on retail shelf',cat:'Retail',done:false,due:'Today'},
+ {t:'Autoclave validation cycle + log',cat:'Equipment',done:false,due:'Today'},
+ {t:'Dr Lena Park — AHPRA registration renews 15 Jul',cat:'Compliance',done:false,due:'24 days',pri:true},
+ {t:'Calibrate fridge thermometers (quarterly)',cat:'Equipment',done:true,due:'Done'}
+];
+var handover=[
+ {by:'Bella L. (RN)',time:'Yesterday 18:02',t:'Hyaluronidase down to 1 — flagged a reorder. Room 2 light flickering, maintenance booked Tue.'},
+ {by:'Dr Lena Park (NP)',time:'Yesterday 16:30',t:'New filler batch JV887 received & logged. Old JV861 fully used.'}
+];
+
+/* =================== RAIL / ROUTER =================== */
+var RAIL=[
+ {id:'today',ic:'home',label:'Today'},
+ {id:'openclose',ic:'checklist',label:'Open & close'},
+ {id:'coldchain',ic:'ac_unit',label:'Cold chain'},
+ {id:'stock',ic:'inventory_2',label:'Stock'},
+ {id:'register',ic:'medication',label:'S4 register'},
+ {id:'waste',ic:'delete_sweep',label:'Waste log'},
+ {id:'tasks',ic:'task_alt',label:'Tasks & handover'}
+];
+var captions={
+ today:['Today','The morning hub — everything needing attention before the first client, in one glance.'],
+ openclose:['Open & close','The daily checklist. Each tick records who did it and when — your opening/closing audit trail.'],
+ coldchain:['Cold chain','Log AM/PM fridge temperatures. Anything outside 2–8°C raises a breach to action immediately.'],
+ stock:['Stock','On-hand levels with par lines, expiry watch, and one-tap reordering or receiving a delivery.'],
+ register:['S4 register','The drug book: received vs administered vs wasted, reconciled against a physical count.'],
+ waste:['Waste log','Record witnessed disposal of partial or expired S4 vials — required for traceability.'],
+ tasks:['Tasks & handover','The team’s to-dos, restock nudges, compliance dates and the shift-to-shift handover note.']
+};
+var cur='today';
+function panel(id){
+  cur=id;renderRail();
+  document.getElementById('main').innerHTML=views[id]();
+  document.getElementById('main').scrollTop=0;
+  setCaption(id);
+}
+function setCaption(id){var c=captions[id];if(!c)return;document.getElementById('capScreen').textContent=c[0];document.getElementById('capText').textContent=c[1];}
+function renderRail(){
+  document.getElementById('rail').innerHTML=
+    '<div class="text-[11px] uppercase tracking-wide text-slate-400 font-semibold px-3 pt-1 pb-1">Back office</div>'+
+    RAIL.map(function(r){
+      var badge=railBadge(r.id);
+      return '<button onclick="panel(\''+r.id+'\')" class="rail '+(cur===r.id?'on':'')+'"><span class="material-symbols-rounded">'+r.ic+'</span><span class="flex-1">'+r.label+'</span>'+badge+'</button>';
+    }).join('');
+}
+function railBadge(id){
+  var n=0;
+  if(id==='openclose')n=openList.filter(function(x){return !x.done;}).length;
+  if(id==='coldchain')n=fridges.filter(function(f){return f.am==null||f.pm==null;}).length;
+  if(id==='stock')n=stock.filter(function(s){return s.qty<s.par;}).length;
+  if(id==='register')n=register.filter(function(r){return r.counted==null;}).length;
+  if(id==='tasks')n=tasks.filter(function(t){return !t.done&&t.pri;}).length;
+  if(!n)return '';
+  var c=cur===id?'bg-white/25 text-white':'bg-rose-100 text-rose-600';
+  return '<span class="text-[11px] font-bold px-1.5 py-0.5 rounded-full '+c+'">'+n+'</span>';
+}
+
+/* =================== VIEWS =================== */
+var views={
+ today:function(){
+   var openDone=openList.filter(function(x){return x.done;}).length;
+   var lowN=stock.filter(function(s){return s.qty<s.par;}).length;
+   var fridgePend=fridges.filter(function(f){return f.am==null;}).length;
+   var regPend=register.filter(function(r){return r.counted==null;}).length;
+   return '<div class="p-5">'+
+   '<div class="flex items-center justify-between mb-4"><div><h2 class="text-xl font-bold">Good morning, '+WHO+'</h2><div class="text-mute text-sm">Sat 21 Jun · opening shift</div></div>'+
+     '<button onclick="panel(\'openclose\')" class="px-4 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-semibold flex items-center gap-1.5"><span class="material-symbols-rounded text-[18px]">play_arrow</span>Run opening checklist</button></div>'+
+   // attention grid
+   '<div class="grid grid-cols-4 gap-3 mb-4">'+
+     statCard('checklist','Opening',openDone+'/'+openList.length,'tasks done',openDone<openList.length?'amber':'emerald','openclose')+
+     statCard('ac_unit','Fridge temps',fridgePend?fridgePend+' to log':'Logged',fridgePend?'AM reading due':'within range',fridgePend?'amber':'emerald','coldchain')+
+     statCard('inventory_2','Stock',lowN?lowN+' low':'OK',lowN?'below par level':'all above par',lowN?'rose':'emerald','stock')+
+     statCard('medication','S4 register',regPend?regPend+' lines':'Reconciled',regPend?'to reconcile':'balanced',regPend?'amber':'emerald','register')+
+   '</div>'+
+   '<div class="grid grid-cols-2 gap-4">'+
+     // needs attention
+     '<div class="card p-4"><div class="font-bold mb-2 flex items-center gap-2"><span class="material-symbols-rounded text-amber-500">priority_high</span>Needs attention</div><div class="space-y-2">'+
+       attn('ac_unit','Log this morning’s fridge temperatures','Fridge 1 & 2 · before first treatment','coldchain')+
+       attn('production_quantity_limits','Dysport below par','2 of 3 — reorder today','stock')+
+       attn('warning','Hyaluronidase down to 1','Emergency reversal — keep ≥2 in stock','stock')+
+       attn('medical_information','AHPRA renewal in 24 days','Dr Lena Park (NP) · 15 Jul','tasks')+
+     '</div></div>'+
+     // expiry watch + handover
+     '<div class="space-y-4">'+
+       '<div class="card p-4"><div class="font-bold mb-2 flex items-center gap-2"><span class="material-symbols-rounded text-rose-500">schedule</span>Expiring soonest</div><div class="space-y-2">'+
+         stock.slice().filter(function(s){return s.exp!=='—';}).sort(function(a,b){return new Date('1 '+a.exp)-new Date('1 '+b.exp);}).slice(0,3).map(function(s){
+           return '<div class="flex items-center gap-3 text-sm"><span class="material-symbols-rounded text-slate-400 text-[18px]">'+(s.s4?'vaccines':'science')+'</span><div class="flex-1"><span class="font-medium">'+s.n+'</span> <span class="text-mute">· '+s.batch+'</span></div><span class="text-mute">exp '+s.exp+'</span></div>';
+         }).join('')+'</div></div>'+
+       '<div class="card p-4"><div class="font-bold mb-2 flex items-center gap-2"><span class="material-symbols-rounded text-brand-600">forum</span>Last handover note</div><div class="text-sm text-mute leading-relaxed">“'+handover[0].t+'”</div><div class="text-xs text-slate-400 mt-2">— '+handover[0].by+', '+handover[0].time+'</div></div>'+
+     '</div>'+
+   '</div>'+
+   '</div>';
+ },
+
+ openclose:function(){
+   return '<div class="p-5">'+
+   '<div class="flex items-center gap-3 mb-4"><h2 class="text-xl font-bold flex-1">Open &amp; close</h2>'+
+     '<div class="inline-flex rounded-xl bg-slate-100 p-1 text-sm font-semibold">'+
+     '<button id="ocOpen" onclick="ocTab(\'open\')" class="px-4 py-1.5 rounded-lg bg-white shadow-soft">Opening</button>'+
+     '<button id="ocClose" onclick="ocTab(\'close\')" class="px-4 py-1.5 rounded-lg text-mute">Closing</button></div></div>'+
+   '<div id="ocBody"></div>'+
+   '</div>';
+ },
+
+ coldchain:function(){
+   return '<div class="p-5"><h2 class="text-xl font-bold mb-1">Cold chain</h2><p class="text-mute text-sm mb-4">Target range <b>2–8°C</b>. Log a reading each morning and evening; a breach pauses use of affected stock.</p>'+
+   '<div class="grid grid-cols-2 gap-4">'+fridges.map(function(f){
+     function badge(v){if(v==null)return '<span class="text-sm text-slate-400">— not logged</span>';var ok=v>=f.min&&v<=f.max;return '<span class="text-sm font-bold '+(ok?'text-emerald-600':'text-rose-600')+'">'+v.toFixed(1)+f.unit+(ok?'':' ⚠')+'</span>';}
+     var breach=(f.am!=null&&(f.am<f.min||f.am>f.max))||(f.pm!=null&&(f.pm<f.min||f.pm>f.max));
+     return '<div class="card p-4 '+(breach?'ring-2 ring-rose-300':'')+'">'+
+       '<div class="flex items-center gap-3"><div class="size-12 rounded-2xl '+(breach?'bg-rose-50 text-rose-600':'bg-brand-50 text-brand-600')+' grid place-items-center"><span class="material-symbols-rounded text-[26px]">ac_unit</span></div>'+
+         '<div class="flex-1"><div class="font-bold">'+f.name+'</div><div class="text-mute text-sm">'+f.use+' · target '+f.min+'–'+f.max+f.unit+'</div></div></div>'+
+       '<div class="grid grid-cols-2 gap-2 mt-4">'+
+         '<div class="rounded-xl bg-slate-50 p-3"><div class="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">AM reading</div><div class="mt-0.5">'+badge(f.am)+'</div></div>'+
+         '<div class="rounded-xl bg-slate-50 p-3"><div class="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">PM reading</div><div class="mt-0.5">'+badge(f.pm)+'</div></div>'+
+       '</div>'+
+       (breach?'<div class="mt-3 rounded-xl bg-rose-50 border border-rose-200 p-3 text-sm text-rose-800 flex items-start gap-2"><span class="material-symbols-rounded text-[18px]">error</span><div><b>Breach.</b> Quarantine stock and notify the prescriber before use.</div></div>':'')+
+       '<div class="flex gap-2 mt-3">'+
+         '<button onclick="openLog(\''+f.id+'\',\'am\')" class="flex-1 py-2.5 rounded-xl '+(f.am==null?'bg-brand-600 text-white':'bg-white border border-slate-200')+' text-sm font-semibold">Log AM</button>'+
+         '<button onclick="openLog(\''+f.id+'\',\'pm\')" class="flex-1 py-2.5 rounded-xl '+(f.pm==null?'bg-brand-600 text-white':'bg-white border border-slate-200')+' text-sm font-semibold">Log PM</button>'+
+       '</div>'+
+     '</div>';
+   }).join('')+'</div>'+
+   '<div class="mt-4 card p-4"><div class="font-semibold text-sm mb-1 flex items-center gap-2"><span class="material-symbols-rounded text-[18px] text-brand-600">monitoring</span>Continuous logger</div><div class="text-sm text-mute">A wireless sensor (CM-01) records every 5 minutes and alerts if the door’s left open or temperature drifts overnight — these manual logs are the human double-check.</div></div>'+
+   '</div>';
+ },
+
+ stock:function(){
+   return '<div class="p-5"><div class="flex items-center gap-3 mb-4"><h2 class="text-xl font-bold flex-1">Stock on hand</h2>'+
+     '<button onclick="openSheet(\'receive\')" class="px-4 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-semibold flex items-center gap-1.5"><span class="material-symbols-rounded text-[18px]">local_shipping</span>Receive a delivery</button></div>'+
+   '<div class="card overflow-hidden"><table class="w-full text-sm"><thead><tr class="text-left text-[11px] uppercase tracking-wide text-slate-400 bg-slate-50"><th class="py-2.5 px-4">Item</th><th>Batch / exp</th><th>On hand</th><th>Par</th><th></th></tr></thead><tbody>'+
+     stock.map(function(s,i){
+       var low=s.qty<s.par;
+       return '<tr class="border-t border-slate-100"><td class="py-3 px-4"><div class="font-semibold flex items-center gap-2">'+s.n+(s.s4?' <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-violet-50 text-violet-700 font-medium">S4</span>':'')+'</div><div class="text-mute text-xs">'+s.cat+(s.note?' · <span class="text-rose-500">'+s.note+'</span>':'')+'</div></td>'+
+         '<td class="text-mute">'+(s.batch==='—'?'—':s.batch+'<div class="text-xs">exp '+s.exp+'</div>')+'</td>'+
+         '<td><span class="text-lg font-bold '+(low?'text-rose-600':'')+'">'+s.qty+'</span></td>'+
+         '<td class="text-mute">'+s.par+'</td>'+
+         '<td class="pr-4 text-right">'+(low?'<button onclick="reorder('+i+')" class="px-3 py-1.5 rounded-lg bg-rose-500 text-white text-xs font-semibold">Reorder</button>':'<span class="text-emerald-600 text-xs font-semibold flex items-center gap-1 justify-end"><span class="material-symbols-rounded text-[15px]">check</span>OK</span>')+'</td></tr>';
+     }).join('')+
+   '</tbody></table></div>'+
+   '<p class="text-xs text-slate-400 mt-3">Reordering raises a purchase task. Receiving a delivery records the new batch &amp; expiry into stock and the S4 register in one step.</p>'+
+   '</div>';
+ },
+
+ register:function(){
+   var anyPend=register.some(function(r){return r.counted==null;});
+   return '<div class="p-5"><div class="flex items-center gap-3 mb-1"><h2 class="text-xl font-bold flex-1">Schedule 4 drug register</h2>'+
+     '<button onclick="reconcileAll()" class="px-4 py-2.5 rounded-xl '+(anyPend?'bg-brand-600 text-white':'bg-emerald-600 text-white')+' text-sm font-semibold flex items-center gap-1.5"><span class="material-symbols-rounded text-[18px]">'+(anyPend?'fact_check':'verified')+'</span>'+(anyPend?'Reconcile all':'Reconciled')+'</button></div>'+
+   '<p class="text-mute text-sm mb-4">Closing balance = opening + received − administered − wasted. Count the safe and reconcile.</p>'+
+   '<div class="card overflow-hidden"><table class="w-full text-sm"><thead><tr class="text-left text-[11px] uppercase tracking-wide text-slate-400 bg-slate-50"><th class="py-2.5 px-4">Medicine</th><th>Open</th><th>Recv</th><th>Admin</th><th>Waste</th><th>Expected</th><th>Counted</th><th></th></tr></thead><tbody>'+
+     register.map(function(r,i){
+       var exp=r.open+r.recv-r.admin-r.waste;
+       var match=r.counted!=null&&r.counted===exp;
+       var disc=r.counted!=null&&r.counted!==exp;
+       return '<tr class="border-t border-slate-100"><td class="py-3 px-4"><div class="font-semibold">'+r.n+'</div><div class="text-mute text-xs">'+r.batch+'</div></td>'+
+         '<td>'+r.open+'</td><td class="text-emerald-600">+'+r.recv+'</td><td class="text-slate-500">−'+r.admin+'</td><td class="text-amber-600">−'+r.waste+'</td>'+
+         '<td class="font-bold">'+exp+'</td>'+
+         '<td>'+(r.counted==null?'<span class="text-slate-300">—</span>':'<span class="font-bold '+(match?'text-emerald-600':'text-rose-600')+'">'+r.counted+'</span>')+'</td>'+
+         '<td class="pr-4 text-right">'+(r.counted==null?'<button onclick="openCount('+i+')" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-semibold">Count</button>':match?'<span class="material-symbols-rounded text-emerald-500 text-[20px]">check_circle</span>':'<span class="text-[11px] px-2 py-1 rounded-full bg-rose-50 text-rose-600 font-bold">Discrepancy</span>')+'</td></tr>';
+     }).join('')+
+   '</tbody></table></div>'+
+   '<div class="mt-3 flex items-center gap-2 text-xs text-slate-400"><span class="material-symbols-rounded text-[16px]">history</span>Every change is timestamped and attributed. Discrepancies require a witnessed note before sign-off.</div>'+
+   '</div>';
+ },
+
+ waste:function(){
+   return '<div class="p-5"><div class="flex items-center gap-3 mb-4"><h2 class="text-xl font-bold flex-1">Waste &amp; disposal log</h2>'+
+     '<button onclick="openSheet(\'waste\')" class="px-4 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-semibold flex items-center gap-1.5"><span class="material-symbols-rounded text-[18px]">add</span>Log disposal</button></div>'+
+   '<div class="space-y-2.5">'+waste.map(function(w){
+     return '<div class="card p-4 flex items-start gap-4"><div class="size-11 rounded-xl bg-amber-50 text-amber-600 grid place-items-center shrink-0"><span class="material-symbols-rounded">delete_sweep</span></div>'+
+       '<div class="flex-1"><div class="font-semibold">'+w.n+' · '+w.amt+'</div><div class="text-sm text-mute">'+w.reason+'</div>'+
+         '<div class="text-xs text-slate-400 mt-1 flex items-center gap-3"><span>By '+w.by+'</span><span class="flex items-center gap-1"><span class="material-symbols-rounded text-[14px]">visibility</span>Witnessed by '+w.wit+'</span><span>'+w.time+'</span></div></div>'+
+       '<span class="text-[11px] px-2 py-1 rounded-full bg-violet-50 text-violet-700 font-medium">'+w.batch+'</span></div>';
+   }).join('')+'</div>'+
+   '<div class="mt-4 rounded-2xl bg-brand-50/70 border border-brand-100 p-4 flex items-start gap-3 text-sm text-brand-900"><span class="material-symbols-rounded text-brand-600">info</span><div>Disposal of any Schedule&nbsp;4 medicine — partial vials, expired stock or breach-affected stock — must be <b>witnessed</b> and recorded. Logging here also posts the amount to the drug register’s “waste” column.</div></div>'+
+   '</div>';
+ },
+
+ tasks:function(){
+   return '<div class="p-5"><div class="grid grid-cols-2 gap-5">'+
+   // tasks
+   '<div><div class="flex items-center gap-2 mb-3"><h2 class="text-xl font-bold flex-1">Tasks</h2><button onclick="openSheet(\'task\')" class="text-sm text-brand-700 font-semibold flex items-center gap-1"><span class="material-symbols-rounded text-[18px]">add</span>Add task</button></div>'+
+     '<div class="space-y-2">'+tasks.map(function(t,i){
+       return '<button onclick="toggleTask('+i+')" class="w-full text-left card p-3.5 flex items-center gap-3">'+
+         '<span class="material-symbols-rounded text-[24px] '+(t.done?'text-emerald-500':'text-slate-300')+'">'+(t.done?'check_circle':'radio_button_unchecked')+'</span>'+
+         '<div class="flex-1 min-w-0"><div class="font-medium text-sm '+(t.done?'line-through text-slate-400':'')+'">'+t.t+'</div>'+
+           '<div class="text-xs text-mute flex items-center gap-2 mt-0.5"><span class="px-1.5 py-0.5 rounded bg-slate-100">'+t.cat+'</span>'+(t.pri&&!t.done?'<span class="text-rose-500 font-semibold">'+t.due+'</span>':'<span>'+t.due+'</span>')+'</div></div>'+
+         (t.pri&&!t.done?'<span class="material-symbols-rounded text-rose-400 text-[18px]">priority_high</span>':'')+'</button>';
+     }).join('')+'</div></div>'+
+   // handover
+   '<div><div class="flex items-center gap-2 mb-3"><h2 class="text-xl font-bold flex-1">Shift handover</h2><button onclick="openSheet(\'handover\')" class="text-sm text-brand-700 font-semibold flex items-center gap-1"><span class="material-symbols-rounded text-[18px]">edit_note</span>Add note</button></div>'+
+     '<div class="space-y-3" id="handoverList">'+renderHandover()+'</div></div>'+
+   '</div></div>';
+ }
+};
+
+/* ---- view helpers ---- */
+function statCard(ic,k,big,sub,tone,go){var col={emerald:'text-emerald-600',amber:'text-amber-600',rose:'text-rose-600'}[tone]||'text-slate-600';
+  return '<button onclick="panel(\''+go+'\')" class="card p-4 text-left hover:shadow-card transition"><div class="flex items-center gap-2 text-slate-400"><span class="material-symbols-rounded text-[20px]">'+ic+'</span><span class="text-xs font-semibold uppercase tracking-wide">'+k+'</span></div><div class="text-2xl font-extrabold mt-1 '+col+'">'+big+'</div><div class="text-xs text-mute">'+sub+'</div></button>';}
+function attn(ic,t,d,go){return '<button onclick="panel(\''+go+'\')" class="w-full text-left flex items-center gap-3 rounded-xl hover:bg-slate-50 p-2 -m-2"><div class="size-9 rounded-lg bg-amber-50 text-amber-600 grid place-items-center shrink-0"><span class="material-symbols-rounded text-[20px]">'+ic+'</span></div><div class="flex-1"><div class="font-medium text-sm">'+t+'</div><div class="text-mute text-xs">'+d+'</div></div><span class="material-symbols-rounded text-slate-300">chevron_right</span></button>';}
+function renderHandover(){return handover.map(function(h){return '<div class="card p-4"><div class="text-sm text-ink leading-relaxed">'+h.t+'</div><div class="text-xs text-slate-400 mt-2 flex items-center gap-2"><img src="https://i.pravatar.cc/32?img=32" class="size-5 rounded-full"/>'+h.by+' · '+h.time+'</div></div>';}).join('');}
+
+/* =================== OPEN / CLOSE =================== */
+var ocMode='open';
+function ocTab(m){ocMode=m;document.getElementById('ocOpen').className='px-4 py-1.5 rounded-lg '+(m==='open'?'bg-white shadow-soft':'text-mute');document.getElementById('ocClose').className='px-4 py-1.5 rounded-lg '+(m==='close'?'bg-white shadow-soft':'text-mute');renderOC();}
+function renderOC(){
+  var list=ocMode==='open'?openList:closeList;
+  var done=list.filter(function(x){return x.done;}).length;
+  document.getElementById('ocBody').innerHTML=
+    '<div class="card p-4 mb-3"><div class="flex items-center gap-3"><div class="text-sm font-semibold">'+(ocMode==='open'?'Opening':'Closing')+' · '+done+' of '+list.length+'</div>'+
+      '<div class="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden"><div class="h-2 rounded-full bg-brand-500 transition-all" style="width:'+(done/list.length*100)+'%"></div></div>'+
+      (done===list.length?'<span class="text-emerald-600 text-sm font-semibold flex items-center gap-1"><span class="material-symbols-rounded text-[18px]">verified</span>Complete</span>':'')+'</div></div>'+
+    '<div class="space-y-2">'+list.map(function(it,i){
+      return '<div class="card p-3.5 flex items-center gap-3"><button onclick="toggleOC('+i+')" class="ck shrink-0"><span class="material-symbols-rounded text-[26px] '+(it.done?'text-emerald-500':'text-slate-300')+'">'+(it.done?'check_circle':'radio_button_unchecked')+'</span></button>'+
+        '<div class="flex-1"><div class="font-medium '+(it.done?'text-slate-400':'')+'">'+it.t+'</div>'+(it.done&&it.by?'<div class="text-xs text-emerald-600">'+it.by+'</div>':'')+'</div>'+
+        (it.link?'<button onclick="panel(\''+it.link+'\')" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-semibold flex items-center gap-1">Open<span class="material-symbols-rounded text-[15px]">arrow_outward</span></button>':'')+'</div>';
+    }).join('')+'</div>';
+}
+function toggleOC(i){var list=ocMode==='open'?openList:closeList;var it=list[i];it.done=!it.done;it.by=it.done?(WHO+' '+now()):null;renderOC();renderRail();}
+
+/* =================== FRIDGE LOG =================== */
+var logTarget=null;
+function openLog(fid,when){
+  logTarget={fid:fid,when:when};
+  var f=fridges.find(function(x){return x.id===fid;});
+  var suggested=(4+Math.random()*0.6).toFixed(1);
+  document.getElementById('sheet').innerHTML=
+    '<h3 class="font-bold text-lg mb-1">Log '+when.toUpperCase()+' temperature</h3><p class="text-mute text-sm mb-4">'+f.name+' · '+f.use+' · target '+f.min+'–'+f.max+'°C</p>'+
+    '<div class="flex items-center justify-center gap-3 my-3"><button onclick="bumpTemp(-0.1)" class="size-12 rounded-xl bg-slate-100 grid place-items-center"><span class="material-symbols-rounded">remove</span></button>'+
+    '<div class="w-36 text-center"><input id="tempInp" value="'+suggested+'" class="w-full text-center text-4xl font-extrabold border-b-2 border-brand-300 focus:outline-none"/><div class="text-mute text-sm">°C</div></div>'+
+    '<button onclick="bumpTemp(0.1)" class="size-12 rounded-xl bg-slate-100 grid place-items-center"><span class="material-symbols-rounded">add</span></button></div>'+
+    '<div class="grid grid-cols-3 gap-2 mb-4">'+['3.8','4.2','9.5'].map(function(v){return '<button onclick="document.getElementById(\'tempInp\').value=\''+v+'\'" class="py-2 rounded-lg bg-slate-50 text-sm font-medium">'+v+'°</button>';}).join('')+'</div>'+
+    '<div class="flex gap-2"><button onclick="closeSheet()" class="flex-1 py-3 rounded-xl bg-white border border-slate-200 font-medium">Cancel</button><button onclick="saveLog()" class="flex-1 py-3 rounded-xl bg-brand-600 text-white font-semibold">Save reading</button></div>';
+  document.getElementById('sheetWrap').classList.remove('hidden');
+}
+function bumpTemp(d){var i=document.getElementById('tempInp');i.value=(parseFloat(i.value||'4')+d).toFixed(1);}
+function saveLog(){
+  var v=parseFloat(document.getElementById('tempInp').value);
+  var f=fridges.find(function(x){return x.id===logTarget.fid;});
+  f[logTarget.when]=v;closeSheet();panel('coldchain');
+  if(v<f.min||v>f.max)toast('⚠ Breach logged — quarantine '+f.use+' & notify prescriber');
+  else toast('Reading saved — '+f.name+' '+v.toFixed(1)+'°C');
+}
+
+/* =================== STOCK =================== */
+function reorder(i){var s=stock[i];tasks.unshift({t:'Order '+s.n+' — below par ('+s.qty+' of '+s.par+')',cat:'Stock',done:false,due:'Today',pri:true});toast('Reorder raised for '+s.n);panel('stock');}
+function doReceive(){
+  var nm=document.getElementById('rcName').value, b=document.getElementById('rcBatch').value, ex=document.getElementById('rcExp').value, q=parseInt(document.getElementById('rcQty').value||'0',10);
+  if(!nm||!q){toast('Enter an item and quantity');return;}
+  var ex2=stock.find(function(s){return s.n.toLowerCase()===nm.toLowerCase();});
+  if(ex2){ex2.qty+=q;if(b)ex2.batch=b;if(ex)ex2.exp=ex;}
+  else stock.push({n:nm,cat:'Received',batch:b||'—',exp:ex||'—',qty:q,par:q,s4:/botox|dysport|filler|juvederm|hyal/i.test(nm)});
+  var reg=register.find(function(r){return r.n.toLowerCase()===nm.toLowerCase();});
+  if(reg)reg.recv+=q;
+  closeSheet();panel('stock');toast(q+' × '+nm+' received & logged to register');
+}
+
+/* =================== REGISTER =================== */
+var countIdx=null;
+function openCount(i){
+  countIdx=i;var r=register[i];var exp=r.open+r.recv-r.admin-r.waste;
+  document.getElementById('sheet').innerHTML=
+    '<h3 class="font-bold text-lg mb-1">Count '+r.n+'</h3><p class="text-mute text-sm mb-4">Batch '+r.batch+' · expected closing balance <b>'+exp+'</b>. Enter what’s physically in the safe.</p>'+
+    '<div class="flex items-center justify-center gap-3 my-3"><button onclick="bumpCount(-1)" class="size-12 rounded-xl bg-slate-100 grid place-items-center"><span class="material-symbols-rounded">remove</span></button>'+
+    '<input id="cntInp" value="'+exp+'" class="w-28 text-center text-4xl font-extrabold border-b-2 border-brand-300 focus:outline-none"/>'+
+    '<button onclick="bumpCount(1)" class="size-12 rounded-xl bg-slate-100 grid place-items-center"><span class="material-symbols-rounded">add</span></button></div>'+
+    '<div class="flex gap-2 mt-4"><button onclick="closeSheet()" class="flex-1 py-3 rounded-xl bg-white border border-slate-200 font-medium">Cancel</button><button onclick="saveCount()" class="flex-1 py-3 rounded-xl bg-brand-600 text-white font-semibold">Confirm count</button></div>';
+  document.getElementById('sheetWrap').classList.remove('hidden');
+}
+function bumpCount(d){var i=document.getElementById('cntInp');i.value=Math.max(0,parseInt(i.value||'0',10)+d);}
+function saveCount(){var r=register[countIdx];var c=parseInt(document.getElementById('cntInp').value,10);var exp=r.open+r.recv-r.admin-r.waste;r.counted=c;closeSheet();panel('register');toast(c===exp?r.n+' reconciled ✓':'Discrepancy on '+r.n+' — witnessed note required');}
+function reconcileAll(){register.forEach(function(r){if(r.counted==null)r.counted=r.open+r.recv-r.admin-r.waste;});panel('register');toast('All lines reconciled & balanced');}
+
+/* =================== WASTE =================== */
+function doWaste(){
+  var nm=document.getElementById('wsName').value,amt=document.getElementById('wsAmt').value,rs=document.getElementById('wsReason').value,wit=document.getElementById('wsWit').value;
+  if(!nm||!amt){toast('Enter the item and amount');return;}
+  var b=(stock.find(function(s){return s.n.toLowerCase()===nm.toLowerCase();})||{}).batch||'—';
+  waste.unshift({n:nm,batch:b,amt:amt,reason:rs||'Disposed',by:'Bella L. (RN)',wit:wit||WHO,time:'Today '+now()});
+  var reg=register.find(function(r){return r.n.toLowerCase()===nm.toLowerCase();});
+  if(reg&&/vial/i.test(amt))reg.waste+=1;
+  closeSheet();panel('waste');toast('Witnessed disposal logged');
+}
+
+/* =================== TASKS / HANDOVER =================== */
+function toggleTask(i){tasks[i].done=!tasks[i].done;if(tasks[i].done){tasks[i].due='Done';tasks[i].pri=false;}panel('tasks');}
+function doTask(){var v=document.getElementById('tkName').value;if(!v){toast('Enter a task');return;}tasks.unshift({t:v,cat:'General',done:false,due:'Today'});closeSheet();panel('tasks');toast('Task added');}
+function doHandover(){var v=document.getElementById('hoName').value;if(!v){toast('Write a note first');return;}handover.unshift({by:WHO,time:'Today '+now(),t:v});closeSheet();panel('tasks');toast('Handover note posted');}
+
+/* =================== SHEETS =================== */
+var sheets={
+ receive:'<h3 class="font-bold text-lg mb-1">Receive a delivery</h3><p class="text-mute text-sm mb-4">Record the batch &amp; expiry into stock and the S4 register together.</p>'+
+   '<div class="space-y-3 text-sm">'+
+   '<div><label class="text-xs text-mute">Item</label><input id="rcName" list="rcItems" value="Dysport 300U" class="w-full mt-1 px-3 py-2.5 border border-slate-200 rounded-xl"/><datalist id="rcItems"><option>Botox 100U</option><option>Dysport 300U</option><option>Juvederm filler</option><option>Hyaluronidase 1500IU</option></datalist></div>'+
+   '<div class="grid grid-cols-2 gap-2"><div><label class="text-xs text-mute">Batch / lot</label><input id="rcBatch" value="D1204" class="w-full mt-1 px-3 py-2.5 border border-slate-200 rounded-xl"/></div><div><label class="text-xs text-mute">Expiry</label><input id="rcExp" value="Dec 2026" class="w-full mt-1 px-3 py-2.5 border border-slate-200 rounded-xl"/></div></div>'+
+   '<div><label class="text-xs text-mute">Quantity (vials)</label><input id="rcQty" type="number" value="2" class="w-full mt-1 px-3 py-2.5 border border-slate-200 rounded-xl"/></div>'+
+   '<label class="flex items-center gap-2 text-mute"><input type="checkbox" checked class="size-4 accent-brand-600"/>Cold-chain intact on arrival (≤8°C)</label>'+
+   '</div><div class="flex gap-2 mt-4"><button onclick="closeSheet()" class="flex-1 py-3 rounded-xl bg-white border border-slate-200 font-medium">Cancel</button><button onclick="doReceive()" class="flex-1 py-3 rounded-xl bg-brand-600 text-white font-semibold">Receive &amp; log</button></div>',
+ waste:'<h3 class="font-bold text-lg mb-1">Log witnessed disposal</h3><p class="text-mute text-sm mb-4">For partial, expired or breach-affected S4 stock.</p>'+
+   '<div class="space-y-3 text-sm">'+
+   '<div><label class="text-xs text-mute">Item</label><input id="wsName" value="Juvederm filler" class="w-full mt-1 px-3 py-2.5 border border-slate-200 rounded-xl"/></div>'+
+   '<div><label class="text-xs text-mute">Amount disposed</label><input id="wsAmt" value="0.2ml (partial syringe)" class="w-full mt-1 px-3 py-2.5 border border-slate-200 rounded-xl"/></div>'+
+   '<div><label class="text-xs text-mute">Reason</label><input id="wsReason" value="End of session — opened product" class="w-full mt-1 px-3 py-2.5 border border-slate-200 rounded-xl"/></div>'+
+   '<div><label class="text-xs text-mute">Witnessed by</label><input id="wsWit" value="Tessa" class="w-full mt-1 px-3 py-2.5 border border-slate-200 rounded-xl"/></div>'+
+   '</div><div class="flex gap-2 mt-4"><button onclick="closeSheet()" class="flex-1 py-3 rounded-xl bg-white border border-slate-200 font-medium">Cancel</button><button onclick="doWaste()" class="flex-1 py-3 rounded-xl bg-brand-600 text-white font-semibold">Log disposal</button></div>',
+ task:'<h3 class="font-bold text-lg mb-3">Add a task</h3><input id="tkName" placeholder="What needs doing?" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm"/><div class="flex gap-2 mt-4"><button onclick="closeSheet()" class="flex-1 py-3 rounded-xl bg-white border border-slate-200 font-medium">Cancel</button><button onclick="doTask()" class="flex-1 py-3 rounded-xl bg-brand-600 text-white font-semibold">Add</button></div>',
+ handover:'<h3 class="font-bold text-lg mb-3">Handover note</h3><textarea id="hoName" rows="4" placeholder="Anything the next shift should know…" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm"></textarea><div class="flex gap-2 mt-4"><button onclick="closeSheet()" class="flex-1 py-3 rounded-xl bg-white border border-slate-200 font-medium">Cancel</button><button onclick="doHandover()" class="flex-1 py-3 rounded-xl bg-brand-600 text-white font-semibold">Post note</button></div>'
+};
+function openSheet(id){document.getElementById('sheet').innerHTML=sheets[id]||'';document.getElementById('sheetWrap').classList.remove('hidden');}
+function closeSheet(){document.getElementById('sheetWrap').classList.add('hidden');}
+
+/* =================== MISC =================== */
+var toastTimer=null;
+function toast(m){var t=document.getElementById('toast');document.getElementById('toastMsg').innerHTML=m;t.classList.remove('hidden');if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.add('hidden');},2400);}
+
+/* jump chips */
+var chips=[['Today','today'],['Open & close','openclose'],['Cold chain','coldchain'],['Stock','stock'],['S4 register','register'],['Waste log','waste'],['Tasks & handover','tasks']];
+document.getElementById('jumpChips').innerHTML=chips.map(function(c){return '<button onclick="panel(\''+c[1]+'\')" class="px-3 py-1.5 rounded-full bg-white border border-slate-200 text-sm hover:border-brand-300 hover:text-brand-700 transition">'+c[0]+'</button>';}).join('');
+
+/* clock */
+function tick(){var el=document.getElementById('topClock');if(el)el.textContent=now();}
+setInterval(tick,15000);
+
+/* render open/close body when entering that panel */
+var _origPanel=panel;
+panel=function(id){_origPanel(id);if(id==='openclose')renderOC();};
+
+/* =================== SCALE-TO-FIT =================== */
+function fit(){
+  var stage=document.getElementById('stage'),dev=document.getElementById('device');
+  var availW=stage.clientWidth;
+  var top=stage.getBoundingClientRect().top;
+  var availH=window.innerHeight-top-24;
+  var s=Math.min(1,availW/1194,availH/834);
+  if(s<=0||!isFinite(s))s=1;
+  dev.style.transform='translateX(-50%) scale('+s+')';
+  stage.style.height=(834*s)+'px';
+}
+window.addEventListener('resize',fit);
+window.addEventListener('load',fit);
+
+/* init */
+panel('today');
+fit();
+tick();
+</script>
+</body>
+</html>

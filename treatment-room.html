@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>The Lounge — Treatment room (concept) · in-room tablet</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=block" rel="stylesheet"/>
+<script>
+tailwind.config={theme:{extend:{
+  fontFamily:{sans:['Inter','system-ui','sans-serif']},
+  colors:{brand:{50:'#f0fdfa',100:'#ccfbf1',200:'#99f6e4',300:'#5eead4',400:'#2dd4bf',500:'#14b8a6',600:'#0d9488',700:'#0f766e',800:'#115e59',900:'#134e4a'},ink:'#0f172a',mute:'#64748b'},
+  boxShadow:{soft:'0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.10)',card:'0 6px 20px rgba(16,24,40,.08)'}
+}}}
+</script>
+<style>
+  body{font-family:Inter,sans-serif}
+  .material-symbols-rounded{font-variation-settings:'FILL' 0,'wght' 400,'opsz' 24;line-height:1;user-select:none}
+  /* ---- tablet device (landscape) ---- */
+  #device{width:1194px;height:834px;position:absolute;top:0;left:50%;transform:translateX(-50%);transform-origin:top center}
+  #bezel{position:absolute;inset:0;border-radius:38px;background:#0b1220;padding:14px;box-shadow:0 0 0 2px #2a3344,0 30px 60px -12px rgba(2,6,23,.55),0 12px 24px -8px rgba(2,6,23,.4)}
+  #screen{position:relative;width:100%;height:100%;border-radius:24px;overflow:hidden;background:#f1f5f9;display:flex;flex-direction:column}
+  #cam{position:absolute;top:50%;left:22px;transform:translateY(-50%);width:8px;height:8px;border-radius:50%;background:#05080f;box-shadow:0 0 0 3px #11192a;z-index:60}
+  [data-panel]{animation:f .22s ease}@keyframes f{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .card{background:#fff;border-radius:18px;box-shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.10)}
+  .scrl::-webkit-scrollbar{width:8px}.scrl::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:8px}
+  .rail{display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;border-radius:14px;cursor:pointer;color:#94a3b8;font-size:10px;font-weight:600;width:100%;border:0;background:none}
+  .rail .material-symbols-rounded{font-size:24px}
+  .rail.on{background:#0d9488;color:#fff}
+  .rail.done .material-symbols-rounded{font-variation-settings:'FILL' 1}
+  .site{cursor:pointer;transition:r .12s}
+  .seg.on{background:#0d9488;color:#fff}
+  input[type=range].ba{-webkit-appearance:none;appearance:none;height:100%;width:100%;background:transparent;position:absolute;inset:0;margin:0;cursor:ew-resize}
+  input[type=range].ba::-webkit-slider-thumb{-webkit-appearance:none;width:34px;height:100%;background:transparent;cursor:ew-resize}
+</style>
+</head>
+<body class="bg-gradient-to-br from-slate-100 via-brand-50/40 to-slate-100 text-ink min-h-screen">
+
+<!-- ============ PAGE CHROME ============ -->
+<header class="max-w-7xl mx-auto px-5 sm:px-6 pt-6 flex items-center gap-3">
+  <a href="index.html" class="size-9 rounded-xl bg-brand-600 text-white grid place-items-center font-bold">L</a>
+  <div class="leading-tight"><div class="font-semibold">The Lounge</div><div class="text-[11px] text-mute -mt-0.5">Treatment room app · concept</div></div>
+  <nav class="ml-auto flex items-center gap-2 text-sm">
+    <a href="index.html" class="px-3 py-1.5 rounded-lg text-mute hover:bg-white hover:text-ink transition flex items-center gap-1"><span class="material-symbols-rounded text-[18px]">arrow_back</span><span class="hidden sm:inline">All prototypes</span></a>
+    <a href="checkin.html" class="px-3 py-1.5 rounded-lg text-mute hover:bg-white hover:text-ink transition flex items-center gap-1"><span class="material-symbols-rounded text-[18px]">how_to_reg</span><span class="hidden sm:inline">Check-in</span></a>
+    <a href="backroom.html" class="px-3 py-1.5 rounded-lg text-mute hover:bg-white hover:text-ink transition flex items-center gap-1"><span class="material-symbols-rounded text-[18px]">inventory_2</span><span class="hidden sm:inline">Back office</span></a>
+    <a href="prototype.html" class="px-3 py-1.5 rounded-lg bg-white shadow-soft text-ink hover:shadow-card transition flex items-center gap-1"><span class="material-symbols-rounded text-[18px]">computer</span><span class="hidden sm:inline">Staff app</span></a>
+  </nav>
+</header>
+
+<main class="max-w-7xl mx-auto px-5 sm:px-6 py-6">
+  <div class="max-w-2xl">
+    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-brand-700 bg-white border border-brand-100 rounded-full px-3 py-1 shadow-soft"><span class="material-symbols-rounded text-[15px]">medical_services</span>Interactive concept · synthetic data</span>
+    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight mt-4 leading-[1.1]">The tablet the nurse uses in the room</h1>
+    <p class="text-mute mt-3 leading-relaxed">A touch-first, safety-forward app for the clinician at the chair: pick up the checked-in client, run the pre-flight safety review, confirm consent and the prescriber's authorisation, chart the treatment on a tap-to-place injection map, capture before/after photos, and record exactly which vial and batch was used — then sign off and push aftercare to the client's phone. Try it — tap the face to chart.</p>
+  </div>
+
+  <div class="mt-6 flex flex-wrap items-center gap-2">
+    <div class="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mr-1">Jump to</div>
+    <div id="jumpChips" class="flex flex-wrap gap-2"></div>
+  </div>
+
+  <div id="caption" class="mt-4 rounded-2xl bg-white shadow-soft p-4 max-w-2xl">
+    <div class="text-[11px] uppercase tracking-wide text-brand-700 font-semibold" id="capScreen">Today</div>
+    <div class="text-sm text-mute mt-1" id="capText">Room 2's list for today. The client who self-checked-in is ready to start.</div>
+  </div>
+
+  <!-- ============ THE TABLET ============ -->
+  <div class="mt-7 flex justify-center">
+    <div id="stage" class="relative w-[1194px] max-w-full">
+      <div id="device">
+        <div id="bezel">
+          <div id="screen">
+            <div id="cam"></div>
+
+            <!-- ===== TOP BAR ===== -->
+            <div class="h-14 shrink-0 bg-white border-b border-slate-200 flex items-center gap-3 px-5">
+              <div class="size-8 rounded-lg bg-brand-600 text-white grid place-items-center font-bold text-sm">L</div>
+              <div class="font-semibold text-sm">Room 2</div>
+              <span class="text-slate-300">·</span>
+              <button onclick="toast('Persona switching is in the full staff app')" class="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-slate-50">
+                <img src="https://i.pravatar.cc/48?img=32" class="size-7 rounded-full"/>
+                <div class="text-left leading-tight"><div class="text-sm font-medium">Bella L.</div><div class="text-[10px] text-mute -mt-0.5">Registered Nurse</div></div>
+              </button>
+              <!-- current client chip -->
+              <div id="clientChip" class="ml-3 hidden items-center gap-2 px-3 py-1.5 rounded-full bg-brand-50 text-brand-800">
+                <img id="ccImg" src="" class="size-6 rounded-full"/>
+                <span class="text-sm font-semibold" id="ccName"></span>
+                <span class="text-[11px] text-brand-600" id="ccSvc"></span>
+                <button onclick="endVisit()" class="ml-1 text-brand-700 hover:text-rose-600"><span class="material-symbols-rounded text-[18px]">close</span></button>
+              </div>
+              <div class="ml-auto flex items-center gap-3 text-mute">
+                <span class="material-symbols-rounded text-[20px]">wifi</span>
+                <span class="material-symbols-rounded text-[20px]">battery_full</span>
+                <span class="text-sm font-semibold text-ink" id="topClock">9:41</span>
+              </div>
+            </div>
+
+            <!-- ===== BODY: rail + main ===== -->
+            <div class="flex-1 flex min-h-0">
+              <!-- left rail -->
+              <div class="w-[88px] shrink-0 bg-white border-r border-slate-200 p-2 flex flex-col gap-1 overflow-y-auto scrl" id="rail"></div>
+
+              <!-- main -->
+              <div class="flex-1 min-w-0 overflow-y-auto scrl bg-slate-50" id="main"></div>
+            </div>
+
+            <!-- toast -->
+            <div id="toast" class="hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-[80] bg-ink text-white px-5 py-3 rounded-2xl text-sm shadow-card flex items-center gap-2"><span class="material-symbols-rounded text-brand-300 text-[20px]">check_circle</span><span id="toastMsg"></span></div>
+
+            <!-- sheet -->
+            <div id="sheetWrap" class="hidden absolute inset-0 z-[70] bg-black/30 grid place-items-center p-8" onclick="if(event.target===this)closeSheet()">
+              <div class="bg-white rounded-3xl shadow-card w-full max-w-md p-6" id="sheet"></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="text-xs text-slate-400 mt-6 max-w-2xl">All names, photos, figures and records are <b>synthetic</b>. Schedule&nbsp;4 medicines are charted in the client's clinical record only — a prescriber authorises the dose before a nurse administers, and every vial is recorded by batch and expiry for traceability.</p>
+</main>
+
+<script>
+/* =================== DATA (all synthetic) =================== */
+var today=[
+ {id:0,name:'Sarah Mitchell',svc:'Anti-wrinkle top-up',type:'tox',time:'9:00',img:45,status:'checked',
+   age:35,alerts:[],allergy:'None known',hist:'24u forehead+glabella (12 Mar) · 30u (18 Dec)',goal:'Soften forehead a little more',
+   consent:true,bdd:'clear',script:{by:'Dr Lena Park (NP)',max:34,note:'Forehead + glabella ± crow’s feet, to 34u',date:'20 Jun'}},
+ {id:1,name:'Olivia Brooks',svc:'Anti-wrinkle',type:'tox',time:'10:15',img:31,status:'booked',
+   age:42,alerts:['Cold sore history — prophylaxis noted'],allergy:'Penicillin',hist:'First anti-wrinkle visit',goal:'Frown lines',
+   consent:false,bdd:'clear',script:null},
+ {id:2,name:'Mia Chen',svc:'Hydrafacial',type:'skin',time:'9:45',img:47,status:'booked',
+   age:29,alerts:[],allergy:'None known',hist:'Hydrafacial monthly',goal:'Congestion + glow',consent:true,bdd:null,script:null}
+];
+
+// injection map sites (viewBox 0 0 300 340) — frontal face
+var SITES=[
+ {id:'gl',  x:150,y:150,area:'Glabella'},
+ {id:'fhL', x:118,y:96, area:'Forehead'},
+ {id:'fhC', x:150,y:86, area:'Forehead'},
+ {id:'fhR', x:182,y:96, area:'Forehead'},
+ {id:'cfL', x:74, y:158,area:'Crow’s feet'},
+ {id:'cfR', x:226,y:158,area:'Crow’s feet'},
+ {id:'brL', x:120,y:132,area:'Brow lift'},
+ {id:'brR', x:180,y:132,area:'Brow lift'}
+];
+var product={name:'Botox 100U',batch:'B2245',exp:'Sep 2026',supplier:'Allergan AU',vial:100};
+
+/* =================== STATE =================== */
+var TX=null; // current visit
+function newTx(c){return {c:c,units:{},photoBefore:false,photoAfter:false,signed:false,bav:50,
+  steps:{snapshot:false,consent:false,chart:false,photos:false}};}
+
+/* =================== RAIL / ROUTER =================== */
+var RAIL=[
+ {id:'today',ic:'list_alt',label:'Today'},
+ {id:'snapshot',ic:'badge',label:'Snapshot',gate:true},
+ {id:'consent',ic:'verified_user',label:'Consent',gate:true},
+ {id:'chart',ic:'vaccines',label:'Chart',gate:true},
+ {id:'photos',ic:'photo_camera',label:'Photos',gate:true},
+ {id:'complete',ic:'task_alt',label:'Complete',gate:true}
+];
+var captions={
+ today:['Today','Room 2’s list. The self-checked-in client is highlighted and ready to start.'],
+ snapshot:['Pre-flight','The 20-second safety read before you touch anything: alerts, allergies, history, goals.'],
+ consent:['Consent & script','The compliance gate — signed consent + the prescriber’s authorised dose, both verified.'],
+ chart:['Injection map','Tap the face to place each injection; units total live and check against the script.'],
+ photos:['Before & after','Consent-gated clinical photos with a drag-to-compare slider.'],
+ complete:['Complete','Sign the record, decrement the exact batch from stock, and push aftercare to the client app.']
+};
+var cur='today';
+function panel(id){
+  if(RAIL.find(function(r){return r.id===id;}).gate && !TX){toast('Start a visit from Today first');id='today';}
+  cur=id;
+  renderRail();
+  document.getElementById('main').innerHTML=views[id]();
+  document.getElementById('main').scrollTop=0;
+  if(id==='chart')drawMap();
+  setCaption(id);
+}
+function setCaption(id){var c=captions[id];if(!c)return;document.getElementById('capScreen').textContent=c[0];document.getElementById('capText').textContent=c[1];}
+function renderRail(){
+  document.getElementById('rail').innerHTML=RAIL.map(function(r){
+    var done=TX&&r.gate&&TX.steps[r.id];
+    var dis=r.gate&&!TX;
+    return '<button onclick="panel(\''+r.id+'\')" class="rail '+(cur===r.id?'on':'')+' '+(done?'done':'')+' '+(dis?'opacity-30':'')+'">'+
+      '<span class="material-symbols-rounded">'+(done&&cur!==r.id?'check_circle':r.ic)+'</span>'+r.label+'</button>';
+  }).join('');
+}
+
+/* =================== VIEWS =================== */
+var views={
+ today:function(){
+   return '<div class="p-5">'+
+   '<div class="flex items-center justify-between mb-3"><h2 class="text-lg font-bold">Today · Room 2</h2><div class="text-sm text-mute">Sat 21 Jun · with Bella L. (RN)</div></div>'+
+   '<div class="space-y-2.5">'+today.map(function(c){
+     var checked=c.status==='checked';
+     return '<div class="card p-4 flex items-center gap-4 '+(checked?'ring-2 ring-brand-300':'')+'">'+
+       '<div class="text-center w-12"><div class="text-base font-bold">'+c.time+'</div></div>'+
+       '<img src="https://i.pravatar.cc/72?img='+c.img+'" class="size-12 rounded-full"/>'+
+       '<div class="flex-1 min-w-0"><div class="font-bold flex items-center gap-2">'+c.name+'<span class="text-[11px] text-mute font-normal">'+c.age+'y</span>'+(c.alerts.length?'<span class="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 font-semibold flex items-center gap-0.5"><span class="material-symbols-rounded text-[13px]">warning</span>'+c.alerts.length+'</span>':'')+'</div>'+
+         '<div class="text-mute text-sm">'+c.svc+'</div></div>'+
+       '<div class="text-right mr-2">'+(checked?'<span class="text-xs font-semibold text-brand-700 flex items-center gap-1"><span class="material-symbols-rounded text-[16px]">how_to_reg</span>Checked in</span>':'<span class="text-xs text-slate-400">'+(c.status==='done'?'Finished':'Not arrived')+'</span>')+
+         (c.consent?'<div class="text-[11px] text-emerald-600 mt-0.5">Consent ✓</div>':'<div class="text-[11px] text-amber-600 mt-0.5">Consent pending</div>')+'</div>'+
+       '<button onclick="startVisit('+c.id+')" class="px-5 py-3 rounded-xl '+(checked?'bg-brand-600 text-white':'bg-white border border-slate-200 text-ink')+' font-semibold flex items-center gap-1.5"><span class="material-symbols-rounded text-[18px]">play_arrow</span>'+(checked?'Start visit':'Open')+'</button>'+
+     '</div>';
+   }).join('')+'</div>'+
+   '<div class="mt-5 rounded-2xl bg-brand-50/70 border border-brand-100 p-4 flex items-start gap-3 text-sm text-brand-900"><span class="material-symbols-rounded text-brand-600">sync</span><div><b>Connected to the front desk.</b> When a client checks in on the reception kiosk they appear here as “Checked in”, so you know they’re ready without leaving the room.</div></div>'+
+   '</div>';
+ },
+
+ snapshot:function(){var c=TX.c;
+   return '<div class="p-5">'+
+   '<div class="card overflow-hidden mb-4">'+
+     '<div class="bg-gradient-to-r from-brand-700 to-brand-900 text-white p-5 flex items-center gap-4">'+
+       '<img src="https://i.pravatar.cc/96?img='+c.img+'" class="size-16 rounded-2xl ring-4 ring-white/20"/>'+
+       '<div class="flex-1"><div class="text-2xl font-bold">'+c.name+'</div><div class="text-white/80">'+c.age+' years · '+c.svc+' · '+c.time+'</div></div>'+
+       '<div class="text-right"><div class="text-[11px] uppercase tracking-wide text-white/60">Goal today</div><div class="font-semibold max-w-[200px]">“'+c.goal+'”</div></div>'+
+     '</div>'+
+   '</div>'+
+   // safety banner
+   (c.alerts.length?
+     '<div class="rounded-2xl bg-amber-50 border border-amber-200 p-4 mb-4"><div class="flex items-center gap-2 font-bold text-amber-800"><span class="material-symbols-rounded">warning</span>Safety alerts</div><ul class="mt-2 space-y-1 text-sm text-amber-800">'+c.alerts.map(function(a){return '<li class="flex items-center gap-2"><span class="material-symbols-rounded text-[16px]">chevron_right</span>'+a+'</li>';}).join('')+'</ul></div>'
+     :'<div class="rounded-2xl bg-emerald-50 border border-emerald-100 p-4 mb-4 flex items-center gap-2 text-emerald-800"><span class="material-symbols-rounded">verified</span><span class="font-medium">No safety alerts flagged. Confirm verbally with the client.</span></div>')+
+   '<div class="grid grid-cols-2 gap-3">'+
+     snapTile('vaccines','Allergies',c.allergy,c.allergy==='None known'?'emerald':'rose')+
+     snapTile('psychology','Wellbeing screen (BDD)',c.bdd==='clear'?'Completed — no concerns':'Not required','emerald')+
+     snapTile('history','Treatment history',c.hist,'slate')+
+     snapTile('today','Today’s pre-visit health check','Completed at check-in · no changes','emerald')+
+   '</div>'+
+   '<div class="mt-4 flex items-center gap-3">'+
+     '<div class="text-sm text-mute flex-1">Read the safety summary aloud and confirm with the client before continuing.</div>'+
+     '<button onclick="markStep(\'snapshot\');panel(\'consent\')" class="px-6 py-3.5 rounded-xl bg-brand-600 text-white font-semibold flex items-center gap-2">Reviewed — continue<span class="material-symbols-rounded">arrow_forward</span></button>'+
+   '</div>'+
+   '</div>';
+ },
+
+ consent:function(){var c=TX.c;
+   var ok=c.consent && c.script;
+   return '<div class="p-5 max-w-3xl">'+
+   '<h2 class="text-lg font-bold mb-1">Consent &amp; prescriber authorisation</h2>'+
+   '<p class="text-mute text-sm mb-4">Both must be in place before any Schedule&nbsp;4 medicine is administered. This is the gate.</p>'+
+   '<div class="space-y-3">'+
+     gateRow(c.consent,'draw','Informed consent — '+c.svc,c.consent?'Signed by '+c.name.split(' ')[0]+' at check-in today · ref CON-4821':'Not signed yet — complete on the reception kiosk or here',!c.consent?'<button onclick="signConsentHere()" class="px-4 py-2 rounded-lg bg-amber-500 text-white text-sm font-semibold">Capture now</button>':'')+
+     gateRow(!!c.script,'verified_user','Prescriber authorisation',c.script?('Authorised by '+c.script.by+' · '+c.script.note+' · '+c.script.date):'No script on file — a prescriber must authorise before treatment',!c.script?'<button onclick="toast(\'Request sent to Dr Lena Park (NP)\')" class="px-4 py-2 rounded-lg bg-brand-600 text-white text-sm font-semibold">Request</button>':'')+
+     gateRow(true,'fact_check','Medical history reviewed','Updated at check-in · contraindications screened','')+
+   '</div>'+
+   (c.script?'<div class="mt-4 card p-4 border-l-4 border-brand-500"><div class="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Authorised dose</div><div class="text-lg font-bold mt-0.5">Up to '+c.script.max+'u · '+product.name+'</div><div class="text-sm text-mute">'+c.script.note+'</div></div>':'')+
+   '<div class="mt-5 flex items-center gap-3">'+
+     (ok?'<div class="text-sm text-emerald-700 flex items-center gap-1 flex-1"><span class="material-symbols-rounded text-[18px]">lock_open</span>All checks satisfied — charting unlocked.</div>'
+        :'<div class="text-sm text-rose-600 flex items-center gap-1 flex-1"><span class="material-symbols-rounded text-[18px]">lock</span>Resolve the items above to unlock charting.</div>')+
+     '<button onclick="'+(ok?'markStep(\'consent\');panel(\'chart\')':'toast(\'Complete consent &amp; authorisation first\')')+'" class="px-6 py-3.5 rounded-xl '+(ok?'bg-brand-600 text-white':'bg-slate-200 text-slate-400')+' font-semibold flex items-center gap-2">Continue to charting<span class="material-symbols-rounded">arrow_forward</span></button>'+
+   '</div>'+
+   '</div>';
+ },
+
+ chart:function(){var c=TX.c;
+   if(c.type!=='tox')return skinChart(c);
+   return '<div class="p-5 flex gap-5">'+
+   // face
+   '<div class="card p-4 shrink-0">'+
+     '<div class="flex items-center justify-between mb-2"><div class="font-bold">Injection map</div><button onclick="resetMap()" class="text-xs text-mute flex items-center gap-1"><span class="material-symbols-rounded text-[16px]">restart_alt</span>Reset</button></div>'+
+     '<svg id="faceSvg" viewBox="0 0 300 340" width="340" height="385" class="select-none"></svg>'+
+     '<div class="text-center text-xs text-mute -mt-1">Tap a point to add 2u · tap again to build up · long list resets at 10u</div>'+
+   '</div>'+
+   // right column
+   '<div class="flex-1 min-w-0 space-y-3">'+
+     // product / batch
+     '<div class="card p-4"><div class="flex items-center gap-2 text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-2"><span class="material-symbols-rounded text-[16px]">inventory_2</span>Product &amp; batch (traceability)</div>'+
+       '<div class="flex items-center gap-3"><div class="size-11 rounded-xl bg-brand-50 text-brand-700 grid place-items-center"><span class="material-symbols-rounded">vaccines</span></div>'+
+       '<div class="flex-1"><div class="font-semibold">'+product.name+'</div><div class="text-sm text-mute">Batch '+product.batch+' · exp '+product.exp+' · '+product.supplier+'</div></div>'+
+       '<button onclick="openSheet(\'batch\')" class="px-3 py-2 rounded-lg bg-white border border-slate-200 text-sm font-medium">Change</button></div></div>'+
+     // dose summary
+     '<div class="card p-4"><div class="flex items-center justify-between"><div class="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">Charted dose</div><div id="doseFlag"></div></div>'+
+       '<div class="flex items-end gap-2 mt-1"><div id="doseTotal" class="text-4xl font-extrabold">0u</div><div class="text-mute text-sm mb-1.5">of '+product.name+'</div></div>'+
+       '<div class="mt-1 h-2 rounded-full bg-slate-100 overflow-hidden"><div id="doseBar" class="h-2 rounded-full bg-brand-500" style="width:0%"></div></div>'+
+       '<div class="text-xs text-mute mt-1" id="doseAuth">Authorised up to '+(c.script?c.script.max:'—')+'u</div>'+
+       '<div id="areaList" class="mt-3 space-y-1.5"></div>'+
+     '</div>'+
+     '<button onclick="finishChart()" class="w-full py-3.5 rounded-xl bg-brand-600 text-white font-semibold flex items-center justify-center gap-2"><span class="material-symbols-rounded">check</span>Confirm chart &amp; continue</button>'+
+   '</div>'+
+   '</div>';
+ },
+
+ photos:function(){var c=TX.c;
+   return '<div class="p-5 max-w-3xl">'+
+   '<div class="rounded-2xl bg-violet-50 border border-violet-100 p-4 mb-4 flex items-center gap-3 text-violet-900"><span class="material-symbols-rounded text-violet-600">photo_camera</span><div class="text-sm"><b>Image-use consent on file.</b> Photos save straight to '+c.name.split(' ')[0]+'’s clinical record — never to the device, never shared without permission.</div></div>'+
+   '<div class="grid grid-cols-2 gap-4">'+
+     photoTile('before','Before','TX.photoBefore')+
+     photoTile('after','After','TX.photoAfter')+
+   '</div>'+
+   '<div class="card p-4 mt-4"><div class="font-semibold mb-2 flex items-center gap-2"><span class="material-symbols-rounded text-[18px] text-brand-600">compare</span>Compare with last visit</div>'+
+     '<div class="relative rounded-xl overflow-hidden h-56 select-none" style="background:linear-gradient(135deg,#fde68a,#fca5a5)">'+
+       '<div class="absolute inset-0 grid place-items-center text-white/80 font-semibold text-lg">12 Mar 2026</div>'+
+       '<div id="baTop" class="absolute inset-y-0 left-0 overflow-hidden" style="width:50%"><div class="absolute inset-0 grid place-items-center text-white/90 font-semibold text-lg" style="background:linear-gradient(135deg,#5eead4,#0d9488);width:560px">Today</div></div>'+
+       '<div id="baLine" class="absolute inset-y-0 w-0.5 bg-white" style="left:50%"><div class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 size-9 rounded-full bg-white shadow grid place-items-center"><span class="material-symbols-rounded text-[18px] text-slate-500">drag_indicator</span></div></div>'+
+       '<input type="range" min="0" max="100" value="50" class="ba" oninput="baMove(this.value)"/>'+
+     '</div></div>'+
+   '<div class="mt-4 flex justify-end"><button onclick="markStep(\'photos\');panel(\'complete\')" class="px-6 py-3.5 rounded-xl bg-brand-600 text-white font-semibold flex items-center gap-2">Continue<span class="material-symbols-rounded">arrow_forward</span></button></div>'+
+   '</div>';
+ },
+
+ complete:function(){var c=TX.c;var tot=totalUnits();
+   var areas=areaTotals();
+   return '<div class="p-5 max-w-3xl">'+
+   '<h2 class="text-lg font-bold mb-3">Treatment record — '+c.name+'</h2>'+
+   '<div class="card p-5 space-y-3">'+
+     sumRow('vaccines','Treatment',c.svc)+
+     (c.type==='tox'?sumRow('show_chart','Dose charted',(tot||0)+'u · '+Object.keys(areas).map(function(k){return areas[k]+'u '+k;}).join(', ')):sumRow('tune','Settings','Recorded in clinical notes'))+
+     (c.type==='tox'?sumRow('inventory_2','Stock used','1 × '+product.name+' (partial) · batch '+product.batch+' · exp '+product.exp):'')+
+     sumRow('verified_user','Authorised by',c.script?c.script.by:'—')+
+     sumRow('draw','Consent','Signed · ref CON-4821')+
+     sumRow('photo_camera','Photos','Before & after saved to record')+
+   '</div>'+
+   '<div class="card p-4 mt-4">'+
+     '<div class="text-sm font-semibold mb-2">Sign off as administering clinician</div>'+
+     '<div onclick="this.querySelector(\'.sl\').classList.remove(\'hidden\');this.querySelector(\'.ph\').classList.add(\'hidden\');TX.signed=true;toast(\'Signed — Bella L. (RN)\')" class="h-20 rounded-xl border-2 border-dashed border-slate-300 bg-white grid place-items-center cursor-pointer relative overflow-hidden"><span class="ph text-slate-300">Tap to sign · Bella L. (RN)</span><svg class="sl hidden absolute inset-0 w-full h-full" viewBox="0 0 500 80" preserveAspectRatio="none"><path d="M30 52 q24 -30 48 -6 t46 -4 q26 -26 44 4 t40 -14 q24 24 52 4 t70 -6" fill="none" stroke="#0f766e" stroke-width="3" stroke-linecap="round"/></svg></div>'+
+   '</div>'+
+   '<div class="card p-4 mt-4"><div class="text-sm font-semibold mb-2">When you save</div>'+
+     toggleRow('send_to_mobile','Push aftercare to the client app',true)+
+     toggleRow('event_repeat','Book a recall reminder in ~12 weeks',true)+
+     toggleRow('inventory','Decrement batch '+product.batch+' in the stock register',true)+
+   '</div>'+
+   '<div class="mt-5 flex items-center gap-3"><div class="flex-1 text-sm text-mute">Saving locks the record and updates the client’s phone, stock and recall.</div>'+
+     '<button onclick="saveRecord()" class="px-7 py-3.5 rounded-xl bg-emerald-600 text-white font-bold flex items-center gap-2"><span class="material-symbols-rounded">lock</span>Save &amp; finish</button></div>'+
+   '</div>';
+ }
+};
+
+/* ---- view helpers ---- */
+function snapTile(ic,k,v,tone){var col={emerald:'text-emerald-600',rose:'text-rose-600',slate:'text-slate-500',amber:'text-amber-600'}[tone]||'text-slate-500';
+  return '<div class="card p-4"><div class="flex items-center gap-2 text-[11px] uppercase tracking-wide text-slate-400 font-semibold"><span class="material-symbols-rounded text-[16px] '+col+'">'+ic+'</span>'+k+'</div><div class="text-sm mt-1 font-medium">'+v+'</div></div>';}
+function gateRow(ok,ic,t,d,action){
+  return '<div class="card p-4 flex items-center gap-4"><div class="size-11 rounded-xl '+(ok?'bg-emerald-50 text-emerald-600':'bg-amber-50 text-amber-600')+' grid place-items-center"><span class="material-symbols-rounded">'+(ok?'check_circle':ic)+'</span></div>'+
+    '<div class="flex-1"><div class="font-semibold">'+t+'</div><div class="text-sm text-mute">'+d+'</div></div>'+(action||(ok?'<span class="text-emerald-600 text-sm font-semibold">Verified</span>':''))+'</div>';
+}
+function sumRow(ic,k,v){return '<div class="flex items-start gap-3"><span class="material-symbols-rounded text-brand-600 text-[20px]">'+ic+'</span><div class="flex-1"><div class="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">'+k+'</div><div class="font-medium">'+v+'</div></div></div>';}
+function toggleRow(ic,t,on){return '<div class="flex items-center gap-3 py-2"><span class="material-symbols-rounded text-mute text-[20px]">'+ic+'</span><div class="flex-1 text-sm font-medium">'+t+'</div><div class="w-11 h-6 rounded-full '+(on?'bg-brand-500':'bg-slate-300')+' relative"><div class="absolute top-0.5 size-5 rounded-full bg-white shadow transition-all" style="left:'+(on?'22px':'2px')+'"></div></div></div>';}
+function photoTile(key,label,bound){
+  var taken=key==='before'?'TX.photoBefore':'TX.photoAfter';
+  return '<div class="card overflow-hidden"><div class="h-44 grid place-items-center relative" id="ph_'+key+'" style="background:linear-gradient(135deg,#e2e8f0,#cbd5e1)">'+
+    '<button onclick="capture(\''+key+'\')" class="px-4 py-2.5 rounded-xl bg-white shadow font-semibold flex items-center gap-2"><span class="material-symbols-rounded text-brand-600">photo_camera</span>Capture '+label.toLowerCase()+'</button></div>'+
+    '<div class="px-4 py-2.5 text-sm font-semibold flex items-center gap-2"><span class="material-symbols-rounded text-[18px] text-slate-400">image</span>'+label+'</div></div>';
+}
+function skinChart(c){
+  return '<div class="p-5 max-w-2xl"><h2 class="text-lg font-bold mb-1">Treatment settings — '+c.svc+'</h2><p class="text-mute text-sm mb-4">Record the parameters used for this skin treatment.</p>'+
+  '<div class="card p-5 space-y-4">'+
+  ['Serum / boost: Hydrating + brightening','Vacuum level: Medium','Passes: 2 full face','Add-on: LED red (10 min)'].map(function(x,i){return '<label class="flex items-center gap-3"><input type="checkbox" '+(i<3?'checked':'')+' class="size-5 accent-brand-600"/><span class="text-sm">'+x+'</span></label>';}).join('')+
+  '</div>'+
+  '<div class="mt-4 flex justify-end"><button onclick="markStep(\'chart\');panel(\'photos\')" class="px-6 py-3.5 rounded-xl bg-brand-600 text-white font-semibold flex items-center gap-2">Continue<span class="material-symbols-rounded">arrow_forward</span></button></div></div>';
+}
+
+/* =================== VISIT LIFECYCLE =================== */
+function startVisit(id){
+  var c=today.find(function(x){return x.id===id;});
+  TX=newTx(c);
+  document.getElementById('clientChip').classList.remove('hidden');
+  document.getElementById('clientChip').classList.add('flex');
+  document.getElementById('ccImg').src='https://i.pravatar.cc/48?img='+c.img;
+  document.getElementById('ccName').textContent=c.name;
+  document.getElementById('ccSvc').textContent='· '+c.svc;
+  panel('snapshot');
+}
+function endVisit(){TX=null;document.getElementById('clientChip').classList.add('hidden');document.getElementById('clientChip').classList.remove('flex');panel('today');}
+function markStep(s){if(TX)TX.steps[s]=true;renderRail();}
+function signConsentHere(){TX.c.consent=true;toast('Consent captured & signed');panel('consent');}
+
+/* =================== INJECTION MAP =================== */
+function drawMap(){
+  var svg=document.getElementById('faceSvg');if(!svg)return;
+  var face=''+
+  // hair/face silhouette
+  '<path d="M150 18 C95 18 64 60 64 120 C64 165 70 200 86 238 C103 280 126 312 150 312 C174 312 197 280 214 238 C230 200 236 165 236 120 C236 60 205 18 150 18 Z" fill="#fde9df" stroke="#f4c7b3" stroke-width="2"/>'+
+  // brows
+  '<path d="M96 118 q22 -12 44 -2" fill="none" stroke="#b08968" stroke-width="4" stroke-linecap="round"/>'+
+  '<path d="M160 116 q22 -10 44 2" fill="none" stroke="#b08968" stroke-width="4" stroke-linecap="round"/>'+
+  // eyes
+  '<ellipse cx="116" cy="140" rx="13" ry="7" fill="#fff" stroke="#cbd5e1"/><circle cx="116" cy="140" r="4" fill="#5b4636"/>'+
+  '<ellipse cx="184" cy="140" rx="13" ry="7" fill="#fff" stroke="#cbd5e1"/><circle cx="184" cy="140" r="4" fill="#5b4636"/>'+
+  // nose + lips
+  '<path d="M150 150 l-7 40 q7 8 14 0" fill="none" stroke="#e7a98f" stroke-width="3" stroke-linecap="round"/>'+
+  '<path d="M132 214 q18 14 36 0 q-18 -8 -36 0" fill="#e9a0a0" stroke="#d98a8a"/>'+
+  // muscle guide hint lines (subtle)
+  '<g opacity="0.0"></g>';
+  var dots=SITES.map(function(s){
+    var u=TX.units[s.id]||0;
+    var r=u?9:7;
+    var fill=u?'#0d9488':'rgba(13,148,136,.18)';
+    var stroke=u?'#0f766e':'#5eead4';
+    return '<g class="site" onclick="tapSite(\''+s.id+'\')">'+
+      '<circle cx="'+s.x+'" cy="'+s.y+'" r="14" fill="transparent"/>'+
+      '<circle cx="'+s.x+'" cy="'+s.y+'" r="'+r+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="2"/>'+
+      (u?'<text x="'+s.x+'" y="'+(s.y+3.5)+'" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">'+u+'</text>':'')+
+      '</g>';
+  }).join('');
+  svg.innerHTML=face+dots;
+  updateDose();
+}
+function tapSite(id){
+  var u=TX.units[id]||0; u+=2; if(u>10)u=0; TX.units[id]=u;
+  drawMap();
+}
+function resetMap(){TX.units={};drawMap();}
+function totalUnits(){var t=0;for(var k in TX.units)t+=TX.units[k];return t;}
+function areaTotals(){var a={};SITES.forEach(function(s){var u=TX.units[s.id]||0;if(u){a[s.area]=(a[s.area]||0)+u;}});return a;}
+function updateDose(){
+  var tot=totalUnits();var c=TX.c;var max=c.script?c.script.max:100;
+  var el=document.getElementById('doseTotal');if(!el)return;
+  el.textContent=tot+'u';
+  var pct=Math.min(100,tot/max*100);
+  var bar=document.getElementById('doseBar');bar.style.width=pct+'%';
+  var over=tot>max;
+  bar.className='h-2 rounded-full '+(over?'bg-rose-500':'bg-brand-500');
+  document.getElementById('doseFlag').innerHTML=over?'<span class="text-xs font-semibold text-rose-600 flex items-center gap-1"><span class="material-symbols-rounded text-[15px]">error</span>Over authorised</span>':(tot?'<span class="text-xs font-semibold text-emerald-600 flex items-center gap-1"><span class="material-symbols-rounded text-[15px]">check</span>Within script</span>':'');
+  document.getElementById('doseAuth').textContent='Authorised up to '+max+'u'+(over?' · prescriber review needed':'');
+  var a=areaTotals();
+  document.getElementById('areaList').innerHTML=Object.keys(a).length?Object.keys(a).map(function(k){return '<div class="flex items-center justify-between text-sm"><span class="text-mute">'+k+'</span><span class="font-semibold">'+a[k]+'u</span></div>';}).join(''):'<div class="text-sm text-slate-400">Tap the face to start charting.</div>';
+}
+function finishChart(){
+  if(TX.c.type==='tox'&&!totalUnits()){toast('Chart at least one point first');return;}
+  markStep('chart');panel('photos');
+}
+
+/* =================== PHOTOS / SLIDER =================== */
+function capture(key){
+  if(key==='before')TX.photoBefore=true;else TX.photoAfter=true;
+  var el=document.getElementById('ph_'+key);
+  el.style.background=key==='before'?'linear-gradient(135deg,#fca5a5,#fdba74)':'linear-gradient(135deg,#5eead4,#0d9488)';
+  el.innerHTML='<div class="text-white/90 font-semibold flex flex-col items-center gap-1"><span class="material-symbols-rounded text-[34px]">photo_camera</span>'+(key==='before'?'Before':'After')+' captured</div><span class="absolute top-2 right-2 size-7 rounded-full bg-white/90 grid place-items-center"><span class="material-symbols-rounded text-[18px] text-emerald-600">check</span></span>';
+  toast((key==='before'?'Before':'After')+' photo saved to record');
+}
+function baMove(v){var t=document.getElementById('baTop'),l=document.getElementById('baLine');if(t)t.style.width=v+'%';if(l)l.style.left=v+'%';if(TX)TX.bav=v;}
+
+/* =================== SHEETS =================== */
+var sheets={
+ batch:'<h3 class="font-bold text-lg mb-1">Select batch</h3><p class="text-mute text-sm mb-4">Scan or pick the vial you’re drawing from — it’s recorded for traceability.</p>'+
+   [['Botox 100U','B2245','Sep 2026',true],['Botox 100U','B2251','Jan 2027',false],['Dysport 300U','D1180','Nov 2026',false]].map(function(b){
+     return '<button onclick="pickBatch(\''+b[0]+'\',\''+b[1]+'\',\''+b[2]+'\')" class="w-full text-left card p-3 flex items-center gap-3 mb-2 '+(b[3]?'ring-2 ring-brand-300':'')+'"><span class="material-symbols-rounded text-brand-600">vaccines</span><div class="flex-1"><div class="font-semibold text-sm">'+b[0]+'</div><div class="text-mute text-xs">Batch '+b[1]+' · exp '+b[2]+'</div></div>'+(b[3]?'<span class="text-[11px] text-emerald-600 font-semibold">In use</span>':'<span class="material-symbols-rounded text-slate-300">chevron_right</span>')+'</button>';
+   }).join('')+'<button onclick="closeSheet()" class="w-full mt-1 py-3 rounded-xl bg-white border border-slate-200 font-medium text-sm">Cancel</button>'
+};
+function openSheet(id){document.getElementById('sheet').innerHTML=sheets[id]||'';document.getElementById('sheetWrap').classList.remove('hidden');}
+function closeSheet(){document.getElementById('sheetWrap').classList.add('hidden');}
+function pickBatch(name,batch,exp){product.name=name;product.batch=batch;product.exp=exp;closeSheet();panel('chart');toast('Now drawing from '+batch);}
+
+/* =================== SAVE =================== */
+function saveRecord(){
+  if(!TX.signed){toast('Sign the record first');return;}
+  var c=TX.c;c.status='done';
+  toast('Record saved · aftercare sent to '+c.name.split(' ')[0]+'’s app');
+  setTimeout(function(){endVisit();},900);
+}
+
+/* =================== MISC =================== */
+var toastTimer=null;
+function toast(m){var t=document.getElementById('toast');document.getElementById('toastMsg').innerHTML=m;t.classList.remove('hidden');if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.add('hidden');},2200);}
+
+/* jump chips */
+var chips=[['Today','today'],['Pre-flight','snapshot'],['Consent & script','consent'],['Injection map','chart'],['Photos','photos'],['Complete','complete']];
+document.getElementById('jumpChips').innerHTML=chips.map(function(c){return '<button onclick="jump(\''+c[1]+'\')" class="px-3 py-1.5 rounded-full bg-white border border-slate-200 text-sm hover:border-brand-300 hover:text-brand-700 transition">'+c[0]+'</button>';}).join('');
+function jump(id){ if(id!=='today'&&!TX){startVisit(0);} panel(id); }
+
+/* clock */
+function tick(){var d=new Date();var h=d.getHours()%12||12;var m=(''+d.getMinutes()).padStart(2,'0');['topClock'].forEach(function(i){var el=document.getElementById(i);if(el)el.textContent=h+':'+m;});}
+setInterval(tick,15000);
+
+/* =================== SCALE-TO-FIT =================== */
+function fit(){
+  var stage=document.getElementById('stage'),dev=document.getElementById('device');
+  var availW=stage.clientWidth;
+  var top=stage.getBoundingClientRect().top;
+  var availH=window.innerHeight-top-24;
+  var s=Math.min(1,availW/1194,availH/834);
+  if(s<=0||!isFinite(s))s=1;
+  dev.style.transform='translateX(-50%) scale('+s+')';
+  stage.style.height=(834*s)+'px';
+}
+window.addEventListener('resize',fit);
+window.addEventListener('load',fit);
+
+/* init */
+panel('today');
+fit();
+tick();
+</script>
+</body>
+</html>

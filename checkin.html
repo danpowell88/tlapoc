@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>The Lounge — Self check-in (concept) · reception tablet</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=block" rel="stylesheet"/>
+<script>
+tailwind.config={theme:{extend:{
+  fontFamily:{sans:['Inter','system-ui','sans-serif']},
+  colors:{brand:{50:'#f0fdfa',100:'#ccfbf1',200:'#99f6e4',300:'#5eead4',400:'#2dd4bf',500:'#14b8a6',600:'#0d9488',700:'#0f766e',800:'#115e59',900:'#134e4a'},ink:'#0f172a',mute:'#64748b'},
+  boxShadow:{soft:'0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.10)',card:'0 6px 20px rgba(16,24,40,.08)'}
+}}}
+</script>
+<style>
+  body{font-family:Inter,sans-serif}
+  .material-symbols-rounded{font-variation-settings:'FILL' 0,'wght' 400,'opsz' 24;line-height:1;user-select:none}
+  /* ---- tablet device (portrait kiosk) ---- */
+  #device{width:820px;height:1180px;position:absolute;top:0;left:50%;transform:translateX(-50%);transform-origin:top center}
+  #bezel{position:absolute;inset:0;border-radius:42px;background:#0b1220;padding:16px;box-shadow:0 0 0 2px #2a3344,0 30px 60px -12px rgba(2,6,23,.55),0 12px 24px -8px rgba(2,6,23,.4)}
+  #screen{position:relative;width:100%;height:100%;border-radius:26px;overflow:hidden;background:#f6f8fb}
+  #cam{position:absolute;top:24px;left:50%;transform:translateX(-50%);width:9px;height:9px;border-radius:50%;background:#05080f;box-shadow:0 0 0 3px #11192a;z-index:60}
+  [data-scr]{animation:f .25s ease}@keyframes f{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .card{background:#fff;border-radius:22px;box-shadow:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.10)}
+  .key{background:#fff;border-radius:18px;box-shadow:0 1px 2px rgba(16,24,40,.06);font-weight:600}
+  .key:active{transform:scale(.96);background:#f1f5f9}
+  .bigbtn:active{transform:scale(.985)}
+  .pulse{animation:pl 2.4s ease-in-out infinite}@keyframes pl{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+  .scrl::-webkit-scrollbar{width:0}
+</style>
+</head>
+<body class="bg-gradient-to-br from-slate-100 via-brand-50/40 to-slate-100 text-ink min-h-screen">
+
+<!-- ============ PAGE CHROME ============ -->
+<header class="max-w-6xl mx-auto px-5 sm:px-6 pt-6 flex items-center gap-3">
+  <a href="index.html" class="size-9 rounded-xl bg-brand-600 text-white grid place-items-center font-bold">L</a>
+  <div class="leading-tight"><div class="font-semibold">The Lounge</div><div class="text-[11px] text-mute -mt-0.5">Reception self check-in · concept</div></div>
+  <nav class="ml-auto flex items-center gap-2 text-sm">
+    <a href="index.html" class="px-3 py-1.5 rounded-lg text-mute hover:bg-white hover:text-ink transition flex items-center gap-1"><span class="material-symbols-rounded text-[18px]">arrow_back</span><span class="hidden sm:inline">All prototypes</span></a>
+    <a href="treatment-room.html" class="px-3 py-1.5 rounded-lg text-mute hover:bg-white hover:text-ink transition flex items-center gap-1"><span class="material-symbols-rounded text-[18px]">medical_services</span><span class="hidden sm:inline">Treatment room</span></a>
+    <a href="backroom.html" class="px-3 py-1.5 rounded-lg text-mute hover:bg-white hover:text-ink transition flex items-center gap-1"><span class="material-symbols-rounded text-[18px]">inventory_2</span><span class="hidden sm:inline">Back office</span></a>
+    <a href="prototype.html" class="px-3 py-1.5 rounded-lg bg-white shadow-soft text-ink hover:shadow-card transition flex items-center gap-1"><span class="material-symbols-rounded text-[18px]">computer</span><span class="hidden sm:inline">Staff app</span></a>
+  </nav>
+</header>
+
+<main class="max-w-6xl mx-auto px-5 sm:px-6 py-6">
+  <div class="max-w-2xl">
+    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-brand-700 bg-white border border-brand-100 rounded-full px-3 py-1 shadow-soft"><span class="material-symbols-rounded text-[15px]">tablet</span>Interactive concept · synthetic data</span>
+    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight mt-4 leading-[1.1]">A tablet on the reception desk that checks clients in — by themselves</h1>
+    <p class="text-mute mt-3 leading-relaxed">When a client arrives they tap the kiosk, find their booking, confirm their details, and complete anything still outstanding (medical history, today's health check, consent) before they sit down. Reception sees them appear on the arrivals board, and the treatment room knows they're here. It's the same self-service experience as the client app — just at the front desk. Tap through it; it's fully clickable.</p>
+  </div>
+
+  <div class="mt-6 flex flex-wrap items-center gap-2">
+    <div class="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mr-1">Jump to a step</div>
+    <div id="stepChips" class="flex flex-wrap gap-2"></div>
+    <button onclick="show('kBoard')" class="ml-auto px-3 py-1.5 rounded-full bg-ink text-white text-sm font-medium flex items-center gap-1.5 hover:bg-slate-800 transition"><span class="material-symbols-rounded text-[18px]">desktop_windows</span>Reception arrivals board</button>
+  </div>
+
+  <div id="caption" class="mt-4 rounded-2xl bg-white shadow-soft p-4 max-w-2xl">
+    <div class="text-[11px] uppercase tracking-wide text-brand-700 font-semibold" id="capScreen">Welcome</div>
+    <div class="text-sm text-mute mt-1" id="capText">The idle "attract" screen. Tap to begin a check-in.</div>
+  </div>
+
+  <!-- ============ THE TABLET ============ -->
+  <div class="mt-7 flex justify-center">
+    <div id="stage" class="relative w-[820px] max-w-full">
+      <div id="device">
+        <div id="bezel">
+          <div id="screen">
+            <div id="cam"></div>
+
+            <!-- ===================== KIOSK ===================== -->
+            <div id="kioskRoot" class="absolute inset-0">
+
+            <!-- ---------- IDLE / WELCOME ---------- -->
+            <section data-scr id="kIdle" class="absolute inset-0">
+              <div class="absolute inset-0 bg-gradient-to-br from-brand-600 via-brand-700 to-brand-900"></div>
+              <div class="absolute inset-0" style="background-image:radial-gradient(rgba(255,255,255,.10) 1.5px,transparent 1.5px);background-size:26px 26px"></div>
+              <div class="relative h-full flex flex-col items-center justify-center text-white text-center px-12">
+                <div class="size-20 rounded-3xl bg-white/15 grid place-items-center text-4xl font-extrabold backdrop-blur">L</div>
+                <div class="mt-6 text-sm uppercase tracking-[0.3em] text-white/70">The Lounge Aesthetics</div>
+                <h2 class="text-5xl font-extrabold mt-3">Welcome in.</h2>
+                <p class="text-white/80 text-xl mt-4 max-w-md">Have an appointment with us today? Check yourself in — it only takes a moment.</p>
+                <button onclick="startFlow()" class="bigbtn pulse mt-10 px-12 py-6 rounded-3xl bg-white text-brand-700 text-2xl font-bold shadow-2xl flex items-center gap-3"><span class="material-symbols-rounded text-[34px]">touch_app</span>Tap to check in</button>
+                <div class="mt-12 flex items-center gap-6 text-white/70 text-sm">
+                  <div class="flex items-center gap-2"><span class="material-symbols-rounded text-[20px]">wifi</span>Free guest Wi-Fi</div>
+                  <div class="flex items-center gap-2"><span class="material-symbols-rounded text-[20px]">lock</span>Your details stay private</div>
+                </div>
+                <button onclick="show('kBoard')" class="absolute bottom-5 right-6 text-white/40 text-xs flex items-center gap-1 hover:text-white/80"><span class="material-symbols-rounded text-[16px]">badge</span>Staff</button>
+              </div>
+            </section>
+
+            <!-- ---------- STEP SHELL (find → confirm → details → health → forms → done) ---------- -->
+            <section data-scr id="kFlow" class="absolute inset-0 hidden flex-col bg-f6f8fb">
+              <!-- top bar -->
+              <div class="px-8 pt-7 pb-4 flex items-center gap-3 bg-white/70 backdrop-blur border-b border-slate-100">
+                <button onclick="cancelFlow()" class="size-11 rounded-2xl bg-white shadow-soft grid place-items-center text-mute"><span class="material-symbols-rounded">close</span></button>
+                <div class="flex-1">
+                  <div class="text-[12px] uppercase tracking-wide text-slate-400 font-semibold" id="flowKicker">Step 1 of 5</div>
+                  <div class="font-bold text-lg -mt-0.5" id="flowTitle">Find your booking</div>
+                </div>
+                <div class="size-11 rounded-2xl bg-brand-600 text-white grid place-items-center font-bold text-lg">L</div>
+              </div>
+              <!-- progress -->
+              <div class="px-8 pt-4 flex gap-1.5" id="flowDots"></div>
+              <!-- body -->
+              <div class="flex-1 overflow-y-auto scrl px-8 py-6" id="flowBody"></div>
+              <!-- footer -->
+              <div class="px-8 pb-8 pt-3 bg-white/70 backdrop-blur border-t border-slate-100 flex items-center gap-3">
+                <button id="flowBack" onclick="flowPrev()" class="px-6 py-4 rounded-2xl bg-white shadow-soft font-semibold text-mute flex items-center gap-1"><span class="material-symbols-rounded">chevron_left</span>Back</button>
+                <div class="flex-1 text-sm text-mute" id="flowHint"></div>
+                <button id="flowNext" onclick="flowNext()" class="bigbtn px-10 py-4 rounded-2xl bg-brand-600 text-white text-lg font-bold shadow-card flex items-center gap-2">Continue<span class="material-symbols-rounded">arrow_forward</span></button>
+              </div>
+            </section>
+
+            <!-- ---------- STAFF ARRIVALS BOARD ---------- -->
+            <section data-scr id="kBoard" class="absolute inset-0 hidden flex-col bg-slate-50">
+              <div class="px-8 pt-7 pb-4 flex items-center gap-3 bg-ink text-white">
+                <div class="size-11 rounded-2xl bg-white/10 grid place-items-center font-bold text-lg">L</div>
+                <div class="flex-1">
+                  <div class="text-[12px] uppercase tracking-wide text-white/50 font-semibold">Reception · staff view</div>
+                  <div class="font-bold text-lg -mt-0.5">Arrivals board · today</div>
+                </div>
+                <div class="text-right"><div class="text-2xl font-bold" id="boardClock">9:41</div><div class="text-[11px] text-white/50">Sat 21 Jun</div></div>
+                <button onclick="show('kIdle')" class="ml-3 px-4 py-2.5 rounded-xl bg-white/10 text-sm font-medium flex items-center gap-1.5"><span class="material-symbols-rounded text-[18px]">tablet</span>Back to kiosk</button>
+              </div>
+              <div class="px-8 pt-4 grid grid-cols-4 gap-3" id="boardStats"></div>
+              <div class="flex-1 overflow-y-auto scrl px-8 py-4 space-y-2.5" id="boardList"></div>
+              <div class="px-8 pb-7 pt-2 text-xs text-slate-400 flex items-center gap-2"><span class="material-symbols-rounded text-[16px]">sync</span>Fed live by the check-in kiosk and the booking diary. Tapping a client mirrors to the treatment-room app.</div>
+            </section>
+
+            </div><!-- /kioskRoot -->
+
+            <!-- toast -->
+            <div id="toast" class="hidden absolute bottom-8 left-1/2 -translate-x-1/2 z-[80] bg-ink text-white px-5 py-3 rounded-2xl text-base shadow-card flex items-center gap-2"><span class="material-symbols-rounded text-brand-300">check_circle</span><span id="toastMsg"></span></div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="text-xs text-slate-400 mt-6 max-w-2xl">All names, figures and records are <b>synthetic</b>. Schedule&nbsp;4 medicines (e.g. anti-wrinkle toxin) are shown in the client's own record only — never advertised or priced. A prescriber assesses suitability before any medicine is given.</p>
+</main>
+
+<script>
+/* =================== DATA (all synthetic) =================== */
+// the person checking in on the demo kiosk
+var me={name:'Sarah Mitchell',first:'Sarah',mobile:'0412 345 678',email:'sarah.m@email.com',dob:'14/03/1991',
+  appt:{svc:'Anti-wrinkle top-up',dur:'45 min',time:'9:00 AM',who:'Bella (RN)',img:32,room:'Room 2',prescriber:'Dr Lena Park (NP)'},
+  tasks:{history:'done',consent:'todo',photo:'done'}};
+
+// arrivals board (the kiosk feeds the top entry)
+var board=[
+ {name:'Sarah Mitchell',svc:'Anti-wrinkle top-up',time:'9:00',who:'Bella (RN)',img:32,room:'Room 2',status:'booked'},
+ {name:'Priya Nair',svc:'Skin needling',time:'9:15',who:'Tessa (Dermal)',img:20,room:'Room 1',status:'in',min:12},
+ {name:'James Okafor',svc:'Filler consult',time:'9:30',who:'Dr Lena Park (NP)',img:12,room:'Room 3',status:'checked',min:4},
+ {name:'Mia Chen',svc:'Hydrafacial',time:'9:45',who:'Tessa (Dermal)',img:47,room:'Room 1',status:'booked'},
+ {name:'Olivia Brooks',svc:'Anti-wrinkle',time:'10:15',who:'Bella (RN)',img:31,room:'Room 2',status:'booked'},
+ {name:'Daniel Reyes',svc:'LED + facial',time:'8:30',who:'Tessa (Dermal)',img:60,room:'Room 1',status:'done'}
+];
+var stat={booked:['Booked','bg-slate-100 text-slate-500','schedule'],checked:['Checked in','bg-brand-50 text-brand-700','how_to_reg'],in:['In treatment','bg-violet-50 text-violet-700','medical_services'],done:['Finished','bg-emerald-50 text-emerald-700','task_alt']};
+
+/* =================== ROUTER =================== */
+var captions={
+ kIdle:['Welcome','The idle "attract" screen on the desk. A client taps to begin.'],
+ kFind:['Find your booking','Match the visit by mobile number — no app or password needed. Reception can also look it up.'],
+ kFound:['Confirm appointment','We found the booking. The client confirms it’s them before anything else happens.'],
+ kDetails:['Check your details','A 10-second contact-details review keeps records current and reachable.'],
+ kHealth:['Today’s health check','"Anything changed?" — the safety question every visit, captured before the chair.'],
+ kForms:['Outstanding before your visit','The compliance gate: anything unsigned (consent) is finished here, not in the room.'],
+ kDone:['You’re checked in','Confirmation + what happens next. Reception and the treatment room are notified instantly.'],
+ kBoard:['Reception arrivals board','The staff-facing companion the kiosk feeds: who’s here, where, and how long they’ve waited.']
+};
+function show(id){
+  document.querySelectorAll('[data-scr]').forEach(function(s){s.classList.add('hidden');s.classList.remove('flex');});
+  var el=document.getElementById(id); if(!el)return;
+  el.classList.remove('hidden'); if(id==='kFlow'||id==='kBoard')el.classList.add('flex');
+  if(id==='kBoard'){renderBoard();}
+  setCaption(captions[id]?id:(id==='kFlow'?step.cap:'kIdle'));
+}
+function setCaption(id){var c=captions[id];if(!c)return;document.getElementById('capScreen').textContent=c[0];document.getElementById('capText').textContent=c[1];}
+
+/* =================== THE FLOW =================== */
+var steps=['kFind','kFound','kDetails','kHealth','kForms','kDone'];
+var titles={kFind:'Find your booking',kFound:'Is this you?',kDetails:'Check your details',kHealth:'Anything changed today?',kForms:'One thing to finish',kDone:'All done'};
+var step={i:0,cap:'kFind',phone:''};
+function startFlow(){step.i=0;step.phone='';show('kFlow');renderStep();}
+function cancelFlow(){show('kIdle');}
+function curId(){return steps[step.i];}
+function renderStep(){
+  // skip the forms step if nothing outstanding
+  var id=curId();
+  step.cap=id;
+  document.getElementById('flowKicker').textContent='Step '+(step.i+1)+' of '+steps.length;
+  document.getElementById('flowTitle').textContent=titles[id];
+  document.getElementById('flowDots').innerHTML=steps.map(function(_,i){return '<div class="flex-1 h-2 rounded-full '+(i<=step.i?'bg-brand-500':'bg-slate-200')+'"></div>';}).join('');
+  document.getElementById('flowBack').style.visibility=step.i===0?'hidden':'visible';
+  document.getElementById('flowBody').innerHTML=bodies[id]();
+  var nb=document.getElementById('flowNext');
+  nb.classList.toggle('hidden',id==='kDone');
+  nb.querySelector('span').textContent=(id==='kForms')?'check':'arrow_forward';
+  nb.childNodes[0].textContent=(id==='kFind')?'Find my booking':(id==='kForms')?'I’ve signed':(id==='kHealth')?'Confirm':'Continue';
+  document.getElementById('flowHint').innerHTML=hints[id]||'';
+  setCaption(id);
+  document.getElementById('flowBody').scrollTop=0;
+}
+function flowNext(){
+  var id=curId();
+  if(id==='kFind'){ if(step.phone.replace(/\D/g,'').length<3){toast('Enter your mobile number');return;} board[0].status='checked'; }
+  if(id==='kHealth'){ if(!step.health){toast('Please answer first');return;} }
+  if(id==='kDetails'){ /* could validate */ }
+  // advance, skipping forms if nothing outstanding
+  do{ step.i++; }while(steps[step.i]==='kForms' && !hasOutstanding());
+  if(step.i>=steps.length){show('kIdle');return;}
+  renderStep();
+  if(curId()==='kDone'){ me.tasks.consent='done'; }
+}
+function flowPrev(){ if(step.i===0)return; do{ step.i--; }while(steps[step.i]==='kForms' && !hasOutstanding()); renderStep(); }
+function hasOutstanding(){return me.tasks.consent==='todo';}
+
+/* ---- step bodies ---- */
+var bodies={
+ kFind:function(){
+   return ''+
+   '<div class="max-w-lg mx-auto text-center">'+
+   '<div class="size-16 rounded-2xl bg-brand-50 text-brand-600 grid place-items-center mx-auto"><span class="material-symbols-rounded text-[32px]">smartphone</span></div>'+
+   '<h3 class="text-2xl font-bold mt-4">What’s your mobile number?</h3>'+
+   '<p class="text-mute mt-1">We’ll find today’s appointment — no app or password needed.</p>'+
+   '<div class="mt-5 h-16 rounded-2xl border-2 border-brand-200 bg-white grid place-items-center text-3xl font-bold tracking-widest" id="phoneDisp">'+ (step.phone||'<span class="text-slate-300">04•• ••• •••</span>') +'</div>'+
+   '<div class="grid grid-cols-3 gap-3 mt-4">'+
+     ['1','2','3','4','5','6','7','8','9'].map(function(n){return '<button onclick="keyTap(\''+n+'\')" class="key h-16 text-2xl">'+n+'</button>';}).join('')+
+     '<button onclick="keyTap(\'clr\')" class="key h-16 text-base text-mute">Clear</button>'+
+     '<button onclick="keyTap(\'0\')" class="key h-16 text-2xl">0</button>'+
+     '<button onclick="keyTap(\'del\')" class="key h-16 grid place-items-center text-mute"><span class="material-symbols-rounded">backspace</span></button>'+
+   '</div>'+
+   '<button onclick="toast(\'Reception notified — someone will be right with you\')" class="mt-5 text-brand-700 font-medium text-sm flex items-center gap-1 mx-auto"><span class="material-symbols-rounded text-[18px]">support_agent</span>Can’t find me? Ask reception</button>'+
+   '</div>';
+ },
+ kFound:function(){var a=me.appt;
+   return ''+
+   '<div class="max-w-lg mx-auto">'+
+   '<div class="text-center mb-5"><div class="size-20 rounded-full overflow-hidden mx-auto ring-4 ring-brand-100"><img src="https://i.pravatar.cc/120?img=45" class="size-full object-cover"/></div>'+
+   '<h3 class="text-2xl font-bold mt-3">Welcome back, '+me.first+'!</h3><p class="text-mute">We found your appointment.</p></div>'+
+   '<div class="card p-5">'+
+     '<div class="flex items-center gap-2 text-brand-700 text-sm font-semibold uppercase tracking-wide"><span class="material-symbols-rounded text-[18px]">event</span>Today’s visit</div>'+
+     '<div class="text-2xl font-bold mt-2">'+a.svc+'</div>'+
+     '<div class="grid grid-cols-2 gap-y-4 gap-x-3 mt-4">'+
+       row('schedule','When',a.time+' · '+a.dur)+
+       row('person','With',a.who)+
+       row('meeting_room','Where',a.room)+
+       row('verified_user','Prescriber',a.prescriber)+
+     '</div>'+
+   '</div>'+
+   '<p class="text-center text-mute text-sm mt-4">Not you, or something looks off? Tap <b>Back</b> or ask reception.</p>'+
+   '</div>';
+ },
+ kDetails:function(){
+   return ''+
+   '<div class="max-w-lg mx-auto">'+
+   '<p class="text-mute mb-4">Quick check — are these still right? Tap any field to fix it.</p>'+
+   '<div class="space-y-3">'+
+     field('badge','Name',me.name)+
+     field('call','Mobile',me.mobile)+
+     field('mail','Email',me.email)+
+     field('cake','Date of birth',me.dob)+
+   '</div>'+
+   '<label class="flex items-start gap-3 card p-4 mt-4"><input type="checkbox" checked class="size-5 accent-brand-600 mt-0.5"/><span class="text-sm">My emergency contact and GP details are unchanged since my last visit.</span></label>'+
+   '</div>';
+ },
+ kHealth:function(){
+   var qs=[['Are you feeling unwell or have any new symptoms today?','sick'],['Started any new medications, including blood thinners?','meds'],['Could you be pregnant or are you breastfeeding?','preg']];
+   return ''+
+   '<div class="max-w-lg mx-auto">'+
+   '<div class="rounded-2xl bg-amber-50 border border-amber-200 p-4 flex items-start gap-3 mb-4"><span class="material-symbols-rounded text-amber-600">health_and_safety</span><div class="text-sm text-amber-800">A few quick safety questions before your treatment. Your nurse reviews anything you flag.</div></div>'+
+   qs.map(function(q,i){return '<div class="card p-4 mb-3"><div class="font-medium mb-3">'+q[0]+'</div><div class="grid grid-cols-2 gap-3">'+
+     '<button onclick="healthPick('+i+',1,this)" data-hp="'+i+'" class="hp py-3 rounded-xl border-2 border-slate-200 font-semibold">Yes</button>'+
+     '<button onclick="healthPick('+i+',0,this)" data-hp="'+i+'" class="hp py-3 rounded-xl border-2 border-brand-500 bg-brand-50 text-brand-700 font-semibold">No</button>'+
+   '</div></div>';}).join('')+
+   '<p class="text-center text-mute text-sm mt-2">Answering "Yes" is fine — it just means your nurse will check in with you first.</p>'+
+   '</div>';
+ },
+ kForms:function(){
+   return ''+
+   '<div class="max-w-lg mx-auto">'+
+   '<div class="rounded-2xl bg-emerald-50 border border-emerald-100 p-4 flex items-center gap-3 mb-4"><span class="material-symbols-rounded text-emerald-600">task_alt</span><div class="text-sm text-emerald-800"><b>Medical history</b> and <b>image-use consent</b> are already on file. Just one thing left.</div></div>'+
+   '<div class="card p-5">'+
+     '<div class="flex items-center gap-2 text-rose-600 text-sm font-semibold"><span class="material-symbols-rounded text-[18px]">draw</span>Needs your signature</div>'+
+     '<div class="text-xl font-bold mt-1">Consent · Anti-wrinkle treatment</div>'+
+     '<div class="rounded-xl bg-slate-50 p-3 text-sm text-mute max-h-32 overflow-auto mt-3 scrl">A prescriber will assess you and, if suitable, prescribe a Schedule 4 medicine administered by a registered nurse. Possible effects include bruising, swelling, headache, asymmetry or, rarely, drooping. Results are temporary (~3–4 months). Costs are quoted before treatment. You may withdraw consent at any time.</div>'+
+     '<label class="flex items-start gap-3 mt-4 text-sm"><input type="checkbox" id="consentChk" class="size-5 accent-brand-600 mt-0.5" onchange="document.getElementById(\'sigBox\').classList.toggle(\'opacity-40\',!this.checked);document.getElementById(\'sigBox\').classList.toggle(\'pointer-events-none\',!this.checked)"/><span>I’ve read and understood the risks, benefits, alternatives and costs.</span></label>'+
+     '<div id="sigBox" class="mt-4 opacity-40 pointer-events-none">'+
+       '<div class="text-xs text-mute mb-1">Sign with your finger</div>'+
+       '<div onclick="this.querySelector(\'.sigline\').classList.remove(\'hidden\');toast(\'Signed\')" class="h-24 rounded-xl border-2 border-dashed border-slate-300 bg-white grid place-items-center cursor-pointer relative overflow-hidden"><span class="text-slate-300 sigplaceholder">Tap to sign</span><svg class="sigline hidden absolute inset-0 w-full h-full" viewBox="0 0 400 96" preserveAspectRatio="none"><path d="M30 60 q20 -34 42 -6 t44 -2 q24 -30 40 6 t38 -16 q22 28 50 6 t60 -8" fill="none" stroke="#0f766e" stroke-width="3" stroke-linecap="round"/></svg></div>'+
+     '</div>'+
+   '</div>'+
+   '</div>';
+ },
+ kDone:function(){var a=me.appt;
+   return ''+
+   '<div class="max-w-lg mx-auto text-center pt-2">'+
+   '<div class="size-24 rounded-full bg-emerald-50 grid place-items-center mx-auto"><span class="material-symbols-rounded text-emerald-500" style="font-size:64px">check_circle</span></div>'+
+   '<h3 class="text-3xl font-extrabold mt-4">You’re checked in, '+me.first+'!</h3>'+
+   '<p class="text-mute text-lg mt-2">Please take a seat — <b>'+a.who+'</b> will call you shortly.</p>'+
+   '<div class="card p-5 mt-6 text-left">'+
+     '<div class="text-[12px] uppercase tracking-wide text-slate-400 font-semibold mb-3">What happens now</div>'+
+     done('how_to_reg','Reception can see you’ve arrived','You’re on the arrivals board.')+
+     done('medical_services',a.who+' is notified','Your record is open in '+a.room+'.')+
+     done('local_cafe','Help yourself','Water and tea are by the window. Free Wi-Fi: <b>Lounge-Guest</b>.')+
+   '</div>'+
+   '<div class="flex gap-3 mt-6">'+
+     '<button onclick="show(\'kBoard\')" class="flex-1 py-4 rounded-2xl bg-white shadow-soft font-semibold flex items-center justify-center gap-2"><span class="material-symbols-rounded">desktop_windows</span>See arrivals board</button>'+
+     '<button onclick="show(\'kIdle\')" class="flex-1 py-4 rounded-2xl bg-brand-600 text-white font-bold flex items-center justify-center gap-2"><span class="material-symbols-rounded">done_all</span>Finish</button>'+
+   '</div>'+
+   '<p class="text-xs text-slate-400 mt-4">This screen returns to the welcome view automatically for the next client.</p>'+
+   '</div>';
+ }
+};
+var hints={kFind:'<span class="flex items-center gap-1"><span class="material-symbols-rounded text-[16px]">lock</span>We only use this to find your booking.</span>',kForms:'Tick the box, then sign to continue.'};
+function row(ic,k,v){return '<div class="flex items-center gap-3"><span class="material-symbols-rounded text-brand-600">'+ic+'</span><div><div class="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">'+k+'</div><div class="font-semibold">'+v+'</div></div></div>';}
+function field(ic,k,v){return '<button onclick="toast(\'Editing '+k.toLowerCase()+'…\')" class="w-full text-left card p-4 flex items-center gap-3"><span class="material-symbols-rounded text-brand-600">'+ic+'</span><div class="flex-1"><div class="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">'+k+'</div><div class="font-semibold">'+v+'</div></div><span class="material-symbols-rounded text-slate-300">edit</span></button>';}
+function done(ic,t,d){return '<div class="flex items-start gap-3 py-2"><div class="size-9 rounded-xl bg-brand-50 text-brand-600 grid place-items-center shrink-0"><span class="material-symbols-rounded text-[20px]">'+ic+'</span></div><div><div class="font-semibold text-sm">'+t+'</div><div class="text-mute text-sm">'+d+'</div></div></div>';}
+
+/* ---- keypad ---- */
+function keyTap(k){
+  if(k==='del')step.phone=step.phone.slice(0,-1);
+  else if(k==='clr')step.phone='';
+  else if(step.phone.replace(/\D/g,'').length<10){step.phone=(step.phone+k);}
+  var d=document.getElementById('phoneDisp');
+  if(d)d.innerHTML=step.phone?formatPhone(step.phone):'<span class="text-slate-300">04•• ••• •••</span>';
+}
+function formatPhone(p){p=p.replace(/\D/g,'');if(p.length>7)return p.slice(0,4)+' '+p.slice(4,7)+' '+p.slice(7);if(p.length>4)return p.slice(0,4)+' '+p.slice(4);return p;}
+function healthPick(i,yes,el){
+  document.querySelectorAll('[data-hp="'+i+'"]').forEach(function(b){b.className='hp py-3 rounded-xl border-2 border-slate-200 font-semibold';});
+  el.className='hp py-3 rounded-xl border-2 '+(yes?'border-amber-400 bg-amber-50 text-amber-700':'border-brand-500 bg-brand-50 text-brand-700')+' font-semibold';
+  step.health=true;
+}
+
+/* =================== ARRIVALS BOARD =================== */
+function renderBoard(){
+  var c={booked:0,checked:0,in:0,done:0};board.forEach(function(b){c[b.status]++;});
+  document.getElementById('boardStats').innerHTML=[
+    ['Waiting room',c.checked,'how_to_reg','text-brand-700'],
+    ['In treatment',c.in,'medical_services','text-violet-700'],
+    ['Still to arrive',c.booked,'schedule','text-slate-500'],
+    ['Finished today',c.done,'task_alt','text-emerald-700']
+  ].map(function(s){return '<div class="card p-4"><div class="flex items-center gap-2 text-slate-400"><span class="material-symbols-rounded text-[20px]">'+s[2]+'</span><span class="text-xs font-semibold uppercase tracking-wide">'+s[0]+'</span></div><div class="text-3xl font-extrabold mt-1 '+s[3]+'">'+s[1]+'</div></div>';}).join('');
+  // order: checked-in first, then in treatment, booked, done
+  var order={checked:0,in:1,booked:2,done:3};
+  var sorted=board.slice().sort(function(a,b){return order[a.status]-order[b.status];});
+  document.getElementById('boardList').innerHTML=sorted.map(function(b){
+    var s=stat[b.status];
+    var wait=b.status==='checked'?('waiting '+b.min+' min'):b.status==='in'?(b.min+' min in'):b.time;
+    var act=b.status==='checked'?'<button onclick="boardCall(\''+b.name+'\')" class="px-4 py-2.5 rounded-xl bg-brand-600 text-white text-sm font-semibold flex items-center gap-1.5"><span class="material-symbols-rounded text-[18px]">campaign</span>Call in</button>':
+            b.status==='booked'?'<span class="text-sm text-slate-400">'+b.time+'</span>':
+            b.status==='in'?'<span class="text-sm text-violet-600 font-medium flex items-center gap-1"><span class="material-symbols-rounded text-[18px]">progress_activity</span>'+b.room+'</span>':
+            '<span class="material-symbols-rounded text-emerald-500">task_alt</span>';
+    return '<div class="card p-3.5 flex items-center gap-4 '+(b.status==='checked'?'ring-2 ring-brand-200':'')+'">'+
+      '<div class="text-center w-14 shrink-0"><div class="text-lg font-bold leading-none">'+b.time.split(' ')[0]+'</div><div class="text-[11px] text-slate-400">'+b.room+'</div></div>'+
+      '<img src="https://i.pravatar.cc/64?img='+b.img+'" class="size-11 rounded-full"/>'+
+      '<div class="flex-1 min-w-0"><div class="font-bold">'+b.name+'</div><div class="text-mute text-sm truncate">'+b.svc+' · '+b.who+'</div></div>'+
+      '<span class="px-3 py-1.5 rounded-full text-xs font-semibold '+s[1]+' flex items-center gap-1"><span class="material-symbols-rounded text-[16px]">'+s[2]+'</span>'+s[0]+'</span>'+
+      '<div class="w-28 text-right text-sm text-mute hidden sm:block">'+wait+'</div>'+
+      '<div class="w-32 flex justify-end">'+act+'</div>'+
+    '</div>';
+  }).join('');
+}
+function boardCall(name){
+  var b=board.find(function(x){return x.name===name;});if(b){b.status='in';b.min=0;}
+  renderBoard();toast(name.split(' ')[0]+' called in to '+(b?b.room:'the room'));
+}
+
+/* =================== MISC =================== */
+var toastTimer=null;
+function toast(m){var t=document.getElementById('toast');document.getElementById('toastMsg').textContent=m;t.classList.remove('hidden');if(toastTimer)clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.add('hidden');},2200);}
+
+/* step chips */
+var chips=[['Find booking','kFind'],['Confirm appointment','kFound'],['Check details','kDetails'],['Health check','kHealth'],['Sign consent','kForms'],['Checked in','kDone']];
+document.getElementById('stepChips').innerHTML=chips.map(function(c){return '<button onclick="jumpStep(\''+c[1]+'\')" class="px-3 py-1.5 rounded-full bg-white border border-slate-200 text-sm hover:border-brand-300 hover:text-brand-700 transition">'+c[0]+'</button>';}).join('');
+function jumpStep(id){step.i=steps.indexOf(id);if(step.i<0)step.i=0;show('kFlow');renderStep();}
+
+/* clock */
+function tick(){var d=new Date();var h=d.getHours()%12||12;var m=(''+d.getMinutes()).padStart(2,'0');var el=document.getElementById('boardClock');if(el)el.textContent=h+':'+m;}
+setInterval(tick,15000);
+
+/* =================== SCALE-TO-FIT =================== */
+function fit(){
+  var stage=document.getElementById('stage'),dev=document.getElementById('device');
+  var availW=stage.clientWidth;
+  var top=stage.getBoundingClientRect().top;
+  var availH=window.innerHeight-top-24;
+  var s=Math.min(1,availW/820,availH/1180);
+  if(s<=0||!isFinite(s))s=1;
+  dev.style.transform='translateX(-50%) scale('+s+')';
+  stage.style.height=(1180*s)+'px';
+}
+window.addEventListener('resize',fit);
+window.addEventListener('load',fit);
+
+/* init */
+show('kIdle');
+fit();
+tick();
+</script>
+</body>
+</html>
