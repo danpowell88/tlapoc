@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
   :root{--brand:#0d9488;--ink:#0f172a;--mute:#64748b;--line:#e2e8f0;--bg:#f8fafc}
   *{box-sizing:border-box}
@@ -34,6 +35,23 @@
   .content hr{border:none;border-top:1px solid var(--line);margin:2em 0}
   .content .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px;margin:1.2em 0;text-align:center;overflow:auto}
   .content .mermaid svg{max-width:100%;height:auto}
+  /* figures: inline-SVG schematics, wiring diagrams & device renderings */
+  .content .fig{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;margin:1.4em 0;text-align:center;overflow:auto}
+  .content .fig svg{max-width:100%;height:auto;display:block;margin:0 auto}
+  .content .fig .cap{margin:.7em 0 0;font-size:13px;color:var(--mute);text-align:center}
+  .content .fig .cap b{color:#334155}
+  .content .figrow{display:flex;gap:16px;flex-wrap:wrap}
+  .content .figrow .fig{flex:1 1 280px;margin:.6em 0}
+  /* interactive 3D enclosure viewer */
+  .content .viewer3d{position:relative;background:linear-gradient(180deg,#f8fafc,#eef2f6);border:1px solid var(--line);border-radius:12px;margin:1.4em 0;overflow:hidden;min-height:300px}
+  .content .viewer3d canvas{display:block;width:100%;touch-action:none;cursor:grab}
+  .content .viewer3d canvas:active{cursor:grabbing}
+  .content .viewer3d .v3d-bar{position:absolute;top:10px;left:10px;right:10px;display:flex;gap:6px;flex-wrap:wrap;z-index:2}
+  .content .viewer3d .v3d-bar button{font-family:inherit;font-size:12px;font-weight:600;color:#334155;background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:8px;padding:5px 10px;cursor:pointer;box-shadow:0 1px 2px rgba(15,23,42,.06)}
+  .content .viewer3d .v3d-bar button:hover{background:#fff;color:var(--brand)}
+  .content .viewer3d .v3d-bar button.on{background:#0d9488;color:#fff;border-color:#0d9488}
+  .content .viewer3d .v3d-hint{position:absolute;bottom:10px;right:12px;font-size:11px;color:var(--mute);background:rgba(255,255,255,.8);padding:3px 8px;border-radius:6px;z-index:2}
+  .content .viewer3d .v3d-tag{position:absolute;bottom:10px;left:12px;font-size:11px;color:var(--mute);background:rgba(255,255,255,.8);padding:3px 8px;border-radius:6px;z-index:2}
   @media(max-width:760px){.side{display:none}.content{padding:24px 18px 60px}}
 </style>
 </head>
@@ -108,11 +126,148 @@ function renderMermaid(){
   content.querySelectorAll("code.language-mermaid").forEach(function(code){var pre=code.closest("pre")||code;var div=document.createElement("div");div.className="mermaid";div.textContent=mmQuote(code.textContent.replace(/\\n/g,"<br/>"));pre.replaceWith(div);});
   if(window.mermaid){try{var r=mermaid.run({querySelector:"#content .mermaid"});if(r&&r.catch)r.catch(function(){});}catch(e){}}
 }
+
+// ---- interactive 3D enclosure viewer (mounts into <div class="viewer3d">) ----
+var _v3dCleanups=[];
+function unmountViewers(){_v3dCleanups.forEach(function(fn){try{fn();}catch(e){}});_v3dCleanups=[];}
+function mountViewers(){
+  content.querySelectorAll(".viewer3d").forEach(function(host){
+    if(host.dataset.mounted)return; host.dataset.mounted="1";
+    if(!window.THREE){host.innerHTML='<p class="v3d-tag" style="position:static;background:none">3D viewer needs WebGL / network access to three.js.</p>';return;}
+    try{build3D(host);}catch(e){host.innerHTML='<p class="v3d-tag" style="position:static;background:none">3D viewer failed to start ('+e+').</p>';}
+  });
+}
+function build3D(host){
+  var T=window.THREE;
+  var W=host.clientWidth||760, H=Math.max(320,Math.round(W*0.52));
+  var scene=new T.Scene();
+  var cam=new T.PerspectiveCamera(36,W/H,1,4000);
+  var renderer=new T.WebGLRenderer({antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+  renderer.setSize(W,H); host.appendChild(renderer.domElement);
+  scene.add(new T.HemisphereLight(0xffffff,0x9fb0c0,0.95));
+  var key=new T.DirectionalLight(0xffffff,0.85); key.position.set(80,120,70); scene.add(key);
+  var fill=new T.DirectionalLight(0xffffff,0.35); fill.position.set(-90,40,-60); scene.add(fill);
+
+  // ---- dimensions (mm) ----
+  var OX=72, OZ=50, BASE=22, LID=8, WALL=2.5;
+  var root=new T.Group(); scene.add(root);
+  var baseGrp=new T.Group(), lidGrp=new T.Group(), pcbGrp=new T.Group(), probeGrp=new T.Group();
+  root.add(baseGrp); root.add(lidGrp); root.add(pcbGrp); root.add(probeGrp);
+
+  var mCase =new T.MeshStandardMaterial({color:0xf4f6f9,roughness:0.55,metalness:0.04});
+  var mLid  =new T.MeshStandardMaterial({color:0xe7ecf2,roughness:0.45,metalness:0.04,transparent:true,opacity:1});
+  var mPort =new T.MeshStandardMaterial({color:0x1f2937,roughness:0.6});
+  var mPcb  =new T.MeshStandardMaterial({color:0x0e7468,roughness:0.65});
+  var mMetal=new T.MeshStandardMaterial({color:0x9aa6b2,roughness:0.35,metalness:0.7});
+  var mCable=new T.MeshStandardMaterial({color:0x111827,roughness:0.7});
+  var mScreen=new T.MeshStandardMaterial({color:0x0b1220,roughness:0.3,emissive:0x0a3b66,emissiveIntensity:0.6});
+  var mLed  =new T.MeshStandardMaterial({color:0x22c55e,emissive:0x16a34a,emissiveIntensity:1.1});
+
+  function box(w,h,d,m,x,y,z){var g=new T.Mesh(new T.BoxGeometry(w,h,d),m);g.position.set(x||0,y||0,z||0);return g;}
+  function cyl(r1,r2,h,m,seg){return new T.Mesh(new T.CylinderGeometry(r1,r2,h,seg||24),m);}
+
+  // base: floor + 4 walls (so it reads as an open box when the lid lifts)
+  var fb=BASE/2;
+  baseGrp.add(box(OX,WALL,OZ,mCase,0,-fb+WALL/2,0));           // floor
+  baseGrp.add(box(OX,BASE,WALL,mCase,0,0,-OZ/2+WALL/2));        // back wall
+  baseGrp.add(box(OX,BASE,WALL,mCase,0,0, OZ/2-WALL/2));        // front wall
+  baseGrp.add(box(WALL,BASE,OZ,mCase, OX/2-WALL/2,0,0));        // right wall (gland)
+  baseGrp.add(box(WALL,BASE,OZ,mCase,-OX/2+WALL/2,0,0));        // left wall (USB-C)
+  // internal standoffs (PCB sits on these)
+  [[OX/2-9,OZ/2-9],[OX/2-9,-OZ/2+9],[-OX/2+9,OZ/2-9],[-OX/2+9,-OZ/2+9]].forEach(function(p){
+    var s=cyl(2,2,7,mCase); s.position.set(p[0],-fb+WALL+3.5,p[1]); baseGrp.add(s);
+  });
+  // mounting ears (front/back) with screw holes
+  [[-1, OZ/2+6],[1,-OZ/2-6]].forEach(function(e){ /* placeholder */ });
+  [ OZ/2+6, -OZ/2-6 ].forEach(function(zc){
+    var ear=box(OX*0.5,WALL,12,mCase,0,-fb+WALL/2,zc); baseGrp.add(ear);
+    [-OX*0.18,OX*0.18].forEach(function(xc){var h=cyl(2.1,2.1,WALL+0.4,mPort); h.position.set(xc,-fb+WALL/2,zc); baseGrp.add(h);});
+  });
+  // USB-C cutout (left short wall)
+  baseGrp.add(box(2,3.4,9,mPort,-OX/2+WALL/2,-fb+WALL+5,0));
+  // cable gland (right short wall) — a stepped boss + probe cable exit
+  var gland=cyl(4.5,5.5,7,mMetal); gland.rotation.z=Math.PI/2; gland.position.set(OX/2+3,-fb+WALL+5,0); baseGrp.add(gland);
+  var glnut=cyl(5.5,5.5,2.5,mMetal); glnut.rotation.z=Math.PI/2; glnut.position.set(OX/2+7,-fb+WALL+5,0); baseGrp.add(glnut);
+
+  // lid (sits on top of the base) — slight overhang lip
+  lidGrp.add(box(OX,LID-2,OZ,mLid,0,BASE/2+(LID-2)/2,0));
+  lidGrp.add(box(OX+1.5,2,OZ+1.5,mLid,0,BASE/2-1,0)); // lip
+  // OLED window + status LED + branding strip on the lid
+  lidGrp.add(box(26,1.2,14,mScreen,-8,BASE/2+LID-2+0.4,-6));
+  var led=cyl(1.3,1.3,1.4,mLed); led.position.set(20,BASE/2+LID-2+0.4,16); lidGrp.add(led);
+  lidGrp.add(box(40,0.6,3,mPort,0,BASE/2+LID-2+0.5,20)); // vent/brand slot
+
+  // PCB (ESP32-C3 super-mini) on standoffs, with USB-C tab, antenna & DS18B20 module
+  pcbGrp.add(box(34,1.6,18,mPcb,0,-fb+WALL+7,0));
+  pcbGrp.add(box(8,3,9,mMetal,-OX/2+WALL+8,-fb+WALL+8.5,0)); // shield/usb block
+  pcbGrp.add(box(7,2,5,mPort,-OX/2+WALL+3.2,-fb+WALL+8,0));  // usb-c connector toward cutout
+  pcbGrp.add(box(10,0.6,16,mPort,12,-fb+WALL+8,0));          // pcb antenna trace area
+  // DS18B20 1-Wire module on the board
+  pcbGrp.add(box(6,2,4,mPort,4,-fb+WALL+9,-6));
+
+  // probe: cable through the gland + stainless DS18B20 tip in a buffer bottle
+  var cable=cyl(1.4,1.4,40,mCable); cable.rotation.z=Math.PI/2; cable.position.set(OX/2+24,-fb+WALL+5,0); probeGrp.add(cable);
+  var tip=cyl(2.4,2.4,12,mMetal); tip.position.set(OX/2+46,-fb-8,0); probeGrp.add(tip);
+  var bottle=new T.Mesh(new T.CylinderGeometry(8,8,22,28),new T.MeshStandardMaterial({color:0x67e8f9,roughness:0.1,metalness:0,transparent:true,opacity:0.45}));
+  bottle.position.set(OX/2+46,-fb-7,0); probeGrp.add(bottle);
+
+  // ground shadow plane
+  var sh=new T.Mesh(new T.CircleGeometry(120,40),new T.MeshBasicMaterial({color:0x0f172a,transparent:true,opacity:0.06}));
+  sh.rotation.x=-Math.PI/2; sh.position.y=-fb-19.5; scene.add(sh);
+
+  // center the whole assembly
+  root.position.y=4;
+
+  // ---- camera / orbit ----
+  var rot={x:-0.5,y:0.7}, dist=180, target=new T.Vector3(0,0,0);
+  function place(){
+    cam.position.x=target.x+dist*Math.cos(rot.x)*Math.sin(rot.y);
+    cam.position.y=target.y+dist*Math.sin(rot.x);
+    cam.position.z=target.z+dist*Math.cos(rot.x)*Math.cos(rot.y);
+    cam.lookAt(target);
+  }
+  var cv=renderer.domElement, drag=false, px=0, py=0, auto=true;
+  cv.addEventListener("pointerdown",function(e){drag=true;auto=false;px=e.clientX;py=e.clientY;cv.setPointerCapture(e.pointerId);});
+  cv.addEventListener("pointermove",function(e){if(!drag)return;rot.y-=(e.clientX-px)*0.01;rot.x+=(e.clientY-py)*0.01;rot.x=Math.max(-1.45,Math.min(1.45,rot.x));px=e.clientX;py=e.clientY;});
+  cv.addEventListener("pointerup",function(e){drag=false;});
+  cv.addEventListener("wheel",function(e){e.preventDefault();dist=Math.max(95,Math.min(360,dist+e.deltaY*0.18));},{passive:false});
+
+  // ---- toolbar ----
+  var bar=document.createElement("div"); bar.className="v3d-bar";
+  function mkBtn(label,fn){var b=document.createElement("button");b.textContent=label;b.onclick=function(){fn(b);};bar.appendChild(b);return b;}
+  var exploded=false, ghost=false;
+  mkBtn("Exploded view",function(b){exploded=!exploded;b.classList.toggle("on",exploded);});
+  mkBtn("Ghost lid",function(b){ghost=!ghost;b.classList.toggle("on",ghost);});
+  var spinBtn=mkBtn("Auto-spin",function(b){auto=!auto;b.classList.toggle("on",auto);}); spinBtn.classList.add("on");
+  mkBtn("Reset",function(){rot={x:-0.5,y:0.7};dist=180;exploded=false;ghost=false;auto=true;bar.querySelectorAll("button").forEach(function(b,i){b.classList.toggle("on",i===2);});});
+  host.appendChild(bar);
+  var hint=document.createElement("div"); hint.className="v3d-hint"; hint.textContent="drag to rotate · scroll to zoom"; host.appendChild(hint);
+  var tag=document.createElement("div"); tag.className="v3d-tag"; tag.textContent="Enclosure ⌀72 × 50 × 30 mm · ABS · IP54"; host.appendChild(tag);
+
+  // ---- animate (pauses GPU work when scrolled off-screen) ----
+  var ex=0, raf=0, alive=true, visible=true;
+  var io=new IntersectionObserver(function(es){visible=es[0].isIntersecting;},{threshold:0.01});
+  io.observe(host);
+  function frame(){
+    if(!alive)return; raf=requestAnimationFrame(frame);
+    if(!visible)return;
+    if(auto&&!drag)rot.y+=0.005;
+    var tgt=exploded?1:0; ex+=(tgt-ex)*0.12;
+    lidGrp.position.y=ex*46; pcbGrp.position.y=ex*20; probeGrp.position.x=ex*30; probeGrp.position.y=ex*-6;
+    mLid.opacity=ghost?0.28:1;
+    place(); renderer.render(scene,cam);
+  }
+  function onResize(){var w=host.clientWidth||W,h=Math.max(320,Math.round(w*0.52));cam.aspect=w/h;cam.updateProjectionMatrix();renderer.setSize(w,h);}
+  window.addEventListener("resize",onResize);
+  frame();
+  _v3dCleanups.push(function(){alive=false;cancelAnimationFrame(raf);io.disconnect();window.removeEventListener("resize",onResize);renderer.dispose();});
+}
 (function buildSide(){let g=null;DOCS.forEach(d=>{if(d.g!==g){g=d.g;const h=document.createElement("div");h.className="grp";h.textContent=g;side.appendChild(h);}const a=document.createElement("a");a.textContent=d.t;a.href="#"+d.p;a.dataset.p=d.p;side.appendChild(a);});})();
 function active(p){side.querySelectorAll("a").forEach(a=>a.classList.toggle("on",a.dataset.p===p));}
 async function show(p){
-  active(p);content.innerHTML="Loading…";
-  try{const md=await fetch(p).then(r=>{if(!r.ok)throw r.status;return r.text();});content.innerHTML=marked.parse(md);renderMermaid();window.scrollTo(0,0);}
+  active(p);unmountViewers();content.innerHTML="Loading…";
+  try{const md=await fetch(p).then(r=>{if(!r.ok)throw r.status;return r.text();});content.innerHTML=marked.parse(md);renderMermaid();mountViewers();window.scrollTo(0,0);}
   catch(e){content.innerHTML="<h1>Couldn't load document</h1><p>"+p+" ("+e+")</p>";}
 }
 function current(){const h=decodeURIComponent(location.hash.slice(1));return DOCS.find(d=>d.p===h)?h:DOCS[0].p;}
