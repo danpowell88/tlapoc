@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Lumea · 3D — see your whole clinic in one place</title>
+<meta name="description" content="An interactive 3D look at Lumea: spin the model to see how bookings, consent, notes, payments, stock and reminders all connect in one place. A WebGL showcase built with Three.js."/>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<script>
+tailwind.config={theme:{extend:{
+  fontFamily:{sans:['Inter','system-ui','sans-serif'],display:['Space Grotesk','system-ui','sans-serif']},
+  colors:{night:{900:'#070a18',800:'#0c1226',700:'#141d3b'},cyan:{300:'#67e8f9',400:'#22d3ee',500:'#06b6d4'},iris:{300:'#a5b4fc',400:'#818cf8',500:'#6366f1'},glow:{400:'#c084fc'}}
+}}}
+</script>
+<script>document.documentElement.classList.add('js')</script>
+<style>
+  html{scroll-behavior:smooth}
+  body{font-family:Inter,sans-serif;-webkit-font-smoothing:antialiased;background:#070a18}
+  .font-display{font-family:'Space Grotesk',sans-serif}
+  .material-symbols-rounded{font-variation-settings:'FILL' 0,'wght' 400,'opsz' 24}
+  ::selection{background:#22d3ee;color:#070a18}
+  .grad-text{background:linear-gradient(110deg,#67e8f9,#818cf8 60%,#c084fc);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .glass{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+  #scene{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+  #scene:active{cursor:grabbing}
+  .legend-item{transition:all .2s;cursor:pointer}
+  .legend-item:hover,.legend-item.on{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25)}
+  .legend-dot{box-shadow:0 0 12px -1px currentColor}
+  .js .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s,transform .7s}
+  .js .reveal.in{opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){.js .reveal{opacity:1!important;transform:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body class="text-white overflow-x-hidden">
+
+<div class="bg-cyan-500/15 text-cyan-300 text-center text-xs py-1.5 font-medium border-b border-white/5">Interactive <b class="text-white">WebGL / Three.js</b> showcase · <a href="index.html" class="underline">see all concepts</a></div>
+
+<!-- ===== NAV ===== -->
+<header class="absolute inset-x-0 top-8 z-30">
+  <div class="max-w-7xl mx-auto px-5 sm:px-8 h-16 flex items-center gap-4">
+    <a href="#top" class="flex items-center gap-2.5">
+      <span class="size-9 rounded-xl bg-gradient-to-br from-cyan-400 to-iris-500 grid place-items-center font-bold">L</span>
+      <span class="font-display text-xl font-bold">Lumea<span class="text-cyan-300"> 3D</span></span>
+    </a>
+    <a href="index.html" class="ml-auto px-4 py-2 rounded-full text-sm font-semibold glass hover:bg-white/15 transition">← All concepts</a>
+  </div>
+</header>
+
+<!-- ===== 3D STAGE ===== -->
+<section id="top" class="relative h-[100svh] min-h-[640px] overflow-hidden bg-night-900">
+  <!-- the WebGL canvas -->
+  <canvas id="scene"></canvas>
+  <!-- soft vignette so text stays readable over the scene -->
+  <div class="pointer-events-none absolute inset-0" style="background:radial-gradient(circle at 50% 40%,transparent 30%,rgba(7,10,24,.55) 80%)"></div>
+
+  <!-- overlay copy -->
+  <div class="pointer-events-none absolute inset-x-0 top-24 sm:top-28">
+    <div class="max-w-7xl mx-auto px-5 sm:px-8">
+      <div class="max-w-xl">
+        <div class="pointer-events-auto reveal inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300 glass rounded-full px-3 py-1.5">
+          <span class="size-1.5 rounded-full bg-cyan-400 animate-pulse"></span> Spin it · it's all connected
+        </div>
+        <h1 class="reveal font-display text-4xl sm:text-6xl font-bold leading-[1.05] mt-4">See your whole clinic, <span class="grad-text">in one place</span>.</h1>
+        <p class="reveal text-white/70 mt-4 text-lg max-w-md">Every part of your day connects to one shared record. Drag to spin the model, scroll to zoom, and tap a feature to see what it does — in plain English.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- interactive legend -->
+  <div class="absolute z-20 bottom-5 left-1/2 -translate-x-1/2 w-[min(94vw,52rem)]">
+    <div id="legend" class="glass rounded-2xl p-2 grid grid-cols-2 sm:grid-cols-4 gap-1.5"></div>
+    <div class="mt-2 glass rounded-2xl px-4 py-3 flex items-start gap-3">
+      <span id="selIco" class="material-symbols-rounded text-cyan-300 mt-0.5">touch_app</span>
+      <div><div id="selTitle" class="font-display font-bold text-sm">Tap a feature above</div><div id="selDesc" class="text-white/70 text-sm">Or drag the scene to explore. Everything orbits one shared client record at the centre.</div></div>
+    </div>
+  </div>
+
+  <!-- controls hint -->
+  <div class="pointer-events-none absolute top-1/2 right-5 -translate-y-1/2 hidden lg:flex flex-col gap-2 text-[11px] text-white/40 text-right">
+    <span class="inline-flex items-center gap-1 justify-end">drag to spin <span class="material-symbols-rounded text-sm">360</span></span>
+    <span class="inline-flex items-center gap-1 justify-end">scroll to zoom <span class="material-symbols-rounded text-sm">zoom_in</span></span>
+    <span class="inline-flex items-center gap-1 justify-end">tap a node <span class="material-symbols-rounded text-sm">ads_click</span></span>
+  </div>
+
+  <!-- graceful fallback if WebGL is unavailable -->
+  <noscript><div class="absolute inset-0 grid place-items-center text-white/60">Enable JavaScript to view the 3D scene.</div></noscript>
+</section>
+
+<!-- ===== EXPLAINER ===== -->
+<section class="max-w-7xl mx-auto px-5 sm:px-8 py-20">
+  <div class="text-center max-w-2xl mx-auto reveal">
+    <h2 class="font-display text-3xl sm:text-4xl font-bold">One record. Everything joined up.</h2>
+    <p class="text-white/60 mt-4 text-lg">The 3D model above isn't just for show — it's how Lumea actually works. Book a client once, and that same record follows them through consent, the treatment, payment and their next reminder. Nothing gets typed twice.</p>
+  </div>
+  <div class="grid sm:grid-cols-3 gap-5 mt-12">
+    <div class="reveal glass rounded-2xl p-6"><span class="material-symbols-rounded text-cyan-300 text-3xl">hub</span><h3 class="font-display font-bold mt-3">One shared record</h3><p class="text-white/60 text-sm mt-1.5">Every feature reads and writes the same client file — always up to date.</p></div>
+    <div class="reveal glass rounded-2xl p-6"><span class="material-symbols-rounded text-cyan-300 text-3xl">bolt</span><h3 class="font-display font-bold mt-3">Less double-handling</h3><p class="text-white/60 text-sm mt-1.5">Details flow from booking to checkout on their own, so there's less to re-enter.</p></div>
+    <div class="reveal glass rounded-2xl p-6"><span class="material-symbols-rounded text-cyan-300 text-3xl">visibility</span><h3 class="font-display font-bold mt-3">The full picture</h3><p class="text-white/60 text-sm mt-1.5">See a client's whole history at a glance — bookings, notes, photos and payments.</p></div>
+  </div>
+  <div class="text-center mt-12 reveal">
+    <a href="prototype.html" class="inline-flex items-center gap-2 px-7 py-4 rounded-full font-semibold bg-gradient-to-br from-cyan-400 to-iris-500 text-night-900 hover:-translate-y-0.5 transition shadow-lg"><span class="material-symbols-rounded">play_circle</span> Try the real thing</a>
+    <a href="index.html" class="inline-flex items-center gap-2 px-7 py-4 rounded-full font-semibold glass hover:bg-white/15 transition ml-2">Other concepts</a>
+  </div>
+  <p class="text-center text-white/35 text-xs mt-10">A concept WebGL showcase (Three.js) · all data is synthetic · gracefully shows a static fallback where 3D isn't available.</p>
+</section>
+
+<!-- Three.js (WebGL) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---- reveals ---- */
+  var reveals=[].slice.call(document.querySelectorAll('.reveal'));
+  reveals.forEach(function(el,i){ el.style.transitionDelay=((i%5)*60)+'ms'; });
+  function inView(el,m){ var r=el.getBoundingClientRect(); var vh=innerHeight||document.documentElement.clientHeight; return r.top<(vh-(m||0))&&r.bottom>0; }
+  function checkReveals(){ for(var i=reveals.length-1;i>=0;i--){ if(reduce||inView(reveals[i],40)){ reveals[i].classList.add('in'); reveals.splice(i,1);} } }
+  addEventListener('scroll',checkReveals,{passive:true}); checkReveals(); addEventListener('load',checkReveals);
+
+  /* ---- feature data ---- */
+  var FEAT=[
+    {name:'Bookings',  ico:'calendar_month', col:0x22d3ee, desc:'A clear diary with walk-ins, a waitlist and reminders that cut no-shows.'},
+    {name:'Consent',   ico:'how_to_reg',     col:0x34d399, desc:'The right form, signed on a tablet before a treatment starts.'},
+    {name:'Notes',     ico:'edit_note',      col:0x818cf8, desc:'Map treatments and save before/after photos to the client record.'},
+    {name:'Payments',  ico:'contactless',    col:0xc084fc, desc:'Tap to pay at the chair, with memberships that renew on their own.'},
+    {name:'Stock & fridge', ico:'inventory_2', col:0xf472b6, desc:'Know what is low and that the fridge stayed cold — no clipboard.'},
+    {name:'Messages',  ico:'forum',          col:0xfbbf24, desc:'Texts and emails together in one tidy inbox, plus recalls.'},
+    {name:'Reports',   ico:'insights',       col:0x67e8f9, desc:'A simple picture of how the clinic is doing — owner only.'}
+  ];
+
+  /* ---- build legend (works even without WebGL) ---- */
+  var legend=document.getElementById('legend');
+  var selIco=document.getElementById('selIco'), selTitle=document.getElementById('selTitle'), selDesc=document.getElementById('selDesc');
+  var items=[];
+  FEAT.forEach(function(f,i){
+    var b=document.createElement('button');
+    b.className='legend-item flex items-center gap-2 rounded-xl border border-white/10 px-2.5 py-2 text-left';
+    b.innerHTML='<span class="legend-dot size-2.5 rounded-full shrink-0" style="background:#'+f.col.toString(16).padStart(6,'0')+';color:#'+f.col.toString(16).padStart(6,'0')+'"></span><span class="text-xs font-semibold truncate">'+f.name+'</span>';
+    b.addEventListener('mouseenter',function(){ highlight(i); });
+    b.addEventListener('mouseleave',function(){ highlight(selected); });
+    b.addEventListener('click',function(){ select(i); });
+    legend.appendChild(b); items.push(b);
+  });
+  var selected=-1;
+  function select(i){
+    selected=i; var f=FEAT[i];
+    selIco.textContent=f.ico; selTitle.textContent=f.name; selDesc.textContent=f.desc;
+    items.forEach(function(b,j){ b.classList.toggle('on', j===i); });
+    highlight(i);
+  }
+
+  /* ---- WebGL scene ---- */
+  var nodes=[], highlight=function(){}; // replaced below if WebGL ok
+  (function initThree(){
+    if(!window.THREE) return;
+    var canvas=document.getElementById('scene'); if(!canvas) return;
+    var renderer; try{ renderer=new THREE.WebGLRenderer({canvas:canvas,alpha:true,antialias:true}); }catch(e){ return; }
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+    var scene=new THREE.Scene();
+    var camera=new THREE.PerspectiveCamera(50,1,0.1,200);
+    scene.add(new THREE.AmbientLight(0xffffff,0.45));
+    var key=new THREE.DirectionalLight(0xa5b4fc,1.0); key.position.set(6,8,10); scene.add(key);
+    var rim=new THREE.DirectionalLight(0x22d3ee,0.7); rim.position.set(-8,-4,6); scene.add(rim);
+
+    var root=new THREE.Group(); scene.add(root);
+
+    // central core = "one shared record"
+    var core=new THREE.Mesh(new THREE.IcosahedronGeometry(2.2,1),
+      new THREE.MeshStandardMaterial({color:0xffffff, roughness:0.25, metalness:0.5, emissive:0x67e8f9, emissiveIntensity:0.4, flatShading:true}));
+    root.add(core);
+    var coreWire=new THREE.Mesh(new THREE.IcosahedronGeometry(2.6,1), new THREE.MeshBasicMaterial({color:0x22d3ee, wireframe:true, transparent:true, opacity:0.18}));
+    root.add(coreWire);
+
+    // feature nodes orbit the core
+    var R=7.5;
+    FEAT.forEach(function(f,i){
+      var ang=(i/FEAT.length)*Math.PI*2;
+      var y=(i%2===0?1:-1)*(1.4+ (i%3)*0.6);
+      var pos=new THREE.Vector3(Math.cos(ang)*R, y, Math.sin(ang)*R);
+      var mat=new THREE.MeshStandardMaterial({color:f.col, roughness:0.3, metalness:0.4, emissive:f.col, emissiveIntensity:0.5, flatShading:true});
+      var mesh=new THREE.Mesh(new THREE.IcosahedronGeometry(1,0), mat);
+      mesh.position.copy(pos); mesh.userData={base:1, ph:Math.random()*Math.PI*2, idx:i};
+      root.add(mesh); nodes.push(mesh);
+      // connecting line core -> node
+      var lg=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), pos]);
+      var line=new THREE.Line(lg, new THREE.LineBasicMaterial({color:f.col, transparent:true, opacity:0.28}));
+      root.add(line);
+    });
+
+    // starfield
+    var starGeo=new THREE.BufferGeometry(); var sv=[];
+    for(var s=0;s<420;s++){ sv.push((Math.random()-0.5)*120,(Math.random()-0.5)*120,(Math.random()-0.5)*120); }
+    starGeo.setAttribute('position', new THREE.Float32BufferAttribute(sv,3));
+    scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({color:0x9fb0ff, size:0.18, transparent:true, opacity:0.6})));
+
+    // highlight: bump a node's size + glow (synchronous; visible to real users, verifiable via eval)
+    highlight=function(i){
+      nodes.forEach(function(n,j){
+        var on=(j===i);
+        n.userData.base = on?1.7:1;
+        n.material.emissiveIntensity = on?1.1:0.5;
+      });
+      renderer.render(scene,camera);
+    };
+
+    // ---- orbit controls (manual: drag, wheel, mouse parallax) ----
+    var radius=20, theta=0.7, phi=1.15, tTheta=0.7, tPhi=1.15, auto=true;
+    function updateCam(){
+      var p=Math.max(0.35, Math.min(Math.PI-0.35, phi));
+      camera.position.set(radius*Math.sin(p)*Math.cos(theta), radius*Math.cos(p), radius*Math.sin(p)*Math.sin(theta));
+      camera.lookAt(0,0,0);
+    }
+    function resize(){ var w=canvas.clientWidth||1,h=canvas.clientHeight||1; renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix(); }
+    resize(); updateCam(); renderer.render(scene,camera);
+    addEventListener('resize',function(){ resize(); renderer.render(scene,camera); },{passive:true});
+
+    var down=false, moved=0, lx=0, ly=0;
+    canvas.addEventListener('pointerdown',function(e){ down=true; auto=false; moved=0; lx=e.clientX; ly=e.clientY; canvas.setPointerCapture(e.pointerId); });
+    canvas.addEventListener('pointermove',function(e){ if(!down)return; var dx=e.clientX-lx, dy=e.clientY-ly; moved+=Math.abs(dx)+Math.abs(dy); tTheta-=dx*0.005; tPhi-=dy*0.005; lx=e.clientX; ly=e.clientY; });
+    canvas.addEventListener('pointerup',function(e){ down=false; if(moved<6) pick(e); setTimeout(function(){auto=true;},2500); });
+    canvas.addEventListener('wheel',function(e){ e.preventDefault(); radius=Math.max(12,Math.min(34,radius+e.deltaY*0.012)); },{passive:false});
+
+    // raycast click to select a node
+    var ray=new THREE.Raycaster(), v2=new THREE.Vector2();
+    function pick(e){
+      var r=canvas.getBoundingClientRect();
+      v2.x=((e.clientX-r.left)/r.width)*2-1; v2.y=-((e.clientY-r.top)/r.height)*2+1;
+      ray.setFromCamera(v2,camera);
+      var hits=ray.intersectObjects(nodes);
+      if(hits.length){ select(hits[0].object.userData.idx); }
+    }
+
+    var raf,t=0,running=false;
+    function loop(){
+      raf=requestAnimationFrame(loop); t+=0.01;
+      if(auto && !down) tTheta+=0.0016;
+      theta+=(tTheta-theta)*0.08; phi+=(tPhi-phi)*0.08;
+      core.rotation.y+=0.003; core.rotation.x+=0.0012; coreWire.rotation.y-=0.002;
+      nodes.forEach(function(n){ var sc=n.userData.base + Math.sin(t+n.userData.ph)*0.05; n.scale.setScalar(sc + (n.userData.base>1?0.0:0)); n.position.y += Math.sin(t*0.8+n.userData.ph)*0.004; n.scale.lerp(new THREE.Vector3(sc,sc,sc),0.2); });
+      updateCam(); renderer.render(scene,camera);
+    }
+    function start(){ if(!running&&!reduce){running=true;loop();} } function stop(){ running=false; cancelAnimationFrame(raf); }
+    document.addEventListener('visibilitychange',function(){ if(document.hidden)stop(); else start(); });
+    start();
+  })();
+})();
+</script>
+</body>
+</html>

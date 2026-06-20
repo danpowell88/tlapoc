@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Lumea — the all-in-one operating system for aesthetic clinics</title>
-<meta name="description" content="Lumea is the compliance-native platform for aesthetic injectable & cosmetic clinics: bookings, consent & S4 prescribing, injection-mapping charting, stock traceability, memberships, reporting and cold-chain monitoring — in one place."/>
+<title>Lumea — all-in-one software for aesthetic clinics</title>
+<meta name="description" content="Lumea is friendly all-in-one software for aesthetic clinics: bookings, consent, treatment notes, payments, memberships, reminders and fridge monitoring — in one calm place. Built for clinic teams, not techies."/>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -91,11 +91,11 @@ tailwind.config={theme:{extend:{
       <span class="font-display text-xl font-semibold tracking-tight">Lumea</span>
     </a>
     <nav class="hidden lg:flex items-center gap-7 text-sm font-medium text-slate-600 mx-auto">
-      <a href="#features" class="hover:text-brand-700 transition">Platform</a>
-      <a href="#clinical" class="hover:text-brand-700 transition">Clinical</a>
-      <a href="#compliance" class="hover:text-brand-700 transition">Compliance</a>
-      <a href="#roles" class="hover:text-brand-700 transition">Roles</a>
-      <a href="#hardware" class="hover:text-brand-700 transition">Hardware</a>
+      <a href="#features" class="hover:text-brand-700 transition">What's inside</a>
+      <a href="#clinical" class="hover:text-brand-700 transition">Notes</a>
+      <a href="#compliance" class="hover:text-brand-700 transition">Staying safe</a>
+      <a href="#roles" class="hover:text-brand-700 transition">Your team</a>
+      <a href="#hardware" class="hover:text-brand-700 transition">Fridge</a>
       <a href="#pricing" class="hover:text-brand-700 transition">Pricing</a>
     </nav>
     <div class="hidden sm:flex items-center gap-2 ml-auto lg:ml-0">
@@ -108,11 +108,11 @@ tailwind.config={theme:{extend:{
   </div>
   <div id="mobileMenu" class="lg:hidden hidden border-t border-slate-100 bg-white/95 backdrop-blur px-5 py-3">
     <div class="flex flex-col gap-1 text-sm font-medium text-slate-700">
-      <a href="#features" class="px-3 py-2.5 rounded-lg hover:bg-slate-50">Platform</a>
-      <a href="#clinical" class="px-3 py-2.5 rounded-lg hover:bg-slate-50">Clinical</a>
-      <a href="#compliance" class="px-3 py-2.5 rounded-lg hover:bg-slate-50">Compliance</a>
-      <a href="#roles" class="px-3 py-2.5 rounded-lg hover:bg-slate-50">Roles</a>
-      <a href="#hardware" class="px-3 py-2.5 rounded-lg hover:bg-slate-50">Hardware</a>
+      <a href="#features" class="px-3 py-2.5 rounded-lg hover:bg-slate-50">What's inside</a>
+      <a href="#clinical" class="px-3 py-2.5 rounded-lg hover:bg-slate-50">Notes</a>
+      <a href="#compliance" class="px-3 py-2.5 rounded-lg hover:bg-slate-50">Staying safe</a>
+      <a href="#roles" class="px-3 py-2.5 rounded-lg hover:bg-slate-50">Your team</a>
+      <a href="#hardware" class="px-3 py-2.5 rounded-lg hover:bg-slate-50">Fridge</a>
       <a href="#pricing" class="px-3 py-2.5 rounded-lg hover:bg-slate-50">Pricing</a>
       <a href="prototype.html" class="mt-2 px-3 py-2.5 rounded-lg text-center font-semibold text-white bg-brand-600">Open the live demo</a>
     </div>
@@ -132,15 +132,15 @@ tailwind.config={theme:{extend:{
     <div>
       <div class="reveal inline-flex items-center gap-2 text-xs font-semibold tracking-wide uppercase text-brand-700 bg-brand-50 border border-brand-100 rounded-full px-3 py-1.5">
         <span class="size-1.5 rounded-full bg-brand-500 animate-pulse"></span>
-        Concept platform · built for AU / QLD clinics
+        Made for clinic teams &amp; nurses · built for AU clinics
       </div>
       <h1 class="reveal font-display text-5xl sm:text-6xl xl:text-7xl font-semibold leading-[1.03] tracking-tight mt-5">
-        The all-in-one OS for <span class="grad-text italic">aesthetic clinics</span>.
+        Your whole clinic, in <span class="grad-text italic">one calm place</span>.
       </h1>
       <p class="reveal text-lg text-slate-600 mt-6 max-w-xl leading-relaxed">
-        Lumea replaces the patchwork of generic booking software, spreadsheets and paper consent.
-        Bookings, S4 prescribing, injection-mapping charts, stock traceability, memberships and reporting —
-        <span class="text-ink font-medium">one clinical-first platform</span>, compliance woven in.
+        No more juggling a booking app, spreadsheets and paper forms. Lumea keeps your
+        bookings, consent, treatment notes, payments, memberships and reminders together —
+        <span class="text-ink font-medium">one tidy place</span>, with the safety paperwork looked after for you.
       </p>
       <div class="reveal flex flex-wrap items-center gap-3 mt-8">
         <a href="prototype.html" class="group inline-flex items-center gap-2 px-5 py-3.5 rounded-2xl font-semibold text-white bg-gradient-to-br from-brand-500 to-brand-700 shadow-lift hover:-translate-y-0.5 transition">
@@ -158,11 +158,13 @@ tailwind.config={theme:{extend:{
       </div>
     </div>
 
-    <!-- hero visual: floating parallax UI cards -->
+    <!-- hero visual: WebGL 3D scene with floating parallax UI cards on top -->
     <div class="relative h-[30rem] lg:h-[34rem] hidden sm:block" id="heroVisual">
-      <!-- glow plate -->
-      <div class="absolute inset-6 rounded-[2rem] bg-gradient-to-br from-brand-600 to-brand-900 shadow-lift" data-parallax="0.05"></div>
-      <div class="absolute inset-6 rounded-[2rem] dotgrid opacity-20"></div>
+      <!-- glow plate hosting the live 3D scene (Three.js draws into the canvas) -->
+      <div class="absolute inset-6 rounded-[2rem] bg-gradient-to-br from-brand-600 to-brand-900 shadow-lift overflow-hidden" data-parallax="0.05">
+        <canvas id="bg3d" class="absolute inset-0 w-full h-full" style="pointer-events:none"></canvas>
+      </div>
+      <div class="absolute inset-6 rounded-[2rem] dotgrid opacity-20 pointer-events-none"></div>
 
       <!-- card: today schedule -->
       <div class="float absolute left-2 top-6 w-64 bg-white rounded-2xl shadow-card p-4 border border-slate-100" data-parallax="0.12" data-tilt>
@@ -190,13 +192,13 @@ tailwind.config={theme:{extend:{
       <div class="float d1 absolute right-1 top-24 w-60 bg-white rounded-2xl shadow-card p-4 border border-slate-100" data-parallax="0.22" data-tilt>
         <div class="flex items-center gap-2 mb-2">
           <span class="size-8 rounded-lg bg-emerald-100 text-emerald-700 grid place-items-center"><span class="material-symbols-rounded text-lg">verified</span></span>
-          <div class="text-sm font-semibold">Consent &amp; S4 gate</div>
+          <div class="text-sm font-semibold">Safety checklist</div>
         </div>
         <div class="space-y-1.5 text-xs">
           <div class="flex items-center gap-2 text-emerald-700"><span class="material-symbols-rounded text-base">check_circle</span> Consent signed</div>
-          <div class="flex items-center gap-2 text-emerald-700"><span class="material-symbols-rounded text-base">check_circle</span> NP authorisation</div>
+          <div class="flex items-center gap-2 text-emerald-700"><span class="material-symbols-rounded text-base">check_circle</span> Sign-off done</div>
           <div class="flex items-center gap-2 text-emerald-700"><span class="material-symbols-rounded text-base">check_circle</span> Cooling-off met</div>
-          <div class="flex items-center gap-2 text-slate-400"><span class="material-symbols-rounded text-base">lock</span> Ready to chart</div>
+          <div class="flex items-center gap-2 text-slate-400"><span class="material-symbols-rounded text-base">lock</span> Ready to start</div>
         </div>
       </div>
 
@@ -259,20 +261,20 @@ tailwind.config={theme:{extend:{
 <section class="max-w-7xl mx-auto px-5 sm:px-8 py-20">
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
     <div class="reveal text-center">
-      <div class="font-display text-5xl sm:text-6xl font-semibold grad-text" data-count="11">0</div>
-      <div class="text-sm text-slate-500 mt-2 font-medium">Product modules,<br>one platform</div>
+      <div class="font-display text-5xl sm:text-6xl font-semibold grad-text" data-count="1">0</div>
+      <div class="text-sm text-slate-500 mt-2 font-medium">place for<br>everything</div>
     </div>
     <div class="reveal text-center">
       <div class="font-display text-5xl sm:text-6xl font-semibold grad-text" data-count="8">0</div>
-      <div class="text-sm text-slate-500 mt-2 font-medium">Connected<br>operational areas</div>
+      <div class="text-sm text-slate-500 mt-2 font-medium">parts of your day,<br>joined up</div>
     </div>
     <div class="reveal text-center">
       <div class="font-display text-5xl sm:text-6xl font-semibold grad-text" data-count="24">0</div>
-      <div class="text-sm text-slate-500 mt-2 font-medium">Compliance criteria<br>tracked end-to-end</div>
+      <div class="text-sm text-slate-500 mt-2 font-medium">safety checks<br>looked after</div>
     </div>
     <div class="reveal text-center">
       <div class="font-display text-5xl sm:text-6xl font-semibold grad-text" data-count="6">0</div>
-      <div class="text-sm text-slate-500 mt-2 font-medium">Role-tailored<br>views &amp; permissions</div>
+      <div class="text-sm text-slate-500 mt-2 font-medium">roles, each their<br>own simple view</div>
     </div>
   </div>
 </section>
@@ -280,9 +282,9 @@ tailwind.config={theme:{extend:{
 <!-- ============================= FEATURES (BENTO) ============================= -->
 <section id="features" class="max-w-7xl mx-auto px-5 sm:px-8 py-16">
   <div class="max-w-2xl reveal">
-    <div class="text-xs font-semibold tracking-[0.2em] uppercase text-brand-600 mb-3">The platform</div>
-    <h2 class="font-display text-4xl sm:text-5xl font-semibold tracking-tight">Everything the clinic runs on, in one place.</h2>
-    <p class="text-slate-600 mt-4 text-lg">Eight tightly connected areas — the front desk, the treatment room, the stock fridge, the till and the back office — sharing one client record and one audit trail.</p>
+    <div class="text-xs font-semibold tracking-[0.2em] uppercase text-brand-600 mb-3">What's inside</div>
+    <h2 class="font-display text-4xl sm:text-5xl font-semibold tracking-tight">Everything your clinic runs on, in one place.</h2>
+    <p class="text-slate-600 mt-4 text-lg">The front desk, the treatment room, the stock fridge, the till and the back office — all sharing one client record, so nothing gets typed twice or lost.</p>
   </div>
 
   <div class="grid md:grid-cols-3 gap-5 mt-12">
@@ -303,15 +305,15 @@ tailwind.config={theme:{extend:{
     <!-- feature: clinical -->
     <article class="reveal lift rounded-3xl p-7 bg-white border border-slate-200 shadow-soft">
       <span class="size-12 rounded-2xl bg-rose-50 text-rose-600 grid place-items-center"><span class="material-symbols-rounded">clinical_notes</span></span>
-      <h3 class="text-xl font-bold mt-5">Clinical charting</h3>
-      <p class="text-slate-600 mt-2 text-sm">Modality-aware notes, injection mapping, before/after photography and complication tracking — built for injectables, not retrofitted.</p>
+      <h3 class="text-xl font-bold mt-5">Treatment notes</h3>
+      <p class="text-slate-600 mt-2 text-sm">Map where you treated, add before/after photos and note anything to watch — built for injectables, easy at the chair.</p>
     </article>
 
     <!-- feature: stock -->
     <article class="reveal lift rounded-3xl p-7 bg-white border border-slate-200 shadow-soft">
       <span class="size-12 rounded-2xl bg-amber-50 text-amber-600 grid place-items-center"><span class="material-symbols-rounded">inventory_2</span></span>
-      <h3 class="text-xl font-bold mt-5">Stock &amp; medicines</h3>
-      <p class="text-slate-600 mt-2 text-sm">Lot-level traceability, cold-chain logging, reconciliation and instant recall lookup — every vial accounted for.</p>
+      <h3 class="text-xl font-bold mt-5">Stock &amp; fridge</h3>
+      <p class="text-slate-600 mt-2 text-sm">Know what's in the fridge, what's running low and that it stayed cold — every vial accounted for, no clipboard.</p>
     </article>
 
     <!-- feature: checkout -->
@@ -324,8 +326,8 @@ tailwind.config={theme:{extend:{
     <!-- feature: growth -->
     <article class="reveal lift rounded-3xl p-7 bg-white border border-slate-200 shadow-soft">
       <span class="size-12 rounded-2xl bg-sky-50 text-sky-600 grid place-items-center"><span class="material-symbols-rounded">campaign</span></span>
-      <h3 class="text-xl font-bold mt-5">Growth &amp; comms</h3>
-      <p class="text-slate-600 mt-2 text-sm">Unified inbox, lead CRM, reviews, reminders &amp; recall — with an advertising linter that keeps marketing TGA-safe.</p>
+      <h3 class="text-xl font-bold mt-5">Messages &amp; growth</h3>
+      <p class="text-slate-600 mt-2 text-sm">One inbox for texts and emails, plus reminders, reviews and recalls — with a gentle check that keeps your posts on the right side of the rules.</p>
     </article>
 
     <!-- big feature: governance -->
@@ -333,13 +335,13 @@ tailwind.config={theme:{extend:{
       <div class="absolute inset-0 dotgrid opacity-10"></div>
       <div class="relative">
         <span class="size-12 rounded-2xl bg-brand-500/20 text-brand-300 grid place-items-center"><span class="material-symbols-rounded">policy</span></span>
-        <h3 class="text-2xl font-bold mt-5">Governance, finance &amp; team</h3>
-        <p class="text-slate-300 mt-2 max-w-lg">Adverse-event &amp; recall registers, policies, waste, privacy and a complete audit log. Plus rostering, credentials &amp; CPD, indemnity tracking, a live compliance board, and finance that reconciles to Xero.</p>
+        <h3 class="text-2xl font-bold mt-5">Behind the scenes: money, team &amp; safety</h3>
+        <p class="text-slate-300 mt-2 max-w-lg">A tidy record of everything, plus staff rosters, training and registration dates, a simple safety board, and takings that quietly add up and match your accounts in Xero.</p>
         <div class="flex flex-wrap gap-2 mt-5 text-xs font-medium text-slate-200">
-          <span class="px-3 py-1 rounded-full bg-white/10">Audit log</span>
-          <span class="px-3 py-1 rounded-full bg-white/10">Adverse events / DAEN</span>
-          <span class="px-3 py-1 rounded-full bg-white/10">Credentials &amp; CPD</span>
-          <span class="px-3 py-1 rounded-full bg-white/10">Xero reconciliation</span>
+          <span class="px-3 py-1 rounded-full bg-white/10">Activity log</span>
+          <span class="px-3 py-1 rounded-full bg-white/10">Safety board</span>
+          <span class="px-3 py-1 rounded-full bg-white/10">Staff &amp; training</span>
+          <span class="px-3 py-1 rounded-full bg-white/10">Matches your accounts</span>
         </div>
       </div>
     </article>
@@ -355,8 +357,8 @@ tailwind.config={theme:{extend:{
       <div class="rounded-3xl bg-white border border-slate-200 shadow-card p-6">
         <div class="flex items-center justify-between mb-4">
           <div>
-            <div class="text-xs text-mute uppercase tracking-wide font-semibold">Charting · botulinum</div>
-            <div class="font-bold text-lg">Client 360 · session 4</div>
+            <div class="text-xs text-mute uppercase tracking-wide font-semibold">Treatment notes</div>
+            <div class="font-bold text-lg">Emma · visit 4</div>
           </div>
           <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700">Consent OK</span>
         </div>
@@ -384,19 +386,19 @@ tailwind.config={theme:{extend:{
           </div>
         </div>
         <div class="mt-4 flex items-center gap-2 text-xs text-mute">
-          <span class="material-symbols-rounded text-brand-500 text-base">history</span> Auto-versioned to the audit trail · linked to lot #BTX-2291
+          <span class="material-symbols-rounded text-brand-500 text-base">history</span> Saved automatically · linked to the product used
         </div>
       </div>
     </div>
     <!-- copy -->
     <div class="order-1 lg:order-2">
-      <div class="reveal text-xs font-semibold tracking-[0.2em] uppercase text-brand-600 mb-3">Clinical charting</div>
-      <h2 class="reveal font-display text-4xl sm:text-5xl font-semibold tracking-tight">Charts that speak <span class="grad-text italic">injectables</span>.</h2>
-      <p class="reveal text-slate-600 mt-5 text-lg leading-relaxed">Drop pins on an anatomical map, record units and product per site, capture before/after photos, and flag complications — all from one screen, on a tablet in the treatment room.</p>
+      <div class="reveal text-xs font-semibold tracking-[0.2em] uppercase text-brand-600 mb-3">Treatment notes</div>
+      <h2 class="reveal font-display text-4xl sm:text-5xl font-semibold tracking-tight">Notes that fit how you <span class="grad-text italic">actually work</span>.</h2>
+      <p class="reveal text-slate-600 mt-5 text-lg leading-relaxed">Tap where you treated on a simple face map, jot the amount used, snap before/after photos and note anything to keep an eye on — all on a tablet, right there in the room.</p>
       <ul class="mt-7 space-y-4">
-        <li class="reveal flex gap-3"><span class="material-symbols-rounded text-brand-600 mt-0.5">touch_app</span><div><b class="text-ink">Injection mapping</b><div class="text-slate-600 text-sm">Tap-to-place sites with dose, product and lot — the dose math is done for you.</div></div></li>
-        <li class="reveal flex gap-3"><span class="material-symbols-rounded text-brand-600 mt-0.5">compare</span><div><b class="text-ink">Before &amp; after</b><div class="text-slate-600 text-sm">Standardised photo capture tied to each session, ready for review and consent.</div></div></li>
-        <li class="reveal flex gap-3"><span class="material-symbols-rounded text-brand-600 mt-0.5">link</span><div><b class="text-ink">Traceable by design</b><div class="text-slate-600 text-sm">Every chart links to the lot used, the prescriber and the consent — auto-versioned.</div></div></li>
+        <li class="reveal flex gap-3"><span class="material-symbols-rounded text-brand-600 mt-0.5">touch_app</span><div><b class="text-ink">Tap to map</b><div class="text-slate-600 text-sm">Place each spot with the amount and product — the maths is done for you.</div></div></li>
+        <li class="reveal flex gap-3"><span class="material-symbols-rounded text-brand-600 mt-0.5">compare</span><div><b class="text-ink">Before &amp; after</b><div class="text-slate-600 text-sm">Photos saved with each visit, ready to compare and show your client.</div></div></li>
+        <li class="reveal flex gap-3"><span class="material-symbols-rounded text-brand-600 mt-0.5">link</span><div><b class="text-ink">Saved for you</b><div class="text-slate-600 text-sm">Each note links to the product used and the consent — kept tidy, automatically.</div></div></li>
       </ul>
     </div>
   </div>
@@ -406,34 +408,34 @@ tailwind.config={theme:{extend:{
 <section id="compliance" class="parallax-band relative text-white py-28" style="background-image:linear-gradient(115deg,rgba(15,118,110,.96),rgba(17,94,89,.96)),radial-gradient(circle at 20% 30%,rgba(45,212,191,.4),transparent 40%),radial-gradient(circle at 80% 70%,rgba(45,212,191,.25),transparent 45%);background-color:#0f766e">
   <div class="max-w-7xl mx-auto px-5 sm:px-8">
     <div class="max-w-2xl">
-      <div class="reveal inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-brand-100 bg-white/10 rounded-full px-3 py-1.5">The moat</div>
-      <h2 class="reveal font-display text-4xl sm:text-5xl font-semibold tracking-tight mt-5">Compliance is woven in, <br class="hidden sm:block">not bolted on.</h2>
-      <p class="reveal text-brand-50/90 mt-5 text-lg leading-relaxed">Generic booking tools treat regulation as paperwork you do on the side. Lumea makes it the rail the workflow runs on — so the clinic can't accidentally step outside the rules.</p>
+      <div class="reveal inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-brand-100 bg-white/10 rounded-full px-3 py-1.5">Staying safe</div>
+      <h2 class="reveal font-display text-4xl sm:text-5xl font-semibold tracking-tight mt-5">The rules, handled <br class="hidden sm:block">quietly for you.</h2>
+      <p class="reveal text-brand-50/90 mt-5 text-lg leading-relaxed">Other tools leave the safety paperwork to you, on the side. Lumea builds it into the everyday flow — so the right boxes get ticked without anyone having to remember a rulebook.</p>
     </div>
 
     <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-12">
       <div class="reveal rounded-2xl bg-white/10 backdrop-blur border border-white/15 p-6">
         <span class="material-symbols-rounded text-brand-200 text-3xl">verified</span>
-        <h3 class="font-bold text-lg mt-3">Consent gating</h3>
-        <p class="text-brand-50/80 text-sm mt-1.5">Treatment can't start until consent, cooling-off and authorisation checks pass.</p>
+        <h3 class="font-bold text-lg mt-3">Consent comes first</h3>
+        <p class="text-brand-50/80 text-sm mt-1.5">A treatment can't start until consent, cooling-off and sign-off are done.</p>
       </div>
       <div class="reveal rounded-2xl bg-white/10 backdrop-blur border border-white/15 p-6">
         <span class="material-symbols-rounded text-brand-200 text-3xl">prescriptions</span>
-        <h3 class="font-bold text-lg mt-3">S4 prescribing</h3>
-        <p class="text-brand-50/80 text-sm mt-1.5">NP/medical authorisation, scripts and S4 medicines governance, tracked to the dose.</p>
+        <h3 class="font-bold text-lg mt-3">Medicines tracked</h3>
+        <p class="text-brand-50/80 text-sm mt-1.5">Sign-offs and prescription medicines are recorded for you, down to the amount.</p>
       </div>
       <div class="reveal rounded-2xl bg-white/10 backdrop-blur border border-white/15 p-6">
         <span class="material-symbols-rounded text-brand-200 text-3xl">campaign</span>
-        <h3 class="font-bold text-lg mt-3">Ad linter</h3>
-        <p class="text-brand-50/80 text-sm mt-1.5">Catches prohibited S4 advertising language before a post ever goes out.</p>
+        <h3 class="font-bold text-lg mt-3">Safer posts</h3>
+        <p class="text-brand-50/80 text-sm mt-1.5">A friendly heads-up if a social post uses wording that isn't allowed.</p>
       </div>
       <div class="reveal rounded-2xl bg-white/10 backdrop-blur border border-white/15 p-6">
         <span class="material-symbols-rounded text-brand-200 text-3xl">fact_check</span>
-        <h3 class="font-bold text-lg mt-3">Audit trail</h3>
-        <p class="text-brand-50/80 text-sm mt-1.5">Every action stamped — who, what, when — across all 24 compliance criteria.</p>
+        <h3 class="font-bold text-lg mt-3">A tidy record</h3>
+        <p class="text-brand-50/80 text-sm mt-1.5">Who did what, and when — kept quietly, ready if you're ever asked.</p>
       </div>
     </div>
-    <p class="reveal text-brand-100/70 text-sm mt-8 flex items-center gap-2"><span class="material-symbols-rounded text-base">shield</span> Aligned to TGA, AHPRA, QLD Health S4 and the Privacy Act.</p>
+    <p class="reveal text-brand-100/70 text-sm mt-8 flex items-center gap-2"><span class="material-symbols-rounded text-base">shield</span> Built around Australian rules for cosmetic clinics — TGA, AHPRA, S4 medicines &amp; the Privacy Act.</p>
   </div>
 </section>
 
@@ -442,14 +444,14 @@ tailwind.config={theme:{extend:{
   <div class="blob bg-violet-100 size-[26rem] -right-28 top-0" data-parallax="0.07" style="opacity:.4"></div>
   <div class="max-w-7xl mx-auto px-5 sm:px-8 grid lg:grid-cols-2 gap-14 items-center">
     <div>
-      <div class="reveal text-xs font-semibold tracking-[0.2em] uppercase text-brand-600 mb-3">Commerce</div>
-      <h2 class="reveal font-display text-4xl sm:text-5xl font-semibold tracking-tight">Revenue that <span class="grad-text italic">runs itself</span>.</h2>
-      <p class="reveal text-slate-600 mt-5 text-lg leading-relaxed">Take payment at the chair, enrol clients into autopay memberships, run rewards, and model price changes before you commit — then watch it reconcile cleanly into Xero.</p>
+      <div class="reveal text-xs font-semibold tracking-[0.2em] uppercase text-brand-600 mb-3">Payments &amp; memberships</div>
+      <h2 class="reveal font-display text-4xl sm:text-5xl font-semibold tracking-tight">Getting paid, <span class="grad-text italic">made easy</span>.</h2>
+      <p class="reveal text-slate-600 mt-5 text-lg leading-relaxed">Tap to take payment at the chair, set up memberships that renew on their own, and reward your regulars — then watch the takings tidy themselves into your accounts.</p>
       <div class="grid sm:grid-cols-2 gap-4 mt-7">
-        <div class="reveal rounded-2xl border border-slate-200 p-5 bg-white shadow-soft"><span class="material-symbols-rounded text-violet-600">credit_card</span><div class="font-semibold mt-2">In-person POS</div><div class="text-sm text-slate-600">Card-present checkout via Square.</div></div>
-        <div class="reveal rounded-2xl border border-slate-200 p-5 bg-white shadow-soft"><span class="material-symbols-rounded text-violet-600">autorenew</span><div class="font-semibold mt-2">Autopay</div><div class="text-sm text-slate-600">Recurring memberships, card-on-file.</div></div>
-        <div class="reveal rounded-2xl border border-slate-200 p-5 bg-white shadow-soft"><span class="material-symbols-rounded text-violet-600">loyalty</span><div class="font-semibold mt-2">Rewards</div><div class="text-sm text-slate-600">Non-S4 loyalty that retains clients.</div></div>
-        <div class="reveal rounded-2xl border border-slate-200 p-5 bg-white shadow-soft"><span class="material-symbols-rounded text-violet-600">query_stats</span><div class="font-semibold mt-2">Pricing what-if</div><div class="text-sm text-slate-600">Model changes before you apply them.</div></div>
+        <div class="reveal rounded-2xl border border-slate-200 p-5 bg-white shadow-soft"><span class="material-symbols-rounded text-violet-600">credit_card</span><div class="font-semibold mt-2">Tap to pay</div><div class="text-sm text-slate-600">Card payments at the chair.</div></div>
+        <div class="reveal rounded-2xl border border-slate-200 p-5 bg-white shadow-soft"><span class="material-symbols-rounded text-violet-600">autorenew</span><div class="font-semibold mt-2">Autopay</div><div class="text-sm text-slate-600">Memberships that renew themselves.</div></div>
+        <div class="reveal rounded-2xl border border-slate-200 p-5 bg-white shadow-soft"><span class="material-symbols-rounded text-violet-600">loyalty</span><div class="font-semibold mt-2">Rewards</div><div class="text-sm text-slate-600">Loyalty that keeps clients coming back.</div></div>
+        <div class="reveal rounded-2xl border border-slate-200 p-5 bg-white shadow-soft"><span class="material-symbols-rounded text-violet-600">query_stats</span><div class="font-semibold mt-2">Try a price</div><div class="text-sm text-slate-600">See the effect before you change it.</div></div>
       </div>
     </div>
     <!-- mockup -->
@@ -480,9 +482,9 @@ tailwind.config={theme:{extend:{
     <p class="text-slate-600 mt-4 text-lg">Everyone sees exactly what they need — and nothing they shouldn't. Money figures stay with the owner; clinical detail stays with clinicians.</p>
   </div>
   <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-12">
-    <div class="reveal lift rounded-2xl border border-slate-200 bg-white p-6 shadow-soft"><span class="size-11 rounded-xl bg-brand-50 text-brand-700 grid place-items-center"><span class="material-symbols-rounded">medical_services</span></span><h3 class="font-bold mt-4">Nurse Practitioner</h3><p class="text-sm text-slate-600 mt-1">Prescribe, authorise and oversee — the clinical lead's command centre.</p></div>
-    <div class="reveal lift rounded-2xl border border-slate-200 bg-white p-6 shadow-soft"><span class="size-11 rounded-xl bg-brand-50 text-brand-700 grid place-items-center"><span class="material-symbols-rounded">vaccines</span></span><h3 class="font-bold mt-4">Registered Nurse</h3><p class="text-sm text-slate-600 mt-1">Chart treatments, map injections and capture photos at the chair.</p></div>
-    <div class="reveal lift rounded-2xl border border-slate-200 bg-white p-6 shadow-soft"><span class="size-11 rounded-xl bg-brand-50 text-brand-700 grid place-items-center"><span class="material-symbols-rounded">face_retouching_natural</span></span><h3 class="font-bold mt-4">Dermal Therapist</h3><p class="text-sm text-slate-600 mt-1">Skin treatments, plans and progress — modality-aware notes.</p></div>
+    <div class="reveal lift rounded-2xl border border-slate-200 bg-white p-6 shadow-soft"><span class="size-11 rounded-xl bg-brand-50 text-brand-700 grid place-items-center"><span class="material-symbols-rounded">medical_services</span></span><h3 class="font-bold mt-4">Nurse Practitioner</h3><p class="text-sm text-slate-600 mt-1">Prescribe, sign off and keep an eye on the clinical side — the lead's home base.</p></div>
+    <div class="reveal lift rounded-2xl border border-slate-200 bg-white p-6 shadow-soft"><span class="size-11 rounded-xl bg-brand-50 text-brand-700 grid place-items-center"><span class="material-symbols-rounded">vaccines</span></span><h3 class="font-bold mt-4">Registered Nurse</h3><p class="text-sm text-slate-600 mt-1">Write up treatments, map them and capture photos — quickly, at the chair.</p></div>
+    <div class="reveal lift rounded-2xl border border-slate-200 bg-white p-6 shadow-soft"><span class="size-11 rounded-xl bg-brand-50 text-brand-700 grid place-items-center"><span class="material-symbols-rounded">face_retouching_natural</span></span><h3 class="font-bold mt-4">Dermal Therapist</h3><p class="text-sm text-slate-600 mt-1">Skin treatments, plans and progress notes — all in one place.</p></div>
     <div class="reveal lift rounded-2xl border border-slate-200 bg-white p-6 shadow-soft"><span class="size-11 rounded-xl bg-brand-50 text-brand-700 grid place-items-center"><span class="material-symbols-rounded">co_present</span></span><h3 class="font-bold mt-4">Reception</h3><p class="text-sm text-slate-600 mt-1">Bookings, check-in, memberships and calls — without seeing the money.</p></div>
     <div class="reveal lift rounded-2xl border border-slate-200 bg-white p-6 shadow-soft"><span class="size-11 rounded-xl bg-brand-50 text-brand-700 grid place-items-center"><span class="material-symbols-rounded">insights</span></span><h3 class="font-bold mt-4">Owner</h3><p class="text-sm text-slate-600 mt-1">The full picture — finance, reporting and the compliance board.</p></div>
     <div class="reveal lift rounded-2xl border border-slate-200 bg-white p-6 shadow-soft"><span class="size-11 rounded-xl bg-brand-50 text-brand-700 grid place-items-center"><span class="material-symbols-rounded">sentiment_satisfied</span></span><h3 class="font-bold mt-4">Client</h3><p class="text-sm text-slate-600 mt-1">Book, consent, pay and rebook from the companion mobile app.</p></div>
@@ -495,15 +497,15 @@ tailwind.config={theme:{extend:{
   <div class="blob bg-brand-500 size-[26rem] -left-24 bottom-0" data-parallax="0.08" style="opacity:.3"></div>
   <div class="relative max-w-7xl mx-auto px-5 sm:px-8 grid lg:grid-cols-2 gap-14 items-center">
     <div>
-      <div class="reveal text-xs font-semibold tracking-[0.2em] uppercase text-brand-300 mb-3">Hardware · cold-chain</div>
-      <h2 class="reveal font-display text-4xl sm:text-5xl font-semibold tracking-tight">Your fridge, <span class="grad-text italic">on the network</span>.</h2>
-      <p class="reveal text-slate-300 mt-5 text-lg leading-relaxed">S4 medicines live or die by temperature. Our reference ESP32 monitor streams live per-fridge readings into Lumea over WiFi — and the moment a fridge drifts out of range, it raises a breach job and logs it to the cold-chain record.</p>
+      <div class="reveal text-xs font-semibold tracking-[0.2em] uppercase text-brand-300 mb-3">Fridge monitoring</div>
+      <h2 class="reveal font-display text-4xl sm:text-5xl font-semibold tracking-tight">Your fridge, <span class="grad-text italic">watched for you</span>.</h2>
+      <p class="reveal text-slate-300 mt-5 text-lg leading-relaxed">Your medicines need to stay cold. A small wireless sensor sends the fridge temperature straight into Lumea — and the moment it gets too warm, you get an alert and it's noted in the record. No more handwritten temperature logs.</p>
       <div class="grid sm:grid-cols-3 gap-4 mt-8">
-        <div class="reveal rounded-2xl bg-white/5 border border-white/10 p-5"><span class="material-symbols-rounded text-brand-300">thermostat</span><div class="font-semibold mt-2 text-sm">Live readings</div><div class="text-slate-400 text-xs mt-1">Per fridge, per clinic.</div></div>
-        <div class="reveal rounded-2xl bg-white/5 border border-white/10 p-5"><span class="material-symbols-rounded text-brand-300">notifications_active</span><div class="font-semibold mt-2 text-sm">Breach alerts</div><div class="text-slate-400 text-xs mt-1">Auto-raised jobs.</div></div>
-        <div class="reveal rounded-2xl bg-white/5 border border-white/10 p-5"><span class="material-symbols-rounded text-brand-300">lock</span><div class="font-semibold mt-2 text-sm">Private API</div><div class="text-slate-400 text-xs mt-1">Authed, per-clinic.</div></div>
+        <div class="reveal rounded-2xl bg-white/5 border border-white/10 p-5"><span class="material-symbols-rounded text-brand-300">thermostat</span><div class="font-semibold mt-2 text-sm">Live readings</div><div class="text-slate-400 text-xs mt-1">Every fridge, all day.</div></div>
+        <div class="reveal rounded-2xl bg-white/5 border border-white/10 p-5"><span class="material-symbols-rounded text-brand-300">notifications_active</span><div class="font-semibold mt-2 text-sm">Instant alerts</div><div class="text-slate-400 text-xs mt-1">If it drifts too warm.</div></div>
+        <div class="reveal rounded-2xl bg-white/5 border border-white/10 p-5"><span class="material-symbols-rounded text-brand-300">lock</span><div class="font-semibold mt-2 text-sm">Private &amp; secure</div><div class="text-slate-400 text-xs mt-1">Just for your clinic.</div></div>
       </div>
-      <a href="docs.html" class="reveal inline-flex items-center gap-2 mt-8 text-brand-300 font-semibold hover:text-brand-200 transition">Read the hardware reference design <span class="material-symbols-rounded text-base">arrow_forward</span></a>
+      <a href="docs.html" class="reveal inline-flex items-center gap-2 mt-8 text-brand-300 font-semibold hover:text-brand-200 transition">See how the sensor works <span class="material-symbols-rounded text-base">arrow_forward</span></a>
     </div>
     <!-- device mockup -->
     <div class="reveal relative" data-parallax="0.05">
@@ -545,9 +547,9 @@ tailwind.config={theme:{extend:{
       <div class="text-xs text-mute mt-1">one room · one clinician</div>
       <ul class="mt-6 space-y-3 text-sm text-slate-700 flex-1">
         <li class="flex gap-2"><span class="material-symbols-rounded text-brand-500 text-lg">check</span>Bookings &amp; client records</li>
-        <li class="flex gap-2"><span class="material-symbols-rounded text-brand-500 text-lg">check</span>Charting &amp; injection mapping</li>
-        <li class="flex gap-2"><span class="material-symbols-rounded text-brand-500 text-lg">check</span>Consent &amp; S4 gating</li>
-        <li class="flex gap-2"><span class="material-symbols-rounded text-brand-500 text-lg">check</span>POS &amp; basic reporting</li>
+        <li class="flex gap-2"><span class="material-symbols-rounded text-brand-500 text-lg">check</span>Treatment notes &amp; photos</li>
+        <li class="flex gap-2"><span class="material-symbols-rounded text-brand-500 text-lg">check</span>Consent &amp; safety checks</li>
+        <li class="flex gap-2"><span class="material-symbols-rounded text-brand-500 text-lg">check</span>Payments &amp; simple reports</li>
       </ul>
       <a href="#contact" class="mt-7 w-full py-3 rounded-xl text-center font-semibold text-brand-700 border border-brand-200 hover:bg-brand-50 transition">Book a demo</a>
     </div>
@@ -561,7 +563,7 @@ tailwind.config={theme:{extend:{
       <ul class="mt-6 space-y-3 text-sm text-slate-700 flex-1">
         <li class="flex gap-2"><span class="material-symbols-rounded text-brand-500 text-lg">check</span>Everything in Solo</li>
         <li class="flex gap-2"><span class="material-symbols-rounded text-brand-500 text-lg">check</span>Memberships &amp; autopay</li>
-        <li class="flex gap-2"><span class="material-symbols-rounded text-brand-500 text-lg">check</span>Stock, lots &amp; cold-chain</li>
+        <li class="flex gap-2"><span class="material-symbols-rounded text-brand-500 text-lg">check</span>Stock &amp; fridge monitoring</li>
         <li class="flex gap-2"><span class="material-symbols-rounded text-brand-500 text-lg">check</span>Growth, inbox &amp; recall</li>
         <li class="flex gap-2"><span class="material-symbols-rounded text-brand-500 text-lg">check</span>Xero &amp; calendar sync</li>
       </ul>
@@ -622,19 +624,19 @@ tailwind.config={theme:{extend:{
   <div class="space-y-3">
     <details class="reveal group rounded-2xl border border-slate-200 bg-white p-5 shadow-soft" open>
       <summary class="flex items-center justify-between font-semibold text-lg">Is this a real, live product?<span class="faq-ico material-symbols-rounded text-brand-600">add</span></summary>
-      <p class="text-slate-600 mt-3">This is a concept prototype ("Option A — Clinical Calm") with fully synthetic data. It demonstrates how an all-in-one, compliance-native platform for aesthetic clinics would look and feel end-to-end.</p>
+      <p class="text-slate-600 mt-3">This is a concept with made-up sample data. It shows how friendly, all-in-one software for an aesthetic clinic would look and feel from end to end.</p>
     </details>
     <details class="reveal group rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
-      <summary class="flex items-center justify-between font-semibold text-lg">How is it different from generic booking software?<span class="faq-ico material-symbols-rounded text-brand-600">add</span></summary>
-      <p class="text-slate-600 mt-3">Generic tools bolt compliance on as paperwork. Lumea builds S4 prescribing, consent gating and the audit trail into the core workflow — plus charting designed for injectables, lot-level stock traceability and cold-chain monitoring that off-the-shelf tools simply don't have.</p>
+      <summary class="flex items-center justify-between font-semibold text-lg">Is it hard to learn?<span class="faq-ico material-symbols-rounded text-brand-600">add</span></summary>
+      <p class="text-slate-600 mt-3">Not at all — it's built for clinic teams, not IT. The screens follow how your day actually flows, so most people are comfortable within a morning.</p>
     </details>
     <details class="reveal group rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
-      <summary class="flex items-center justify-between font-semibold text-lg">What compliance frameworks does it cover?<span class="faq-ico material-symbols-rounded text-brand-600">add</span></summary>
-      <p class="text-slate-600 mt-3">The design is mapped to TGA advertising rules, AHPRA, QLD Health S4 medicines governance and the Privacy Act — tracked across 24 compliance criteria with a live compliance board.</p>
+      <summary class="flex items-center justify-between font-semibold text-lg">Does it keep us on the right side of the rules?<span class="faq-ico material-symbols-rounded text-brand-600">add</span></summary>
+      <p class="text-slate-600 mt-3">Yes — the safety paperwork is built in and designed around the Australian rules for cosmetic clinics (TGA, AHPRA, S4 medicines and the Privacy Act), so the right boxes get ticked as you go.</p>
     </details>
     <details class="reveal group rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
       <summary class="flex items-center justify-between font-semibold text-lg">Does it work on mobile and tablet?<span class="faq-ico material-symbols-rounded text-brand-600">add</span></summary>
-      <p class="text-slate-600 mt-3">Yes — a responsive web app for the front desk and back office, with companion client &amp; provider apps (Flutter) for booking, consent and charting on the go.</p>
+      <p class="text-slate-600 mt-3">Yes — it's lovely on a tablet in the treatment room, with apps for your team and your clients for booking, consent and notes on the go.</p>
     </details>
     <details class="reveal group rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
       <summary class="flex items-center justify-between font-semibold text-lg">Can I see how it actually works?<span class="faq-ico material-symbols-rounded text-brand-600">add</span></summary>
@@ -663,7 +665,7 @@ tailwind.config={theme:{extend:{
         <span class="size-9 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-white grid place-items-center font-bold">L</span>
         <span class="font-display text-xl font-semibold tracking-tight text-white">Lumea</span>
       </a>
-      <p class="mt-4 text-sm max-w-xs">The compliance-native operating system for aesthetic injectable &amp; cosmetic clinics. A concept prototype — all data is synthetic.</p>
+      <p class="mt-4 text-sm max-w-xs">Friendly, all-in-one software for aesthetic &amp; cosmetic clinics. A concept — all data is made up.</p>
     </div>
     <div>
       <div class="text-white font-semibold text-sm mb-3">Explore</div>
@@ -701,6 +703,8 @@ tailwind.config={theme:{extend:{
   </div>
 </footer>
 
+<!-- Three.js (WebGL) — progressive enhancement; page works fully without it -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (function(){
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -788,6 +792,65 @@ tailwind.config={theme:{extend:{
   window.addEventListener('scroll', pump, {passive:true});
   window.addEventListener('resize', pump, {passive:true});
   if(!reduce){ window.addEventListener('pointermove', onPointer, {passive:true}); }
+
+  /* ---- WebGL hero scene (Three.js) — progressive enhancement.
+         Draws softly-lit floating shapes into the plate behind the hero cards.
+         Guarded so a missing CDN / no-WebGL device simply keeps the gradient. ---- */
+  function initThree(){
+    if(!window.THREE) return;
+    var canvas = document.getElementById('bg3d');
+    if(!canvas) return;
+    var renderer;
+    try { renderer = new THREE.WebGLRenderer({canvas:canvas, alpha:true, antialias:true}); }
+    catch(e){ return; } // no WebGL — gradient plate remains
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(55, 1, 0.1, 100);
+    camera.position.z = 15;
+    scene.add(new THREE.AmbientLight(0xffffff, 0.85));
+    var key = new THREE.DirectionalLight(0xccfbf1, 1.1); key.position.set(4, 6, 8); scene.add(key);
+    var rim = new THREE.DirectionalLight(0x5eead4, 0.6); rim.position.set(-6, -2, 4); scene.add(rim);
+
+    var group = new THREE.Group(); scene.add(group);
+    var geos = [new THREE.IcosahedronGeometry(1,0), new THREE.OctahedronGeometry(1,0), new THREE.TorusGeometry(0.7,0.28,16,40), new THREE.DodecahedronGeometry(1,0)];
+    var cols = [0x14b8a6, 0x2dd4bf, 0x5eead4, 0x99f6e4];
+    var shapes = [];
+    for(var i=0;i<14;i++){
+      var mat = new THREE.MeshStandardMaterial({color: cols[i%cols.length], roughness:0.35, metalness:0.15, flatShading:true, transparent:true, opacity:0.92});
+      var m = new THREE.Mesh(geos[i%geos.length], mat);
+      m.position.set((Math.random()-0.5)*16, (Math.random()-0.5)*12, (Math.random()-0.5)*7);
+      var s = 0.45 + Math.random()*1.25; m.scale.set(s,s,s);
+      m.userData = {rx:(Math.random()-0.5)*0.012, ry:(Math.random()-0.5)*0.012, ph:Math.random()*Math.PI*2};
+      group.add(m); shapes.push(m);
+    }
+    function resize(){
+      var w = canvas.clientWidth || 1, h = canvas.clientHeight || 1;
+      renderer.setSize(w, h, false); camera.aspect = w/h; camera.updateProjectionMatrix();
+    }
+    resize();
+    renderer.render(scene, camera); // one synchronous frame so something shows even if rAF is throttled
+
+    var mx = 0, my = 0;
+    window.addEventListener('pointermove', function(e){ mx = (e.clientX/window.innerWidth - 0.5); my = (e.clientY/window.innerHeight - 0.5); }, {passive:true});
+    window.addEventListener('resize', resize, {passive:true});
+
+    var raf, t = 0, running = false;
+    function loop(){
+      raf = requestAnimationFrame(loop); t += 0.01;
+      for(var i=0;i<shapes.length;i++){ var m = shapes[i]; m.rotation.x += m.userData.rx; m.rotation.y += m.userData.ry; m.position.y += Math.sin(t + m.userData.ph)*0.004; }
+      group.rotation.y += 0.0009;
+      camera.position.x += (mx*5 - camera.position.x)*0.05;
+      camera.position.y += (-my*3 - camera.position.y)*0.05;
+      camera.lookAt(0,0,0);
+      renderer.render(scene, camera);
+    }
+    function start(){ if(!running && !reduce){ running = true; loop(); } }
+    function stop(){ running = false; cancelAnimationFrame(raf); }
+    document.addEventListener('visibilitychange', function(){ if(document.hidden) stop(); else start(); });
+    start();
+  }
+  initThree();
 
   // initial pass — reveals/counters above the fold fire immediately on load
   frame();
