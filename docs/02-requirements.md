@@ -389,6 +389,8 @@ Each becomes a focused PRD (problem, user stories, flows, data, acceptance crite
 > Six research/design passes extended the prototype with POC flows for the areas it didn't yet cover —
 > **treatments & clinical depth, front desk & operations, money & retail, staff & HR, compliance & governance, growth & integrations** (client app excluded). New REQ lines are grouped by module; ADRs are the
 > reconciled **ADR-0025…0036**. Most are ⏭ Phase 2 with the prototype showing the concept now.
+>
+> **Scope adjustments (rev 4.1, 2026-06-20):** (1) **Finances move to Xero & integrations** — the app keeps only **pricing / what-if + high-level reporting**; in-app commission pay-run, supplier POs/AP, refund/dispute management and BAS/GST are **dropped** (ADR-0027 revised; REQ-RPT-6 narrowed; REQ-MED-14, REQ-PAY-7 reclassified external). (2) **Newsletter builder & social scheduler removed** — email campaigns & social posting live in the clinic's existing tools (Mailchimp, Meta Business Suite); the advertising linter now covers **review replies + the public booking page** (ADR-0034 revised; REQ-NOTIF-10/11 withdrawn). (3) **Reviews** gain **acknowledge / flag / auto-detect follow-up** for negative reviews & complaints (ADR-0032 extended; REQ-NOTIF-8 strengthened).
 
 **New / extended requirements**
 
@@ -410,10 +412,10 @@ Each becomes a focused PRD (problem, user stories, flows, data, acceptance crite
 |---|---|---|
 | **Clinical** area: treatment-menu modality model; complication-response modal (VO/anaphylaxis → AE + job); photography/ghost-overlay; outcomes | REQ-CLIN-10..13 ➕, REQ-FAC-4 ➕, ADR-0025 | ✅ ➕ (⏭ deep charting) |
 | **Operations** area: twice-daily **fridge log + breach → quarantine + job**; open/close checklist; rooms/devices + utilisation; equipment register; call log + walk-in/waitlist | REQ-FAC-5/6/7 ➕, REQ-BOOK-8/9/10 ➕, REQ-MED-13 ➕, REQ-NOTIF-8(phone) ➕, ADR-0026 | ✅ ➕ (hard-conflict ⏭) |
-| **Finance** area: commission/pay-run + engagement-risk banner; PO + reorder + S4-signer; refunds/disputes; BAS/GST | REQ-RPT-6 ➕, REQ-MED-14/15 ➕, REQ-PAY-7..10 ➕, REQ-TEN-6 ➕, ADR-0027 | ✅ ➕ (full payroll ⏭/out) |
+| **Finance** area *(rev 4.1)*: light **pricing + high-level reporting** hub; books deferred to **Xero** (in-app commission/PO/AP/disputes/BAS dropped) | REQ-RPT-6 (narrowed), ADR-0022/0027 (revised) | ✅ |
 | **Team** area: roster & leave; people & credentials; **compliance board** (`canInject` gate, PII-excludes-cosmetic block) | REQ-TEN-6..9 ➕, ADR-0028/0029 | ✅ ➕ (PIE auto-verify 🔬) |
 | **Governance** area: overview digest; **AE/DAEN routing + submit**; **recall execution + ack tracking**; policy sign-off; waste manifests + IPC; DSAR + breach drill; **audit pack** | REQ-RPT-7 ➕, REQ-FAC-8/9/10 ➕, REQ-SEC-8/9 ➕, REQ-MED-12 ➕, ADR-0030/0031, C12 | ✅ ➕ (electronic submit 🔬) |
-| **Growth** area: leads CRM; reviews (S4-testimonial block); newsletter + per-block linter; social scheduler | REQ-NOTIF-8..12 ➕, REQ-MEMB-10 ➕, ADR-0032/0033/0034 | ✅ ➕ (lite) |
+| **Growth** area *(rev 4.1)*: leads CRM; reviews with **acknowledge / flag / auto-detect follow-up** + S4-repost block — newsletter & social **removed** (handled in Mailchimp/Meta) | REQ-NOTIF-8/9 ➕, REQ-MEMB-10 ➕, ADR-0032/0033/0034 (revised) | ✅ ➕ |
 | **Settings → Integrations** + public-booking-page preview (generic names, S4 price withheld) | REQ-INT-2a/4/5/6/7 ➕, REQ-NOTIF-12 ➕, ADR-0035/0036 | ✅ ➕ (mostly concept ⏭) |
 
 **12.2 register additions**

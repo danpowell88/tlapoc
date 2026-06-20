@@ -212,6 +212,7 @@ into individual `ADR-NNNN-*.md` files later; kept as one log for a lean team.
 **Decision:** Compute money views as **read models** over the reporting layer (ADR-0013): commission pay-run = attributed service+product revenue × a configured split, exported as CSV / Xero bill — we do **not** calculate super/PAYG/payroll tax; an **engagement-type flag** drives a compliance banner. `PurchaseOrder` + receiving extends the catalogue (ADR-0021); **S4 POs require a prescriber signer** + ARTG/lawful supply (C11). Retail SKUs are non-S4 catalogue items. Every catalogue item carries a **`taxCode`**; invoices compute **GST per line** + a BAS summary (G1/1A/1B) to Xero. Refunds/disputes use `IPaymentProvider.refund` (ADR-0007) + the Jobs queue (ADR-0023) and **restock non-S4 only**; BNPL (Afterpay/Zip) are tenders, not new processors.
 **Consequences:** Faithful money attribution and correct GST without owning payroll/tax liability (stays with the accountant). Risk: clinics may read commission output as tax-ready — mitigated by an explicit non-advice banner.
 **Alternatives:** Build a payroll/super engine (rejected — liability + scope); off-platform spreadsheets (loses live attribution).
+> **Revised 2026-06-20 (scope cut):** the books move to **Xero & integrations**. The app keeps **pricing / what-if** (ADR-0022) and **high-level reporting** (ADR-0013) only; in-app **commission pay-run, supplier POs/AP, refund/dispute management and BAS/GST tooling are dropped** (handled in Xero / payroll / the bookkeeper). Per-line tax coding + invoice/payment sync to Xero remains so the books stay correct. The **Finance screen becomes a light pricing + reporting hub** that defers the ledger to Xero. (REQ-RPT-6 narrows to pricing + reporting; REQ-MED-14 PO/AP and REQ-PAY-7 dispute-management move to "external / Xero".)
 
 ## ADR-0028 — Credential, CPD & **insurance currency** as first-class gating data
 **Status:** Accepted (POC simulates AHPRA verification)
@@ -247,6 +248,7 @@ into individual `ADR-NNNN-*.md` files later; kept as one log for a lean team.
 **Decision:** Post-visit review requests go to **all** eligible clients with no sentiment pre-screen. Staff may **reply** to any review. The platform **prevents** surfacing/reposting a review as marketing when it references an S4 outcome — the `s4` flag (ADR-0014) + advertising linter (REQ-NOTIF-4) drive the block.
 **Consequences:** Defensible under both AHPRA and ACL; the reputation feature can't be weaponised into non-compliant testimonials.
 **Alternatives:** Gated review requests (illegal); free reposting (prohibited testimonials).
+> **Extended 2026-06-20:** reviews can be **acknowledged** and **flagged for follow-up**; negative reviews (≤3★) and complaint-keyword matches are **auto-detected** and raised as review jobs in the Follow-ups queue (Lead Nurse for unhappy/clinical, Reception otherwise) — closing the loop between a public review and the action it needs.
 
 ## ADR-0033 — Lead / prospect **CRM as a projection over conversations**
 **Status:** Accepted
@@ -261,6 +263,7 @@ into individual `ADR-NNNN-*.md` files later; kept as one log for a lean team.
 **Decision:** Every public-content surface reuses the single advertising-linter service (REQ-NOTIF-4) + the `s4` flag (ADR-0014), **per-block / per-field** (server-side, not just UI); a mandatory Spam-Act footer (sender ID + unsubscribe) is injected and non-removable; cosmetic posts auto-label 18+.
 **Consequences:** Consistent, hard-to-bypass compliance across growth surfaces; the linter is the choke-point.
 **Alternatives:** Per-surface ad-hoc checks (drift, gaps, accidental breaches).
+> **Revised 2026-06-20 (scope cut):** the **newsletter builder and social scheduler are out of scope** — email campaigns and social posting are handled in the clinic's existing tools (Mailchimp, Meta Business Suite), not rebuilt here. The single advertising linter now governs the surfaces the app **does** own: **review replies, 1:1 inbox replies, and the public booking page / SEO**. (REQ-NOTIF-10 newsletter & REQ-NOTIF-11 social → withdrawn; the linter requirement REQ-NOTIF-4 stands.)
 
 ## ADR-0035 — **e-Prescribing** via `IPrescribingProvider` adapter (eRx/ETP) — 🔬 *feasibility research required*
 **Status:** Proposed (deferred; research)

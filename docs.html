@@ -6,6 +6,7 @@
 <title>Documentation — The Lounge Aesthetics POC</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
 <style>
   :root{--brand:#0d9488;--ink:#0f172a;--mute:#64748b;--line:#e2e8f0;--bg:#f8fafc}
   *{box-sizing:border-box}
@@ -31,6 +32,8 @@
   .content blockquote{margin:1em 0;padding:.4em 1em;border-left:3px solid var(--brand);background:#f0fdfa;color:#334155;border-radius:0 8px 8px 0}
   .content a{color:var(--brand)}
   .content hr{border:none;border-top:1px solid var(--line);margin:2em 0}
+  .content .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px;margin:1.2em 0;text-align:center;overflow:auto}
+  .content .mermaid svg{max-width:100%;height:auto}
   @media(max-width:760px){.side{display:none}.content{padding:24px 18px 60px}}
 </style>
 </head>
@@ -49,6 +52,15 @@
 <script>
 const DOCS=[
  {p:"docs/00-index.md",t:"Overview & index",g:"Start here"},
+ {p:"docs/overviews/00-overviews-index.md",t:"Area overviews — index",g:"Area overviews"},
+ {p:"docs/overviews/01-front-desk-operations.md",t:"Front desk & operations",g:"Area overviews"},
+ {p:"docs/overviews/02-clinical.md",t:"Clinical",g:"Area overviews"},
+ {p:"docs/overviews/03-stock-medicines.md",t:"Stock & medicines",g:"Area overviews"},
+ {p:"docs/overviews/04-checkout-memberships-pricing.md",t:"Checkout, memberships & pricing",g:"Area overviews"},
+ {p:"docs/overviews/05-finance-reporting.md",t:"Finance & reporting",g:"Area overviews"},
+ {p:"docs/overviews/06-team-hr.md",t:"Team & HR",g:"Area overviews"},
+ {p:"docs/overviews/07-governance-compliance.md",t:"Governance & compliance",g:"Area overviews"},
+ {p:"docs/overviews/08-growth-communications.md",t:"Growth & communications",g:"Area overviews"},
  {p:"docs/01-market-research.md",t:"Market research",g:"Research"},
  {p:"docs/02-requirements.md",t:"Requirements & compliance",g:"Requirements"},
  {p:"docs/adr/decision-log.md",t:"Architecture decisions (ADRs)",g:"Architecture"},
@@ -67,12 +79,17 @@ const DOCS=[
  {p:"docs/ux/flows.md",t:"UX flows",g:"UX"},
 ];
 marked.setOptions({gfm:true,breaks:false});
+if(window.mermaid)mermaid.initialize({startOnLoad:false,theme:"neutral",securityLevel:"loose",flowchart:{useMaxWidth:true,htmlLabels:true}});
 const side=document.getElementById("side"),content=document.getElementById("content");
+function renderMermaid(){
+  content.querySelectorAll("code.language-mermaid").forEach(function(code){var pre=code.closest("pre")||code;var div=document.createElement("div");div.className="mermaid";div.textContent=code.textContent;pre.replaceWith(div);});
+  if(window.mermaid){try{var r=mermaid.run({querySelector:"#content .mermaid"});if(r&&r.catch)r.catch(function(){});}catch(e){}}
+}
 (function buildSide(){let g=null;DOCS.forEach(d=>{if(d.g!==g){g=d.g;const h=document.createElement("div");h.className="grp";h.textContent=g;side.appendChild(h);}const a=document.createElement("a");a.textContent=d.t;a.href="#"+d.p;a.dataset.p=d.p;side.appendChild(a);});})();
 function active(p){side.querySelectorAll("a").forEach(a=>a.classList.toggle("on",a.dataset.p===p));}
 async function show(p){
   active(p);content.innerHTML="Loading…";
-  try{const md=await fetch(p).then(r=>{if(!r.ok)throw r.status;return r.text();});content.innerHTML=marked.parse(md);window.scrollTo(0,0);}
+  try{const md=await fetch(p).then(r=>{if(!r.ok)throw r.status;return r.text();});content.innerHTML=marked.parse(md);renderMermaid();window.scrollTo(0,0);}
   catch(e){content.innerHTML="<h1>Couldn't load document</h1><p>"+p+" ("+e+")</p>";}
 }
 function current(){const h=decodeURIComponent(location.hash.slice(1));return DOCS.find(d=>d.p===h)?h:DOCS[0].p;}
