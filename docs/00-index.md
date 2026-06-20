@@ -9,10 +9,11 @@ clinics (the modern replacement for Mindbody). This folder holds the full planni
 |---|-----|------------|
 | 1 | [01-market-research.md](01-market-research.md) | Competitor deep-dives, feature taxonomy, AU/QLD regulatory landscape |
 | 2 | [02-requirements.md](02-requirements.md) | Locked decisions, modules (`REQ-*`), 24 compliance criteria (`C1–C24`), phasing |
-| 3 | [adr/decision-log.md](adr/decision-log.md) | Architecture Decision Records (`ADR-0001…`) — the "how" |
-| 4 | [prds/](prds/) | Product Requirement Docs (`PRD-01…11`) — per-feature detail, → backlog |
-| 5 | [ux/README.md](ux/README.md) | UX principles, screen inventory & end-to-end flows |
-| 6 | [overviews/](overviews/00-overviews-index.md) | **Area overviews** — per-section function tours with workflow flowcharts & roles |
+| 3 | [03-commercial-model.md](03-commercial-model.md) | **Pricing structure, QLD market size (TAM/SAM/SOM), revenue projection & operating costs** |
+| 4 | [adr/decision-log.md](adr/decision-log.md) | Architecture Decision Records (`ADR-0001…`) — the "how" |
+| 5 | [prds/](prds/) | Product Requirement Docs (`PRD-01…11`) — per-feature detail, → backlog |
+| 6 | [ux/README.md](ux/README.md) | UX principles, screen inventory & end-to-end flows |
+| 7 | [overviews/](overviews/00-overviews-index.md) | **Area overviews** — per-section function tours with workflow flowcharts & roles |
 
 ## Area overviews (function tours)
 
