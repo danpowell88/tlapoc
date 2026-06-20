@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Book an appointment</title>
+<!--
+  The Lounge Aesthetics — embeddable PUBLIC booking widget (POC).
+  Self-contained: scoped CSS (theme via CSS variables), vanilla JS, synthetic data, no network.
+  Designed to render inside a clinic's own website via <iframe> or via embed.js.
+
+  Compliance model (docs: PRD-02 §6, PRD-07 §10.6, C9):
+   - Public, clinic-customised "display" names only — never S4 brands / "anti-wrinkle injections".
+   - Prices are WITHHELD. S4-scheduled services are *always* price-free + flagged "consultation required".
+   - Scope-aware: injectables (S4) only offer practitioners with RN/NP scope.
+   - No deposit / card-on-file (v1).
+
+  Config arrives two ways:
+   1. URL query params (used by the iframe snippet)  e.g. ?clinic=...&primary=14b8a6&radius=18&theme=dark
+   2. postMessage {type:'tla:config', config:{...}} from the host (used by embed.js data-config & the playground)
+
+  The widget talks back to the host with postMessage:
+   - {type:'tla:ready'}                       on load
+   - {type:'tla:resize', height}              whenever content height changes (host auto-resizes the iframe)
+   - {type:'tla:booking', payload}            on a completed booking request
+-->
+<style>
+  :root{
+    --p:#0d9488; --on-p:#ffffff;
+    --p-soft:color-mix(in srgb, var(--p) 12%, #fff);
+    --p-line:color-mix(in srgb, var(--p) 38%, #fff);
+    --bg:#f6f7f9; --surface:#ffffff; --surface-2:#f1f5f9;
+    --text:#0f172a; --muted:#64748b; --border:#e2e8f0;
+    --radius:16px;
+    --font:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --shadow:0 1px 2px rgba(16,24,40,.06),0 6px 22px rgba(16,24,40,.07);
+  }
+  html[data-theme="dark"]{
+    --on-p:#ffffff;
+    --p-soft:color-mix(in srgb, var(--p) 22%, #0b1220);
+    --p-line:color-mix(in srgb, var(--p) 46%, #0b1220);
+    --bg:#0b1220; --surface:#111a2b; --surface-2:#0e1626;
+    --text:#e8edf5; --muted:#94a3b8; --border:#243149;
+    --shadow:0 1px 2px rgba(0,0,0,.35),0 14px 34px rgba(0,0,0,.4);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:transparent}
+  body{font-family:var(--font);color:var(--text);-webkit-font-smoothing:antialiased;line-height:1.45}
+  .wrap{max-width:560px;margin:0 auto;background:var(--surface);border:1px solid var(--border);
+        border-radius:calc(var(--radius) + 4px);box-shadow:var(--shadow);overflow:hidden}
+  /* header */
+  .head{padding:18px 22px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
+  .logo{width:40px;height:40px;border-radius:calc(var(--radius) - 4px);background:var(--p);color:var(--on-p);
+        display:grid;place-items:center;font-weight:800;font-size:18px;flex:none}
+  .head h1{font-size:16px;font-weight:700;margin:0;letter-spacing:-.01em}
+  .head .sub{font-size:12px;color:var(--muted);margin-top:1px}
+  /* progress */
+  .steps{display:flex;gap:6px;padding:14px 22px 0}
+  .steps .s{flex:1;height:4px;border-radius:99px;background:var(--surface-2)}
+  .steps .s.on{background:var(--p)}
+  .steps .s.done{background:var(--p-line)}
+  .crumb{padding:12px 22px 0;display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;min-height:18px}
+  .crumb .back{display:inline-flex;align-items:center;gap:4px;background:none;border:0;color:var(--p);
+        font:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:4px 6px;border-radius:8px}
+  .crumb .back:hover{background:var(--p-soft)}
+  /* body */
+  .body{padding:14px 22px 22px}
+  .lead{font-size:18px;font-weight:700;letter-spacing:-.01em;margin:6px 0 2px}
+  .hint{font-size:13px;color:var(--muted);margin:0 0 14px}
+  /* cards */
+  .opt{width:100%;text-align:left;display:flex;gap:12px;align-items:flex-start;
+       padding:14px;border:1.5px solid var(--border);border-radius:var(--radius);background:var(--surface);
+       cursor:pointer;margin-bottom:10px;transition:border-color .12s,background .12s,transform .04s;color:inherit}
+  .opt:hover{border-color:var(--p-line)}
+  .opt:active{transform:scale(.995)}
+  .opt.sel{border-color:var(--p);background:var(--p-soft)}
+  .opt .ic{width:38px;height:38px;border-radius:10px;background:var(--surface-2);color:var(--p);
+       display:grid;place-items:center;flex:none;font-size:20px}
+  .opt .t{font-weight:650;font-size:15px}
+  .opt .d{font-size:12.5px;color:var(--muted);margin-top:3px}
+  .opt .meta{margin-top:7px;display:flex;flex-wrap:wrap;gap:6px}
+  .tag{font-size:11px;font-weight:600;padding:3px 8px;border-radius:99px;background:var(--surface-2);color:var(--muted)}
+  .tag.gate{background:color-mix(in srgb,var(--p) 14%,transparent);color:var(--p)}
+  .opt .chev{margin-left:auto;color:var(--muted);align-self:center;font-size:20px}
+  /* day strip + slots */
+  .daystrip{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px;scrollbar-width:thin}
+  .day{flex:none;width:64px;text-align:center;padding:10px 6px;border:1.5px solid var(--border);
+       border-radius:var(--radius);background:var(--surface);cursor:pointer;color:inherit;transition:border-color .12s,background .12s}
+  .day:hover{border-color:var(--p-line)}
+  .day.sel{border-color:var(--p);background:var(--p-soft)}
+  .day .dow{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .day .num{font-size:18px;font-weight:700;margin-top:2px}
+  .day .mon{font-size:10.5px;color:var(--muted);margin-top:1px}
+  .slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .slot{padding:10px 6px;border:1.5px solid var(--border);border-radius:12px;background:var(--surface);
+        cursor:pointer;font:inherit;font-size:13.5px;font-weight:600;color:inherit;transition:border-color .12s,background .12s}
+  .slot:hover{border-color:var(--p-line)}
+  .slot.sel{border-color:var(--p);background:var(--p);color:var(--on-p)}
+  .empty{font-size:13px;color:var(--muted);padding:18px 0;text-align:center}
+  /* form */
+  .field{margin-bottom:13px}
+  .field label{display:block;font-size:12.5px;font-weight:600;margin-bottom:5px}
+  .field input,.field textarea{width:100%;padding:11px 12px;border:1.5px solid var(--border);border-radius:12px;
+       background:var(--surface);color:var(--text);font:inherit;font-size:14px;outline:none;transition:border-color .12s}
+  .field input:focus,.field textarea:focus{border-color:var(--p)}
+  .field textarea{resize:vertical;min-height:64px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .check{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:var(--muted);margin:4px 0 4px}
+  .check input{margin-top:2px;width:16px;height:16px;accent-color:var(--p);flex:none}
+  /* summary */
+  .summary{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:14px}
+  .summary .r{display:flex;justify-content:space-between;gap:12px;padding:11px 14px;border-bottom:1px solid var(--border);font-size:13.5px}
+  .summary .r:last-child{border-bottom:0}
+  .summary .r .k{color:var(--muted)}
+  .summary .r .v{font-weight:600;text-align:right}
+  .note{display:flex;gap:8px;font-size:12.5px;color:var(--muted);background:var(--surface-2);
+        padding:11px 13px;border-radius:12px;margin-bottom:14px;line-height:1.4}
+  .note .ic{color:var(--p);flex:none}
+  /* buttons */
+  .btn{width:100%;padding:13px 16px;border-radius:var(--radius);border:0;font:inherit;font-size:15px;font-weight:700;cursor:pointer}
+  .btn-primary{background:var(--p);color:var(--on-p)}
+  .btn-primary:hover{filter:brightness(.95)}
+  .btn-primary:disabled{opacity:.5;cursor:not-allowed;filter:none}
+  .btn-ghost{background:var(--surface);border:1.5px solid var(--border);color:var(--text);margin-top:8px}
+  .btn-ghost:hover{border-color:var(--p-line)}
+  /* success */
+  .ok{text-align:center;padding:14px 6px}
+  .ok .ring{width:64px;height:64px;border-radius:99px;background:var(--p-soft);color:var(--p);
+       display:grid;place-items:center;margin:6px auto 14px;font-size:34px}
+  .ok h2{font-size:20px;margin:0 0 6px}
+  .ok p{color:var(--muted);font-size:14px;margin:0 auto 6px;max-width:380px}
+  .ref{display:inline-block;margin-top:8px;font-weight:700;letter-spacing:.06em;background:var(--surface-2);
+       padding:8px 14px;border-radius:10px}
+  /* footer */
+  .foot{padding:12px 22px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);
+        display:flex;justify-content:space-between;gap:10px;align-items:center}
+  .foot a{color:var(--muted)}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  @media(max-width:480px){.row2{grid-template-columns:1fr}.slots{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap" id="wrap">
+  <div class="head" id="head">
+    <div class="logo" id="logo">L</div>
+    <div>
+      <h1 id="clinicName">The Lounge Aesthetics</h1>
+      <div class="sub">Book an appointment</div>
+    </div>
+  </div>
+  <div class="steps" id="steps"></div>
+  <div class="crumb" id="crumb"></div>
+  <div class="body" id="view"></div>
+  <div class="foot">
+    <span id="footNote">Your details are kept private &amp; used only to manage your booking.</span>
+    <span>Secured booking</span>
+  </div>
+</div>
+
+<script>
+"use strict";
+(function(){
+  /* ---------- defaults (synthetic) ------------------------------------- */
+  const DEFAULTS = {
+    clinic: 'The Lounge Aesthetics',
+    primary: '#0d9488',
+    radius: 16,
+    theme: 'light',
+    header: true,
+    cta: 'Request appointment',
+    mode: 'book',            // 'book' = choose a time · 'request' = no times, just enquire
+    font: '',
+    // Public, clinic-customised names only. `schedule:'S4'` => price-free + consult-gated + RN/NP scope.
+    services: [
+      { id:'consult', name:'Cosmetic consultation', schedule:'non-S4', dur:30, roles:['NP','RN','DT'],
+        desc:'Meet your practitioner to plan a personalised treatment. Redeemable against your treatment.' },
+      { id:'smooth', name:'Wrinkle-relaxing treatment', schedule:'S4', dur:45, roles:['NP','RN'],
+        desc:'A practitioner-led prescription treatment. A consultation is always included.' },
+      { id:'volume', name:'Volume &amp; contour', schedule:'S4', dur:45, roles:['NP','RN'],
+        desc:'Restore subtle volume and definition. Practitioner-led, consultation included.' },
+      { id:'booster', name:'Skin booster', schedule:'S4', dur:30, roles:['NP','RN'],
+        desc:'Deep-hydration skin treatment delivered by a practitioner.' },
+      { id:'facial', name:'Signature skin facial', schedule:'non-S4', dur:60, roles:['DT'],
+        desc:'A results-driven facial tailored to your skin by a dermal therapist.' },
+      { id:'laser', name:'Skin rejuvenation', schedule:'non-S4', dur:45, roles:['DT'],
+        desc:'Targeted light-based treatment for tone and texture.' }
+    ],
+    practitioners: [
+      { id:'lee',   name:'Dr Lee',  title:'Nurse Practitioner', role:'NP' },
+      { id:'bella', name:'Bella',   title:'Registered Nurse',   role:'RN' },
+      { id:'mara',  name:'Mara',    title:'Registered Nurse',   role:'RN' },
+      { id:'sienna',name:'Sienna',  title:'Dermal Therapist',   role:'DT' }
+    ]
+  };
+
+  /* ---------- config from URL params ---------------------------------- */
+  function fromURL(){
+    const q = new URLSearchParams(location.search);
+    const c = {};
+    if(q.has('clinic'))  c.clinic  = q.get('clinic');
+    if(q.has('primary')) c.primary = '#'+q.get('primary').replace(/^#/,'');
+    if(q.has('radius'))  c.radius  = parseInt(q.get('radius'),10);
+    if(q.has('theme'))   c.theme   = q.get('theme');
+    if(q.has('header'))  c.header  = q.get('header')!=='0';
+    if(q.has('cta'))     c.cta     = q.get('cta');
+    if(q.has('mode'))    c.mode    = q.get('mode');
+    if(q.has('font'))    c.font    = q.get('font');
+    // compact services:  svc=Name~dur~s4,Name~dur~ns   (clinic-customised public names)
+    if(q.has('svc')){
+      c.services = q.get('svc').split(',').filter(Boolean).map((s,i)=>{
+        const [name,dur,sch] = s.split('~');
+        const isS4 = (sch||'').toLowerCase().startsWith('s');
+        return { id:'s'+i, name:name.trim(), dur:parseInt(dur,10)||30,
+                 schedule:isS4?'S4':'non-S4', roles:isS4?['NP','RN']:['NP','RN','DT'],
+                 desc:isS4?'Practitioner-led prescription treatment. Consultation included.'
+                          :'Book a time that suits you.' };
+      });
+    }
+    return c;
+  }
+
+  let CFG = Object.assign({}, DEFAULTS, fromURL());
+
+  /* ---------- theming -------------------------------------------------- */
+  function luminance(hex){
+    const m = hex.replace('#','').match(/.{2}/g); if(!m) return 1;
+    const [r,g,b] = m.map(h=>{ const v=parseInt(h,16)/255; return v<=.03928? v/12.92 : Math.pow((v+.055)/1.055,2.4); });
+    return .2126*r + .7152*g + .0722*b;
+  }
+  function applyTheme(){
+    const root = document.documentElement, s = root.style;
+    root.setAttribute('data-theme', CFG.theme==='dark'?'dark':'light');
+    s.setProperty('--p', CFG.primary);
+    s.setProperty('--on-p', luminance(CFG.primary) > .55 ? '#0f172a' : '#ffffff');
+    s.setProperty('--radius', (Math.max(0,Math.min(28, CFG.radius))||16)+'px');
+    if(CFG.font) s.setProperty('--font', CFG.font + ", 'Inter', system-ui, sans-serif");
+    document.getElementById('clinicName').textContent = CFG.clinic;
+    document.getElementById('logo').textContent = (CFG.clinic.trim()[0]||'·').toUpperCase();
+    document.getElementById('head').style.display = CFG.header ? '' : 'none';
+  }
+
+  /* ---------- synthetic availability (deterministic) ------------------ */
+  function rnd(n){ const x = Math.sin(n*99.7)*10000; return x - Math.floor(x); }
+  function openDays(seed){
+    const out=[], today=new Date(); let d=0;
+    while(out.length<10 && d<28){
+      const date = new Date(today); date.setDate(today.getDate()+d); d++;
+      if(date.getDay()===0){ continue; }              // closed Sundays
+      out.push(date);
+    }
+    return out;
+  }
+  function slotsFor(date, seed){
+    const times=['9:00','9:30','10:00','10:30','11:00','11:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00'];
+    const key = date.getDate()*7 + date.getMonth()*31 + seed*13;
+    return times.filter((t,i)=> rnd(key+i) > 0.5);
+  }
+
+  /* ---------- state ---------------------------------------------------- */
+  const ST = { step:0, service:null, prac:null, day:null, time:null, form:{} };
+  const fmtDay  = d => d.toLocaleDateString('en-AU',{weekday:'short'}).toUpperCase();
+  const fmtNum  = d => d.getDate();
+  const fmtMon  = d => d.toLocaleDateString('en-AU',{month:'short'});
+  const fmtFull = d => d.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long'});
+  const esc = s => String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  // steps depend on mode (request mode skips time selection)
+  function flow(){ return CFG.mode==='request' ? ['service','prac','details','done'] : ['service','prac','time','details','done']; }
+
+  /* ---------- render --------------------------------------------------- */
+  const view = document.getElementById('view');
+  function render(){
+    const steps = flow(), cur = steps[ST.step];
+    // progress bar (exclude 'done')
+    const visible = steps.filter(s=>s!=='done');
+    document.getElementById('steps').innerHTML = visible.map((s,i)=>
+      `<div class="s ${i<ST.step?'done':''} ${i===ST.step?'on':''}"></div>`).join('');
+    // breadcrumb / back
+    document.getElementById('crumb').innerHTML = (ST.step>0 && cur!=='done')
+      ? `<button class="back" onclick="TLA.back()">&larr; Back</button>` : '';
+
+    if(cur==='service')  return renderService();
+    if(cur==='prac')     return renderPrac();
+    if(cur==='time')     return renderTime();
+    if(cur==='details')  return renderDetails();
+    if(cur==='done')     return renderDone();
+  }
+
+  function renderService(){
+    view.innerHTML =
+      `<div class="lead">What can we help with?</div>
+       <p class="hint">Choose a service. Pricing is confirmed privately with your practitioner.</p>` +
+      CFG.services.map(s=>{
+        const gated = s.schedule==='S4';
+        return `<button class="opt ${ST.service&&ST.service.id===s.id?'sel':''}" onclick="TLA.pickService('${s.id}')">
+          <div class="ic">${gated?'✦':'✿'}</div>
+          <div style="flex:1">
+            <div class="t">${esc(s.name)}</div>
+            <div class="d">${s.desc}</div>
+            <div class="meta">
+              <span class="tag">${s.dur} min</span>
+              ${gated?'<span class="tag gate">Consultation required</span>':''}
+            </div>
+          </div>
+          <div class="chev">›</div>
+        </button>`;
+      }).join('');
+    done();
+  }
+
+  function renderPrac(){
+    const eligible = CFG.practitioners.filter(p=> ST.service.roles.includes(p.role));
+    view.innerHTML =
+      `<div class="lead">Choose your practitioner</div>
+       <p class="hint">${ST.service.schedule==='S4'
+          ? 'Prescription treatments are delivered by our nurses &amp; nurse practitioners only.'
+          : 'Pick who you’d like to see, or let us choose.'}</p>
+       <button class="opt ${ST.prac==='any'?'sel':''}" onclick="TLA.pickPrac('any')">
+         <div class="ic">★</div>
+         <div style="flex:1"><div class="t">Any available</div><div class="d">Soonest appointment across the team.</div></div>
+         <div class="chev">›</div>
+       </button>` +
+      eligible.map(p=>`
+        <button class="opt ${ST.prac&&ST.prac.id===p.id?'sel':''}" onclick="TLA.pickPrac('${p.id}')">
+          <div class="ic">${esc(p.name.trim()[0])}</div>
+          <div style="flex:1"><div class="t">${esc(p.name)}</div><div class="d">${esc(p.title)}</div></div>
+          <div class="chev">›</div>
+        </button>`).join('');
+    done();
+  }
+
+  function renderTime(){
+    const seed = CFG.services.findIndex(s=>s.id===ST.service.id)+1;
+    const days = openDays(seed);
+    if(!ST.day) ST.day = days[0];
+    const daysHtml = days.map(d=>{
+      const sel = ST.day && d.toDateString()===ST.day.toDateString();
+      return `<button class="day ${sel?'sel':''}" onclick="TLA.pickDay('${d.toISOString()}')">
+        <div class="dow">${fmtDay(d)}</div><div class="num">${fmtNum(d)}</div><div class="mon">${fmtMon(d)}</div>
+      </button>`;
+    }).join('');
+    const slots = slotsFor(ST.day, seed);
+    const slotsHtml = slots.length
+      ? `<div class="slots">${slots.map(t=>`<button class="slot ${ST.time===t?'sel':''}" onclick="TLA.pickTime('${t}')">${t}</button>`).join('')}</div>`
+      : `<div class="empty">No times left this day — try another date.</div>`;
+    view.innerHTML =
+      `<div class="lead">Pick a time</div>
+       <p class="hint">${esc(ST.service.name)} · ${ST.service.dur} min${ST.prac&&ST.prac!=='any'?' · '+esc(ST.prac.name):''}</p>
+       <div class="daystrip">${daysHtml}</div>${slotsHtml}`;
+    done();
+  }
+
+  function renderDetails(){
+    const f = ST.form;
+    view.innerHTML =
+      `<div class="lead">Your details</div>
+       <p class="hint">We’ll confirm your ${CFG.mode==='request'?'enquiry':'appointment'} by email or text.</p>
+       <div class="row2">
+         <div class="field"><label>First name</label><input id="fn" value="${esc(f.fn||'')}" autocomplete="given-name"></div>
+         <div class="field"><label>Last name</label><input id="ln" value="${esc(f.ln||'')}" autocomplete="family-name"></div>
+       </div>
+       <div class="field"><label>Email</label><input id="em" type="email" value="${esc(f.em||'')}" autocomplete="email"></div>
+       <div class="field"><label>Mobile</label><input id="ph" type="tel" value="${esc(f.ph||'')}" autocomplete="tel"></div>
+       <div class="field"><label>Anything we should know? <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+         <textarea id="nt" placeholder="First visit, areas of interest, questions…">${esc(f.nt||'')}</textarea></div>
+       <label class="check"><input type="checkbox" id="mk" ${f.mk?'checked':''}>
+         <span>Send me skincare tips &amp; offers. You can unsubscribe anytime. Appointment reminders are sent regardless.</span></label>
+       <button class="btn btn-primary" id="submit" onclick="TLA.submit()">${esc(CFG.cta)}</button>`;
+    ['fn','ln','em','ph','nt','mk'].forEach(id=>{
+      const el=document.getElementById(id); if(!el) return;
+      el.addEventListener('input', ()=>{ f[id]= id==='mk'?el.checked:el.value; });
+    });
+    done();
+  }
+
+  function renderDone(){
+    const ref = 'TLA-' + Math.random().toString(36).slice(2,6).toUpperCase();
+    ST.ref = ref;
+    const when = (CFG.mode!=='request' && ST.day && ST.time)
+      ? `${fmtFull(ST.day)} at ${ST.time}` : 'We’ll be in touch to confirm a time';
+    view.innerHTML =
+      `<div class="ok">
+        <div class="ring">✓</div>
+        <h2>${CFG.mode==='request'?'Enquiry received':'Appointment requested'}</h2>
+        <p>Thanks ${esc(ST.form.fn||'')}, we’ve received your request for <b>${esc(ST.service.name)}</b>.</p>
+        <p>${esc(when)}.</p>
+        ${ST.service.schedule==='S4'
+          ? `<div class="note" style="text-align:left;margin-top:14px"><span class="ic">ℹ</span>
+             <span>This is a practitioner-led treatment. Suitability &amp; pricing are confirmed during your consultation — there’s nothing to pay now.</span></div>`
+          : ''}
+        <div class="ref">${ref}</div>
+        <button class="btn btn-ghost" onclick="TLA.reset()">Make another booking</button>
+      </div>`;
+    post({type:'tla:booking', payload:{
+      ref, service:ST.service.name, schedule:ST.service.schedule,
+      practitioner: ST.prac==='any'?'Any':(ST.prac&&ST.prac.name)||null,
+      date: (ST.day&&CFG.mode!=='request')?ST.day.toISOString().slice(0,10):null,
+      time: CFG.mode!=='request'?ST.time:null,
+      contact:{ name:[ST.form.fn,ST.form.ln].filter(Boolean).join(' '), email:ST.form.em, phone:ST.form.ph },
+      marketingOptIn: !!ST.form.mk
+    }});
+    done();
+  }
+
+  /* ---------- actions -------------------------------------------------- */
+  window.TLA = {
+    pickService(id){ ST.service = CFG.services.find(s=>s.id===id); ST.prac=null; ST.day=null; ST.time=null; next(); },
+    pickPrac(id){ ST.prac = id==='any'?'any':CFG.practitioners.find(p=>p.id===id); next(); },
+    pickDay(iso){ ST.day = new Date(iso); ST.time=null; render(); },
+    pickTime(t){ ST.time = t; next(); },
+    back(){ ST.step=Math.max(0,ST.step-1); render(); },
+    submit(){
+      const f=ST.form;
+      if(!f.fn||!f.em||!f.ph){ alert('Please add your name, email and mobile.'); return; }
+      next();
+    },
+    reset(){ ST.step=0; ST.service=ST.prac=ST.day=ST.time=null; ST.form={}; render(); }
+  };
+  function next(){
+    const steps=flow();
+    // skip 'time' automatically in request mode is handled by flow(); just advance
+    ST.step = Math.min(steps.length-1, ST.step+1);
+    render();
+  }
+
+  /* ---------- host messaging ------------------------------------------ */
+  function post(msg){ try{ parent.postMessage(msg, '*'); }catch(e){} }
+  let lastH = 0;
+  function postHeight(){ // getBoundingClientRect forces synchronous layout, so this is accurate immediately
+    const h = Math.ceil(document.getElementById('wrap').getBoundingClientRect().height) + 2;
+    if(h!==lastH){ lastH=h; post({type:'tla:resize', height:h}); }
+  }
+  function done(){ postHeight(); requestAnimationFrame(postHeight); } // sync now + after paint (fonts/reflow)
+  // belt-and-braces height tracking
+  if('ResizeObserver' in window){ new ResizeObserver(done).observe(document.getElementById('wrap')); }
+
+  window.addEventListener('message', e=>{
+    const d=e.data; if(!d||d.type!=='tla:config'||!d.config) return;
+    CFG = Object.assign({}, CFG, d.config);
+    applyTheme(); ST.step=0; ST.service=ST.prac=ST.day=ST.time=null; ST.form={}; render();
+  });
+
+  /* ---------- boot ----------------------------------------------------- */
+  applyTheme();
+  render();
+  post({type:'tla:ready'});
+})();
+</script>
+</body>
+</html>

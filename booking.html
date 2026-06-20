@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Public booking widget — embed &amp; customise · The Lounge Aesthetics POC</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','system-ui','sans-serif']},colors:{brand:{50:'#f0fdfa',100:'#ccfbf1',500:'#14b8a6',600:'#0d9488',700:'#0f766e',800:'#115e59'}}}}}</script>
+<style>
+  body{font-family:Inter,sans-serif}
+  .material-symbols-rounded{font-variation-settings:'FILL' 0,'wght' 400,'opsz' 24}
+  /* mock clinic site (the host page the widget gets dropped into) */
+  .site{font-family:'Segoe UI',Inter,system-ui,sans-serif}
+  .site-hero{background:linear-gradient(135deg,#faf5ff,#eef2ff)}
+  pre code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+</style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+<header class="max-w-6xl mx-auto px-6 pt-12 pb-5">
+  <div class="flex items-center justify-between gap-4 flex-wrap">
+    <div>
+      <div class="text-xs tracking-[0.25em] uppercase text-brand-600 font-semibold mb-2">Concept prototype · sample data</div>
+      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Public booking widget</h1>
+      <p class="text-slate-500 mt-3 max-w-2xl text-[15px]">An embeddable, white-label booking flow that drops into a clinic's <b>own</b> website — as an iframe or a one-line script. Prices are withheld and every treatment shows the clinic's own <b>public name</b>. Customise it on the left and watch the live preview update.</p>
+    </div>
+    <a href="index.html" class="text-sm text-brand-700 font-medium hover:underline flex items-center gap-1 shrink-0"><span class="material-symbols-rounded text-lg">arrow_back</span>Back to overview</a>
+  </div>
+</header>
+
+<main class="max-w-6xl mx-auto px-6 pb-20 grid lg:grid-cols-[360px_1fr] gap-6 items-start">
+
+  <!-- ========== CONTROLS ========== -->
+  <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 lg:sticky lg:top-5 space-y-5">
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-rounded text-brand-600">tune</span>
+      <h2 class="font-bold">Customise</h2>
+    </div>
+
+    <label class="block">
+      <span class="text-xs font-semibold text-slate-600">Clinic name</span>
+      <input id="c-clinic" value="Bayside Skin &amp; Laser" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 text-sm">
+    </label>
+
+    <div>
+      <span class="text-xs font-semibold text-slate-600">Brand colour</span>
+      <div class="mt-1.5 flex items-center gap-2">
+        <input id="c-primary" type="color" value="#7c3aed" class="w-10 h-9 rounded-lg border border-slate-200 bg-white p-0.5 cursor-pointer">
+        <div class="flex gap-1.5" id="swatches"></div>
+      </div>
+    </div>
+
+    <label class="block">
+      <span class="text-xs font-semibold text-slate-600 flex justify-between">Corner radius <span id="c-radius-v" class="text-slate-400 font-normal">18px</span></span>
+      <input id="c-radius" type="range" min="0" max="26" value="18" class="mt-1 w-full accent-brand-600">
+    </label>
+
+    <div class="grid grid-cols-2 gap-3">
+      <label class="block">
+        <span class="text-xs font-semibold text-slate-600">Theme</span>
+        <select id="c-theme" class="mt-1 w-full px-2.5 py-2 rounded-xl border border-slate-200 text-sm bg-white">
+          <option value="light">Light</option><option value="dark">Dark</option>
+        </select>
+      </label>
+      <label class="block">
+        <span class="text-xs font-semibold text-slate-600">Flow</span>
+        <select id="c-mode" class="mt-1 w-full px-2.5 py-2 rounded-xl border border-slate-200 text-sm bg-white">
+          <option value="book">Pick a time</option><option value="request">Enquiry only</option>
+        </select>
+      </label>
+    </div>
+
+    <label class="block">
+      <span class="text-xs font-semibold text-slate-600">Button label</span>
+      <input id="c-cta" value="Request appointment" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 text-sm">
+    </label>
+
+    <label class="flex items-center gap-2 text-sm">
+      <input id="c-header" type="checkbox" checked class="w-4 h-4 accent-brand-600">
+      <span class="text-slate-700">Show widget header (clinic name + logo)</span>
+    </label>
+
+    <div>
+      <div class="flex items-center justify-between mb-1.5">
+        <span class="text-xs font-semibold text-slate-600">Public service names</span>
+        <button id="addSvc" class="text-xs text-brand-700 font-semibold hover:underline flex items-center gap-0.5"><span class="material-symbols-rounded text-base">add</span>Add</button>
+      </div>
+      <p class="text-[11px] text-slate-400 mb-2 leading-snug">Generic, clinic-set names only. Mark prescription (S4) services — they're always price-free &amp; flagged "consultation required".</p>
+      <div id="svcList" class="space-y-2"></div>
+    </div>
+  </section>
+
+  <!-- ========== PREVIEW + CODE ========== -->
+  <div class="space-y-6 min-w-0">
+
+    <!-- mock clinic website with the widget embedded -->
+    <section class="rounded-2xl border border-slate-200 shadow-sm overflow-hidden bg-white">
+      <div class="bg-slate-100 border-b border-slate-200 px-3 py-2 flex items-center gap-2">
+        <div class="flex gap-1.5"><span class="w-3 h-3 rounded-full bg-rose-400"></span><span class="w-3 h-3 rounded-full bg-amber-400"></span><span class="w-3 h-3 rounded-full bg-emerald-400"></span></div>
+        <div class="flex-1 mx-2 bg-white rounded-md border border-slate-200 px-3 py-1 text-xs text-slate-400 truncate"><span id="urlClinic">baysideskin</span>.com.au/book</div>
+        <button id="resizeBtn" title="Toggle mobile width" class="text-slate-400 hover:text-slate-600"><span class="material-symbols-rounded text-lg">smartphone</span></button>
+      </div>
+      <!-- this whole block is the CLINIC'S OWN page; the widget is the embedded part -->
+      <div class="site">
+        <div class="site-hero px-6 sm:px-10 pt-9 pb-7 text-center">
+          <div class="text-[11px] tracking-[0.25em] uppercase font-semibold mb-2" id="siteKicker" style="color:#7c3aed">Bayside Skin &amp; Laser</div>
+          <h3 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-800">Book your appointment</h3>
+          <p class="text-slate-500 text-sm mt-2 max-w-md mx-auto">Choose a service and a time that suits you — our team will confirm everything with you personally.</p>
+        </div>
+        <div class="px-4 sm:px-6 pb-8 -mt-2">
+          <div id="previewHolder" class="mx-auto transition-all" style="max-width:560px">
+            <iframe id="widget" src="booking-widget.html?clinic=Bayside%20Skin%20%26%20Laser&primary=7c3aed&radius=18&theme=light&mode=book&cta=Request%20appointment"
+              title="Booking widget preview" class="w-full block" style="border:0;height:560px;background:transparent" loading="lazy"></iframe>
+          </div>
+          <p class="text-center text-[11px] text-slate-400 mt-4">↑ Everything inside the card is the embedded widget · the rest is the clinic's own page</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- captured booking (proves price-free lead capture) -->
+    <section id="resultCard" class="hidden rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+      <div class="flex items-center gap-2 mb-2"><span class="material-symbols-rounded text-emerald-600">mark_email_read</span><h2 class="font-bold text-emerald-900">Booking captured by the host page</h2></div>
+      <p class="text-xs text-emerald-800/80 mb-3">This is the <code>tla:booking</code> event the clinic's site receives — note there is <b>no price</b>, just the public service name and the lead's contact details.</p>
+      <pre class="bg-white/70 rounded-xl p-3 text-xs overflow-x-auto text-emerald-950"><code id="resultJson"></code></pre>
+    </section>
+
+    <!-- embed code -->
+    <section class="rounded-2xl border border-slate-200 shadow-sm bg-white overflow-hidden">
+      <div class="px-5 pt-4 flex items-center gap-2 border-b border-slate-200">
+        <span class="material-symbols-rounded text-brand-600">code</span>
+        <h2 class="font-bold py-2">Embed code</h2>
+        <div class="ml-auto flex text-sm" id="tabs">
+          <button data-tab="js"     class="tab px-3 py-2 font-medium border-b-2 border-brand-600 text-brand-700">Script (inline)</button>
+          <button data-tab="popup"  class="tab px-3 py-2 font-medium border-b-2 border-transparent text-slate-500">Script (popup)</button>
+          <button data-tab="iframe" class="tab px-3 py-2 font-medium border-b-2 border-transparent text-slate-500">Plain iframe</button>
+        </div>
+      </div>
+      <div class="p-5">
+        <p id="tabHelp" class="text-xs text-slate-500 mb-3"></p>
+        <div class="relative">
+          <button id="copyBtn" class="absolute top-2.5 right-2.5 text-xs bg-slate-800 text-white px-2.5 py-1.5 rounded-lg hover:bg-slate-700 flex items-center gap-1"><span class="material-symbols-rounded text-sm">content_copy</span>Copy</button>
+          <pre class="bg-slate-900 text-slate-100 rounded-xl p-4 pr-20 text-xs overflow-x-auto leading-relaxed"><code id="snippet"></code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- compliance / how-it-works -->
+    <section class="grid sm:grid-cols-2 gap-4">
+      <div class="rounded-2xl border border-slate-200 bg-white p-5">
+        <div class="flex items-center gap-2 mb-2"><span class="material-symbols-rounded text-brand-600">verified_user</span><h3 class="font-bold text-sm">Compliant by configuration</h3></div>
+        <ul class="text-[13px] text-slate-600 space-y-1.5">
+          <li class="flex gap-2"><span class="text-brand-600">•</span>Prices are withheld; S4 (prescription) services are <b>always</b> price-free and gated to "consultation required".</li>
+          <li class="flex gap-2"><span class="text-brand-600">•</span>Only generic, clinic-set public names — no S4 brands or "anti-wrinkle injections".</li>
+          <li class="flex gap-2"><span class="text-brand-600">•</span>Scope-aware: prescription treatments only offer RN / NP practitioners.</li>
+          <li class="flex gap-2"><span class="text-brand-600">•</span>No deposit or card-on-file (v1) — it captures the request, the clinic confirms.</li>
+        </ul>
+      </div>
+      <div class="rounded-2xl border border-slate-200 bg-white p-5">
+        <div class="flex items-center gap-2 mb-2"><span class="material-symbols-rounded text-brand-600">integration_instructions</span><h3 class="font-bold text-sm">How embedding works</h3></div>
+        <ul class="text-[13px] text-slate-600 space-y-1.5">
+          <li class="flex gap-2"><span class="text-brand-600">•</span>The widget always renders in a sandboxed iframe — the clinic's CSS can't break it, and it can't touch theirs.</li>
+          <li class="flex gap-2"><span class="text-brand-600">•</span>The frame <b>auto-resizes</b> to its content via <code>postMessage</code> — no scrollbars.</li>
+          <li class="flex gap-2"><span class="text-brand-600">•</span>Simple theming (colour, radius, names) rides in the URL; richer config is pushed via <code>data-config</code>.</li>
+          <li class="flex gap-2"><span class="text-brand-600">•</span>A <code>tla:booking</code> event lets the host site react (analytics, redirect, etc.).</li>
+        </ul>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<p class="max-w-6xl mx-auto px-6 pb-12 text-xs text-slate-400">All names, services and bookings are <b>synthetic</b> — no real client, staff or business data. Production embed URLs point at <code>danpowell88.github.io/tlapoc/</code>.</p>
+
+<script>
+const PROD = 'https://danpowell88.github.io/tlapoc/';
+const $ = s => document.querySelector(s);
+const widget = $('#widget');
+
+// default white-label catalog (a clinic different from The Lounge, to show off white-labelling)
+let services = [
+  { name:'Skin consultation',        dur:30, s4:false },
+  { name:'Wrinkle-relaxing treatment',dur:45, s4:true  },
+  { name:'Volume & contour',          dur:45, s4:true  },
+  { name:'Signature facial',          dur:60, s4:false }
+];
+
+const swatchColors = ['#7c3aed','#0d9488','#e11d48','#2563eb','#d97706','#0f172a'];
+$('#swatches').innerHTML = swatchColors.map(c=>`<button data-c="${c}" class="w-7 h-7 rounded-lg border border-slate-200" style="background:${c}"></button>`).join('');
+$('#swatches').onclick = e => { const b=e.target.closest('[data-c]'); if(!b) return; $('#c-primary').value=b.dataset.c; sync(); };
+
+/* ---- service rows ---- */
+function renderSvc(){
+  $('#svcList').innerHTML = services.map((s,i)=>`
+    <div class="flex items-center gap-1.5">
+      <input data-i="${i}" data-k="name" value="${s.name.replace(/"/g,'&quot;')}" class="svc flex-1 min-w-0 px-2.5 py-1.5 rounded-lg border border-slate-200 text-sm">
+      <input data-i="${i}" data-k="dur" type="number" min="5" step="5" value="${s.dur}" class="svc w-14 px-2 py-1.5 rounded-lg border border-slate-200 text-sm" title="minutes">
+      <button data-i="${i}" data-k="s4" class="svc-s4 px-2 py-1.5 rounded-lg text-[11px] font-semibold border ${s.s4?'bg-violet-600 text-white border-violet-600':'bg-white text-slate-500 border-slate-200'}" title="Prescription (S4) — price-free, consult-gated">S4</button>
+      <button data-i="${i}" class="svc-del text-slate-300 hover:text-rose-500" title="Remove">&times;</button>
+    </div>`).join('');
+}
+$('#svcList').addEventListener('input', e=>{
+  const el=e.target.closest('.svc'); if(!el) return;
+  const i=+el.dataset.i, k=el.dataset.k;
+  services[i][k] = k==='dur' ? (parseInt(el.value,10)||5) : el.value;
+  sync(false); // don't re-render rows (keep focus)
+});
+$('#svcList').addEventListener('click', e=>{
+  const s4=e.target.closest('.svc-s4'); const del=e.target.closest('.svc-del');
+  if(s4){ const i=+s4.dataset.i; services[i].s4=!services[i].s4; renderSvc(); sync(false); }
+  if(del){ const i=+del.dataset.i; services.splice(i,1); renderSvc(); sync(false); }
+});
+$('#addSvc').onclick = ()=>{ services.push({name:'New service',dur:30,s4:false}); renderSvc(); sync(false); };
+
+/* ---- collect config ---- */
+function opts(){
+  return {
+    clinic:  $('#c-clinic').value || 'Your Clinic',
+    primary: $('#c-primary').value,
+    radius:  +$('#c-radius').value,
+    theme:   $('#c-theme').value,
+    header:  $('#c-header').checked,
+    cta:     $('#c-cta').value || 'Request appointment',
+    mode:    $('#c-mode').value
+  };
+}
+function svcObjects(){
+  return services.map((s,i)=>({
+    id:'s'+i, name:s.name, schedule:s.s4?'S4':'non-S4', dur:s.dur,
+    roles: s.s4?['NP','RN']:['NP','RN','DT'],
+    desc:  s.s4?'Practitioner-led prescription treatment. A consultation is included.'
+               :'Book a time that suits you.'
+  }));
+}
+
+/* ---- live preview via postMessage ---- */
+let ready=false;
+function pushConfig(){
+  if(!ready) return;
+  widget.contentWindow.postMessage({type:'tla:config', config:Object.assign(opts(),{services:svcObjects()})}, '*');
+}
+
+/* ---- snippet generation ---- */
+function attr(o){ // shared data-* attributes
+  return `data-clinic="${esc(o.clinic)}" data-primary="${o.primary}" data-radius="${o.radius}"`+
+         ` data-theme="${o.theme}" data-mode="${o.mode}" data-cta="${esc(o.cta)}"${o.header?'':' data-header="0"'}`;
+}
+function configAttr(){ return `data-config='${JSON.stringify({services:svcObjects()})}'`; }
+function iframeURL(o){
+  const svc = services.map(s=>`${s.name}~${s.dur}~${s.s4?'s4':'ns'}`).join(',');
+  const p = new URLSearchParams({clinic:o.clinic, primary:o.primary.replace('#',''), radius:o.radius,
+    theme:o.theme, mode:o.mode, cta:o.cta, svc});
+  if(!o.header) p.set('header','0');
+  return PROD+'booking-widget.html?'+p.toString();
+}
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+let tab='js';
+function snippet(){
+  const o=opts();
+  if(tab==='iframe'){
+    return `<iframe\n  src="${esc(iframeURL(o))}"\n  style="width:100%;border:0;height:620px"\n  title="Book an appointment" loading="lazy"></iframe>`;
+  }
+  if(tab==='popup'){
+    return `<button ${attr(o)} ${configAttr()}\n  data-tla-booking-popup>${esc(o.cta)}</button>\n\n`+
+           `<script src="${PROD}embed.js" async><\/script>`;
+  }
+  return `<div ${attr(o)}\n  ${configAttr()}\n  data-tla-booking></div>\n\n`+
+         `<script src="${PROD}embed.js" async><\/script>`;
+}
+const tabHelp = {
+  js:'Recommended. Drop the div where the widget should appear, plus one script tag. Auto-resizes, themes from data-* and rich config from data-config.',
+  popup:'A button that opens the widget in a centered modal. Good for a "Book now" call-to-action in a nav bar.',
+  iframe:'No JavaScript. Theming + public names ride in the URL. Set a fixed height (the script versions auto-resize for you).'
+};
+
+function renderSnippet(){ $('#snippet').textContent = snippet(); $('#tabHelp').textContent = tabHelp[tab]; }
+
+/* ---- main sync ---- */
+function sync(reRows=true){
+  $('#c-radius-v').textContent = $('#c-radius').value+'px';
+  $('#urlClinic').textContent = ($('#c-clinic').value||'clinic').toLowerCase().replace(/[^a-z0-9]+/g,'').slice(0,18)||'clinic';
+  $('#siteKicker').textContent = $('#c-clinic').value || 'Your Clinic';
+  $('#siteKicker').style.color = $('#c-primary').value;
+  pushConfig();
+  renderSnippet();
+}
+
+/* ---- wire controls ---- */
+['c-clinic','c-primary','c-radius','c-theme','c-mode','c-cta','c-header'].forEach(id=>{
+  const el=document.getElementById(id);
+  el.addEventListener('input', ()=>sync(false));
+  el.addEventListener('change', ()=>sync(false));
+});
+
+$('#tabs').addEventListener('click', e=>{
+  const b=e.target.closest('.tab'); if(!b) return; tab=b.dataset.tab;
+  document.querySelectorAll('.tab').forEach(t=>{ const on=t===b;
+    t.classList.toggle('border-brand-600',on); t.classList.toggle('text-brand-700',on);
+    t.classList.toggle('border-transparent',!on); t.classList.toggle('text-slate-500',!on); });
+  renderSnippet();
+});
+
+$('#copyBtn').onclick = ()=>{ navigator.clipboard.writeText(snippet()).then(()=>{
+  const b=$('#copyBtn'); const o=b.innerHTML; b.innerHTML='<span class="material-symbols-rounded text-sm">check</span>Copied'; setTimeout(()=>b.innerHTML=o,1400); }); };
+
+let mobile=false;
+$('#resizeBtn').onclick = ()=>{ mobile=!mobile; $('#previewHolder').style.maxWidth = mobile?'380px':'560px';
+  $('#resizeBtn').classList.toggle('text-brand-600',mobile); };
+
+/* ---- receive from widget ---- */
+window.addEventListener('message', e=>{
+  if(e.source!==widget.contentWindow) return;
+  const d=e.data||{};
+  if(d.type==='tla:ready'){ ready=true; pushConfig(); }
+  else if(d.type==='tla:resize' && d.height){ widget.style.height = d.height+'px'; }
+  else if(d.type==='tla:booking'){
+    $('#resultCard').classList.remove('hidden');
+    $('#resultJson').textContent = JSON.stringify(d.payload,null,2);
+    $('#resultCard').scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+});
+
+/* ---- boot ---- */
+renderSvc(); renderSnippet();
+</script>
+</body>
+</html>
