@@ -1,6 +1,8 @@
 # PRD-06 — Payments, Memberships & Non-S4 Rewards
 
 > **▸ Option A alignment (rev 2, 2026-06-19).** Adds **REQ-PAY-6 checkout assist** (subtle membership/restock upsell + **client rapport** panel + **post-checkout rebooking** on the treatment interval), **REQ-MEMB-8** loyalty/referrals/gift-cards + **dunning retry** (full campaigns/referrals stay Phase 2), and **REQ-MEMB-9 pricing & what-if planning** for the owner (ADR-0022). Square AU card-on-file **recurring autopay** remains a de-risk spike (🔬 F3). See [requirements §12](../02-requirements.md#12-option-a-prototype-alignment--feasibility-register).
+>
+> **▸ Option A alignment (rev 4, 2026-06-20).** Adds the **Finance** money-read-models (ADR-0027): **per-line GST coding** (services + retail both taxable — fixes the naive total÷11), **refunds/credit-notes & disputes** (restock non-S4 only; dispute → Job), **BNPL/tips** tenders, **retail SKUs + supplier POs**, a **BAS/GST summary**, and a **commission/pay-run** with an **engagement-type risk banner** — explicitly **attribution & export, not a payroll/tax engine** (REQ-PAY-7..10, REQ-RPT-6, REQ-MED-14/15). Referral/affiliate credit is **non-S4 only** (REQ-MEMB-10). Online checkout/deposits & BNPL stay Phase 2 (ADR-0036, F14 cooling-off invariant).
 
 > **Phase:** 1 · **Status:** Draft
 > **Requirements:** REQ-PAY-1…5, REQ-MEMB-1…7 · **Compliance:** C9, C23 (reward comms), C18 (records)

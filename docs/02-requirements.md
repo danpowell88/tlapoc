@@ -383,3 +383,50 @@ Each becomes a focused PRD (problem, user stories, flows, data, acceptance crite
 > **Net:** v1 stays as specified (manual charting; SMS/email comms + recall). The prototype's **social inbox,
 > auto-detect, full loyalty/referrals and any LLM assistance are Phase 2+** pending F1/F2/F4/F5. Everything
 > else the prototype shows is already spec'd or added as a `REQ`/`ADR` this rev.
+
+### 12.3 Gap-area build (rev 4, 2026-06-20)
+
+> Six research/design passes extended the prototype with POC flows for the areas it didn't yet cover —
+> **treatments & clinical depth, front desk & operations, money & retail, staff & HR, compliance & governance, growth & integrations** (client app excluded). New REQ lines are grouped by module; ADRs are the
+> reconciled **ADR-0025…0036**. Most are ⏭ Phase 2 with the prototype showing the concept now.
+
+**New / extended requirements**
+
+- **Clinical — `CLIN`:** REQ-CLIN-10 ★⏭ **modality-aware charting** (toxin · filler · skin · energy-device · weight-loss; each drives capture surface, S4|non-S4 · medicine|device class, unit and DAEN routing; filler = multi-area/multi-syringe/per-area lot + **VO/blindness consent gate**) · REQ-CLIN-11 ★⏭ **energy-device settings/fluence logbook** + skin-typing + patch-test + safety checks, **blocked without a state laser licence** · REQ-CLIN-12 🔬⏭ **standardised photography** (fixed poses + **ghost-overlay**) · REQ-CLIN-13 ⏭ **outcome & revision tracking** (touch-up/satisfaction/complication per type & practitioner). (→ C5/C8/C12/C14/C20)
+- **Consult/medicines — `RX`/`MED`:** REQ-RX-6 ★⏭ **weight-loss GLP-1 programs** as titration protocols · REQ-MED-12 ★⏠ **compounded-GLP-1 block & ARTG-brand enforcement** (prohibited since 1 Oct 2024) · REQ-MED-13 ⏭ **device & energy-equipment register** (class, ARTG, service/calibration) · REQ-MED-14 ★ **supplier purchase orders & receiving** (reorder-to-PO from below-par; **S4 POs need a prescriber signer** + TGA-approved wholesaler) · REQ-MED-15 **retail (non-S4) inventory & POS** (barcode, cost, margin, supplier, par). (→ C8/C11)
+- **Facility — `FAC`:** REQ-FAC-4 ★ **complication-response workflow** (VO/anaphylaxis protocol → log hyaluronidase/adrenaline vs kit + client + lot → routed AE record → follow-up/mandatory-report jobs) · REQ-FAC-5 ★ **twice-daily cold-chain log** ("Strive for 5") with a **breach pathway** (quarantine lot · report) · REQ-FAC-6 ★ **sterilisation & equipment maintenance register** (autoclave validation + spore testing, AS 5369:2023; laser service/calibration) · REQ-FAC-7 **daily open/close checklist** · REQ-FAC-8 ★ **clinical & sharps waste manifests** (NSW CA+TC / QLD WTC) · REQ-FAC-9 ★ **policies & procedures register with staff read-&-sign-off** · REQ-FAC-10 ★ **incident & mandatory-reporting case management**. (→ C13/C16/C18/C20/C24)
+- **Booking — `BOOK`:** REQ-BOOK-8 ⏭ **walk-ins & same-day add-ons** (gate-respecting) · REQ-BOOK-9 ⏭ **waitlist auto-fill on cancel/no-show** (scope-matched) · REQ-BOOK-10 ⏭ **room/chair/device resources** (conflict-flag + utilisation) · REQ-BOOK-3 *(amended)* **opt-in, ACL-fair booking deposit / card-on-file hold**, suppressed during cooling-off (C6). (→ ADR-0026)
+- **Payments — `PAY`:** REQ-PAY-7 **refunds, credit notes & disputes** (restock non-S4 only; dispute → Job) · REQ-PAY-8 ⏭ **BNPL tenders** (Afterpay/Zip) · REQ-PAY-9 **tips** (direct vs employer-pooled flag) · REQ-PAY-10 ★ **per-line GST coding** (services + retail taxable). (→ ADR-0007/0027)
+- **Reporting — `RPT`:** REQ-RPT-6 **money read models** (commission/pay-run with engagement-risk flag, retail margin, refunds/disputes, **BAS/GST summary** G1/1A/1B) — attribution & export, **not a payroll/tax engine** · REQ-RPT-7 ★ **inspection-readiness pack** (one-click evidence bundle). (→ ADR-0027, C10/C18/C20)
+- **Tenancy/Team — `TEN`:** REQ-TEN-6 **staff engagement type** (employee/contractor) + commission split → compliance banner · REQ-TEN-7 ★ **credential + CPD + cosmetic-cover PII** records driving a `canInject` gate · REQ-TEN-8 🔬 **AHPRA auto-verification (PIE)** with manual fallback · REQ-TEN-9 **roster, shifts & leave** driving booking availability. (→ ADR-0028/0029, C4/C19)
+- **Security/privacy — `SEC`:** REQ-SEC-8 ★ **DSAR workflow (APP 12/13)** with a ≤30-day clock · REQ-SEC-9 ★ **breach assessment & drill** (NDB, OAIC). (→ C21/C22)
+- **Comms/growth — `NOTIF`:** REQ-NOTIF-8 ★ **reviews/reputation** (request-all, no gating; reply; **block S4 repost**) · REQ-NOTIF-9 ★ **lead/prospect CRM** over the inbox · REQ-NOTIF-10 **email/newsletter builder** (per-block linter) · REQ-NOTIF-11 **social scheduler** (linter + 18+) · REQ-NOTIF-12 **public booking widget + SEO** (generic names, S4 price withheld) · REQ-MEMB-10 **referral/affiliate depth** (non-S4 credit only). (→ ADR-0032/0033/0034, C9/C23)
+- **Integrations — `INT`:** REQ-INT-2a 🔬⏭ **two-way calendar sync** · REQ-INT-4 ⏭ **online checkout & deposits** (S4 never priced online) · REQ-INT-5 🔬⏭ **e-prescribing (eRx/ETP)** · REQ-INT-6 **Medicare/HICAPS** non-applicable to cosmetic · REQ-INT-7 ⏭ **webhooks/public API** (Phase 3). (→ ADR-0035/0036)
+- **Compliance acceptance — extend `C12`:** adverse-event routing is **modality-derived** (toxin & filler-as-medicine → DAEN-medicines; device-class filler/PDO/RF → DAEN-devices); flag mandatory reporting (ASDER, day-hospital facilities, from 21 Mar 2026).
+
+**12.1 map additions**
+
+| Option A prototype feature | Maps to | Status |
+|---|---|---|
+| **Clinical** area: treatment-menu modality model; complication-response modal (VO/anaphylaxis → AE + job); photography/ghost-overlay; outcomes | REQ-CLIN-10..13 ➕, REQ-FAC-4 ➕, ADR-0025 | ✅ ➕ (⏭ deep charting) |
+| **Operations** area: twice-daily **fridge log + breach → quarantine + job**; open/close checklist; rooms/devices + utilisation; equipment register; call log + walk-in/waitlist | REQ-FAC-5/6/7 ➕, REQ-BOOK-8/9/10 ➕, REQ-MED-13 ➕, REQ-NOTIF-8(phone) ➕, ADR-0026 | ✅ ➕ (hard-conflict ⏭) |
+| **Finance** area: commission/pay-run + engagement-risk banner; PO + reorder + S4-signer; refunds/disputes; BAS/GST | REQ-RPT-6 ➕, REQ-MED-14/15 ➕, REQ-PAY-7..10 ➕, REQ-TEN-6 ➕, ADR-0027 | ✅ ➕ (full payroll ⏭/out) |
+| **Team** area: roster & leave; people & credentials; **compliance board** (`canInject` gate, PII-excludes-cosmetic block) | REQ-TEN-6..9 ➕, ADR-0028/0029 | ✅ ➕ (PIE auto-verify 🔬) |
+| **Governance** area: overview digest; **AE/DAEN routing + submit**; **recall execution + ack tracking**; policy sign-off; waste manifests + IPC; DSAR + breach drill; **audit pack** | REQ-RPT-7 ➕, REQ-FAC-8/9/10 ➕, REQ-SEC-8/9 ➕, REQ-MED-12 ➕, ADR-0030/0031, C12 | ✅ ➕ (electronic submit 🔬) |
+| **Growth** area: leads CRM; reviews (S4-testimonial block); newsletter + per-block linter; social scheduler | REQ-NOTIF-8..12 ➕, REQ-MEMB-10 ➕, ADR-0032/0033/0034 | ✅ ➕ (lite) |
+| **Settings → Integrations** + public-booking-page preview (generic names, S4 price withheld) | REQ-INT-2a/4/5/6/7 ➕, REQ-NOTIF-12 ➕, ADR-0035/0036 | ✅ ➕ (mostly concept ⏭) |
+
+**12.2 register additions**
+
+| # | Item | Question | Disposition |
+|---|------|----------|-------------|
+| **F9**  | **Filler/device DAEN routing & mandatory reporting** | Split medicine vs device AE routing; detect day-hospital obligation (ASDER, 21 Mar 2026)? | Catalogue `regClass`/`daenRoute` drives routing; tenant facility-type flag drives voluntary vs mandatory; prefill export only. (ADR-0025/0031) ✅/⏭ |
+| **F10** | **State laser/IPL licensing gate** | Model a per-state/class credential gate without building each state's licence workflow? | `laserLicence` credential flag (state + class) gates booking/charting; only QLD/WA/TAS regulate (IPL only TAS); soft-warn elsewhere. (ADR-0025) 🔬 ⏭ |
+| **F11** | **Compounded-GLP-1 enforcement** | Reliably block compounded/non-ARTG GLP-1 at catalogue/chart? | `compounded`/`artg` flags + hard block (prohibited 1 Oct 2024); shortage/brand-substitution tracking. ✅ ⏭ |
+| **F12** | **Standardised photo / ghost-overlay** | Ghost-overlay alignment now; 3D later? | CSS-opacity overlay in v1-style; VECTRA/LifeViz note-as-future; rides ADR-0009 media + C14. 🔬 ⏭ |
+| **F13** | **AHPRA PIE auto-verification** | Programmatic register lookup for credentialing? | Approval-gated paid SOAP service; **manual-verify fallback is first-class**; POC simulates. (ADR-0028) 🔬 ⏭ |
+| **F14** | **Deposit ⇄ cooling-off** | Can an opt-in deposit coexist with under-18/elective cooling-off? | **No** — deposit suppressed whenever cooling-off applies; only the consult fee is collectable (C6). Encode as an invariant, not config. (ADR-0026) ✅ |
+| **F15** | **Reg-system submission APIs (TGA/EPA)** | Electronic submit to AEMS/ASDER or state EPA waste systems, or portals only? | v1 = prefill + portal hand-off + recorded manifest/reference; assess APIs + the day-hospital boundary. (ADR-0031) 🔬 ⏭ |
+| **F16** | **Two-way calendar sync** | Bidirectional dedupe across MS Graph + Google without double-booking? | External busy→availability block; clinic appt→external event w/ stable correlation id; platform = source of truth. (ADR-0036) 🔬 ⏭ |
+| **F17** | **e-Prescribing (eRx/ETP)** | Can a cosmetic prescriber issue conformant electronic **private** S4 scripts? | Behind `IPrescribingProvider`; needs HPI-I, exchange conformance, token/ASL; bind to consult (C1) + S4 register. (ADR-0035) 🔬 ⏭ |
+| **F18** | **Commission output mistaken for tax-ready** | Will clinics treat the pay-run as payroll? | Persistent non-advice banner + engagement-risk flag; ADR-0027 states attribution & export, **not** a tax engine. ✅ |

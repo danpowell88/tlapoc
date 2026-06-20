@@ -1,6 +1,8 @@
 # PRD-10 — Integrations: Xero & Calendar
 
 > **▸ Option A alignment (rev 2, 2026-06-19).** Comms is no longer outbound-only: the omnichannel inbox adds **inbound webhooks + provider Send/Conversations APIs** (Meta Messenger/IG, SMS, email) behind an **`IMessagingChannel`** port extending ADR-0012 (see **ADR-0018**, **REQ-NOTIF-6**, 🔬). Xero and calendar adapters are unchanged. See [requirements §12](../02-requirements.md#12-option-a-prototype-alignment--feasibility-register).
+>
+> **▸ Option A alignment (rev 4, 2026-06-20).** Adds the growth/integration roadmap (the prototype's **Settings → Integrations** screen, mostly concept cards): **two-way calendar sync** (ADR-0012 → bidirectional under `ICalendarProvider`, F16), **online checkout & deposits** (behind `IPaymentProvider`; **S4 never priced or sold online**), **e-prescribing** (`IPrescribingProvider`, eRx/ETP private S4 scripts — 🔬 F17), **webhooks/public API** (Phase 3), and **Medicare/HICAPS** surfaced as *non-applicable to cosmetic*. Xero export extends to **bills (POs/pay-runs), credit notes (refunds) and a BAS summary** (ADR-0035/0036, REQ-INT-2a/4/5/6/7).
 
 > **Phase:** 1 · **Status:** Draft
 > **Requirements:** REQ-INT-1…3 · **Compliance:** C10/C21 (cross-border sub-processors)

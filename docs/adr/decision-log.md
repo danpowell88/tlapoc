@@ -187,3 +187,91 @@ into individual `ADR-NNNN-*.md` files later; kept as one log for a lean team.
 **Decision:** The `Appointment`/`Visit` is a **state machine** — Booked → Confirmed → (Late / No-show) → In treatment → For checkout → Done (→ Recall set) — and each state surfaces the **next action for whoever's responsible now**, handing off automatically: reception flags **late / no-show** (a no-show auto-creates a **follow-up call** job, ADR-0023) and a clinician **starts** treatment; on **finalise**, a close-out (send aftercare · set recall · 2-day **wellbeing call** · adverse-event) sets the visit **For checkout**, lighting up reception's queue; payment marks it **Done**. Small clinics skip a formal **check-in** — *late attendance* and *no-shows* are the flags that matter. Capabilities (ADR-0017) gate the per-state actions; charting is **treatment-type-aware** (toxin injection-map + S4 lot vs a non-S4 skin note).
 **Consequences:** One spine ties booking → charting → checkout → recall → follow-ups together; the "what's next" is always visible to the right role.
 **Alternatives:** Independent screens with manual status (status quo — easy to drop the ball); a formal check-in/queue-management module (heavier than a small clinic needs).
+
+---
+
+> **ADR-0025…0036 (rev 4, 2026-06-20)** — the **gap-area build**. Six research/design passes (treatments & clinical depth, front desk & operations, money & retail, staff & HR, compliance & governance, growth & integrations) extended the Option A prototype with new POC flows. Each agent independently proposed "ADR-0025"; the numbers below are the **reconciled, canonical** assignment. The client app remains out of scope.
+
+## ADR-0025 — Treatment **modality model**: typed charts, product-class routing & licence gating
+**Status:** Proposed (Phase 2; v1 ships toxin + non-S4 skin only)
+**Context:** Beyond the toxin slice, real clinics run dermal filler, energy devices (laser/IPL/RF), threads/PRP/boosters/fat-dissolving/IV, and weight-loss (GLP-1) programs. Each differs on four axes the toxin spine doesn't capture: **schedule** (S4 vs non-S4), **regulatory class** (medicine vs Class III device vs autologous/consumable), **adverse-event routing** (DAEN-medicines vs DAEN-devices vs none) and **who may legally perform it** — filler is **dual-natured** (S4 for prescribing/custody/advertising but device-class for DAEN); energy devices need a **state radiation/laser licence** (QLD/WA/TAS only; IPL only TAS) not an S4 capability; pharmacy-**compounded GLP-1 is prohibited (1 Oct 2024)** so only ARTG brands may be supplied.
+**Decision:** Model treatment as a typed **modality** carrying `{schedule, regClass, daenRoute, unit, advertisable, requires:[consult|rx|s4Lot|laserLicence|patchTest]}`. Charting becomes **modality-aware** (extends ADR-0024): filler = multi-area / multi-syringe / per-area lot + **VO/blindness consent gate**; energy device = **settings/fluence logbook** + safety checks + **licence gate** (no S4); weight-loss = **titration protocol** + ARTG/compounded enforcement. The catalogue **`s4` flag (ADR-0014/0021) is extended**, not replaced, with `regClass`, `artg`, `compounded`, `daenRoute`. A new **`laserLicence` credential** (per state/class) gates energy-device booking/charting.
+**Consequences:** One classification record drives charting surface, consent clauses, custody, rewards/advertising and AE routing — no per-modality bespoke logic. v1 unaffected (toxin + skin only).
+**Alternatives:** Per-treatment bespoke screens (unmaintainable, drifts on compliance); treat all injectables as "S4 like toxin" (wrong DAEN routing, misses device class & laser-licence gate & the GLP-1 ban).
+
+## ADR-0026 — Front-desk **operations** & opt-in booking deposits
+**Status:** Accepted (re-opens the v1 "no deposits" decision)
+**Context:** The prototype lacked the front-desk/facility layer a clinic is audited on — walk-ins, waitlist fill, room/device conflicts, a **daily cold-chain log** ("Strive for 5" wants twice-daily min/max/current even with a data-logger; we only alerted on excursion), sterilisation/equipment maintenance (**AS 5369:2023**, superseding AS/NZS 4815), open/close checklists and inbound phone. Deposits were deferred, but lawful ACL-fair deposit practice and no-show loss make a front-desk-controlled, opt-in deposit worth re-scoping.
+**Decision:** Add an **Operations** area (reception/facility concerns, ADR-0017) extending existing spines: cold-chain log + breach pathway hang off the **stock ledger** (C13); equipment/open-close are lightweight registers projecting **Jobs** (ADR-0023); walk-ins/waitlist/resources extend the **visit lifecycle & calendar** (ADR-0024); phone becomes a **channel + Job**. **Booking deposits are opt-in, ACL-fair, disclosed-at-booking, refundable on notice and suppressed during cooling-off (C6)** — never a pressure mechanism. Equipment/sterilisation tracking is **optional per tenant**.
+**Consequences:** Reception gets a real home; the clinic can evidence cold-chain, sterilisation & emergency-kit currency at audit; cancelled chair-time and missed calls are recoverable.
+**Alternatives:** Keep deposits deferred (leaves no-show loss); a heavyweight CMMS (overkill); bypass gates for walk-ins (rejected — breaks C1–C3).
+
+## ADR-0027 — Money **read models**: commission/pay-run, AP/PO, retail & BAS — attribution & export, **not** a payroll/tax engine
+**Status:** Accepted (v1 builds per-line GST + PO/receive + retail SKUs; full pay-run/BNPL Phase 2)
+**Context:** Contractor injectors are paid by service/product split, but AU super (SGAA s12(3)) and state payroll-tax "relevant contract" rules largely catch individual injector splits regardless of the "contractor" label, and Payday Super starts 1 Jul 2026. GST: aesthetic services **and** retail are both taxable; the prototype's flat `total/11` GST is wrong. We receive stock but never order it.
+**Decision:** Compute money views as **read models** over the reporting layer (ADR-0013): commission pay-run = attributed service+product revenue × a configured split, exported as CSV / Xero bill — we do **not** calculate super/PAYG/payroll tax; an **engagement-type flag** drives a compliance banner. `PurchaseOrder` + receiving extends the catalogue (ADR-0021); **S4 POs require a prescriber signer** + ARTG/lawful supply (C11). Retail SKUs are non-S4 catalogue items. Every catalogue item carries a **`taxCode`**; invoices compute **GST per line** + a BAS summary (G1/1A/1B) to Xero. Refunds/disputes use `IPaymentProvider.refund` (ADR-0007) + the Jobs queue (ADR-0023) and **restock non-S4 only**; BNPL (Afterpay/Zip) are tenders, not new processors.
+**Consequences:** Faithful money attribution and correct GST without owning payroll/tax liability (stays with the accountant). Risk: clinics may read commission output as tax-ready — mitigated by an explicit non-advice banner.
+**Alternatives:** Build a payroll/super engine (rejected — liability + scope); off-platform spreadsheets (loses live attribution).
+
+## ADR-0028 — Credential, CPD & **insurance currency** as first-class gating data
+**Status:** Accepted (POC simulates AHPRA verification)
+**Context:** ADR-0017 gates clinical actions on capabilities × concerns and on credentials, but credential/CPD/PII data was implicit. AU law (s129 National Law, NMBA standards, Sept-2025 cosmetic guidelines) makes registration currency, CPD (RN/EN 20h, NP 30h) and **cosmetic-scope** professional-indemnity insurance hard preconditions for lawful injectable practice — and standard nursing PII policies often **exclude** cosmetic.
+**Decision:** Model credential, CPD and PII as structured per-practitioner records. Derive a single **compliance status** (`canInject`) and feed it into (a) booking availability, (b) charting gates, (c) the owner exceptions digest, (d) the Follow-ups queue as expiry tasks. Auto-verify via the **AHPRA Practitioner Information Exchange (PIE)** where approved, degrading to **manual verification with a stored "verified-on" date** (🔬 PIE is approval-gated SOAP).
+**Consequences:** "Are we legal to operate today?" becomes a board, not a memory; a practitioner whose PII excludes cosmetic is flagged not-bookable for S4.
+**Alternatives:** Keep credentials implicit (status quo — risk of a lapsed/uncovered injector treating).
+
+## ADR-0029 — **Roster** as the source of truth for booking availability
+**Status:** Accepted (single location; multi-location & payroll Phase 2)
+**Context:** Booking step 2 only *hinted* a roster ("availability respects their shifts"). The roster *is* availability: a practitioner is bookable only when rostered at that location AND compliant for the service scope.
+**Decision:** A per-location roster of shifts & leave (Owner/Lead manage; Reception read-only). A practitioner is bookable for a service **iff rostered that day AND `canInject`/scope-compliant** (ADR-0028). Multi-location/locum roster and payroll/commission are deferred (commission lives in ADR-0027).
+**Consequences:** Turns booking-step hint copy into real behaviour; roster + insurance status gate who can be scheduled.
+**Alternatives:** Free-for-all availability (double-books, schedules non-compliant injectors).
+
+## ADR-0030 — **Governance hub**: cross-case compliance surface, guardrails stay woven
+**Status:** Accepted
+**Context:** The prototype wove compliance into each workflow (consult-gated scripts, consent blocks, cold-chain, lot→client recall lookup, adverse-event concept, complaints in the inbox). But *execution & evidence* work — DAEN submission, recall campaigns, incident case-management, P&P sign-off, waste manifests, audit packs, DSAR/breach — is owner/compliance-officer work done **across** cases, with no home.
+**Decision:** Add a single **Governance** module, capability-gated (financials or a `compliance` concern; default-on for owner/solo/nurse-led). It is a **read/manage surface** that launches the existing woven-in flows and **projects** existing signals into governance worklists — it does **not** relocate any guardrail. Per-treatment invariants stay enforced in the domain (ADR-0008); all governance actions are append-only audited (ADR-0010) and read from the reporting read models (ADR-0013).
+**Consequences:** The compliance officer gets one place to *do governance and produce evidence*; the moat's hard rules remain un-bypassable and un-moved.
+**Alternatives:** Pure-woven, no hub (cross-case work has nowhere to live); a separate compliance product (overkill, breaks single-clinic feel).
+
+## ADR-0031 — DAEN / regulatory **submission via prefilled export + portal hand-off** (no direct API in v1) — 🔬
+**Status:** Proposed (v1 = prefill + mark-submitted; electronic submit later)
+**Context:** TGA runs two databases (DAEN-medicines vs DAEN-devices) and, for facility mandatory device reports, **ASDER** (from 21 Mar 2026, day-hospital facilities, 10-day window); state EPAs run their own waste-tracking systems (NSW IWTS CA+TC, QLD WTC). Direct integration is uncertain and jurisdiction-specific.
+**Decision:** v1 **classifies and prefills** the correct report (route by product `schedule`/`type`), **flags mandatory triggers**, opens the official portal and records submission status + reference in the audit trail. State waste tracking is captured as **recorded manifest numbers**, not API-integrated. Most room-based cosmetic clinics fall *outside* the mandatory device rule — the system flags the obligation rather than asserting it universally.
+**Consequences:** Faithful, low-risk; clean upgrade path to electronic submit.
+**Alternatives:** Build direct submission now (unproven APIs, high maintenance); leave fully manual (misses the moat).
+
+## ADR-0032 — Reviews & reputation: **request-all (no gating), reply-yes, repost-S4-no**
+**Status:** Accepted
+**Context:** Patients posting organic reviews is fine, but (a) reposting/embedding a review that endorses an S4 outcome becomes a prohibited **testimonial** (National Law s133; TGA Code Part 6) and (b) **review gating** — soliciting only happy clients — is **misleading conduct under the ACL** (ACCC).
+**Decision:** Post-visit review requests go to **all** eligible clients with no sentiment pre-screen. Staff may **reply** to any review. The platform **prevents** surfacing/reposting a review as marketing when it references an S4 outcome — the `s4` flag (ADR-0014) + advertising linter (REQ-NOTIF-4) drive the block.
+**Consequences:** Defensible under both AHPRA and ACL; the reputation feature can't be weaponised into non-compliant testimonials.
+**Alternatives:** Gated review requests (illegal); free reposting (prohibited testimonials).
+
+## ADR-0033 — Lead / prospect **CRM as a projection over conversations**
+**Status:** Accepted
+**Context:** Most enquiries arrive via IG/FB DM, website and phone asking the one thing clinics can't answer publicly ("how much is Botox?"). A pipeline lets reception convert privately — 1:1 service replies are out of scope of public-advertising rules.
+**Decision:** A `Lead` (stage, source, interest, `client_id?`, `conversation_id?`, consent) is a thin pipeline layer over the inbox (ADR-0018/0019); stage transitions feed conversion read models (ADR-0013). Outbound nudges gate on marketing consent (C23) + the linter (C9).
+**Consequences:** Enquiries don't get lost; conversion is measurable; the consent gate keeps outreach Spam-Act-safe.
+**Alternatives:** Work enquiries only in the inbox (no pipeline/conversion view).
+
+## ADR-0034 — **One advertising linter** for all public/outbound content
+**Status:** Accepted
+**Context:** Newsletter builder, social scheduler, public booking page/SEO and review replies are all public advertising of a clinic that can't promote an S4 good (no Botox brand/price, no testimonials, no under-18 targeting).
+**Decision:** Every public-content surface reuses the single advertising-linter service (REQ-NOTIF-4) + the `s4` flag (ADR-0014), **per-block / per-field** (server-side, not just UI); a mandatory Spam-Act footer (sender ID + unsubscribe) is injected and non-removable; cosmetic posts auto-label 18+.
+**Consequences:** Consistent, hard-to-bypass compliance across growth surfaces; the linter is the choke-point.
+**Alternatives:** Per-surface ad-hoc checks (drift, gaps, accidental breaches).
+
+## ADR-0035 — **e-Prescribing** via `IPrescribingProvider` adapter (eRx/ETP) — 🔬 *feasibility research required*
+**Status:** Proposed (deferred; research)
+**Context:** AU electronic prescribing uses token (SMS/email) or Active Script List via exchanges (eRx, MediSecure), built around PBS but supporting **private** scripts. A cosmetic prescriber could issue a compliant electronic private S4 script — a heavier integration (conformance, prescriber HPI-I).
+**Decision:** If built, electronic private S4 scripts issue behind an `IPrescribingProvider` port, bound to the synchronous consult (C1, ADR-0011), prescriber identity and the S4 register (ADR-0008/0021). No PBS assumptions for cosmetic use. v1 keeps paper/PDF private scripts.
+**Consequences:** A future convenience with the same custody/consult guarantees; deferred until feasibility is proven.
+**Alternatives:** Build now (unproven, heavy); never (loses a real convenience).
+
+## ADR-0036 — Online checkout, **deposits**, two-way calendar & public API — phasing
+**Status:** Proposed (deferred — §9 later phases)
+**Context:** Online checkout + booking deposits reduce no-shows; two-way calendar sync (M365/Google) is real demand; webhooks/public API are Phase 3. Medicare/HICAPS is non-applicable to cosmetic (claimable only for therapeutic exceptions).
+**Decision:** Online checkout + deposits sit behind the existing `IPaymentProvider` (ADR-0007); **S4 is never priced or sold online** (ADR-0014). Two-way calendar promotes ADR-0012 to **bidirectional** under `ICalendarProvider` (external busy events block availability; clinic appts push out). Webhooks/event-bus/public API stay **Phase 3**. Medicare/HICAPS is surfaced as "not applicable to cosmetic" and otherwise out of scope.
+**Consequences:** A clear, honest roadmap for growth integrations without overpromising in v1.
+**Alternatives:** Pull everything forward (scope blow-out, unproven feasibility); ignore the demand (loses competitiveness later).

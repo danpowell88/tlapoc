@@ -33,6 +33,7 @@
       <a href="#dermal" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100">Dermal</a>
       <a href="#owner" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100">Owner</a>
       <a href="#client" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100">Client</a>
+      <a href="#built" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100">Now built</a>
       <a href="#gaps" class="px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-100">Gaps</a>
     </nav>
     <a href="prototype.html" class="ml-2 text-sm text-brand-700 font-medium hidden sm:inline">Open app →</a>
@@ -176,11 +177,65 @@
   </div>
 </section>
 
+<!-- =================== NOW BUILT =================== -->
+<section id="built" class="max-w-6xl mx-auto px-5 py-8 border-t border-slate-200">
+  <div class="flex items-center gap-3 mb-1"><span class="size-10 rounded-xl bg-emerald-600 text-white grid place-items-center"><span class="material-symbols-rounded">new_releases</span></span><h2 class="text-2xl font-bold">Now built — the gap areas, prototyped</h2></div>
+  <p class="text-slate-500 mb-6 max-w-3xl">After a deep-research pass on each area below, we built POC flows for the parts a real AU clinic leans on every day — across <b>Clinical</b>, <b>Operations</b>, <b>Finance</b>, <b>Team</b>, <b>Governance</b> and <b>Growth</b>. The screens below are live; the deeper or riskier pieces stay sequenced as Roadmap/Research in the next section. <span class="text-slate-400">(Client app excluded for now.)</span></p>
+
+  <div class="space-y-10">
+    <div class="grid lg:grid-cols-5 gap-6 items-start">
+      <div class="lg:col-span-2"><div class="text-xs font-bold text-emerald-600 mb-1">Clinical · safety</div><h3 class="text-lg font-semibold mb-2">Managing a complication</h3><p class="text-sm text-slate-600 mb-2"><b>What happens:</b> a filler client shows signs of vascular occlusion — minutes matter.</p><p class="text-sm text-slate-600"><b>In the app:</b> <b>Clinical → Complication protocols</b> launches the VO checklist, logs the hyaluronidase against the emergency kit and the client, and opens a routed <b>adverse-event</b> case + follow-up job. Anaphylaxis has its own protocol.</p></div>
+      <div class="lg:col-span-3 frame"><div class="bar"><span class="dot bg-rose-400"></span><span class="dot bg-amber-400"></span><span class="dot bg-emerald-400"></span><span class="ml-2">Clinical · complication protocols</span></div><iframe loading="lazy" src="prototype.html?p=lead&view=clinical-safety&embed=1"></iframe><div class="px-3 py-2 text-xs"><a class="text-brand-700 font-medium" href="prototype.html?p=lead&view=clinical-safety" target="_blank">Open live ↗</a></div></div>
+    </div>
+
+    <div class="grid lg:grid-cols-5 gap-6 items-start">
+      <div class="lg:col-span-2"><div class="text-xs font-bold text-emerald-600 mb-1">Clinical · menu</div><h3 class="text-lg font-semibold mb-2">One model for every treatment</h3><p class="text-sm text-slate-600 mb-2"><b>What happens:</b> the clinic adds filler, laser, threads and a weight-loss program.</p><p class="text-sm text-slate-600"><b>In the app:</b> the <b>treatment menu</b> carries each modality's classification — S4 vs device, the DAEN route, the unit, rewards/ads rules — and <b>blocks compounded GLP-1</b>. One record drives charting, consent and adverse-event routing.</p></div>
+      <div class="lg:col-span-3 frame"><div class="bar"><span class="dot bg-rose-400"></span><span class="dot bg-amber-400"></span><span class="dot bg-emerald-400"></span><span class="ml-2">Clinical · treatment menu</span></div><iframe loading="lazy" src="prototype.html?p=np&view=clinical-menu&embed=1"></iframe><div class="px-3 py-2 text-xs"><a class="text-brand-700 font-medium" href="prototype.html?p=np&view=clinical-menu" target="_blank">Open live ↗</a></div></div>
+    </div>
+
+    <div class="grid lg:grid-cols-5 gap-6 items-start">
+      <div class="lg:col-span-2"><div class="text-xs font-bold text-emerald-600 mb-1">Operations · cold-chain</div><h3 class="text-lg font-semibold mb-2">Opening up — the fridge log</h3><p class="text-sm text-slate-600 mb-2"><b>What happens:</b> Tess unlocks and, before touching the fridges, logs the morning temps — the law (<i>Strive for 5</i>) wants min/max/current twice a day.</p><p class="text-sm text-slate-600"><b>In the app:</b> <b>Operations → Open / close &amp; fridge</b>. A reading over 8°C <b>quarantines the affected lot</b> and raises a breach job to the Lead — nothing left to memory.</p></div>
+      <div class="lg:col-span-3 frame"><div class="bar"><span class="dot bg-rose-400"></span><span class="dot bg-amber-400"></span><span class="dot bg-emerald-400"></span><span class="ml-2">Operations · open / close &amp; fridge log</span></div><iframe loading="lazy" src="prototype.html?p=reception&view=ops-fridge&embed=1"></iframe><div class="px-3 py-2 text-xs"><a class="text-brand-700 font-medium" href="prototype.html?p=reception&view=ops-fridge" target="_blank">Open live ↗</a></div></div>
+    </div>
+
+    <div class="grid lg:grid-cols-5 gap-6 items-start">
+      <div class="lg:col-span-2"><div class="text-xs font-bold text-emerald-600 mb-1">Operations · phones &amp; walk-ins</div><h3 class="text-lg font-semibold mb-2">A missed call and a walk-in</h3><p class="text-sm text-slate-600 mb-2"><b>What happens:</b> the phone rings mid-checkout; a woman walks in wanting "a bit of Botox today".</p><p class="text-sm text-slate-600"><b>In the app:</b> the missed call sits in the <b>Call log</b> with an auto text-back and a callback job; the injectable <b>walk-in is forced to a consult first</b>, and a freed slot can be offered straight off the <b>waitlist</b>.</p></div>
+      <div class="lg:col-span-3 frame"><div class="bar"><span class="dot bg-rose-400"></span><span class="dot bg-amber-400"></span><span class="dot bg-emerald-400"></span><span class="ml-2">Operations · call log</span></div><iframe loading="lazy" src="prototype.html?p=reception&view=ops-phone&embed=1"></iframe><div class="px-3 py-2 text-xs"><a class="text-brand-700 font-medium" href="prototype.html?p=reception&view=ops-phone" target="_blank">Open live ↗</a></div></div>
+    </div>
+
+    <div class="grid lg:grid-cols-5 gap-6 items-start">
+      <div class="lg:col-span-2"><div class="text-xs font-bold text-emerald-600 mb-1">Team · compliance</div><h3 class="text-lg font-semibold mb-2">Are we legal to open today?</h3><p class="text-sm text-slate-600 mb-2"><b>What happens:</b> one nurse's indemnity policy doesn't cover cosmetic injectables.</p><p class="text-sm text-slate-600"><b>In the app:</b> the <b>Team → Compliance board</b> derives a single status per practitioner from registration, CPD and cosmetic-cover insurance — and <b>flags her not-bookable for S4</b>. Expiries land in Follow-ups; AHPRA verify is one tap (simulated).</p></div>
+      <div class="lg:col-span-3 frame"><div class="bar"><span class="dot bg-rose-400"></span><span class="dot bg-amber-400"></span><span class="dot bg-emerald-400"></span><span class="ml-2">Team · compliance board</span></div><iframe loading="lazy" src="prototype.html?p=lead&view=compliance&embed=1"></iframe><div class="px-3 py-2 text-xs"><a class="text-brand-700 font-medium" href="prototype.html?p=lead&view=compliance" target="_blank">Open live ↗</a></div></div>
+    </div>
+
+    <div class="grid lg:grid-cols-5 gap-6 items-start">
+      <div class="lg:col-span-2"><div class="text-xs font-bold text-emerald-600 mb-1">Finance · pay-run</div><h3 class="text-lg font-semibold mb-2">Pay-run Friday</h3><p class="text-sm text-slate-600 mb-2"><b>What happens:</b> two injectors are contractors on a service split.</p><p class="text-sm text-slate-600"><b>In the app:</b> <b>Finance → Commission &amp; pay</b> attributes each practitioner's service + product revenue and applies their split — flagging the <b>individual-contractor</b> row where super &amp; payroll tax likely apply. It exports to Xero; it does <i>not</i> pretend to be payroll. BAS, POs (with S4 signer) and refunds live here too.</p></div>
+      <div class="lg:col-span-3 frame"><div class="bar"><span class="dot bg-rose-400"></span><span class="dot bg-amber-400"></span><span class="dot bg-emerald-400"></span><span class="ml-2">Finance · commission &amp; pay</span></div><iframe loading="lazy" src="prototype.html?p=owner&view=finance-pay&embed=1"></iframe><div class="px-3 py-2 text-xs"><a class="text-brand-700 font-medium" href="prototype.html?p=owner&view=finance-pay" target="_blank">Open live ↗</a></div></div>
+    </div>
+
+    <div class="grid lg:grid-cols-5 gap-6 items-start">
+      <div class="lg:col-span-2"><div class="text-xs font-bold text-emerald-600 mb-1">Governance · adverse events</div><h3 class="text-lg font-semibold mb-2">Reporting an adverse event</h3><p class="text-sm text-slate-600 mb-2"><b>What happens:</b> an NP logged a vascular occlusion after filler.</p><p class="text-sm text-slate-600"><b>In the app:</b> <b>Governance → Adverse events</b> classifies it as a <b>device</b> event (filler) vs the <b>medicine</b> path a toxin would take, prefills the report, lights the mandatory-trigger flag, and one tap opens the TGA portal and marks it submitted — all audit-logged.</p></div>
+      <div class="lg:col-span-3 frame"><div class="bar"><span class="dot bg-rose-400"></span><span class="dot bg-amber-400"></span><span class="dot bg-emerald-400"></span><span class="ml-2">Governance · adverse events &amp; DAEN</span></div><iframe loading="lazy" src="prototype.html?p=owner&view=gov-daen&embed=1"></iframe><div class="px-3 py-2 text-xs"><a class="text-brand-700 font-medium" href="prototype.html?p=owner&view=gov-daen" target="_blank">Open live ↗</a></div></div>
+    </div>
+
+    <div class="grid lg:grid-cols-5 gap-6 items-start">
+      <div class="lg:col-span-2"><div class="text-xs font-bold text-emerald-600 mb-1">Governance · recalls &amp; evidence</div><h3 class="text-lg font-semibold mb-2">Running a recall</h3><p class="text-sm text-slate-600 mb-2"><b>What happens:</b> a sponsor field-safety notice names a toxin lot.</p><p class="text-sm text-slate-600"><b>In the app:</b> <b>Governance → Recalls</b> already knows the exact clients who received that lot; the owner runs an SMS + call safety campaign and watches <b>acknowledgements</b> tick up. Policies sign-off, waste manifests, DSAR/breach drills and a one-click <b>inspection pack</b> are all here.</p></div>
+      <div class="lg:col-span-3 frame"><div class="bar"><span class="dot bg-rose-400"></span><span class="dot bg-amber-400"></span><span class="dot bg-emerald-400"></span><span class="ml-2">Governance · recalls</span></div><iframe loading="lazy" src="prototype.html?p=owner&view=gov-recall&embed=1"></iframe><div class="px-3 py-2 text-xs"><a class="text-brand-700 font-medium" href="prototype.html?p=owner&view=gov-recall" target="_blank">Open live ↗</a></div></div>
+    </div>
+
+    <div class="grid lg:grid-cols-5 gap-6 items-start">
+      <div class="lg:col-span-2"><div class="text-xs font-bold text-emerald-600 mb-1">Growth · leads &amp; reviews</div><h3 class="text-lg font-semibold mb-2">Growth, without the compliance risk</h3><p class="text-sm text-slate-600 mb-2"><b>What happens:</b> enquiries pile up; a happy client posts a glowing "my Botox looks amazing" review.</p><p class="text-sm text-slate-600"><b>In the app:</b> a <b>lead pipeline</b> tracks enquiry → consult → converted; <b>Reviews</b> requests go to everyone (no sentiment gating) and replies are fine — but <b>resharing the S4 review is blocked</b>. The newsletter builder lints every block, and the public booking page withholds S4 prices. <b>Settings → Integrations</b> shows what's connected vs roadmap.</p></div>
+      <div class="lg:col-span-3 frame"><div class="bar"><span class="dot bg-rose-400"></span><span class="dot bg-amber-400"></span><span class="dot bg-emerald-400"></span><span class="ml-2">Growth · leads (CRM)</span></div><iframe loading="lazy" src="prototype.html?p=owner&view=leads&embed=1"></iframe><div class="px-3 py-2 text-xs"><a class="text-brand-700 font-medium" href="prototype.html?p=owner&view=leads" target="_blank">Open live ↗</a> · <a class="text-brand-700 font-medium" href="prototype.html?p=reception&view=reviews" target="_blank">Reviews ↗</a> · <a class="text-brand-700 font-medium" href="prototype.html?p=owner&view=integrations" target="_blank">Integrations ↗</a></div></div>
+    </div>
+  </div>
+</section>
+
 <!-- =================== GAPS =================== -->
 <section id="gaps" class="max-w-6xl mx-auto px-5 py-8 border-t border-slate-200">
-  <div class="flex items-center gap-3 mb-1"><span class="size-10 rounded-xl bg-slate-900 text-white grid place-items-center"><span class="material-symbols-rounded">construction</span></span><h2 class="text-2xl font-bold">What we don't cover (yet)</h2></div>
-  <p class="text-slate-500 mb-4 max-w-3xl">Being honest about the edges. v1 deliberately nails the <b>compliant injectable loop</b>; plenty of real clinic life sits outside that. Here's what a clinic does that the prototype doesn't fully handle — sorted so nothing is a surprise.</p>
+  <div class="flex items-center gap-3 mb-1"><span class="size-10 rounded-xl bg-slate-900 text-white grid place-items-center"><span class="material-symbols-rounded">construction</span></span><h2 class="text-2xl font-bold">The full map — built &amp; still to come</h2></div>
+  <p class="text-slate-500 mb-4 max-w-3xl">Being honest about the edges. v1 nails the <b>compliant injectable loop</b>; the gap-area pass above built POC flows for much of the rest (marked <b>Built</b> below). The remaining <b>Roadmap</b>/<b>Gap</b>/<b>Research</b> items are sequenced in the docs — sorted so nothing is a surprise.</p>
   <div class="flex flex-wrap gap-3 text-xs mb-7">
+    <span class="inline-flex items-center gap-1.5"><span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-700">Built</span>prototyped now (see "Now built")</span>
     <span class="inline-flex items-center gap-1.5"><span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-700">Roadmap</span>planned (Phase 2/3 — see docs)</span>
     <span class="inline-flex items-center gap-1.5"><span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-700">Gap</span>real need, not addressed yet</span>
     <span class="inline-flex items-center gap-1.5"><span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-sky-100 text-sky-700">External</span>another system handles it</span>
@@ -192,13 +247,12 @@
     <div class="rounded-2xl border border-slate-200 bg-white p-5">
       <h3 class="font-bold mb-3 flex items-center gap-2"><span class="material-symbols-rounded text-brand-600">vaccines</span>Treatments &amp; clinical</h3>
       <ul class="space-y-2 text-sm">
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-700 h-fit">Roadmap</span><span><b>Dermal filler sessions</b> — multiple syringes/areas &amp; lots per visit, filler-specific consent &amp; the device DAEN pathway.</span></li>
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-700 h-fit">Gap</span><span><b>Energy devices</b> (laser/IPL/RF) — scheduling, per-shot settings/fluence logbook, device safety &amp; eyewear checks.</span></li>
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-700 h-fit">Gap</span><span><b>Other modalities</b> — threads/PDO, PRP, skin boosters, fat-dissolving, IV therapy.</span></li>
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-700 h-fit">Gap</span><span><b>Weight-loss injectables</b> (semaglutide/tirzepatide) — titration, supply &amp; their distinct compliance.</span></li>
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-700 h-fit">Gap</span><span><b>Complication management</b> — active workflow for vascular occlusion / anaphylaxis &amp; hyaluronidase use (we hold the kit register, not the response flow).</span></li>
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-700 h-fit">Gap</span><span><b>Standardised photography</b> — fixed angles/lighting, ghost-overlay, 3D imaging (we have basic before/after).</span></li>
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-700 h-fit">Gap</span><span><b>Outcome &amp; revision tracking</b> — touch-up/redo rates, satisfaction per treatment.</span></li>
+        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-700 h-fit">Built</span><span><b>Dermal filler &amp; the modality model</b> — multi-syringe/lots, filler-specific consent &amp; device-DAEN routing (deep multi-area charting is Roadmap).</span></li>
+        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-700 h-fit">Built</span><span><b>Energy devices</b> (laser/IPL/RF) — register, settings/fluence logbook concept &amp; a <b>state-laser-licence gate</b>.</span></li>
+        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-700 h-fit">Built</span><span><b>Weight-loss injectables</b> (semaglutide/tirzepatide) — titration program &amp; a hard <b>compounded-GLP-1 block</b>.</span></li>
+        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-700 h-fit">Built</span><span><b>Complication management</b> — VO / anaphylaxis response flow logging hyaluronidase &amp; opening a routed AE case.</span></li>
+        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-700 h-fit">Built</span><span><b>Standardised photography</b> — fixed poses + ghost-overlay; <b>outcome &amp; revision tracking</b> per treatment (3D imaging is Roadmap).</span></li>
+        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-700 h-fit">Roadmap</span><span><b>Other modalities</b> — threads/PDO, PRP, skin boosters, fat-dissolving, IV therapy (classified in the menu; deep charting later).</span></li>
         <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-sky-100 text-sky-700 h-fit">External</span><span><b>Telehealth video</b> itself — recorded as consult metadata only.</span></li>
       </ul>
     </div>
@@ -207,13 +261,11 @@
     <div class="rounded-2xl border border-slate-200 bg-white p-5">
       <h3 class="font-bold mb-3 flex items-center gap-2"><span class="material-symbols-rounded text-brand-600">support_agent</span>Front desk &amp; operations</h3>
       <ul class="space-y-2 text-sm">
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-700 h-fit">Gap</span><span><b>Walk-ins &amp; same-day add-ons</b> — the flow assumes a pre-booked appointment.</span></li>
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-700 h-fit">Roadmap</span><span><b>Deposits, card-on-file holds &amp; no-show / late-cancel fees</b> — deliberately out of v1.</span></li>
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-700 h-fit">Roadmap</span><span><b>Waitlist auto-fill</b> into cancellations (light today).</span></li>
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-700 h-fit">Gap</span><span><b>Room / chair / device conflicts</b> &amp; utilisation (rooms are shown, not enforced).</span></li>
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-700 h-fit">Gap</span><span><b>Equipment maintenance</b> — autoclave validation, laser servicing &amp; calibration logs.</span></li>
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-700 h-fit">Gap</span><span><b>Daily open/close checklists &amp; fridge temp logs</b> (we alert on excursions, no daily log routine).</span></li>
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-700 h-fit">Gap</span><span><b>Inbound phone calls</b> — call logging / missed-call text-back (the inbox is digital channels).</span></li>
+        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-700 h-fit">Built</span><span><b>Walk-ins &amp; same-day add-ons</b> — gate-respecting (an injectable walk-in is forced to a consult first).</span></li>
+        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-700 h-fit">Built</span><span><b>Waitlist auto-fill</b> — offer a freed slot to a scope-matched client in one tap.</span></li>
+        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-700 h-fit">Built</span><span><b>Daily open/close checklist &amp; twice-daily fridge log</b> — excursions quarantine the lot &amp; raise a breach job.</span></li>
+        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-700 h-fit">Built</span><span><b>Rooms / chairs / devices</b> &amp; utilisation; <b>equipment maintenance</b> register (autoclave/laser); <b>inbound call log</b> + missed-call text-back.</span></li>
+        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-700 h-fit">Roadmap</span><span><b>Hard resource conflict-blocking</b> &amp; <b>deposits / card-on-file holds &amp; no-show fees</b> (opt-in, ACL-fair, cooling-off-suppressed — concept shown).</span></li>
       </ul>
     </div>
 
@@ -221,12 +273,11 @@
     <div class="rounded-2xl border border-slate-200 bg-white p-5">
       <h3 class="font-bold mb-3 flex items-center gap-2"><span class="material-symbols-rounded text-brand-600">payments</span>Money &amp; retail</h3>
       <ul class="space-y-2 text-sm">
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-700 h-fit">Roadmap</span><span><b>Practitioner commission / pay-splits &amp; payroll</b> — important for contractor injectors.</span></li>
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-700 h-fit">Gap</span><span><b>Supplier purchase orders &amp; accounts payable</b> — we <i>receive</i> stock but don't order it.</span></li>
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-700 h-fit">Roadmap</span><span><b>Retail (skincare) inventory &amp; POS</b> — barcodes, suppliers, stock counts.</span></li>
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-700 h-fit">Gap</span><span><b>Refunds, chargebacks &amp; disputes</b> handling.</span></li>
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-700 h-fit">Roadmap</span><span><b>BNPL / payment plans</b> (Afterpay etc.) &amp; tips distribution.</span></li>
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-700 h-fit">Roadmap</span><span><b>Deeper accounting / BAS</b> — Xero export is planned (PRD-10).</span></li>
+        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-700 h-fit">Built</span><span><b>Commission / pay-run</b> — attributed splits with an engagement-risk flag (<i>attribution &amp; export, not payroll</i>).</span></li>
+        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-700 h-fit">Built</span><span><b>Supplier purchase orders &amp; AP</b> — reorder-to-PO from below-par; S4 POs need a prescriber signer.</span></li>
+        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-700 h-fit">Built</span><span><b>Refunds &amp; disputes</b> (restock non-S4 only) and a <b>BAS / GST summary</b> with per-line tax coding.</span></li>
+        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-700 h-fit">Roadmap</span><span><b>Retail (skincare) inventory &amp; POS</b> (barcodes/counts), <b>BNPL / payment plans</b> &amp; tips distribution.</span></li>
+        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-sky-100 text-sky-700 h-fit">External</span><span><b>Payroll, super &amp; tax lodgement</b> — accountant / payroll vendor (we attribute &amp; export to Xero).</span></li>
       </ul>
     </div>
 
@@ -234,10 +285,10 @@
     <div class="rounded-2xl border border-slate-200 bg-white p-5">
       <h3 class="font-bold mb-3 flex items-center gap-2"><span class="material-symbols-rounded text-brand-600">badge</span>Staff &amp; HR</h3>
       <ul class="space-y-2 text-sm">
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-700 h-fit">Gap</span><span><b>Rostering, shifts &amp; leave</b> — booking only <i>hints</i> at a roster.</span></li>
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-700 h-fit">Gap</span><span><b>AHPRA credential auto-verification &amp; CPD / training records</b> (we store credentials; the gate exists, not the CPD log).</span></li>
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-700 h-fit">Gap</span><span><b>Timesheets &amp; hours.</b></span></li>
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-700 h-fit">Gap</span><span><b>Indemnity insurance</b> tracking &amp; expiry per practitioner.</span></li>
+        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-700 h-fit">Built</span><span><b>Rostering, shifts &amp; leave</b> — the roster drives who's bookable.</span></li>
+        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-700 h-fit">Built</span><span><b>Credential + CPD + cosmetic-cover indemnity</b> on a compliance board — a PII gap flags a nurse not-bookable for S4.</span></li>
+        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-violet-100 text-violet-700 h-fit">Research</span><span><b>AHPRA register auto-verification (PIE)</b> — approval-gated; a first-class manual-verify fallback ships either way.</span></li>
+        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-700 h-fit">Roadmap</span><span><b>Timesheets &amp; hours</b> (rostered vs actual; no pay calc).</span></li>
       </ul>
     </div>
 
@@ -245,12 +296,11 @@
     <div class="rounded-2xl border border-slate-200 bg-white p-5">
       <h3 class="font-bold mb-3 flex items-center gap-2"><span class="material-symbols-rounded text-brand-600">verified_user</span>Compliance &amp; governance</h3>
       <ul class="space-y-2 text-sm">
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-700 h-fit">Roadmap</span><span><b>DAEN adverse-event submission</b> — we prefill the export; no electronic submit yet.</span></li>
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-700 h-fit">Gap</span><span><b>Incident &amp; mandatory-reporting</b> case-management workflow (lightweight in v1).</span></li>
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-700 h-fit">Gap</span><span><b>Policies &amp; procedures</b> document management &amp; staff sign-off.</span></li>
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-700 h-fit">Roadmap</span><span><b>Full infection-control</b> + sharps / clinical-waste manifests &amp; pickups (lightweight today).</span></li>
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-700 h-fit">Gap</span><span><b>Recall execution</b> — we find lot→clients instantly; running the recall comms campaign is the next step.</span></li>
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-700 h-fit">Gap</span><span><b>Audit / inspection packs</b> — one-click evidence bundle; data-access-request &amp; breach drills (registers exist).</span></li>
+        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-700 h-fit">Built</span><span><b>DAEN adverse-event routing</b> — medicine vs device, prefilled + mandatory-trigger flag + portal hand-off (electronic submit is Roadmap).</span></li>
+        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-700 h-fit">Built</span><span><b>Recall execution</b> — lot→clients → SMS/call campaign → acknowledgement tracking.</span></li>
+        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-700 h-fit">Built</span><span><b>Policies &amp; procedures</b> sign-off; <b>incident</b> register; <b>clinical/sharps waste manifests</b> + IPC log.</span></li>
+        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-700 h-fit">Built</span><span><b>Audit / inspection pack</b> (one-click bundle) and <b>DSAR (APP 12/13) + breach drill</b> with 30-day clocks.</span></li>
+        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-700 h-fit">Roadmap</span><span><b>Electronic DAEN/ASDER submission</b> &amp; <b>state-EPA waste-system integration</b> (prefill + recorded manifest today).</span></li>
       </ul>
     </div>
 
@@ -258,10 +308,9 @@
     <div class="rounded-2xl border border-slate-200 bg-white p-5">
       <h3 class="font-bold mb-3 flex items-center gap-2"><span class="material-symbols-rounded text-brand-600">hub</span>Growth, integrations &amp; the client app</h3>
       <ul class="space-y-2 text-sm">
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-700 h-fit">Gap</span><span><b>Reviews / reputation</b> requests &amp; monitoring; a <b>lead/prospect CRM pipeline</b> (enquiry → consult → conversion).</span></li>
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-700 h-fit">Gap</span><span><b>Website booking widget</b> &amp; SEO; social content scheduling.</span></li>
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-700 h-fit">Roadmap</span><span><b>Email campaign builder</b> &amp; deeper referral/affiliate (concept shown).</span></li>
-        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-700 h-fit">Roadmap</span><span><b>Online checkout / deposits</b>, two-way calendar sync, <b>e-prescribing (ETP)</b>, webhooks / public API.</span></li>
+        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-700 h-fit">Built</span><span><b>Reviews / reputation</b> (request-all, no gating; S4-repost blocked) and a <b>lead/prospect CRM pipeline</b>.</span></li>
+        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-700 h-fit">Built</span><span><b>Newsletter builder</b> (per-block advertising linter), <b>social scheduler</b> &amp; a <b>public booking page</b> (generic names, S4 price withheld).</span></li>
+        <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-700 h-fit">Roadmap</span><span><b>Online checkout / deposits</b>, two-way calendar sync, <b>e-prescribing (ETP)</b>, deeper referral/affiliate, webhooks / public API (Integrations settings show the roadmap).</span></li>
         <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-sky-100 text-sky-700 h-fit">External</span><span><b>Medicare / HICAPS / health-fund</b> (mostly non-claimable for cosmetic); e-sign &amp; payroll vendors.</span></li>
         <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-violet-100 text-violet-700 h-fit">Research</span><span><b>IG/FB/WhatsApp messaging</b> &amp; injection auto-detect — feasibility to validate (24-h window, App Review, on-device ML).</span></li>
         <li class="flex gap-2"><span class="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-700 h-fit">Gap</span><span><b>Client app</b> — two-way chat, NPS/satisfaction surveys, self-reschedule depth &amp; waitlist opt-in.</span></li>
@@ -278,7 +327,7 @@
 
 <script>
 // highlight the role nav as you scroll
-var ids=['reception','rn','lead','np','dermal','owner','client','gaps'];
+var ids=['reception','rn','lead','np','dermal','owner','client','built','gaps'];
 var obs=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){document.querySelectorAll('.rolenav a').forEach(function(a){a.classList.toggle('on',a.getAttribute('href')==='#'+e.target.id);});}});},{rootMargin:'-40% 0px -55% 0px'});
 ids.forEach(function(id){var el=document.getElementById(id);if(el)obs.observe(el);});
 </script>

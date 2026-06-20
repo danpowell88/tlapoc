@@ -1,6 +1,8 @@
 # PRD-04 — Consult, Prescribing & S4 Medicines Governance  *(the moat)*
 
 > **▸ Option A alignment (rev 2, 2026-06-19).** Medicines is now a **multi-product, multi-unit catalogue** (ADR-0021, **REQ-MED-11**): typed products (toxin/filler/skin) each with their own **unit** (units vs syringes), per-product **on-hand / usage-history / par / expiry**, **vial reconciliation**, and a capability-gated **product admin** that sets the **S4 flag** (the single classification driving rewards & advertising, ADR-0014). The consult-gated-script + individual-Rx moat (C1/C2) is unchanged. See [requirements §12](../02-requirements.md#12-option-a-prototype-alignment--feasibility-register).
+>
+> **▸ Option A alignment (rev 4, 2026-06-20).** Extends to **filler-as-medicine** and **weight-loss GLP-1** programs: the catalogue carries `regClass`/`artg`/`compounded`, so the system **blocks prohibited compounded GLP-1** (banned 1 Oct 2024) and routes adverse events to the **correct DAEN dataset** (medicine vs device). Adds **supplier purchase orders & receiving** — S4 POs require a **prescriber signer** + TGA-approved wholesaler — and **retail (non-S4) SKUs** (ADR-0025/0027/0031, REQ-MED-12/13/14/15). DAEN routing + recall execution + mandatory-trigger flagging live in the Governance hub (PRD-08/PRD-11).
 
 > **Phase:** 1 · **Status:** Draft
 > **Requirements:** REQ-RX-1…5, REQ-MED-1…10 · **Compliance:** C1, C2, C7, C8, C11, C13, C15, C16, C17

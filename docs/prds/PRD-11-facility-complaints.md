@@ -1,6 +1,8 @@
 # PRD-11 — Facility, Infection Control, Emergency & Complaints
 
 > **▸ Option A alignment (rev 2, 2026-06-19).** No material change — facility/infection-control/emergency stay **lightweight record-keeping** in v1. One linkage worth noting: a **complaint** raised from a conversation (inbox, ADR-0019) should surface the **AHPRA** complaint pathway (C24). See [requirements §12](../02-requirements.md#12-option-a-prototype-alignment--feasibility-register).
+>
+> **▸ Option A alignment (rev 4, 2026-06-20).** Promoted from "lightweight record-keeping" to real workflows (mostly surfaced in the **Operations** + **Governance** areas, ADR-0026/0030): a **twice-daily cold-chain log** with a **breach pathway** (quarantine lot · report), a **daily open/close checklist**, a **sterilisation & equipment maintenance register** (autoclave validation + spore testing, AS 5369:2023; laser service/calibration), **clinical & sharps waste manifests** (NSW CA+TC / QLD WTC), a **complication-response workflow** (VO/anaphylaxis → log kit → routed AE + jobs), **incident & mandatory-reporting** case management, and **policies & procedures sign-off** (REQ-FAC-4..10).
 
 > **Phase:** 1–2 (lightweight in v1) · **Status:** Draft
 > **Requirements:** REQ-FAC-1…3, REQ-CLI-4 (complaints) · **Compliance:** C20, C24
