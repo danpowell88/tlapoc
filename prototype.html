@@ -42,12 +42,31 @@ tailwind.config={theme:{extend:{
   }
   /* embed mode — for the day-in-the-life guide iframes: hide app chrome, show just the screen */
   body.embed #sidebar{display:none}
+  body.embed #loginScreen{display:none}
   body.embed #staffApp header{display:none}
   body.embed #navOverlay{display:none}
   body.embed #staffApp main{padding:1rem}
 </style>
 </head>
 <body class="bg-slate-50 text-ink">
+<!-- ============ LOGIN / PERSONA PICKER ============ -->
+<div id="loginScreen" class="fixed inset-0 z-[100] overflow-y-auto bg-gradient-to-b from-white via-brand-50 to-slate-100">
+  <div class="min-h-full flex flex-col">
+    <header class="px-6 py-5 flex items-center gap-3">
+      <div class="size-10 rounded-xl bg-brand-600 text-white grid place-items-center font-bold text-lg">L</div>
+      <div><div class="font-semibold leading-tight">The Lounge</div><div class="text-xs text-mute">Aesthetics platform · interactive demo</div></div>
+    </header>
+    <main class="flex-1 w-full max-w-6xl mx-auto px-6 py-6 sm:py-8">
+      <div class="max-w-2xl">
+        <span class="inline-flex items-center gap-1.5 text-xs font-medium text-brand-700 bg-brand-50 border border-brand-100 rounded-full px-3 py-1"><span class="material-symbols-rounded text-[15px]">groups</span>Choose who you are</span>
+        <h1 class="text-2xl sm:text-3xl font-semibold mt-4">Sign in to explore the demo</h1>
+        <p class="text-mute mt-2 leading-relaxed">Pick a persona to &ldquo;log in&rdquo;. Each role sees a view tailored to what they actually do &mdash; and what they&rsquo;re allowed to see. You can switch users any time from the top bar. <span class="text-slate-400">All data is synthetic.</span></p>
+      </div>
+      <div id="loginGrid" class="mt-8"></div>
+    </main>
+    <footer class="px-6 py-5 text-center text-xs text-slate-400">Demo only &middot; no real client, staff or business data.</footer>
+  </div>
+</div>
 <div id="staffApp" class="flex min-h-screen">
   <aside id="sidebar" class="w-60 shrink-0 bg-white border-r border-slate-200 flex flex-col">
     <div class="px-3 py-3 border-b border-slate-100 relative">
@@ -149,7 +168,7 @@ tailwind.config={theme:{extend:{
       <div class="relative flex-1 max-w-md hidden md:block"><span class="material-symbols-rounded absolute left-3 top-2.5 text-mute">search</span><input placeholder="Search clients, appointments, invoices…" class="w-full pl-10 pr-4 py-2 bg-slate-100 rounded-xl text-sm focus:outline-none focus:ring-2 ring-brand-500"/></div>
       <div class="flex-1 md:hidden"></div>
       <button onclick="show('booking');wstep(1)" class="px-3 sm:px-4 py-2 rounded-xl bg-brand-600 text-white text-sm font-medium flex items-center gap-1 shrink-0"><span class="material-symbols-rounded text-lg">add</span><span class="hidden sm:inline">New booking</span></button>
-      <button class="size-10 grid place-items-center rounded-full hover:bg-slate-100 text-slate-600 relative"><span class="material-symbols-rounded">notifications</span><span class="absolute top-2 right-2 size-2 bg-rose-500 rounded-full"></span></button>      <label class="flex items-center gap-1 text-xs text-mute whitespace-nowrap"><span class="hidden lg:inline">View as</span><select id="personaSel" onchange="setPersona(this.value)" class="text-sm border border-slate-200 rounded-xl px-2 py-1.5 bg-white focus:outline-none focus:ring-2 ring-brand-500"><option value="np">Nurse Practitioner</option><option value="lead">Lead Nurse</option><option value="rn">Nurse (RN)</option><option value="dermal">Dermal / Laser tech</option><option value="reception">Reception</option><option value="owner">Owner (business)</option><option value="client">Client</option><option disabled>── combined / small-clinic ──</option><option value="solo">Solo NP — all roles</option><option value="nurseled">Nurse-led RN (+ reception)</option><option disabled>＋ Custom roles — coming soon</option></select></label>
+      <button class="size-10 grid place-items-center rounded-full hover:bg-slate-100 text-slate-600 relative"><span class="material-symbols-rounded">notifications</span><span class="absolute top-2 right-2 size-2 bg-rose-500 rounded-full"></span></button>      <button onclick="showLogin()" title="Switch user" class="flex items-center gap-1.5 text-xs text-mute hover:text-ink whitespace-nowrap px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition"><span class="material-symbols-rounded text-[16px]">swap_horiz</span><span class="hidden lg:inline">Switch user</span></button>
       <div class="group relative flex items-center gap-2 cursor-help">
         <img id="hdrAvatar" src="https://i.pravatar.cc/64?img=47" class="size-9 rounded-full object-cover"/>
         <div class="text-sm leading-tight hidden sm:block"><div id="hdrName" class="font-medium">Bella L.</div><div class="text-xs text-mute flex items-center gap-1"><span id="hdrRole">Nurse · RN</span><span class="material-symbols-rounded text-[15px] text-slate-400">info</span></div></div>
@@ -980,7 +999,7 @@ tailwind.config={theme:{extend:{
   <header class="h-16 bg-white border-b border-slate-200 flex items-center px-5 gap-3 sticky top-0 z-10">
     <div class="size-9 rounded-xl bg-brand-600 text-white grid place-items-center font-bold">L</div>
     <div class="font-semibold">The Lounge</div>
-    <label class="ml-auto flex items-center gap-1 text-xs text-mute whitespace-nowrap"><span class="hidden lg:inline">View as</span><select id="personaSelC" onchange="setPersona(this.value)" class="text-sm border border-slate-200 rounded-xl px-2 py-1.5 bg-white"><option value="np">Nurse Practitioner</option><option value="lead">Lead Nurse</option><option value="rn">Nurse (RN)</option><option value="dermal">Dermal / Laser tech</option><option value="reception">Reception</option><option value="owner">Owner (business)</option><option value="client">Client</option><option disabled>── combined / small-clinic ──</option><option value="solo">Solo NP — all roles</option><option value="nurseled">Nurse-led RN (+ reception)</option><option disabled>＋ Custom roles — coming soon</option></select></label>
+    <button onclick="showLogin()" title="Switch user" class="ml-auto flex items-center gap-1.5 text-xs text-mute hover:text-ink whitespace-nowrap px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition"><span class="material-symbols-rounded text-[16px]">swap_horiz</span><span class="hidden lg:inline">Switch user</span></button>
     <img id="cAvatar" src="https://i.pravatar.cc/96?img=45" class="size-9 rounded-full object-cover"/>
   </header>
   <main class="max-w-md mx-auto px-4 pt-5 pb-28">
@@ -1521,8 +1540,28 @@ const personas={
  owner:{name:'Mark Davis',role:'Owner (business)',img:51,mode:'staff',caps:{chart:0,chartView:1,stock:1,receive:0,financials:1,team:'manage',integrations:1},concerns:['fin','biz','stock','stockalert','compliance','hr','facility'],note:'Business owner · full financials, reports, growth, governance & read-only oversight of clinical records, stock, roster & facility · cannot prescribe, chart or hold S4'},
  solo:{name:'Dr Lena Park',role:'Solo NP — all roles',img:12,mode:'staff',caps:{chart:1,chartView:1,stock:1,receive:1,financials:1,team:'manage',integrations:1},concerns:['fin','ops','clin','stock','consent','stockalert','recall','biz','frontdesk','facility','compliance','hr'],note:'Single-handed clinic — covers reception, clinical, prescribing, stock, growth, governance & the books'},
  nurseled:{name:'Bella L.',role:'Nurse-led RN (+ reception)',img:47,mode:'staff',caps:{chart:1,chartView:1,stock:1,receive:0,financials:0,team:'manage'},concerns:['ops','clin','stock','consent','stockalert','recall','biz','frontdesk','facility','compliance','hr'],note:'Runs a nurse-led clinic — clinical + front desk + roster + governance; prescriber is remote (telehealth)'},
- client:{name:'Sarah Mitchell',role:'Glow Club member',img:45,mode:'client'}};
+ client:{name:'Sarah Mitchell',role:'Glow Club member',img:45,mode:'client',note:'The client-facing app — books appointments, tracks Glow Club rewards & membership, manages consent and follows her care plan'}};
 let persona='np';
+/* ---------- login / persona picker ---------- */
+var loginGroups=[
+ {h:'Clinic team — pick a single role',keys:['reception','rn','dermal','lead','np','owner']},
+ {h:'Small-clinic combined roles',keys:['solo','nurseled']},
+ {h:'The client experience',keys:['client']}];
+function renderLogin(){var box=document.getElementById('loginGrid');if(!box)return;
+ box.innerHTML=loginGroups.map(function(g){
+  var cards=g.keys.map(function(k){var p=personas[k];if(!p)return '';
+   var fn=p.name.replace(/^Dr\.?\s+/,'').split(' ')[0];
+   return '<button onclick="login(\''+k+'\')" class="group text-left bg-white rounded-2xl shadow-soft hover:shadow-card border border-slate-100 hover:border-brand-300 p-5 transition flex flex-col focus:outline-none focus:ring-2 ring-brand-500">'
+     +'<div class="flex items-center gap-3"><img src="https://i.pravatar.cc/96?img='+p.img+'" class="size-12 rounded-full object-cover"/>'
+     +'<div class="min-w-0"><div class="font-semibold truncate">'+p.name+'</div><div class="text-xs text-mute truncate">'+p.role+'</div></div></div>'
+     +'<p class="text-xs text-mute mt-3 leading-relaxed flex-1">'+(p.note||'')+'</p>'
+     +'<span class="mt-4 inline-flex items-center gap-1 text-brand-700 text-sm font-medium">Log in as '+fn+'<span class="material-symbols-rounded text-[18px] group-hover:translate-x-0.5 transition-transform">arrow_forward</span></span>'
+     +'</button>';
+  }).join('');
+  return '<div class="mb-8"><h2 class="text-xs font-semibold text-mute uppercase tracking-wide mb-3">'+g.h+'</h2><div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">'+cards+'</div></div>';
+ }).join('');}
+function showLogin(){var ls=document.getElementById('loginScreen');if(ls){ls.classList.remove('hidden');ls.scrollTop=0;}}
+function login(k){setPersona(k);var ls=document.getElementById('loginScreen');if(ls)ls.classList.add('hidden');window.scrollTo(0,0);}
 function setPersona(k){persona=k;const p=personas[k];var sa=document.getElementById('personaSel');if(sa)sa.value=k;var sc=document.getElementById('personaSelC');if(sc)sc.value=k;
  if(p.mode==='client'){document.getElementById('staffApp').classList.add('hidden');document.getElementById('clientApp').classList.remove('hidden');document.getElementById('cName').textContent=p.name.split(' ')[0];document.getElementById('cAvatar').src='https://i.pravatar.cc/96?img='+p.img;cshow('chome');return;}
  document.getElementById('clientApp').classList.add('hidden');document.getElementById('staffApp').classList.remove('hidden');
@@ -1829,11 +1868,12 @@ function renderIntegrations(){var b=document.getElementById('setIntegrations');i
 
 function renderNewAreas(){renderClinMenu();renderClinSafety();renderClinImaging();renderFridges();renderMonitors();renderChecklist();renderResources();renderEquip();renderCalls();renderFinSnapshot();renderRoster();renderTeamLeave();renderTeamPeople();renderTeamCompliance();renderLeads();renderReviews();renderGovAE();renderGovRecalls();renderGovPolicies();renderGovPrivacy();renderAudit();renderGovOverview();renderGovBadge();renderIntegrations();}
 
-renderClients();renderToday();renderChartList();wstep(1);initInj();initBA();renderStock();renderCheckout();renderWeek();renderMarketing();renderMemberships();renderReports();renderChartProduct();renderNewAreas();setPersona('np');
+renderClients();renderToday();renderChartList();wstep(1);initInj();initBA();renderStock();renderCheckout();renderWeek();renderMarketing();renderMemberships();renderReports();renderChartProduct();renderNewAreas();setPersona('np');renderLogin();
 /* ---------- deep-link + embed (used by guide.html) ---------- */
 (function(){try{var q=new URLSearchParams(location.search);var p=q.get('p'),s=q.get('s'),v=q.get('view');
  if(q.get('embed')==='1')document.body.classList.add('embed');
  if(p&&personas[p])setPersona(p);
+ if((p&&personas[p])||q.get('embed')==='1'){var ls=document.getElementById('loginScreen');if(ls)ls.classList.add('hidden');}
  function goScreen(x){if(!x)return;if(x.indexOf(':')>-1){var a=x.split(':');goSub(a[0],a[1]);}else show(x);}
  var V={inbox:function(){goSub('marketing','inbox');openConvo(0);},followups:function(){show('followups');},checkout:function(){show('checkout');},pricing:function(){goSub('memberships','pricing');},memberships:function(){goSub('memberships','overview');},reports:function(){show('reports');},stock:function(){show('stock');},schedule:function(){show('schedule');},chartlist:function(){show('chartlist');},booking:function(){show('booking');wstep(1);},'chart-review':function(){apptStart(0);},'chart-skin':function(){apptStart(3);},'client-book':function(){if(typeof cshow==='function')cshow('cbook');},'client-rewards':function(){if(typeof cshow==='function')cshow('cmember');},'client-care':function(){if(typeof cshow==='function')cshow('ccare');},
  'clinical-menu':function(){goSub('clinical','menu');},'clinical-safety':function(){goSub('clinical','safety');},'clinical-imaging':function(){goSub('clinical','imaging');},
