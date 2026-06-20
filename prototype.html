@@ -759,6 +759,11 @@ tailwind.config={theme:{extend:{
 
         <!-- REVENUE -->
         <div data-rp="revenue" class="hidden">
+          <div class="flex items-center gap-1.5 mb-4 text-sm border-b border-slate-100 pb-2 flex-wrap">
+            <button onclick="goRepSub('revenue','overview')" data-rsub="revenue:overview" class="px-2.5 py-1 rounded-lg text-brand-700 bg-brand-50 font-medium">Overview</button>
+            <button onclick="goRepSub('revenue','trends')" data-rsub="revenue:trends" class="px-2.5 py-1 rounded-lg text-mute hover:bg-slate-50">Trends &amp; history</button>
+          </div>
+          <div data-rsec="revenue:overview">
           <div id="repRevKpi" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
           <div class="grid lg:grid-cols-3 gap-6 mb-6">
             <div class="lg:col-span-2 bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Revenue <span class="text-mute text-xs font-normal">· last 6 months</span></h2><div id="repRevTrend"></div><div id="repRevTrendLbl" class="flex justify-between text-xs text-mute mt-1"></div></div>
@@ -769,30 +774,51 @@ tailwind.config={theme:{extend:{
             <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Top clients <span class="text-mute text-xs font-normal">· by lifetime spend</span></h2><table class="w-full text-sm"><thead class="text-mute border-b border-slate-100"><tr><th class="text-left font-medium py-2">Client</th><th class="text-left font-medium py-2">Membership</th><th class="text-right font-medium py-2">Lifetime</th></tr></thead><tbody id="repTopClients" class="divide-y divide-slate-100"></tbody></table></div>
           </div>
           <div class="bg-white rounded-2xl shadow-soft p-5 mt-6"><h2 class="font-semibold mb-1">Treatment profitability <span class="text-mute text-xs font-normal">· margin &amp; revenue per chair-hour</span></h2><p class="text-mute text-sm mb-3 max-w-3xl">Revenue alone hides what actually pays. This nets off product &amp; consumable cost and divides by chair time — so you can see which treatments earn most <b>per hour</b>, not just in total.</p><div class="overflow-x-auto"><table class="w-full text-sm"><thead class="text-mute border-b border-slate-100"><tr><th class="text-left font-medium py-2">Treatment</th><th class="text-right font-medium py-2">Done</th><th class="text-right font-medium py-2">Revenue</th><th class="text-right font-medium py-2">Product cost</th><th class="text-right font-medium py-2">Gross margin</th><th class="text-right font-medium py-2">$ / hour</th></tr></thead><tbody id="repProfit" class="divide-y divide-slate-100"></tbody></table></div><div id="repProfitNote" class="text-xs text-mute mt-3"></div></div>
+          </div>
+          <div data-rsec="revenue:trends" id="repSecRevTrends" class="hidden"></div>
         </div>
 
         <!-- RETENTION -->
         <div data-rp="retention" class="hidden">
+          <div class="flex items-center gap-1.5 mb-4 text-sm border-b border-slate-100 pb-2 flex-wrap">
+            <button onclick="goRepSub('retention','overview')" data-rsub="retention:overview" class="px-2.5 py-1 rounded-lg text-brand-700 bg-brand-50 font-medium">Overview</button>
+            <button onclick="goRepSub('retention','trends')" data-rsub="retention:trends" class="px-2.5 py-1 rounded-lg text-mute hover:bg-slate-50">Trends &amp; history</button>
+          </div>
+          <div data-rsec="retention:overview">
           <div id="repRetKpi" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
           <div class="grid lg:grid-cols-3 gap-6">
             <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">New vs returning</h2><div id="repNvR"></div></div>
             <div class="lg:col-span-2 bg-white rounded-2xl shadow-soft p-5"><div class="flex items-center justify-between mb-3"><h2 class="font-semibold">At-risk &amp; lapsed clients</h2><button onclick="show('followups')" class="text-brand-700 text-xs font-medium">Open follow-ups &rarr;</button></div><div id="repAtRisk"></div></div>
           </div>
           <div class="bg-white rounded-2xl shadow-soft p-5 mt-6"><h2 class="font-semibold mb-1">Cohort retention <span class="text-mute text-xs font-normal">· % still active by months since first visit</span></h2><p class="text-mute text-sm mb-4 max-w-3xl">Each row is the group of clients who first visited that month. Reading a row left-to-right shows how many are still active over time — the truest measure of whether new clients stick.</p><div id="repCohorts" class="overflow-x-auto"></div><div id="repCohortNote" class="text-xs text-mute mt-3"></div></div>
+          </div>
+          <div data-rsec="retention:trends" id="repSecRetTrends" class="hidden"></div>
         </div>
 
         <!-- MEMBERSHIPS -->
         <div data-rp="memberships" class="hidden">
+          <div class="flex items-center gap-1.5 mb-4 text-sm border-b border-slate-100 pb-2 flex-wrap">
+            <button onclick="goRepSub('memberships','overview')" data-rsub="memberships:overview" class="px-2.5 py-1 rounded-lg text-brand-700 bg-brand-50 font-medium">Overview</button>
+            <button onclick="goRepSub('memberships','trends')" data-rsub="memberships:trends" class="px-2.5 py-1 rounded-lg text-mute hover:bg-slate-50">Trends &amp; history</button>
+          </div>
+          <div data-rsec="memberships:overview">
           <div id="repMemKpi" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
           <div class="grid lg:grid-cols-2 gap-6 mb-6">
             <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Plan mix <span class="text-mute text-xs font-normal">· members &amp; MRR</span></h2><div id="repPlanMix"></div></div>
             <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Net member movement <span class="text-mute text-xs font-normal">· this month</span></h2><div id="repChurn"></div></div>
           </div>
           <div class="bg-white rounded-2xl shadow-soft p-5"><div class="flex items-center justify-between mb-1"><h2 class="font-semibold">Prepaid liability <span class="text-mute text-xs font-normal">· service owed on packages</span></h2><button onclick="goSub('memberships','plans')" class="text-brand-700 text-xs font-medium">Open packages &rarr;</button></div><p class="text-mute text-sm mb-3">Money taken for treatments not yet delivered — a liability until redeemed. Expiring packages are a recall opportunity (and revenue at risk of refund).</p><table class="w-full text-sm"><thead class="text-mute border-b border-slate-100"><tr><th class="text-left font-medium py-2">Package</th><th class="text-right font-medium py-2">Sold</th><th class="text-right font-medium py-2">Redeemed</th><th class="text-right font-medium py-2">Liability</th></tr></thead><tbody id="repDeferred" class="divide-y divide-slate-100"></tbody></table></div>
+          </div>
+          <div data-rsec="memberships:trends" id="repSecMemTrends" class="hidden"></div>
         </div>
 
         <!-- CAPACITY -->
         <div data-rp="capacity" class="hidden">
+          <div class="flex items-center gap-1.5 mb-4 text-sm border-b border-slate-100 pb-2 flex-wrap">
+            <button onclick="goRepSub('capacity','overview')" data-rsub="capacity:overview" class="px-2.5 py-1 rounded-lg text-brand-700 bg-brand-50 font-medium">Overview</button>
+            <button onclick="goRepSub('capacity','trends')" data-rsub="capacity:trends" class="px-2.5 py-1 rounded-lg text-mute hover:bg-slate-50">Trends &amp; history</button>
+          </div>
+          <div data-rsec="capacity:overview">
           <p class="text-mute text-sm mb-4 max-w-3xl">A clinic sells time in a chair. This is how full those chairs are — overall, by practitioner and by day — and what the empty hours are worth. Idle capacity is the cheapest revenue to win back.</p>
           <div id="repCapKpi" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
           <div class="grid lg:grid-cols-2 gap-6 mb-6">
@@ -800,6 +826,8 @@ tailwind.config={theme:{extend:{
             <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Utilisation by day</h2><div id="repCapDay"></div></div>
           </div>
           <div id="repCapNote"></div>
+          </div>
+          <div data-rsec="capacity:trends" id="repSecCapTrends" class="hidden"></div>
         </div>
       </section>
 
@@ -1656,6 +1684,20 @@ var REP={period:'30d',
  profit:{dur:{'Anti-wrinkle':30,'Filler':45,'Skin':60,'Consult':30},cost:{'Anti-wrinkle':0.35,'Filler':0.40,'Skin':0.15,'Consult':0.05}},
  cohorts:[['Jan',38,[100,82,74,68,63,60]],['Feb',42,[100,80,71,66,61]],['Mar',35,[100,84,76,70]],['Apr',47,[100,79,72]],['May',51,[100,83]],['Jun',42,[100]]],
  capacity:{fill:76,booked:152,available:200,revPerHr:842,byPrac:[['Dr Lena Park',88,'bg-brand-500'],['Bella L.',79,'bg-emerald-500'],['Priya Raman',71,'bg-amber-500'],['Chloe Adams',64,'bg-violet-500']],byDay:[['Mon',72],['Tue',81],['Wed',63],['Thu',85],['Fri',90]]}};
+/* 12-month history for trend analysis (Jul 2025 → Jun 2026; Jun ties to the current REP figures) */
+var RH={
+ months:['Jul 25','Aug 25','Sep 25','Oct 25','Nov 25','Dec 25','Jan 26','Feb 26','Mar 26','Apr 26','May 26','Jun 26'],
+ revenue:[88000,92000,95000,90000,101000,110000,96000,103000,99000,112000,117000,128000],
+ visits:[205,215,225,210,235,248,220,228,232,250,238,240],
+ newClients:[28,30,33,29,38,41,34,36,39,44,40,42],
+ conversion:[33,34,32,35,36,38,34,36,37,39,37,38],
+ retention:[78,79,77,80,81,79,80,81,80,83,81,82],
+ members:[548,560,571,580,588,596,603,609,614,619,622,634],
+ mrr:[64300,65800,67000,68100,69000,69900,70800,71500,72100,72700,73100,74346],
+ churn:[1.6,1.5,1.4,1.7,1.3,1.2,1.5,1.3,1.2,1.0,1.2,1.1],
+ noShow:[6.2,5.8,5.5,6.0,5.1,4.8,5.3,5.0,4.9,4.4,4.7,4.6],
+ utilisation:[68,70,72,69,74,77,71,73,72,78,75,76]};
+function repSer(key){return RH.months.map(function(m,i){return [m,RH[key][i]];});}
 var REP_TKEY='tla_rep_targets';
 (function(){try{var s=JSON.parse(localStorage.getItem(REP_TKEY));if(s)Object.assign(REP.targets,s);}catch(e){}})();
 function repk(){return REP.periods[REP.period].k;}
@@ -1676,7 +1718,13 @@ function repTile(label,value,o){o=o||{};var state=o.state,badge='';
 function repPct(v){return v+'%';}
 /* tab + period switching */
 var repTab='scorecard';
-function goRep(t){repTab=t;document.querySelectorAll('[data-rp]').forEach(function(p){p.classList.toggle('hidden',p.getAttribute('data-rp')!==t);});document.querySelectorAll('[data-rpill]').forEach(function(b){var on=b.getAttribute('data-rpill')===t;b.className='px-3 py-1.5 rounded-full '+(on?'bg-brand-600 text-white font-medium':'bg-white shadow-soft text-mute');});window.scrollTo(0,0);}
+function goRep(t){repTab=t;document.querySelectorAll('[data-rp]').forEach(function(p){p.classList.toggle('hidden',p.getAttribute('data-rp')!==t);});document.querySelectorAll('[data-rpill]').forEach(function(b){var on=b.getAttribute('data-rpill')===t;b.className='px-3 py-1.5 rounded-full '+(on?'bg-brand-600 text-white font-medium':'bg-white shadow-soft text-mute');});if(repSub[t])applyRepSub(t);window.scrollTo(0,0);}
+/* second-level sub-tabs (Overview / Trends) within each report area */
+var repSub={revenue:'overview',retention:'overview',memberships:'overview',capacity:'overview'};
+function applyRepSub(area){var cur=repSub[area]||'overview';
+ document.querySelectorAll('[data-rsec^="'+area+':"]').forEach(function(s){s.classList.toggle('hidden',s.getAttribute('data-rsec')!==area+':'+cur);});
+ document.querySelectorAll('[data-rsub^="'+area+':"]').forEach(function(b){var on=b.getAttribute('data-rsub')===area+':'+cur;b.className='px-2.5 py-1 rounded-lg '+(on?'text-brand-700 bg-brand-50 font-medium':'text-mute hover:bg-slate-50');});}
+function goRepSub(area,sub){repSub[area]=sub;applyRepSub(area);}
 function setRepPeriod(p){REP.period=p;var l=document.getElementById('repPeriodLbl');if(l)l.textContent=REP.periods[p].lbl;document.querySelectorAll('#repPeriod button').forEach(function(b){var on=b.getAttribute('data-rper')===p;b.className='px-3 py-2 '+(on?'bg-brand-50 text-brand-700 font-medium':'text-mute');});renderReports();}
 /* targets */
 function setRepTarget(k,v){REP.targets[k]=parseFloat(v)||0;}
@@ -1796,7 +1844,52 @@ function renderRepCapacity(){var kp=document.getElementById('repCapKpi');if(!kp)
  document.getElementById('repCapDay').innerHTML=c.byDay.map(function(d){var col=d[1]>=80?'bg-emerald-500':d[1]>=70?'bg-brand-500':'bg-amber-500';return repBar(d[0],'',d[1]+'%',d[1],col);}).join('');
  var lowDay=c.byDay.slice().sort(function(a,b){return a[1]-b[1];})[0],lowPrac=c.byPrac.slice().sort(function(a,b){return a[1]-b[1];})[0];
  document.getElementById('repCapNote').innerHTML='<div class="rounded-xl bg-amber-50 text-amber-800 text-sm px-4 py-3 flex items-start gap-2"><span class="material-symbols-rounded text-base">tips_and_updates</span><div><b>'+lowDay[0]+'</b> ('+lowDay[1]+'%) and <b>'+lowPrac[0]+'</b> ('+lowPrac[1]+'%) have the most open capacity. Filling the '+idle+' idle hours at '+repMoney(c.revPerHr)+'/hr is roughly <b>'+repMoneyK(idle*c.revPerHr)+' a week</b> of latent revenue — aim waitlist offers &amp; promos there.</div></div>';}
-function renderReports(){renderRepInsights();renderScorecard();renderRepRevenue();renderRepProfit();renderRepRetention();renderRepCohorts();renderRepMemberships();renderRepCapacity();}
+/* ---- historical charting engine (inline SVG: area + line, 3-mo moving average, trend line) ---- */
+function repLinReg(ys){var n=ys.length,sx=0,sy=0,sxy=0,sxx=0;for(var i=0;i<n;i++){sx+=i;sy+=ys[i];sxy+=i*ys[i];sxx+=i*i;}var d=n*sxx-sx*sx;var slope=d?(n*sxy-sx*sy)/d:0;return {slope:slope,int:(sy-slope*sx)/n};}
+function repMA(ys,w){return ys.map(function(_,i){if(i<w-1)return null;var s=0;for(var j=i-w+1;j<=i;j++)s+=ys[j];return s/w;});}
+function repChart(o){var s=o.series,vals=s.map(function(x){return x[1];}),n=vals.length;
+ var W=720,H=o.height||230,padL=54,padB=26,padT=12,padR=14,plotW=W-padL-padR,plotH=H-padT-padB;
+ var mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals);
+ var span=(mx-mn)||1;mx+=span*0.08;if(o.zero){mn=0;}else{mn-=span*0.08;}span=mx-mn;
+ var X=function(i){return padL+(n>1?i/(n-1)*plotW:0);},Y=function(v){return padT+plotH-((v-mn)/span)*plotH;};
+ var fmt=o.fmt||function(v){return Math.round(v);};
+ var grid='',G=4;for(var g=0;g<=G;g++){var gv=mn+span*g/G,gy=Y(gv);grid+='<line x1="'+padL+'" y1="'+gy.toFixed(1)+'" x2="'+(W-padR)+'" y2="'+gy.toFixed(1)+'" stroke="#eef1f4"/><text x="'+(padL-7)+'" y="'+(gy+3).toFixed(1)+'" text-anchor="end" font-size="10" fill="#94a3b8">'+fmt(gv)+'</text>';}
+ var step=Math.ceil(n/6),xl='';for(var i=0;i<n;i++){if(i%step!==0&&i!==n-1)continue;xl+='<text x="'+X(i).toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle" font-size="10" fill="#94a3b8">'+s[i][0]+'</text>';}
+ var pts=vals.map(function(v,i){return X(i).toFixed(1)+','+Y(v).toFixed(1);}).join(' ');
+ var area='<polygon points="'+pts+' '+X(n-1).toFixed(1)+','+(padT+plotH)+' '+X(0).toFixed(1)+','+(padT+plotH)+'" fill="'+o.color+'" opacity=".10"/>';
+ var line='<polyline points="'+pts+'" fill="none" stroke="'+o.color+'" stroke-width="2.5"/>';
+ var dots=vals.map(function(v,i){return '<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(v).toFixed(1)+'" r="2.4" fill="'+o.color+'"/>';}).join('');
+ var maL='';if(o.ma!==false){var ma=repMA(vals,3),mp=[];ma.forEach(function(v,i){if(v!=null)mp.push(X(i).toFixed(1)+','+Y(v).toFixed(1));});maL='<polyline points="'+mp.join(' ')+'" fill="none" stroke="#0f172a" stroke-width="1.5" stroke-dasharray="5 4" opacity=".5"/>';}
+ var tL='';if(o.trend!==false){var r=repLinReg(vals);tL='<line x1="'+X(0).toFixed(1)+'" y1="'+Y(r.int).toFixed(1)+'" x2="'+X(n-1).toFixed(1)+'" y2="'+Y(r.int+r.slope*(n-1)).toFixed(1)+'" stroke="#64748b" stroke-width="1.5" stroke-dasharray="2 3"/>';}
+ return '<svg viewBox="0 0 '+W+' '+H+'" class="w-full" style="max-height:'+H+'px">'+grid+xl+area+tL+maL+line+dots+'</svg>';}
+function repChartLegend(color,label){return '<div class="flex items-center gap-4 text-[11px] text-mute flex-wrap mb-1"><span class="flex items-center gap-1.5"><span class="inline-block w-4 h-[3px] rounded" style="background:'+color+'"></span>'+label+'</span><span class="flex items-center gap-1.5"><span class="inline-block w-4 border-t-2 border-dashed border-slate-700 opacity-60"></span>3-mo avg</span><span class="flex items-center gap-1.5"><span class="inline-block w-4 border-t-2 border-dotted border-slate-400"></span>trend</span></div>';}
+function repTrendStats(series,fmt,o){o=o||{};var vals=series.map(function(s){return s[1];}),n=vals.length,last=vals[n-1],prev=vals[n-2];
+ var mom=prev?(last-prev)/prev*100:0,avg3=(vals[n-1]+vals[n-2]+vals[n-3])/3,r=repLinReg(vals),proj=r.int+r.slope*n,total=vals[0]?(last-vals[0])/vals[0]*100:0;
+ var peakV=Math.max.apply(null,vals),peakM=series[vals.indexOf(peakV)][0],low=o.lowerBetter;
+ function chip(v){var good=low?v<0:v>=0;return '<span class="'+(good?'text-emerald-600':'text-rose-600')+'">'+(v>=0?'▲ ':'▼ ')+Math.abs(v).toFixed(1)+'%</span>';}
+ var cards=[['Latest',fmt(last),series[n-1][0]],['MoM',chip(mom),'vs '+series[n-2][0]],['3-mo avg',fmt(avg3),'smoothed'],['12-mo change',chip(total),series[0][0]+' → '+series[n-1][0]],['Projected',fmt(Math.max(0,proj)),'next month'],['Peak',fmt(peakV),peakM]];
+ return '<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-4">'+cards.map(function(c){return '<div class="rounded-xl border border-slate-100 p-3"><div class="text-mute text-[11px]">'+c[0]+'</div><div class="text-lg font-semibold mt-0.5">'+c[1]+'</div><div class="text-mute text-[11px] mt-0.5">'+c[2]+'</div></div>';}).join('')+'</div>';}
+function repMonthTable(series,fmt){var vals=series.map(function(s){return s[1];});return '<table class="w-full text-sm"><thead class="text-mute border-b border-slate-100"><tr><th class="text-left font-medium py-2">Month</th><th class="text-right font-medium py-2">Value</th><th class="text-right font-medium py-2">MoM</th></tr></thead><tbody class="divide-y divide-slate-50">'+series.map(function(s,i){var d=i>0&&vals[i-1]?(vals[i]-vals[i-1])/vals[i-1]*100:null;return '<tr><td class="py-2">'+s[0]+'</td><td class="text-right font-medium">'+fmt(s[1])+'</td><td class="text-right '+(d==null?'text-mute':d>=0?'text-emerald-600':'text-rose-600')+'">'+(d==null?'—':(d>=0?'+':'')+d.toFixed(1)+'%')+'</td></tr>';}).join('')+'</tbody></table>';}
+function repChartCard(title,intro,series,color,fmt,o){o=o||{};return '<div class="bg-white rounded-2xl shadow-soft p-5 mb-6"><h2 class="font-semibold mb-1">'+title+'</h2>'+(intro?'<p class="text-mute text-sm mb-3 max-w-3xl">'+intro+'</p>':'')+repTrendStats(series,fmt,o)+repChartLegend(color,o.label||title)+repChart({series:series,color:color,fmt:o.yfmt||fmt,height:o.height,zero:o.zero})+'</div>';}
+function renderRepTrends(){
+ var fM=function(v){return repMoneyK(v);},fN=function(v){return repNum(Math.round(v));},fP=function(v){return (Math.round(v*10)/10)+'%';},fV=function(v){return '$'+repNum(Math.round(v));};
+ var el=document.getElementById('repSecRevTrends');
+ if(el){var rev=repSer('revenue'),rpv=RH.months.map(function(m,i){return [m,Math.round(RH.revenue[i]/RH.visits[i])];});
+  el.innerHTML=repChartCard('Monthly revenue','12-month history. The dashed line is a 3-month moving average (smooths seasonal noise); the dotted line is the underlying trend.',rev,'#0d9488',fM,{label:'revenue',zero:true})
+   +repChartCard('Revenue per visit','Average spend per visit — rising means a richer treatment mix or higher prices, not just more bodies through the door.',rpv,'#185fa5',fV,{label:'$/visit'})
+   +'<div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Monthly detail</h2>'+repMonthTable(rev,fM)+'</div>';}
+ el=document.getElementById('repSecRetTrends');
+ if(el)el.innerHTML=repChartCard('New clients','New-client acquisition by month — the top of the funnel.',repSer('newClients'),'#7c3aed',fN,{label:'new clients',zero:true})
+   +repChartCard('Conversion rate','Share of new clients who became members.',repSer('conversion'),'#0d9488',fP,{label:'conversion'})
+   +repChartCard('Retention rate','Repeat-patient retention — the bottom of the funnel.',repSer('retention'),'#0891b2',fP,{label:'retention'});
+ el=document.getElementById('repSecMemTrends');
+ if(el)el.innerHTML=repChartCard('Membership MRR','Recurring revenue by month — the most predictable line in the business.',repSer('mrr'),'#0d9488',fM,{label:'MRR',zero:true})
+   +repChartCard('Active members','Total members on the books at month end.',repSer('members'),'#185fa5',fN,{label:'members'})
+   +repChartCard('Monthly churn rate','Members leaving each month as a % of the base. Lower is better — a downward trend is shown green.',repSer('churn'),'#a32d2d',fP,{label:'churn',lowerBetter:true});
+ el=document.getElementById('repSecCapTrends');
+ if(el)el.innerHTML=repChartCard('Chair-time utilisation','How full the chairs are, month by month.',repSer('utilisation'),'#0d9488',fP,{label:'utilisation'})
+   +repChartCard('No-show rate','Missed appointments as a % of booked — lost capacity. Lower is better; deposits & reminders should push it down.',repSer('noShow'),'#bd7a18',fP,{label:'no-show',lowerBetter:true});}
+function renderReports(){renderRepInsights();renderScorecard();renderRepRevenue();renderRepProfit();renderRepRetention();renderRepCohorts();renderRepMemberships();renderRepCapacity();renderRepTrends();}
 /* ---------- follow-ups / jobs queue ---------- */
 var JT={reply:{i:'reply',c:'bg-brand-50 text-brand-700',lab:'Reply'},callback:{i:'call',c:'bg-rose-50 text-rose-700',lab:'Callback'},recall:{i:'event_repeat',c:'bg-amber-50 text-amber-700',lab:'Recall'},consent:{i:'draft',c:'bg-violet-50 text-violet-700',lab:'Consent'},stock:{i:'vaccines',c:'bg-amber-50 text-amber-700',lab:'Stock'},restock:{i:'inventory_2',c:'bg-emerald-50 text-emerald-700',lab:'Restock'},admin:{i:'task_alt',c:'bg-slate-100 text-slate-600',lab:'Task'},lead:{i:'person_add',c:'bg-brand-50 text-brand-700',lab:'Lead'},review:{i:'star',c:'bg-amber-50 text-amber-700',lab:'Review'},facility:{i:'ac_unit',c:'bg-sky-50 text-sky-700',lab:'Facility'},cred:{i:'verified_user',c:'bg-violet-50 text-violet-700',lab:'Credential'},cpd:{i:'school',c:'bg-amber-50 text-amber-700',lab:'CPD'},insurance:{i:'policy',c:'bg-rose-50 text-rose-700',lab:'Insurance'},policy:{i:'verified',c:'bg-violet-50 text-violet-700',lab:'Policy'},dsar:{i:'badge',c:'bg-brand-50 text-brand-700',lab:'DSAR'},ae:{i:'release_alert',c:'bg-rose-50 text-rose-700',lab:'Adverse event'}};
 var SRC={auto:{t:'auto-detected',c:'bg-violet-50 text-violet-600'},manual:{t:'flagged',c:'bg-amber-50 text-amber-700'},system:{t:'system',c:'bg-slate-100 text-slate-500'},recall:{t:'recall',c:'bg-slate-100 text-slate-500'}};
