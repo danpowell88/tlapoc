@@ -741,11 +741,13 @@ tailwind.config={theme:{extend:{
           <button onclick="goRep('revenue')" data-rpill="revenue" class="px-3 py-1.5 rounded-full bg-white shadow-soft text-mute">Revenue</button>
           <button onclick="goRep('retention')" data-rpill="retention" class="px-3 py-1.5 rounded-full bg-white shadow-soft text-mute">Retention &amp; rebooking</button>
           <button onclick="goRep('memberships')" data-rpill="memberships" class="px-3 py-1.5 rounded-full bg-white shadow-soft text-mute">Memberships</button>
+          <button onclick="goRep('capacity')" data-rpill="capacity" class="px-3 py-1.5 rounded-full bg-white shadow-soft text-mute">Capacity</button>
         </div>
 
         <!-- SCORECARD -->
         <div data-rp="scorecard">
-          <p class="text-mute text-sm mb-4 max-w-3xl">The numbers that decide how the business is doing — grouped <b>Growth</b>, <b>Performance</b> and <b>Finance</b>. Each tile is measured against last month or a target you set, and turns green when the target is hit.</p>
+          <div id="repInsights" class="mb-6"></div>
+          <p class="text-mute text-sm mb-4 max-w-3xl">The numbers that decide how the business is doing — grouped <b>Growth</b>, <b>Performance</b> and <b>Finance</b>. Each tile is measured against last month or a target you set, turns green when the target is hit, and clicks through to the detail.</p>
           <div class="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-2">Growth</div>
           <div id="repScGrowth" class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5"></div>
           <div class="text-[11px] uppercase tracking-wide text-slate-400 font-semibold mb-2">Performance</div>
@@ -766,6 +768,7 @@ tailwind.config={theme:{extend:{
             <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Revenue by practitioner</h2><div id="repByPrac"></div></div>
             <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Top clients <span class="text-mute text-xs font-normal">· by lifetime spend</span></h2><table class="w-full text-sm"><thead class="text-mute border-b border-slate-100"><tr><th class="text-left font-medium py-2">Client</th><th class="text-left font-medium py-2">Membership</th><th class="text-right font-medium py-2">Lifetime</th></tr></thead><tbody id="repTopClients" class="divide-y divide-slate-100"></tbody></table></div>
           </div>
+          <div class="bg-white rounded-2xl shadow-soft p-5 mt-6"><h2 class="font-semibold mb-1">Treatment profitability <span class="text-mute text-xs font-normal">· margin &amp; revenue per chair-hour</span></h2><p class="text-mute text-sm mb-3 max-w-3xl">Revenue alone hides what actually pays. This nets off product &amp; consumable cost and divides by chair time — so you can see which treatments earn most <b>per hour</b>, not just in total.</p><div class="overflow-x-auto"><table class="w-full text-sm"><thead class="text-mute border-b border-slate-100"><tr><th class="text-left font-medium py-2">Treatment</th><th class="text-right font-medium py-2">Done</th><th class="text-right font-medium py-2">Revenue</th><th class="text-right font-medium py-2">Product cost</th><th class="text-right font-medium py-2">Gross margin</th><th class="text-right font-medium py-2">$ / hour</th></tr></thead><tbody id="repProfit" class="divide-y divide-slate-100"></tbody></table></div><div id="repProfitNote" class="text-xs text-mute mt-3"></div></div>
         </div>
 
         <!-- RETENTION -->
@@ -775,6 +778,7 @@ tailwind.config={theme:{extend:{
             <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">New vs returning</h2><div id="repNvR"></div></div>
             <div class="lg:col-span-2 bg-white rounded-2xl shadow-soft p-5"><div class="flex items-center justify-between mb-3"><h2 class="font-semibold">At-risk &amp; lapsed clients</h2><button onclick="show('followups')" class="text-brand-700 text-xs font-medium">Open follow-ups &rarr;</button></div><div id="repAtRisk"></div></div>
           </div>
+          <div class="bg-white rounded-2xl shadow-soft p-5 mt-6"><h2 class="font-semibold mb-1">Cohort retention <span class="text-mute text-xs font-normal">· % still active by months since first visit</span></h2><p class="text-mute text-sm mb-4 max-w-3xl">Each row is the group of clients who first visited that month. Reading a row left-to-right shows how many are still active over time — the truest measure of whether new clients stick.</p><div id="repCohorts" class="overflow-x-auto"></div><div id="repCohortNote" class="text-xs text-mute mt-3"></div></div>
         </div>
 
         <!-- MEMBERSHIPS -->
@@ -785,6 +789,17 @@ tailwind.config={theme:{extend:{
             <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Net member movement <span class="text-mute text-xs font-normal">· this month</span></h2><div id="repChurn"></div></div>
           </div>
           <div class="bg-white rounded-2xl shadow-soft p-5"><div class="flex items-center justify-between mb-1"><h2 class="font-semibold">Prepaid liability <span class="text-mute text-xs font-normal">· service owed on packages</span></h2><button onclick="goSub('memberships','plans')" class="text-brand-700 text-xs font-medium">Open packages &rarr;</button></div><p class="text-mute text-sm mb-3">Money taken for treatments not yet delivered — a liability until redeemed. Expiring packages are a recall opportunity (and revenue at risk of refund).</p><table class="w-full text-sm"><thead class="text-mute border-b border-slate-100"><tr><th class="text-left font-medium py-2">Package</th><th class="text-right font-medium py-2">Sold</th><th class="text-right font-medium py-2">Redeemed</th><th class="text-right font-medium py-2">Liability</th></tr></thead><tbody id="repDeferred" class="divide-y divide-slate-100"></tbody></table></div>
+        </div>
+
+        <!-- CAPACITY -->
+        <div data-rp="capacity" class="hidden">
+          <p class="text-mute text-sm mb-4 max-w-3xl">A clinic sells time in a chair. This is how full those chairs are — overall, by practitioner and by day — and what the empty hours are worth. Idle capacity is the cheapest revenue to win back.</p>
+          <div id="repCapKpi" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
+          <div class="grid lg:grid-cols-2 gap-6 mb-6">
+            <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Utilisation by practitioner</h2><div id="repCapPrac"></div></div>
+            <div class="bg-white rounded-2xl shadow-soft p-5"><h2 class="font-semibold mb-3">Utilisation by day</h2><div id="repCapDay"></div></div>
+          </div>
+          <div id="repCapNote"></div>
         </div>
       </section>
 
@@ -1637,7 +1652,10 @@ var REP={period:'30d',
  rebooking:68,rebookingD:3,retention:82,retentionD:4,noShow:4.6,conversion:38,
  mrr:74346,members:634,newMembers:19,churnedMembers:7,churnRate:1.1,autopay:96.5,
  deferredExp60:18400,atRisk:18,lapsed:34,atRiskValue:42600,
- targets:{mrr:80000,members:680,conversion:40,retention:80,rebooking:70,noshow:5}};
+ targets:{mrr:80000,members:680,conversion:40,retention:80,rebooking:70,noshow:5},
+ profit:{dur:{'Anti-wrinkle':30,'Filler':45,'Skin':60,'Consult':30},cost:{'Anti-wrinkle':0.35,'Filler':0.40,'Skin':0.15,'Consult':0.05}},
+ cohorts:[['Jan',38,[100,82,74,68,63,60]],['Feb',42,[100,80,71,66,61]],['Mar',35,[100,84,76,70]],['Apr',47,[100,79,72]],['May',51,[100,83]],['Jun',42,[100]]],
+ capacity:{fill:76,booked:152,available:200,revPerHr:842,byPrac:[['Dr Lena Park',88,'bg-brand-500'],['Bella L.',79,'bg-emerald-500'],['Priya Raman',71,'bg-amber-500'],['Chloe Adams',64,'bg-violet-500']],byDay:[['Mon',72],['Tue',81],['Wed',63],['Thu',85],['Fri',90]]}};
 var REP_TKEY='tla_rep_targets';
 (function(){try{var s=JSON.parse(localStorage.getItem(REP_TKEY));if(s)Object.assign(REP.targets,s);}catch(e){}})();
 function repk(){return REP.periods[REP.period].k;}
@@ -1653,7 +1671,8 @@ function repTile(label,value,o){o=o||{};var state=o.state,badge='';
  if(o.target!=null&&o.tval!=null){var hit=o.higher?o.tval>=o.target:o.tval<=o.target;state=hit?'good':(o.higher?o.tval>=0.9*o.target:o.tval<=1.1*o.target)?'warn':'bad';badge='<span class="px-1.5 py-0.5 rounded text-[11px] '+(hit?'bg-emerald-50 text-emerald-700':'bg-amber-50 text-amber-700')+'">'+(hit?'✓ ':'')+'target '+o.tfmt(o.target)+'</span>';}
  if(o.trend!=null){var up=o.trend>=0;badge='<span class="px-1.5 py-0.5 rounded text-[11px] '+(up?'bg-emerald-50 text-emerald-700':'bg-rose-50 text-rose-700')+'">'+(up?'▲ ':'▼ ')+Math.abs(o.trend).toFixed(1)+'% MoM</span>';state=up?'good':'bad';}
  var c={good:'#10b981',warn:'#f59e0b',bad:'#ef4444'}[state]||'#e2e8f0';
- return '<div class="bg-white rounded-2xl shadow-soft p-4" style="border-left:3px solid '+c+'"><div class="text-mute text-xs flex items-center gap-1">'+(o.icon?'<span class="material-symbols-rounded text-[15px]">'+o.icon+'</span>':'')+label+'</div><div class="text-2xl font-semibold mt-1">'+value+'</div><div class="mt-1 flex items-center gap-2 flex-wrap text-xs text-mute min-h-[18px]">'+(o.sub?'<span>'+o.sub+'</span>':'')+badge+'</div></div>';}
+ var oc=o.link?' onclick="goRep(\''+o.link+'\')"':'',cls=o.link?' hover:shadow-card transition':'',cur=o.link?';cursor:pointer':'';
+ return '<div class="bg-white rounded-2xl shadow-soft p-4'+cls+'" style="border-left:3px solid '+c+cur+'"'+oc+'><div class="text-mute text-xs flex items-center gap-1">'+(o.icon?'<span class="material-symbols-rounded text-[15px]">'+o.icon+'</span>':'')+label+'</div><div class="text-2xl font-semibold mt-1">'+value+'</div><div class="mt-1 flex items-center gap-2 flex-wrap text-xs text-mute min-h-[18px]">'+(o.sub?'<span>'+o.sub+'</span>':'')+badge+'</div></div>';}
 function repPct(v){return v+'%';}
 /* tab + period switching */
 var repTab='scorecard';
@@ -1670,22 +1689,22 @@ function renderScorecard(){var g=document.getElementById('repScGrowth');if(!g)re
  var lastRev=REP.revMonths[REP.revMonths.length-1][1],prevRev=REP.revMonths[REP.revMonths.length-2][1],revTrend=(lastRev-prevRev)/prevRev*100;
  var seen=Math.round(REP.newClients/(REP.conversion/100));
  g.innerHTML=[
-  repTile('MRR',repMoneyK(REP.mrr),{icon:'subscriptions',sub:'ARR '+repMoneyK(REP.mrr*12),target:t.mrr,tval:REP.mrr,higher:true,tfmt:repMoneyK}),
-  repTile('Active members',repNum(REP.members),{icon:'loyalty',target:t.members,tval:REP.members,higher:true,tfmt:repNum}),
-  repTile('Net member change',(net>=0?'+':'')+net,{icon:'group_add',sub:REP.newMembers+' new − '+REP.churnedMembers+' churned',state:net>=0?'good':'bad'}),
-  repTile('New members (MTD)',repNum(REP.newMembers),{icon:'person_add',sub:'this month'})
+  repTile('MRR',repMoneyK(REP.mrr),{icon:'subscriptions',sub:'ARR '+repMoneyK(REP.mrr*12),target:t.mrr,tval:REP.mrr,higher:true,tfmt:repMoneyK,link:'memberships'}),
+  repTile('Active members',repNum(REP.members),{icon:'loyalty',target:t.members,tval:REP.members,higher:true,tfmt:repNum,link:'memberships'}),
+  repTile('Net member change',(net>=0?'+':'')+net,{icon:'group_add',sub:REP.newMembers+' new − '+REP.churnedMembers+' churned',state:net>=0?'good':'bad',link:'memberships'}),
+  repTile('New members (MTD)',repNum(REP.newMembers),{icon:'person_add',sub:'this month',link:'memberships'})
  ].join('');
  document.getElementById('repScPerf').innerHTML=[
-  repTile('Conversion',repPct(REP.conversion),{icon:'conversion_path',sub:REP.newClients+' of '+seen+' new clients',target:t.conversion,tval:REP.conversion,higher:true,tfmt:repPct}),
-  repTile('Retention',repPct(REP.retention),{icon:'cycle',target:t.retention,tval:REP.retention,higher:true,tfmt:repPct}),
-  repTile('Rebooking',repPct(REP.rebooking),{icon:'event_repeat',target:t.rebooking,tval:REP.rebooking,higher:true,tfmt:repPct}),
-  repTile('No-show',repPct(REP.noShow),{icon:'event_busy',sub:'ceiling',target:t.noshow,tval:REP.noShow,higher:false,tfmt:repPct})
+  repTile('Conversion',repPct(REP.conversion),{icon:'conversion_path',sub:REP.newClients+' of '+seen+' new clients',target:t.conversion,tval:REP.conversion,higher:true,tfmt:repPct,link:'retention'}),
+  repTile('Retention',repPct(REP.retention),{icon:'cycle',target:t.retention,tval:REP.retention,higher:true,tfmt:repPct,link:'retention'}),
+  repTile('Rebooking',repPct(REP.rebooking),{icon:'event_repeat',target:t.rebooking,tval:REP.rebooking,higher:true,tfmt:repPct,link:'retention'}),
+  repTile('No-show',repPct(REP.noShow),{icon:'event_busy',sub:'ceiling',target:t.noshow,tval:REP.noShow,higher:false,tfmt:repPct,link:'capacity'})
  ].join('');
  document.getElementById('repScFin').innerHTML=[
-  repTile('Revenue last month',repMoneyK(lastRev),{icon:'payments',sub:'Jun',trend:revTrend}),
-  repTile('Prepaid liability',repMoneyK(repDeferredTotal()),{icon:'hourglass_top',sub:repMoneyK(REP.deferredExp60)+' expiring 60d',state:'warn'}),
-  repTile('To reactivate',repNum(REP.atRisk+REP.lapsed),{icon:'call',sub:repMoneyK(REP.atRiskValue)+' at stake',state:(REP.atRisk+REP.lapsed)>40?'bad':'warn'}),
-  repTile('Autopay success',repPct(REP.autopay),{icon:'autorenew',sub:'recurring billing',state:REP.autopay>=97?'good':'warn'})
+  repTile('Revenue last month',repMoneyK(lastRev),{icon:'payments',sub:'Jun',trend:revTrend,link:'revenue'}),
+  repTile('Prepaid liability',repMoneyK(repDeferredTotal()),{icon:'hourglass_top',sub:repMoneyK(REP.deferredExp60)+' expiring 60d',state:'warn',link:'memberships'}),
+  repTile('To reactivate',repNum(REP.atRisk+REP.lapsed),{icon:'call',sub:repMoneyK(REP.atRiskValue)+' at stake',state:(REP.atRisk+REP.lapsed)>40?'bad':'warn',link:'retention'}),
+  repTile('Autopay success',repPct(REP.autopay),{icon:'autorenew',sub:'recurring billing',state:REP.autopay>=97?'good':'warn',link:'memberships'})
  ].join('');
  renderRepTargets();}
 /* revenue */
@@ -1734,7 +1753,50 @@ function renderRepMemberships(){var kp=document.getElementById('repMemKpi');if(!
  var rows=pkgs.map(function(p){var d=repDeferredRow(p);return '<tr><td class="py-2.5 font-medium">'+p.name+'</td><td class="text-right text-mute">'+p.sold+'</td><td class="text-right text-mute">'+d.usedN+' / '+d.totS+'</td><td class="text-right font-medium">'+repMoney(d.liab)+'</td></tr>';}).join('');
  rows+='<tr class="font-semibold"><td class="py-2.5">Total liability</td><td></td><td class="text-right text-mute">'+repMoneyK(REP.deferredExp60)+' exp. 60d</td><td class="text-right">'+repMoney(repDeferredTotal())+'</td></tr>';
  document.getElementById('repDeferred').innerHTML=rows;}
-function renderReports(){renderScorecard();renderRepRevenue();renderRepRetention();renderRepMemberships();}
+/* insights — plain-language synthesis derived from the data, each links to its tab */
+function repInsights(){var t=REP.targets,ins=[];
+ var prof=repTx.map(function(x){var dur=REP.profit.dur[x.t]||30,hrs=x.n*dur/60;return {t:x.t,perHr:hrs?x.rev/hrs:0,n:x.n};});
+ var best=prof.slice().sort(function(a,b){return b.perHr-a.perHr;})[0],worst=prof.slice().sort(function(a,b){return a.perHr-b.perHr;})[0];
+ ins.push({type:'opp',icon:'trending_up',html:'<b>'+best.t+'</b> earns the most per chair-hour ('+repMoney(best.perHr)+'/h). Steer capacity &amp; promotions toward it.',tab:'revenue'});
+ ins.push({type:'watch',icon:'schedule',html:'<b>'+worst.t+'</b> fills the most chair time but only '+repMoney(worst.perHr)+'/h — make sure it feeds rebooking &amp; memberships, not just the diary.',tab:'revenue'});
+ if(REP.conversion<t.conversion)ins.push({type:'watch',icon:'conversion_path',html:'Conversion is <b>'+REP.conversion+'%</b> vs your '+t.conversion+'% target — closing that gap is about '+Math.max(1,Math.round(REP.newClients*(t.conversion-REP.conversion)/100))+' more members a month.',tab:'retention'});
+ var lowDay=REP.capacity.byDay.slice().sort(function(a,b){return a[1]-b[1];})[0];
+ ins.push({type:'opp',icon:'event_available',html:'<b>'+lowDay[0]+'</b> runs at just '+lowDay[1]+'% utilisation — your best slot for waitlist offers or a flash promo.',tab:'capacity'});
+ ins.push({type:'watch',icon:'hourglass_top',html:repMoneyK(REP.deferredExp60)+' of prepaid packages expire within 60 days — book these clients in before the service (and goodwill) lapses.',tab:'memberships'});
+ ins.push({type:'good',icon:'cycle',html:'Retention is steady — about <b>60%</b> of new clients are still active five months on. Memberships &amp; recall are doing their job.',tab:'retention'});
+ return ins;}
+function renderRepInsights(){var b=document.getElementById('repInsights');if(!b)return;
+ var KIND={opp:{c:'border-emerald-200 bg-emerald-50',ic:'text-emerald-600',lab:'Opportunity',lc:'bg-emerald-100 text-emerald-700'},watch:{c:'border-amber-200 bg-amber-50',ic:'text-amber-600',lab:'Watch',lc:'bg-amber-100 text-amber-700'},good:{c:'border-slate-200 bg-white',ic:'text-brand-600',lab:'On track',lc:'bg-brand-50 text-brand-700'}};
+ b.innerHTML='<div class="flex items-center gap-2 mb-2"><span class="material-symbols-rounded text-brand-500">lightbulb</span><h2 class="font-semibold">Insights</h2><span class="text-mute text-xs">— what the numbers are telling you · tap to dig in</span></div><div class="grid md:grid-cols-2 gap-3">'+repInsights().map(function(i){var k=KIND[i.type]||KIND.good;return '<button onclick="goRep(\''+i.tab+'\')" class="text-left rounded-2xl border '+k.c+' p-3 flex items-start gap-2.5 hover:shadow-soft transition"><span class="material-symbols-rounded '+k.ic+' text-[20px] shrink-0">'+i.icon+'</span><div class="min-w-0"><span class="px-1.5 py-0.5 rounded text-[10px] font-semibold '+k.lc+' uppercase tracking-wide">'+k.lab+'</span><div class="text-sm text-slate-700 mt-1">'+i.html+'</div></div></button>';}).join('')+'</div>';}
+/* treatment profitability — margin & revenue per chair-hour */
+function renderRepProfit(){var b=document.getElementById('repProfit');if(!b)return;
+ var rows=repTx.map(function(x){var dur=REP.profit.dur[x.t]||30,cost=REP.profit.cost[x.t]||0,hrs=x.n*dur/60,cst=x.rev*cost,marg=x.rev-cst,perHr=hrs?x.rev/hrs:0;return {t:x.t,n:x.n,rev:x.rev,cst:cst,marg:marg,mpct:Math.round((1-cost)*100),perHr:perHr};});
+ var maxHr=Math.max.apply(null,rows.map(function(r){return r.perHr;}));
+ b.innerHTML=rows.slice().sort(function(a,b){return b.perHr-a.perHr;}).map(function(r){var hot=r.perHr===maxHr;return '<tr><td class="py-2.5 font-medium">'+r.t+'</td><td class="text-right text-mute">'+r.n+'</td><td class="text-right">'+repMoney(r.rev)+'</td><td class="text-right text-mute">−'+repMoney(r.cst)+'</td><td class="text-right">'+repMoney(r.marg)+' <span class="text-mute text-xs">'+r.mpct+'%</span></td><td class="text-right font-semibold '+(hot?'text-emerald-600':'')+'">'+repMoney(r.perHr)+(hot?' ★':'')+'</td></tr>';}).join('');
+ var best=rows.slice().sort(function(a,b){return b.perHr-a.perHr;})[0],worst=rows.slice().sort(function(a,b){return a.perHr-b.perHr;})[0];
+ var n=document.getElementById('repProfitNote');if(n)n.innerHTML='<b>'+best.t+'</b> earns '+repMoney(best.perHr)+'/hour vs <b>'+worst.t+'</b> at '+repMoney(worst.perHr)+'/hour — same chair, very different return. Product-cost % is an estimate for the demo.';}
+/* cohort retention heatmap */
+function cohortColor(v){if(v==null)return 'background:#f8fafc;color:#cbd5e1';if(v>=80)return 'background:#10b981;color:#fff';if(v>=65)return 'background:#6ee7b7;color:#064e3b';if(v>=50)return 'background:#fcd34d;color:#5b3b00';return 'background:#fca5a5;color:#7f1d1d';}
+function renderRepCohorts(){var b=document.getElementById('repCohorts');if(!b)return;var maxLen=Math.max.apply(null,REP.cohorts.map(function(c){return c[2].length;}));
+ var cols='grid-template-columns:96px repeat('+maxLen+',minmax(0,1fr))',mw='min-width:'+(96+maxLen*54)+'px';
+ var head='<div class="grid gap-1 mb-1" style="'+cols+';'+mw+'"><div></div>'+Array.apply(null,{length:maxLen}).map(function(_,i){return '<div class="text-xs text-mute text-center">M'+i+'</div>';}).join('')+'</div>';
+ var body=REP.cohorts.map(function(c){var cells='';for(var i=0;i<maxLen;i++){var v=c[2][i];cells+='<div class="rounded-md text-center text-xs py-2 font-medium" style="'+cohortColor(v)+'">'+(v==null?'·':v+'%')+'</div>';}return '<div class="grid gap-1 mb-1" style="'+cols+';'+mw+'"><div class="text-xs text-slate-600 self-center">'+c[0]+' <span class="text-mute">· '+c[1]+'</span></div>'+cells+'</div>';}).join('');
+ var legend='<div class="flex items-center gap-3 mt-2 text-[11px] text-mute flex-wrap"><span class="flex items-center gap-1"><span class="inline-block size-3 rounded" style="background:#10b981"></span>≥80%</span><span class="flex items-center gap-1"><span class="inline-block size-3 rounded" style="background:#6ee7b7"></span>65–79%</span><span class="flex items-center gap-1"><span class="inline-block size-3 rounded" style="background:#fcd34d"></span>50–64%</span><span class="flex items-center gap-1"><span class="inline-block size-3 rounded" style="background:#fca5a5"></span>&lt;50%</span></div>';
+ b.innerHTML=head+body+legend;
+ var n=document.getElementById('repCohortNote');if(n)n.innerHTML='Reading across to M5: about <b>60%</b> of clients are still active five months after their first visit. Watch any row that drops faster than the ones above it — that intake needs a recall push.';}
+/* capacity & utilisation */
+function renderRepCapacity(){var kp=document.getElementById('repCapKpi');if(!kp)return;var c=REP.capacity,idle=c.available-c.booked;
+ kp.innerHTML=[
+  repTile('Chair-time fill',repPct(c.fill),{icon:'event_seat',sub:c.booked+'h of '+c.available+'h booked',state:c.fill>=80?'good':c.fill>=70?'warn':'bad'}),
+  repTile('Booked hours',c.booked+'h',{icon:'event',sub:'this week'}),
+  repTile('Idle hours',idle+'h',{icon:'hourglass_empty',sub:'unbooked capacity',state:'warn'}),
+  repTile('Revenue / booked hr',repMoney(c.revPerHr),{icon:'payments',sub:'across all chairs'})
+ ].join('');
+ document.getElementById('repCapPrac').innerHTML=c.byPrac.map(function(p){return repBar(p[0],'',p[1]+'%',p[1],p[2]);}).join('');
+ document.getElementById('repCapDay').innerHTML=c.byDay.map(function(d){var col=d[1]>=80?'bg-emerald-500':d[1]>=70?'bg-brand-500':'bg-amber-500';return repBar(d[0],'',d[1]+'%',d[1],col);}).join('');
+ var lowDay=c.byDay.slice().sort(function(a,b){return a[1]-b[1];})[0],lowPrac=c.byPrac.slice().sort(function(a,b){return a[1]-b[1];})[0];
+ document.getElementById('repCapNote').innerHTML='<div class="rounded-xl bg-amber-50 text-amber-800 text-sm px-4 py-3 flex items-start gap-2"><span class="material-symbols-rounded text-base">tips_and_updates</span><div><b>'+lowDay[0]+'</b> ('+lowDay[1]+'%) and <b>'+lowPrac[0]+'</b> ('+lowPrac[1]+'%) have the most open capacity. Filling the '+idle+' idle hours at '+repMoney(c.revPerHr)+'/hr is roughly <b>'+repMoneyK(idle*c.revPerHr)+' a week</b> of latent revenue — aim waitlist offers &amp; promos there.</div></div>';}
+function renderReports(){renderRepInsights();renderScorecard();renderRepRevenue();renderRepProfit();renderRepRetention();renderRepCohorts();renderRepMemberships();renderRepCapacity();}
 /* ---------- follow-ups / jobs queue ---------- */
 var JT={reply:{i:'reply',c:'bg-brand-50 text-brand-700',lab:'Reply'},callback:{i:'call',c:'bg-rose-50 text-rose-700',lab:'Callback'},recall:{i:'event_repeat',c:'bg-amber-50 text-amber-700',lab:'Recall'},consent:{i:'draft',c:'bg-violet-50 text-violet-700',lab:'Consent'},stock:{i:'vaccines',c:'bg-amber-50 text-amber-700',lab:'Stock'},restock:{i:'inventory_2',c:'bg-emerald-50 text-emerald-700',lab:'Restock'},admin:{i:'task_alt',c:'bg-slate-100 text-slate-600',lab:'Task'},lead:{i:'person_add',c:'bg-brand-50 text-brand-700',lab:'Lead'},review:{i:'star',c:'bg-amber-50 text-amber-700',lab:'Review'},facility:{i:'ac_unit',c:'bg-sky-50 text-sky-700',lab:'Facility'},cred:{i:'verified_user',c:'bg-violet-50 text-violet-700',lab:'Credential'},cpd:{i:'school',c:'bg-amber-50 text-amber-700',lab:'CPD'},insurance:{i:'policy',c:'bg-rose-50 text-rose-700',lab:'Insurance'},policy:{i:'verified',c:'bg-violet-50 text-violet-700',lab:'Policy'},dsar:{i:'badge',c:'bg-brand-50 text-brand-700',lab:'DSAR'},ae:{i:'release_alert',c:'bg-rose-50 text-rose-700',lab:'Adverse event'}};
 var SRC={auto:{t:'auto-detected',c:'bg-violet-50 text-violet-600'},manual:{t:'flagged',c:'bg-amber-50 text-amber-700'},system:{t:'system',c:'bg-slate-100 text-slate-500'},recall:{t:'recall',c:'bg-slate-100 text-slate-500'}};
