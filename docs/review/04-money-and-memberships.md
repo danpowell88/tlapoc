@@ -43,6 +43,17 @@ sends sales data across to Xero rather than trying to be accounting software.
 - **Why it exists:** predictable recurring income (**MRR**) and a reason for clients to keep coming
   back. The card can be added **online or in the app** — it doesn't have to be done at the desk.
 
+```mermaid
+flowchart TD
+  A[Billing day] --> B[Charge the stored card automatically]
+  B --> C{Did it go through?}
+  C -->|Yes| D[Receipt + sent to Xero]
+  C -->|No| E[Polite retry-and-remind - dunning]
+  E --> F{Recovered?}
+  F -->|Yes| D
+  F -->|No| G[Failed-payment task to Reception + shown in owner exceptions]
+```
+
 ### Packages / series
 - **What it is:** sell a bundle ("course of 3") and redeem the visits over time, tracking "visits
   remaining" and any account credit.

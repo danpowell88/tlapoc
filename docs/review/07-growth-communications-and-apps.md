@@ -75,6 +75,20 @@ flowchart LR
 - **What it is:** a simple pipeline over the inbox — enquiry → consult booked → converted or lost — so
   the clinic can see where new business is coming from and chase warm leads.
 
+```mermaid
+flowchart TD
+  A[Message arrives in the inbox] --> B[Auto-sorted: pricing / booking / complaint]
+  B --> C{Pricing question?}
+  C -->|Yes| D[Reply privately - public S4 pricing stays off-limits]
+  C -->|No| E[Handle / suggested reply]
+  D --> F[Track as a lead]
+  E --> F
+  F --> G[Pipeline: New to Consult booked to Converted or Lost]
+  G --> H{Opted in to marketing?}
+  H -->|Yes| I[Gentle follow-up allowed]
+  H -->|No| J[No outbound until they opt in]
+```
+
 ### Public booking page
 - **What it is:** the page where the public books online. Because the page is itself "advertising,"
   injectable services are listed with **generic names and prices withheld**.

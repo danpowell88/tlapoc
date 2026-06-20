@@ -151,6 +151,20 @@ This is the clinical record of what was actually done. It **adapts to the treatm
   capture everything for both the patient's safety and the mandatory follow-up.
 - **Who it's for:** the treating RN/NP, with Lead Nurse oversight.
 
+```mermaid
+flowchart TD
+  A[Signs of a complication] --> B{What type?}
+  B -->|Blocked vessel - VO| C[Vascular-occlusion protocol]
+  B -->|Severe allergic - anaphylaxis| D[Adrenaline protocol]
+  C --> E[Log hyaluronidase used - kit + patient + batch]
+  D --> F[Log adrenaline used - kit + patient]
+  E --> G[Open adverse-event case - routed to the right TGA database]
+  F --> G
+  G --> H[Raise follow-up + mandatory-report check tasks]
+  C --> I{Any eye symptom?}
+  I -->|Yes| J[Ocular emergency - transfer to hospital now]
+```
+
 ---
 
 ## 5. Treatment plans & outcomes

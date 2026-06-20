@@ -18,23 +18,13 @@ clinics (the modern replacement for Mindbody). This folder holds the full planni
 | 4 | [adr/decision-log.md](adr/decision-log.md) | Architecture Decision Records (`ADR-0001…`) — the "how" |
 | 5 | [prds/](prds/) | Product Requirement Docs (`PRD-01…11`) — per-feature detail, → backlog |
 | 6 | [ux/README.md](ux/README.md) | UX principles, screen inventory & end-to-end flows |
-| 7 | [overviews/](overviews/00-overviews-index.md) | **Area overviews** — per-section function tours with workflow flowcharts & roles |
 
-## Area overviews (function tours)
+## Function tours (plain-language review)
 
-A page per app area: what each function does, when it's used, the workflow (as a Mermaid flowchart), and
-which role does each step. Start at the [overviews index](overviews/00-overviews-index.md).
-
-| Overview | Covers |
-|---|---|
-| [Front desk & operations](overviews/01-front-desk-operations.md) | Booking, walk-ins/waitlist, clients, follow-ups, fridge log, rooms/equipment, calls |
-| [Clinical](overviews/02-clinical.md) | Consult, prescribing, modality-aware charting, complications, photography |
-| [Stock & medicines](overviews/03-stock-medicines.md) | Catalogue, lots, cold-chain, reconciliation, recall lookup |
-| [Checkout, memberships & pricing](overviews/04-checkout-memberships-pricing.md) | POS, rewards, memberships/autopay, pricing what-if |
-| [Finance & reporting](overviews/05-finance-reporting.md) | Snapshot + reporting; what lives in Xero vs the app |
-| [Team & HR](overviews/06-team-hr.md) | Roster, credentials, CPD, indemnity, the compliance board |
-| [Governance & compliance](overviews/07-governance-compliance.md) | Adverse events/DAEN, recalls, policies, waste, privacy, audit |
-| [Growth & communications](overviews/08-growth-communications.md) | Inbox, lead CRM, reviews, reminders/recall, public booking page |
+The per-area function tours — what each feature does, who it's for, and the workflows — now live in the
+**[Plain-language review](review/00-start-here.md)**, a jargon-free, chaptered walk-through written so a
+non-technical clinic operator can read every area and assess coverage. (This folds in and replaces the
+old "Area overviews".)
 
 ## Hardware
 

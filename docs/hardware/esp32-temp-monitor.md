@@ -430,7 +430,7 @@ flowchart TD
 
 ## Related
 
-- App area: [Front desk & operations overview](../overviews/01-front-desk-operations.md)
+- App area: [Front desk & operations (plain-language review)](../review/01-front-desk-and-operations.md)
 - Requirements: `REQ-MED-7` (cold-chain log), `REQ-FAC-5` (breach pathway), `REQ-INT-7` (device webhooks/API)
 - ADRs: **ADR-0026** (front-desk operations), **ADR-0031** (the breach/job pathway), **ADR-0036** (webhooks/API phasing)
 - Compliance: `C13` (cold-chain), "Strive for 5" National Vaccine Storage Guidelines

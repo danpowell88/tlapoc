@@ -555,7 +555,7 @@ flowchart TD
 
 ## Related
 
-- App areas: [Front desk & operations overview](../overviews/01-front-desk-operations.md) · [Stock & medicines overview](../overviews/03-stock-medicines.md)
+- App areas: [Front desk & operations (plain-language review)](../review/01-front-desk-and-operations.md) · [Medicines & stock (plain-language review)](../review/03-medicines-and-stock.md)
 - Sibling hardware: [ESP32 fridge temperature monitor](esp32-temp-monitor.md)
 - Requirements: `REQ-MED-8` (secure storage — restrict + **log access**), `REQ-MED-10` (stocktake/loss-theft), `REQ-FAC-5` (breach/job pathway), `REQ-INT-7` (device webhooks/API)
 - Compliance: `C15` (secure S4 storage — access logged), `C17` (stocktake/discrepancy + loss/theft)

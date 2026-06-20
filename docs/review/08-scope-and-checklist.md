@@ -143,7 +143,7 @@ Go through each line and tick it, question it, or note what's missing. *"To run 
 If you want the detailed, technical version behind any of this:
 
 - The full requirements list: [Requirements & compliance](../02-requirements.md)
-- Per-area function tours (with workflow diagrams): [Area overviews](../overviews/00-overviews-index.md)
+- The pricing & market case: [Commercial model](../03-commercial-model.md)
 - The per-feature build documents: [the PRDs](../00-index.md#the-prd-set)
 
 > Back to the start: **[Start here](00-start-here.md)**.
