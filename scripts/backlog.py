@@ -416,14 +416,20 @@ def cmd_project(epics, dry=False):
     else:
         print(f"project exists: {proj.get('url')}")
     pnum = str(proj["number"])
+    failed = []
     for n in nums:
         url = f"https://github.com/{REPO}/issues/{n}"
         if dry:
             print(f"  would add #{n}")
             continue
-        run(["gh", "project", "item-add", pnum, "--owner", "danpowell88", "--url", url],
-            check=False)
-    print(f"Added {len(nums)} issues to project {PROJECT_TITLE}.")
+        res = run(["gh", "project", "item-add", pnum, "--owner", "danpowell88", "--url", url],
+                  check=False)
+        if res.returncode != 0:
+            failed.append(n)
+        time.sleep(0.4)  # pace GraphQL mutations
+    print(f"Added {len(nums) - len(failed)} / {len(nums)} issues to project {PROJECT_TITLE}.")
+    if failed:
+        print(f"Failed (re-run `project` to retry, item-add is idempotent): {failed}")
 
 
 def cmd_verify(_epics):
