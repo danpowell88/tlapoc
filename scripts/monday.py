@@ -58,6 +58,33 @@ COLUMNS = [
 
 MS_ORDER = {mid: i for i, (mid, _t, _d) in enumerate(MILESTONES)}
 
+# Clinic-first delivery order (overrides milestone order for sequencing/sprints):
+# reception → injectables → compliance → some reporting FIRST;
+# payments, comms, integrations, apps & client-facing come much later.
+EPIC_TRACK = {
+    "SPRINT-0": 1,   # engineering foundations & setup
+    "PRD-01": 2,     # tenancy, RBAC, credentials, audit (compliance core)
+    "PLATFORM": 3,   # staff app shell, Today, nav, financial gating
+    "PRD-02": 4,     # reception: booking, calendar, clients, check-in
+    "PRD-03": 5,     # intake, consent & gating (compliance)
+    "PRD-04": 6,     # injectables: consult, prescribing, S4 governance
+    "PRD-05": 7,     # injectables: clinical charting
+    "PRD-08": 8,     # reporting & compliance dashboards
+    "PRD-11": 9,     # facility, infection-control & complaints (compliance)
+    "PRD-06": 10,    # payments, memberships & rewards
+    "PRD-07": 11,    # comms, reminders, recall & growth
+    "PRD-10": 12,    # integrations: Xero & calendar (later)
+    "PRD-09": 13,    # apps (Flutter client & provider) (much later)
+    "PHASE-2": 99,   # deferred placeholders
+}
+EPIC_THEME = {
+    "SPRINT-0": "Setup", "PRD-01": "Foundations", "PLATFORM": "App shell",
+    "PRD-02": "Reception", "PRD-03": "Consent", "PRD-04": "Injectables",
+    "PRD-05": "Charting", "PRD-08": "Reporting", "PRD-11": "Compliance ops",
+    "PRD-06": "Payments", "PRD-07": "Comms & growth", "PRD-10": "Integrations",
+    "PRD-09": "Apps", "PHASE-2": "Backlog",
+}
+
 # epic -> where it lives in the prototype (for the UI / Designs section)
 EPIC_UI = {
     "SPRINT-0": "Non-UI / platform scaffolding — no prototype screen.",
@@ -171,7 +198,7 @@ def plan_sprints(epics):
 
     def rank(ep, s):
         k = f"{ep['epic']['key']}/{s['key']}"
-        return (MS_ORDER.get(ep["epic"]["milestone"], 99),
+        return (EPIC_TRACK.get(ep["epic"]["key"], 50),
                 prio.get(s.get("priority", "P1"), 1), seq[k])
 
     # Kahn topo sort honouring depends_on within the sprintable set
@@ -219,9 +246,9 @@ def plan_sprints(epics):
     # name each sprint by its dominant milestone
     named = []
     for i, grp in enumerate(sprints, 1):
-        ms = [key_of[k][0]["epic"]["milestone"] for k in grp]
-        dom = min(ms, key=lambda m: (-ms.count(m), MS_ORDER[m]))  # deterministic dominant milestone
-        label = MS_TITLE[dom].split("·", 1)[-1].split("(")[0].strip()
+        eks = [key_of[k][0]["epic"]["key"] for k in grp]
+        dom = min(eks, key=lambda e: (-eks.count(e), EPIC_TRACK.get(e, 50)))
+        label = EPIC_THEME.get(dom, dom)
         named.append((f"Sprint {i:02d} — {label}", [key_of[k] for k in grp]))
     named.append(("Backlog — Phase 2+ (later)", later))
     return named, cap, total

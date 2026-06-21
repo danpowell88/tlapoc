@@ -31,13 +31,10 @@ import urllib.error
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from backlog import load, MS_TITLE
-from monday import (estimate, type_label, tasks_for, plan_sprints, MS_ORDER,
+from monday import (estimate, type_label, tasks_for, plan_sprints,
+                    EPIC_TRACK, EPIC_THEME,
                     bg_text, req_bullets, ui_text, tech_blocks,
                     compliance_links, prd_link)
-
-SPRINT_THEME = {"M0": "Setup", "M1": "Foundations", "M2": "Booking",
-                "M3": "Clinical", "M4": "Commerce", "M5": "Reporting & apps",
-                "M6": "Facility", "M7": "Backlog"}
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CFG = os.path.join(HERE, ".jira-config")
@@ -509,15 +506,15 @@ def cmd_sprints():
         if not title.lower().startswith("sprint"):
             continue
         i += 1
-        ms = [ep["epic"]["milestone"] for ep, _s in items]
-        dom = min(ms, key=lambda m: (-ms.count(m), MS_ORDER[m]))
-        name = f"Sprint {i:02d} · {SPRINT_THEME.get(dom, '')}".strip()[:29]
+        eks = [ep["epic"]["key"] for ep, _s in items]
+        dom = min(eks, key=lambda e: (-eks.count(e), EPIC_TRACK.get(e, 50)))
+        name = f"Sprint {i:02d} · {EPIC_THEME.get(dom, dom)}".strip()[:29]
         sk = f"sprint:{name}"
         if sk in st:
             sid = st[sk]
         else:
             sid = api("POST", "sprint",
-                      {"name": name, "originBoardId": bid, "goal": MS_TITLE[dom]},
+                      {"name": name, "originBoardId": bid, "goal": EPIC_THEME.get(dom, dom)},
                       base="rest/agile/1.0")["id"]
             st[sk] = sid
             save_state(st)
