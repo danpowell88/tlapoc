@@ -40,8 +40,8 @@ TOKEN_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".monday-t
 # ---- column plan: title -> monday column_type -------------------------------
 COLUMNS = [
     ("Status", "status"),
-    ("Type", "dropdown"),
-    ("Epic", "dropdown"),
+    ("Type", "status"),
+    ("Epic (tag)", "dropdown"),
     ("Stage", "dropdown"),
     ("Priority", "status"),
     ("Area", "dropdown"),
@@ -220,7 +220,7 @@ def plan_sprints(epics):
     named = []
     for i, grp in enumerate(sprints, 1):
         ms = [key_of[k][0]["epic"]["milestone"] for k in grp]
-        dom = max(set(ms), key=ms.count)
+        dom = min(ms, key=lambda m: (-ms.count(m), MS_ORDER[m]))  # deterministic dominant milestone
         label = MS_TITLE[dom].split("·", 1)[-1].split("(")[0].strip()
         named.append((f"Sprint {i:02d} — {label}", [key_of[k] for k in grp]))
     named.append(("Backlog — Phase 2+ (later)", later))
@@ -355,11 +355,15 @@ def ensure_columns(existing):
     return by_title
 
 
-def create_groups(named):
-    """Create sprint groups in order; return {title: id}."""
+def create_groups(named, existing_titles=()):
+    """Create sprint groups in order (idempotent); return {title: id} for created."""
     ids = {}
     prev = None
     for title, _items in named:
+        if title in existing_titles:
+            print(f"group ✓ exists {title}")
+            prev = None
+            continue
         if prev is None:
             q = """mutation($b:ID!,$t:String!){ create_group(board_id:$b, group_name:$t){ id } }"""
             d = gql(q, {"b": BOARD_ID, "t": title})
@@ -376,35 +380,66 @@ def create_groups(named):
     return ids
 
 
-def delete_old(old_groups, old_columns, keep_group_ids, keep_col_titles):
-    for g in old_groups:
-        if g["id"] in keep_group_ids:
-            continue
-        gql("mutation($b:ID!,$g:String!){ delete_group(board_id:$b, group_id:$g){ id } }",
-            {"b": BOARD_ID, "g": g["id"]})
-        print(f"group - {g['title']}")
-        time.sleep(0.2)
+PROTECTED_COL_TYPES = ("name", "item_id", "subtasks", "subitems")
+
+
+def delete_columns(old_columns, keep=()):
+    """Wipe non-protected columns for a clean slate (but keep my own)."""
     for c in old_columns:
-        if c["title"] in keep_col_titles or c["type"] in ("name", "subtasks", "subitems"):
+        if c["type"] in PROTECTED_COL_TYPES or c["title"] in keep:
             continue
         try:
             gql("mutation($b:ID!,$c:String!){ delete_column(board_id:$b, column_id:$c){ id } }",
                 {"b": BOARD_ID, "c": c["id"]})
             print(f"col - {c['title']}")
         except SystemExit as e:
-            print(f"col - skip {c['title']} ({e})")
+            print(f"col - skip {c['title']} ({str(e)[:60]})")
+        time.sleep(0.2)
+
+
+def delete_groups(old_groups):
+    for g in old_groups:
+        try:
+            gql("mutation($b:ID!,$g:String!){ delete_group(board_id:$b, group_id:$g){ id } }",
+                {"b": BOARD_ID, "g": g["id"]})
+            print(f"group - {g['title']}")
+        except SystemExit as e:
+            print(f"group - skip {g['title']} ({str(e)[:60]})")
         time.sleep(0.2)
 
 
 def cmd_rebuild():
-    b = board_state()
-    old_groups, old_cols = b["groups"], b["columns"]
-    cols = ensure_columns(old_cols)               # create my columns first
     named, cap, total = plan_sprints(load())
-    gids = create_groups(named)                   # create my groups first
-    keep_titles = {t for t, _ in COLUMNS} | {"Name"}
-    delete_old(old_groups, old_cols, set(gids.values()), keep_titles)
+    my_cols = {t for t, _ in COLUMNS}
+    b = board_state()
+    # 1. columns: wipe template (keep mine), then create mine clean
+    delete_columns(b["columns"], keep=my_cols)
+    ensure_columns(board_state()["columns"])
+    # 2. groups: clean reset in correct order via a temp group (board never hits zero)
+    tmp = gql("mutation($b:ID!){ create_group(board_id:$b, group_name:\"_tmp\"){ id } }",
+              {"b": BOARD_ID})["create_group"]["id"]
+    delete_groups([g for g in board_state()["groups"] if g["id"] != tmp])
+    create_groups(named)                                       # all fresh, ordered
+    delete_groups([g for g in board_state()["groups"] if g["id"] == tmp])
     print(f"\nRebuild done. {len(named)} groups, capacity {cap} pts/sprint, {total} pts total.")
+
+
+def clear_items():
+    """Delete all items on the board so seed is safe to re-run."""
+    d = gql("query($id:[ID!]){ boards(ids:$id){ items_page(limit:200){ cursor items{ id } } } }",
+            {"id": [BOARD_ID]})
+    page = d["boards"][0]["items_page"]
+    items, cursor = page["items"], page["cursor"]
+    while cursor:
+        nd = gql("query($c:String!){ next_items_page(limit:200, cursor:$c){ cursor items{ id } } }",
+                 {"c": cursor})
+        items += nd["next_items_page"]["items"]
+        cursor = nd["next_items_page"]["cursor"]
+    for it in items:
+        gql("mutation($i:ID!){ delete_item(item_id:$i){ id } }", {"i": it["id"]})
+        time.sleep(0.1)
+    if items:
+        print(f"cleared {len(items)} existing items")
 
 
 def cmd_seed():
@@ -414,6 +449,7 @@ def cmd_seed():
     missing = [t for t, _ in COLUMNS if t not in cols]
     if missing:
         raise SystemExit(f"Missing columns {missing}; run rebuild first.")
+    clear_items()
     named, cap, total = plan_sprints(load())
     n = 0
     for gtitle, items in named:
@@ -423,8 +459,8 @@ def cmd_seed():
         for ep, s in items:
             cv = {
                 cols["Status"]: {"label": "Backlog"},
-                cols["Type"]: {"labels": [type_label(s)]},
-                cols["Epic"]: {"labels": [ep["epic"]["key"]]},
+                cols["Type"]: {"label": type_label(s)},
+                cols["Epic (tag)"]: {"labels": [ep["epic"]["key"]]},
                 cols["Stage"]: {"labels": [stage_label(ep)]},
                 cols["Priority"]: {"label": s.get("priority", "P1")},
                 cols["Estimate (pts)"]: estimate(s),
