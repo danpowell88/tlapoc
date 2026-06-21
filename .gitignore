@@ -2,3 +2,6 @@ scripts/.backlog-state.json
 scripts/.monday-token
 __pycache__/
 *.pyc
+scripts/.jira-token
+scripts/.jira-config
+scripts/.jira-state.json
