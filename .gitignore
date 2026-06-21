@@ -5,3 +5,4 @@ __pycache__/
 scripts/.jira-token
 scripts/.jira-config
 scripts/.jira-state.json
+docs/backlog/screens/
