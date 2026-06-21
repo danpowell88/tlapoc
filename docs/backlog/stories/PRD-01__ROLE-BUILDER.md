@@ -7,6 +7,10 @@
 As a owner, I want to define custom roles from capabilities, so that I can model staff arrangements that don't fit the presets.
 Beyond the preset personas, a future custom-role builder lets owners define bespoke capability sets. Deferred — placeholder.
 
+## How it works
+
+Beyond preset personas, a future custom-role builder lets owners compose bespoke capability sets for unusual staffing. Deferred — the capability model is already builder-ready, so design-only for v1.
+
 ## Requirements
 
 - To define custom roles from capabilities.
@@ -16,6 +20,11 @@ Beyond the preset personas, a future custom-role builder lets owners define besp
 
 - [ ] Placeholder — design only in v1; presets are sufficient for launch.
 - [ ] Captured so the capability model stays builder-ready.
+
+## Suggested data model
+
+- **Role (custom)** — reuses Role/Capability + an editor UI
+  - _Placeholder; presets suffice for launch._
 
 ## Technical notes (high level)
 

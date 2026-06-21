@@ -9,6 +9,11 @@
 As a client, I want to complete my medical history, medications, allergies and contraindications before my visit on my phone, so that my practitioner has what they need and my treatment is safe.
 Clients complete medical history, meds, allergies and contraindications on their phone before the visit; responses auto-link to the chart.
 
+## How it works
+
+Pre-visit intake collects the medical history, medications, allergies and contraindications a practitioner must see before treating. It is sent on booking and completed by the client on their phone, then auto-linked to the chart.
+Incomplete required intake contributes to the treatment block (GATING) — the clinic can't safely or lawfully proceed without it.
+
 ## Requirements
 
 - To complete my medical history, medications, allergies and contraindications before my visit on my phone.
@@ -22,7 +27,18 @@ Clients complete medical history, meds, allergies and contraindications on their
 
 ## UI designs / screenshots
 
-prototype.html — Forms & consent; client-app.html intake/consent; checkin.html.
+_Prototype screen: prototype.html — Forms & consent; client-app.html intake/consent; checkin.html._
+
+- Client app / public: a pre-visit intake wizard (medical history -> meds -> allergies/contraindications) — see client-app.png; also completable at the reception check-in tablet (checkin.png).
+- Staff: Forms & consent (forms-consent.png) shows intake status per client and lets the desk send/chase it.
+- Forms are configurable (admin-defined fields).
+
+## Suggested data model
+
+- **IntakeForm** — id, tenant_id, name, version, fields(json schema)
+  - _Configurable; versioned._
+- **IntakeResponse** — id, tenant_id, client_id, appointment_id, form_version, answers(json), submitted_at
+  - _Auto-linked to the chart; contributes to the gate._
 
 ## Technical notes (high level)
 

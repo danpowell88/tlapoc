@@ -9,6 +9,10 @@
 As a developer, I want a one-command local environment seeded with synthetic tenant, staff, clients, catalogue and stock, so that I can run and demo any module locally without touching real data.
 Realistic synthetic data (clinic, staff with credentials, clients, services incl. S4/non-S4, stock) lets every module be developed and demoed without real PII. All data must stay synthetic (project rule).
 
+## How it works
+
+A one-command local environment seeded with a synthetic tenant: staff roles/credentials, clients (incl. an under-18), services flagged S4/non-S4, and stock lots — all clearly synthetic (project rule), reproducible, and reused by integration/e2e tests. Lets any module be developed/demoed without real PII.
+
 ## Requirements
 
 - A one-command local environment seeded with synthetic tenant, staff, clients, catalogue and stock.

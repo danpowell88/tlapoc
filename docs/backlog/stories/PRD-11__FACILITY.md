@@ -7,6 +7,11 @@
 As a owner, I want to record facility accreditation and be alerted before it expires, so that we never lapse on accreditation.
 Per-location accreditation status + expiry alerts before lapse (REQ-FAC-1, C20).
 
+## How it works
+
+Per-location facility accreditation (e.g. ACSQHC/NSQHS where applicable) recorded with status + expiry alerts before lapse. Whether accreditation is blocking or advisory in the product is configurable (open question). Records are audited.
+Evidences the clinic's facility obligations (C20).
+
 ## Requirements
 
 - To record facility accreditation and be alerted before it expires.
@@ -21,7 +26,14 @@ Per-location accreditation status + expiry alerts before lapse (REQ-FAC-1, C20).
 
 ## UI designs / screenshots
 
-prototype.html — Front desk/Operations (Open/close & fridge log, Temperature monitors, Rooms & devices, Equipment, Call log); backroom.html.
+_Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge log, Temperature monitors, Rooms & devices, Equipment, Call log); backroom.html._
+
+- Prototype: Operations (ops-equipment.png area) / facility profile — accreditation status per location with expiry alerts.
+
+## Suggested data model
+
+- **FacilityAccreditation** — id, tenant_id, location_id, scheme, status, expiry, evidence_ref
+  - _Expiry alerts; blocking vs advisory configurable._
 
 ## Technical notes (high level)
 

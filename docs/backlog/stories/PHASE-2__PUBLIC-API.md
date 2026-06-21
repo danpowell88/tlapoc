@@ -7,6 +7,10 @@
 As a integrator, I want a public API and webhooks, so that third-party tools can integrate.
 Outbound/inbound public API + webhooks for third parties (PRD-10 deferred; Phase 3).
 
+## How it works
+
+Placeholder (Phase 3): an outbound/inbound public API + webhooks for third parties. The internal API is already OpenAPI-described and contract-first, so this is auth/rate-limit/versioning + webhook delivery on top.
+
 ## Requirements
 
 - A public API and webhooks.
@@ -16,6 +20,11 @@ Outbound/inbound public API + webhooks for third parties (PRD-10 deferred; Phase
 
 - [ ] Placeholder — Phase 3; internal API is OpenAPI-described already.
 - [ ] Captured so the API stays contract-first.
+
+## Suggested data model
+
+- **(future) ApiKey / Webhook** — tenant_id, scopes, secret / url, events[]
+  - _Phase 3._
 
 ## Technical notes (high level)
 

@@ -9,6 +9,11 @@
 As a front desk, I want a clear visit status flow with check-in, an in-room-now indicator and late/no-show flags, so that the team always knows where each client is in the visit.
 Bookings move through booked → reminded → checked-in → in-room → checked-out, with late/no-show flags and role hand-offs (REQ-BOOK-7).
 
+## How it works
+
+The visit lifecycle is a status state-machine: booked -> reminded -> checked-in -> in-room -> checked-out, with role hand-offs. Late and no-show flags are raised; a no-show automatically creates a follow-up call (PRD-07).
+Captures new-vs-returning, reason and roster so reporting and recall work.
+
 ## Requirements
 
 - A clear visit status flow with check-in, an in-room-now indicator and late/no-show flags.
@@ -22,7 +27,17 @@ Bookings move through booked → reminded → checked-in → in-room → checked
 
 ## UI designs / screenshots
 
-prototype.html — Schedule, 'New booking' wizard, Clients directory & 360.
+_Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients directory & 360._
+
+- Prototype: Today (dashboard.png) — waiting / in-room / checked-out columns; an 'in-room now' indicator with quick links to chart/profile.
+- Check-in on arrival; late/no-show flags; status chips on each appointment.
+
+## Suggested data model
+
+- **Appointment.status** — booked|reminded|checked_in|in_room|checked_out|late|no_show|cancelled
+  - _Transitions audited; no_show raises a Job (PRD-07)._
+- **VisitEvent** — id, appointment_id, status, at, actor_id
+  - _Audit trail of the visit's transitions._
 
 ## Technical notes (high level)
 

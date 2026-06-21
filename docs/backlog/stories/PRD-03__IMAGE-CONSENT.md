@@ -9,6 +9,11 @@
 As a client, I want to give separate consent for photo use and withdraw it whenever I want, so that I control how my images are used.
 Photo use requires its own scoped consent, withdrawable at any time, which immediately stops downstream use (C14).
 
+## How it works
+
+Photo use needs its own scoped consent, separate from treatment consent and withdrawable at any time. Withdrawing it immediately stops downstream use (PRD-05/09 media checks) and is audited.
+Granted/withdrawn state shows as a chip on the patient header.
+
 ## Requirements
 
 - To give separate consent for photo use and withdraw it whenever I want.
@@ -20,6 +25,15 @@ Photo use requires its own scoped consent, withdrawable at any time, which immed
 - [ ] Withdrawing it immediately stops further use and is audited.
 - [ ] Downstream media features (PRD-05/09) check this consent.
 - [ ] Granted/withdrawn state is visible on the patient header chip.
+
+## UI designs / screenshots
+
+- Client app: a separate image-use consent toggle with scope + a withdraw control (client-app.png); staff see the image-use chip on the Client 360 / charting header (charting.png).
+
+## Suggested data model
+
+- **ImageConsent** — id, client_id, scope, granted_at, withdrawn_at, status
+  - _Withdrawn_at immediately blocks media use; audited (C14)._
 
 ## Technical notes (high level)
 

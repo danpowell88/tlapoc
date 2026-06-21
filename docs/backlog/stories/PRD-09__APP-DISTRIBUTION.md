@@ -9,6 +9,11 @@
 As a mobile developer, I want a store-distribution and (where viable) code-push pipeline for both apps, so that we can ship and patch the apps responsibly.
 Store distribution + code-push (e.g. Shorebird) where the compliance posture allows (open question) (ADR-0006).
 
+## How it works
+
+Store distribution + (where the compliance posture allows) code-push (e.g. Shorebird) for both Flutter apps from CI, with versioning + minimum-supported-version handling and crash/usage telemetry into observability (ADR-0006).
+Lets the clinic ship and responsibly patch the apps.
+
 ## Requirements
 
 - A store-distribution and (where viable) code-push pipeline for both apps.
@@ -22,7 +27,14 @@ Store distribution + code-push (e.g. Shorebird) where the compliance posture all
 
 ## UI designs / screenshots
 
-client-app.html, treatment-room.html, checkin.html, backroom.html.
+_Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.html._
+
+- No in-app screen — release pipeline + an in-app 'update required' gate for unsupported versions.
+
+## Suggested data model
+
+- **AppRelease** — platform, version, min_supported, channel, code_push_ref?
+  - _Code-push viability assessed for compliance._
 
 ## Technical notes (high level)
 

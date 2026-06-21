@@ -9,6 +9,11 @@
 As a owner, I want stock custody limited to an on-site prescriber and bound to a secure, access-logged location, so that S4 custody meets the exclusive-custody rule.
 Only NP/prescriber roles may take custody; stock is bound to a secure, access-logged location. Mode-A custodian must physically work at the clinic with exclusive custody (C7/C15).
 
+## How it works
+
+Only NP/prescriber roles may take custody; stock is bound to a secure, access-logged location. The Mode-A custodian must physically work at the clinic and hold exclusive custody — a remote prescriber consigning stock is flagged non-compliant (C7/C15).
+A custodian + exclusive-custody attestation + designated medicine-store contact are recorded.
+
 ## Requirements
 
 - Stock custody limited to an on-site prescriber and bound to a secure, access-logged location.
@@ -20,6 +25,18 @@ Only NP/prescriber roles may take custody; stock is bound to a secure, access-lo
 - [ ] Stock is bound to a secure location; access is logged.
 - [ ] A custodian + exclusive-custody attestation + designated medicine-store contact are recorded.
 - [ ] A remote prescriber consigning stock is flagged non-compliant.
+
+## UI designs / screenshots
+
+- Prototype: Stock & medicines header (stock.png) shows 'custody Dr Lee NP · locked fridge'; the custodian + secure-location binding is visible; access is logged.
+- Custody-change is capability-gated and audited.
+
+## Suggested data model
+
+- **StockLocation** — id, tenant_id, name(locked cabinet/fridge), custodian_id, exclusive_custody_attested(bool), store_contact
+  - _Custody limited to on-site prescriber (C7); access logged._
+- **AccessLog** — id, location_id, actor_id, at, event(open|close|tamper)
+  - _Feeds the optional ESP32 cabinet sensor + audit._
 
 ## Technical notes (high level)
 

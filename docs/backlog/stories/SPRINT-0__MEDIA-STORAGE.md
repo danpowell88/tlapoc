@@ -9,6 +9,10 @@
 As a backend developer, I want a media service for encrypted AU-resident blob storage with signed-URL upload/download, so that photos/documents are stored and served securely and consistently.
 Clinical photos and documents must be stored centrally in AU, served via short-lived signed URLs, and never persisted on personal devices (C14/ADR-0009). A shared media service underpins PRD-05 photos and PRD-09 capture.
 
+## How it works
+
+A media service: AU-resident, encrypted blob storage served only via short-lived signed URLs, with consent- and capability-checked, audited access and no public/unsigned path (C14/C21/ADR-0009/0016). Underpins PRD-05 photos and PRD-09 capture — media is never persisted on personal devices.
+
 ## Requirements
 
 - A media service for encrypted AU-resident blob storage with signed-URL upload/download.
@@ -20,6 +24,11 @@ Clinical photos and documents must be stored centrally in AU, served via short-l
 - [ ] Upload + download flows are demonstrated from web and Flutter.
 - [ ] Media access is consent- and capability-checked and audited.
 - [ ] No public/unsigned access to media is possible.
+
+## Suggested data model
+
+- **MediaObject** — id, tenant_id, owner_ref, blob_path(AU), content_type, created_at; access via signed URL only
+  - _No public access; consent/capability-checked._
 
 ## Technical notes (high level)
 

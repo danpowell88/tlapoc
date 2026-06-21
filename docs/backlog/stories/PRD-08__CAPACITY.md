@@ -9,6 +9,11 @@
 As a owner, I want capacity and utilisation reporting, so that I can fill quiet windows and right-size rosters.
 The prototype's Reports → Capacity view reports chair/room/practitioner utilisation and quiet windows (overview/trends).
 
+## How it works
+
+Capacity & utilisation reporting by practitioner, room/chair and device over a date range, with a trend view; quiet windows highlighted to feed waitlist/recall fill. Matches the prototype's capacity metrics.
+Helps fill quiet windows and right-size rosters.
+
 ## Requirements
 
 - Capacity and utilisation reporting.
@@ -22,7 +27,14 @@ The prototype's Reports → Capacity view reports chair/room/practitioner utilis
 
 ## UI designs / screenshots
 
-prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack).
+_Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack)._
+
+- Prototype: Reports -> Capacity (reports.png, goRep('capacity'), overview/trends) — utilisation by resource with quiet-window highlights.
+
+## Suggested data model
+
+- **(read) CapacityMetrics** — utilisation by practitioner/room/device, quiet_windows, by date
+  - _Feeds waitlist/recall fill._
 
 ## Technical notes (high level)
 

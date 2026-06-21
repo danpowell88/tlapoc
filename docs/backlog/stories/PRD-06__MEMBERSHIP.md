@@ -9,6 +9,11 @@
 As a client, I want to join a membership and have my card auto-charged on schedule, so that I get member perks without manual payments.
 Membership plans/tiers with automatic recurring billing from a tokenised card-on-file (added online/in-app or at desk) and failed-payment dunning (REQ-MEMB-1/2/3).
 
+## How it works
+
+Membership plans/tiers with automatic recurring billing from a tokenised card-on-file (added online/in-app or at the desk) and failed-payment dunning. Lifecycle (join/pause/cancel/win-back) is tracked and feeds MRR/churn reporting; benefits/credits auto-apply at checkout.
+The recurring-revenue engine; autopay built on the Square recurring spike.
+
 ## Requirements
 
 - To join a membership and have my card auto-charged on schedule.
@@ -19,6 +24,19 @@ Membership plans/tiers with automatic recurring billing from a tokenised card-on
 - [ ] A failed charge triggers dunning/recovery.
 - [ ] Lifecycle (join/pause/cancel/win-back) tracked → MRR/churn reporting (PRD-08).
 - [ ] Benefits/credits auto-apply at checkout.
+
+## UI designs / screenshots
+
+- Prototype: Memberships -> Members & billing (memb-members.png) — member list, plan, card-on-file status, next charge, dunning state; Plans & packages (memb-plans.png) to define tiers.
+- Client app: join + add card-on-file (client-app.png).
+
+## Suggested data model
+
+- **MembershipPlan** — id, tenant_id, name, tier, price, period, benefits[]
+- **Membership** — id, client_id, plan_id, token_ref, schedule, status(active|paused|cancelled), next_charge_at
+  - _Autopay; dunning on failure -> MRR/churn (PRD-08)._
+- **DunningAttempt** — id, membership_id, attempt, at, result
+  - _Retry/recover on failed charge._
 
 ## Technical notes (high level)
 

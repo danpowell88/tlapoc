@@ -9,6 +9,11 @@
 As a admin, I want a workflow that, when a breach is flagged, guides assessment and produces OAIC + individual notifications and a register entry, so that we meet Notifiable Data Breaches obligations.
 An eligible data breach (NDB scheme) must be assessed and, if eligible, notified to OAIC + individuals, with a breach register (C22).
 
+## How it works
+
+When a potential data breach is flagged, a guided workflow assesses eligibility under the Notifiable Data Breaches scheme; if eligible it produces OAIC + individual notification drafts and a register entry. Observability/security signals (Sprint-0 OBS) can seed a case.
+There is a legal clock, so the workflow tracks assessment and notification dates.
+
 ## Requirements
 
 - A workflow that, when a breach is flagged, guides assessment and produces OAIC + individual notifications and a register entry.
@@ -20,6 +25,14 @@ An eligible data breach (NDB scheme) must be assessed and, if eligible, notified
 - [ ] If assessed eligible, it produces OAIC + individual notification drafts.
 - [ ] A breach-register entry is created and retained.
 - [ ] Observability/security signals (Sprint 0 OBS) can seed a breach case.
+
+## UI designs / screenshots
+
+- Surfaces in Governance: a breach register + a case workflow (assess -> notify -> close) with status and dates.
+
+## Suggested data model
+
+- **DataBreach** — id, tenant_id, detected_at, description, assessment(json), eligible(bool), oaic_notified_at, individuals_notified_at, status
 
 ## Technical notes (high level)
 

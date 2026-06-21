@@ -7,6 +7,11 @@
 As a injector, I want optional AI assistance for notes and injection-point suggestions, so that charting is faster (with human confirmation).
 AI scribe and advisory auto-detection of injection points are explicitly out for v1 (no AI; everything manual + human-confirmed). Placeholder (REQ-CLIN-6, ADR-0020).
 
+## How it works
+
+Placeholder (Phase 2): optional AI assistance for note dictation and advisory auto-detection of injection points. Explicitly no AI in v1 — everything manual and human-controlled; any future feature is advisory + human-confirmed only (ADR-0020).
+Captured to keep the data model ready.
+
 ## Requirements
 
 - Optional AI assistance for notes and injection-point suggestions.
@@ -20,6 +25,11 @@ AI scribe and advisory auto-detection of injection points are explicitly out for
 ## UI designs / screenshots
 
 prototype.html — Charting + Clinical (Skin analysis, Body contouring, Complication protocols, Photography & outcomes); treatment-room.html.
+
+## Suggested data model
+
+- **(future) AIAssist** — advisory suggestions attached to a draft ChartEntry; human confirms
+  - _No AI in v1._
 
 ## Technical notes (high level)
 

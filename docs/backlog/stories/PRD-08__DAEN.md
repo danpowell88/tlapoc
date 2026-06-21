@@ -9,6 +9,11 @@
 As a prescriber, I want to generate a prefilled DAEN adverse-event report targeting the correct database, so that reporting an adverse event is fast and correct.
 Classify seriousness, route medicine vs device, produce a prefilled DAEN export/submission and flag mandatory cases (C12, ADR-0031).
 
+## How it works
+
+Generate a prefilled DAEN adverse-event report with seriousness set, targeting the correct database (medicine vs device), and flag mandatory-reporting cases (C12, ADR-0031). Recall execution + acknowledgement tracking lives in the hub.
+Makes reporting an adverse event fast and correct; submission is export/file (electronic channel an open option).
+
 ## Requirements
 
 - To generate a prefilled DAEN adverse-event report targeting the correct database.
@@ -23,7 +28,14 @@ Classify seriousness, route medicine vs device, produce a prefilled DAEN export/
 
 ## UI designs / screenshots
 
-prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack).
+_Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack)._
+
+- Prototype: Governance -> Adverse events & DAEN (gov-ae.png) — AE list, open a case, prefilled DAEN form routed medicine/device, mandatory-trigger flag, submit/export (openDaen/submitDaen).
+
+## Suggested data model
+
+- **DaenReport** — id, adverse_event_id, target(medicine|device), seriousness, mandatory(bool), prefilled(json), submitted_at
+  - _From AdverseEvent (PRD-05); export/file._
 
 ## Technical notes (high level)
 

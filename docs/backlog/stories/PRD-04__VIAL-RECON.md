@@ -9,6 +9,11 @@
 As a owner, I want vial/unit reconciliation across draws and wastage, so that stock, billing and the medicine register always agree.
 Units drawn vs vial size + wastage must reconcile so stock, billing and the register agree (C8).
 
+## How it works
+
+Vial/unit reconciliation tracks units drawn vs vial size plus wastage, so stock, billing and the medicine register always agree. Each administration decrements the selected lot; discrepancies are surfaced and feed reporting (PRD-08).
+Partial-vial handling is supported (one vial may treat several patients).
+
 ## Requirements
 
 - Vial/unit reconciliation across draws and wastage.
@@ -20,6 +25,16 @@ Units drawn vs vial size + wastage must reconcile so stock, billing and the regi
 - [ ] Discrepancies are surfaced.
 - [ ] Reconciliation data feeds reporting (PRD-08).
 - [ ] Partial-vial handling is supported.
+
+## UI designs / screenshots
+
+- Prototype: Stock & medicines (stock.png) — per-lot on-hand vs received vs wasted columns; usage history; reconciliation surfaced when draws don't match.
+- Charting finalise deducts charted units from the lot (see charting.png).
+
+## Suggested data model
+
+- **StockLedger** — id, lot_id, movement(receive|administer|waste|adjust), units, ref(administration_id?), at, actor_id
+  - _Sum reconciles on_hand; partial-vial waste recorded; discrepancies flagged (C8)._
 
 ## Technical notes (high level)
 

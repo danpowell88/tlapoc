@@ -9,6 +9,10 @@
 As a platform engineer, I want structured logging, distributed tracing, key metrics dashboards and alerting wired across API and apps, so that we can diagnose issues and detect incidents (feeding the breach workflow) quickly.
 You cannot run a compliance-critical platform blind. Centralised logs, distributed traces, metrics and alerting are needed from the first deploy.
 
+## How it works
+
+Structured logging, distributed tracing (correlation ids across web/app/API), key metrics dashboards and alerting from the first deploy, with audit/security-relevant signals distinguishable so they can seed the breach workflow (PRD-01). You can't run a compliance-critical platform blind.
+
 ## Requirements
 
 - Structured logging, distributed tracing, key metrics dashboards and alerting wired across API and apps.

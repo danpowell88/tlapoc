@@ -9,6 +9,11 @@
 As a front desk / owner, I want to track leads/prospects through to booking, so that enquiries don't get lost and convert better.
 The prototype's Growth → Leads (CRM) screen tracks enquiries who haven't booked yet, over the inbox (ADR-0033).
 
+## How it works
+
+A lead/prospect CRM (Phase 2) over the inbox: track enquiries who haven't booked yet, with source, status and next action; convert to a client/booking preserving history. Lead follow-ups surface in the Follow-ups queue; marketing to leads respects Spam-Act consent.
+Stops enquiries getting lost and improves conversion (ADR-0033).
+
 ## Requirements
 
 - To track leads/prospects through to booking.
@@ -24,7 +29,14 @@ The prototype's Growth → Leads (CRM) screen tracks enquiries who haven't booke
 
 ## UI designs / screenshots
 
-prototype.html — Comms & growth (Inbox/Automations/Campaigns), Growth (Leads/Reviews), Follow-ups, Settings → Public booking page; booking-widget.html.
+_Prototype screen: prototype.html — Comms & growth (Inbox/Automations/Campaigns), Growth (Leads/Reviews), Follow-ups, Settings → Public booking page; booking-widget.html._
+
+- Prototype: Growth -> Leads (CRM) (growth-leads.png) — lead list with source/status/next-action; convert-to-client/booking action.
+
+## Suggested data model
+
+- **Lead** — id, tenant_id, name, contact, source, status(new|nurturing|won|lost), next_action, converted_client_id?
+  - _Convert preserves history; consent for marketing (C23)._
 
 ## Technical notes (high level)
 

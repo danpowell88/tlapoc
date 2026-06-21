@@ -9,6 +9,11 @@
 As a staff member, I want a single 360° client profile pulling together history, medical flags, consents, photos, memberships, balances and comms, so that I have the full picture in one place.
 Any staff member can open a client's full profile: history, contacts, medical flags, consents, photos, memberships, balances, comms and complaints.
 
+## How it works
+
+A single 360-degree client profile pulls together everything any staff member needs: overview, medical/contraindications, consents, photos, visit history, memberships, balance, comms and complaints — surfacing data owned by PRD-03/04/05/06/11 via the API.
+Access is RBAC-scoped (reception sees limited clinical info) and audited.
+
 ## Requirements
 
 - A single 360° client profile pulling together history, medical flags, consents, photos, memberships, balances and comms.
@@ -23,7 +28,15 @@ Any staff member can open a client's full profile: history, contacts, medical fl
 
 ## UI designs / screenshots
 
-prototype.html — Schedule, 'New booking' wizard, Clients directory & 360.
+_Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients directory & 360._
+
+- Prototype: Client 360 (client-360.png) — header with consent/age chips (consent / image-use / under-18 cooling-off), tabbed sections for medical, consents, photos, visits, memberships, balance, comms, complaints.
+- Quick links into charting, checkout and follow-ups.
+
+## Suggested data model
+
+- **Client (aggregate view)** — joins Client + IntakeResponse + ConsentSignature + Photo + Appointment + Membership + AccountBalance + Complaint
+  - _Read aggregation; each part owned by its module. RBAC filters fields._
 
 ## Technical notes (high level)
 

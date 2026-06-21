@@ -9,6 +9,11 @@
 As a owner / multi-site staff, I want to switch the active clinic/location, so that I work in the right location's data.
 The prototype's sidebar switches between clinics/locations (Brisbane, Gold Coast, a locum site). The in-product switcher is demonstrated; full multi-location data depth is PHASE-2/MULTI-LOCATION.
 
+## How it works
+
+A switcher lists the locations/clinics the user can access and sets the active clinic/location context; data shown is scoped to it (RLS tenant + location), and the active location is reflected in audit and reporting. Builds on PHASE-2/MULTI-LOCATION for deeper multi-site features.
+Lets multi-site owners/staff work in the right location's data.
+
 ## Requirements
 
 - To switch the active clinic/location.
@@ -22,7 +27,14 @@ The prototype's sidebar switches between clinics/locations (Brisbane, Gold Coast
 
 ## UI designs / screenshots
 
-prototype.html — sidebar clinic switcher.
+_Prototype screen: prototype.html — sidebar clinic switcher._
+
+- Prototype: the sidebar clinic switcher (dashboard.png) — lists clinics (Brisbane, Gold Coast, locum site); selecting one sets the active location.
+
+## Suggested data model
+
+- **(session) ActiveLocation** — session.location_id within tenant
+  - _Scopes data + audit + reporting._
 
 ## Technical notes (high level)
 

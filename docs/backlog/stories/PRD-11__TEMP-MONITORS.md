@@ -9,6 +9,11 @@
 As a owner / staff, I want to manage temperature monitors, see their readings and act on breaches, so that cold-chain is continuously evidenced without manual logging.
 The prototype's Operations → Temperature monitors (openMonitor/monitorJob) manages wireless cold-chain sensors (the ESP32 design), charts readings and raises breach jobs.
 
+## How it works
+
+Manage wireless cold-chain sensors (the ESP32 design): register/provision monitors per fridge/location authenticating to the per-clinic API, chart readings over time, and raise breach jobs; detect missing heartbeats (dead monitor). Manual fridge log (OPENCLOSE) and monitors reconcile into one cold-chain record (C13).
+Continuous, evidenced cold-chain without manual logging.
+
 ## Requirements
 
 - To manage temperature monitors, see their readings and act on breaches.
@@ -23,7 +28,16 @@ The prototype's Operations → Temperature monitors (openMonitor/monitorJob) man
 
 ## UI designs / screenshots
 
-prototype.html — Operations → Temperature monitors.
+_Prototype screen: prototype.html — Operations → Temperature monitors._
+
+- Prototype: Operations -> Temperature monitors (ops-monitors.png) — monitor list per fridge, live/charted temps, breach alerts, dead-monitor detection (openMonitor/monitorJob).
+
+## Suggested data model
+
+- **Monitor** — id, tenant_id, location_id, fridge, api_key_ref, last_heartbeat, status
+  - _ESP32; missing heartbeat -> alert._
+- **(reuses) TempLog/Excursion** — (PRD-04 COLD-CHAIN)
+  - _Manual + device readings reconcile._
 
 ## Technical notes (high level)
 

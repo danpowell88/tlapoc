@@ -9,6 +9,10 @@
 As a mobile developer, I want client and provider app shells with bottom-tab navigation, shared auth/API/design packages and secure token storage, so that the two apps are built from one codebase with consistent plumbing.
 One Flutter codebase, two flavours (client, provider), sharing auth, the API client and the design system (ADR-0006).
 
+## How it works
+
+Client + provider app shells (bottom-tab nav) from one Flutter codebase, sharing auth (Entra staff / External ID clients), the generated API client and the design system, with secure token storage; CI produces internal builds (ADR-0004/0006). The base PRD-09 builds on.
+
 ## Requirements
 
 - Client and provider app shells with bottom-tab navigation, shared auth/API/design packages and secure token storage.
@@ -22,7 +26,9 @@ One Flutter codebase, two flavours (client, provider), sharing auth, the API cli
 
 ## UI designs / screenshots
 
-Non-UI / platform scaffolding — no prototype screen.
+_Prototype screen: Non-UI / platform scaffolding — no prototype screen._
+
+- Client tabs Home/Book/My care/Membership/Account and provider tabs Schedule/Patient/Medicines/Tasks (empty shells) — see client-app.png / treatment-room.png.
 
 ## Technical notes (high level)
 

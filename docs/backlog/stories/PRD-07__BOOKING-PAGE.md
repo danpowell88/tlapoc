@@ -9,6 +9,11 @@
 As a owner, I want my public booking page to use generic service names and withhold S4 prices automatically, so that we don't reference S4 in public advertising.
 The public booking page uses generic service names and withholds S4 prices by configuration (catalog schedule flag), with no advertising linter (REQ-NOTIF-12, C9).
 
+## How it works
+
+The public booking page uses generic service names and withholds S4 prices by configuration (the catalog schedule flag), with no advertising linter (C9). No brands, 'anti-wrinkle injections', prices or #botox appear for S4 services.
+Advertising compliance beyond this is clinic-owned (external tools).
+
 ## Requirements
 
 - My public booking page to use generic service names and withhold S4 prices automatically.
@@ -23,7 +28,15 @@ The public booking page uses generic service names and withholds S4 prices by co
 
 ## UI designs / screenshots
 
-prototype.html — Comms & growth (Inbox/Automations/Campaigns), Growth (Leads/Reviews), Follow-ups, Settings → Public booking page; booking-widget.html.
+_Prototype screen: prototype.html — Comms & growth (Inbox/Automations/Campaigns), Growth (Leads/Reviews), Follow-ups, Settings → Public booking page; booking-widget.html._
+
+- Prototype: Settings -> Public booking page (settings-booking.png) — toggle generic names + withhold S4 prices; the public page (public-booking.png) reflects it.
+- Configuration-driven, not a linter.
+
+## Suggested data model
+
+- **PublicBookingConfig** — tenant_id, generic_names(bool), withhold_s4_prices(bool)
+  - _Shared with PRD-02 ONLINE-BOOK; driven by Service.schedule (ADR-0014)._
 
 ## Technical notes (high level)
 

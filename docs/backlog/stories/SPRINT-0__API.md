@@ -9,6 +9,10 @@
 As a backend developer, I want an API skeleton with auth middleware, tenant-context resolution, a standard error/response model and health checks, so that feature modules are added consistently and cross-cutting concerns are solved once.
 A consistent API skeleton (clean/layered architecture, request pipeline, problem-details errors, pagination) means every feature module plugs in the same way.
 
+## How it works
+
+.NET API skeleton with auth middleware (validates Entra staff + client tokens, resolves tenant context for RLS), a standard problem-details error model, consistent pagination/filtering, health/readiness endpoints and structured request logging — a vertical-slice sample proves the full pattern. Every feature module plugs in the same way (ADR-0005).
+
 ## Requirements
 
 - An API skeleton with auth middleware, tenant-context resolution, a standard error/response model and health checks.

@@ -9,6 +9,11 @@
 As a staff member, I want to record and read shift-handover notes, so that the next shift knows outstanding tasks and issues.
 The prototype's back-office tablet includes a shift-handover panel so the team passes on what the next shift needs to know.
 
+## How it works
+
+Shift-handover notes so the team passes on what the next shift needs to know; notes are timestamped, attributed, tenant/location-scoped, and shown alongside outstanding follow-ups/jobs. Accessible from the back-office tablet.
+Smooth, safe shift transitions.
+
 ## Requirements
 
 - To record and read shift-handover notes.
@@ -22,7 +27,14 @@ The prototype's back-office tablet includes a shift-handover panel so the team p
 
 ## UI designs / screenshots
 
-prototype.html — Front desk/Operations (Open/close & fridge log, Temperature monitors, Rooms & devices, Equipment, Call log); backroom.html.
+_Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge log, Temperature monitors, Rooms & devices, Equipment, Call log); backroom.html._
+
+- Prototype: back-office tablet -> Shift handover (backroom.png) — add/read handover notes; outstanding jobs surfaced alongside.
+
+## Suggested data model
+
+- **ShiftHandover** — id, tenant_id, location_id, note, created_by, at
+  - _Shown with outstanding Jobs (PRD-07)._
 
 ## Technical notes (high level)
 

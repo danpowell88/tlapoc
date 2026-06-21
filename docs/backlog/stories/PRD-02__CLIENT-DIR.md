@@ -9,6 +9,11 @@
 As a front desk, I want to search and filter clients, merge duplicates and soft-delete with audit, so that the client list stays accurate and findable.
 A searchable client directory with duplicate merge and audited soft-delete keeps the record clean.
 
+## How it works
+
+A fast, searchable client directory with duplicate detection/merge (preserving history + audit) and audited soft-delete, so the client list stays accurate and findable.
+Quick client search is reachable from the front-desk shell (the header search).
+
 ## Requirements
 
 - To search and filter clients, merge duplicates and soft-delete with audit.
@@ -23,7 +28,17 @@ A searchable client directory with duplicate merge and audited soft-delete keeps
 
 ## UI designs / screenshots
 
-prototype.html — Schedule, 'New booking' wizard, Clients directory & 360.
+_Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients directory & 360._
+
+- Prototype: Clients (clients.png) — searchable/filterable directory list; row -> opens Client 360; merge-duplicates and soft-delete actions.
+- Global header search jumps straight to a client.
+
+## Suggested data model
+
+- **Client** — (as PRD-01 CLIENT-CORE) + search index
+  - _Merge re-points child records; soft-delete sets deleted_at._
+- **MergeLog** — id, primary_id, merged_id, at, actor_id
+  - _Audited; reversible reference._
 
 ## Technical notes (high level)
 

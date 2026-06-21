@@ -9,6 +9,11 @@
 As a front desk, I want a day/week/room calendar showing practitioners and rooms with correct service durations and buffers, so that I can run the diary at a glance and book without clashes.
 Front desk needs a fast day/week/room calendar with service durations, buffers and rosters — the core of the diary.
 
+## How it works
+
+The calendar is the operational heart of reception: a multi-resource diary (practitioner + room/chair/device) that the whole front desk runs from. Service durations include buffer/processing/turnaround so back-to-back bookings are realistic.
+Availability is derived from roster intersected with canInject (PRD-01), so only rostered, cleared practitioners are offered — injectables never offer an uncredentialed staffer. Drag-to-move rebooks; room/device conflicts are flagged.
+
 ## Requirements
 
 - A day/week/room calendar showing practitioners and rooms with correct service durations and buffers.
@@ -22,7 +27,21 @@ Front desk needs a fast day/week/room calendar with service durations, buffers a
 
 ## UI designs / screenshots
 
-prototype.html — Schedule, 'New booking' wizard, Clients directory & 360.
+_Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients directory & 360._
+
+- Prototype: Schedule (schedule.png) — day/week/room views with practitioner columns; appointment blocks colour-coded by type/status.
+- Per-day and per-treatment-type counts + utilisation; quiet-window fill suggestions.
+- Drag an appointment to move it; conflicting room/chair/device usage is flagged inline.
+- Time-off and unrostered periods render as unavailable.
+
+## Suggested data model
+
+- **Appointment** — id, tenant_id, location_id, client_id, service_id, practitioner_id, room_id, start, end, status, reason, source(online|desk|walkin)
+  - _Status drives the visit lifecycle (LIFECYCLE)._
+- **Resource** — id, tenant_id, type(room|chair|device), name, status
+  - _Booked alongside the practitioner; conflict-checked._
+- **(derived) Availability** — = RosterShift - TimeOff - existing appts, intersected with canInject + resource free
+  - _Feeds the slot picker._
 
 ## Technical notes (high level)
 

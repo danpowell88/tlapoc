@@ -9,6 +9,11 @@
 As a system, I want to enforce a 7-day cooling-off and payment block for under-18s and record a second consultation, so that minors are protected per the rules.
 Under-18s require ≥7 days between consent and procedure plus a payment block (except the consult) and a recorded second consultation; an optional adult cooling-off is configurable (C6).
 
+## How it works
+
+For under-18s the system enforces >=7 days between consent and procedure and blocks payment (except the consult) until it elapses, and records a second-consultation offer. An optional adult cooling-off is configurable (default per legal read).
+The payment block coordinates with PRD-06; the booking deposit/hold is suppressed during cooling-off (F14 invariant).
+
 ## Requirements
 
 - To enforce a 7-day cooling-off and payment block for under-18s and record a second consultation.
@@ -20,6 +25,16 @@ Under-18s require ≥7 days between consent and procedure plus a payment block (
 - [ ] A second-consultation offer is recorded.
 - [ ] Optional adult cooling-off is configurable (default per legal read).
 - [ ] Payment block coordinates with PRD-06.
+
+## UI designs / screenshots
+
+- Patient header shows an 'under-18 cooling-off' chip with the elapse date; checkout is blocked (except consult) until then.
+- A recorded second-consultation offer appears on the client timeline.
+
+## Suggested data model
+
+- **CoolingOffTimer** — id, client_id, appointment_id, consent_at, eligible_at, payment_blocked(bool), second_consult_offered_at
+  - _Under-18 mandatory 7d; adult optional/config._
 
 ## Technical notes (high level)
 

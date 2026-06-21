@@ -7,6 +7,10 @@
 As a mobile engineer, I want a spike of the Flutter canvas: tap-to-add and drag injection points over a facial diagram and a photo, each holding metadata, so that PRD-05 charting builds on a proven, performant canvas.
 The injection-mapping canvas is the hero clinical screen and the highest app risk (tap-to-add + drag points on a facial diagram/photo, per-point metadata). Prove the approach before PRD-05.
 
+## How it works
+
+Spike of the Flutter injection-mapping canvas: tap-to-add + drag points over a facial diagram and a photo, each holding metadata, performing smoothly with many points, with a coordinate model that survives image scaling/rotation. De-risks the hero clinical screen (PRD-05/MAPPING).
+
 ## Requirements
 
 - A spike of the Flutter canvas: tap-to-add and drag injection points over a facial diagram and a photo, each holding metadata.

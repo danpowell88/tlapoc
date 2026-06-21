@@ -6,7 +6,13 @@
     "phase": "1",
     "prd": "docs/prds/PRD-08-reporting-compliance.md",
     "summary": "Turns the platform's data into the business intelligence the clinic relies on and the audit-ready compliance evidence that makes the moat real — consent coverage, the S4 register, lot recall, registration/retention watch, breach & complaints registers, the DAEN adverse-event prefill, plus a one-click inspection-readiness pack. Built on dedicated read-models/materialized views. Financial figures stay owner-gated.",
-    "labels": ["type:epic", "PRD-08", "phase:1", "area:web", "area:data"]
+    "labels": [
+      "type:epic",
+      "PRD-08",
+      "phase:1",
+      "area:web",
+      "area:data"
+    ]
   },
   "stories": [
     {
@@ -22,10 +28,43 @@
         "Read-models are built incrementally per module.",
         "Backfill/rebuild of a read-model is supported."
       ],
-      "refs": {"req": ["REQ-RPT-1"], "adr": ["0013", "0010"], "prd_ac": ["AC7"]},
-      "labels": ["type:story", "PRD-08", "phase:1", "area:data"],
+      "refs": {
+        "req": [
+          "REQ-RPT-1"
+        ],
+        "adr": [
+          "0013",
+          "0010"
+        ],
+        "prd_ac": [
+          "AC7"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-08",
+        "phase:1",
+        "area:data"
+      ],
       "priority": "P1",
-      "depends_on": ["PRD-01/AUDIT"]
+      "depends_on": [
+        "PRD-01/AUDIT"
+      ],
+      "detail": [
+        "Dashboards read from dedicated read-models / materialized views fed by domain events + the audit stream (ADR-0013), not the transactional DB. Eventual consistency is acceptable; views are built incrementally per module and support backfill/rebuild.",
+        "Keeps dashboards fast and avoids hammering OLTP — the foundation every report sits on."
+      ],
+      "ui_spec": [
+        "No screen — backend projections feeding all of Reports + Governance.",
+        "A sample event flows from a write to a read-model projection (Sprint-0 DOMAIN-EVENTS)."
+      ],
+      "data_model": [
+        {
+          "entity": "ReportingView",
+          "fields": "materialized views per metric (revenue, retention, utilisation, MRR, compliance)",
+          "notes": "Fed by domain events + AuditEvent; rebuildable."
+        }
+      ]
     },
     {
       "key": "BUSINESS-DASH",
@@ -40,10 +79,40 @@
         "Reward-cost vs retention surfaces (from PRD-06).",
         "All money figures are gated behind the owner financial capability."
       ],
-      "refs": {"req": ["REQ-RPT-1", "REQ-RPT-2"], "prd_ac": ["AC6"]},
-      "labels": ["type:story", "PRD-08", "phase:1", "area:web"],
+      "refs": {
+        "req": [
+          "REQ-RPT-1",
+          "REQ-RPT-2"
+        ],
+        "prd_ac": [
+          "AC6"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-08",
+        "phase:1",
+        "area:web"
+      ],
       "priority": "P1",
-      "depends_on": ["PRD-08/READ-MODELS"]
+      "depends_on": [
+        "PRD-08/READ-MODELS"
+      ],
+      "detail": [
+        "The owner BI the clinic already relies on: revenue, retention/churn, no-shows, cancellations, conversion, at-risk, big spenders, membership MRR/churn and per-practitioner mix — date-filterable. Reward-cost vs retention surfaces (from PRD-06). All money figures are gated behind the owner financial capability.",
+        "Rebuilds the prototype's analytics on live data and fixes the Mindbody reporting gap."
+      ],
+      "ui_spec": [
+        "Prototype: Reports (reports.png) — revenue trend, treatment mix, top treatments, new-vs-returning, retention, membership MRR; date-range presets + custom; per-practitioner.",
+        "Money figures hidden for non-owner roles (.fin gating)."
+      ],
+      "data_model": [
+        {
+          "entity": "(read) BusinessMetrics",
+          "fields": "revenue, retention, churn, no_shows, cancellations, conversion, at_risk, big_spenders, mrr by date/practitioner",
+          "notes": "From read-models; owner-gated."
+        }
+      ]
     },
     {
       "key": "COMPLIANCE-DASH",
@@ -58,10 +127,57 @@
         "Registration-expiry watch and records-due-for-destruction lists render with their basis.",
         "Breach and complaints registers are viewable/exportable."
       ],
-      "refs": {"req": ["REQ-RPT-3"], "compliance": ["C1", "C8", "C18", "C19", "C22", "C24"], "prd_ac": ["AC1", "AC2", "AC3", "AC4"]},
-      "labels": ["type:story", "PRD-08", "phase:1", "area:web", "compliance"],
+      "refs": {
+        "req": [
+          "REQ-RPT-3"
+        ],
+        "compliance": [
+          "C1",
+          "C8",
+          "C18",
+          "C19",
+          "C22",
+          "C24"
+        ],
+        "prd_ac": [
+          "AC1",
+          "AC2",
+          "AC3",
+          "AC4"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-08",
+        "phase:1",
+        "area:web",
+        "compliance"
+      ],
       "priority": "P1",
-      "depends_on": ["PRD-08/READ-MODELS", "PRD-04/RECALL-LOOKUP"]
+      "depends_on": [
+        "PRD-08/READ-MODELS",
+        "PRD-04/RECALL-LOOKUP"
+      ],
+      "detail": [
+        "Compliance dashboards + register exports: consent coverage, consult-before-script adherence (shows 100% by construction; exceptions impossible to create), the S4 register export, lot->clients recall, cooling-off adherence, registration-expiry watch, records-retention-due, S4 stock discrepancies, and the breach + complaints registers.",
+        "Turns the moat's data into audit-ready evidence (the Governance hub overview)."
+      ],
+      "ui_spec": [
+        "Prototype: Governance -> Overview (gov-overview.png) — compliance metrics + register links; exports for the S4 register, lot-recall and the breach/complaints registers.",
+        "Registration-expiry watch + records-due lists with their basis."
+      ],
+      "data_model": [
+        {
+          "entity": "ComplianceMetric",
+          "fields": "key(consent_coverage|consult_adherence|cooling_off|reg_expiry|retention_due|stock_discrepancy), value, exceptions[]",
+          "notes": "From read-models + AuditEvent."
+        },
+        {
+          "entity": "RegisterExport",
+          "fields": "type(s4_register|lot_recall|breach|complaints), generated_at, ref",
+          "notes": "Exportable evidence (C8/C22/C24)."
+        }
+      ]
     },
     {
       "key": "DAEN",
@@ -76,10 +192,42 @@
         "Recall execution + acknowledgement tracking lives in the hub.",
         "Submission is export/file (electronic channel is an open option)."
       ],
-      "refs": {"compliance": ["C12"], "adr": ["0031"], "prd_ac": ["AC5"]},
-      "labels": ["type:story", "PRD-08", "phase:1", "area:web", "compliance"],
+      "refs": {
+        "compliance": [
+          "C12"
+        ],
+        "adr": [
+          "0031"
+        ],
+        "prd_ac": [
+          "AC5"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-08",
+        "phase:1",
+        "area:web",
+        "compliance"
+      ],
       "priority": "P1",
-      "depends_on": ["PRD-05/ADVERSE-EVENT"]
+      "depends_on": [
+        "PRD-05/ADVERSE-EVENT"
+      ],
+      "detail": [
+        "Generate a prefilled DAEN adverse-event report with seriousness set, targeting the correct database (medicine vs device), and flag mandatory-reporting cases (C12, ADR-0031). Recall execution + acknowledgement tracking lives in the hub.",
+        "Makes reporting an adverse event fast and correct; submission is export/file (electronic channel an open option)."
+      ],
+      "ui_spec": [
+        "Prototype: Governance -> Adverse events & DAEN (gov-ae.png) — AE list, open a case, prefilled DAEN form routed medicine/device, mandatory-trigger flag, submit/export (openDaen/submitDaen)."
+      ],
+      "data_model": [
+        {
+          "entity": "DaenReport",
+          "fields": "id, adverse_event_id, target(medicine|device), seriousness, mandatory(bool), prefilled(json), submitted_at",
+          "notes": "From AdverseEvent (PRD-05); export/file."
+        }
+      ]
     },
     {
       "key": "DATA-QUALITY",
@@ -94,10 +242,35 @@
         "Checks run on a schedule.",
         "Findings feed the needs-attention digest."
       ],
-      "refs": {"req": ["REQ-RPT-4"]},
-      "labels": ["type:story", "PRD-08", "phase:1", "area:web"],
+      "refs": {
+        "req": [
+          "REQ-RPT-4"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-08",
+        "phase:1",
+        "area:web"
+      ],
       "priority": "P2",
-      "depends_on": ["PRD-08/READ-MODELS"]
+      "depends_on": [
+        "PRD-08/READ-MODELS"
+      ],
+      "detail": [
+        "Anomaly checks carried over from the prototype: active-but-unseen, completed-not-checked-in, duplicates, missing contacts, implausible dates. Findings are listed, actionable, run on a schedule, and feed the needs-attention digest.",
+        "Keeps the data clean and trustworthy."
+      ],
+      "ui_spec": [
+        "Prototype: Reports -> data-quality findings (reports.png) — a list of anomalies with a jump-to-fix; feeds the owner digest."
+      ],
+      "data_model": [
+        {
+          "entity": "DataQualityFinding",
+          "fields": "id, tenant_id, check, entity_ref, detail, detected_at, resolved_at",
+          "notes": "Scheduled checks; feeds ATTENTION-DIGEST."
+        }
+      ]
     },
     {
       "key": "ATTENTION-DIGEST",
@@ -112,10 +285,35 @@
         "Digest respects role/financial gating.",
         "Available as an at-a-glance owner view."
       ],
-      "refs": {"req": ["REQ-RPT-5"]},
-      "labels": ["type:story", "PRD-08", "phase:1", "area:web"],
+      "refs": {
+        "req": [
+          "REQ-RPT-5"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-08",
+        "phase:1",
+        "area:web"
+      ],
       "priority": "P2",
-      "depends_on": ["PRD-08/COMPLIANCE-DASH"]
+      "depends_on": [
+        "PRD-08/COMPLIANCE-DASH"
+      ],
+      "detail": [
+        "A single owner 'needs attention' digest aggregating exceptions across the clinic — expiries, discrepancies, data-quality findings, failed payments, overdue follow-ups — each linking to its source. Respects role/financial gating.",
+        "The at-a-glance 'what needs me' view for the owner."
+      ],
+      "ui_spec": [
+        "Prototype: Today (dashboard.png) surfaces the owner exceptions digest; each item deep-links to its source screen."
+      ],
+      "data_model": [
+        {
+          "entity": "(read) AttentionDigest",
+          "fields": "aggregates CredentialAlert + Excursion + Stocktake discrepancy + DataQualityFinding + DunningAttempt + overdue Job",
+          "notes": "Role/financial-gated."
+        }
+      ]
     },
     {
       "key": "INSPECTION-PACK",
@@ -130,10 +328,44 @@
         "DSAR (APP 12/13) and a breach drill are runnable from the hub.",
         "Pack generation is audited."
       ],
-      "refs": {"req": ["REQ-RPT-7", "REQ-SEC-8", "REQ-SEC-9"], "compliance": ["C10"], "adr": ["0030"]},
-      "labels": ["type:story", "PRD-08", "phase:1", "area:web", "compliance"],
+      "refs": {
+        "req": [
+          "REQ-RPT-7",
+          "REQ-SEC-8",
+          "REQ-SEC-9"
+        ],
+        "compliance": [
+          "C10"
+        ],
+        "adr": [
+          "0030"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-08",
+        "phase:1",
+        "area:web",
+        "compliance"
+      ],
       "priority": "P2",
-      "depends_on": ["PRD-08/COMPLIANCE-DASH"]
+      "depends_on": [
+        "PRD-08/COMPLIANCE-DASH"
+      ],
+      "detail": [
+        "A one-click inspection-readiness pack assembling the evidence an inspector asks for (consent coverage, S4 register, registration/insurance status, IPC/waste logs, registers) and the cross-case Governance hub: policies sign-off, DSAR (APP 12/13) and a breach drill. Pack generation is audited (REQ-RPT-7, ADR-0030).",
+        "Makes the clinic always inspection-ready."
+      ],
+      "ui_spec": [
+        "Prototype: Governance -> Audit pack (gov-audit.png) — buildAuditPack assembles the evidence bundle; the hub links policies sign-off, DSAR and breach drill."
+      ],
+      "data_model": [
+        {
+          "entity": "InspectionPack",
+          "fields": "id, tenant_id, generated_at, contents[](register refs + logs + status), actor_id",
+          "notes": "Audited; one-click bundle."
+        }
+      ]
     },
     {
       "key": "REPORT-BUILDER",
@@ -146,9 +378,29 @@
         "Placeholder — Phase 2+; v1 ships fixed dashboards + exports.",
         "Captured so the read-model layer stays export-friendly."
       ],
-      "refs": {"req": ["REQ-RPT-1"]},
-      "labels": ["type:story", "PRD-08", "phase:2plus", "area:web"],
-      "priority": "P2"
+      "refs": {
+        "req": [
+          "REQ-RPT-1"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-08",
+        "phase:2plus",
+        "area:web"
+      ],
+      "priority": "P2",
+      "detail": [
+        "Placeholder (Phase 2+): a custom report builder, external BI warehouse and cross-clinic benchmarking. v1 ships fixed dashboards + exports; the read-model layer stays export-friendly so this can follow.",
+        "Captured to keep the architecture builder-ready."
+      ],
+      "data_model": [
+        {
+          "entity": "(future) CustomReport",
+          "fields": "user-defined query over read-models",
+          "notes": "Phase 2+."
+        }
+      ]
     },
     {
       "key": "SCORECARD",
@@ -163,10 +415,36 @@
         "Drills into the underlying clients/appointments.",
         "Reads from the reporting read-models (PRD-08/READ-MODELS)."
       ],
-      "refs": {"req": ["REQ-RPT-1", "REQ-RPT-2"]},
-      "labels": ["type:story", "PRD-08", "phase:1", "area:web"],
+      "refs": {
+        "req": [
+          "REQ-RPT-1",
+          "REQ-RPT-2"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-08",
+        "phase:1",
+        "area:web"
+      ],
       "priority": "P2",
-      "depends_on": ["PRD-08/BUSINESS-DASH"]
+      "depends_on": [
+        "PRD-08/BUSINESS-DASH"
+      ],
+      "detail": [
+        "A per-practitioner scorecard: revenue, retention/rebooking, utilisation and outcome/revision signals — date-filterable, drilling into the underlying clients/appointments. Financial figures owner-gated.",
+        "Lets the owner coach the team and see who drives retention."
+      ],
+      "ui_spec": [
+        "Prototype: Reports -> Scorecard (reports.png, goRep('scorecard')) — per-practitioner metrics with drill-down."
+      ],
+      "data_model": [
+        {
+          "entity": "(read) PractitionerScorecard",
+          "fields": "practitioner_id, revenue, retention, rebooking, utilisation, outcomes by date",
+          "notes": "From read-models; owner-gated."
+        }
+      ]
     },
     {
       "key": "CAPACITY",
@@ -181,10 +459,36 @@
         "Reads from the reporting read-models.",
         "Matches the prototype's capacity metrics."
       ],
-      "refs": {"req": ["REQ-RPT-1", "REQ-RPT-2"]},
-      "labels": ["type:story", "PRD-08", "phase:1", "area:web"],
+      "refs": {
+        "req": [
+          "REQ-RPT-1",
+          "REQ-RPT-2"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-08",
+        "phase:1",
+        "area:web"
+      ],
       "priority": "P2",
-      "depends_on": ["PRD-08/READ-MODELS"]
+      "depends_on": [
+        "PRD-08/READ-MODELS"
+      ],
+      "detail": [
+        "Capacity & utilisation reporting by practitioner, room/chair and device over a date range, with a trend view; quiet windows highlighted to feed waitlist/recall fill. Matches the prototype's capacity metrics.",
+        "Helps fill quiet windows and right-size rosters."
+      ],
+      "ui_spec": [
+        "Prototype: Reports -> Capacity (reports.png, goRep('capacity'), overview/trends) — utilisation by resource with quiet-window highlights."
+      ],
+      "data_model": [
+        {
+          "entity": "(read) CapacityMetrics",
+          "fields": "utilisation by practitioner/room/device, quiet_windows, by date",
+          "notes": "Feeds waitlist/recall fill."
+        }
+      ]
     },
     {
       "key": "TRUE-COST",
@@ -199,10 +503,39 @@
         "Feeds pricing & what-if (PRD-06/PRICING-WHATIF); figures are owner-gated.",
         "Detailed accounting still defers to Xero (attribution, not a ledger)."
       ],
-      "refs": {"req": ["REQ-RPT-6"], "adr": ["0027"]},
-      "labels": ["type:story", "PRD-08", "phase:1", "area:web"],
+      "refs": {
+        "req": [
+          "REQ-RPT-6"
+        ],
+        "adr": [
+          "0027"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-08",
+        "phase:1",
+        "area:web"
+      ],
       "priority": "P2",
-      "depends_on": ["PRD-08/READ-MODELS", "PRD-04/VIAL-RECON"]
+      "depends_on": [
+        "PRD-08/READ-MODELS",
+        "PRD-04/VIAL-RECON"
+      ],
+      "detail": [
+        "True-cost / margin (COGS) reporting: cost of goods (product units/vial cost, consumables) attributed per treatment/service, so margin = revenue - COGS is visible per service and practitioner. Feeds pricing & what-if (PRD-06); figures owner-gated. Detailed accounting still defers to Xero.",
+        "Shows real profitability, not just revenue."
+      ],
+      "ui_spec": [
+        "Prototype: Finance (finance.png) — true-cost/margin per treatment using vial/consumable cost; owner-only."
+      ],
+      "data_model": [
+        {
+          "entity": "(read) MarginByService",
+          "fields": "service_id, revenue, cogs(vial+consumables), margin by date",
+          "notes": "Uses VIAL-RECON (PRD-04); attribution not a ledger (ADR-0027)."
+        }
+      ]
     },
     {
       "key": "POLICIES",
@@ -217,10 +550,48 @@
         "Sign-off status is included in the inspection-readiness pack.",
         "Changes to a policy require re-acknowledgement."
       ],
-      "refs": {"req": ["REQ-RPT-7"], "compliance": ["C10", "C20"], "adr": ["0030"]},
-      "labels": ["type:story", "PRD-08", "phase:1", "area:web", "compliance"],
+      "refs": {
+        "req": [
+          "REQ-RPT-7"
+        ],
+        "compliance": [
+          "C10",
+          "C20"
+        ],
+        "adr": [
+          "0030"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-08",
+        "phase:1",
+        "area:web",
+        "compliance"
+      ],
       "priority": "P1",
-      "depends_on": ["PRD-08/INSPECTION-PACK"]
+      "depends_on": [
+        "PRD-08/INSPECTION-PACK"
+      ],
+      "detail": [
+        "Policies & procedures sign-off: versioned policies published to relevant roles, with staff sign-off recorded per version + date; outstanding sign-offs surface and a policy change requires re-acknowledgement. Sign-off status is included in the inspection pack.",
+        "Evidences that the team has read current procedures (part of the Governance hub)."
+      ],
+      "ui_spec": [
+        "Prototype: Governance -> Policies (gov-policies.png) — policy list with versions + per-staff sign-off status (signPolicy); outstanding highlighted."
+      ],
+      "data_model": [
+        {
+          "entity": "Policy",
+          "fields": "id, tenant_id, name, version, body, roles[]",
+          "notes": "Re-ack required on change."
+        },
+        {
+          "entity": "PolicySignoff",
+          "fields": "id, policy_version, staff_id, signed_at",
+          "notes": "Feeds inspection pack."
+        }
+      ]
     }
   ]
 }

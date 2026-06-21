@@ -9,6 +9,11 @@
 As a admin, I want retention timers and a destruction register that surfaces records due for destruction and logs their destruction, so that we keep records exactly as long as the law requires, no more, no less.
 Records must be retained per legal periods (adults ≥7y from last contact; minors to age 25; indefinite on complaint/litigation) and destroyed with a register + certificate (C18).
 
+## How it works
+
+A retention engine keeps records exactly as long as the law requires: adults >=7y from last contact, minors to age 25, indefinite where a complaint/litigation flag is set. Records past their period surface for destruction; destroying one writes a register entry (patient, period, date) + certificate reference.
+A transfer log records records handed to another provider.
+
 ## Requirements
 
 - Retention timers and a destruction register that surfaces records due for destruction and logs their destruction.
@@ -20,6 +25,17 @@ Records must be retained per legal periods (adults ≥7y from last contact; mino
 - [ ] Records past retention surface for destruction with their retention basis.
 - [ ] Destroying a record writes a destruction-register entry (patient, period, date) + certificate reference.
 - [ ] A transfer log records records handed to another provider.
+
+## UI designs / screenshots
+
+- Surfaces in Governance: a 'records due for destruction' list (with retention basis) and the destruction register + certificates.
+
+## Suggested data model
+
+- **RetentionPolicy** — id, tenant_id, record_type, basis(adult7y|minor25|indefinite_on_flag), period
+- **DestructionRecord** — id, tenant_id, record_ref, patient, period, destroyed_at, certificate_ref
+  - _Immutable + audited._
+- **TransferLog** — id, record_ref, to_provider, at
 
 ## Technical notes (high level)
 

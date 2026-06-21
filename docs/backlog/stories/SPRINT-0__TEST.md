@@ -9,6 +9,10 @@
 As a developer, I want test harnesses for API (unit + integration), web and apps, plus an e2e smoke suite and coverage gates in CI, so that compliance invariants are protected by tests and regressions are caught automatically.
 A clinical platform needs a serious automated-test culture: unit, integration (incl. RLS/auth/audit invariants) and end-to-end, with coverage gates.
 
+## How it works
+
+Test harnesses for API (unit + integration against a real Postgres with RLS), web and apps, plus an e2e smoke (sign-in + sample flow) and coverage gates in CI — with a documented convention for 'compliance invariant' tests (a gate MUST block). Protects the moat's invariants and catches regressions automatically.
+
 ## Requirements
 
 - Test harnesses for API (unit + integration), web and apps, plus an e2e smoke suite and coverage gates in CI.

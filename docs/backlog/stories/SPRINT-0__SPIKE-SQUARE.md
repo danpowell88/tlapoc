@@ -7,6 +7,10 @@
 As a engineer, I want a spike confirming Square AU can tokenise a card and run recurring charges with failure/dunning handling, so that the membership autopay design is viable (or an alternative is chosen early).
 Membership autopay depends on Square AU supporting tokenised card-on-file recurring charges with dunning — flagged 🔬 in the docs. De-risk before committing PRD-06 memberships.
 
+## How it works
+
+Spike confirming Square AU can tokenise a card and run recurring charges with failure/dunning handling in sandbox, PCI-safe (no PAN, tokens only, ADR-0007). Membership autopay (PRD-06) depends on this; flagged 🔬 — produces a go/no-go.
+
 ## Requirements
 
 - A spike confirming Square AU can tokenise a card and run recurring charges with failure/dunning handling.

@@ -9,6 +9,11 @@
 As a client, I want an account area where I can see my data, know it stays in Australia, and request access or correction, so that I'm in control of my information.
 The Account area exposes profile, balances, card-on-file and a 'Your data & privacy' surface (residency note, access copy, request correction) (C21).
 
+## How it works
+
+The Account area exposes profile, balances, card-on-file and a 'Your data & privacy' surface: the residency note ('your data stays in Australia'), request a copy, request correction, and request account deletion — tracked to resolution and audited (APP 12/13, PRD-01).
+Puts the client in control of their information.
+
 ## Requirements
 
 - An account area where I can see my data, know it stays in Australia, and request access or correction.
@@ -23,7 +28,14 @@ The Account area exposes profile, balances, card-on-file and a 'Your data & priv
 
 ## UI designs / screenshots
 
-client-app.html, treatment-room.html, checkin.html, backroom.html.
+_Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.html._
+
+- Prototype: client app Account (client-app.png) — 'Edit profile', 'Update card on file', 'Request account deletion', privacy/access-correction; residency trust note.
+
+## Suggested data model
+
+- **(reuses)** — PrivacyRequest (PRD-01) — access/correction/deletion with DSAR clock
+  - _Self-service entry point; staff resolve via Governance._
 
 ## Technical notes (high level)
 

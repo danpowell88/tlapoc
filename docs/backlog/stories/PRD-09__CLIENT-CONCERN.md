@@ -9,6 +9,11 @@
 As a client, I want to report a concern after my treatment from the app, so that the clinic responds quickly if something's wrong.
 The prototype's client app lets a client report a post-treatment concern, which bridges into staff follow-ups (and can escalate to an adverse event/complaint). A safety-critical client→clinic channel.
 
+## How it works
+
+A safety-critical client->clinic channel: the client reports a post-treatment concern (with optional photo, consent-respecting) from the app, raising a follow-up job for staff with the client/treatment linked. Staff can call back, resolve, or escalate to an adverse event (PRD-05) / complaint (PRD-11). The client sees acknowledgement; the exchange is recorded and audited.
+Bridges the client app to staff follow-ups (the concern bridge, localStorage in the proto).
+
 ## Requirements
 
 - To report a concern after my treatment from the app.
@@ -23,7 +28,14 @@ The prototype's client app lets a client report a post-treatment concern, which 
 
 ## UI designs / screenshots
 
-client-app.html — Report a concern; prototype Follow-ups.
+_Prototype screen: client-app.html — Report a concern; prototype Follow-ups._
+
+- Prototype: client app 'Report a concern' (client-app.png) -> appears in staff Follow-ups (followups.png) as a job (openConcern/concernCall).
+
+## Suggested data model
+
+- **Concern** — id, tenant_id, client_id, treatment_ref, body, photo_ref?, status, raised_at
+  - _Raises a Job (PRD-07); escalate -> AdverseEvent/Complaint._
 
 ## Technical notes (high level)
 

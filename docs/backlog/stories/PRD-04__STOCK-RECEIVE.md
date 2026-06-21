@@ -9,6 +9,11 @@
 As a prescriber/owner, I want to receive S4 stock and record its ARTG status, brand, sponsor and lawful supply source, so that we only hold lawfully-supplied, approved medicine.
 S4 stock is received from a TGA-approved wholesaler with ARTG status, brand, sponsor and lawful supply source recorded; non-ARTG/unverified source is warned/blocked (C11). S4 POs require a prescriber signer.
 
+## How it works
+
+S4 stock is received from a TGA-approved wholesaler with ARTG status, brand, sponsor and lawful supply source recorded per lot. Receiving non-ARTG or unverified-source stock is warned/blocked per config (C11). S4 purchase orders require a prescriber signer.
+Ensures the clinic only holds lawfully-supplied, approved medicine, with provenance for every lot.
+
 ## Requirements
 
 - To receive S4 stock and record its ARTG status, brand, sponsor and lawful supply source.
@@ -20,6 +25,18 @@ S4 stock is received from a TGA-approved wholesaler with ARTG status, brand, spo
 - [ ] Receiving non-ARTG or unverified-source stock is warned/blocked per config.
 - [ ] S4 purchase orders require a prescriber signer + TGA-approved wholesaler.
 - [ ] ARTG validation supports manual entry (lookup against an ARTG dataset is an open option).
+
+## UI designs / screenshots
+
+- Prototype: Stock & medicines -> 'Receive stock' (stock.png) — a modal capturing lot, expiry, units received, supplier, ARTG; the lot then appears in the stock table with on-hand/expiry/temp/status.
+- ARTG validation supports manual entry (dataset lookup is an open option).
+
+## Suggested data model
+
+- **StockItem** — id, tenant_id, product_id, lot, expiry, received_units, on_hand, supplier, artg_verified(bool), supply_source, location_id, custodian_id, status
+  - _Provenance per lot (C11); on_hand decremented by administrations._
+- **PurchaseOrder** — id, tenant_id, supplier, lines[], prescriber_signer_id, status
+  - _S4 POs require a prescriber signer + approved wholesaler._
 
 ## Technical notes (high level)
 

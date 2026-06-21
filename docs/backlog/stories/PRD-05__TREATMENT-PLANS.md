@@ -9,6 +9,11 @@
 As a injector, I want to build multi-session treatment plans from protocol templates, so that ongoing care is structured and drives recall.
 Multi-session treatment plans + applyable protocol templates feed recall and structure ongoing care (REQ-CLIN-7).
 
+## How it works
+
+Multi-session treatment plans built from applyable protocol templates structure ongoing care and feed the recall worklist (PRD-07). Plan progress shows on the Client 360; a charting overview / 'in-room now' entry lists active plans.
+Lets the clinic plan courses (e.g. a skin program) and keep clients on cadence.
+
 ## Requirements
 
 - To build multi-session treatment plans from protocol templates.
@@ -22,7 +27,17 @@ Multi-session treatment plans + applyable protocol templates feed recall and str
 
 ## UI designs / screenshots
 
-prototype.html — Charting + Clinical (Skin analysis, Body contouring, Complication protocols, Photography & outcomes); treatment-room.html.
+_Prototype screen: prototype.html — Charting + Clinical (Skin analysis, Body contouring, Complication protocols, Photography & outcomes); treatment-room.html._
+
+- Prototype: Charting (charting.png) — apply a protocol to create a multi-session plan; plan progress on Client 360 (client-360.png).
+- Active plans listed on the charting overview / in-room entry.
+
+## Suggested data model
+
+- **TreatmentPlan** — id, tenant_id, client_id, protocol_id, sessions[]{service, interval, status}, created_at
+  - _Feeds recall; progress on Client 360._
+- **Protocol** — id, tenant_id, name, steps[]
+  - _Applyable template._
 
 ## Technical notes (high level)
 

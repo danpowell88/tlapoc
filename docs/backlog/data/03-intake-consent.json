@@ -6,7 +6,13 @@
     "phase": "1",
     "prd": "docs/prds/PRD-03-intake-consent-gating.md",
     "summary": "Turns AHPRA's patient-safety rules into enforced workflow: pre-visit intake (medical history, contraindications, BDD/psychological screen), versioned e-signed consent with mandated content, separate withdrawable image-use consent, and cooling-off + payment blocks for under-18s. Treatment is blocked until required intake/consent is complete and current.",
-    "labels": ["type:epic", "PRD-03", "phase:1", "area:backend", "compliance"]
+    "labels": [
+      "type:epic",
+      "PRD-03",
+      "phase:1",
+      "area:backend",
+      "compliance"
+    ]
   },
   "stories": [
     {
@@ -22,10 +28,44 @@
         "Responses auto-link to the client's chart.",
         "Incomplete required intake contributes to the treatment block."
       ],
-      "refs": {"req": ["REQ-CONS-2", "REQ-CONS-3"]},
-      "labels": ["type:story", "PRD-03", "phase:1", "area:client-app", "area:backend"],
+      "refs": {
+        "req": [
+          "REQ-CONS-2",
+          "REQ-CONS-3"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-03",
+        "phase:1",
+        "area:client-app",
+        "area:backend"
+      ],
       "priority": "P0",
-      "depends_on": ["PRD-02/ONLINE-BOOK"]
+      "depends_on": [
+        "PRD-02/ONLINE-BOOK"
+      ],
+      "detail": [
+        "Pre-visit intake collects the medical history, medications, allergies and contraindications a practitioner must see before treating. It is sent on booking and completed by the client on their phone, then auto-linked to the chart.",
+        "Incomplete required intake contributes to the treatment block (GATING) — the clinic can't safely or lawfully proceed without it."
+      ],
+      "ui_spec": [
+        "Client app / public: a pre-visit intake wizard (medical history -> meds -> allergies/contraindications) — see client-app.png; also completable at the reception check-in tablet (checkin.png).",
+        "Staff: Forms & consent (forms-consent.png) shows intake status per client and lets the desk send/chase it.",
+        "Forms are configurable (admin-defined fields)."
+      ],
+      "data_model": [
+        {
+          "entity": "IntakeForm",
+          "fields": "id, tenant_id, name, version, fields(json schema)",
+          "notes": "Configurable; versioned."
+        },
+        {
+          "entity": "IntakeResponse",
+          "fields": "id, tenant_id, client_id, appointment_id, form_version, answers(json), submitted_at",
+          "notes": "Auto-linked to the chart; contributes to the gate."
+        }
+      ]
     },
     {
       "key": "BDD",
@@ -40,10 +80,43 @@
         "A positive flag is surfaced to the prescriber and recorded.",
         "Which instrument is used is configurable (open question to confirm)."
       ],
-      "refs": {"req": ["REQ-CONS-2"], "compliance": ["C3"], "prd_ac": ["AC2"]},
-      "labels": ["type:story", "PRD-03", "phase:1", "area:backend", "compliance"],
+      "refs": {
+        "req": [
+          "REQ-CONS-2"
+        ],
+        "compliance": [
+          "C3"
+        ],
+        "prd_ac": [
+          "AC2"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-03",
+        "phase:1",
+        "area:backend",
+        "compliance"
+      ],
       "priority": "P0",
-      "depends_on": ["PRD-03/INTAKE"]
+      "depends_on": [
+        "PRD-03/INTAKE"
+      ],
+      "detail": [
+        "Cosmetic guidelines require screening for Body Dysmorphic Disorder. A validated BDD/psychological instrument is embedded in intake; a completed screen authored/reviewed by an RN/NP must be present before treatment, and a positive flag is surfaced to the prescriber.",
+        "Which validated instrument to embed is an open question to confirm clinically."
+      ],
+      "ui_spec": [
+        "Client app: the BDD/wellbeing screen within the intake wizard (client-app.png).",
+        "Charting pre-treatment review (charting.png) shows a 'BDD screen: clear' / flagged chip to the prescriber."
+      ],
+      "data_model": [
+        {
+          "entity": "ScreeningResult",
+          "fields": "id, tenant_id, client_id, instrument, answers(json), score, flag(bool), reviewed_by, reviewed_at",
+          "notes": "Positive flag surfaced to prescriber; required before treatment (C3)."
+        }
+      ]
     },
     {
       "key": "CONSENT",
@@ -58,10 +131,50 @@
         "Changing a template creates a new version; previously signed consents stay bound to their version.",
         "Consent versions are retained per the retention policy (C18)."
       ],
-      "refs": {"req": ["REQ-CONS-1"], "compliance": ["C5", "C18"], "prd_ac": ["AC1", "AC6"]},
-      "labels": ["type:story", "PRD-03", "phase:1", "area:backend", "compliance"],
+      "refs": {
+        "req": [
+          "REQ-CONS-1"
+        ],
+        "compliance": [
+          "C5",
+          "C18"
+        ],
+        "prd_ac": [
+          "AC1",
+          "AC6"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-03",
+        "phase:1",
+        "area:backend",
+        "compliance"
+      ],
       "priority": "P0",
-      "depends_on": ["PRD-03/INTAKE"]
+      "depends_on": [
+        "PRD-03/INTAKE"
+      ],
+      "detail": [
+        "Consent must be versioned, e-signed, plain-language, and contain the mandated content: procedure nature, risks/benefits/alternatives, the practitioner's qualifications, costs, realistic-outcome language and complaint mechanisms (including the right to AHPRA despite any NDA).",
+        "Treatment is blocked until a current, version-matched consent is signed; changing a template creates a new version and previously signed consents stay bound to the version they were signed against. Versions are retained per the retention policy."
+      ],
+      "ui_spec": [
+        "Client app: plain-language consent reader + e-signature (client-app.png); staff see consent status in Forms & consent (forms-consent.png) and as a chip on the charting/patient header (charting.png).",
+        "Mandated-content sections are explicit; the block states exactly what is missing."
+      ],
+      "data_model": [
+        {
+          "entity": "ConsentTemplate",
+          "fields": "id, tenant_id, treatment_type, version, content(sections), mandated_fields[]",
+          "notes": "New version on change; old signatures stay bound."
+        },
+        {
+          "entity": "ConsentSignature",
+          "fields": "id, client_id, appointment_id, template_version, signed_at, signature_ref, verbal_confirmed",
+          "notes": "Retained (C18); drives the treatment gate."
+        }
+      ]
     },
     {
       "key": "IMAGE-CONSENT",
@@ -76,10 +189,42 @@
         "Downstream media features (PRD-05/09) check this consent.",
         "Granted/withdrawn state is visible on the patient header chip."
       ],
-      "refs": {"req": ["REQ-CONS-5"], "compliance": ["C14"], "prd_ac": ["AC4"]},
-      "labels": ["type:story", "PRD-03", "phase:1", "area:backend", "compliance"],
+      "refs": {
+        "req": [
+          "REQ-CONS-5"
+        ],
+        "compliance": [
+          "C14"
+        ],
+        "prd_ac": [
+          "AC4"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-03",
+        "phase:1",
+        "area:backend",
+        "compliance"
+      ],
       "priority": "P1",
-      "depends_on": ["PRD-03/CONSENT"]
+      "depends_on": [
+        "PRD-03/CONSENT"
+      ],
+      "detail": [
+        "Photo use needs its own scoped consent, separate from treatment consent and withdrawable at any time. Withdrawing it immediately stops downstream use (PRD-05/09 media checks) and is audited.",
+        "Granted/withdrawn state shows as a chip on the patient header."
+      ],
+      "ui_spec": [
+        "Client app: a separate image-use consent toggle with scope + a withdraw control (client-app.png); staff see the image-use chip on the Client 360 / charting header (charting.png)."
+      ],
+      "data_model": [
+        {
+          "entity": "ImageConsent",
+          "fields": "id, client_id, scope, granted_at, withdrawn_at, status",
+          "notes": "Withdrawn_at immediately blocks media use; audited (C14)."
+        }
+      ]
     },
     {
       "key": "COOLING-OFF",
@@ -94,10 +239,44 @@
         "Optional adult cooling-off is configurable (default per legal read).",
         "Payment block coordinates with PRD-06."
       ],
-      "refs": {"req": ["REQ-CONS-4"], "compliance": ["C6"], "prd_ac": ["AC3"]},
-      "labels": ["type:story", "PRD-03", "phase:1", "area:backend", "compliance"],
+      "refs": {
+        "req": [
+          "REQ-CONS-4"
+        ],
+        "compliance": [
+          "C6"
+        ],
+        "prd_ac": [
+          "AC3"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-03",
+        "phase:1",
+        "area:backend",
+        "compliance"
+      ],
       "priority": "P1",
-      "depends_on": ["PRD-01/CLIENT-CORE", "PRD-03/CONSENT"]
+      "depends_on": [
+        "PRD-01/CLIENT-CORE",
+        "PRD-03/CONSENT"
+      ],
+      "detail": [
+        "For under-18s the system enforces >=7 days between consent and procedure and blocks payment (except the consult) until it elapses, and records a second-consultation offer. An optional adult cooling-off is configurable (default per legal read).",
+        "The payment block coordinates with PRD-06; the booking deposit/hold is suppressed during cooling-off (F14 invariant)."
+      ],
+      "ui_spec": [
+        "Patient header shows an 'under-18 cooling-off' chip with the elapse date; checkout is blocked (except consult) until then.",
+        "A recorded second-consultation offer appears on the client timeline."
+      ],
+      "data_model": [
+        {
+          "entity": "CoolingOffTimer",
+          "fields": "id, client_id, appointment_id, consent_at, eligible_at, payment_blocked(bool), second_consult_offered_at",
+          "notes": "Under-18 mandatory 7d; adult optional/config."
+        }
+      ]
     },
     {
       "key": "GATING",
@@ -112,10 +291,44 @@
         "The gate is the shared mechanism consumed by PRD-04/05.",
         "Gate decisions are audited."
       ],
-      "refs": {"compliance": ["C5"], "adr": ["0008"], "prd_ac": ["AC1"]},
-      "labels": ["type:story", "PRD-03", "phase:1", "area:backend", "compliance"],
+      "refs": {
+        "compliance": [
+          "C5"
+        ],
+        "adr": [
+          "0008"
+        ],
+        "prd_ac": [
+          "AC1"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-03",
+        "phase:1",
+        "area:backend",
+        "compliance"
+      ],
       "priority": "P0",
-      "depends_on": ["PRD-03/CONSENT", "PRD-03/BDD"]
+      "depends_on": [
+        "PRD-03/CONSENT",
+        "PRD-03/BDD"
+      ],
+      "detail": [
+        "The shared treatment gate: charting/treatment cannot start unless required intake + a current consent (and BDD screen) exist — enforced server-side, surfaced via the calm blocked-action banner ('what is missing, how to fix, who can resolve'). Never a dead-end.",
+        "This is the mechanism PRD-04 (consult/Rx) and PRD-05 (charting) consume; gate decisions are audited."
+      ],
+      "ui_spec": [
+        "Prototype: the Charting pre-treatment review (charting.png) shows the gate chips and blocks opening the map until satisfied; the banner explains and links the fix.",
+        "Same gate reused on the provider app (treatment-room.png)."
+      ],
+      "data_model": [
+        {
+          "entity": "(derived) TreatmentGate",
+          "fields": "= required IntakeResponse present AND current ConsentSignature AND ScreeningResult present (AND consult/Rx for S4)",
+          "notes": "Server-enforced; evaluated before charting opens (ADR-0008)."
+        }
+      ]
     }
   ]
 }

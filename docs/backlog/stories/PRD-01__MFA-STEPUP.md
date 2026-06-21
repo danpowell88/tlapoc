@@ -9,6 +9,11 @@
 As a security-conscious clinic, I want MFA for staff and step-up re-authentication on the most sensitive actions, so that high-risk operations can't be performed on a walk-up or hijacked session.
 Staff MFA is required; sensitive clinical/medicines/financial actions (e.g. prescribing, S4 custody changes, destruction, data export) may require step-up re-auth. Client MFA policy is an open question.
 
+## How it works
+
+Staff sign-in enforces MFA (via Entra). The most sensitive actions — prescribing, S4 custody changes, destruction, data export — require a recent/step-up re-auth or are blocked with a clear prompt. Client MFA policy is configurable per clinic.
+Step-up events are audited.
+
 ## Requirements
 
 - MFA for staff and step-up re-authentication on the most sensitive actions.
@@ -20,6 +25,15 @@ Staff MFA is required; sensitive clinical/medicines/financial actions (e.g. pres
 - [ ] Configured sensitive actions require a recent/step-up auth or are blocked with a clear prompt.
 - [ ] Step-up events are audited.
 - [ ] Client MFA policy (optional vs required for sensitive actions) is configurable (open question resolved per clinic).
+
+## UI designs / screenshots
+
+- A step-up prompt appears when a configured sensitive action is attempted without recent strong auth; otherwise invisible.
+
+## Suggested data model
+
+- **AuthAssurance** — session_id, mfa_at, stepup_at, methods[]
+  - _Sensitive actions check recency of stepup_at._
 
 ## Technical notes (high level)
 

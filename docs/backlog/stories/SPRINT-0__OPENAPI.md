@@ -9,6 +9,10 @@
 As a developer, I want the API to publish an OpenAPI document and CI to generate typed clients for web and Flutter, so that front-ends always match the API contract.
 Generating typed clients for Angular and Flutter from the API's OpenAPI spec keeps the three surfaces in lock-step and removes hand-written DTO drift (ADR-0006).
 
+## How it works
+
+The API publishes a versioned OpenAPI document and CI generates typed clients for Angular + Flutter into the shared packages, failing on a breaking contract change without a version bump (ADR-0006). Keeps the three surfaces in lock-step and removes hand-written DTO drift.
+
 ## Requirements
 
 - The API to publish an OpenAPI document and CI to generate typed clients for web and Flutter.

@@ -9,6 +9,11 @@
 As a user, I want clear sign-in and sign-out screens and a session that behaves safely, so that I can authenticate and trust my session.
 The prototype demos a login/persona screen; the real product needs proper sign-in/out UI for staff (Entra) and clients (External ID), plus session lifecycle — built on the Sprint 0 auth wiring.
 
+## How it works
+
+The real sign-in sits on the Sprint-0 Entra wiring: staff sign in via Microsoft 365 SSO; clients via social / email+password / OTP with account recovery. Sign-out clears the session everywhere; idle-timeout + absolute limits apply and expiry returns to sign-in without losing in-progress work.
+Every sign-in, sign-out and failed attempt is an auth audit event.
+
 ## Requirements
 
 - Clear sign-in and sign-out screens and a session that behaves safely.
@@ -23,7 +28,15 @@ The prototype demos a login/persona screen; the real product needs proper sign-i
 
 ## UI designs / screenshots
 
-prototype.html — header 'Switch user' (sign-in/persona), Team → People & credentials / Compliance board, Settings.
+_Prototype screen: prototype.html — header 'Switch user' (sign-in/persona), Team → People & credentials / Compliance board, Settings._
+
+- Staff: an Entra SSO sign-in screen; clients: social/email/OTP sign-in + sign-up + recovery (the prototype persona picker stands in for this).
+- Session-expiry returns to sign-in, preserving unsaved drafts where possible.
+
+## Suggested data model
+
+- **Session** — id, user_id, tenant_id, started_at, last_seen, expires_at, device
+  - _Idle + absolute limits; revoked on sign-out._
 
 ## Technical notes (high level)
 

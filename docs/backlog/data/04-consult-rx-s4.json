@@ -6,7 +6,13 @@
     "phase": "1",
     "prd": "docs/prds/PRD-04-consult-prescribing-s4.md",
     "summary": "The defensible core. Every S4 administration is provably tied to a synchronous consult, an individual prescription, valid consent, and a batch/lot drawn from lawfully-supplied, ARTG-approved stock held under correct custody. QLD S4 + TGA rules implemented as enforced invariants, producing an audit-ready medicine register and a lot→clients recall lookup. Highest-risk module — build right after PRD-01, with a legal review of the requirements first.",
-    "labels": ["type:epic", "PRD-04", "phase:1", "area:backend", "compliance"]
+    "labels": [
+      "type:epic",
+      "PRD-04",
+      "phase:1",
+      "area:backend",
+      "compliance"
+    ]
   },
   "stories": [
     {
@@ -22,10 +28,48 @@
         "The remote-prescriber path links the externally-conducted consult to the resulting script.",
         "Consult creation is audited."
       ],
-      "refs": {"req": ["REQ-RX-1", "REQ-RX-4"], "compliance": ["C1"], "adr": ["0011"], "prd_ac": ["AC1"]},
-      "labels": ["type:story", "PRD-04", "phase:1", "area:backend", "compliance"],
+      "refs": {
+        "req": [
+          "REQ-RX-1",
+          "REQ-RX-4"
+        ],
+        "compliance": [
+          "C1"
+        ],
+        "adr": [
+          "0011"
+        ],
+        "prd_ac": [
+          "AC1"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-04",
+        "phase:1",
+        "area:backend",
+        "compliance"
+      ],
       "priority": "P0",
-      "depends_on": ["PRD-02/CONSULT-GATE", "PRD-03/GATING"]
+      "depends_on": [
+        "PRD-02/CONSULT-GATE",
+        "PRD-03/GATING"
+      ],
+      "detail": [
+        "A synchronous Consult is the legal precondition for any S4 prescription. It records modality (in-person or external-telehealth), prescriber, timestamp, an external reference (for telehealth) and notes, and must exist before a script can be written (C1).",
+        "The remote-prescriber path links an externally-conducted consult to the resulting script — the consult happens in the clinic's existing telehealth tool; this system records its details (ADR-0011)."
+      ],
+      "ui_spec": [
+        "Prototype: Charting pre-treatment review (charting.png) — the 'Consult & prescription' card with a 'Record consult' action and status tick; consult must be ticked before 'Write prescription' is usable.",
+        "Modality toggle (in-person / telehealth-external) with an external-reference field for telehealth."
+      ],
+      "data_model": [
+        {
+          "entity": "Consult",
+          "fields": "id, tenant_id, client_id, appointment_id, prescriber_id, modality(in_person|telehealth_ext), at, external_ref, notes",
+          "notes": "Required before any Prescription (C1); audited."
+        }
+      ]
     },
     {
       "key": "PRESCRIPTION",
@@ -40,10 +84,47 @@
         "Prescriber may be NP, remote prescriber, or designated RN prescriber (with recorded partnered prescriber).",
         "Off-label is flagged on the script and requires consent covering off-label use."
       ],
-      "refs": {"req": ["REQ-RX-2", "REQ-RX-5"], "compliance": ["C2", "C5"], "prd_ac": ["AC2", "AC8"]},
-      "labels": ["type:story", "PRD-04", "phase:1", "area:backend", "compliance"],
+      "refs": {
+        "req": [
+          "REQ-RX-2",
+          "REQ-RX-5"
+        ],
+        "compliance": [
+          "C2",
+          "C5"
+        ],
+        "prd_ac": [
+          "AC2",
+          "AC8"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-04",
+        "phase:1",
+        "area:backend",
+        "compliance"
+      ],
       "priority": "P0",
-      "depends_on": ["PRD-04/CONSULT", "PRD-01/CREDENTIALS"]
+      "depends_on": [
+        "PRD-04/CONSULT",
+        "PRD-01/CREDENTIALS"
+      ],
+      "detail": [
+        "An individual prescription is written per client per consult — never a batch/standing-order, never async (text/email/online-only) (C2). The prescriber may be an NP, a remote prescriber, or a designated RN prescriber (QLD endorsement, recorded with a partnered prescriber).",
+        "Off-label is flagged on the script and requires consent that covers off-label use. The script is the authority an RN administers against."
+      ],
+      "ui_spec": [
+        "Prototype: Charting -> 'Write prescription' (charting.png) — product, dose/units, off-label flag; tied to the just-recorded consult and this single client.",
+        "Attempting a batch/standing-order or applying one script to multiple clients is rejected with a reason."
+      ],
+      "data_model": [
+        {
+          "entity": "Prescription",
+          "fields": "id, tenant_id, client_id, consult_id, prescriber_id, product_id, dose_units, off_label(bool), status(active|consumed|expired), created_at",
+          "notes": "One per client per consult; no batch/async (C2). Designated RN prescriber records partnered_prescriber_id."
+        }
+      ]
     },
     {
       "key": "PRODUCT-CATALOGUE",
@@ -58,9 +139,41 @@
         "Products carry regClass/artg/compounded; prohibited compounded GLP-1 is blocked.",
         "Retail (non-S4) SKUs supported alongside medicines."
       ],
-      "refs": {"req": ["REQ-MED-11", "REQ-MED-12", "REQ-MED-13"], "adr": ["0014", "0021", "0025"]},
-      "labels": ["type:story", "PRD-04", "phase:1", "area:backend", "compliance"],
-      "priority": "P0"
+      "refs": {
+        "req": [
+          "REQ-MED-11",
+          "REQ-MED-12",
+          "REQ-MED-13"
+        ],
+        "adr": [
+          "0014",
+          "0021",
+          "0025"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-04",
+        "phase:1",
+        "area:backend",
+        "compliance"
+      ],
+      "priority": "P0",
+      "detail": [
+        "A typed, multi-unit catalogue (toxin/filler/skin/retail) where each product has its own unit (units vs syringes), par level and expiry tracking, plus regClass/ARTG/compounded metadata. The capability-gated product admin sets the S4 flag — the single classification that drives rewards eligibility (PRD-06) and public-page naming (PRD-07).",
+        "regClass/compounded enable blocking prohibited compounded GLP-1 and routing adverse events to the correct DAEN dataset (medicine vs device)."
+      ],
+      "ui_spec": [
+        "Prototype: Stock & medicines -> Products (stock.png, 'Products' button opens the catalogue) — typed products with unit, par, ARTG status, S4 flag toggle; capability-gated admin.",
+        "Retail (non-S4) SKUs sit alongside medicines."
+      ],
+      "data_model": [
+        {
+          "entity": "Product",
+          "fields": "id, tenant_id, name, type(toxin|filler|skin|retail), unit(units|syringes|each), schedule(S4|non-S4), reg_class, artg_no, sponsor, compounded(bool), par_level",
+          "notes": "schedule flag is the master classification (ADR-0014/0021)."
+        }
+      ]
     },
     {
       "key": "ADMIN-GATE",
@@ -75,10 +188,48 @@
         "A blocked attempt shows the reason and writes an audit event.",
         "The administration appears in the medicine register."
       ],
-      "refs": {"req": ["REQ-RX-3", "REQ-MED-4"], "compliance": ["C8"], "adr": ["0010"], "prd_ac": ["AC3"]},
-      "labels": ["type:story", "PRD-04", "phase:1", "area:backend", "compliance"],
+      "refs": {
+        "req": [
+          "REQ-RX-3",
+          "REQ-MED-4"
+        ],
+        "compliance": [
+          "C8"
+        ],
+        "adr": [
+          "0010"
+        ],
+        "prd_ac": [
+          "AC3"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-04",
+        "phase:1",
+        "area:backend",
+        "compliance"
+      ],
       "priority": "P0",
-      "depends_on": ["PRD-04/PRESCRIPTION", "PRD-04/STOCK-RECEIVE"]
+      "depends_on": [
+        "PRD-04/PRESCRIPTION",
+        "PRD-04/STOCK-RECEIVE"
+      ],
+      "detail": [
+        "An RN may only administer S4 against a valid, unconsumed prescription for that same client, with current consent and a selected in-date lot; the administration record is immutable once saved (C8). A blocked attempt shows the reason and writes an audit event.",
+        "This is the central invariant of the moat — every dose is provably lawful and traceable. It appears in the medicine register and links lot->client for recall."
+      ],
+      "ui_spec": [
+        "Prototype: Charting (charting.png) — administration is the act of finalising the injection map against the selected lot; the gate chips (consult/consent) and lot selection must be satisfied first.",
+        "Over-draw or missing prerequisites block finalise with an explanatory banner."
+      ],
+      "data_model": [
+        {
+          "entity": "Administration",
+          "fields": "id, tenant_id, client_id, prescription_id, product_id, lot_id, units, site, depth, administrator_id, at",
+          "notes": "Immutable (ADR-0010); requires valid unconsumed Rx (same client) + current consent + in-date lot; appears in register."
+        }
+      ]
     },
     {
       "key": "STOCK-RECEIVE",
@@ -93,10 +244,49 @@
         "S4 purchase orders require a prescriber signer + TGA-approved wholesaler.",
         "ARTG validation supports manual entry (lookup against an ARTG dataset is an open option)."
       ],
-      "refs": {"req": ["REQ-MED-6", "REQ-MED-2"], "compliance": ["C11"], "prd_ac": ["AC7"]},
-      "labels": ["type:story", "PRD-04", "phase:1", "area:backend", "compliance"],
+      "refs": {
+        "req": [
+          "REQ-MED-6",
+          "REQ-MED-2"
+        ],
+        "compliance": [
+          "C11"
+        ],
+        "prd_ac": [
+          "AC7"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-04",
+        "phase:1",
+        "area:backend",
+        "compliance"
+      ],
       "priority": "P0",
-      "depends_on": ["PRD-04/PRODUCT-CATALOGUE"]
+      "depends_on": [
+        "PRD-04/PRODUCT-CATALOGUE"
+      ],
+      "detail": [
+        "S4 stock is received from a TGA-approved wholesaler with ARTG status, brand, sponsor and lawful supply source recorded per lot. Receiving non-ARTG or unverified-source stock is warned/blocked per config (C11). S4 purchase orders require a prescriber signer.",
+        "Ensures the clinic only holds lawfully-supplied, approved medicine, with provenance for every lot."
+      ],
+      "ui_spec": [
+        "Prototype: Stock & medicines -> 'Receive stock' (stock.png) — a modal capturing lot, expiry, units received, supplier, ARTG; the lot then appears in the stock table with on-hand/expiry/temp/status.",
+        "ARTG validation supports manual entry (dataset lookup is an open option)."
+      ],
+      "data_model": [
+        {
+          "entity": "StockItem",
+          "fields": "id, tenant_id, product_id, lot, expiry, received_units, on_hand, supplier, artg_verified(bool), supply_source, location_id, custodian_id, status",
+          "notes": "Provenance per lot (C11); on_hand decremented by administrations."
+        },
+        {
+          "entity": "PurchaseOrder",
+          "fields": "id, tenant_id, supplier, lines[], prescriber_signer_id, status",
+          "notes": "S4 POs require a prescriber signer + approved wholesaler."
+        }
+      ]
     },
     {
       "key": "CUSTODY-STORAGE",
@@ -111,10 +301,50 @@
         "A custodian + exclusive-custody attestation + designated medicine-store contact are recorded.",
         "A remote prescriber consigning stock is flagged non-compliant."
       ],
-      "refs": {"req": ["REQ-MED-2", "REQ-MED-8"], "compliance": ["C7", "C15"], "prd_ac": ["AC5"]},
-      "labels": ["type:story", "PRD-04", "phase:1", "area:backend", "compliance"],
+      "refs": {
+        "req": [
+          "REQ-MED-2",
+          "REQ-MED-8"
+        ],
+        "compliance": [
+          "C7",
+          "C15"
+        ],
+        "prd_ac": [
+          "AC5"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-04",
+        "phase:1",
+        "area:backend",
+        "compliance"
+      ],
       "priority": "P0",
-      "depends_on": ["PRD-04/STOCK-RECEIVE"]
+      "depends_on": [
+        "PRD-04/STOCK-RECEIVE"
+      ],
+      "detail": [
+        "Only NP/prescriber roles may take custody; stock is bound to a secure, access-logged location. The Mode-A custodian must physically work at the clinic and hold exclusive custody — a remote prescriber consigning stock is flagged non-compliant (C7/C15).",
+        "A custodian + exclusive-custody attestation + designated medicine-store contact are recorded."
+      ],
+      "ui_spec": [
+        "Prototype: Stock & medicines header (stock.png) shows 'custody Dr Lee NP · locked fridge'; the custodian + secure-location binding is visible; access is logged.",
+        "Custody-change is capability-gated and audited."
+      ],
+      "data_model": [
+        {
+          "entity": "StockLocation",
+          "fields": "id, tenant_id, name(locked cabinet/fridge), custodian_id, exclusive_custody_attested(bool), store_contact",
+          "notes": "Custody limited to on-site prescriber (C7); access logged."
+        },
+        {
+          "entity": "AccessLog",
+          "fields": "id, location_id, actor_id, at, event(open|close|tamper)",
+          "notes": "Feeds the optional ESP32 cabinet sensor + audit."
+        }
+      ]
     },
     {
       "key": "COLD-CHAIN",
@@ -129,10 +359,49 @@
         "A breach pathway can quarantine a lot and raise a job (links PRD-11).",
         "Excursion history is retained and visible."
       ],
-      "refs": {"req": ["REQ-MED-7"], "compliance": ["C13"], "prd_ac": ["AC6"]},
-      "labels": ["type:story", "PRD-04", "phase:1", "area:backend", "area:integration", "compliance"],
+      "refs": {
+        "req": [
+          "REQ-MED-7"
+        ],
+        "compliance": [
+          "C13"
+        ],
+        "prd_ac": [
+          "AC6"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-04",
+        "phase:1",
+        "area:backend",
+        "area:integration",
+        "compliance"
+      ],
       "priority": "P1",
-      "depends_on": ["PRD-04/CUSTODY-STORAGE"]
+      "depends_on": [
+        "PRD-04/CUSTODY-STORAGE"
+      ],
+      "detail": [
+        "Toxin must stay 2-8C. Temperature can be logged manually and via the device API (ESP32 monitor); an excursion raises an alert and flags affected stock for quarantine, and the breach pathway can quarantine a lot and raise a job (links PRD-11).",
+        "Excursion history is retained and visible — evidence that cold-chain held for every lot used (C13)."
+      ],
+      "ui_spec": [
+        "Prototype: Front desk/Operations -> Temperature monitors (ops-monitors.png) — live/charted fridge temps per location, breach alerts; the stock table shows a per-lot temp (e.g. '4.2C').",
+        "An excursion visibly quarantines the lot and raises a follow-up job."
+      ],
+      "data_model": [
+        {
+          "entity": "TempLog",
+          "fields": "id, tenant_id, location_id, monitor_id, temp, at, source(manual|device)",
+          "notes": "2-8C range; out-of-range -> Excursion."
+        },
+        {
+          "entity": "Excursion",
+          "fields": "id, location_id, started_at, ended_at, min, max, affected_lots[], action(quarantine)",
+          "notes": "Raises alert + job; flags stock (C13)."
+        }
+      ]
     },
     {
       "key": "VIAL-RECON",
@@ -147,10 +416,40 @@
         "Reconciliation data feeds reporting (PRD-08).",
         "Partial-vial handling is supported."
       ],
-      "refs": {"req": ["REQ-MED-5"], "compliance": ["C8"]},
-      "labels": ["type:story", "PRD-04", "phase:1", "area:backend", "compliance"],
+      "refs": {
+        "req": [
+          "REQ-MED-5"
+        ],
+        "compliance": [
+          "C8"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-04",
+        "phase:1",
+        "area:backend",
+        "compliance"
+      ],
       "priority": "P1",
-      "depends_on": ["PRD-04/ADMIN-GATE"]
+      "depends_on": [
+        "PRD-04/ADMIN-GATE"
+      ],
+      "detail": [
+        "Vial/unit reconciliation tracks units drawn vs vial size plus wastage, so stock, billing and the medicine register always agree. Each administration decrements the selected lot; discrepancies are surfaced and feed reporting (PRD-08).",
+        "Partial-vial handling is supported (one vial may treat several patients)."
+      ],
+      "ui_spec": [
+        "Prototype: Stock & medicines (stock.png) — per-lot on-hand vs received vs wasted columns; usage history; reconciliation surfaced when draws don't match.",
+        "Charting finalise deducts charted units from the lot (see charting.png)."
+      ],
+      "data_model": [
+        {
+          "entity": "StockLedger",
+          "fields": "id, lot_id, movement(receive|administer|waste|adjust), units, ref(administration_id?), at, actor_id",
+          "notes": "Sum reconciles on_hand; partial-vial waste recorded; discrepancies flagged (C8)."
+        }
+      ]
     },
     {
       "key": "RECALL-LOOKUP",
@@ -165,10 +464,48 @@
         "Recall execution + acknowledgement tracking is available (full hub in PRD-08/11).",
         "The register is queryable by date, product, prescriber, administrator."
       ],
-      "refs": {"req": ["REQ-MED-4"], "compliance": ["C8"], "prd_ac": ["AC4"]},
-      "labels": ["type:story", "PRD-04", "phase:1", "area:backend", "compliance"],
+      "refs": {
+        "req": [
+          "REQ-MED-4"
+        ],
+        "compliance": [
+          "C8"
+        ],
+        "prd_ac": [
+          "AC4"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-04",
+        "phase:1",
+        "area:backend",
+        "compliance"
+      ],
       "priority": "P0",
-      "depends_on": ["PRD-04/ADMIN-GATE"]
+      "depends_on": [
+        "PRD-04/ADMIN-GATE"
+      ],
+      "detail": [
+        "Given a lot number, the system instantly lists every client/administration for that lot, and exports an audit-ready medicine register. Recall execution + acknowledgement tracking lives in the Governance hub.",
+        "This is the payoff of recording per-point lot in charting — a recall that would take days on paper takes minutes (C8)."
+      ],
+      "ui_spec": [
+        "Prototype: Governance -> Recalls (gov-recalls.png) — enter a lot -> list of affected clients/administrations; start a recall with acknowledgement tracking.",
+        "The medicine register is queryable by date, product, prescriber, administrator and exportable."
+      ],
+      "data_model": [
+        {
+          "entity": "(query) LotRecall",
+          "fields": "lot -> [Administration{client, at, units, administrator}]",
+          "notes": "Built on Administration + StockItem; powers recall + register export."
+        },
+        {
+          "entity": "Recall",
+          "fields": "id, tenant_id, lot, reason, started_at, acknowledgements[]",
+          "notes": "Tracks per-client acknowledgement."
+        }
+      ]
     },
     {
       "key": "WASTAGE-DESTRUCTION",
@@ -183,10 +520,42 @@
         "Licensed/RUM disposal pathway is recorded.",
         "Records are immutable and audited."
       ],
-      "refs": {"req": ["REQ-MED-9"], "compliance": ["C16"], "prd_ac": ["AC9"]},
-      "labels": ["type:story", "PRD-04", "phase:1", "area:backend", "compliance"],
+      "refs": {
+        "req": [
+          "REQ-MED-9"
+        ],
+        "compliance": [
+          "C16"
+        ],
+        "prd_ac": [
+          "AC9"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-04",
+        "phase:1",
+        "area:backend",
+        "compliance"
+      ],
       "priority": "P1",
-      "depends_on": ["PRD-04/CUSTODY-STORAGE"]
+      "depends_on": [
+        "PRD-04/CUSTODY-STORAGE"
+      ],
+      "detail": [
+        "Wastage and destruction (including partial vials) are recorded via a licensed/RUM pathway with certificate references (C16). Records capture quantity, reason, pathway and certificate, are immutable and audited.",
+        "Closes the medicines loop alongside reconciliation and stocktake."
+      ],
+      "ui_spec": [
+        "Prototype: Stock & medicines -> record wastage/destruction (stock.png) — quantity, reason, pathway, certificate ref; also surfaced in the back-office waste log (backroom.png)."
+      ],
+      "data_model": [
+        {
+          "entity": "StockDestruction",
+          "fields": "id, lot_id, units, reason, pathway(RUM|licensed), certificate_ref, at, actor_id",
+          "notes": "Partial-vial supported; immutable + audited (C16)."
+        }
+      ]
     },
     {
       "key": "STOCKTAKE",
@@ -201,10 +570,47 @@
         "Expiry alerts surface near-expiry lots.",
         "Stocktake results feed the compliance dashboard (PRD-08)."
       ],
-      "refs": {"req": ["REQ-MED-10"], "compliance": ["C17"], "prd_ac": ["AC9"]},
-      "labels": ["type:story", "PRD-04", "phase:1", "area:backend", "compliance"],
+      "refs": {
+        "req": [
+          "REQ-MED-10"
+        ],
+        "compliance": [
+          "C17"
+        ],
+        "prd_ac": [
+          "AC9"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-04",
+        "phase:1",
+        "area:backend",
+        "compliance"
+      ],
       "priority": "P1",
-      "depends_on": ["PRD-04/CUSTODY-STORAGE"]
+      "depends_on": [
+        "PRD-04/CUSTODY-STORAGE"
+      ],
+      "detail": [
+        "Stocktakes compare expected vs counted stock per lot; discrepancies are recorded and a discrepancy can trigger a loss/theft report. Near-expiry lots surface via expiry alerts. Results feed the compliance dashboard (C17).",
+        "Keeps stock integrity provable and losses reported."
+      ],
+      "ui_spec": [
+        "Prototype: Stock & medicines (stock.png) — a stocktake action comparing counted vs expected per lot; discrepancies highlighted with a loss/theft report path; expiry alerts on near-expiry lots."
+      ],
+      "data_model": [
+        {
+          "entity": "Stocktake",
+          "fields": "id, tenant_id, at, actor_id, lines[]{lot_id, expected, counted, variance}",
+          "notes": "Variance -> discrepancy."
+        },
+        {
+          "entity": "LossReport",
+          "fields": "id, stocktake_id, lot_id, units, kind(loss|theft), reported_at",
+          "notes": "Triggerable from a discrepancy (C17)."
+        }
+      ]
     },
     {
       "key": "MODE-B",
@@ -217,9 +623,36 @@
         "Placeholder — v1 is Mode A only; tenant mode switch already anticipates Mode B.",
         "Captured so the medicines model stays mode-aware."
       ],
-      "refs": {"req": ["REQ-MED-1"], "compliance": ["C7"]},
-      "labels": ["type:story", "PRD-04", "phase:2plus", "area:backend"],
-      "priority": "P2"
+      "refs": {
+        "req": [
+          "REQ-MED-1"
+        ],
+        "compliance": [
+          "C7"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-04",
+        "phase:2plus",
+        "area:backend"
+      ],
+      "priority": "P2",
+      "detail": [
+        "Placeholder (Phase 2): a pharmacy-dispensing model where a pharmacy partner holds/dispenses stock, for clinics without on-site custody. v1 is Mode A only; the tenant mode switch already anticipates Mode B (DispensedItem entity reserved)."
+      ],
+      "data_model": [
+        {
+          "entity": "MedicineMode",
+          "fields": "tenant_id, mode(A_onsite|B_pharmacy)",
+          "notes": "v1 = A only."
+        },
+        {
+          "entity": "DispensedItem",
+          "fields": "(reserved for Mode B)",
+          "notes": "Placeholder."
+        }
+      ]
     }
   ]
 }

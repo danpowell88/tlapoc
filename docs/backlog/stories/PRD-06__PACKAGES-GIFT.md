@@ -9,6 +9,11 @@
 As a front desk, I want to sell and redeem packages and gift cards and track client balances, so that clients can pre-pay and carry credit.
 Sell/redeem packages (visits remaining) and gift cards, track client balances/credit and AR ageing (REQ-PAY-3/5).
 
+## How it works
+
+Sell/redeem packages/series ('visits remaining') and gift cards, and track client balances/credit + AR ageing. Redemptions appear in the closeout and post to Xero.
+Lets clients pre-pay courses and carry credit.
+
 ## Requirements
 
 - To sell and redeem packages and gift cards and track client balances.
@@ -22,7 +27,19 @@ Sell/redeem packages (visits remaining) and gift cards, track client balances/cr
 
 ## UI designs / screenshots
 
-prototype.html — Checkout, Memberships; client-app.html Rewards/Account.
+_Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rewards/Account._
+
+- Prototype: Checkout (checkout.png) for sale/redeem; Memberships -> Gift cards (memb-gifts.png) for issuing/tracking gift-card balances; package 'visits remaining' on the Client 360.
+- Balance/credit + AR ageing visible to owner/manager.
+
+## Suggested data model
+
+- **Package** — id, tenant_id, client_id, service_id, total_visits, remaining, purchased_at
+  - _Redeemed over time._
+- **GiftCard** — id, tenant_id, code, initial, balance, status
+  - _Sell/redeem/track._
+- **AccountBalance** — client_id, credit, ar_ageing
+  - _Client credit + receivables ageing._
 
 ## Technical notes (high level)
 

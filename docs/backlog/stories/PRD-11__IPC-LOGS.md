@@ -7,6 +7,11 @@
 As a staff member, I want to keep infection-control logs for sterilisation/single-use and sharps/clinical-waste disposal, so that we evidence safe practice.
 Sterilisation/single-use, sharps & clinical-waste disposal logs, all audited (REQ-FAC-2, C20). Fuller v2 adds manifests + sterilisation register.
 
+## How it works
+
+Infection-control logs: sterilisation/single-use and sharps/clinical-waste disposal, all audited and retrievable for inspection. A twice-daily cold-chain log with a breach pathway is supported (links PRD-04 cold-chain); waste manifests + a sterilisation register are captured for v2 expansion.
+Day-to-day evidence of safe practice (C20).
+
 ## Requirements
 
 - To keep infection-control logs for sterilisation/single-use and sharps/clinical-waste disposal.
@@ -21,7 +26,16 @@ Sterilisation/single-use, sharps & clinical-waste disposal logs, all audited (RE
 
 ## UI designs / screenshots
 
-prototype.html — Front desk/Operations (Open/close & fridge log, Temperature monitors, Rooms & devices, Equipment, Call log); backroom.html.
+_Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge log, Temperature monitors, Rooms & devices, Equipment, Call log); backroom.html._
+
+- Prototype: Operations -> Open/close & fridge log (ops-openclose.png) + the back-office waste log (backroom.png) — sterilisation/single-use, sharps & clinical-waste entries.
+
+## Suggested data model
+
+- **InfectionControlLog** — id, tenant_id, location_id, kind(sterilisation|single_use|sharps|clinical_waste), detail, at, actor_id
+  - _Audited; feeds inspection pack._
+- **WasteManifest** — id, tenant_id, stream(clinical|sharps), carrier, certificate_ref, at
+  - _NSW CA+TC / QLD WTC (v2 expansion)._
 
 ## Technical notes (high level)
 

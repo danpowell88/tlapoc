@@ -7,6 +7,10 @@
 As a front desk, I want native POS hardware and a kiosk check-in mode, so that the desk and waiting room are smoother.
 Native POS hardware integration and a tablet kiosk mode (PRD-06/09 non-goals).
 
+## How it works
+
+Placeholder (Phase 2+): native POS hardware integration and a tablet kiosk check-in mode. v1 uses Square card-present + the in-app/web flows; checkout and check-in are designed to stay hardware-friendly.
+
 ## Requirements
 
 - Native POS hardware and a kiosk check-in mode.
@@ -20,6 +24,11 @@ Native POS hardware integration and a tablet kiosk mode (PRD-06/09 non-goals).
 ## UI designs / screenshots
 
 Future — not built in the prototype (some shown as concept cards in Settings → Integrations).
+
+## Suggested data model
+
+- **(future) PosDevice / KioskSession** — tenant_id, device, mode
+  - _Phase 2+._
 
 ## Technical notes (high level)
 

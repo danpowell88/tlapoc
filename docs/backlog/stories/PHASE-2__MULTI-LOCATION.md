@@ -7,6 +7,10 @@
 As a owner of multiple sites, I want to switch between locations in one place, so that I run several clinics from one login.
 Switching between locations/clinics in one tenant. The data model is location-aware; the switching UX is deferred.
 
+## How it works
+
+Placeholder (Phase 2+): switching between locations/clinics in one tenant. The data model is already location-aware (Location on every relevant entity), so this is the switching UX + cross-location reporting — built on PLATFORM/CLINIC-SWITCH.
+
 ## Requirements
 
 - To switch between locations in one place.
@@ -20,6 +24,11 @@ Switching between locations/clinics in one tenant. The data model is location-aw
 ## UI designs / screenshots
 
 Future — not built in the prototype (some shown as concept cards in Settings → Integrations).
+
+## Suggested data model
+
+- **(reuses) Location** — already on tenant-scoped entities
+  - _Switching UX + cross-location rollups deferred._
 
 ## Technical notes (high level)
 

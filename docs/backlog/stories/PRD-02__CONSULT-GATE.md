@@ -9,6 +9,11 @@
 As a system, I want to block a checked-in injectable appointment from opening charting unless a consult is linked, so that no S4 treatment can proceed without the required consult.
 An injectable appointment cannot move to charting without a linked Consult — the booking-side half of the moat (REQ-BOOK-5).
 
+## How it works
+
+The booking-side half of the moat: an injectable appointment cannot progress to charting until a synchronous Consult is linked (REQ-BOOK-5). Server-enforced, surfaced via the blocked-action banner.
+This guarantees no S4 treatment can begin without the consult, complementing the consent gate (PRD-03) and the Rx gate (PRD-04).
+
 ## Requirements
 
 - To block a checked-in injectable appointment from opening charting unless a consult is linked.
@@ -20,6 +25,16 @@ An injectable appointment cannot move to charting without a linked Consult — t
 - [ ] The blocked-action banner explains what's missing and who can resolve it.
 - [ ] Once a consult is recorded the gate clears (handoff to PRD-04).
 - [ ] The block is server-enforced, not just UI.
+
+## UI designs / screenshots
+
+- Prototype: the Charting screen (charting.png) shows the gate chips (Consult / Consent / screening) and the Consult & prescription card; a checked-in injectable with no consult cannot open charting and shows why.
+- On the schedule/Today board, an injectable visit shows its gate status.
+
+## Suggested data model
+
+- **Appointment.consult_id** — FK Consult (PRD-04), nullable until consult recorded
+  - _Charting open is blocked while null for S4 services._
 
 ## Technical notes (high level)
 

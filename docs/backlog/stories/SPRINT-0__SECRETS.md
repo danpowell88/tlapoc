@@ -9,6 +9,10 @@
 As a platform engineer, I want a managed secret store (Key Vault) wired into each environment and a typed config story for the API and apps, so that no secret is ever committed and rotation is possible.
 Connection strings, provider keys (Square, SMS, Xero) and signing secrets must live in a managed vault, never in code or config files.
 
+## How it works
+
+A managed secret store (Key Vault) wired into each environment with typed, environment-specific config that fails fast on missing required values; a secret-scanning check fails the build on a committed secret. No secret ever in source control; rotation needs no code change.
+
 ## Requirements
 
 - A managed secret store (Key Vault) wired into each environment and a typed config story for the API and apps.

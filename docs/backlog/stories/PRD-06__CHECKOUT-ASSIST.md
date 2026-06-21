@@ -9,6 +9,11 @@
 As a front desk, I want checkout to suggest relevant non-S4 upsells and prompt rebooking at the right interval, so that I help clients and keep them on cadence.
 Subtle membership/restock upsell + client rapport panel + post-checkout rebooking on the treatment interval (REQ-PAY-6, ADR-0022).
 
+## How it works
+
+At checkout, a subtle membership/restock upsell + a client-rapport panel, and a post-checkout rebooking prompt on the treatment interval. Upsell suggestions never include S4 discounting.
+Helps the desk add value and keep clients on cadence; integrates with the calendar (PRD-02) and recall (PRD-07).
+
 ## Requirements
 
 - Checkout to suggest relevant non-S4 upsells and prompt rebooking at the right interval.
@@ -22,7 +27,14 @@ Subtle membership/restock upsell + client rapport panel + post-checkout rebookin
 
 ## UI designs / screenshots
 
-prototype.html — Checkout, Memberships; client-app.html Rewards/Account.
+_Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rewards/Account._
+
+- Prototype: Checkout (checkout.png) — a subtle upsell card (e.g. 'Slow-moving retail: bundle SPF with facials'), a client-rapport panel, and a rebook prompt at the interval after payment.
+
+## Suggested data model
+
+- **(derived) CheckoutSuggestion** — from RewardRule + stock aging + treatment interval
+  - _Non-S4 upsell only; rebook -> Appointment (PRD-02)._
 
 ## Technical notes (high level)
 

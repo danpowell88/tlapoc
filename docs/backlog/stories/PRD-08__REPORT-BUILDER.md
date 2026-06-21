@@ -7,6 +7,11 @@
 As a owner, I want to build custom reports and benchmark against other clinics, so that I can answer bespoke questions.
 A custom report builder, external BI warehouse and cross-clinic benchmarking are Phase 2+. Placeholder.
 
+## How it works
+
+Placeholder (Phase 2+): a custom report builder, external BI warehouse and cross-clinic benchmarking. v1 ships fixed dashboards + exports; the read-model layer stays export-friendly so this can follow.
+Captured to keep the architecture builder-ready.
+
 ## Requirements
 
 - To build custom reports and benchmark against other clinics.
@@ -20,6 +25,11 @@ A custom report builder, external BI warehouse and cross-clinic benchmarking are
 ## UI designs / screenshots
 
 prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack).
+
+## Suggested data model
+
+- **(future) CustomReport** — user-defined query over read-models
+  - _Phase 2+._
 
 ## Technical notes (high level)
 

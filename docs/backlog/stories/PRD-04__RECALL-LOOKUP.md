@@ -9,6 +9,11 @@
 As a prescriber/owner, I want to enter a lot number and instantly see every client who received it, plus export the medicine register, so that we can run a recall in minutes and evidence the register.
 Given a lot, the system must instantly list every client/administration for that lot, and export an audit-ready medicine register (C8).
 
+## How it works
+
+Given a lot number, the system instantly lists every client/administration for that lot, and exports an audit-ready medicine register. Recall execution + acknowledgement tracking lives in the Governance hub.
+This is the payoff of recording per-point lot in charting — a recall that would take days on paper takes minutes (C8).
+
 ## Requirements
 
 - To enter a lot number and instantly see every client who received it, plus export the medicine register.
@@ -20,6 +25,18 @@ Given a lot, the system must instantly list every client/administration for that
 - [ ] The S4 register exports a complete, immutable record of administrations.
 - [ ] Recall execution + acknowledgement tracking is available (full hub in PRD-08/11).
 - [ ] The register is queryable by date, product, prescriber, administrator.
+
+## UI designs / screenshots
+
+- Prototype: Governance -> Recalls (gov-recalls.png) — enter a lot -> list of affected clients/administrations; start a recall with acknowledgement tracking.
+- The medicine register is queryable by date, product, prescriber, administrator and exportable.
+
+## Suggested data model
+
+- **(query) LotRecall** — lot -> [Administration{client, at, units, administrator}]
+  - _Built on Administration + StockItem; powers recall + register export._
+- **Recall** — id, tenant_id, lot, reason, started_at, acknowledgements[]
+  - _Tracks per-client acknowledgement._
 
 ## Technical notes (high level)
 

@@ -9,6 +9,11 @@
 As a owner, I want to model pricing and run what-if scenarios, so that I can set prices and plan membership economics.
 An owner pricing + what-if planner over the reporting read-models (REQ-MEMB-9, ADR-0022). The Finance screen is a light pricing + reporting hub; the ledger defers to Xero.
 
+## How it works
+
+An owner pricing + what-if planner over the reporting read-models — model prices and scenarios (e.g. membership economics). The Finance area is a light pricing + reporting hub; the ledger/payroll/AP/BAS tooling defers to Xero. Invoices/payments still sync from checkout.
+Scenario outputs are owner-gated.
+
 ## Requirements
 
 - To model pricing and run what-if scenarios.
@@ -22,7 +27,15 @@ An owner pricing + what-if planner over the reporting read-models (REQ-MEMB-9, A
 
 ## UI designs / screenshots
 
-prototype.html — Checkout, Memberships; client-app.html Rewards/Account.
+_Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rewards/Account._
+
+- Prototype: Memberships -> Pricing & what-if (memb-pricing.png) and Finance (finance.png) — pricing model + scenario sliders; owner-only.
+- Reads the same read-models as Reports (PRD-08).
+
+## Suggested data model
+
+- **PricingScenario** — id, tenant_id, inputs(json), outputs(json)
+  - _Over PRD-08 read-models; owner-gated. No in-app ledger (ADR-0027)._
 
 ## Technical notes (high level)
 

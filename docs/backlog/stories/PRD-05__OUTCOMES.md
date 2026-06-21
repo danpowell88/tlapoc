@@ -9,6 +9,11 @@
 As a injector / owner, I want to track treatment outcomes and any revisions/touch-ups, so that we can measure quality and feed it to reporting.
 The prototype's Photography & outcomes view tracks before/after outcomes and a revision/touch-up signal that feeds reporting (REQ-CLIN-13).
 
+## How it works
+
+Tracks treatment outcomes and any revisions/touch-ups, linked to the original treatment, and feeds reporting (PRD-08). Respects image-use consent for any photo-based outcome.
+Lets the clinic measure quality (result ratings, revision rates) over time.
+
 ## Requirements
 
 - To track treatment outcomes and any revisions/touch-ups.
@@ -24,7 +29,14 @@ The prototype's Photography & outcomes view tracks before/after outcomes and a r
 
 ## UI designs / screenshots
 
-prototype.html — Clinical → Photography & outcomes.
+_Prototype screen: prototype.html — Clinical → Photography & outcomes._
+
+- Prototype: Clinical -> Photography & outcomes (clinical-imaging.png) — before/after outcomes + a revision/touch-up signal feeding reporting.
+
+## Suggested data model
+
+- **Outcome** — id, chart_entry_id, client_id, rating, before_photo_id, after_photo_id, revision_of?
+  - _Revision links to the original treatment; feeds reporting._
 
 ## Technical notes (high level)
 

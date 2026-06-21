@@ -9,6 +9,11 @@
 As a front desk, I want to log phone calls against a client and raise a follow-up if needed, so that phone interactions aren't lost and callbacks happen.
 The prototype's Operations → Call log records inbound/outbound phone interactions against clients and raises follow-ups (the phone is still a primary clinic channel).
 
+## How it works
+
+Log inbound/outbound phone calls against a client (direction, summary, outcome) and raise a follow-up job if needed; calls appear in the client's comms history and a missed-call/callback can be tracked to resolution. The phone is still a primary clinic channel.
+Captures phone interactions so nothing is lost.
+
 ## Requirements
 
 - To log phone calls against a client and raise a follow-up if needed.
@@ -23,7 +28,14 @@ The prototype's Operations → Call log records inbound/outbound phone interacti
 
 ## UI designs / screenshots
 
-prototype.html — Front desk/Operations (Open/close & fridge log, Temperature monitors, Rooms & devices, Equipment, Call log); backroom.html.
+_Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge log, Temperature monitors, Rooms & devices, Equipment, Call log); backroom.html._
+
+- Prototype: Operations -> Call log (ops-phone.png) — log a call against a client; raise a follow-up; appears in comms history.
+
+## Suggested data model
+
+- **CallLog** — id, tenant_id, client_id, direction(in|out), summary, outcome, at, actor_id
+  - _Can raise a Job (PRD-07); in comms history._
 
 ## Technical notes (high level)
 

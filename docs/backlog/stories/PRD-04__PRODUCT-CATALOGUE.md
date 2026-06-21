@@ -7,6 +7,11 @@
 As a owner, I want a product catalogue where each product has a type, unit, S4 flag and regulatory metadata, so that the right rules apply to each product across the platform.
 A typed, multi-unit catalogue (toxin/filler/skin/retail) with the S4 flag — the single classification driving rewards eligibility and public-page naming — plus regClass/ARTG/compounded for GLP-1 handling (ADR-0014/0021).
 
+## How it works
+
+A typed, multi-unit catalogue (toxin/filler/skin/retail) where each product has its own unit (units vs syringes), par level and expiry tracking, plus regClass/ARTG/compounded metadata. The capability-gated product admin sets the S4 flag — the single classification that drives rewards eligibility (PRD-06) and public-page naming (PRD-07).
+regClass/compounded enable blocking prohibited compounded GLP-1 and routing adverse events to the correct DAEN dataset (medicine vs device).
+
 ## Requirements
 
 - A product catalogue where each product has a type, unit, S4 flag and regulatory metadata.
@@ -17,6 +22,16 @@ A typed, multi-unit catalogue (toxin/filler/skin/retail) with the S4 flag — th
 - [ ] Capability-gated product admin sets the S4 flag (drives PRD-06 rewards + PRD-07 naming).
 - [ ] Products carry regClass/artg/compounded; prohibited compounded GLP-1 is blocked.
 - [ ] Retail (non-S4) SKUs supported alongside medicines.
+
+## UI designs / screenshots
+
+- Prototype: Stock & medicines -> Products (stock.png, 'Products' button opens the catalogue) — typed products with unit, par, ARTG status, S4 flag toggle; capability-gated admin.
+- Retail (non-S4) SKUs sit alongside medicines.
+
+## Suggested data model
+
+- **Product** — id, tenant_id, name, type(toxin|filler|skin|retail), unit(units|syringes|each), schedule(S4|non-S4), reg_class, artg_no, sponsor, compounded(bool), par_level
+  - _schedule flag is the master classification (ADR-0014/0021)._
 
 ## Technical notes (high level)
 

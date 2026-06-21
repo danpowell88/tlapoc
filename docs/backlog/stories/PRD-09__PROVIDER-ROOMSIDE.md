@@ -9,6 +9,11 @@
 As a injector, I want to map injections, capture photos and finalise the chart room-side, so that the full clinical record is captured at the chair.
 Map injections, capture photos via signed URLs (never on device), record consult/link script and finalise — all surfacing PRD-04/05 (REQ-APP-2, C14/ADR-0009).
 
+## How it works
+
+Room-side charting on the provider app: map injections, capture photos via signed URLs (never on device), record consult/link script and finalise — surfacing PRD-04/05. Thumb-first, gloves-on usability; finalisation is server-side and the entry becomes read-only once final.
+The hero clinical workflow at the chair.
+
 ## Requirements
 
 - To map injections, capture photos and finalise the chart room-side.
@@ -23,7 +28,15 @@ Map injections, capture photos via signed URLs (never on device), record consult
 
 ## UI designs / screenshots
 
-client-app.html, treatment-room.html, checkin.html, backroom.html.
+_Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.html._
+
+- Prototype: provider app (treatment-room.png) — 'Treatment record', 'Treatment settings', the injection map + camera; finalise locks the note.
+- Photos capture to central storage; none persist on device after sync (C14).
+
+## Suggested data model
+
+- **(reuses)** — ChartEntry/InjectionPoint/Photo (PRD-05), Administration (PRD-04)
+  - _Same entities; provider-app surface._
 
 ## Technical notes (high level)
 

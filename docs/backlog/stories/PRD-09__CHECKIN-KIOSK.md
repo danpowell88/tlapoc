@@ -9,6 +9,11 @@
 As a client arriving for a visit, I want to check myself in on the reception tablet, so that the team knows I've arrived and I complete anything outstanding.
 The prototype's checkin surface is a reception-desk tablet where clients check themselves in (confirm details, complete any outstanding intake/consent), updating the Today board.
 
+## How it works
+
+A reception-desk tablet where clients self-check-in: verify identity/appointment and complete any outstanding intake/consent, updating the visit lifecycle / Today board (PRD-02). The surface is locked-down (no access to other clients' data) and times out between clients.
+Speeds arrivals and captures missing pre-visit items.
+
 ## Requirements
 
 - To check myself in on the reception tablet.
@@ -23,7 +28,14 @@ The prototype's checkin surface is a reception-desk tablet where clients check t
 
 ## UI designs / screenshots
 
-checkin.html.
+_Prototype screen: checkin.html._
+
+- Prototype: check-in tablet (checkin.png) — 'Welcome in' self-check-in; verify appointment, complete outstanding intake/consent; returns to a neutral state between clients.
+
+## Suggested data model
+
+- **(reuses)** — Appointment.status -> checked_in (PRD-02); IntakeResponse/ConsentSignature (PRD-03)
+  - _Kiosk session is single-client + auto-timeout._
 
 ## Technical notes (high level)
 

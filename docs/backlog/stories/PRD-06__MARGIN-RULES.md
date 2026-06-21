@@ -9,6 +9,11 @@
 As a owner, I want to set margin-aware reward rules with caps and eligible items and see reward-cost vs retention, so that rewards drive retention without eroding margin.
 Owners set value caps and eligible items; reporting shows reward-cost vs retention (REQ-MEMB-6). Reward comms respect advertising rules (C9/C23).
 
+## How it works
+
+Owners set margin-aware reward rules (value caps, eligible items) and see reward-cost vs retention in reporting. Reward communications go only to consented, logged-in clients (no public S4 price promotion) (C9/C23).
+Keeps loyalty profitable and compliant; rule config is owner-gated.
+
 ## Requirements
 
 - To set margin-aware reward rules with caps and eligible items and see reward-cost vs retention.
@@ -20,6 +25,15 @@ Owners set value caps and eligible items; reporting shows reward-cost vs retenti
 - [ ] Reward-cost vs retention surfaces in reporting (PRD-08).
 - [ ] Reward communications go only to consented, logged-in clients (no public S4 price promotion).
 - [ ] Rule config is owner-gated.
+
+## UI designs / screenshots
+
+- Prototype: Memberships -> Pricing & what-if (memb-pricing.png, owner-only .fin) — caps + eligible items; reward-cost vs retention surfaces in Reports (PRD-08).
+
+## Suggested data model
+
+- **RewardRule.value_cap / eligible_items** — + reporting: reward_cost vs retention
+  - _Owner-gated; reward comms consented-only._
 
 ## Technical notes (high level)
 

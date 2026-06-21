@@ -6,7 +6,13 @@
     "phase": "1",
     "prd": "docs/prds/PRD-11-facility-complaints.md",
     "summary": "The record-keeping that evidences AHPRA's facility, infection-control and emergency obligations, plus a complaints register with the mandated AHPRA pathway. Lightweight registers + reminders in v1, with fuller workflows (cold-chain log, open/close checklist, sterilisation register, waste manifests, complication-response) layered on.",
-    "labels": ["type:epic", "PRD-11", "phase:1", "area:web", "area:backend"]
+    "labels": [
+      "type:epic",
+      "PRD-11",
+      "phase:1",
+      "area:web",
+      "area:backend"
+    ]
   },
   "stories": [
     {
@@ -22,9 +28,39 @@
         "Whether accreditation is blocking or advisory is configurable (open question).",
         "Records are audited."
       ],
-      "refs": {"req": ["REQ-FAC-1"], "compliance": ["C20"], "prd_ac": ["AC1"]},
-      "labels": ["type:story", "PRD-11", "phase:1", "area:web", "compliance"],
-      "priority": "P2"
+      "refs": {
+        "req": [
+          "REQ-FAC-1"
+        ],
+        "compliance": [
+          "C20"
+        ],
+        "prd_ac": [
+          "AC1"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-11",
+        "phase:1",
+        "area:web",
+        "compliance"
+      ],
+      "priority": "P2",
+      "detail": [
+        "Per-location facility accreditation (e.g. ACSQHC/NSQHS where applicable) recorded with status + expiry alerts before lapse. Whether accreditation is blocking or advisory in the product is configurable (open question). Records are audited.",
+        "Evidences the clinic's facility obligations (C20)."
+      ],
+      "ui_spec": [
+        "Prototype: Operations (ops-equipment.png area) / facility profile — accreditation status per location with expiry alerts."
+      ],
+      "data_model": [
+        {
+          "entity": "FacilityAccreditation",
+          "fields": "id, tenant_id, location_id, scheme, status, expiry, evidence_ref",
+          "notes": "Expiry alerts; blocking vs advisory configurable."
+        }
+      ]
     },
     {
       "key": "IPC-LOGS",
@@ -39,9 +75,44 @@
         "A twice-daily cold-chain log with a breach pathway is supported (links PRD-04 cold-chain).",
         "Waste manifests/sterilisation register are captured for v2 expansion."
       ],
-      "refs": {"req": ["REQ-FAC-2"], "compliance": ["C20"], "prd_ac": ["AC2"]},
-      "labels": ["type:story", "PRD-11", "phase:1", "area:web", "compliance"],
-      "priority": "P2"
+      "refs": {
+        "req": [
+          "REQ-FAC-2"
+        ],
+        "compliance": [
+          "C20"
+        ],
+        "prd_ac": [
+          "AC2"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-11",
+        "phase:1",
+        "area:web",
+        "compliance"
+      ],
+      "priority": "P2",
+      "detail": [
+        "Infection-control logs: sterilisation/single-use and sharps/clinical-waste disposal, all audited and retrievable for inspection. A twice-daily cold-chain log with a breach pathway is supported (links PRD-04 cold-chain); waste manifests + a sterilisation register are captured for v2 expansion.",
+        "Day-to-day evidence of safe practice (C20)."
+      ],
+      "ui_spec": [
+        "Prototype: Operations -> Open/close & fridge log (ops-openclose.png) + the back-office waste log (backroom.png) — sterilisation/single-use, sharps & clinical-waste entries."
+      ],
+      "data_model": [
+        {
+          "entity": "InfectionControlLog",
+          "fields": "id, tenant_id, location_id, kind(sterilisation|single_use|sharps|clinical_waste), detail, at, actor_id",
+          "notes": "Audited; feeds inspection pack."
+        },
+        {
+          "entity": "WasteManifest",
+          "fields": "id, tenant_id, stream(clinical|sharps), carrier, certificate_ref, at",
+          "notes": "NSW CA+TC / QLD WTC (v2 expansion)."
+        }
+      ]
     },
     {
       "key": "EMERGENCY-KIT",
@@ -56,9 +127,45 @@
         "Emergency/complication protocol links are surfaced.",
         "Ties into the complication-response flow (PRD-05)."
       ],
-      "refs": {"req": ["REQ-FAC-3"], "compliance": ["C20"], "prd_ac": ["AC1", "AC4"]},
-      "labels": ["type:story", "PRD-11", "phase:1", "area:web", "compliance"],
-      "priority": "P2"
+      "refs": {
+        "req": [
+          "REQ-FAC-3"
+        ],
+        "compliance": [
+          "C20"
+        ],
+        "prd_ac": [
+          "AC1",
+          "AC4"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-11",
+        "phase:1",
+        "area:web",
+        "compliance"
+      ],
+      "priority": "P2",
+      "detail": [
+        "Track the emergency kit (incl. hyaluronidase for filler vascular occlusion, anaphylaxis) with expiry alerts before lapse, plus a continuity-of-care contact for when the treating practitioner/prescriber is unavailable. Emergency/complication protocol links are surfaced (ties to PRD-05 complication response).",
+        "Ensures the clinic is prepared for complications (C20)."
+      ],
+      "ui_spec": [
+        "Prototype: Operations + Clinical -> Complication protocols (clinical-safety.png) — emergency-kit register with expiry alerts (saveKit/newKit/removeKit); continuity-of-care contact."
+      ],
+      "data_model": [
+        {
+          "entity": "EmergencyKitItem",
+          "fields": "id, tenant_id, location_id, name(hyaluronidase|adrenaline|...), expiry, quantity",
+          "notes": "Expiry alerts; linked from complication protocols."
+        },
+        {
+          "entity": "ContinuityContact",
+          "fields": "id, tenant_id, name, role, phone",
+          "notes": "Surfaced when prescriber unavailable."
+        }
+      ]
     },
     {
       "key": "COMPLAINTS",
@@ -73,9 +180,40 @@
         "Complaints feed the register/reporting (PRD-08).",
         "A complaint can be raised from a conversation (links PRD-07)."
       ],
-      "refs": {"req": ["REQ-CLI-4"], "compliance": ["C24", "C18"], "prd_ac": ["AC3"]},
-      "labels": ["type:story", "PRD-11", "phase:1", "area:web", "compliance"],
-      "priority": "P1"
+      "refs": {
+        "req": [
+          "REQ-CLI-4"
+        ],
+        "compliance": [
+          "C24",
+          "C18"
+        ],
+        "prd_ac": [
+          "AC3"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-11",
+        "phase:1",
+        "area:web",
+        "compliance"
+      ],
+      "priority": "P1",
+      "detail": [
+        "A complaints/adverse-outcome register linked to client/treatment that surfaces complaint mechanisms including AHPRA (noting an NDA doesn't remove that right). A complaint flag drives indefinite retention of the related record (C18, PRD-01) and feeds reporting (PRD-08). A complaint can be raised from a conversation (PRD-07).",
+        "Handles complaints correctly and retains them (C24)."
+      ],
+      "ui_spec": [
+        "Prototype: Governance -> Overview (gov-overview.png) complaints register; raise a complaint linked to client/treatment with the AHPRA pathway surfaced."
+      ],
+      "data_model": [
+        {
+          "entity": "Complaint",
+          "fields": "id, tenant_id, client_id, treatment_ref, status, pathway(ahpra|internal), opened_at, resolution",
+          "notes": "Sets indefinite retention flag (C18); feeds reporting."
+        }
+      ]
     },
     {
       "key": "FAC-WORKFLOWS",
@@ -88,9 +226,34 @@
         "Placeholder — v1 is lightweight registers; these workflows are Phase 2.",
         "Captured so the facility model anticipates them."
       ],
-      "refs": {"req": ["REQ-FAC-4", "REQ-FAC-10"], "adr": ["0026", "0030"]},
-      "labels": ["type:story", "PRD-11", "phase:2plus", "area:web"],
-      "priority": "P2"
+      "refs": {
+        "req": [
+          "REQ-FAC-4",
+          "REQ-FAC-10"
+        ],
+        "adr": [
+          "0026",
+          "0030"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-11",
+        "phase:2plus",
+        "area:web"
+      ],
+      "priority": "P2",
+      "detail": [
+        "Placeholder (Phase 2): fuller facility workflows — deep incident & mandatory-reporting case management beyond the registers (the open/close, equipment, IPC and complication-response pieces are now their own v1 stories). The facility model already anticipates them (ADR-0026/0030).",
+        "Captured so operations can be fully systematised later."
+      ],
+      "data_model": [
+        {
+          "entity": "IncidentCase",
+          "fields": "id, tenant_id, type, mandatory_reportable(bool), steps[], status",
+          "notes": "Phase 2 case management."
+        }
+      ]
     },
     {
       "key": "OPENCLOSE",
@@ -105,10 +268,48 @@
         "Logs are audited and feed the inspection pack (PRD-08).",
         "Ties into automated temperature monitors (PRD-11/TEMP-MONITORS, PRD-04/COLD-CHAIN)."
       ],
-      "refs": {"req": ["REQ-FAC-2"], "compliance": ["C13", "C20"], "adr": ["0026"]},
-      "labels": ["type:story", "PRD-11", "phase:1", "area:web", "compliance"],
+      "refs": {
+        "req": [
+          "REQ-FAC-2"
+        ],
+        "compliance": [
+          "C13",
+          "C20"
+        ],
+        "adr": [
+          "0026"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-11",
+        "phase:1",
+        "area:web",
+        "compliance"
+      ],
       "priority": "P1",
-      "depends_on": ["PRD-04/COLD-CHAIN"]
+      "depends_on": [
+        "PRD-04/COLD-CHAIN"
+      ],
+      "detail": [
+        "A twice-daily routine: a configurable open/close checklist plus a fridge-temperature log. Checklists are completed and recorded with who/when; an out-of-range fridge reading triggers the breach pathway (quarantine lot + job). Logs are audited and feed the inspection pack; ties into automated monitors (TEMP-MONITORS) and PRD-04 cold-chain.",
+        "The daily safe open/close discipline."
+      ],
+      "ui_spec": [
+        "Prototype: Operations -> Open / close & fridge log (ops-openclose.png); also on the back-office tablet (backroom.png) — checklist items + a fridge temp entry with breach handling (openFridge/saveFridge)."
+      ],
+      "data_model": [
+        {
+          "entity": "OpenCloseChecklist",
+          "fields": "id, tenant_id, location_id, type(open|close), items[]{label, done}, completed_by, at",
+          "notes": "Configurable checklist."
+        },
+        {
+          "entity": "FridgeLog",
+          "fields": "id, location_id, temp, at, actor_id, breach(bool)",
+          "notes": "Out-of-range -> quarantine lot + Job (PRD-04/PRD-07)."
+        }
+      ]
     },
     {
       "key": "TEMP-MONITORS",
@@ -123,10 +324,48 @@
         "Missing heartbeats (dead monitor) are detected and surfaced.",
         "Manual fridge log (OPENCLOSE) and monitors reconcile into one cold-chain record (C13)."
       ],
-      "refs": {"req": ["REQ-MED-7"], "compliance": ["C13"], "adr": ["0026"]},
-      "labels": ["type:story", "PRD-11", "phase:1", "area:web", "area:integration", "compliance"],
+      "refs": {
+        "req": [
+          "REQ-MED-7"
+        ],
+        "compliance": [
+          "C13"
+        ],
+        "adr": [
+          "0026"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-11",
+        "phase:1",
+        "area:web",
+        "area:integration",
+        "compliance"
+      ],
       "priority": "P1",
-      "depends_on": ["PRD-04/COLD-CHAIN"]
+      "depends_on": [
+        "PRD-04/COLD-CHAIN"
+      ],
+      "detail": [
+        "Manage wireless cold-chain sensors (the ESP32 design): register/provision monitors per fridge/location authenticating to the per-clinic API, chart readings over time, and raise breach jobs; detect missing heartbeats (dead monitor). Manual fridge log (OPENCLOSE) and monitors reconcile into one cold-chain record (C13).",
+        "Continuous, evidenced cold-chain without manual logging."
+      ],
+      "ui_spec": [
+        "Prototype: Operations -> Temperature monitors (ops-monitors.png) — monitor list per fridge, live/charted temps, breach alerts, dead-monitor detection (openMonitor/monitorJob)."
+      ],
+      "data_model": [
+        {
+          "entity": "Monitor",
+          "fields": "id, tenant_id, location_id, fridge, api_key_ref, last_heartbeat, status",
+          "notes": "ESP32; missing heartbeat -> alert."
+        },
+        {
+          "entity": "(reuses) TempLog/Excursion",
+          "fields": "(PRD-04 COLD-CHAIN)",
+          "notes": "Manual + device readings reconcile."
+        }
+      ]
     },
     {
       "key": "ROOMS-DEVICES",
@@ -141,10 +380,38 @@
         "Out-of-service status removes a resource from availability.",
         "Device records link to equipment maintenance (PRD-11/EQUIPMENT)."
       ],
-      "refs": {"req": ["REQ-BOOK-1"], "adr": ["0026"]},
-      "labels": ["type:story", "PRD-11", "phase:1", "area:web"],
+      "refs": {
+        "req": [
+          "REQ-BOOK-1"
+        ],
+        "adr": [
+          "0026"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-11",
+        "phase:1",
+        "area:web"
+      ],
       "priority": "P2",
-      "depends_on": ["PRD-02/CALENDAR"]
+      "depends_on": [
+        "PRD-02/CALENDAR"
+      ],
+      "detail": [
+        "Manage the clinic's rooms, chairs and devices as bookable resources the calendar schedules against (conflict-flagging in PRD-02). Out-of-service status removes a resource from availability; device records link to equipment maintenance.",
+        "Keeps scheduling honest about real capacity."
+      ],
+      "ui_spec": [
+        "Prototype: Operations -> Rooms & devices (ops-resources.png) — create/edit rooms/chairs/devices (type, location, status); out-of-service toggles availability."
+      ],
+      "data_model": [
+        {
+          "entity": "Resource",
+          "fields": "(shared with PRD-02) id, type(room|chair|device), name, location_id, status",
+          "notes": "Out-of-service removes from availability; device links to Equipment."
+        }
+      ]
     },
     {
       "key": "EQUIPMENT",
@@ -159,10 +426,48 @@
         "Service events are logged with evidence and audited.",
         "Feeds the inspection-readiness pack (PRD-08)."
       ],
-      "refs": {"req": ["REQ-FAC-2", "REQ-FAC-4"], "compliance": ["C20"], "adr": ["0026"]},
-      "labels": ["type:story", "PRD-11", "phase:1", "area:web", "compliance"],
+      "refs": {
+        "req": [
+          "REQ-FAC-2",
+          "REQ-FAC-4"
+        ],
+        "compliance": [
+          "C20"
+        ],
+        "adr": [
+          "0026"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-11",
+        "phase:1",
+        "area:web",
+        "compliance"
+      ],
       "priority": "P2",
-      "depends_on": ["PRD-11/ROOMS-DEVICES"]
+      "depends_on": [
+        "PRD-11/ROOMS-DEVICES"
+      ],
+      "detail": [
+        "An equipment & maintenance register tracking servicing/validation/calibration (autoclave validation, spore testing, laser service/calibration) with due dates; due/overdue items raise alerts and service events are logged with evidence and audited. Feeds the inspection pack.",
+        "Keeps devices safe, validated and in-service (promoted from the FAC-WORKFLOWS placeholder)."
+      ],
+      "ui_spec": [
+        "Prototype: Operations -> Equipment & maintenance (ops-equipment.png) — equipment list with service/validation schedules + due/overdue alerts."
+      ],
+      "data_model": [
+        {
+          "entity": "Equipment",
+          "fields": "id, tenant_id, location_id, name, type, linked_resource_id?",
+          "notes": "Links to a bookable Resource (device)."
+        },
+        {
+          "entity": "MaintenanceRecord",
+          "fields": "id, equipment_id, kind(service|validation|calibration|spore_test), due_at, done_at, evidence_ref",
+          "notes": "Due/overdue alerts; inspection evidence."
+        }
+      ]
     },
     {
       "key": "CALL-LOG",
@@ -177,10 +482,38 @@
         "Logs are tenant-scoped and audited.",
         "A missed-call/callback can be tracked to resolution."
       ],
-      "refs": {"req": ["REQ-CLI-1"], "compliance": ["C10"]},
-      "labels": ["type:story", "PRD-11", "phase:1", "area:web"],
+      "refs": {
+        "req": [
+          "REQ-CLI-1"
+        ],
+        "compliance": [
+          "C10"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-11",
+        "phase:1",
+        "area:web"
+      ],
       "priority": "P2",
-      "depends_on": ["PRD-07/FOLLOWUPS"]
+      "depends_on": [
+        "PRD-07/FOLLOWUPS"
+      ],
+      "detail": [
+        "Log inbound/outbound phone calls against a client (direction, summary, outcome) and raise a follow-up job if needed; calls appear in the client's comms history and a missed-call/callback can be tracked to resolution. The phone is still a primary clinic channel.",
+        "Captures phone interactions so nothing is lost."
+      ],
+      "ui_spec": [
+        "Prototype: Operations -> Call log (ops-phone.png) — log a call against a client; raise a follow-up; appears in comms history."
+      ],
+      "data_model": [
+        {
+          "entity": "CallLog",
+          "fields": "id, tenant_id, client_id, direction(in|out), summary, outcome, at, actor_id",
+          "notes": "Can raise a Job (PRD-07); in comms history."
+        }
+      ]
     },
     {
       "key": "SHIFT-HANDOVER",
@@ -195,10 +528,35 @@
         "Handover entries are timestamped and attributed.",
         "Accessible from the back-office tablet (PRD-09/BACKOFFICE-TABLET)."
       ],
-      "refs": {"req": ["REQ-FAC-2"]},
-      "labels": ["type:story", "PRD-11", "phase:1", "area:web"],
+      "refs": {
+        "req": [
+          "REQ-FAC-2"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-11",
+        "phase:1",
+        "area:web"
+      ],
       "priority": "P2",
-      "depends_on": ["PRD-07/FOLLOWUPS"]
+      "depends_on": [
+        "PRD-07/FOLLOWUPS"
+      ],
+      "detail": [
+        "Shift-handover notes so the team passes on what the next shift needs to know; notes are timestamped, attributed, tenant/location-scoped, and shown alongside outstanding follow-ups/jobs. Accessible from the back-office tablet.",
+        "Smooth, safe shift transitions."
+      ],
+      "ui_spec": [
+        "Prototype: back-office tablet -> Shift handover (backroom.png) — add/read handover notes; outstanding jobs surfaced alongside."
+      ],
+      "data_model": [
+        {
+          "entity": "ShiftHandover",
+          "fields": "id, tenant_id, location_id, note, created_by, at",
+          "notes": "Shown with outstanding Jobs (PRD-07)."
+        }
+      ]
     }
   ]
 }

@@ -9,6 +9,10 @@
 As a security-minded engineer, I want TLS everywhere, encryption at rest, hardened HTTP headers, least-privilege identities and dependency/secret/code scanning in CI, so that the platform meets its baseline security obligations from day one.
 Encryption in transit + at rest, least-privilege, secure headers and automated scanning establish the security posture the compliance docs assume (C10/C21).
 
+## How it works
+
+The baseline security posture: TLS everywhere, encryption at rest, hardened HTTP headers (CSP/HSTS), locked-down CORS, least-privilege service identities, and dependency/secret/SAST scanning in CI gating merges on high-severity findings (C10/C21/ADR-0016).
+
 ## Requirements
 
 - TLS everywhere, encryption at rest, hardened HTTP headers, least-privilege identities and dependency/secret/code scanning in CI.

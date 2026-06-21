@@ -9,6 +9,11 @@
 As a prescriber, I want to record a synchronous consult (in person or from our external telehealth app) before writing any script, so that every prescription is backed by a real assessment.
 A Consult (in-person or external-telehealth) records modality, prescriber, timestamp, external reference and notes — required before any script (C1).
 
+## How it works
+
+A synchronous Consult is the legal precondition for any S4 prescription. It records modality (in-person or external-telehealth), prescriber, timestamp, an external reference (for telehealth) and notes, and must exist before a script can be written (C1).
+The remote-prescriber path links an externally-conducted consult to the resulting script — the consult happens in the clinic's existing telehealth tool; this system records its details (ADR-0011).
+
 ## Requirements
 
 - To record a synchronous consult (in person or from our external telehealth app) before writing any script.
@@ -20,6 +25,16 @@ A Consult (in-person or external-telehealth) records modality, prescriber, times
 - [ ] A prescription cannot be saved without a linked synchronous consult at/just-before script time.
 - [ ] The remote-prescriber path links the externally-conducted consult to the resulting script.
 - [ ] Consult creation is audited.
+
+## UI designs / screenshots
+
+- Prototype: Charting pre-treatment review (charting.png) — the 'Consult & prescription' card with a 'Record consult' action and status tick; consult must be ticked before 'Write prescription' is usable.
+- Modality toggle (in-person / telehealth-external) with an external-reference field for telehealth.
+
+## Suggested data model
+
+- **Consult** — id, tenant_id, client_id, appointment_id, prescriber_id, modality(in_person|telehealth_ext), at, external_ref, notes
+  - _Required before any Prescription (C1); audited._
 
 ## Technical notes (high level)
 

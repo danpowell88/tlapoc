@@ -9,6 +9,11 @@
 As a practitioner, I want my appointments to appear in Outlook/Google and external busy-time to block my availability, so that I have one source of truth for my time.
 Appointments sync both ways with Outlook/Google; external busy events block availability, behind ICalendarProvider (REQ-INT-2).
 
+## How it works
+
+Two-way sync of appointments with Outlook (MS Graph) and Google Calendar behind an ICalendarProvider port: creating/moving/cancelling reflects both ways, and external busy events block availability in booking (PRD-02). Per-staff opt-in and conflict-resolution rules (open question).
+Gives practitioners one source of truth for their time.
+
 ## Requirements
 
 - My appointments to appear in Outlook/Google and external busy-time to block my availability.
@@ -19,6 +24,17 @@ Appointments sync both ways with Outlook/Google; external busy events block avai
 - [ ] External busy events block availability in booking (PRD-02).
 - [ ] Per-staff opt-in and conflict-resolution rules (open question) supported.
 - [ ] Implemented behind ICalendarProvider (swappable).
+
+## UI designs / screenshots
+
+- Prototype: Settings -> Integrations (settings-integrations.png) — per-staff calendar connect (M365/Google) + two-way sync toggle; external busy time shows as unavailable in Schedule.
+
+## Suggested data model
+
+- **CalendarLink** — id, staff_id, provider(m365|google), tokens, sync_mode(two_way), status
+  - _Per-staff opt-in._
+- **SyncLog** — id, calendar_link_id, appointment_id, direction, at, result
+  - _Busy events block availability._
 
 ## Technical notes (high level)
 

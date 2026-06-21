@@ -9,6 +9,10 @@
 As a front-end developer, I want an Angular shell with the Entra auth guard, top-level routing, a role-aware navigation frame and the design-system theme applied, so that feature screens drop into a consistent, authenticated layout.
 The admin/front-desk web app needs a shell — auth guard, role-aware nav, layout — before feature screens land.
 
+## How it works
+
+Angular shell with the Entra auth guard, top-level routing, a role-aware navigation frame and the design-system theme applied, so feature screens drop into a consistent authenticated layout. Foundation for PLATFORM/APP-NAV (ADR-0005).
+
 ## Requirements
 
 - An Angular shell with the Entra auth guard, top-level routing, a role-aware navigation frame and the design-system theme applied.
@@ -22,7 +26,9 @@ The admin/front-desk web app needs a shell — auth guard, role-aware nav, layou
 
 ## UI designs / screenshots
 
-Non-UI / platform scaffolding — no prototype screen.
+_Prototype screen: Non-UI / platform scaffolding — no prototype screen._
+
+- The authenticated app frame (later filled by PLATFORM/APP-NAV; see dashboard.png) — sign-in redirect, shell layout, themed.
 
 ## Technical notes (high level)
 

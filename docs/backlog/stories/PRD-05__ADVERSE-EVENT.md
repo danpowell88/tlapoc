@@ -9,6 +9,11 @@
 As a injector, I want to log an adverse event linked to the treatment, product and lot, so that it feeds the TGA report and the right follow-ups happen.
 Log an adverse event/complication linked to the treatment, product and lot, classify seriousness and target the correct DAEN database (REQ-CLIN-5, C12). Includes the VO/anaphylaxis complication-response flow.
 
+## How it works
+
+Log an adverse event/complication linked to the treatment, product and lot; classify seriousness and target the correct DAEN database (medicine vs device) (C12). A complication-response flow (vascular occlusion / anaphylaxis -> log hyaluronidase/adrenaline) routes the AE and raises jobs.
+Full prefilled DAEN submission lives in the Governance hub (PRD-08).
+
 ## Requirements
 
 - To log an adverse event linked to the treatment, product and lot.
@@ -23,7 +28,15 @@ Log an adverse event/complication linked to the treatment, product and lot, clas
 
 ## UI designs / screenshots
 
-prototype.html — Charting + Clinical (Skin analysis, Body contouring, Complication protocols, Photography & outcomes); treatment-room.html.
+_Prototype screen: prototype.html — Charting + Clinical (Skin analysis, Body contouring, Complication protocols, Photography & outcomes); treatment-room.html._
+
+- Prototype: Clinical -> Complication protocols (clinical-safety.png) — launch a protocol, log the response/kit used; an adverse-event capture linked to the treatment/product/lot.
+- Routes to Governance -> Adverse events & DAEN (gov-ae) with seriousness set.
+
+## Suggested data model
+
+- **AdverseEvent** — id, tenant_id, client_id, chart_entry_id, product_id, lot_id, seriousness, daen_target(medicine|device), description, at
+  - _Feeds DAEN prefill (PRD-08); raises jobs._
 
 ## Technical notes (high level)
 

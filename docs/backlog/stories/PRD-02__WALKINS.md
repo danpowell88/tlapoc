@@ -9,6 +9,11 @@
 As a front desk, I want to add walk-ins and same-day add-ons against available rooms/chairs/devices, so that we capture opportunistic demand without breaking the rules or double-booking resources.
 Walk-ins and same-day add-ons are supported but gate-respecting (an injectable walk-in still needs a consult first); room/chair/device resources are scheduled with conflict-flagging.
 
+## How it works
+
+Walk-ins and same-day add-ons are supported but gate-respecting: an injectable walk-in still needs a consult first. Rooms/chairs/devices are scheduled as resources with conflict-flagging and utilisation; VIP/first-time tags supported.
+Lets the clinic capture opportunistic demand without breaking the rules or double-booking.
+
 ## Requirements
 
 - To add walk-ins and same-day add-ons against available rooms/chairs/devices.
@@ -22,7 +27,14 @@ Walk-ins and same-day add-ons are supported but gate-respecting (an injectable w
 
 ## UI designs / screenshots
 
-prototype.html — Schedule, 'New booking' wizard, Clients directory & 360.
+_Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients directory & 360._
+
+- Prototype: Schedule (schedule.png) — add walk-in / same-day add-on against an available resource; resource conflicts flagged before confirm; VIP / first-time appointment tags.
+
+## Suggested data model
+
+- **Appointment** — (as CALENDAR) source=walkin; tags[](vip|first_time)
+  - _Injectable walk-in still requires consult_id before charting._
 
 ## Technical notes (high level)
 

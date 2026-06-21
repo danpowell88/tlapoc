@@ -9,6 +9,10 @@
 As a developer, I want pipelines that build and test the API, web and apps on every PR and deploy to dev/staging on merge, so that broken code is caught early and releases are repeatable.
 Continuous build/test on every PR and automated deploys to environments prevent integration drift and make the compliance posture (tests, scans) enforceable.
 
+## How it works
+
+Pipelines build + test the API/web/apps on every PR (blocking merge on failure) and auto-deploy to dev on merge; mobile builds produce installable artifacts. This makes the compliance posture (tests, scans) enforceable rather than aspirational and is the backbone for repeatable releases.
+
 ## Requirements
 
 - Pipelines that build and test the API, web and apps on every PR and deploy to dev/staging on merge.

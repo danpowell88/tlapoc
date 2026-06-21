@@ -7,6 +7,10 @@
 As a owner, I want to optionally require a booking deposit or card-on-file hold, so that no-shows cost less.
 An opt-in, ACL-fair booking deposit / card-on-file hold, suppressed during cooling-off (F14 invariant). Deferred to Phase 2 — placeholder.
 
+## How it works
+
+Placeholder (Phase 2): an opt-in booking deposit / card-on-file hold to reduce no-shows. Must keep the cooling-off suppression invariant (F14) — no hold during a cooling-off period. Not in v1.
+
 ## Requirements
 
 - To optionally require a booking deposit or card-on-file hold.
@@ -16,6 +20,11 @@ An opt-in, ACL-fair booking deposit / card-on-file hold, suppressed during cooli
 
 - [ ] Placeholder — not in v1 (no deposits/holds in v1).
 - [ ] Design must keep the cooling-off suppression invariant (F14): no hold during a cooling-off period.
+
+## Suggested data model
+
+- **BookingHold** — id, appointment_id, amount, token_ref, status
+  - _Placeholder; suppressed during cooling-off._
 
 ## Technical notes (high level)
 

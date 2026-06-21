@@ -6,7 +6,13 @@
     "phase": "1",
     "prd": "docs/prds/PRD-07-comms-reminders-recall.md",
     "summary": "The engine that keeps the book full and clients coming back at the right cadence: reminders, pre-/after-care sequences, and recall (~12-week toxin re-care) over SMS/email/push — with Spam Act consent/unsubscribe baked in. Advertising content is produced in the clinic's external tools; the platform has no advertising linter, and the public booking page uses generic names with S4 prices withheld by configuration.",
-    "labels": ["type:epic", "PRD-07", "phase:1", "area:backend", "area:integration"]
+    "labels": [
+      "type:epic",
+      "PRD-07",
+      "phase:1",
+      "area:backend",
+      "area:integration"
+    ]
   },
   "stories": [
     {
@@ -22,9 +28,45 @@
         "Provider is swappable behind the port.",
         "All sends log to the client's comms history."
       ],
-      "refs": {"req": ["REQ-NOTIF-1"], "adr": ["0012"], "prd_ac": ["AC5"]},
-      "labels": ["type:story", "PRD-07", "phase:1", "area:backend", "area:integration"],
-      "priority": "P0"
+      "refs": {
+        "req": [
+          "REQ-NOTIF-1"
+        ],
+        "adr": [
+          "0012"
+        ],
+        "prd_ac": [
+          "AC5"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-07",
+        "phase:1",
+        "area:backend",
+        "area:integration"
+      ],
+      "priority": "P0",
+      "detail": [
+        "An INotifier abstraction over an AU SMS provider + email + app push, with per-tenant templates (ADR-0012). All sends log to the client's comms history; the provider is swappable behind the port.",
+        "The shared delivery layer every reminder/aftercare/recall/marketing message goes through."
+      ],
+      "ui_spec": [
+        "No dedicated screen — surfaces through templates + the comms history on the Client 360; admin sets the SMS/email/push providers in Settings.",
+        "Per-tenant message templates."
+      ],
+      "data_model": [
+        {
+          "entity": "MessageTemplate",
+          "fields": "id, tenant_id, channel(sms|email|push), key, body, variables[]",
+          "notes": "Per-tenant; rendered per send."
+        },
+        {
+          "entity": "NotificationLog",
+          "fields": "id, tenant_id, client_id, channel, template_key, status, sent_at",
+          "notes": "Comms history; swappable provider behind INotifier."
+        }
+      ]
     },
     {
       "key": "REMINDERS-CARE",
@@ -39,10 +81,44 @@
         "Transactional messages send regardless of marketing opt-in and avoid S4 references.",
         "Sends are logged to comms history."
       ],
-      "refs": {"req": ["REQ-NOTIF-2"], "prd_ac": ["AC3"]},
-      "labels": ["type:story", "PRD-07", "phase:1", "area:backend"],
+      "refs": {
+        "req": [
+          "REQ-NOTIF-2"
+        ],
+        "prd_ac": [
+          "AC3"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-07",
+        "phase:1",
+        "area:backend"
+      ],
       "priority": "P1",
-      "depends_on": ["PRD-07/CHANNELS"]
+      "depends_on": [
+        "PRD-07/CHANNELS"
+      ],
+      "detail": [
+        "Appointment reminders/confirmations plus pre-care and aftercare sequences (multi-touch, timed per treatment type). Confirm/decline updates the appointment (PRD-02). Transactional messages send regardless of marketing opt-in and avoid S4 references.",
+        "Keeps clients prepared and cared-for around each visit."
+      ],
+      "ui_spec": [
+        "Prototype: Comms -> Automations (marketing-auto.png) configures the reminder/aftercare sequences; sends appear in the client's comms history.",
+        "Reminder includes confirm/decline + reschedule links (PRD-02 REMINDERS)."
+      ],
+      "data_model": [
+        {
+          "entity": "Sequence",
+          "fields": "id, tenant_id, trigger(booking|visit), treatment_type, steps[]{offset, channel, template_key}",
+          "notes": "Multi-touch, timed per treatment."
+        },
+        {
+          "entity": "SequenceRun",
+          "fields": "id, sequence_id, client_id, appointment_id, step_status[]",
+          "notes": "Transactional; exempt from opt-in."
+        }
+      ]
     },
     {
       "key": "RECALL",
@@ -57,10 +133,39 @@
         "Front desk can work the recall/rebook worklist.",
         "Recall integrates with treatment plans (PRD-05) and rebooking (PRD-06)."
       ],
-      "refs": {"req": ["REQ-NOTIF-3"], "prd_ac": ["AC4"]},
-      "labels": ["type:story", "PRD-07", "phase:1", "area:backend"],
+      "refs": {
+        "req": [
+          "REQ-NOTIF-3"
+        ],
+        "prd_ac": [
+          "AC4"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-07",
+        "phase:1",
+        "area:backend"
+      ],
       "priority": "P1",
-      "depends_on": ["PRD-07/CHANNELS"]
+      "depends_on": [
+        "PRD-07/CHANNELS"
+      ],
+      "detail": [
+        "Recare at the treatment interval (toxin ~12 weeks) + unbooked-rebook prompts, with a recall/rebook worklist for front desk. A toxin client with no future booking enters the worklist at the configured interval and receives the nudge.",
+        "Integrates with treatment plans (PRD-05) and rebooking (PRD-06); keeps the book full and clients on cadence."
+      ],
+      "ui_spec": [
+        "Prototype: Follow-ups (followups.png) includes the recall/rebook worklist of clients due; automatic recall nudges via the channels.",
+        "Unbooked recommended sessions prompt a rebook."
+      ],
+      "data_model": [
+        {
+          "entity": "RecallTask",
+          "fields": "id, tenant_id, client_id, due_at, reason(interval|unbooked_plan), status, last_nudge_at",
+          "notes": "Generated at interval by a scheduled job; works the worklist."
+        }
+      ]
     },
     {
       "key": "MARKETING-CONSENT",
@@ -75,10 +180,48 @@
         "Sender identification is included.",
         "Suppression list is honoured across channels (and by PRD-06 reward comms)."
       ],
-      "refs": {"req": ["REQ-NOTIF-5"], "compliance": ["C23"], "prd_ac": ["AC1"]},
-      "labels": ["type:story", "PRD-07", "phase:1", "area:backend", "compliance"],
+      "refs": {
+        "req": [
+          "REQ-NOTIF-5"
+        ],
+        "compliance": [
+          "C23"
+        ],
+        "prd_ac": [
+          "AC1"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-07",
+        "phase:1",
+        "area:backend",
+        "compliance"
+      ],
       "priority": "P1",
-      "depends_on": ["PRD-07/CHANNELS"]
+      "depends_on": [
+        "PRD-07/CHANNELS"
+      ],
+      "detail": [
+        "Opt-in for commercial electronic messages, sender identification, and a functional unsubscribe that suppresses immediately on withdrawal (Spam Act, C23). Marketing sends only to opted-in clients; suppression is honoured across channels (and by PRD-06 reward comms).",
+        "Transactional reminders/aftercare are exempt and always send."
+      ],
+      "ui_spec": [
+        "Client app/profile: marketing opt-in toggle + unsubscribe in every marketing message; staff see consent state on the Client 360.",
+        "Admin: suppression list."
+      ],
+      "data_model": [
+        {
+          "entity": "MarketingConsent",
+          "fields": "id, client_id, channel, opted_in(bool), updated_at",
+          "notes": "Required for marketing (C23)."
+        },
+        {
+          "entity": "SuppressionList",
+          "fields": "tenant_id, contact, reason, at",
+          "notes": "Honoured across all marketing/reward comms."
+        }
+      ]
     },
     {
       "key": "BOOKING-PAGE",
@@ -93,10 +236,46 @@
         "Configuration is driven by the catalog schedule flag (PRD-04).",
         "Advertising compliance beyond this is clinic-owned (external tools)."
       ],
-      "refs": {"req": ["REQ-NOTIF-12"], "compliance": ["C9"], "adr": ["0014"], "prd_ac": ["AC2"]},
-      "labels": ["type:story", "PRD-07", "phase:1", "area:web", "compliance"],
+      "refs": {
+        "req": [
+          "REQ-NOTIF-12"
+        ],
+        "compliance": [
+          "C9"
+        ],
+        "adr": [
+          "0014"
+        ],
+        "prd_ac": [
+          "AC2"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-07",
+        "phase:1",
+        "area:web",
+        "compliance"
+      ],
       "priority": "P1",
-      "depends_on": ["PRD-02/ONLINE-BOOK"]
+      "depends_on": [
+        "PRD-02/ONLINE-BOOK"
+      ],
+      "detail": [
+        "The public booking page uses generic service names and withholds S4 prices by configuration (the catalog schedule flag), with no advertising linter (C9). No brands, 'anti-wrinkle injections', prices or #botox appear for S4 services.",
+        "Advertising compliance beyond this is clinic-owned (external tools)."
+      ],
+      "ui_spec": [
+        "Prototype: Settings -> Public booking page (settings-booking.png) — toggle generic names + withhold S4 prices; the public page (public-booking.png) reflects it.",
+        "Configuration-driven, not a linter."
+      ],
+      "data_model": [
+        {
+          "entity": "PublicBookingConfig",
+          "fields": "tenant_id, generic_names(bool), withhold_s4_prices(bool)",
+          "notes": "Shared with PRD-02 ONLINE-BOOK; driven by Service.schedule (ADR-0014)."
+        }
+      ]
     },
     {
       "key": "FOLLOWUPS",
@@ -111,10 +290,39 @@
         "Inbound comms auto-categorise into jobs by rules/keyword (no AI).",
         "A no-show (PRD-02) and negative reviews raise jobs into this queue."
       ],
-      "refs": {"req": ["REQ-NOTIF-7"], "adr": ["0023"]},
-      "labels": ["type:story", "PRD-07", "phase:1", "area:web"],
+      "refs": {
+        "req": [
+          "REQ-NOTIF-7"
+        ],
+        "adr": [
+          "0023"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-07",
+        "phase:1",
+        "area:web"
+      ],
       "priority": "P2",
-      "depends_on": ["PRD-07/CHANNELS"]
+      "depends_on": [
+        "PRD-07/CHANNELS"
+      ],
+      "detail": [
+        "A unified follow-up / job queue: scattered recall, needs-attention and unanswered-comms items merge into one queue; staff can flag any message so it isn't lost; inbound comms auto-categorise into jobs by rules/keyword (no AI). A no-show (PRD-02) and negative reviews raise jobs here.",
+        "The single 'what needs doing' list across the clinic (ADR-0023)."
+      ],
+      "ui_spec": [
+        "Prototype: Follow-ups (followups.png) — a job list with type, client link, assignee, status; actions: open, done, snooze, reopen, reassign, callback; a count badge in the nav.",
+        "Jobs created from recalls, no-shows, flagged messages, reviews, AE."
+      ],
+      "data_model": [
+        {
+          "entity": "Job",
+          "fields": "id, tenant_id, type(recall|callback|review|ae|attention|message), client_id?, source_ref, assignee_id, status(open|snoozed|done), due_at",
+          "notes": "Merged queue; auto-categorised by rules/keyword."
+        }
+      ]
     },
     {
       "key": "INBOX",
@@ -128,9 +336,44 @@
         "Reviews acknowledge/flag/auto-detect-follow-up and the lead CRM are captured for later.",
         "Meta feasibility (App Review, Business Verification, 24-h window) flagged for validation."
       ],
-      "refs": {"req": ["REQ-NOTIF-6", "REQ-NOTIF-8", "REQ-NOTIF-9"], "adr": ["0018", "0032", "0033"]},
-      "labels": ["type:story", "PRD-07", "phase:2plus", "area:integration"],
-      "priority": "P2"
+      "refs": {
+        "req": [
+          "REQ-NOTIF-6",
+          "REQ-NOTIF-8",
+          "REQ-NOTIF-9"
+        ],
+        "adr": [
+          "0018",
+          "0032",
+          "0033"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-07",
+        "phase:2plus",
+        "area:integration"
+      ],
+      "priority": "P2",
+      "detail": [
+        "Placeholder (Phase 2): an omnichannel inbox (IG/FB/SMS/email) with categorisation, client linking and templated/keyword suggested replies (no AI). Meta feasibility (App Review, Business Verification, 24-h window, no cold-DM) means marketing DMs are out — IG/FB/WhatsApp are reactive/service channels while proactive marketing stays on SMS/email.",
+        "Inbound webhooks + provider Send/Conversations APIs behind an IMessagingChannel port (ADR-0018)."
+      ],
+      "ui_spec": [
+        "Prototype: Comms -> Inbox (marketing-inbox.png) — conversation list with channel + category, client linking, flag, templated/keyword replies (scanInbox/openConvo/sendMsg/linkConvo/flagConvo)."
+      ],
+      "data_model": [
+        {
+          "entity": "Conversation",
+          "fields": "id, tenant_id, channel, client_id?, category, status, last_at",
+          "notes": "Phase 2; reactive channels only."
+        },
+        {
+          "entity": "Message",
+          "fields": "id, conversation_id, direction, body, at",
+          "notes": "Inbound via webhooks; flag -> Job."
+        }
+      ]
     },
     {
       "key": "AUTOMATIONS",
@@ -145,10 +388,39 @@
         "Marketing automations respect opt-in/unsubscribe (C23); transactional ones always send.",
         "Drives the same sequence engine as PRD-07/REMINDERS-CARE and PRD-07/RECALL."
       ],
-      "refs": {"req": ["REQ-NOTIF-2", "REQ-NOTIF-3"], "compliance": ["C23"]},
-      "labels": ["type:story", "PRD-07", "phase:1", "area:web"],
+      "refs": {
+        "req": [
+          "REQ-NOTIF-2",
+          "REQ-NOTIF-3"
+        ],
+        "compliance": [
+          "C23"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-07",
+        "phase:1",
+        "area:web"
+      ],
       "priority": "P2",
-      "depends_on": ["PRD-07/REMINDERS-CARE"]
+      "depends_on": [
+        "PRD-07/REMINDERS-CARE"
+      ],
+      "detail": [
+        "The management UI over the sequence engine: configure automations that map a trigger (booking, visit, interval) to a timed sequence of messages, each enable/disable-able and editable per treatment type. Marketing automations respect opt-in/unsubscribe; transactional ones always send.",
+        "Drives the same engine as REMINDERS-CARE and RECALL."
+      ],
+      "ui_spec": [
+        "Prototype: Comms -> Automations (marketing-auto.png) — a list of automations with trigger -> timed steps, on/off toggles (toggleAuto), per-treatment editing."
+      ],
+      "data_model": [
+        {
+          "entity": "Automation",
+          "fields": "id, tenant_id, trigger, treatment_type, sequence_id, enabled(bool)",
+          "notes": "UI over Sequence; respects consent for marketing."
+        }
+      ]
     },
     {
       "key": "REVIEWS",
@@ -163,10 +435,43 @@
         "A caution warns against resharing an S4-endorsing review as a testimonial (C9).",
         "No sentiment-gating of who is asked (request-all)."
       ],
-      "refs": {"req": ["REQ-NOTIF-9"], "compliance": ["C9", "C23"], "adr": ["0032"]},
-      "labels": ["type:story", "PRD-07", "phase:2plus", "area:web", "compliance"],
+      "refs": {
+        "req": [
+          "REQ-NOTIF-9"
+        ],
+        "compliance": [
+          "C9",
+          "C23"
+        ],
+        "adr": [
+          "0032"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-07",
+        "phase:2plus",
+        "area:web",
+        "compliance"
+      ],
       "priority": "P2",
-      "depends_on": ["PRD-07/FOLLOWUPS"]
+      "depends_on": [
+        "PRD-07/FOLLOWUPS"
+      ],
+      "detail": [
+        "Reviews & reputation (Phase 2): request reviews from consented clients, reply/acknowledge, and auto-raise follow-up jobs for negative reviews (<=3 stars) and complaint matches. A staff caution warns against resharing an S4-endorsing review as a prohibited testimonial (C9). No sentiment-gating of who is asked (request-all).",
+        "Manages reputation and catches problems early."
+      ],
+      "ui_spec": [
+        "Prototype: Growth -> Reviews (growth-reviews.png) — request/scan reviews, reply/acknowledge/flag (scanReviews/reviewReply/reviewFlag/reviewAck); negative ones raise jobs into Follow-ups with the testimonial caution."
+      ],
+      "data_model": [
+        {
+          "entity": "Review",
+          "fields": "id, tenant_id, client_id?, source, rating, body, status(new|acknowledged|replied|flagged), at",
+          "notes": "<=3 stars -> Job; testimonial caution (C9)."
+        }
+      ]
     },
     {
       "key": "LEADS-CRM",
@@ -181,10 +486,42 @@
         "Lead follow-ups surface in the Follow-ups queue.",
         "Marketing to leads respects Spam-Act consent (C23)."
       ],
-      "refs": {"req": ["REQ-NOTIF-8"], "compliance": ["C23"], "adr": ["0033"]},
-      "labels": ["type:story", "PRD-07", "phase:2plus", "area:web", "compliance"],
+      "refs": {
+        "req": [
+          "REQ-NOTIF-8"
+        ],
+        "compliance": [
+          "C23"
+        ],
+        "adr": [
+          "0033"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-07",
+        "phase:2plus",
+        "area:web",
+        "compliance"
+      ],
       "priority": "P2",
-      "depends_on": ["PRD-07/FOLLOWUPS"]
+      "depends_on": [
+        "PRD-07/FOLLOWUPS"
+      ],
+      "detail": [
+        "A lead/prospect CRM (Phase 2) over the inbox: track enquiries who haven't booked yet, with source, status and next action; convert to a client/booking preserving history. Lead follow-ups surface in the Follow-ups queue; marketing to leads respects Spam-Act consent.",
+        "Stops enquiries getting lost and improves conversion (ADR-0033)."
+      ],
+      "ui_spec": [
+        "Prototype: Growth -> Leads (CRM) (growth-leads.png) — lead list with source/status/next-action; convert-to-client/booking action."
+      ],
+      "data_model": [
+        {
+          "entity": "Lead",
+          "fields": "id, tenant_id, name, contact, source, status(new|nurturing|won|lost), next_action, converted_client_id?",
+          "notes": "Convert preserves history; consent for marketing (C23)."
+        }
+      ]
     },
     {
       "key": "CAMPAIGNS",
@@ -198,9 +535,37 @@
         "The platform exposes consented audience export / segments for those tools where appropriate (C23).",
         "If ever built in-app, it must honour TGA/AHPRA advertising rules and the no-public-S4-pricing rule (C9)."
       ],
-      "refs": {"compliance": ["C9", "C23"], "adr": ["0034"]},
-      "labels": ["type:story", "PRD-07", "phase:2plus", "area:integration", "compliance"],
-      "priority": "P2"
+      "refs": {
+        "compliance": [
+          "C9",
+          "C23"
+        ],
+        "adr": [
+          "0034"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-07",
+        "phase:2plus",
+        "area:integration",
+        "compliance"
+      ],
+      "priority": "P2",
+      "detail": [
+        "Placeholder: advertising/campaign tooling was withdrawn from scope (ADR-0034 withdrawn) — email campaigns and social belong in the clinic's external tools (Mailchimp, Meta Business Suite). The platform may expose consented audience segments for export. Any in-app campaign must honour TGA/AHPRA rules and the no-public-S4-pricing rule (C9).",
+        "Tracked to reconcile the prototype's Campaigns screen with the scope cut."
+      ],
+      "ui_spec": [
+        "Prototype: Comms -> Campaigns (marketing-camp.png) exists as a concept; real campaigns run in external tools."
+      ],
+      "data_model": [
+        {
+          "entity": "AudienceSegment (export)",
+          "fields": "consented clients matching filters",
+          "notes": "Export to external tools; no in-app advertising engine."
+        }
+      ]
     }
   ]
 }

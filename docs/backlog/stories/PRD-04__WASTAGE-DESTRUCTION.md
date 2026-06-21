@@ -9,6 +9,11 @@
 As a owner, I want to record wastage, disposal and destruction (including partial vials) with certificates, so that we evidence lawful disposal of S4 medicine.
 Wastage and destruction (incl. partial vials) must be recorded via a licensed/RUM pathway with certificates (C16).
 
+## How it works
+
+Wastage and destruction (including partial vials) are recorded via a licensed/RUM pathway with certificate references (C16). Records capture quantity, reason, pathway and certificate, are immutable and audited.
+Closes the medicines loop alongside reconciliation and stocktake.
+
 ## Requirements
 
 - To record wastage, disposal and destruction (including partial vials) with certificates.
@@ -20,6 +25,15 @@ Wastage and destruction (incl. partial vials) must be recorded via a licensed/RU
 - [ ] Partial-vial destruction is supported.
 - [ ] Licensed/RUM disposal pathway is recorded.
 - [ ] Records are immutable and audited.
+
+## UI designs / screenshots
+
+- Prototype: Stock & medicines -> record wastage/destruction (stock.png) — quantity, reason, pathway, certificate ref; also surfaced in the back-office waste log (backroom.png).
+
+## Suggested data model
+
+- **StockDestruction** — id, lot_id, units, reason, pathway(RUM|licensed), certificate_ref, at, actor_id
+  - _Partial-vial supported; immutable + audited (C16)._
 
 ## Technical notes (high level)
 

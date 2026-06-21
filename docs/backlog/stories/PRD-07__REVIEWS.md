@@ -9,6 +9,11 @@
 As a owner, I want to request reviews and manage replies, with negative ones auto-raising follow-ups, so that reputation is managed and problems are caught early.
 The prototype's Growth → Reviews screen (scanReviews/reviewReply/reviewFlag/reviewAck) requests reviews, replies/acknowledges, and auto-raises follow-up jobs for negative reviews (≤3★) — with a staff caution against resharing an S4-endorsing review as a prohibited testimonial.
 
+## How it works
+
+Reviews & reputation (Phase 2): request reviews from consented clients, reply/acknowledge, and auto-raise follow-up jobs for negative reviews (<=3 stars) and complaint matches. A staff caution warns against resharing an S4-endorsing review as a prohibited testimonial (C9). No sentiment-gating of who is asked (request-all).
+Manages reputation and catches problems early.
+
 ## Requirements
 
 - To request reviews and manage replies, with negative ones auto-raising follow-ups.
@@ -24,7 +29,14 @@ The prototype's Growth → Reviews screen (scanReviews/reviewReply/reviewFlag/re
 
 ## UI designs / screenshots
 
-prototype.html — Comms & growth (Inbox/Automations/Campaigns), Growth (Leads/Reviews), Follow-ups, Settings → Public booking page; booking-widget.html.
+_Prototype screen: prototype.html — Comms & growth (Inbox/Automations/Campaigns), Growth (Leads/Reviews), Follow-ups, Settings → Public booking page; booking-widget.html._
+
+- Prototype: Growth -> Reviews (growth-reviews.png) — request/scan reviews, reply/acknowledge/flag (scanReviews/reviewReply/reviewFlag/reviewAck); negative ones raise jobs into Follow-ups with the testimonial caution.
+
+## Suggested data model
+
+- **Review** — id, tenant_id, client_id?, source, rating, body, status(new|acknowledged|replied|flagged), at
+  - _<=3 stars -> Job; testimonial caution (C9)._
 
 ## Technical notes (high level)
 

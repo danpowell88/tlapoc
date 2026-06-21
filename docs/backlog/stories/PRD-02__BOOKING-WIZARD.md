@@ -9,6 +9,11 @@
 As a front desk, I want a guided booking wizard to create an appointment in a few steps, so that I can book clients quickly at the desk or over the phone.
 The prototype's front-desk 'New booking' wizard (service select, slot pick, client attach, confirm) is the staff counterpart to client self-booking, and the entry point most bookings flow through.
 
+## How it works
+
+The staff booking wizard is the desk/phone counterpart to online self-booking and the path most bookings flow through: service -> practitioner -> time slot -> client -> confirm, with the cancellation policy shown and reminders scheduled.
+Scope-aware: injectable services only offer cleared RN/NP; under-18 is flagged for cooling-off.
+
 ## Requirements
 
 - A guided booking wizard to create an appointment in a few steps.
@@ -23,7 +28,15 @@ The prototype's front-desk 'New booking' wizard (service select, slot pick, clie
 
 ## UI designs / screenshots
 
-prototype.html — Schedule, 'New booking' wizard, Clients directory & 360.
+_Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients directory & 360._
+
+- Prototype: 'New booking' wizard (booking-wizard.png) — stepper (service, practitioner, slot, client, confirm); attach existing client or create inline; slot grid reflects roster + availability.
+- Confirmation shows policy + schedules reminders.
+
+## Suggested data model
+
+- **Appointment** — (as CALENDAR) source=desk
+  - _Created via the wizard; same entity/flow._
 
 ## Technical notes (high level)
 

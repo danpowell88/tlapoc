@@ -9,6 +9,11 @@
 As a developer, I want a payment-provider abstraction with a Square adapter and cash tender, so that payments are swappable and PCI-safe.
 An IPaymentProvider port (authorize/capture, refund, void, tokenize, recurring, gift-card) with a Square adapter first and cash as an internal tender; no PAN stored, only tokens (ADR-0007).
 
+## How it works
+
+A payment-provider abstraction (IPaymentProvider) exposes authorize/capture, refund, void, tokenize, recurring and gift-card, with a Square adapter first and cash as an internal tender. No PAN is ever stored — only provider tokens (ADR-0007, PCI-safe).
+Built on the SPIKE-SQUARE findings; keeps the platform provider-swappable.
+
 ## Requirements
 
 - A payment-provider abstraction with a Square adapter and cash tender.
@@ -19,6 +24,17 @@ An IPaymentProvider port (authorize/capture, refund, void, tokenize, recurring, 
 - [ ] Square adapter implemented; cash is an internal tender.
 - [ ] No PAN is ever stored — only provider tokens.
 - [ ] Built on SPIKE-SQUARE findings.
+
+## UI designs / screenshots
+
+- No dedicated screen — surfaces through Checkout (checkout.png) and membership card-on-file capture; this story is the backend port + Square adapter.
+
+## Suggested data model
+
+- **PaymentMethodToken** — id, tenant_id, client_id, provider(square), token_ref, brand, last4, exp
+  - _Token only; no PAN (ADR-0007)._
+- **ProviderTxn** — id, payment_id, provider_ref, type(auth|capture|refund|void), amount, status
+  - _Adapter-mapped provider transactions._
 
 ## Technical notes (high level)
 

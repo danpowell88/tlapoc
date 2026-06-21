@@ -9,6 +9,11 @@
 As a front desk, I want one search box that finds clients, appointments and invoices, so that I can jump to anything in a couple of keystrokes.
 The prototype header has a global search across clients, appointments and invoices — a core front-desk speed feature absent from the backlog.
 
+## How it works
+
+One global search across clients, appointments and invoices, grouped by type, returning tenant-scoped results that respect role/financial gating (no money to non-owner). Selecting a result deep-links to the relevant screen; keyboard-accessible and fast.
+The front-desk speed feature — jump to anything in a couple of keystrokes.
+
 ## Requirements
 
 - One search box that finds clients, appointments and invoices.
@@ -23,7 +28,14 @@ The prototype header has a global search across clients, appointments and invoic
 
 ## UI designs / screenshots
 
-prototype.html — header search box.
+_Prototype screen: prototype.html — header search box._
+
+- Prototype: the header search box (dashboard.png, 'Search clients, appointments, invoices…') — grouped results; select -> deep link.
+
+## Suggested data model
+
+- **(index) SearchIndex** — client/appointment/invoice projections, tenant-scoped
+  - _Role/financial-filtered results._
 
 ## Technical notes (high level)
 

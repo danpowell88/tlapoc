@@ -9,6 +9,11 @@
 As a staff member, I want an in-app notification centre for events relevant to my role, so that I don't miss time-sensitive things.
 The header bell + badges imply an in-app notification surface for alerts (new bookings, failed payments, expiries, AE/recall, jobs assigned).
 
+## How it works
+
+An in-app notification centre surfacing role-relevant events (new bookings, failed payments, expiries, AE/recall, job assignment) with read/unread state + a badge count per user; each notification deep-links to its source. In-app is one delivery target of INotifier (PRD-07).
+So time-sensitive things aren't missed.
+
 ## Requirements
 
 - An in-app notification centre for events relevant to my role.
@@ -22,7 +27,14 @@ The header bell + badges imply an in-app notification surface for alerts (new bo
 
 ## UI designs / screenshots
 
-prototype.html — sidebar/app shell, Today dashboard, header (global search, clinic switcher, switch-user, scope tooltip).
+_Prototype screen: prototype.html — sidebar/app shell, Today dashboard, header (global search, clinic switcher, switch-user, scope tooltip)._
+
+- Prototype: the header bell + badge (dashboard.png) -> a notification list; each item deep-links to its source.
+
+## Suggested data model
+
+- **Notification** — id, tenant_id, user_id, kind, source_ref, read(bool), at
+  - _Per-user; in-app channel of INotifier._
 
 ## Technical notes (high level)
 

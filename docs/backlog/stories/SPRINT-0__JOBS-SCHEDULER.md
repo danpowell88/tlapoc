@@ -9,6 +9,10 @@
 As a platform engineer, I want a background-job framework with scheduling, retries, idempotency and dead-lettering, so that time-driven and async work runs reliably and observably.
 Many features are time-driven, not user-driven: reminders/recall sends, membership autopay + dunning retries, retention timers, temperature polling, expiry alerts, read-model projections. A reliable background worker + scheduler is needed before those features land.
 
+## How it works
+
+A background-job framework (scheduler + queue) with retry, back-off, idempotency and dead-lettering — the engine behind every time-driven feature: reminder/recall sends, membership autopay + dunning, retention timers, temperature polling, expiry alerts and read-model projections. Jobs are tenant-aware and run under an audited elevated context (the RLS bypass path), and runs are observable.
+
 ## Requirements
 
 - A background-job framework with scheduling, retries, idempotency and dead-lettering.
@@ -19,6 +23,11 @@ Many features are time-driven, not user-driven: reminders/recall sends, membersh
 - [ ] Jobs are tenant-aware and run under an audited elevated context (per RLS bypass path).
 - [ ] Job runs are observable (metrics/logs/alerts) via the Sprint 0 observability stack.
 - [ ] A sample recurring job (e.g. expiry scan) and a sample queued job are demonstrated.
+
+## Suggested data model
+
+- **JobRun** — id, type, payload, scheduled_for, attempts, status(queued|running|done|dead), tenant_id
+  - _Retry/back-off; dead-letter; audited elevated context._
 
 ## Technical notes (high level)
 

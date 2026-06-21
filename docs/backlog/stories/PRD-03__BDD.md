@@ -9,6 +9,11 @@
 As a RN/NP, I want a BDD/psychological screen completed and surfaced before I proceed, so that I can avoid harm for at-risk patients per the guidelines.
 Cosmetic guidelines require BDD screening; a positive result must be surfaced to the prescriber before treatment (C3).
 
+## How it works
+
+Cosmetic guidelines require screening for Body Dysmorphic Disorder. A validated BDD/psychological instrument is embedded in intake; a completed screen authored/reviewed by an RN/NP must be present before treatment, and a positive flag is surfaced to the prescriber.
+Which validated instrument to embed is an open question to confirm clinically.
+
 ## Requirements
 
 - A BDD/psychological screen completed and surfaced before I proceed.
@@ -20,6 +25,16 @@ Cosmetic guidelines require BDD screening; a positive result must be surfaced to
 - [ ] A completed screen authored/reviewed by an RN/NP is present before treatment.
 - [ ] A positive flag is surfaced to the prescriber and recorded.
 - [ ] Which instrument is used is configurable (open question to confirm).
+
+## UI designs / screenshots
+
+- Client app: the BDD/wellbeing screen within the intake wizard (client-app.png).
+- Charting pre-treatment review (charting.png) shows a 'BDD screen: clear' / flagged chip to the prescriber.
+
+## Suggested data model
+
+- **ScreeningResult** — id, tenant_id, client_id, instrument, answers(json), score, flag(bool), reviewed_by, reviewed_at
+  - _Positive flag surfaced to prescriber; required before treatment (C3)._
 
 ## Technical notes (high level)
 

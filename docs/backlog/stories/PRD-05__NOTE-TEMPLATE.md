@@ -9,6 +9,11 @@
 As a injector, I want a guided note that first surfaces safety, last treatment and the consult/Rx, then a toxin template, so that I chart quickly and safely with the right context in front of me.
 Charting is a guided, treatment-type-aware flow: a pre-treatment review (safety + last-treatment + consult/Rx surfaced) then a configurable toxin note (structured + free text + snippets) (REQ-CLIN-1/9).
 
+## How it works
+
+Charting is a guided, treatment-type-aware flow. Step 1 (pre-treatment review) surfaces safety flags, the last treatment, and the linked consult/Rx — read-only context the injector checks before starting. The toxin note is a configurable template (structured fields + free text + reusable phrases/snippets); a non-S4 skin variant swaps the map for a skin note.
+Charting cannot open unless the consult+consent gate (PRD-03/04) is satisfied — the safe path is the only path.
+
 ## Requirements
 
 - A guided note that first surfaces safety, last treatment and the consult/Rx, then a toxin template.
@@ -22,7 +27,18 @@ Charting is a guided, treatment-type-aware flow: a pre-treatment review (safety 
 
 ## UI designs / screenshots
 
-prototype.html — Charting + Clinical (Skin analysis, Body contouring, Complication protocols, Photography & outcomes); treatment-room.html.
+_Prototype screen: prototype.html — Charting + Clinical (Skin analysis, Body contouring, Complication protocols, Photography & outcomes); treatment-room.html._
+
+- Prototype: Charting (charting.png) — header gate chips; Step 1 'Pre-treatment review' card (Allergies/Contraindications/BDD/Consent/Consult chips + 'Last treatment: 24u 12 Mar forehead+glabella Bella RN' + Consult & prescription).
+- Treatment-type toggle: Anti-wrinkle (toxin) / Skin treatment.
+- A finalise close-out captures aftercare, recall, the 2-day wellbeing call and any adverse event before checkout.
+
+## Suggested data model
+
+- **ChartEntry** — id, tenant_id, client_id, appointment_id, consult_id, treatment_type, status(draft|final), author_id, finalised_at
+  - _Shared with MAPPING; one per treatment._
+- **NoteTemplate** — id, tenant_id, treatment_type, fields(json), snippets[]
+  - _Configurable toxin template; non-S4 skin variant._
 
 ## Technical notes (high level)
 

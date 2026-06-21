@@ -6,7 +6,13 @@
     "phase": "1",
     "prd": "docs/prds/PRD-09-apps-client-provider.md",
     "summary": "Two Flutter apps over the shared .NET API: a client app (book, intake/consent, photos, memberships, rewards, balances, card-on-file) and a provider app (room-side charting, injection mapping, camera capture, consult/Rx, finalise) — the latter resilient to treatment-room connectivity. One codebase, two flavours, sharing auth, the API client and the design system.",
-    "labels": ["type:epic", "PRD-09", "phase:1", "area:client-app", "area:provider-app"]
+    "labels": [
+      "type:epic",
+      "PRD-09",
+      "phase:1",
+      "area:client-app",
+      "area:provider-app"
+    ]
   },
   "stories": [
     {
@@ -22,10 +28,44 @@
         "Sign-in via social/email/OTP, tenant-scoped.",
         "Reminders/recall (PRD-07) are received in-app."
       ],
-      "refs": {"req": ["REQ-APP-1"], "adr": ["0004"], "prd_ac": ["AC1", "AC4"]},
-      "labels": ["type:story", "PRD-09", "phase:1", "area:client-app"],
+      "refs": {
+        "req": [
+          "REQ-APP-1"
+        ],
+        "adr": [
+          "0004"
+        ],
+        "prd_ac": [
+          "AC1",
+          "AC4"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-09",
+        "phase:1",
+        "area:client-app"
+      ],
       "priority": "P1",
-      "depends_on": ["PRD-02/ONLINE-BOOK", "PRD-03/CONSENT"]
+      "depends_on": [
+        "PRD-02/ONLINE-BOOK",
+        "PRD-03/CONSENT"
+      ],
+      "detail": [
+        "The client completes the full pre-visit journey entirely in-app: book -> intake -> e-sign consent (incl. image-use), then receives reminders/recall. Surfaces PRD-02 booking and PRD-03 intake/consent through the Flutter client app; sign-in via social/email/OTP, tenant-scoped.",
+        "Removes paperwork and gets clients ready before they arrive."
+      ],
+      "ui_spec": [
+        "Prototype: client app (client-app.png) bottom-tabs — Home/For you, Book, then the intake + consent flow ('You're booked!', 'All set — thank you').",
+        "Reminders/recall received in-app."
+      ],
+      "data_model": [
+        {
+          "entity": "(reuses)",
+          "fields": "Appointment (PRD-02) + IntakeResponse/ConsentSignature (PRD-03) via the API",
+          "notes": "Client app is a surface over those modules."
+        }
+      ]
     },
     {
       "key": "CLIENT-CARE",
@@ -40,10 +80,43 @@
         "Card-on-file can be added in-app (feeds PRD-06 autopay).",
         "No one-off online checkout is exposed."
       ],
-      "refs": {"req": ["REQ-APP-1"], "compliance": ["C14"], "prd_ac": ["AC5"]},
-      "labels": ["type:story", "PRD-09", "phase:1", "area:client-app"],
+      "refs": {
+        "req": [
+          "REQ-APP-1"
+        ],
+        "compliance": [
+          "C14"
+        ],
+        "prd_ac": [
+          "AC5"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-09",
+        "phase:1",
+        "area:client-app"
+      ],
       "priority": "P2",
-      "depends_on": ["PRD-06/MEMBERSHIP", "PRD-05/PHOTOS"]
+      "depends_on": [
+        "PRD-06/MEMBERSHIP",
+        "PRD-05/PHOTOS"
+      ],
+      "detail": [
+        "In the app the client views consented before/after photos, memberships, rewards/perks and balances, and adds a card-on-file for autopay (feeds PRD-06). No one-off online checkout is exposed.",
+        "Self-service for care history and payments."
+      ],
+      "ui_spec": [
+        "Prototype: client app (client-app.png) tabs — My care (visit history, photos with consent), Rewards (redeem points, gift cards), Account (update card on file).",
+        "Photo viewing is image-use-consent-gated."
+      ],
+      "data_model": [
+        {
+          "entity": "(reuses)",
+          "fields": "Photo (PRD-05), Membership/RewardLedger/AccountBalance (PRD-06), PaymentMethodToken",
+          "notes": "Card-on-file feeds PRD-06 autopay; no one-off checkout."
+        }
+      ]
     },
     {
       "key": "CLIENT-PRIVACY",
@@ -58,10 +131,39 @@
         "Requests are tracked to resolution.",
         "Actions are audited."
       ],
-      "refs": {"req": ["REQ-APP-1"], "compliance": ["C21"]},
-      "labels": ["type:story", "PRD-09", "phase:1", "area:client-app", "compliance"],
+      "refs": {
+        "req": [
+          "REQ-APP-1"
+        ],
+        "compliance": [
+          "C21"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-09",
+        "phase:1",
+        "area:client-app",
+        "compliance"
+      ],
       "priority": "P2",
-      "depends_on": ["PRD-01/PRIVACY-RIGHTS"]
+      "depends_on": [
+        "PRD-01/PRIVACY-RIGHTS"
+      ],
+      "detail": [
+        "The Account area exposes profile, balances, card-on-file and a 'Your data & privacy' surface: the residency note ('your data stays in Australia'), request a copy, request correction, and request account deletion — tracked to resolution and audited (APP 12/13, PRD-01).",
+        "Puts the client in control of their information."
+      ],
+      "ui_spec": [
+        "Prototype: client app Account (client-app.png) — 'Edit profile', 'Update card on file', 'Request account deletion', privacy/access-correction; residency trust note."
+      ],
+      "data_model": [
+        {
+          "entity": "(reuses)",
+          "fields": "PrivacyRequest (PRD-01) — access/correction/deletion with DSAR clock",
+          "notes": "Self-service entry point; staff resolve via Governance."
+        }
+      ]
     },
     {
       "key": "PROVIDER-DAY",
@@ -76,10 +178,42 @@
         "The consult+consent gate (PRD-03/04) is enforced before charting opens.",
         "Quick links to map/photos/finalise."
       ],
-      "refs": {"req": ["REQ-APP-2"], "adr": ["0004"], "prd_ac": ["AC1"]},
-      "labels": ["type:story", "PRD-09", "phase:1", "area:provider-app"],
+      "refs": {
+        "req": [
+          "REQ-APP-2"
+        ],
+        "adr": [
+          "0004"
+        ],
+        "prd_ac": [
+          "AC1"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-09",
+        "phase:1",
+        "area:provider-app"
+      ],
       "priority": "P1",
-      "depends_on": ["PRD-05/NOTE-TEMPLATE"]
+      "depends_on": [
+        "PRD-05/NOTE-TEMPLATE"
+      ],
+      "detail": [
+        "The provider app shows the practitioner's day and opens a patient with consult+consent status shown before charting — the consult+consent gate (PRD-03/04) is enforced before charting opens. Provider signs in via Entra SSO, tenant-scoped.",
+        "Room-side starting point with the right context and gates."
+      ],
+      "ui_spec": [
+        "Prototype: provider app (treatment-room.png) — 'Today · Room 2' schedule; open a patient -> 'Consent & prescriber authorisation' status; quick links to map/photos/finalise.",
+        "Bottom tabs: Schedule / Patient / Medicines / Tasks."
+      ],
+      "data_model": [
+        {
+          "entity": "(reuses)",
+          "fields": "Appointment (PRD-02) + gate (PRD-03/04)",
+          "notes": "Provider app surface; Entra SSO."
+        }
+      ]
     },
     {
       "key": "PROVIDER-ROOMSIDE",
@@ -94,10 +228,48 @@
         "Finalisation is server-side; once finalised the entry is read-only.",
         "Thumb-first, gloves-on usability (UX §1)."
       ],
-      "refs": {"req": ["REQ-APP-2"], "compliance": ["C14"], "adr": ["0009"], "prd_ac": ["AC2", "AC6"]},
-      "labels": ["type:story", "PRD-09", "phase:1", "area:provider-app", "compliance"],
+      "refs": {
+        "req": [
+          "REQ-APP-2"
+        ],
+        "compliance": [
+          "C14"
+        ],
+        "adr": [
+          "0009"
+        ],
+        "prd_ac": [
+          "AC2",
+          "AC6"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-09",
+        "phase:1",
+        "area:provider-app",
+        "compliance"
+      ],
       "priority": "P1",
-      "depends_on": ["PRD-05/MAPPING", "PRD-05/PHOTOS"]
+      "depends_on": [
+        "PRD-05/MAPPING",
+        "PRD-05/PHOTOS"
+      ],
+      "detail": [
+        "Room-side charting on the provider app: map injections, capture photos via signed URLs (never on device), record consult/link script and finalise — surfacing PRD-04/05. Thumb-first, gloves-on usability; finalisation is server-side and the entry becomes read-only once final.",
+        "The hero clinical workflow at the chair."
+      ],
+      "ui_spec": [
+        "Prototype: provider app (treatment-room.png) — 'Treatment record', 'Treatment settings', the injection map + camera; finalise locks the note.",
+        "Photos capture to central storage; none persist on device after sync (C14)."
+      ],
+      "data_model": [
+        {
+          "entity": "(reuses)",
+          "fields": "ChartEntry/InjectionPoint/Photo (PRD-05), Administration (PRD-04)",
+          "notes": "Same entities; provider-app surface."
+        }
+      ]
     },
     {
       "key": "PROVIDER-OFFLINE",
@@ -112,10 +284,41 @@
         "Finalise is disabled until synced.",
         "Built on SPIKE-OFFLINE and PRD-05/OFFLINE."
       ],
-      "refs": {"req": ["REQ-APP-3"], "adr": ["0015"], "prd_ac": ["AC3"]},
-      "labels": ["type:story", "PRD-09", "phase:1", "area:provider-app"],
+      "refs": {
+        "req": [
+          "REQ-APP-3"
+        ],
+        "adr": [
+          "0015"
+        ],
+        "prd_ac": [
+          "AC3"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-09",
+        "phase:1",
+        "area:provider-app"
+      ],
       "priority": "P1",
-      "depends_on": ["PRD-05/OFFLINE"]
+      "depends_on": [
+        "PRD-05/OFFLINE"
+      ],
+      "detail": [
+        "The provider app keeps working offline: charting/photos queue locally (encrypted) and sync on reconnect with no loss; a persistent indicator shows queued count + last-sync, and finalise is disabled until synced (ADR-0015, built on SPIKE-OFFLINE + PRD-05/OFFLINE).",
+        "Treatment-room Wi-Fi drops never cost the clinician data."
+      ],
+      "ui_spec": [
+        "Prototype: provider app (treatment-room.png) — a persistent sync/offline indicator; queued-items count + last-sync; finalise disabled until synced."
+      ],
+      "data_model": [
+        {
+          "entity": "(reuses)",
+          "fields": "LocalQueue (PRD-05/OFFLINE) on-device",
+          "notes": "Encrypted; last-write-wins drafts; server-side finalise."
+        }
+      ]
     },
     {
       "key": "APP-DISTRIBUTION",
@@ -130,10 +333,40 @@
         "Versioning + minimum-supported-version handling in place.",
         "Crash/usage telemetry feeds observability."
       ],
-      "refs": {"req": ["REQ-APP-1", "REQ-APP-2"], "adr": ["0006"]},
-      "labels": ["type:story", "PRD-09", "phase:1", "area:client-app", "area:provider-app"],
+      "refs": {
+        "req": [
+          "REQ-APP-1",
+          "REQ-APP-2"
+        ],
+        "adr": [
+          "0006"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-09",
+        "phase:1",
+        "area:client-app",
+        "area:provider-app"
+      ],
       "priority": "P2",
-      "depends_on": ["SPRINT-0/FLUTTER"]
+      "depends_on": [
+        "SPRINT-0/FLUTTER"
+      ],
+      "detail": [
+        "Store distribution + (where the compliance posture allows) code-push (e.g. Shorebird) for both Flutter apps from CI, with versioning + minimum-supported-version handling and crash/usage telemetry into observability (ADR-0006).",
+        "Lets the clinic ship and responsibly patch the apps."
+      ],
+      "ui_spec": [
+        "No in-app screen — release pipeline + an in-app 'update required' gate for unsupported versions."
+      ],
+      "data_model": [
+        {
+          "entity": "AppRelease",
+          "fields": "platform, version, min_supported, channel, code_push_ref?",
+          "notes": "Code-push viability assessed for compliance."
+        }
+      ]
     },
     {
       "key": "CHECKIN-KIOSK",
@@ -148,10 +381,39 @@
         "Check-in updates the visit lifecycle/Today board (PRD-02).",
         "The surface is locked-down (no access to other clients' data) and times out between clients."
       ],
-      "refs": {"req": ["REQ-BOOK-4"], "compliance": ["C10"]},
-      "labels": ["type:story", "PRD-09", "phase:1", "area:web"],
+      "refs": {
+        "req": [
+          "REQ-BOOK-4"
+        ],
+        "compliance": [
+          "C10"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-09",
+        "phase:1",
+        "area:web"
+      ],
       "priority": "P2",
-      "depends_on": ["PRD-02/LIFECYCLE", "PRD-03/GATING"]
+      "depends_on": [
+        "PRD-02/LIFECYCLE",
+        "PRD-03/GATING"
+      ],
+      "detail": [
+        "A reception-desk tablet where clients self-check-in: verify identity/appointment and complete any outstanding intake/consent, updating the visit lifecycle / Today board (PRD-02). The surface is locked-down (no access to other clients' data) and times out between clients.",
+        "Speeds arrivals and captures missing pre-visit items."
+      ],
+      "ui_spec": [
+        "Prototype: check-in tablet (checkin.png) — 'Welcome in' self-check-in; verify appointment, complete outstanding intake/consent; returns to a neutral state between clients."
+      ],
+      "data_model": [
+        {
+          "entity": "(reuses)",
+          "fields": "Appointment.status -> checked_in (PRD-02); IntakeResponse/ConsentSignature (PRD-03)",
+          "notes": "Kiosk session is single-client + auto-timeout."
+        }
+      ]
     },
     {
       "key": "BACKOFFICE-TABLET",
@@ -166,10 +428,42 @@
         "Role/financial gating applies; actions are audited.",
         "Usable on a shared device with appropriate session handling."
       ],
-      "refs": {"req": ["REQ-MED-2", "REQ-FAC-2"], "compliance": ["C8", "C20"]},
-      "labels": ["type:story", "PRD-09", "phase:1", "area:web"],
+      "refs": {
+        "req": [
+          "REQ-MED-2",
+          "REQ-FAC-2"
+        ],
+        "compliance": [
+          "C8",
+          "C20"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-09",
+        "phase:1",
+        "area:web"
+      ],
       "priority": "P2",
-      "depends_on": ["PRD-11/OPENCLOSE", "PRD-07/FOLLOWUPS"]
+      "depends_on": [
+        "PRD-11/OPENCLOSE",
+        "PRD-07/FOLLOWUPS"
+      ],
+      "detail": [
+        "A bench tablet for behind-the-scenes work: open/close checklist, cold-chain log, stock on hand, S4 drug register, waste/disposal log, tasks and shift handover — each panel reusing the underlying modules (PRD-04 medicines, PRD-11 operations, PRD-07 jobs). Role/financial gating applies; actions audited.",
+        "A focused operations view for the back room."
+      ],
+      "ui_spec": [
+        "Prototype: back-office tablet (backroom.png) — 'Good morning', Open & close, Cold chain, Stock on hand, Schedule 4 drug register, Waste & disposal log, Tasks, Shift handover.",
+        "Shared-device session handling."
+      ],
+      "data_model": [
+        {
+          "entity": "(reuses)",
+          "fields": "OpenCloseChecklist/TempLog/StockItem/StockLedger/StockDestruction/Job/ShiftHandover",
+          "notes": "Aggregates operations + medicines + jobs."
+        }
+      ]
     },
     {
       "key": "CLIENT-CONCERN",
@@ -184,10 +478,42 @@
         "Staff can call back, resolve, or escalate to an adverse event (PRD-05) / complaint (PRD-11).",
         "The client sees acknowledgement; the exchange is recorded and audited."
       ],
-      "refs": {"req": ["REQ-CLIN-5", "REQ-CLI-4"], "compliance": ["C12", "C24"]},
-      "labels": ["type:story", "PRD-09", "phase:1", "area:client-app", "compliance"],
+      "refs": {
+        "req": [
+          "REQ-CLIN-5",
+          "REQ-CLI-4"
+        ],
+        "compliance": [
+          "C12",
+          "C24"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-09",
+        "phase:1",
+        "area:client-app",
+        "compliance"
+      ],
       "priority": "P1",
-      "depends_on": ["PRD-07/FOLLOWUPS", "PRD-05/ADVERSE-EVENT"]
+      "depends_on": [
+        "PRD-07/FOLLOWUPS",
+        "PRD-05/ADVERSE-EVENT"
+      ],
+      "detail": [
+        "A safety-critical client->clinic channel: the client reports a post-treatment concern (with optional photo, consent-respecting) from the app, raising a follow-up job for staff with the client/treatment linked. Staff can call back, resolve, or escalate to an adverse event (PRD-05) / complaint (PRD-11). The client sees acknowledgement; the exchange is recorded and audited.",
+        "Bridges the client app to staff follow-ups (the concern bridge, localStorage in the proto)."
+      ],
+      "ui_spec": [
+        "Prototype: client app 'Report a concern' (client-app.png) -> appears in staff Follow-ups (followups.png) as a job (openConcern/concernCall)."
+      ],
+      "data_model": [
+        {
+          "entity": "Concern",
+          "fields": "id, tenant_id, client_id, treatment_ref, body, photo_ref?, status, raised_at",
+          "notes": "Raises a Job (PRD-07); escalate -> AdverseEvent/Complaint."
+        }
+      ]
     }
   ]
 }

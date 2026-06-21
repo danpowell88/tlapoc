@@ -9,6 +9,11 @@
 As a dermal therapist / injector, I want to record a structured skin assessment (and optionally an AI-assisted scan) and share results with the client, so that skin treatment is planned and tracked, and clients see their progress.
 The prototype's Clinical → Skin analysis screen captures a structured skin assessment with zone scoring, an AI scan (simulateScan) and a push-to-client summary (pushSkinToClient). Per the no-AI-in-v1 stance, AI scoring is advisory/Phase 2; the manual assessment record can be v1.
 
+## How it works
+
+A structured skin assessment (concerns, zones, scores) recorded against the client, optionally with an AI-assisted scan, and a summary that can be pushed to the client app. Per the no-AI-in-v1 stance, AI auto-scoring is advisory + human-confirmed and gated to Phase 2; the manual assessment record can be v1.
+Assessments feed treatment planning and outcomes.
+
 ## Requirements
 
 - To record a structured skin assessment (and optionally an AI-assisted scan) and share results with the client.
@@ -23,7 +28,15 @@ The prototype's Clinical → Skin analysis screen captures a structured skin ass
 
 ## UI designs / screenshots
 
-prototype.html — Clinical → Skin analysis (scan + push-to-client); client-app.html.
+_Prototype screen: prototype.html — Clinical → Skin analysis (scan + push-to-client); client-app.html._
+
+- Prototype: Clinical -> Skin analysis (clinical-skin.png) — zone scoring, a scan action (simulateScan), and a push-to-client summary (pushSkinToClient); appears in the client app.
+- AI scoring shown as advisory; clinician confirms.
+
+## Suggested data model
+
+- **SkinAssessment** — id, tenant_id, client_id, zones[]{area, concern, score}, source(manual|ai_advisory), pushed_to_client_at
+  - _Feeds plans/outcomes; AI advisory (Phase 2)._
 
 ## Technical notes (high level)
 

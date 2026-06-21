@@ -7,6 +7,10 @@
 As a engineer, I want a time-boxed spike proving staff + client sign-in from Flutter and web through to authorised .NET API calls, so that the auth wiring stories proceed on a proven approach.
 End-to-end auth across Entra (staff), Entra External ID (clients), Flutter and .NET is novel enough to de-risk before committing the auth wiring stories.
 
+## How it works
+
+Time-boxed spike proving end-to-end auth: staff (Entra) + client (External ID) sign-in from Flutter and web through to an authorised .NET call carrying tenant + role claims usable for RLS/RBAC. De-risks the highest-uncertainty plumbing before the AUTH wiring stories; output is findings + an ADR if needed.
+
 ## Requirements
 
 - A time-boxed spike proving staff + client sign-in from Flutter and web through to authorised .NET API calls.

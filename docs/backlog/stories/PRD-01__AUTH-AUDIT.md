@@ -9,6 +9,11 @@
 As a compliance officer, I want an audit of authentication and authorisation events, including blocked out-of-scope attempts, so that we can investigate access and prove the gates work.
 Beyond data-access audit, security needs a record of authentication and authorisation events: sign-in success/failure, lockouts, MFA/step-up, role switches and every scope-block (a blocked out-of-scope action).
 
+## How it works
+
+Beyond data-access audit, security needs a record of authentication/authorisation events: sign-in success/failure, lockouts, MFA/step-up, role switches and every scope-block (a blocked out-of-scope or lapsed-registration attempt, with the reason).
+Queryable/exportable alongside the data-access audit; can seed the breach workflow on suspicious patterns.
+
 ## Requirements
 
 - An audit of authentication and authorisation events, including blocked out-of-scope attempts.
@@ -20,6 +25,15 @@ Beyond data-access audit, security needs a record of authentication and authoris
 - [ ] Every blocked out-of-scope or lapsed-registration action writes an audit event with the reason.
 - [ ] These events are queryable/exportable alongside the data-access audit.
 - [ ] Suspicious patterns can feed the breach workflow (PRD-01/BREACH).
+
+## UI designs / screenshots
+
+- Surfaces in the admin audit viewer / Governance audit pack filtered to auth + authorisation events.
+
+## Suggested data model
+
+- **AuthEvent** — id, tenant_id, actor_id, kind(signin_ok|signin_fail|lockout|mfa|stepup|role_switch|scope_block), reason, at
+  - _Peer of AuditEvent; scope_block records the blocked capability._
 
 ## Technical notes (high level)
 

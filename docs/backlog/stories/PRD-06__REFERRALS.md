@@ -7,6 +7,11 @@
 As a client / owner, I want to refer friends and earn non-S4 credit, so that word-of-mouth growth is rewarded compliantly.
 The prototype's Memberships → Referrals screen shows referral/affiliate credit. Per scope, advanced loyalty/referrals are Phase 2 and referral/affiliate credit is non-S4 only (REQ-MEMB-10).
 
+## How it works
+
+Placeholder (Phase 2): referrals/affiliate credit, non-S4 only — reusing the rewards-engine guardrail (no S4 incentive, C9). Core membership/rewards mechanics ship first.
+Captured so the rewards model stays referral-ready.
+
 ## Requirements
 
 - To refer friends and earn non-S4 credit.
@@ -21,7 +26,14 @@ The prototype's Memberships → Referrals screen shows referral/affiliate credit
 
 ## UI designs / screenshots
 
-prototype.html — Checkout, Memberships; client-app.html Rewards/Account.
+_Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rewards/Account._
+
+- Prototype: Memberships -> Referrals (memb-referrals.png) — referral/affiliate credit concept.
+
+## Suggested data model
+
+- **Referral** — id, referrer_id, referee_id, credit(non-S4), status
+  - _Phase 2; non-S4 credit only._
 
 ## Technical notes (high level)
 

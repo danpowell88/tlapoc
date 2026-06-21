@@ -9,6 +9,11 @@
 As a owner / compliance officer, I want to publish policies and track staff sign-off, so that I can evidence that the team has read current procedures.
 The prototype's Governance → Policies screen (signPolicy) tracks staff acknowledgement/sign-off of clinic policies and procedures, part of the Governance hub.
 
+## How it works
+
+Policies & procedures sign-off: versioned policies published to relevant roles, with staff sign-off recorded per version + date; outstanding sign-offs surface and a policy change requires re-acknowledgement. Sign-off status is included in the inspection pack.
+Evidences that the team has read current procedures (part of the Governance hub).
+
 ## Requirements
 
 - To publish policies and track staff sign-off.
@@ -23,7 +28,16 @@ The prototype's Governance → Policies screen (signPolicy) tracks staff acknowl
 
 ## UI designs / screenshots
 
-prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack).
+_Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack)._
+
+- Prototype: Governance -> Policies (gov-policies.png) — policy list with versions + per-staff sign-off status (signPolicy); outstanding highlighted.
+
+## Suggested data model
+
+- **Policy** — id, tenant_id, name, version, body, roles[]
+  - _Re-ack required on change._
+- **PolicySignoff** — id, policy_version, staff_id, signed_at
+  - _Feeds inspection pack._
 
 ## Technical notes (high level)
 

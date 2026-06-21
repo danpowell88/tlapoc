@@ -9,6 +9,11 @@
 As a injector/prescriber, I want to see my day and open a patient with consult/consent status shown before I chart, so that I work room-side with the right context and gates.
 The provider sees their day and opens a patient with consult+consent status verified before charting (REQ-APP-2).
 
+## How it works
+
+The provider app shows the practitioner's day and opens a patient with consult+consent status shown before charting — the consult+consent gate (PRD-03/04) is enforced before charting opens. Provider signs in via Entra SSO, tenant-scoped.
+Room-side starting point with the right context and gates.
+
 ## Requirements
 
 - To see my day and open a patient with consult/consent status shown before I chart.
@@ -22,7 +27,15 @@ The provider sees their day and opens a patient with consult+consent status veri
 
 ## UI designs / screenshots
 
-client-app.html, treatment-room.html, checkin.html, backroom.html.
+_Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.html._
+
+- Prototype: provider app (treatment-room.png) — 'Today · Room 2' schedule; open a patient -> 'Consent & prescriber authorisation' status; quick links to map/photos/finalise.
+- Bottom tabs: Schedule / Patient / Medicines / Tasks.
+
+## Suggested data model
+
+- **(reuses)** — Appointment (PRD-02) + gate (PRD-03/04)
+  - _Provider app surface; Entra SSO._
 
 ## Technical notes (high level)
 

@@ -9,6 +9,11 @@
 As a owner, I want temperature logging for the medicine fridge with excursion alerts, so that we never use medicine that breached cold-chain.
 Toxin must stay 2–8°C; temperature logging raises excursion alerts and flags affected stock (C13). Integrates with the optional ESP32 cold-chain monitor.
 
+## How it works
+
+Toxin must stay 2-8C. Temperature can be logged manually and via the device API (ESP32 monitor); an excursion raises an alert and flags affected stock for quarantine, and the breach pathway can quarantine a lot and raise a job (links PRD-11).
+Excursion history is retained and visible — evidence that cold-chain held for every lot used (C13).
+
 ## Requirements
 
 - Temperature logging for the medicine fridge with excursion alerts.
@@ -20,6 +25,18 @@ Toxin must stay 2–8°C; temperature logging raises excursion alerts and flags 
 - [ ] An excursion raises an alert and flags affected stock for quarantine.
 - [ ] A breach pathway can quarantine a lot and raise a job (links PRD-11).
 - [ ] Excursion history is retained and visible.
+
+## UI designs / screenshots
+
+- Prototype: Front desk/Operations -> Temperature monitors (ops-monitors.png) — live/charted fridge temps per location, breach alerts; the stock table shows a per-lot temp (e.g. '4.2C').
+- An excursion visibly quarantines the lot and raises a follow-up job.
+
+## Suggested data model
+
+- **TempLog** — id, tenant_id, location_id, monitor_id, temp, at, source(manual|device)
+  - _2-8C range; out-of-range -> Excursion._
+- **Excursion** — id, location_id, started_at, ended_at, min, max, affected_lots[], action(quarantine)
+  - _Raises alert + job; flags stock (C13)._
 
 ## Technical notes (high level)
 

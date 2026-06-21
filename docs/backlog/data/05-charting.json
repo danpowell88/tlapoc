@@ -46,6 +46,27 @@
       "priority": "P0",
       "depends_on": [
         "PRD-04/ADMIN-GATE"
+      ],
+      "detail": [
+        "Charting is a guided, treatment-type-aware flow. Step 1 (pre-treatment review) surfaces safety flags, the last treatment, and the linked consult/Rx — read-only context the injector checks before starting. The toxin note is a configurable template (structured fields + free text + reusable phrases/snippets); a non-S4 skin variant swaps the map for a skin note.",
+        "Charting cannot open unless the consult+consent gate (PRD-03/04) is satisfied — the safe path is the only path."
+      ],
+      "ui_spec": [
+        "Prototype: Charting (charting.png) — header gate chips; Step 1 'Pre-treatment review' card (Allergies/Contraindications/BDD/Consent/Consult chips + 'Last treatment: 24u 12 Mar forehead+glabella Bella RN' + Consult & prescription).",
+        "Treatment-type toggle: Anti-wrinkle (toxin) / Skin treatment.",
+        "A finalise close-out captures aftercare, recall, the 2-day wellbeing call and any adverse event before checkout."
+      ],
+      "data_model": [
+        {
+          "entity": "ChartEntry",
+          "fields": "id, tenant_id, client_id, appointment_id, consult_id, treatment_type, status(draft|final), author_id, finalised_at",
+          "notes": "Shared with MAPPING; one per treatment."
+        },
+        {
+          "entity": "NoteTemplate",
+          "fields": "id, tenant_id, treatment_type, fields(json), snippets[]",
+          "notes": "Configurable toxin template; non-S4 skin variant."
+        }
       ]
     },
     {
@@ -198,6 +219,21 @@
       "priority": "P1",
       "depends_on": [
         "PRD-03/IMAGE-CONSENT"
+      ],
+      "detail": [
+        "Standardised before/after photos captured room-side with a framing/ghosting guide, compared side-by-side across visits. Media is stored centrally via short-lived signed URLs, never persisted on the device beyond a transient sync cache, and capture requires current image-use consent (PRD-03/C14/ADR-0009).",
+        "The drag-to-compare slider lets the clinician show progress; annotations supported."
+      ],
+      "ui_spec": [
+        "Prototype: Charting 'Before / after' compare with a drag slider ('12 weeks apart · stored securely, never on device') — see charting.png; and Clinical -> Photography & outcomes (clinical-imaging.png) for the gallery/compare.",
+        "Camera/upload with a framing/ghost overlay; capture blocked without image-use consent."
+      ],
+      "data_model": [
+        {
+          "entity": "Photo",
+          "fields": "id, tenant_id, client_id, chart_entry_id, blob_ref(signed-url), framing_meta(json), taken_at, image_consent_id",
+          "notes": "Central storage; never on device (C14/ADR-0009)."
+        }
       ]
     },
     {
@@ -234,6 +270,26 @@
       "priority": "P0",
       "depends_on": [
         "PRD-05/MAPPING"
+      ],
+      "detail": [
+        "A finalised note is locked; any later change is an appended, audited amendment that preserves the original (ADR-0010). Finalisation happens server-side, and the finalise close-out captures aftercare, recall, the 2-day wellbeing call and any adverse event.",
+        "This tamper-evidence is what makes the clinical record trustworthy in an inspection."
+      ],
+      "ui_spec": [
+        "Prototype: Charting 'Finalise & checkout' (charting.png) — 'Finalising locks the note and deducts the units used from the selected lot'; finalised notes render read-only with an amendment trail.",
+        "Read-only oversight view for non-editors (e.g. owner)."
+      ],
+      "data_model": [
+        {
+          "entity": "ChartEntry.locked",
+          "fields": "+ finalised_at",
+          "notes": "No edit after final."
+        },
+        {
+          "entity": "Amendment",
+          "fields": "id, chart_entry_id, author_id, created_at, reason, payload",
+          "notes": "Append-only; original preserved."
+        }
       ]
     },
     {
@@ -271,6 +327,21 @@
       "depends_on": [
         "SPRINT-0/SPIKE-OFFLINE",
         "PRD-05/IMMUTABILITY"
+      ],
+      "detail": [
+        "Treatment rooms drop Wi-Fi, so charting/photos queue locally (encrypted) and sync on reconnect with no loss; drafts use last-write-wins and finalisation occurs server-side (ADR-0015). A persistent sync indicator shows queued count + last-sync time; finalise is disabled until synced.",
+        "Primarily a provider-app capability (PRD-09) but the sync model is defined here; built on SPIKE-OFFLINE."
+      ],
+      "ui_spec": [
+        "Prototype: provider app (treatment-room.png) shows a sync/offline indicator; finalise disabled until synced.",
+        "Queued drafts/photos visibly pending; no data loss on reconnect."
+      ],
+      "data_model": [
+        {
+          "entity": "LocalQueue (device)",
+          "fields": "draft chart edits + pending photos, encrypted; sync cursor",
+          "notes": "Last-write-wins drafts; server-side finalise (ADR-0010/0015)."
+        }
       ]
     },
     {
@@ -307,6 +378,21 @@
       "priority": "P1",
       "depends_on": [
         "PRD-05/IMMUTABILITY"
+      ],
+      "detail": [
+        "Log an adverse event/complication linked to the treatment, product and lot; classify seriousness and target the correct DAEN database (medicine vs device) (C12). A complication-response flow (vascular occlusion / anaphylaxis -> log hyaluronidase/adrenaline) routes the AE and raises jobs.",
+        "Full prefilled DAEN submission lives in the Governance hub (PRD-08)."
+      ],
+      "ui_spec": [
+        "Prototype: Clinical -> Complication protocols (clinical-safety.png) — launch a protocol, log the response/kit used; an adverse-event capture linked to the treatment/product/lot.",
+        "Routes to Governance -> Adverse events & DAEN (gov-ae) with seriousness set."
+      ],
+      "data_model": [
+        {
+          "entity": "AdverseEvent",
+          "fields": "id, tenant_id, client_id, chart_entry_id, product_id, lot_id, seriousness, daen_target(medicine|device), description, at",
+          "notes": "Feeds DAEN prefill (PRD-08); raises jobs."
+        }
       ]
     },
     {
@@ -339,6 +425,26 @@
       "priority": "P2",
       "depends_on": [
         "PRD-05/NOTE-TEMPLATE"
+      ],
+      "detail": [
+        "Multi-session treatment plans built from applyable protocol templates structure ongoing care and feed the recall worklist (PRD-07). Plan progress shows on the Client 360; a charting overview / 'in-room now' entry lists active plans.",
+        "Lets the clinic plan courses (e.g. a skin program) and keep clients on cadence."
+      ],
+      "ui_spec": [
+        "Prototype: Charting (charting.png) — apply a protocol to create a multi-session plan; plan progress on Client 360 (client-360.png).",
+        "Active plans listed on the charting overview / in-room entry."
+      ],
+      "data_model": [
+        {
+          "entity": "TreatmentPlan",
+          "fields": "id, tenant_id, client_id, protocol_id, sessions[]{service, interval, status}, created_at",
+          "notes": "Feeds recall; progress on Client 360."
+        },
+        {
+          "entity": "Protocol",
+          "fields": "id, tenant_id, name, steps[]",
+          "notes": "Applyable template."
+        }
       ]
     },
     {
@@ -369,7 +475,21 @@
         "phase:2plus",
         "area:provider-app"
       ],
-      "priority": "P2"
+      "priority": "P2",
+      "detail": [
+        "Placeholder/extension (Phase 2): modality-aware charting beyond toxin — dermal filler (multi-area, per-area lot, mandatory VO/blindness consent gate), energy-device charting (per-pass settings/fluence, laser-licence gated), weight-loss titration, and ghost-overlay photo alignment. The modality model already anticipates these (ADR-0025).",
+        "v1 ships toxin + a non-S4 skin note; each modality's specific gates are captured for later build."
+      ],
+      "ui_spec": [
+        "Prototype: Clinical -> Body contouring (clinical-body.png) and the skin note demonstrate the modality model; filler/energy/weight-loss are concept-level for v1."
+      ],
+      "data_model": [
+        {
+          "entity": "ChartEntry.treatment_type",
+          "fields": "+ modality-specific payloads (filler areas, device passes, titration)",
+          "notes": "Filler adds VO/blindness consent gate; energy requires laser licence."
+        }
+      ]
     },
     {
       "key": "AI-SCRIBE",
@@ -396,7 +516,18 @@
         "phase:2plus",
         "area:provider-app"
       ],
-      "priority": "P2"
+      "priority": "P2",
+      "detail": [
+        "Placeholder (Phase 2): optional AI assistance for note dictation and advisory auto-detection of injection points. Explicitly no AI in v1 — everything manual and human-controlled; any future feature is advisory + human-confirmed only (ADR-0020).",
+        "Captured to keep the data model ready."
+      ],
+      "data_model": [
+        {
+          "entity": "(future) AIAssist",
+          "fields": "advisory suggestions attached to a draft ChartEntry; human confirms",
+          "notes": "No AI in v1."
+        }
+      ]
     },
     {
       "key": "SKIN-ANALYSIS",
@@ -430,6 +561,21 @@
       "priority": "P2",
       "depends_on": [
         "PRD-05/NOTE-TEMPLATE"
+      ],
+      "detail": [
+        "A structured skin assessment (concerns, zones, scores) recorded against the client, optionally with an AI-assisted scan, and a summary that can be pushed to the client app. Per the no-AI-in-v1 stance, AI auto-scoring is advisory + human-confirmed and gated to Phase 2; the manual assessment record can be v1.",
+        "Assessments feed treatment planning and outcomes."
+      ],
+      "ui_spec": [
+        "Prototype: Clinical -> Skin analysis (clinical-skin.png) — zone scoring, a scan action (simulateScan), and a push-to-client summary (pushSkinToClient); appears in the client app.",
+        "AI scoring shown as advisory; clinician confirms."
+      ],
+      "data_model": [
+        {
+          "entity": "SkinAssessment",
+          "fields": "id, tenant_id, client_id, zones[]{area, concern, score}, source(manual|ai_advisory), pushed_to_client_at",
+          "notes": "Feeds plans/outcomes; AI advisory (Phase 2)."
+        }
       ]
     },
     {
@@ -463,6 +609,20 @@
       "priority": "P2",
       "depends_on": [
         "PRD-05/MODALITY"
+      ],
+      "detail": [
+        "Charts body-contouring treatments (e.g. CoolSculpting) on a body map with per-area applicator/cycle settings; sessions feed multi-session plans and outcomes. Device-gated where a licence/patch-test applies.",
+        "Part of the modality-aware charting model (Phase 2)."
+      ],
+      "ui_spec": [
+        "Prototype: Clinical -> Body contouring (clinical-body.png) — a body map with add/remove/cycle areas (bodyAdd/bodyDel/bodyCyc) and per-area settings (applicator, cycles, parameters)."
+      ],
+      "data_model": [
+        {
+          "entity": "BodyChart",
+          "fields": "id, chart_entry_id, areas[]{region, applicator, cycles, params}",
+          "notes": "Body-map analogue of InjectionPoint; feeds plans/outcomes."
+        }
       ]
     },
     {
@@ -498,6 +658,25 @@
       "priority": "P1",
       "depends_on": [
         "PRD-05/ADVERSE-EVENT"
+      ],
+      "detail": [
+        "A library of complication protocols (e.g. vascular occlusion, anaphylaxis) with guided response steps and required kit items — the reference side of the adverse-event response. Launching a protocol logs the response, can raise an adverse event, and records completion timing/outcome.",
+        "Links to the emergency-kit register (PRD-11) so the right kit is on hand."
+      ],
+      "ui_spec": [
+        "Prototype: Clinical -> Complication protocols (clinical-safety.png) — protocol cards with step-by-step guidance and kit links; openComplication/completeComplication actions."
+      ],
+      "data_model": [
+        {
+          "entity": "ComplicationProtocol",
+          "fields": "id, tenant_id, name, steps[], required_kit[]",
+          "notes": "Reference library."
+        },
+        {
+          "entity": "ComplicationResponse",
+          "fields": "id, protocol_id, client_id, chart_entry_id, started_at, completed_at, outcome, kit_used[]",
+          "notes": "Can raise an AdverseEvent + jobs."
+        }
       ]
     },
     {
@@ -530,6 +709,20 @@
       "priority": "P2",
       "depends_on": [
         "PRD-05/PHOTOS"
+      ],
+      "detail": [
+        "Tracks treatment outcomes and any revisions/touch-ups, linked to the original treatment, and feeds reporting (PRD-08). Respects image-use consent for any photo-based outcome.",
+        "Lets the clinic measure quality (result ratings, revision rates) over time."
+      ],
+      "ui_spec": [
+        "Prototype: Clinical -> Photography & outcomes (clinical-imaging.png) — before/after outcomes + a revision/touch-up signal feeding reporting."
+      ],
+      "data_model": [
+        {
+          "entity": "Outcome",
+          "fields": "id, chart_entry_id, client_id, rating, before_photo_id, after_photo_id, revision_of?",
+          "notes": "Revision links to the original treatment; feeds reporting."
+        }
       ]
     }
   ]

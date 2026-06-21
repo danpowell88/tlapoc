@@ -6,7 +6,13 @@
     "phase": "1",
     "prd": "docs/prds/PRD-10-integrations.md",
     "summary": "Outbound integrations that remove double-entry: push sales/payments to Xero, and keep appointments in sync with staff calendars (M365 / Google) — each behind a swappable adapter, with an AU/APP-8 sub-processor posture.",
-    "labels": ["type:epic", "PRD-10", "phase:1", "area:integration", "area:backend"]
+    "labels": [
+      "type:epic",
+      "PRD-10",
+      "phase:1",
+      "area:integration",
+      "area:backend"
+    ]
   },
   "stories": [
     {
@@ -22,10 +28,52 @@
         "Services vs retail vs memberships map to the right accounts (defaults are an open question).",
         "Implemented behind IAccountingExport (swappable)."
       ],
-      "refs": {"req": ["REQ-INT-1"], "adr": ["0012"], "prd_ac": ["AC1", "AC4"]},
-      "labels": ["type:story", "PRD-10", "phase:1", "area:integration"],
+      "refs": {
+        "req": [
+          "REQ-INT-1"
+        ],
+        "adr": [
+          "0012"
+        ],
+        "prd_ac": [
+          "AC1",
+          "AC4"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-10",
+        "phase:1",
+        "area:integration"
+      ],
       "priority": "P1",
-      "depends_on": ["PRD-06/POS"]
+      "depends_on": [
+        "PRD-06/POS"
+      ],
+      "detail": [
+        "On checkout, create/sync the invoice + payment (and payouts) in Xero with correct account + GST mapping, retries and a reconciliation status — behind an IAccountingExport port. Services vs retail vs memberships map to the right accounts (defaults an open question).",
+        "Removes double-entry so the books reconcile without re-keying; the app keeps pricing/reporting while the ledger lives in Xero (ADR-0027)."
+      ],
+      "ui_spec": [
+        "Prototype: Settings -> Integrations (settings-integrations.png) — Xero connection card + account/GST mapping + sync/reconciliation status; per-sale posting is automatic from Checkout."
+      ],
+      "data_model": [
+        {
+          "entity": "IntegrationConnection",
+          "fields": "id, tenant_id, provider(xero), tokens, status",
+          "notes": "OAuth connection; AU/APP-8 posture."
+        },
+        {
+          "entity": "AccountMapping",
+          "fields": "tenant_id, item_type(service|retail|membership), xero_account, gst_code",
+          "notes": "Drives the posting."
+        },
+        {
+          "entity": "SyncJob",
+          "fields": "id, provider, ref(invoice/payment), status, retries, reconciled(bool)",
+          "notes": "Retry + reconciliation status."
+        }
+      ]
     },
     {
       "key": "CALENDAR-SYNC",
@@ -40,10 +88,47 @@
         "Per-staff opt-in and conflict-resolution rules (open question) supported.",
         "Implemented behind ICalendarProvider (swappable)."
       ],
-      "refs": {"req": ["REQ-INT-2"], "adr": ["0012"], "prd_ac": ["AC2", "AC4"]},
-      "labels": ["type:story", "PRD-10", "phase:1", "area:integration"],
+      "refs": {
+        "req": [
+          "REQ-INT-2"
+        ],
+        "adr": [
+          "0012"
+        ],
+        "prd_ac": [
+          "AC2",
+          "AC4"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-10",
+        "phase:1",
+        "area:integration"
+      ],
       "priority": "P2",
-      "depends_on": ["PRD-02/CALENDAR"]
+      "depends_on": [
+        "PRD-02/CALENDAR"
+      ],
+      "detail": [
+        "Two-way sync of appointments with Outlook (MS Graph) and Google Calendar behind an ICalendarProvider port: creating/moving/cancelling reflects both ways, and external busy events block availability in booking (PRD-02). Per-staff opt-in and conflict-resolution rules (open question).",
+        "Gives practitioners one source of truth for their time."
+      ],
+      "ui_spec": [
+        "Prototype: Settings -> Integrations (settings-integrations.png) — per-staff calendar connect (M365/Google) + two-way sync toggle; external busy time shows as unavailable in Schedule."
+      ],
+      "data_model": [
+        {
+          "entity": "CalendarLink",
+          "fields": "id, staff_id, provider(m365|google), tokens, sync_mode(two_way), status",
+          "notes": "Per-staff opt-in."
+        },
+        {
+          "entity": "SyncLog",
+          "fields": "id, calendar_link_id, appointment_id, direction, at, result",
+          "notes": "Busy events block availability."
+        }
+      ]
     },
     {
       "key": "SUBPROCESSOR-POSTURE",
@@ -58,10 +143,45 @@
         "All integrations are outbound and swappable.",
         "Ties into PRD-01/RESIDENCY enforcement."
       ],
-      "refs": {"req": ["REQ-INT-3"], "compliance": ["C21"], "adr": ["0016"], "prd_ac": ["AC3"]},
-      "labels": ["type:story", "PRD-10", "phase:1", "area:integration", "compliance"],
+      "refs": {
+        "req": [
+          "REQ-INT-3"
+        ],
+        "compliance": [
+          "C21"
+        ],
+        "adr": [
+          "0016"
+        ],
+        "prd_ac": [
+          "AC3"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-10",
+        "phase:1",
+        "area:integration",
+        "compliance"
+      ],
       "priority": "P2",
-      "depends_on": ["PRD-01/RESIDENCY"]
+      "depends_on": [
+        "PRD-01/RESIDENCY"
+      ],
+      "detail": [
+        "No integration sends PII to a non-AU sub-processor unless an APP-8 assessment + consent record exists; flows are registered, and all integrations are outbound and swappable (ADR-0012/0016). Ties into PRD-01/RESIDENCY enforcement.",
+        "Keeps integrations inside cross-border privacy rules (C21)."
+      ],
+      "ui_spec": [
+        "Prototype: Settings -> Integrations (settings-integrations.png) — each integration shows its data-residency posture; an admin sub-processor register lists flows + APP-8 status."
+      ],
+      "data_model": [
+        {
+          "entity": "SubProcessor",
+          "fields": "(shared with PRD-01) id, name, region, app8_assessment_ref, consent_ref",
+          "notes": "Non-AU blocked unless assessed + consented."
+        }
+      ]
     },
     {
       "key": "INTEGRATIONS-LATER",
@@ -76,9 +196,39 @@
         "Medicare/HICAPS recorded as non-applicable to cosmetic.",
         "e-prescribing flagged for feasibility validation."
       ],
-      "refs": {"req": ["REQ-INT-4", "REQ-INT-5", "REQ-INT-6", "REQ-INT-7"], "adr": ["0035", "0036"]},
-      "labels": ["type:story", "PRD-10", "phase:2plus", "area:integration"],
-      "priority": "P2"
+      "refs": {
+        "req": [
+          "REQ-INT-4",
+          "REQ-INT-5",
+          "REQ-INT-6",
+          "REQ-INT-7"
+        ],
+        "adr": [
+          "0035",
+          "0036"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PRD-10",
+        "phase:2plus",
+        "area:integration"
+      ],
+      "priority": "P2",
+      "detail": [
+        "Placeholder (Phase 2/3): online checkout & deposits (S4 never priced/sold online), e-prescribing (eRx/ETP, needs validation), public API/webhooks (Phase 3), and Medicare/HICAPS (recorded as non-applicable to cosmetic). Each sits behind its existing port (IPaymentProvider, IPrescribingProvider).",
+        "Captured so the architecture stays extension-ready (ADR-0035/0036)."
+      ],
+      "ui_spec": [
+        "Prototype: Settings -> Integrations (settings-integrations.png) shows these as concept cards (mostly disabled)."
+      ],
+      "data_model": [
+        {
+          "entity": "(future)",
+          "fields": "OnlineOrder / EPrescription / Webhook / ApiKey",
+          "notes": "Behind existing ports; S4 never online."
+        }
+      ]
     }
   ]
 }

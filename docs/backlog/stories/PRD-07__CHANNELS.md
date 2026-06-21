@@ -7,6 +7,11 @@
 As a developer, I want a notification abstraction over SMS, email and push with per-tenant templates, so that all messaging is consistent and provider-swappable.
 An INotifier port over an AU SMS provider + email + app push, with per-tenant templates (REQ-NOTIF-1, ADR-0012).
 
+## How it works
+
+An INotifier abstraction over an AU SMS provider + email + app push, with per-tenant templates (ADR-0012). All sends log to the client's comms history; the provider is swappable behind the port.
+The shared delivery layer every reminder/aftercare/recall/marketing message goes through.
+
 ## Requirements
 
 - A notification abstraction over SMS, email and push with per-tenant templates.
@@ -17,6 +22,18 @@ An INotifier port over an AU SMS provider + email + app push, with per-tenant te
 - [ ] Per-tenant message templates supported.
 - [ ] Provider is swappable behind the port.
 - [ ] All sends log to the client's comms history.
+
+## UI designs / screenshots
+
+- No dedicated screen — surfaces through templates + the comms history on the Client 360; admin sets the SMS/email/push providers in Settings.
+- Per-tenant message templates.
+
+## Suggested data model
+
+- **MessageTemplate** — id, tenant_id, channel(sms|email|push), key, body, variables[]
+  - _Per-tenant; rendered per send._
+- **NotificationLog** — id, tenant_id, client_id, channel, template_key, status, sent_at
+  - _Comms history; swappable provider behind INotifier._
 
 ## Technical notes (high level)
 

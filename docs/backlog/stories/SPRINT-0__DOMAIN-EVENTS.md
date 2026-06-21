@@ -9,6 +9,10 @@
 As a backend developer, I want a domain-event mechanism (transactional outbox + dispatch) modules can publish to and subscribe from, so that read-models, jobs and notifications react to changes without tight coupling.
 Reporting read-models, the follow-up job queue, notifications and cross-module reactions all consume domain events. A lightweight event backbone (outbox + dispatch) decouples modules.
 
+## How it works
+
+A domain-event backbone (transactional outbox + at-least-once dispatch) modules publish to and subscribe from, so read-models (PRD-08), the follow-up job queue (PRD-07), notifications and cross-module reactions stay decoupled. Events carry tenant context, are consumed idempotently, and are observable (ADR-0013/0010).
+
 ## Requirements
 
 - A domain-event mechanism (transactional outbox + dispatch) modules can publish to and subscribe from.
@@ -19,6 +23,11 @@ Reporting read-models, the follow-up job queue, notifications and cross-module r
 - [ ] Subscribers (read-models, jobs, notifications) can consume events idempotently.
 - [ ] Events carry tenant context and are observable.
 - [ ] A sample event flows from a write to a read-model projection.
+
+## Suggested data model
+
+- **OutboxEvent** — id, tenant_id, type, payload, occurred_at, dispatched_at
+  - _Transactional outbox; idempotent consumers._
 
 ## Technical notes (high level)
 

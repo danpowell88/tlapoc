@@ -9,6 +9,10 @@
 As a maintainer, I want protected main with required status checks and reviews, PR/issue templates, and protected prod deployments, so that quality gates can't be bypassed and changes are traceable.
 Branch protection, required checks, PR templates and environment protection rules keep the main branch deployable and reviewable.
 
+## How it works
+
+Repo governance: protected main requiring passing checks + a review before merge, PR/issue templates (PR references the backlog item), protected production deploys, and CODEOWNERS routing reviews for sensitive areas (auth, medicines, compliance). Keeps main deployable and changes traceable.
+
 ## Requirements
 
 - Protected main with required status checks and reviews, PR/issue templates, and protected prod deployments.

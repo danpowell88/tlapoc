@@ -9,6 +9,11 @@
 As a clinician, I want a library of complication protocols with guided response steps and kit links, so that in an emergency I follow the correct, documented steps.
 The prototype's Clinical → Complication protocols (openComplication/completeComplication) provides step-by-step VO/anaphylaxis protocols and links the emergency kit — the reference side of the adverse-event response.
 
+## How it works
+
+A library of complication protocols (e.g. vascular occlusion, anaphylaxis) with guided response steps and required kit items — the reference side of the adverse-event response. Launching a protocol logs the response, can raise an adverse event, and records completion timing/outcome.
+Links to the emergency-kit register (PRD-11) so the right kit is on hand.
+
 ## Requirements
 
 - A library of complication protocols with guided response steps and kit links.
@@ -23,7 +28,16 @@ The prototype's Clinical → Complication protocols (openComplication/completeCo
 
 ## UI designs / screenshots
 
-prototype.html — Clinical → Complication protocols.
+_Prototype screen: prototype.html — Clinical → Complication protocols._
+
+- Prototype: Clinical -> Complication protocols (clinical-safety.png) — protocol cards with step-by-step guidance and kit links; openComplication/completeComplication actions.
+
+## Suggested data model
+
+- **ComplicationProtocol** — id, tenant_id, name, steps[], required_kit[]
+  - _Reference library._
+- **ComplicationResponse** — id, protocol_id, client_id, chart_entry_id, started_at, completed_at, outcome, kit_used[]
+  - _Can raise an AdverseEvent + jobs._
 
 ## Technical notes (high level)
 

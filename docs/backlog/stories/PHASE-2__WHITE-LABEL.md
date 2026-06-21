@@ -7,6 +7,10 @@
 As a clinic owner, I want to brand the platform with my clinic's look, so that clients see my brand.
 Per-tenant branding/theming of web and apps (PRD-01 non-goal).
 
+## How it works
+
+Placeholder (Phase 2+): per-tenant branding/theming of web and apps. The design system is token-driven, so theming is a matter of per-tenant token sets.
+
 ## Requirements
 
 - To brand the platform with my clinic's look.
@@ -20,6 +24,11 @@ Per-tenant branding/theming of web and apps (PRD-01 non-goal).
 ## UI designs / screenshots
 
 Future — not built in the prototype (some shown as concept cards in Settings → Integrations).
+
+## Suggested data model
+
+- **(future) TenantTheme** — tenant_id, tokens(json)
+  - _Design system already token-driven._
 
 ## Technical notes (high level)
 

@@ -9,6 +9,11 @@
 As a staff member, I want a navigation shell that groups screens into workspaces and only shows what my role can access, so that I find my tools fast and never see screens I can't use.
 The prototype's sidebar groups screens into workspaces (Clinical, Front desk, Comms & growth, Memberships, Business, Team, Governance, Settings) plus top-level Today/Schedule/Clients/Follow-ups/Checkout, with collapsible sections and a mobile drawer. Nav entries are capability-gated (data-allow).
 
+## How it works
+
+The app shell groups screens into workspaces (Clinical, Front desk, Comms & growth, Memberships, Business, Team, Governance, Settings) plus top-level Today/Schedule/Clients/Follow-ups/Checkout, with collapsible sections and a mobile drawer. Every nav entry is capability-gated (data-allow) so a role only sees what it can use.
+The frame every feature screen drops into; badges show outstanding Follow-ups + Governance counts.
+
 ## Requirements
 
 - A navigation shell that groups screens into workspaces and only shows what my role can access.
@@ -22,7 +27,15 @@ The prototype's sidebar groups screens into workspaces (Clinical, Front desk, Co
 
 ## UI designs / screenshots
 
-prototype.html — sidebar/app shell, Today dashboard, header (global search, clinic switcher, switch-user, scope tooltip).
+_Prototype screen: prototype.html — sidebar/app shell, Today dashboard, header (global search, clinic switcher, switch-user, scope tooltip)._
+
+- Prototype: the left sidebar (dashboard.png) — top-level items + collapsible 'Workspaces'; active screen/section persist; mobile uses a drawer + overlay.
+- Follow-ups and Governance show count badges; entries outside the role are hidden.
+
+## Suggested data model
+
+- **(derived) NavModel** — from Role.capabilities -> visible nav entries + badge counts
+  - _Capability-gated; no separate persistence beyond user prefs._
 
 ## Technical notes (high level)
 

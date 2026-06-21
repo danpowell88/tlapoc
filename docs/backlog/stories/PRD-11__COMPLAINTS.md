@@ -7,6 +7,11 @@
 As a manager, I want to log a complaint against a client/treatment and have the system surface the AHPRA pathway, so that complaints are handled correctly and retained.
 A complaints/adverse-outcome register linked to client/treatment that surfaces complaint mechanisms incl. AHPRA (NDA doesn't remove the right), feeds retention (complaint → indefinite) and reporting (REQ-CLI-4, C24).
 
+## How it works
+
+A complaints/adverse-outcome register linked to client/treatment that surfaces complaint mechanisms including AHPRA (noting an NDA doesn't remove that right). A complaint flag drives indefinite retention of the related record (C18, PRD-01) and feeds reporting (PRD-08). A complaint can be raised from a conversation (PRD-07).
+Handles complaints correctly and retains them (C24).
+
 ## Requirements
 
 - To log a complaint against a client/treatment and have the system surface the AHPRA pathway.
@@ -21,7 +26,14 @@ A complaints/adverse-outcome register linked to client/treatment that surfaces c
 
 ## UI designs / screenshots
 
-prototype.html — Front desk/Operations (Open/close & fridge log, Temperature monitors, Rooms & devices, Equipment, Call log); backroom.html.
+_Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge log, Temperature monitors, Rooms & devices, Equipment, Call log); backroom.html._
+
+- Prototype: Governance -> Overview (gov-overview.png) complaints register; raise a complaint linked to client/treatment with the AHPRA pathway surfaced.
+
+## Suggested data model
+
+- **Complaint** — id, tenant_id, client_id, treatment_ref, status, pathway(ahpra|internal), opened_at, resolution
+  - _Sets indefinite retention flag (C18); feeds reporting._
 
 ## Technical notes (high level)
 

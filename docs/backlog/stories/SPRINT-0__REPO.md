@@ -7,6 +7,10 @@
 As a developer, I want a scaffolded repo with the API, web, app and shared-package folders, a clean .NET solution, an Angular workspace and a Flutter workspace wired together, so that everyone builds against one consistent structure and shared code has an obvious home.
 A single, well-structured repo (or workspace) for the .NET API, Angular web, two Flutter apps and shared packages keeps versioning, CI and code-sharing sane from day one.
 
+## How it works
+
+A single, well-structured workspace for the .NET API, Angular web, two Flutter apps and shared packages (design system + API client), with consistent formatter/linter/editorconfig from day one. Keeps versioning, CI and code-sharing sane and gives shared code an obvious home (ADR-0005/0006).
+
 ## Requirements
 
 - A scaffolded repo with the API, web, app and shared-package folders, a clean .NET solution, an Angular workspace and a Flutter workspace wired together.

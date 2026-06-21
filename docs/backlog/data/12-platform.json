@@ -6,7 +6,13 @@
     "phase": "1",
     "prd": "docs/ux/README.md",
     "summary": "The cross-cutting product surfaces the prototype exercises that don't belong to a single feature PRD: the app shell + collapsible workspace navigation, the role-tailored Today dashboard, global search, the in-app notification centre, the clinic switcher, the persona/active-role + scope-of-practice display, and the owner-only financial (.fin) gating that hides money figures from non-owner roles. These tie all the feature modules together into one coherent, role-aware app.",
-    "labels": ["type:epic", "PLATFORM", "phase:1", "area:web", "area:design"]
+    "labels": [
+      "type:epic",
+      "PLATFORM",
+      "phase:1",
+      "area:web",
+      "area:design"
+    ]
   },
   "stories": [
     {
@@ -22,10 +28,40 @@
         "Active screen + section state persist; mobile uses a drawer + overlay.",
         "A Follow-ups badge and a Governance badge show outstanding counts."
       ],
-      "refs": {"req": ["REQ-TEN-3"], "adr": ["0017"]},
-      "labels": ["type:story", "PLATFORM", "phase:1", "area:web"],
+      "refs": {
+        "req": [
+          "REQ-TEN-3"
+        ],
+        "adr": [
+          "0017"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PLATFORM",
+        "phase:1",
+        "area:web"
+      ],
       "priority": "P1",
-      "depends_on": ["SPRINT-0/WEB-SHELL", "PRD-01/RBAC"]
+      "depends_on": [
+        "SPRINT-0/WEB-SHELL",
+        "PRD-01/RBAC"
+      ],
+      "detail": [
+        "The app shell groups screens into workspaces (Clinical, Front desk, Comms & growth, Memberships, Business, Team, Governance, Settings) plus top-level Today/Schedule/Clients/Follow-ups/Checkout, with collapsible sections and a mobile drawer. Every nav entry is capability-gated (data-allow) so a role only sees what it can use.",
+        "The frame every feature screen drops into; badges show outstanding Follow-ups + Governance counts."
+      ],
+      "ui_spec": [
+        "Prototype: the left sidebar (dashboard.png) — top-level items + collapsible 'Workspaces'; active screen/section persist; mobile uses a drawer + overlay.",
+        "Follow-ups and Governance show count badges; entries outside the role are hidden."
+      ],
+      "data_model": [
+        {
+          "entity": "(derived) NavModel",
+          "fields": "from Role.capabilities -> visible nav entries + badge counts",
+          "notes": "Capability-gated; no separate persistence beyond user prefs."
+        }
+      ]
     },
     {
       "key": "TODAY",
@@ -40,10 +76,39 @@
         "Surfaces the follow-up/needs-attention digest and key alerts (expiries, failed payments).",
         "Quick links jump to chart/profile/checkout for in-flight visits."
       ],
-      "refs": {"req": ["REQ-RPT-5"], "adr": ["0017"]},
-      "labels": ["type:story", "PLATFORM", "phase:1", "area:web"],
+      "refs": {
+        "req": [
+          "REQ-RPT-5"
+        ],
+        "adr": [
+          "0017"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PLATFORM",
+        "phase:1",
+        "area:web"
+      ],
       "priority": "P1",
-      "depends_on": ["PLATFORM/APP-NAV"]
+      "depends_on": [
+        "PLATFORM/APP-NAV"
+      ],
+      "detail": [
+        "The Today landing shows the live state of the clinic — waiting / in-room / checked-out and the day's schedule — tailored to the signed-in role's concerns (ADR-0017), plus the follow-up/needs-attention digest and key alerts (expiries, failed payments). Quick links jump to chart/profile/checkout for in-flight visits.",
+        "Each role starts the day knowing exactly what to do."
+      ],
+      "ui_spec": [
+        "Prototype: Today (dashboard.png) — waiting/in-room/checked-out columns, the day at a glance, role-tailored widgets, and the exceptions digest.",
+        "Reception sees front-desk tasks; NP sees clinical; owner sees the business digest."
+      ],
+      "data_model": [
+        {
+          "entity": "(read) TodayBoard",
+          "fields": "from Appointment.status + Job + AttentionDigest, filtered by role concern",
+          "notes": "Role-tailored; read aggregation."
+        }
+      ]
     },
     {
       "key": "SEARCH",
@@ -58,10 +123,38 @@
         "Selecting a result deep-links to the relevant screen.",
         "Search is keyboard-accessible and fast on clinic data volumes."
       ],
-      "refs": {"req": ["REQ-CLI-1"], "compliance": ["C10"]},
-      "labels": ["type:story", "PLATFORM", "phase:1", "area:web"],
+      "refs": {
+        "req": [
+          "REQ-CLI-1"
+        ],
+        "compliance": [
+          "C10"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PLATFORM",
+        "phase:1",
+        "area:web"
+      ],
       "priority": "P2",
-      "depends_on": ["PLATFORM/APP-NAV"]
+      "depends_on": [
+        "PLATFORM/APP-NAV"
+      ],
+      "detail": [
+        "One global search across clients, appointments and invoices, grouped by type, returning tenant-scoped results that respect role/financial gating (no money to non-owner). Selecting a result deep-links to the relevant screen; keyboard-accessible and fast.",
+        "The front-desk speed feature — jump to anything in a couple of keystrokes."
+      ],
+      "ui_spec": [
+        "Prototype: the header search box (dashboard.png, 'Search clients, appointments, invoices…') — grouped results; select -> deep link."
+      ],
+      "data_model": [
+        {
+          "entity": "(index) SearchIndex",
+          "fields": "client/appointment/invoice projections, tenant-scoped",
+          "notes": "Role/financial-filtered results."
+        }
+      ]
     },
     {
       "key": "NOTIFICATIONS",
@@ -76,10 +169,36 @@
         "Each notification deep-links to its source.",
         "Channels are consistent with PRD-07 (in-app is one delivery target of INotifier)."
       ],
-      "refs": {"req": ["REQ-NOTIF-1"]},
-      "labels": ["type:story", "PLATFORM", "phase:1", "area:web"],
+      "refs": {
+        "req": [
+          "REQ-NOTIF-1"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PLATFORM",
+        "phase:1",
+        "area:web"
+      ],
       "priority": "P2",
-      "depends_on": ["PLATFORM/APP-NAV", "PRD-07/CHANNELS"]
+      "depends_on": [
+        "PLATFORM/APP-NAV",
+        "PRD-07/CHANNELS"
+      ],
+      "detail": [
+        "An in-app notification centre surfacing role-relevant events (new bookings, failed payments, expiries, AE/recall, job assignment) with read/unread state + a badge count per user; each notification deep-links to its source. In-app is one delivery target of INotifier (PRD-07).",
+        "So time-sensitive things aren't missed."
+      ],
+      "ui_spec": [
+        "Prototype: the header bell + badge (dashboard.png) -> a notification list; each item deep-links to its source."
+      ],
+      "data_model": [
+        {
+          "entity": "Notification",
+          "fields": "id, tenant_id, user_id, kind, source_ref, read(bool), at",
+          "notes": "Per-user; in-app channel of INotifier."
+        }
+      ]
     },
     {
       "key": "ROLE-CONTEXT",
@@ -94,10 +213,44 @@
         "The active role is recorded on actions and in the audit trail.",
         "Scope is sourced from PRD-01 RBAC, not hard-coded per screen."
       ],
-      "refs": {"req": ["REQ-TEN-3", "REQ-TEN-4"], "compliance": ["C4"], "adr": ["0017"]},
-      "labels": ["type:story", "PLATFORM", "phase:1", "area:web", "compliance"],
+      "refs": {
+        "req": [
+          "REQ-TEN-3",
+          "REQ-TEN-4"
+        ],
+        "compliance": [
+          "C4"
+        ],
+        "adr": [
+          "0017"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PLATFORM",
+        "phase:1",
+        "area:web",
+        "compliance"
+      ],
       "priority": "P1",
-      "depends_on": ["PRD-01/RBAC", "PRD-01/MULTI-ROLE"]
+      "depends_on": [
+        "PRD-01/RBAC",
+        "PRD-01/MULTI-ROLE"
+      ],
+      "detail": [
+        "The header shows the signed-in user, active role and a scope-of-practice summary; a user holding multiple roles can switch active role and capabilities update accordingly (consumes PRD-01 RBAC + MULTI-ROLE). The active role is recorded on actions and in the audit trail; scope is sourced from RBAC, not hard-coded per screen.",
+        "Makes 'who am I acting as and what can I do' explicit, and explains blocks."
+      ],
+      "ui_spec": [
+        "Prototype: header user chip + scope tooltip + 'Switch user' (dashboard.png) — active role + scope summary; switch-active-role for multi-role users."
+      ],
+      "data_model": [
+        {
+          "entity": "(session) ActiveRole",
+          "fields": "session.active_role_id (from StaffRole)",
+          "notes": "Stamped on actions + audit; scope from Role.capabilities."
+        }
+      ]
     },
     {
       "key": "FIN-GATING",
@@ -112,10 +265,44 @@
         "Gating is enforced server-side (API never returns gated figures to unauthorised roles), not just hidden in UI.",
         "Attempted access is denied and audited."
       ],
-      "refs": {"req": ["REQ-TEN-3"], "compliance": ["C4", "C10"], "adr": ["0017"]},
-      "labels": ["type:story", "PLATFORM", "phase:1", "area:backend", "compliance"],
+      "refs": {
+        "req": [
+          "REQ-TEN-3"
+        ],
+        "compliance": [
+          "C4",
+          "C10"
+        ],
+        "adr": [
+          "0017"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PLATFORM",
+        "phase:1",
+        "area:backend",
+        "compliance"
+      ],
       "priority": "P0",
-      "depends_on": ["PRD-01/RBAC"]
+      "depends_on": [
+        "PRD-01/RBAC"
+      ],
+      "detail": [
+        "All revenue/MRR/pricing figures are hidden from non-owner roles across the app AND the API — enforced server-side (the API never returns gated figures to unauthorised roles), not just hidden in the UI. Non-owner roles see operational data (e.g. membership status) but no money; attempted access is denied and audited.",
+        "The project's owner-only financials rule, made structural (the .fin capability)."
+      ],
+      "ui_spec": [
+        "Prototype: money figures tagged .fin are hidden for reception/clinical roles across dashboards, checkout totals, finance, memberships and reports; visible only to the owner.",
+        "A non-owner never sees revenue/MRR/pricing."
+      ],
+      "data_model": [
+        {
+          "entity": "Capability finance.read",
+          "fields": "gates money fields server-side",
+          "notes": "API strips/denies gated figures; access attempts audited."
+        }
+      ]
     },
     {
       "key": "CLINIC-SWITCH",
@@ -130,10 +317,35 @@
         "The active location is reflected in audit and reporting.",
         "Builds on PHASE-2/MULTI-LOCATION data model where deeper multi-site features are needed."
       ],
-      "refs": {"req": ["REQ-TEN-1"]},
-      "labels": ["type:story", "PLATFORM", "phase:1", "area:web"],
+      "refs": {
+        "req": [
+          "REQ-TEN-1"
+        ]
+      },
+      "labels": [
+        "type:story",
+        "PLATFORM",
+        "phase:1",
+        "area:web"
+      ],
       "priority": "P2",
-      "depends_on": ["PRD-01/TENANT"]
+      "depends_on": [
+        "PRD-01/TENANT"
+      ],
+      "detail": [
+        "A switcher lists the locations/clinics the user can access and sets the active clinic/location context; data shown is scoped to it (RLS tenant + location), and the active location is reflected in audit and reporting. Builds on PHASE-2/MULTI-LOCATION for deeper multi-site features.",
+        "Lets multi-site owners/staff work in the right location's data."
+      ],
+      "ui_spec": [
+        "Prototype: the sidebar clinic switcher (dashboard.png) — lists clinics (Brisbane, Gold Coast, locum site); selecting one sets the active location."
+      ],
+      "data_model": [
+        {
+          "entity": "(session) ActiveLocation",
+          "fields": "session.location_id within tenant",
+          "notes": "Scopes data + audit + reporting."
+        }
+      ]
     }
   ]
 }

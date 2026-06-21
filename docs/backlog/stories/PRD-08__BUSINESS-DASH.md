@@ -9,6 +9,11 @@
 As a owner, I want dashboards for revenue, retention, no-shows, conversion, at-risk, big spenders and membership MRR/churn, filterable by date and practitioner, so that I can run the business on real numbers.
 Revenue, retention/churn, no-shows, cancellations, conversion, at-risk, big spenders, membership MRR/churn and per-practitioner mix, date-filterable (REQ-RPT-1/2). Money figures owner-gated.
 
+## How it works
+
+The owner BI the clinic already relies on: revenue, retention/churn, no-shows, cancellations, conversion, at-risk, big spenders, membership MRR/churn and per-practitioner mix — date-filterable. Reward-cost vs retention surfaces (from PRD-06). All money figures are gated behind the owner financial capability.
+Rebuilds the prototype's analytics on live data and fixes the Mindbody reporting gap.
+
 ## Requirements
 
 - Dashboards for revenue, retention, no-shows, conversion, at-risk, big spenders and membership MRR/churn, filterable by date and practitioner.
@@ -22,7 +27,15 @@ Revenue, retention/churn, no-shows, cancellations, conversion, at-risk, big spen
 
 ## UI designs / screenshots
 
-prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack).
+_Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack)._
+
+- Prototype: Reports (reports.png) — revenue trend, treatment mix, top treatments, new-vs-returning, retention, membership MRR; date-range presets + custom; per-practitioner.
+- Money figures hidden for non-owner roles (.fin gating).
+
+## Suggested data model
+
+- **(read) BusinessMetrics** — revenue, retention, churn, no_shows, cancellations, conversion, at_risk, big_spenders, mrr by date/practitioner
+  - _From read-models; owner-gated._
 
 ## Technical notes (high level)
 

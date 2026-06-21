@@ -7,6 +7,10 @@
 As a engineer, I want a spike proving EF Core reliably sets the Postgres session tenant for RLS under connection pooling and async, so that the RLS baseline is built on a verified pattern.
 Setting the per-request tenant for RLS through EF Core's connection/session lifecycle has known sharp edges (pooling, background jobs). Prove it before building on it.
 
+## How it works
+
+Spike proving EF Core reliably sets the Postgres session tenant for RLS under connection pooling and async, with a safe audited elevated path for background jobs and an acceptable performance impact. De-risks the RLS baseline (ADR-0002/0003).
+
 ## Requirements
 
 - A spike proving EF Core reliably sets the Postgres session tenant for RLS under connection pooling and async.

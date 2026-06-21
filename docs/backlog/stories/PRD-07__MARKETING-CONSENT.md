@@ -9,6 +9,11 @@
 As a client, I want to only receive marketing I opted into, with a working unsubscribe on every message, so that my consent is respected per the Spam Act.
 Opt-in for commercial electronic messages, sender identification and a functional unsubscribe that suppresses immediately on withdrawal (REQ-NOTIF-5, C23).
 
+## How it works
+
+Opt-in for commercial electronic messages, sender identification, and a functional unsubscribe that suppresses immediately on withdrawal (Spam Act, C23). Marketing sends only to opted-in clients; suppression is honoured across channels (and by PRD-06 reward comms).
+Transactional reminders/aftercare are exempt and always send.
+
 ## Requirements
 
 - To only receive marketing I opted into, with a working unsubscribe on every message.
@@ -20,6 +25,18 @@ Opt-in for commercial electronic messages, sender identification and a functiona
 - [ ] Unsubscribing suppresses future marketing immediately.
 - [ ] Sender identification is included.
 - [ ] Suppression list is honoured across channels (and by PRD-06 reward comms).
+
+## UI designs / screenshots
+
+- Client app/profile: marketing opt-in toggle + unsubscribe in every marketing message; staff see consent state on the Client 360.
+- Admin: suppression list.
+
+## Suggested data model
+
+- **MarketingConsent** — id, client_id, channel, opted_in(bool), updated_at
+  - _Required for marketing (C23)._
+- **SuppressionList** — tenant_id, contact, reason, at
+  - _Honoured across all marketing/reward comms._
 
 ## Technical notes (high level)
 

@@ -9,6 +9,11 @@
 As a therapist, I want to chart body-contouring treatments on a body map with per-area applicator/cycle settings, so that non-facial treatments are recorded with the same rigour.
 The prototype's Clinical → Body contouring screen charts body treatments on a body map (bodyAdd/bodyDel/bodyCyc) with applicator/cycle settings — a distinct modality beyond the face.
 
+## How it works
+
+Charts body-contouring treatments (e.g. CoolSculpting) on a body map with per-area applicator/cycle settings; sessions feed multi-session plans and outcomes. Device-gated where a licence/patch-test applies.
+Part of the modality-aware charting model (Phase 2).
+
 ## Requirements
 
 - To chart body-contouring treatments on a body map with per-area applicator/cycle settings.
@@ -23,7 +28,14 @@ The prototype's Clinical → Body contouring screen charts body treatments on a 
 
 ## UI designs / screenshots
 
-prototype.html — Clinical → Body contouring (body map).
+_Prototype screen: prototype.html — Clinical → Body contouring (body map)._
+
+- Prototype: Clinical -> Body contouring (clinical-body.png) — a body map with add/remove/cycle areas (bodyAdd/bodyDel/bodyCyc) and per-area settings (applicator, cycles, parameters).
+
+## Suggested data model
+
+- **BodyChart** — id, chart_entry_id, areas[]{region, applicator, cycles, params}
+  - _Body-map analogue of InjectionPoint; feeds plans/outcomes._
 
 ## Technical notes (high level)
 

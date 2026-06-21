@@ -9,6 +9,11 @@
 As a owner, I want a daily closeout that balances card and cash, so that the till reconciles every day.
 End-of-day closeout balances card + cash (REQ-PAY-4).
 
+## How it works
+
+An end-of-day closeout balances card + cash for the day and surfaces variances. Figures are owner-gated and reconcile to the Xero posting (PRD-10).
+The daily till-reconciliation routine.
+
 ## Requirements
 
 - A daily closeout that balances card and cash.
@@ -22,7 +27,15 @@ End-of-day closeout balances card + cash (REQ-PAY-4).
 
 ## UI designs / screenshots
 
-prototype.html — Checkout, Memberships; client-app.html Rewards/Account.
+_Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rewards/Account._
+
+- Prototype: Checkout -> daily closeout (checkout.png) — card vs cash totals for the day, variance highlight; owner-only figures.
+- Also surfaced on the back-office tablet (backroom.png).
+
+## Suggested data model
+
+- **Closeout** — id, tenant_id, location_id, date, card_total, cash_total, variance, closed_by
+  - _Reconciles to Xero (PRD-10)._
 
 ## Technical notes (high level)
 

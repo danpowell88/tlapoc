@@ -9,6 +9,11 @@
 As a owner, I want to track equipment servicing, validation and calibration with reminders, so that devices stay safe, validated and within service.
 The prototype's Operations → Equipment & maintenance tracks sterilisation/equipment servicing (autoclave validation, spore testing, laser service/calibration) with due dates — promoted from the FAC-WORKFLOWS placeholder.
 
+## How it works
+
+An equipment & maintenance register tracking servicing/validation/calibration (autoclave validation, spore testing, laser service/calibration) with due dates; due/overdue items raise alerts and service events are logged with evidence and audited. Feeds the inspection pack.
+Keeps devices safe, validated and in-service (promoted from the FAC-WORKFLOWS placeholder).
+
 ## Requirements
 
 - To track equipment servicing, validation and calibration with reminders.
@@ -23,7 +28,16 @@ The prototype's Operations → Equipment & maintenance tracks sterilisation/equi
 
 ## UI designs / screenshots
 
-prototype.html — Front desk/Operations (Open/close & fridge log, Temperature monitors, Rooms & devices, Equipment, Call log); backroom.html.
+_Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge log, Temperature monitors, Rooms & devices, Equipment, Call log); backroom.html._
+
+- Prototype: Operations -> Equipment & maintenance (ops-equipment.png) — equipment list with service/validation schedules + due/overdue alerts.
+
+## Suggested data model
+
+- **Equipment** — id, tenant_id, location_id, name, type, linked_resource_id?
+  - _Links to a bookable Resource (device)._
+- **MaintenanceRecord** — id, equipment_id, kind(service|validation|calibration|spore_test), due_at, done_at, evidence_ref
+  - _Due/overdue alerts; inspection evidence._
 
 ## Technical notes (high level)
 

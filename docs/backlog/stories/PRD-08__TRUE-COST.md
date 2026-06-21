@@ -9,6 +9,11 @@
 As a owner, I want true-cost and margin reporting per treatment/service, so that I price and plan on real profitability.
 The prototype adds true-cost reporting — cost of goods (units/vial cost, consumables) per treatment to show real margin, not just revenue.
 
+## How it works
+
+True-cost / margin (COGS) reporting: cost of goods (product units/vial cost, consumables) attributed per treatment/service, so margin = revenue - COGS is visible per service and practitioner. Feeds pricing & what-if (PRD-06); figures owner-gated. Detailed accounting still defers to Xero.
+Shows real profitability, not just revenue.
+
 ## Requirements
 
 - True-cost and margin reporting per treatment/service.
@@ -22,7 +27,14 @@ The prototype adds true-cost reporting — cost of goods (units/vial cost, consu
 
 ## UI designs / screenshots
 
-prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack).
+_Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack)._
+
+- Prototype: Finance (finance.png) — true-cost/margin per treatment using vial/consumable cost; owner-only.
+
+## Suggested data model
+
+- **(read) MarginByService** — service_id, revenue, cogs(vial+consumables), margin by date
+  - _Uses VIAL-RECON (PRD-04); attribution not a ledger (ADR-0027)._
 
 ## Technical notes (high level)
 

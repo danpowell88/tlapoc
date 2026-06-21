@@ -7,6 +7,10 @@
 As a designer/developer, I want a shared set of design tokens and core components (buttons, inputs, banners, the blocked-action banner, chips, tables), so that all surfaces look consistent and the compliance UX patterns are reusable.
 One design system (tokens, components) shared across web and the two Flutter apps delivers the 'fast and modern, thumb-first' UX the docs demand and avoids re-styling per surface.
 
+## How it works
+
+A shared design system (tokens + core components) consumed by web and both Flutter apps, including the cross-cutting UX patterns (blocked-action banner, consent/age chips, S4 guardrail tag, offline indicator) with accessibility basics verified. Delivers the 'fast, modern, thumb-first' UX and avoids re-styling per surface (ADR-0006).
+
 ## Requirements
 
 - A shared set of design tokens and core components (buttons, inputs, banners, the blocked-action banner, chips, tables).
@@ -20,7 +24,9 @@ One design system (tokens, components) shared across web and the two Flutter app
 
 ## UI designs / screenshots
 
-Non-UI / platform scaffolding — no prototype screen.
+_Prototype screen: Non-UI / platform scaffolding — no prototype screen._
+
+- A component gallery/storybook; the patterns appear across every prototype screen (e.g. chips on charting.png, banners, the S4 guardrail).
 
 ## Technical notes (high level)
 

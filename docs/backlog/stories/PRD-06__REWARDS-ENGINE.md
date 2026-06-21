@@ -9,6 +9,11 @@
 As a client, I want to earn and redeem rewards on non-S4 items only, so that I'm rewarded without breaching S4 advertising rules.
 Visit-based + membership rewards that the engine blocks from ever applying to S4 items; configuring an S4 reward is blocked (REQ-MEMB-4/5/7, C9/ADR-0014).
 
+## How it works
+
+Visit-based rewards (milestones/every-Nth-visit) + membership perks that the engine blocks from ever applying to S4 items; configuring an S4 reward is blocked (C9/ADR-0014). Rewards apply to non-S4 items, add-ons, or account/gift credit — never the toxin itself.
+Drives repeat visits without eroding margin or breaching advertising law. The catalog schedule flag (PRD-04) drives eligibility.
+
 ## Requirements
 
 - To earn and redeem rewards on non-S4 items only.
@@ -20,6 +25,18 @@ Visit-based + membership rewards that the engine blocks from ever applying to S4
 - [ ] The engine refuses to earn, redeem or discount against any S4-flagged item.
 - [ ] Attempting to configure an S4 reward is blocked.
 - [ ] Catalog schedule flag (from PRD-04) drives eligibility.
+
+## UI designs / screenshots
+
+- Prototype: Memberships -> Loyalty (memb-loyalty.png) — reward rules + ledger; S4 items in the catalog show disabled reward/discount controls with a tooltip (the S4 guardrail).
+- Earn/redeem visible on the Client 360 + client app rewards.
+
+## Suggested data model
+
+- **RewardRule** — id, tenant_id, basis(milestone|nth_visit|membership), eligible_items(non-S4), value_cap
+  - _S4 eligibility blocked (C9)._
+- **RewardLedger** — id, client_id, earned, redeemed, balance, ref
+  - _Non-S4 redemptions only._
 
 ## Technical notes (high level)
 

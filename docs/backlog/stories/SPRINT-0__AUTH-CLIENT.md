@@ -9,6 +9,10 @@
 As a client, I want to create an account and sign in with social login, email+password, or a one-time code, so that I can access booking, intake and my records easily and securely.
 Clients create accounts with Google/Apple, email+password, or email/SMS OTP via Entra External ID (CIAM).
 
+## How it works
+
+Clients create accounts and sign in via Entra External ID (CIAM) with Google/Apple, email+password, or email/SMS OTP, plus account recovery (ADR-0004). Client identities are tenant-scoped and distinct from staff; de-risked by SPIKE-AUTH.
+
 ## Requirements
 
 - To create an account and sign in with social login, email+password, or a one-time code.

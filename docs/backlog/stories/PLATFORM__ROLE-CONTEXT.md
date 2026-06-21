@@ -9,6 +9,11 @@
 As a staff member with more than one role, I want to see my current role and scope and switch active role where I hold several, so that the app applies the right permissions and shows why an action is blocked.
 The prototype shows the current persona, role + a scope-of-practice tooltip, and a 'switch user' control. Real users may hold multiple roles (e.g. NP who is also owner) and need to act under a chosen role with the correct scope.
 
+## How it works
+
+The header shows the signed-in user, active role and a scope-of-practice summary; a user holding multiple roles can switch active role and capabilities update accordingly (consumes PRD-01 RBAC + MULTI-ROLE). The active role is recorded on actions and in the audit trail; scope is sourced from RBAC, not hard-coded per screen.
+Makes 'who am I acting as and what can I do' explicit, and explains blocks.
+
 ## Requirements
 
 - To see my current role and scope and switch active role where I hold several.
@@ -23,7 +28,14 @@ The prototype shows the current persona, role + a scope-of-practice tooltip, and
 
 ## UI designs / screenshots
 
-prototype.html — sidebar/app shell, Today dashboard, header (global search, clinic switcher, switch-user, scope tooltip).
+_Prototype screen: prototype.html — sidebar/app shell, Today dashboard, header (global search, clinic switcher, switch-user, scope tooltip)._
+
+- Prototype: header user chip + scope tooltip + 'Switch user' (dashboard.png) — active role + scope summary; switch-active-role for multi-role users.
+
+## Suggested data model
+
+- **(session) ActiveRole** — session.active_role_id (from StaffRole)
+  - _Stamped on actions + audit; scope from Role.capabilities._
 
 ## Technical notes (high level)
 

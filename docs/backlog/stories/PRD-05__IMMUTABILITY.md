@@ -9,6 +9,11 @@
 As a injector, I want my finalised note to be locked, with later changes added as visible audited amendments, so that the clinical record is trustworthy and tamper-evident.
 A finalised note is locked; any later change is an appended, audited amendment preserving the original (REQ-CLIN-4, ADR-0010).
 
+## How it works
+
+A finalised note is locked; any later change is an appended, audited amendment that preserves the original (ADR-0010). Finalisation happens server-side, and the finalise close-out captures aftercare, recall, the 2-day wellbeing call and any adverse event.
+This tamper-evidence is what makes the clinical record trustworthy in an inspection.
+
 ## Requirements
 
 - My finalised note to be locked, with later changes added as visible audited amendments.
@@ -19,6 +24,18 @@ A finalised note is locked; any later change is an appended, audited amendment p
 - [ ] An amendment creates a new linked, audited entry preserving the original.
 - [ ] Finalisation happens server-side.
 - [ ] The finalise close-out captures aftercare, recall, the 2-day wellbeing call and any adverse event.
+
+## UI designs / screenshots
+
+- Prototype: Charting 'Finalise & checkout' (charting.png) — 'Finalising locks the note and deducts the units used from the selected lot'; finalised notes render read-only with an amendment trail.
+- Read-only oversight view for non-editors (e.g. owner).
+
+## Suggested data model
+
+- **ChartEntry.locked** — + finalised_at
+  - _No edit after final._
+- **Amendment** — id, chart_entry_id, author_id, created_at, reason, payload
+  - _Append-only; original preserved._
 
 ## Technical notes (high level)
 

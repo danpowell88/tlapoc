@@ -7,6 +7,11 @@
 As a injector, I want modality-aware charting for filler, energy devices and weight-loss, so that the platform covers the full treatment menu.
 Phase 2 adds dermal filler (multi-area, per-area lot, VO/blindness consent gate), energy-device charting (per-pass settings, laser-licence gated), weight-loss titration and ghost-overlay photo alignment (REQ-CLIN-10..13). Placeholder.
 
+## How it works
+
+Placeholder/extension (Phase 2): modality-aware charting beyond toxin — dermal filler (multi-area, per-area lot, mandatory VO/blindness consent gate), energy-device charting (per-pass settings/fluence, laser-licence gated), weight-loss titration, and ghost-overlay photo alignment. The modality model already anticipates these (ADR-0025).
+v1 ships toxin + a non-S4 skin note; each modality's specific gates are captured for later build.
+
 ## Requirements
 
 - Modality-aware charting for filler, energy devices and weight-loss.
@@ -19,7 +24,14 @@ Phase 2 adds dermal filler (multi-area, per-area lot, VO/blindness consent gate)
 
 ## UI designs / screenshots
 
-prototype.html — Charting + Clinical (Skin analysis, Body contouring, Complication protocols, Photography & outcomes); treatment-room.html.
+_Prototype screen: prototype.html — Charting + Clinical (Skin analysis, Body contouring, Complication protocols, Photography & outcomes); treatment-room.html._
+
+- Prototype: Clinical -> Body contouring (clinical-body.png) and the skin note demonstrate the modality model; filler/energy/weight-loss are concept-level for v1.
+
+## Suggested data model
+
+- **ChartEntry.treatment_type** — + modality-specific payloads (filler areas, device passes, titration)
+  - _Filler adds VO/blindness consent gate; energy requires laser licence._
 
 ## Technical notes (high level)
 

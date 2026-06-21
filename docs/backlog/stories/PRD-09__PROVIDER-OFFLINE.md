@@ -9,6 +9,11 @@
 As a injector, I want the app to keep working offline and clearly show my sync state, so that treatment-room Wi-Fi drops never cost me data.
 Charting/photos queue locally encrypted and sync on reconnect with no loss; a persistent sync/offline indicator shows queued count + last sync (REQ-APP-3, ADR-0015).
 
+## How it works
+
+The provider app keeps working offline: charting/photos queue locally (encrypted) and sync on reconnect with no loss; a persistent indicator shows queued count + last-sync, and finalise is disabled until synced (ADR-0015, built on SPIKE-OFFLINE + PRD-05/OFFLINE).
+Treatment-room Wi-Fi drops never cost the clinician data.
+
 ## Requirements
 
 - The app to keep working offline and clearly show my sync state.
@@ -22,7 +27,14 @@ Charting/photos queue locally encrypted and sync on reconnect with no loss; a pe
 
 ## UI designs / screenshots
 
-client-app.html, treatment-room.html, checkin.html, backroom.html.
+_Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.html._
+
+- Prototype: provider app (treatment-room.png) — a persistent sync/offline indicator; queued-items count + last-sync; finalise disabled until synced.
+
+## Suggested data model
+
+- **(reuses)** — LocalQueue (PRD-05/OFFLINE) on-device
+  - _Encrypted; last-write-wins drafts; server-side finalise._
 
 ## Technical notes (high level)
 

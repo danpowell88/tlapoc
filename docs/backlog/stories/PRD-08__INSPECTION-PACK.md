@@ -9,6 +9,11 @@
 As a owner, I want a one-click pack that assembles the evidence an inspector would ask for, so that we're always inspection-ready.
 A one-click inspection-readiness pack and the cross-case Governance hub (policies sign-off, waste manifests/IPC, DSAR + breach drill) (REQ-RPT-7, ADR-0030, REQ-SEC-8/9).
 
+## How it works
+
+A one-click inspection-readiness pack assembling the evidence an inspector asks for (consent coverage, S4 register, registration/insurance status, IPC/waste logs, registers) and the cross-case Governance hub: policies sign-off, DSAR (APP 12/13) and a breach drill. Pack generation is audited (REQ-RPT-7, ADR-0030).
+Makes the clinic always inspection-ready.
+
 ## Requirements
 
 - A one-click pack that assembles the evidence an inspector would ask for.
@@ -23,7 +28,14 @@ A one-click inspection-readiness pack and the cross-case Governance hub (policie
 
 ## UI designs / screenshots
 
-prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack).
+_Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack)._
+
+- Prototype: Governance -> Audit pack (gov-audit.png) — buildAuditPack assembles the evidence bundle; the hub links policies sign-off, DSAR and breach drill.
+
+## Suggested data model
+
+- **InspectionPack** — id, tenant_id, generated_at, contents[](register refs + logs + status), actor_id
+  - _Audited; one-click bundle._
 
 ## Technical notes (high level)
 

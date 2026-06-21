@@ -9,6 +9,11 @@
 As a owner, I want a single 'needs attention' digest of exceptions across the clinic, so that I can act on what matters without hunting.
 An owner digest of exceptions across the platform (REQ-RPT-5).
 
+## How it works
+
+A single owner 'needs attention' digest aggregating exceptions across the clinic — expiries, discrepancies, data-quality findings, failed payments, overdue follow-ups — each linking to its source. Respects role/financial gating.
+The at-a-glance 'what needs me' view for the owner.
+
 ## Requirements
 
 - A single 'needs attention' digest of exceptions across the clinic.
@@ -22,7 +27,14 @@ An owner digest of exceptions across the platform (REQ-RPT-5).
 
 ## UI designs / screenshots
 
-prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack).
+_Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack)._
+
+- Prototype: Today (dashboard.png) surfaces the owner exceptions digest; each item deep-links to its source screen.
+
+## Suggested data model
+
+- **(read) AttentionDigest** — aggregates CredentialAlert + Excursion + Stocktake discrepancy + DataQualityFinding + DunningAttempt + overdue Job
+  - _Role/financial-gated._
 
 ## Technical notes (high level)
 

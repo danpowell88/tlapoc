@@ -9,6 +9,11 @@
 As a manager, I want to manage the clinic's rooms, chairs and devices as bookable resources, so that scheduling reflects real capacity and avoids conflicts.
 The prototype's Operations → Rooms & devices manages the bookable rooms/chairs/devices that the calendar schedules against (resource conflict-flagging in PRD-02).
 
+## How it works
+
+Manage the clinic's rooms, chairs and devices as bookable resources the calendar schedules against (conflict-flagging in PRD-02). Out-of-service status removes a resource from availability; device records link to equipment maintenance.
+Keeps scheduling honest about real capacity.
+
 ## Requirements
 
 - To manage the clinic's rooms, chairs and devices as bookable resources.
@@ -22,7 +27,14 @@ The prototype's Operations → Rooms & devices manages the bookable rooms/chairs
 
 ## UI designs / screenshots
 
-prototype.html — Front desk/Operations (Open/close & fridge log, Temperature monitors, Rooms & devices, Equipment, Call log); backroom.html.
+_Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge log, Temperature monitors, Rooms & devices, Equipment, Call log); backroom.html._
+
+- Prototype: Operations -> Rooms & devices (ops-resources.png) — create/edit rooms/chairs/devices (type, location, status); out-of-service toggles availability.
+
+## Suggested data model
+
+- **Resource** — (shared with PRD-02) id, type(room|chair|device), name, location_id, status
+  - _Out-of-service removes from availability; device links to Equipment._
 
 ## Technical notes (high level)
 

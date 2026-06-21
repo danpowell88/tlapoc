@@ -9,6 +9,11 @@
 As a owner, I want all revenue/MRR/pricing figures hidden from non-owner roles across the app and API, so that financials stay owner-only.
 Project rule + prototype: revenue, MRR and pricing figures must stay gated behind the owner financial capability; non-owner roles (e.g. reception) see memberships but no money figures. The prototype tags these with a .fin class toggled by capability.
 
+## How it works
+
+All revenue/MRR/pricing figures are hidden from non-owner roles across the app AND the API — enforced server-side (the API never returns gated figures to unauthorised roles), not just hidden in the UI. Non-owner roles see operational data (e.g. membership status) but no money; attempted access is denied and audited.
+The project's owner-only financials rule, made structural (the .fin capability).
+
 ## Requirements
 
 - All revenue/MRR/pricing figures hidden from non-owner roles across the app and API.
@@ -20,6 +25,16 @@ Project rule + prototype: revenue, MRR and pricing figures must stay gated behin
 - [ ] Non-owner roles see operational data (e.g. membership status) but no revenue/MRR/pricing.
 - [ ] Gating is enforced server-side (API never returns gated figures to unauthorised roles), not just hidden in UI.
 - [ ] Attempted access is denied and audited.
+
+## UI designs / screenshots
+
+- Prototype: money figures tagged .fin are hidden for reception/clinical roles across dashboards, checkout totals, finance, memberships and reports; visible only to the owner.
+- A non-owner never sees revenue/MRR/pricing.
+
+## Suggested data model
+
+- **Capability finance.read** — gates money fields server-side
+  - _API strips/denies gated figures; access attempts audited._
 
 ## Technical notes (high level)
 

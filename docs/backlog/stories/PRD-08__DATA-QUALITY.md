@@ -9,6 +9,11 @@
 As a owner, I want data-quality checks that flag anomalies in my records, so that the data stays clean and trustworthy.
 Carry over anomaly checks: active-but-unseen, completed-not-checked-in, duplicates, missing contacts, implausible dates (REQ-RPT-4).
 
+## How it works
+
+Anomaly checks carried over from the prototype: active-but-unseen, completed-not-checked-in, duplicates, missing contacts, implausible dates. Findings are listed, actionable, run on a schedule, and feed the needs-attention digest.
+Keeps the data clean and trustworthy.
+
 ## Requirements
 
 - Data-quality checks that flag anomalies in my records.
@@ -22,7 +27,14 @@ Carry over anomaly checks: active-but-unseen, completed-not-checked-in, duplicat
 
 ## UI designs / screenshots
 
-prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack).
+_Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack)._
+
+- Prototype: Reports -> data-quality findings (reports.png) — a list of anomalies with a jump-to-fix; feeds the owner digest.
+
+## Suggested data model
+
+- **DataQualityFinding** — id, tenant_id, check, entity_ref, detail, detected_at, resolved_at
+  - _Scheduled checks; feeds ATTENTION-DIGEST._
 
 ## Technical notes (high level)
 

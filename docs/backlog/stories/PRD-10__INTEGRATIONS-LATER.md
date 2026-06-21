@@ -7,6 +7,11 @@
 As a owner, I want future integrations: online checkout/deposits, e-prescribing and a public API, so that the platform extends as we scale.
 Online checkout & deposits (S4 never priced/sold online), e-prescribing (eRx/ETP, 🔬), public API/webhooks (Phase 3) and Medicare/HICAPS (non-applicable to cosmetic). Placeholder (REQ-INT-2a/4/5/6/7, ADR-0035/0036).
 
+## How it works
+
+Placeholder (Phase 2/3): online checkout & deposits (S4 never priced/sold online), e-prescribing (eRx/ETP, needs validation), public API/webhooks (Phase 3), and Medicare/HICAPS (recorded as non-applicable to cosmetic). Each sits behind its existing port (IPaymentProvider, IPrescribingProvider).
+Captured so the architecture stays extension-ready (ADR-0035/0036).
+
 ## Requirements
 
 - Future integrations: online checkout/deposits, e-prescribing and a public API.
@@ -18,6 +23,15 @@ Online checkout & deposits (S4 never priced/sold online), e-prescribing (eRx/ETP
 - [ ] S4 is never priced or sold online (invariant carried forward).
 - [ ] Medicare/HICAPS recorded as non-applicable to cosmetic.
 - [ ] e-prescribing flagged for feasibility validation.
+
+## UI designs / screenshots
+
+- Prototype: Settings -> Integrations (settings-integrations.png) shows these as concept cards (mostly disabled).
+
+## Suggested data model
+
+- **(future)** — OnlineOrder / EPrescription / Webhook / ApiKey
+  - _Behind existing ports; S4 never online._
 
 ## Technical notes (high level)
 

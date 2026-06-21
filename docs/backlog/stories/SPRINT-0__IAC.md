@@ -7,6 +7,10 @@
 As a platform engineer, I want dev, staging and prod environments provisioned via IaC, all pinned to Australia East, so that data residency is guaranteed and environments are reproducible.
 All PII/PHI must resolve to Australia East (C21/ADR-0016). Defining dev/staging/prod as code makes residency, isolation and reproducibility provable.
 
+## How it works
+
+dev/staging/prod provisioned as code, all pinned to Australia East so data residency (C21/ADR-0016) is provable and reproducible. A non-AU region for any PII/PHI resource fails the IaC policy check; environments are isolated and a non-prod env can be torn down/recreated with one command.
+
 ## Requirements
 
 - Dev, staging and prod environments provisioned via IaC, all pinned to Australia East.
@@ -18,6 +22,11 @@ All PII/PHI must resolve to Australia East (C21/ADR-0016). Defining dev/staging/
 - [ ] A non-AU region for any PII/PHI resource fails the IaC policy check.
 - [ ] Environments are isolated (separate data stores, secrets, identities).
 - [ ] Tear-down/re-create of a non-prod environment is a single command.
+
+## Suggested data model
+
+- **(infra) Environment** — region=AustraliaEast, isolated data store/secrets/identity per env
+  - _Residency policy enforced in IaC._
 
 ## Technical notes (high level)
 

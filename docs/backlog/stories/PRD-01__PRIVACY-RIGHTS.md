@@ -9,6 +9,11 @@
 As a client, I want to see a clear collection notice, access a copy of my data and request a correction, so that my privacy rights under the Privacy Act are respected.
 Clients have APP 12/13 rights: a collection notice/consent at sign-up, and the ability to access and request correction of their own data (DSAR clock ≤30 days).
 
+## How it works
+
+Clients get APP 12/13 rights: a collection notice + consent at sign-up, the ability to view/export their own data, and to request a correction — all tracked against the DSAR <=30-day clock and audited.
+Self-service lives in the client app privacy area; staff handle requests via Governance.
+
 ## Requirements
 
 - To see a clear collection notice, access a copy of my data and request a correction.
@@ -20,6 +25,18 @@ Clients have APP 12/13 rights: a collection notice/consent at sign-up, and the a
 - [ ] A client can view/export their own personal/health data.
 - [ ] A correction request is tracked to resolution against the DSAR clock.
 - [ ] All access/correction actions are audited.
+
+## UI designs / screenshots
+
+- Client app: Account -> 'Your data & privacy' (residency note, request a copy, request correction) — client-app.png.
+- Staff side: a DSAR queue in Governance with the response clock.
+
+## Suggested data model
+
+- **PrivacyRequest** — id, tenant_id, client_id, type(access|correction|deletion), opened_at, due_at, status, resolution
+  - _DSAR clock = opened_at + 30d._
+- **ConsentToCollect** — id, client_id, notice_version, granted_at
+  - _Captured at sign-up._
 
 ## Technical notes (high level)
 

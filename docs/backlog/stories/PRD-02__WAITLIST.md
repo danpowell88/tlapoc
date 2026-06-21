@@ -9,6 +9,11 @@
 As a front desk, I want a waitlist that auto-offers a freed slot when an appointment cancels or no-shows, so that we keep the diary full.
 Clients can join a waitlist; cancellations/no-shows auto-offer the freed slot to fill quiet windows.
 
+## How it works
+
+A waitlist captures clients who want an earlier slot; when an appointment cancels or no-shows, the freed slot is auto-offered to the waitlist to keep the diary full and fill quiet windows.
+Offered/accepted/expired states are tracked.
+
 ## Requirements
 
 - A waitlist that auto-offers a freed slot when an appointment cancels or no-shows.
@@ -22,7 +27,14 @@ Clients can join a waitlist; cancellations/no-shows auto-offer the freed slot to
 
 ## UI designs / screenshots
 
-prototype.html — Schedule, 'New booking' wizard, Clients directory & 360.
+_Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients directory & 360._
+
+- Prototype: Schedule (schedule.png) — waitlist management + a backfill prompt on cancellation; quiet-window fill suggestions from utilisation.
+
+## Suggested data model
+
+- **WaitlistEntry** — id, tenant_id, client_id, service_id, window, status(waiting|offered|accepted|expired), offered_at
+  - _Backfills on cancel/no-show._
 
 ## Technical notes (high level)
 

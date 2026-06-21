@@ -7,6 +7,10 @@
 As a prospective clinic, I want to sign up for the platform myself and pay a subscription, so that onboarding doesn't need manual provisioning.
 Self-service tenant sign-up, subscription billing and per-tenant Entra federation for selling the platform as SaaS (PRD-01 non-goal; Phase 3).
 
+## How it works
+
+Placeholder (Phase 3): self-service tenant sign-up, subscription billing and per-tenant Entra federation to sell the platform as SaaS. v1 provisions tenants manually; tenancy/identity are already SaaS-ready.
+
 ## Requirements
 
 - To sign up for the platform myself and pay a subscription.
@@ -16,6 +20,11 @@ Self-service tenant sign-up, subscription billing and per-tenant Entra federatio
 
 - [ ] Placeholder — Phase 3; v1 provisions tenants manually.
 - [ ] Captured so tenancy/identity stay SaaS-ready.
+
+## Suggested data model
+
+- **(future) Subscription** — tenant_id, plan, billing_status
+  - _Phase 3._
 
 ## Technical notes (high level)
 

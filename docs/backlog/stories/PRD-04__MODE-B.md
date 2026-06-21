@@ -7,6 +7,10 @@
 As a owner, I want a pharmacy-dispensing mode for clinics without on-site custody, so that the platform fits a pharmacy-partner arrangement.
 An alternative dispensing model where a pharmacy partner holds/dispenses stock. No pharmacy partner yet — deferred, placeholder. (DispensedItem entity reserved.)
 
+## How it works
+
+Placeholder (Phase 2): a pharmacy-dispensing model where a pharmacy partner holds/dispenses stock, for clinics without on-site custody. v1 is Mode A only; the tenant mode switch already anticipates Mode B (DispensedItem entity reserved).
+
 ## Requirements
 
 - A pharmacy-dispensing mode for clinics without on-site custody.
@@ -17,6 +21,13 @@ An alternative dispensing model where a pharmacy partner holds/dispenses stock. 
 
 - [ ] Placeholder — v1 is Mode A only; tenant mode switch already anticipates Mode B.
 - [ ] Captured so the medicines model stays mode-aware.
+
+## Suggested data model
+
+- **MedicineMode** — tenant_id, mode(A_onsite|B_pharmacy)
+  - _v1 = A only._
+- **DispensedItem** — (reserved for Mode B)
+  - _Placeholder._
 
 ## Technical notes (high level)
 

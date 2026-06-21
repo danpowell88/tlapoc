@@ -9,6 +9,11 @@
 As a injector, I want my notes and photos to queue locally and sync when back online if the room loses Wi-Fi, so that I never lose work mid-treatment.
 If Wi-Fi drops mid-visit, notes/photos queue locally (encrypted) and sync on reconnect with no loss; finalisation is server-side (REQ-CLIN/APP, ADR-0015).
 
+## How it works
+
+Treatment rooms drop Wi-Fi, so charting/photos queue locally (encrypted) and sync on reconnect with no loss; drafts use last-write-wins and finalisation occurs server-side (ADR-0015). A persistent sync indicator shows queued count + last-sync time; finalise is disabled until synced.
+Primarily a provider-app capability (PRD-09) but the sync model is defined here; built on SPIKE-OFFLINE.
+
 ## Requirements
 
 - My notes and photos to queue locally and sync when back online if the room loses Wi-Fi.
@@ -22,7 +27,15 @@ If Wi-Fi drops mid-visit, notes/photos queue locally (encrypted) and sync on rec
 
 ## UI designs / screenshots
 
-prototype.html — Charting + Clinical (Skin analysis, Body contouring, Complication protocols, Photography & outcomes); treatment-room.html.
+_Prototype screen: prototype.html — Charting + Clinical (Skin analysis, Body contouring, Complication protocols, Photography & outcomes); treatment-room.html._
+
+- Prototype: provider app (treatment-room.png) shows a sync/offline indicator; finalise disabled until synced.
+- Queued drafts/photos visibly pending; no data loss on reconnect.
+
+## Suggested data model
+
+- **LocalQueue (device)** — draft chart edits + pending photos, encrypted; sync cursor
+  - _Last-write-wins drafts; server-side finalise (ADR-0010/0015)._
 
 ## Technical notes (high level)
 

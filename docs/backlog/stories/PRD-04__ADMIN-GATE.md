@@ -9,6 +9,11 @@
 As a RN, I want to administer S4 only against a valid unconsumed script for this client, recording product, units, depth, site and batch-lot/expiry, so that every dose is lawful, traceable and tamper-proof.
 An RN can only administer S4 against a valid, unconsumed prescription for that same client, with current consent and a selected in-date lot; the record is immutable once saved (C8).
 
+## How it works
+
+An RN may only administer S4 against a valid, unconsumed prescription for that same client, with current consent and a selected in-date lot; the administration record is immutable once saved (C8). A blocked attempt shows the reason and writes an audit event.
+This is the central invariant of the moat — every dose is provably lawful and traceable. It appears in the medicine register and links lot->client for recall.
+
 ## Requirements
 
 - To administer S4 only against a valid unconsumed script for this client, recording product, units, depth, site and batch-lot/expiry.
@@ -20,6 +25,16 @@ An RN can only administer S4 against a valid, unconsumed prescription for that s
 - [ ] It records product, units, depth, site and batch-lot/expiry; it is immutable once saved.
 - [ ] A blocked attempt shows the reason and writes an audit event.
 - [ ] The administration appears in the medicine register.
+
+## UI designs / screenshots
+
+- Prototype: Charting (charting.png) — administration is the act of finalising the injection map against the selected lot; the gate chips (consult/consent) and lot selection must be satisfied first.
+- Over-draw or missing prerequisites block finalise with an explanatory banner.
+
+## Suggested data model
+
+- **Administration** — id, tenant_id, client_id, prescription_id, product_id, lot_id, units, site, depth, administrator_id, at
+  - _Immutable (ADR-0010); requires valid unconsumed Rx (same client) + current consent + in-date lot; appears in register._
 
 ## Technical notes (high level)
 

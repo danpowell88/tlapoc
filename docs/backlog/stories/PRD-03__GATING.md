@@ -9,6 +9,11 @@
 As a RN/NP, I want the system to block treatment until required intake and consent are complete and current, telling me exactly what's missing, so that the compliant path is the only path.
 Treatment cannot start unless required intake + consent are complete and current — enforced server-side, surfaced via the blocked-action banner (ADR-0008).
 
+## How it works
+
+The shared treatment gate: charting/treatment cannot start unless required intake + a current consent (and BDD screen) exist — enforced server-side, surfaced via the calm blocked-action banner ('what is missing, how to fix, who can resolve'). Never a dead-end.
+This is the mechanism PRD-04 (consult/Rx) and PRD-05 (charting) consume; gate decisions are audited.
+
 ## Requirements
 
 - The system to block treatment until required intake and consent are complete and current, telling me exactly what's missing.
@@ -20,6 +25,16 @@ Treatment cannot start unless required intake + consent are complete and current
 - [ ] The block states what's missing and how to resolve it (never a dead-end).
 - [ ] The gate is the shared mechanism consumed by PRD-04/05.
 - [ ] Gate decisions are audited.
+
+## UI designs / screenshots
+
+- Prototype: the Charting pre-treatment review (charting.png) shows the gate chips and blocks opening the map until satisfied; the banner explains and links the fix.
+- Same gate reused on the provider app (treatment-room.png).
+
+## Suggested data model
+
+- **(derived) TreatmentGate** — = required IntakeResponse present AND current ConsentSignature AND ScreeningResult present (AND consult/Rx for S4)
+  - _Server-enforced; evaluated before charting opens (ADR-0008)._
 
 ## Technical notes (high level)
 

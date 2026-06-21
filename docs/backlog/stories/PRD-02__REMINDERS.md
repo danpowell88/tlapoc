@@ -9,6 +9,11 @@
 As a client, I want appointment reminders I can confirm/decline and the ability to reschedule or cancel within policy myself, so that I don't need to call and the clinic's diary stays accurate.
 Clients get reminders they can confirm/decline and can self-reschedule or cancel within policy without calling.
 
+## How it works
+
+Clients get reminders they can confirm/decline and can self-reschedule or cancel within policy without calling. Outside policy, the configured rule applies (no auto-charge in v1).
+The reminder channel is provided by PRD-07; this story is the booking-side scheduling + self-service actions.
+
 ## Requirements
 
 - Appointment reminders I can confirm/decline and the ability to reschedule or cancel within policy myself.
@@ -22,7 +27,17 @@ Clients get reminders they can confirm/decline and can self-reschedule or cancel
 
 ## UI designs / screenshots
 
-prototype.html — Schedule, 'New booking' wizard, Clients directory & 360.
+_Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients directory & 360._
+
+- Client app / email-SMS: reminder with confirm/decline + reschedule/cancel links; the desk sees confirm/decline status on the appointment (schedule.png).
+- Cancellation/no-show policy is configurable in settings.
+
+## Suggested data model
+
+- **ReminderSchedule** — id, appointment_id, channel, send_at, status(sent|confirmed|declined)
+  - _Updates Appointment.status on confirm/decline._
+- **CancellationPolicy** — tenant_id, window_hours, no_show_rule
+  - _No deposit/auto-charge in v1._
 
 ## Technical notes (high level)
 

@@ -9,6 +9,11 @@
 As a client, I want timely reminders I can confirm/decline and pre-/after-care instructions for my treatment, so that I'm prepared and cared for around my visit.
 Appointment reminders/confirmations plus pre-care and aftercare sequences (multi-touch, timed per treatment type) (REQ-NOTIF-2). Transactional messages are exempt from opt-in.
 
+## How it works
+
+Appointment reminders/confirmations plus pre-care and aftercare sequences (multi-touch, timed per treatment type). Confirm/decline updates the appointment (PRD-02). Transactional messages send regardless of marketing opt-in and avoid S4 references.
+Keeps clients prepared and cared-for around each visit.
+
 ## Requirements
 
 - Timely reminders I can confirm/decline and pre-/after-care instructions for my treatment.
@@ -19,6 +24,18 @@ Appointment reminders/confirmations plus pre-care and aftercare sequences (multi
 - [ ] Pre-care + aftercare sequences are multi-touch and timed per treatment type.
 - [ ] Transactional messages send regardless of marketing opt-in and avoid S4 references.
 - [ ] Sends are logged to comms history.
+
+## UI designs / screenshots
+
+- Prototype: Comms -> Automations (marketing-auto.png) configures the reminder/aftercare sequences; sends appear in the client's comms history.
+- Reminder includes confirm/decline + reschedule links (PRD-02 REMINDERS).
+
+## Suggested data model
+
+- **Sequence** — id, tenant_id, trigger(booking|visit), treatment_type, steps[]{offset, channel, template_key}
+  - _Multi-touch, timed per treatment._
+- **SequenceRun** — id, sequence_id, client_id, appointment_id, step_status[]
+  - _Transactional; exempt from opt-in._
 
 ## Technical notes (high level)
 

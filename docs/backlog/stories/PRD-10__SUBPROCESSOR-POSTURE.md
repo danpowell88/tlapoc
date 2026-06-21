@@ -9,6 +9,11 @@
 As a owner, I want assurance that any data leaving the platform goes only to AU-resident or APP-8-assessed sub-processors, so that integrations don't breach cross-border rules.
 No integration sends PII to a non-AU sub-processor unless an APP-8 assessment + consent record exists (REQ-INT-3, C21/ADR-0016).
 
+## How it works
+
+No integration sends PII to a non-AU sub-processor unless an APP-8 assessment + consent record exists; flows are registered, and all integrations are outbound and swappable (ADR-0012/0016). Ties into PRD-01/RESIDENCY enforcement.
+Keeps integrations inside cross-border privacy rules (C21).
+
 ## Requirements
 
 - Assurance that any data leaving the platform goes only to AU-resident or APP-8-assessed sub-processors.
@@ -20,6 +25,15 @@ No integration sends PII to a non-AU sub-processor unless an APP-8 assessment + 
 - [ ] Sub-processor data flows are registered.
 - [ ] All integrations are outbound and swappable.
 - [ ] Ties into PRD-01/RESIDENCY enforcement.
+
+## UI designs / screenshots
+
+- Prototype: Settings -> Integrations (settings-integrations.png) — each integration shows its data-residency posture; an admin sub-processor register lists flows + APP-8 status.
+
+## Suggested data model
+
+- **SubProcessor** — (shared with PRD-01) id, name, region, app8_assessment_ref, consent_ref
+  - _Non-AU blocked unless assessed + consented._
 
 ## Technical notes (high level)
 

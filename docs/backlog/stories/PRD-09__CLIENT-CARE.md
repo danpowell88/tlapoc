@@ -9,6 +9,11 @@
 As a client, I want to view my photos, memberships, rewards and balance and add a card-on-file, so that I can self-serve my care and payments.
 Clients view consented before/after photos, memberships, rewards/perks and balances, and add a card-on-file for autopay (REQ-APP-1).
 
+## How it works
+
+In the app the client views consented before/after photos, memberships, rewards/perks and balances, and adds a card-on-file for autopay (feeds PRD-06). No one-off online checkout is exposed.
+Self-service for care history and payments.
+
 ## Requirements
 
 - To view my photos, memberships, rewards and balance and add a card-on-file.
@@ -23,7 +28,15 @@ Clients view consented before/after photos, memberships, rewards/perks and balan
 
 ## UI designs / screenshots
 
-client-app.html, treatment-room.html, checkin.html, backroom.html.
+_Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.html._
+
+- Prototype: client app (client-app.png) tabs — My care (visit history, photos with consent), Rewards (redeem points, gift cards), Account (update card on file).
+- Photo viewing is image-use-consent-gated.
+
+## Suggested data model
+
+- **(reuses)** — Photo (PRD-05), Membership/RewardLedger/AccountBalance (PRD-06), PaymentMethodToken
+  - _Card-on-file feeds PRD-06 autopay; no one-off checkout._
 
 ## Technical notes (high level)
 

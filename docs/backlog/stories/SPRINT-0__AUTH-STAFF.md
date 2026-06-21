@@ -9,6 +9,10 @@
 As a staff member, I want to sign in to the web and provider app with my Microsoft 365 account and MFA, so that I use one secure corporate identity and no extra password.
 Staff sign in with the clinic's existing Microsoft 365 accounts via Entra ID with MFA (ADR-0004). This is the plumbing; the RBAC/scope rules are PRD-01.
 
+## How it works
+
+Staff sign in with the clinic's existing Microsoft 365 accounts via Entra ID SSO + MFA (ADR-0004); tokens carry tenant + a stable user id usable by the API, and sessions are scoped to one tenant. The plumbing the RBAC/scope rules (PRD-01) build on; de-risked by SPIKE-AUTH.
+
 ## Requirements
 
 - To sign in to the web and provider app with my Microsoft 365 account and MFA.

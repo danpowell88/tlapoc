@@ -9,6 +9,10 @@
 As a backend developer, I want a Postgres database with EF Core, a migration pipeline and base entity/columns conventions, so that every module adds schema consistently and migrations run automatically per environment.
 A migrations-first data layer with a base entity convention (tenant_id, audit columns) underpins every module.
 
+## How it works
+
+Postgres + EF Core with a migrations-first pipeline and a base-entity convention (tenant_id + created/updated audit columns) that every module inherits. Migrations apply automatically per environment; local dev uses a containerised Postgres seeded by SEED (ADR-0002).
+
 ## Requirements
 
 - A Postgres database with EF Core, a migration pipeline and base entity/columns conventions.
@@ -19,6 +23,11 @@ A migrations-first data layer with a base entity convention (tenant_id, audit co
 - [ ] Base entity convention includes tenant_id and created/updated audit columns.
 - [ ] A sample entity round-trips through repository + migration in tests.
 - [ ] Local dev uses a containerised Postgres seeded by S0-SEED.
+
+## Suggested data model
+
+- **BaseEntity** — id, tenant_id, created_at, created_by, updated_at, updated_by
+  - _Convention inherited by all tenant-scoped tables._
 
 ## Technical notes (high level)
 

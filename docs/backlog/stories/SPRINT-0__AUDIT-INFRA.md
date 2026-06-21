@@ -9,6 +9,10 @@
 As a platform engineer, I want an append-only AuditEvent store and a simple API/interceptor for modules to record reads and writes, so that auditability is a built-in default rather than a per-feature afterthought.
 C10/ADR-0010 require an immutable record of who read/changed clinical, medicines and PII data. Building the append-only AuditEvent plumbing now lets every later module just emit events.
 
+## How it works
+
+The append-only AuditEvent store + a reusable interceptor/helper so any module records create/update/read with who/what/when/tenant, and tampering (update/delete) is rejected at the data layer (C10/ADR-0010). Makes auditability a built-in default, not a per-feature afterthought; PRD-01/AUDIT builds the export UI on top.
+
 ## Requirements
 
 - An append-only AuditEvent store and a simple API/interceptor for modules to record reads and writes.
@@ -20,6 +24,11 @@ C10/ADR-0010 require an immutable record of who read/changed clinical, medicines
 - [ ] A reusable interceptor/helper records create/update/read for annotated entities or endpoints.
 - [ ] Events are queryable and exportable (full register UI is PRD-01/PRD-08).
 - [ ] Tampering attempts (update/delete) are rejected at the data layer.
+
+## Suggested data model
+
+- **AuditEvent** — id, tenant_id, actor_id, action, entity_type, entity_id, at, context(json)
+  - _Append-only; no update/delete path._
 
 ## Technical notes (high level)
 

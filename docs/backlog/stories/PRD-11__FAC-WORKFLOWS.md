@@ -7,6 +7,11 @@
 As a owner, I want fuller facility workflows: checklists, maintenance registers and incident case management, so that operations and safety are fully systematised.
 Open/close checklist, sterilisation & equipment maintenance register (autoclave validation, spore testing, laser service), deep incident & mandatory-reporting case management — Phase 2 (REQ-FAC-4..10). Placeholder.
 
+## How it works
+
+Placeholder (Phase 2): fuller facility workflows — deep incident & mandatory-reporting case management beyond the registers (the open/close, equipment, IPC and complication-response pieces are now their own v1 stories). The facility model already anticipates them (ADR-0026/0030).
+Captured so operations can be fully systematised later.
+
 ## Requirements
 
 - Fuller facility workflows: checklists, maintenance registers and incident case management.
@@ -20,6 +25,11 @@ Open/close checklist, sterilisation & equipment maintenance register (autoclave 
 ## UI designs / screenshots
 
 prototype.html — Front desk/Operations (Open/close & fridge log, Temperature monitors, Rooms & devices, Equipment, Call log); backroom.html.
+
+## Suggested data model
+
+- **IncidentCase** — id, tenant_id, type, mandatory_reportable(bool), steps[], status
+  - _Phase 2 case management._
 
 ## Technical notes (high level)
 

@@ -9,6 +9,11 @@
 As a owner, I want a per-practitioner scorecard, so that I can coach the team and see who drives retention.
 The prototype's Reports → Scorecard view shows per-practitioner performance (revenue, retention, rebooking, utilisation, outcomes).
 
+## How it works
+
+A per-practitioner scorecard: revenue, retention/rebooking, utilisation and outcome/revision signals — date-filterable, drilling into the underlying clients/appointments. Financial figures owner-gated.
+Lets the owner coach the team and see who drives retention.
+
 ## Requirements
 
 - A per-practitioner scorecard.
@@ -22,7 +27,14 @@ The prototype's Reports → Scorecard view shows per-practitioner performance (r
 
 ## UI designs / screenshots
 
-prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack).
+_Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack)._
+
+- Prototype: Reports -> Scorecard (reports.png, goRep('scorecard')) — per-practitioner metrics with drill-down.
+
+## Suggested data model
+
+- **(read) PractitionerScorecard** — practitioner_id, revenue, retention, rebooking, utilisation, outcomes by date
+  - _From read-models; owner-gated._
 
 ## Technical notes (high level)
 

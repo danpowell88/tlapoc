@@ -9,6 +9,11 @@
 As a client, I want to book, complete intake and e-sign consent entirely in the app, so that I'm ready for my visit without paperwork.
 A client can complete the full pre-visit journey entirely in-app (REQ-APP-1).
 
+## How it works
+
+The client completes the full pre-visit journey entirely in-app: book -> intake -> e-sign consent (incl. image-use), then receives reminders/recall. Surfaces PRD-02 booking and PRD-03 intake/consent through the Flutter client app; sign-in via social/email/OTP, tenant-scoped.
+Removes paperwork and gets clients ready before they arrive.
+
 ## Requirements
 
 - To book, complete intake and e-sign consent entirely in the app.
@@ -22,7 +27,15 @@ A client can complete the full pre-visit journey entirely in-app (REQ-APP-1).
 
 ## UI designs / screenshots
 
-client-app.html, treatment-room.html, checkin.html, backroom.html.
+_Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.html._
+
+- Prototype: client app (client-app.png) bottom-tabs — Home/For you, Book, then the intake + consent flow ('You're booked!', 'All set — thank you').
+- Reminders/recall received in-app.
+
+## Suggested data model
+
+- **(reuses)** — Appointment (PRD-02) + IntakeResponse/ConsentSignature (PRD-03) via the API
+  - _Client app is a surface over those modules._
 
 ## Technical notes (high level)
 

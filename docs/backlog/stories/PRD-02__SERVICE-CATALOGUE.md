@@ -9,6 +9,11 @@
 As a owner / manager, I want to manage the menu of services with durations, eligible roles and the S4 flag, so that booking, rewards and the public page all behave correctly per service.
 The prototype's clinical Treatment menu + admin services list defines bookable services with durations, eligible roles, and the S4/non-S4 flag that drives scope-aware booking, rewards eligibility and public-page naming.
 
+## How it works
+
+The services / treatment menu defines every bookable service with duration/buffer, eligible roles, price and the S4/non-S4 flag. That single flag drives scope-aware booking (C4), rewards eligibility (C9) and public-page naming (PRD-07).
+Linked to the medicines/products catalogue (PRD-04) where a service consumes a product.
+
 ## Requirements
 
 - To manage the menu of services with durations, eligible roles and the S4 flag.
@@ -23,7 +28,15 @@ The prototype's clinical Treatment menu + admin services list defines bookable s
 
 ## UI designs / screenshots
 
-prototype.html — Schedule, 'New booking' wizard, Clients directory & 360.
+_Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients directory & 360._
+
+- Prototype: Clinical -> Treatment menu (clinical-menu.png) and admin Services & products — each service row shows duration, eligible roles, price, S4 flag; capability-gated admin; changes audited.
+- The S4 tag visibly marks services and disables reward/discount controls on them.
+
+## Suggested data model
+
+- **Service** — id, tenant_id, name, public_name, duration, buffer, price, schedule(S4|non-S4), eligible_roles[], product_id?
+  - _schedule flag is the master classification (ADR-0014)._
 
 ## Technical notes (high level)
 

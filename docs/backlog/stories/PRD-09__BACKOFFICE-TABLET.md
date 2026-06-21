@@ -9,6 +9,11 @@
 As a clinic staff, I want a bench-tablet view of the day's operational jobs, so that behind-the-scenes work (logs, stock, handover) is quick at the bench.
 The prototype's backroom surface is a bench tablet for behind-the-scenes work: open/close, cold-chain, stock on hand, S4 drug register, waste/disposal log, tasks and shift handover — a focused operations view.
 
+## How it works
+
+A bench tablet for behind-the-scenes work: open/close checklist, cold-chain log, stock on hand, S4 drug register, waste/disposal log, tasks and shift handover — each panel reusing the underlying modules (PRD-04 medicines, PRD-11 operations, PRD-07 jobs). Role/financial gating applies; actions audited.
+A focused operations view for the back room.
+
 ## Requirements
 
 - A bench-tablet view of the day's operational jobs.
@@ -23,7 +28,15 @@ The prototype's backroom surface is a bench tablet for behind-the-scenes work: o
 
 ## UI designs / screenshots
 
-backroom.html.
+_Prototype screen: backroom.html._
+
+- Prototype: back-office tablet (backroom.png) — 'Good morning', Open & close, Cold chain, Stock on hand, Schedule 4 drug register, Waste & disposal log, Tasks, Shift handover.
+- Shared-device session handling.
+
+## Suggested data model
+
+- **(reuses)** — OpenCloseChecklist/TempLog/StockItem/StockLedger/StockDestruction/Job/ShiftHandover
+  - _Aggregates operations + medicines + jobs._
 
 ## Technical notes (high level)
 
