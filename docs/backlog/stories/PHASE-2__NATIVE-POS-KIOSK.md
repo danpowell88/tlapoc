@@ -1,0 +1,42 @@
+# Native POS hardware & tablet kiosk mode (placeholder)
+
+> **Epic:** [PHASE-2 — Phase 2+ / scale (cross-cutting placeholders)](../epics/PHASE-2.md)  ·  **Key:** `PHASE-2/NATIVE-POS-KIOSK`  ·  **Type:** Story  ·  **Stage:** M7  ·  **Priority:** P2  ·  **Estimate:** 1 pts  ·  **Area:** web
+
+## Background
+
+Phase 2+ / scale (cross-cutting placeholders) — Program-level capability deliberately deferred beyond v1 and not owned by a single feature PRD — the SaaS/scale layer.
+
+As a front desk, I want native POS hardware and a kiosk check-in mode, so that the desk and waiting room are smoother.
+
+Native POS hardware integration and a tablet kiosk mode (PRD-06/09 non-goals).
+
+## Requirements
+
+- Native POS hardware and a kiosk check-in mode.
+- Traces to requirement(s): REQ-PAY-2, REQ-APP-1.
+- Deferred (Phase 2+): placeholder — design-only for now.
+
+## Acceptance Criteria
+
+- [ ] Placeholder — Phase 2+; v1 uses Square card-present + in-app flows.
+- [ ] Captured so checkout/check-in stay hardware-friendly.
+
+## UI designs / screenshots
+
+Future — not built in the prototype (some shown as concept cards in Settings → Integrations).
+
+## Technical notes (high level)
+
+Stack: Angular web (admin/front-desk/public).
+
+## Other
+
+Epic: PHASE-2 — Phase 2+ / scale (cross-cutting placeholders).
+Source PRD: docs/prds/PRD-01-foundations-tenancy.md.
+Backlog key: PHASE-2/NATIVE-POS-KIOSK.
+Phase: 2+ · Priority: P2 · Estimate: 1 pts.
+
+## Tasks (dev pickup)
+
+- [ ] **Scope & design when pulled into a sprint** — Deferred placeholder — no build yet.
+- [ ] **Confirm it still fits scope / regulatory stance**

@@ -319,6 +319,77 @@ def area_labels(s):
     return [a.split(":", 1)[1] for a in s.get("labels", []) if a.startswith("area:")]
 
 
+def tasks_for(ep, s):
+    """Deterministic dev-task breakdown for a story (what devs pick up)."""
+    labs = s.get("labels", [])
+    areas = area_labels(s)
+    text = (s.get("context", "") + " " + " ".join(s.get("acceptance", []))).lower()
+    out = []
+
+    def add(title, note=""):
+        out.append({"title": title, "note": note})
+
+    if "type:spike" in labs:
+        add("Define spike scope, questions & success criteria", "What we must learn before building.")
+        add("Build a throwaway prototype", "Smallest thing that answers the question.")
+        add("Evaluate results, risks & options")
+        add("Write up findings + go/no-go recommendation (ADR if warranted)")
+        return out
+
+    if "phase:2plus" in labs:
+        add("Scope & design when pulled into a sprint", "Deferred placeholder — no build yet.")
+        add("Confirm it still fits scope / regulatory stance")
+        return out
+
+    if "type:chore" in labs:
+        add(f"Implement: {s['title']}")
+        if "area:infra" in labs:
+            add("Wire into CI/CD + per-environment config")
+        if "area:data" in labs:
+            add("Apply via migrations; verify RLS/tenancy")
+        add("Document setup & usage")
+        add("Validate in dev + add a smoke test")
+        return _dedup(out, 6)
+
+    # regular story implementation spine
+    if "area:data" in labs:
+        add("Data model & migrations", "Entities/columns; tenant_id + RLS.")
+    if "area:backend" in labs:
+        add("Domain logic & business rules", "Core behaviour + invariants.")
+        add("API endpoint(s) + OpenAPI contract", "Wire request/response; regenerate clients.")
+    if "compliance" in labs:
+        cs = ", ".join(refs(s, "compliance")) or "see Other"
+        add("Enforce compliance gate + audit events", f"Server-side ({cs}); blocked path explains why.")
+    if "area:web" in labs:
+        add("Web UI", sec_ui(ep, s))
+    if "area:client-app" in labs:
+        add("Client app UI (Flutter)")
+    if "area:provider-app" in labs:
+        add("Provider app UI (Flutter)")
+    if "area:integration" in labs:
+        add("Integration adapter + config", "Behind the port; AU / APP-8 posture.")
+    if "area:design" in labs:
+        add("Design-system component(s)")
+    if "offline" in text or ("queue" in text and "sync" in text):
+        add("Offline queue + sync handling", "Encrypted local queue; finalise server-side.")
+    add("Tests (unit + integration)", "Cover acceptance criteria, incl. any gate/invariant.")
+
+    out = _dedup(out, 7)
+    if len(out) < 2:
+        out.insert(0, {"title": f"Implement: {s['title']}", "note": ""})
+    return out
+
+
+def _dedup(tasks, cap):
+    seen, out = set(), []
+    for t in tasks:
+        if t["title"] in seen:
+            continue
+        seen.add(t["title"])
+        out.append(t)
+    return out[:cap]
+
+
 # ---------------------------------------------------------------- board ops
 def board_state():
     q = """query($id:[ID!]){ boards(ids:$id){ name
