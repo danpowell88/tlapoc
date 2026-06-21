@@ -170,6 +170,22 @@
       "labels": ["type:story", "PRD-06", "phase:1", "area:web"],
       "priority": "P2",
       "depends_on": ["PRD-06/POS"]
+    },
+    {
+      "key": "REFERRALS",
+      "title": "Referrals & affiliate credit (non-S4) (placeholder)",
+      "context": "The prototype's Memberships → Referrals screen shows referral/affiliate credit. Per scope, advanced loyalty/referrals are Phase 2 and referral/affiliate credit is non-S4 only (REQ-MEMB-10).",
+      "as_a": "client / owner",
+      "i_want": "to refer friends and earn non-S4 credit",
+      "so_that": "word-of-mouth growth is rewarded compliantly",
+      "acceptance": [
+        "Placeholder — Phase 2; core membership/rewards mechanics ship first.",
+        "Referral/affiliate credit is non-S4 only (no S4 incentive), reusing the rewards engine guardrail (C9).",
+        "Captured so the rewards model stays referral-ready."
+      ],
+      "refs": {"req": ["REQ-MEMB-10"], "compliance": ["C9"], "adr": ["0014"]},
+      "labels": ["type:story", "PRD-06", "phase:2plus", "area:web"],
+      "priority": "P2"
     }
   ]
 }

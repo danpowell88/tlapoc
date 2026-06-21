@@ -164,6 +164,78 @@
       "refs": {"req": ["REQ-CLIN-6"], "adr": ["0020"]},
       "labels": ["type:story", "PRD-05", "phase:2plus", "area:provider-app"],
       "priority": "P2"
+    },
+    {
+      "key": "SKIN-ANALYSIS",
+      "title": "Skin analysis & assessment (with AI scan, advisory)",
+      "context": "The prototype's Clinical → Skin analysis screen captures a structured skin assessment with zone scoring, an AI scan (simulateScan) and a push-to-client summary (pushSkinToClient). Per the no-AI-in-v1 stance, AI scoring is advisory/Phase 2; the manual assessment record can be v1.",
+      "as_a": "dermal therapist / injector",
+      "i_want": "to record a structured skin assessment (and optionally an AI-assisted scan) and share results with the client",
+      "so_that": "skin treatment is planned and tracked, and clients see their progress",
+      "acceptance": [
+        "A structured skin assessment (concerns, zones, scores) can be recorded against the client.",
+        "AI auto-scoring is advisory and human-confirmed, and is gated to Phase 2 (no AI in v1).",
+        "An assessment summary can be pushed to the client app (consent-respecting).",
+        "Assessments feed treatment planning (PRD-05/TREATMENT-PLANS) and outcomes."
+      ],
+      "refs": {"req": ["REQ-CLIN-1", "REQ-CLIN-7"], "adr": ["0020", "0025"]},
+      "labels": ["type:story", "PRD-05", "phase:2plus", "area:provider-app"],
+      "priority": "P2",
+      "depends_on": ["PRD-05/NOTE-TEMPLATE"]
+    },
+    {
+      "key": "BODY-CONTOURING",
+      "title": "Body contouring charting (e.g. CoolSculpting)",
+      "context": "The prototype's Clinical → Body contouring screen charts body treatments on a body map (bodyAdd/bodyDel/bodyCyc) with applicator/cycle settings — a distinct modality beyond the face.",
+      "as_a": "therapist",
+      "i_want": "to chart body-contouring treatments on a body map with per-area applicator/cycle settings",
+      "so_that": "non-facial treatments are recorded with the same rigour",
+      "acceptance": [
+        "A body map supports adding/removing/cycling treatment areas with per-area settings (applicator, cycles, parameters).",
+        "Sessions feed multi-session plans and outcomes.",
+        "Device-gated where a licence/patch-test applies (per modality rules).",
+        "Part of the modality-aware charting model (extends PRD-05/MODALITY)."
+      ],
+      "refs": {"req": ["REQ-CLIN-10", "REQ-CLIN-12"], "adr": ["0025"]},
+      "labels": ["type:story", "PRD-05", "phase:2plus", "area:provider-app"],
+      "priority": "P2",
+      "depends_on": ["PRD-05/MODALITY"]
+    },
+    {
+      "key": "COMPLICATION-LIBRARY",
+      "title": "Complication protocol library & response kits",
+      "context": "The prototype's Clinical → Complication protocols (openComplication/completeComplication) provides step-by-step VO/anaphylaxis protocols and links the emergency kit — the reference side of the adverse-event response.",
+      "as_a": "clinician",
+      "i_want": "a library of complication protocols with guided response steps and kit links",
+      "so_that": "in an emergency I follow the correct, documented steps",
+      "acceptance": [
+        "Protocols (e.g. vascular occlusion, anaphylaxis) present guided steps and required kit items.",
+        "Launching a protocol logs the response and can raise an adverse event (PRD-05/ADVERSE-EVENT).",
+        "Completion is recorded with timing and outcome.",
+        "Links to the emergency-kit register (PRD-11/EMERGENCY-KIT)."
+      ],
+      "refs": {"req": ["REQ-CLIN-13", "REQ-FAC-3"], "compliance": ["C12", "C20"]},
+      "labels": ["type:story", "PRD-05", "phase:1", "area:provider-app", "compliance"],
+      "priority": "P1",
+      "depends_on": ["PRD-05/ADVERSE-EVENT"]
+    },
+    {
+      "key": "OUTCOMES",
+      "title": "Outcomes & revision tracking",
+      "context": "The prototype's Photography & outcomes view tracks before/after outcomes and a revision/touch-up signal that feeds reporting (REQ-CLIN-13).",
+      "as_a": "injector / owner",
+      "i_want": "to track treatment outcomes and any revisions/touch-ups",
+      "so_that": "we can measure quality and feed it to reporting",
+      "acceptance": [
+        "Outcomes are captured against treatments (e.g. result rating, before/after linkage).",
+        "Revision/touch-up events are recorded and linked to the original treatment.",
+        "Outcome/revision signals feed reporting (PRD-08).",
+        "Respects image-use consent for any photo-based outcome."
+      ],
+      "refs": {"req": ["REQ-CLIN-13"], "compliance": ["C14"]},
+      "labels": ["type:story", "PRD-05", "phase:2plus", "area:provider-app"],
+      "priority": "P2",
+      "depends_on": ["PRD-05/PHOTOS"]
     }
   ]
 }

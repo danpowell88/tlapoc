@@ -220,6 +220,78 @@
       "refs": {"req": ["REQ-TEN-5"], "adr": ["0017"]},
       "labels": ["type:story", "PRD-01", "phase:2plus", "area:backend"],
       "priority": "P2"
+    },
+    {
+      "key": "SIGNIN-UI",
+      "title": "Sign-in / sign-out screens & session management",
+      "context": "The prototype demos a login/persona screen; the real product needs proper sign-in/out UI for staff (Entra) and clients (External ID), plus session lifecycle — built on the Sprint 0 auth wiring.",
+      "as_a": "user",
+      "i_want": "clear sign-in and sign-out screens and a session that behaves safely",
+      "so_that": "I can authenticate and trust my session",
+      "acceptance": [
+        "Staff sign-in via Entra SSO; client sign-in/up via social, email+password and OTP, with account recovery.",
+        "Sign-out clears the session everywhere; token refresh is seamless.",
+        "Idle-timeout and absolute session limits apply; expiry returns to sign-in without data loss.",
+        "Sign-in, sign-out and failed attempts are recorded as auth audit events."
+      ],
+      "refs": {"req": ["REQ-TEN-2"], "compliance": ["C10"], "adr": ["0004"], "prd_ac": ["AC3"]},
+      "labels": ["type:story", "PRD-01", "phase:1", "area:web", "compliance"],
+      "priority": "P0",
+      "depends_on": ["SPRINT-0/AUTH-STAFF", "SPRINT-0/AUTH-CLIENT"]
+    },
+    {
+      "key": "MFA-STEPUP",
+      "title": "MFA & step-up authentication for sensitive actions",
+      "context": "Staff MFA is required; sensitive clinical/medicines/financial actions (e.g. prescribing, S4 custody changes, destruction, data export) may require step-up re-auth. Client MFA policy is an open question.",
+      "as_a": "security-conscious clinic",
+      "i_want": "MFA for staff and step-up re-authentication on the most sensitive actions",
+      "so_that": "high-risk operations can't be performed on a walk-up or hijacked session",
+      "acceptance": [
+        "Staff sign-in enforces MFA (via Entra).",
+        "Configured sensitive actions require a recent/step-up auth or are blocked with a clear prompt.",
+        "Step-up events are audited.",
+        "Client MFA policy (optional vs required for sensitive actions) is configurable (open question resolved per clinic)."
+      ],
+      "refs": {"req": ["REQ-TEN-2", "REQ-SEC-1"], "compliance": ["C10"], "adr": ["0004"]},
+      "labels": ["type:story", "PRD-01", "phase:1", "area:backend", "compliance"],
+      "priority": "P1",
+      "depends_on": ["PRD-01/SIGNIN-UI"]
+    },
+    {
+      "key": "MULTI-ROLE",
+      "title": "Multi-role staff & active-role context",
+      "context": "Some users legitimately hold several roles (e.g. an NP who is also the business owner, or a lead nurse covering reception). The model must allow multiple role assignments and an active-role context that the authorisation pipeline honours.",
+      "as_a": "staff member with multiple roles",
+      "i_want": "to be assigned more than one role and act under a chosen active role",
+      "so_that": "my permissions reflect what I'm doing without separate logins",
+      "acceptance": [
+        "A staff profile can hold multiple roles; the union/active-role model is well-defined.",
+        "The authorisation pipeline evaluates capabilities for the active role (consumed by PLATFORM/ROLE-CONTEXT).",
+        "Switching active role is recorded; actions capture the role used.",
+        "Owner-only financial capability is independent of clinical roles (an NP isn't automatically owner)."
+      ],
+      "refs": {"req": ["REQ-TEN-3", "REQ-TEN-4"], "compliance": ["C4"], "adr": ["0017"]},
+      "labels": ["type:story", "PRD-01", "phase:1", "area:backend", "compliance"],
+      "priority": "P1",
+      "depends_on": ["PRD-01/RBAC"]
+    },
+    {
+      "key": "AUTH-AUDIT",
+      "title": "Authentication & authorisation audit events",
+      "context": "Beyond data-access audit, security needs a record of authentication and authorisation events: sign-in success/failure, lockouts, MFA/step-up, role switches and every scope-block (a blocked out-of-scope action).",
+      "as_a": "compliance officer",
+      "i_want": "an audit of authentication and authorisation events, including blocked out-of-scope attempts",
+      "so_that": "we can investigate access and prove the gates work",
+      "acceptance": [
+        "Sign-in success/failure, lockout, MFA/step-up and role-switch events are recorded.",
+        "Every blocked out-of-scope or lapsed-registration action writes an audit event with the reason.",
+        "These events are queryable/exportable alongside the data-access audit.",
+        "Suspicious patterns can feed the breach workflow (PRD-01/BREACH)."
+      ],
+      "refs": {"req": ["REQ-SEC-3"], "compliance": ["C10", "C4", "C19"], "adr": ["0010"], "prd_ac": ["AC1", "AC4"]},
+      "labels": ["type:story", "PRD-01", "phase:1", "area:backend", "compliance"],
+      "priority": "P1",
+      "depends_on": ["PRD-01/AUDIT", "PRD-01/RBAC"]
     }
   ]
 }

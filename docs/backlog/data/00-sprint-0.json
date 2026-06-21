@@ -426,6 +426,76 @@
       "refs": {"compliance": ["C14"], "adr": ["0009", "0010", "0015"]},
       "labels": ["type:spike", "spike", "SPRINT-0", "phase:0", "area:provider-app"],
       "priority": "P1"
+    },
+    {
+      "key": "JOBS-SCHEDULER",
+      "title": "Background jobs & scheduler infrastructure",
+      "context": "Many features are time-driven, not user-driven: reminders/recall sends, membership autopay + dunning retries, retention timers, temperature polling, expiry alerts, read-model projections. A reliable background worker + scheduler is needed before those features land.",
+      "as_a": "platform engineer",
+      "i_want": "a background-job framework with scheduling, retries, idempotency and dead-lettering",
+      "so_that": "time-driven and async work runs reliably and observably",
+      "acceptance": [
+        "A worker host runs scheduled + queued jobs with retry, back-off and dead-letter handling.",
+        "Jobs are tenant-aware and run under an audited elevated context (per RLS bypass path).",
+        "Job runs are observable (metrics/logs/alerts) via the Sprint 0 observability stack.",
+        "A sample recurring job (e.g. expiry scan) and a sample queued job are demonstrated."
+      ],
+      "labels": ["type:chore", "SPRINT-0", "phase:0", "area:backend", "area:infra"],
+      "priority": "P0",
+      "depends_on": ["SPRINT-0/API", "SPRINT-0/RLS"]
+    },
+    {
+      "key": "MEDIA-STORAGE",
+      "title": "Media storage & signed-URL service",
+      "context": "Clinical photos and documents must be stored centrally in AU, served via short-lived signed URLs, and never persisted on personal devices (C14/ADR-0009). A shared media service underpins PRD-05 photos and PRD-09 capture.",
+      "as_a": "backend developer",
+      "i_want": "a media service for encrypted AU-resident blob storage with signed-URL upload/download",
+      "so_that": "photos/documents are stored and served securely and consistently",
+      "acceptance": [
+        "Blob storage is AU-resident and encrypted at rest; access is via short-lived signed URLs only.",
+        "Upload + download flows are demonstrated from web and Flutter.",
+        "Media access is consent- and capability-checked and audited.",
+        "No public/unsigned access to media is possible."
+      ],
+      "refs": {"compliance": ["C14", "C21"], "adr": ["0009", "0016"]},
+      "labels": ["type:chore", "SPRINT-0", "phase:0", "area:backend", "area:infra", "compliance"],
+      "priority": "P1",
+      "depends_on": ["SPRINT-0/IAC", "SPRINT-0/API"]
+    },
+    {
+      "key": "DOMAIN-EVENTS",
+      "title": "Domain-event / messaging backbone",
+      "context": "Reporting read-models, the follow-up job queue, notifications and cross-module reactions all consume domain events. A lightweight event backbone (outbox + dispatch) decouples modules.",
+      "as_a": "backend developer",
+      "i_want": "a domain-event mechanism (transactional outbox + dispatch) modules can publish to and subscribe from",
+      "so_that": "read-models, jobs and notifications react to changes without tight coupling",
+      "acceptance": [
+        "Modules publish domain events transactionally (outbox) with at-least-once dispatch.",
+        "Subscribers (read-models, jobs, notifications) can consume events idempotently.",
+        "Events carry tenant context and are observable.",
+        "A sample event flows from a write to a read-model projection."
+      ],
+      "refs": {"adr": ["0013", "0010"]},
+      "labels": ["type:chore", "SPRINT-0", "phase:0", "area:backend", "area:data"],
+      "priority": "P1",
+      "depends_on": ["SPRINT-0/AUDIT-INFRA"]
+    },
+    {
+      "key": "FEATURE-FLAGS",
+      "title": "Feature flags & per-tenant configuration",
+      "context": "The build is staged and many capabilities are configurable per tenant (cooling-off policy, S4 naming, telehealth path risk, modality availability, deferred features). A flag + config mechanism lets features ship dark and toggle per tenant.",
+      "as_a": "platform engineer",
+      "i_want": "feature flags and a typed per-tenant configuration store",
+      "so_that": "we can ship features progressively and tailor behaviour per clinic",
+      "acceptance": [
+        "Feature flags can be toggled globally and per tenant.",
+        "Per-tenant configuration (e.g. cooling-off N days, S4 naming, modality availability) is typed and validated.",
+        "Flag/config reads are cached and observable.",
+        "Changing a flag/config is audited."
+      ],
+      "labels": ["type:chore", "SPRINT-0", "phase:0", "area:backend"],
+      "priority": "P2",
+      "depends_on": ["SPRINT-0/API"]
     }
   ]
 }

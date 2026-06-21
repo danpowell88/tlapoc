@@ -134,6 +134,60 @@
       "labels": ["type:story", "PRD-09", "phase:1", "area:client-app", "area:provider-app"],
       "priority": "P2",
       "depends_on": ["SPRINT-0/FLUTTER"]
+    },
+    {
+      "key": "CHECKIN-KIOSK",
+      "title": "Reception self-check-in surface (tablet)",
+      "context": "The prototype's checkin surface is a reception-desk tablet where clients check themselves in (confirm details, complete any outstanding intake/consent), updating the Today board.",
+      "as_a": "client arriving for a visit",
+      "i_want": "to check myself in on the reception tablet",
+      "so_that": "the team knows I've arrived and I complete anything outstanding",
+      "acceptance": [
+        "A client can self-check-in (verify identity/appointment) on a shared tablet surface.",
+        "Outstanding intake/consent is prompted and completable at check-in.",
+        "Check-in updates the visit lifecycle/Today board (PRD-02).",
+        "The surface is locked-down (no access to other clients' data) and times out between clients."
+      ],
+      "refs": {"req": ["REQ-BOOK-4"], "compliance": ["C10"]},
+      "labels": ["type:story", "PRD-09", "phase:1", "area:web"],
+      "priority": "P2",
+      "depends_on": ["PRD-02/LIFECYCLE", "PRD-03/GATING"]
+    },
+    {
+      "key": "BACKOFFICE-TABLET",
+      "title": "Back-office / bench tablet surface",
+      "context": "The prototype's backroom surface is a bench tablet for behind-the-scenes work: open/close, cold-chain, stock on hand, S4 drug register, waste/disposal log, tasks and shift handover — a focused operations view.",
+      "as_a": "clinic staff",
+      "i_want": "a bench-tablet view of the day's operational jobs",
+      "so_that": "behind-the-scenes work (logs, stock, handover) is quick at the bench",
+      "acceptance": [
+        "Surfaces open/close checklist, cold-chain log, stock on hand, S4 register, waste log, tasks and shift handover.",
+        "Each panel reuses the underlying modules (PRD-04 medicines, PRD-11 operations, PRD-07 jobs).",
+        "Role/financial gating applies; actions are audited.",
+        "Usable on a shared device with appropriate session handling."
+      ],
+      "refs": {"req": ["REQ-MED-2", "REQ-FAC-2"], "compliance": ["C8", "C20"]},
+      "labels": ["type:story", "PRD-09", "phase:1", "area:web"],
+      "priority": "P2",
+      "depends_on": ["PRD-11/OPENCLOSE", "PRD-07/FOLLOWUPS"]
+    },
+    {
+      "key": "CLIENT-CONCERN",
+      "title": "Client 'report a concern' → follow-up / AE bridge",
+      "context": "The prototype's client app lets a client report a post-treatment concern, which bridges into staff follow-ups (and can escalate to an adverse event/complaint). A safety-critical client→clinic channel.",
+      "as_a": "client",
+      "i_want": "to report a concern after my treatment from the app",
+      "so_that": "the clinic responds quickly if something's wrong",
+      "acceptance": [
+        "A client can submit a concern (with optional photo, consent-respecting) from the app.",
+        "The concern raises a follow-up job for staff (PRD-07) with the client/treatment linked.",
+        "Staff can call back, resolve, or escalate to an adverse event (PRD-05) / complaint (PRD-11).",
+        "The client sees acknowledgement; the exchange is recorded and audited."
+      ],
+      "refs": {"req": ["REQ-CLIN-5", "REQ-CLI-4"], "compliance": ["C12", "C24"]},
+      "labels": ["type:story", "PRD-09", "phase:1", "area:client-app", "compliance"],
+      "priority": "P1",
+      "depends_on": ["PRD-07/FOLLOWUPS", "PRD-05/ADVERSE-EVENT"]
     }
   ]
 }

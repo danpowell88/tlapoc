@@ -185,6 +185,42 @@
       "refs": {"req": ["REQ-BOOK-3"], "adr": ["0036"]},
       "labels": ["type:story", "PRD-02", "phase:2plus", "area:backend"],
       "priority": "P2"
+    },
+    {
+      "key": "BOOKING-WIZARD",
+      "title": "Staff booking wizard (service → practitioner → time → client → confirm)",
+      "context": "The prototype's front-desk 'New booking' wizard (service select, slot pick, client attach, confirm) is the staff counterpart to client self-booking, and the entry point most bookings flow through.",
+      "as_a": "front desk",
+      "i_want": "a guided booking wizard to create an appointment in a few steps",
+      "so_that": "I can book clients quickly at the desk or over the phone",
+      "acceptance": [
+        "Wizard steps: service → practitioner → time slot → client → confirm.",
+        "Scope-aware: injectable services offer only cleared RN/NP (C4); slots reflect roster ∩ availability.",
+        "An existing client can be attached or a new one created inline; under-18 is flagged.",
+        "Confirmation shows the cancellation policy and schedules reminders (PRD-07)."
+      ],
+      "refs": {"req": ["REQ-BOOK-2"], "compliance": ["C4"], "prd_ac": ["AC1"]},
+      "labels": ["type:story", "PRD-02", "phase:1", "area:web", "compliance"],
+      "priority": "P1",
+      "depends_on": ["PRD-02/CALENDAR", "PRD-02/SERVICE-CATALOGUE"]
+    },
+    {
+      "key": "SERVICE-CATALOGUE",
+      "title": "Services & treatment-menu admin (durations, eligible roles, S4 flag)",
+      "context": "The prototype's clinical Treatment menu + admin services list defines bookable services with durations, eligible roles, and the S4/non-S4 flag that drives scope-aware booking, rewards eligibility and public-page naming.",
+      "as_a": "owner / manager",
+      "i_want": "to manage the menu of services with durations, eligible roles and the S4 flag",
+      "so_that": "booking, rewards and the public page all behave correctly per service",
+      "acceptance": [
+        "Services carry duration/buffer, eligible roles, price and the S4/non-S4 flag.",
+        "The S4 flag drives scope-aware booking (C4), rewards eligibility (C9) and public naming (PRD-07).",
+        "Capability-gated admin; changes are audited.",
+        "Linked to the medicines/products catalogue (PRD-04) where a service consumes a product."
+      ],
+      "refs": {"req": ["REQ-BOOK-2"], "compliance": ["C4", "C9"], "adr": ["0014"]},
+      "labels": ["type:story", "PRD-02", "phase:1", "area:web", "compliance"],
+      "priority": "P1",
+      "depends_on": ["PRD-04/PRODUCT-CATALOGUE"]
     }
   ]
 }

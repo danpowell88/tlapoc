@@ -1,0 +1,139 @@
+{
+  "epic": {
+    "key": "PLATFORM",
+    "title": "Platform shell, navigation & cross-cutting UX",
+    "milestone": "M1",
+    "phase": "1",
+    "prd": "docs/ux/README.md",
+    "summary": "The cross-cutting product surfaces the prototype exercises that don't belong to a single feature PRD: the app shell + collapsible workspace navigation, the role-tailored Today dashboard, global search, the in-app notification centre, the clinic switcher, the persona/active-role + scope-of-practice display, and the owner-only financial (.fin) gating that hides money figures from non-owner roles. These tie all the feature modules together into one coherent, role-aware app.",
+    "labels": ["type:epic", "PLATFORM", "phase:1", "area:web", "area:design"]
+  },
+  "stories": [
+    {
+      "key": "APP-NAV",
+      "title": "App shell & collapsible workspace navigation",
+      "context": "The prototype's sidebar groups screens into workspaces (Clinical, Front desk, Comms & growth, Memberships, Business, Team, Governance, Settings) plus top-level Today/Schedule/Clients/Follow-ups/Checkout, with collapsible sections and a mobile drawer. Nav entries are capability-gated (data-allow).",
+      "as_a": "staff member",
+      "i_want": "a navigation shell that groups screens into workspaces and only shows what my role can access",
+      "so_that": "I find my tools fast and never see screens I can't use",
+      "acceptance": [
+        "Top-level items (Today, Schedule, Clients, Follow-ups, Checkout) + collapsible workspaces render per the IA.",
+        "Each nav entry is capability-gated; entries outside the user's role are hidden.",
+        "Active screen + section state persist; mobile uses a drawer + overlay.",
+        "A Follow-ups badge and a Governance badge show outstanding counts."
+      ],
+      "refs": {"req": ["REQ-TEN-3"], "adr": ["0017"]},
+      "labels": ["type:story", "PLATFORM", "phase:1", "area:web"],
+      "priority": "P1",
+      "depends_on": ["SPRINT-0/WEB-SHELL", "PRD-01/RBAC"]
+    },
+    {
+      "key": "TODAY",
+      "title": "Role-tailored Today dashboard",
+      "context": "The prototype opens on a Today board: waiting / in-room / checked-out columns, the day's appointments, the jobs/needs-attention digest and alerts — tailored to the signed-in role's 'concerns' (ADR-0017).",
+      "as_a": "staff member",
+      "i_want": "a Today landing page showing the live state of the clinic and what needs my attention, tailored to my role",
+      "so_that": "I start the day knowing exactly what to do",
+      "acceptance": [
+        "Today shows waiting / in-room / checked-out and the day's schedule at a glance.",
+        "The content is role-tailored by concern (e.g. reception sees front-desk tasks, NP sees clinical).",
+        "Surfaces the follow-up/needs-attention digest and key alerts (expiries, failed payments).",
+        "Quick links jump to chart/profile/checkout for in-flight visits."
+      ],
+      "refs": {"req": ["REQ-RPT-5"], "adr": ["0017"]},
+      "labels": ["type:story", "PLATFORM", "phase:1", "area:web"],
+      "priority": "P1",
+      "depends_on": ["PLATFORM/APP-NAV"]
+    },
+    {
+      "key": "SEARCH",
+      "title": "Global search (clients, appointments, invoices)",
+      "context": "The prototype header has a global search across clients, appointments and invoices — a core front-desk speed feature absent from the backlog.",
+      "as_a": "front desk",
+      "i_want": "one search box that finds clients, appointments and invoices",
+      "so_that": "I can jump to anything in a couple of keystrokes",
+      "acceptance": [
+        "Search returns matching clients, appointments and invoices, grouped by type.",
+        "Results are tenant-scoped and respect role/financial gating (no money to non-owner).",
+        "Selecting a result deep-links to the relevant screen.",
+        "Search is keyboard-accessible and fast on clinic data volumes."
+      ],
+      "refs": {"req": ["REQ-CLI-1"], "compliance": ["C10"]},
+      "labels": ["type:story", "PLATFORM", "phase:1", "area:web"],
+      "priority": "P2",
+      "depends_on": ["PLATFORM/APP-NAV"]
+    },
+    {
+      "key": "NOTIFICATIONS",
+      "title": "In-app notification centre",
+      "context": "The header bell + badges imply an in-app notification surface for alerts (new bookings, failed payments, expiries, AE/recall, jobs assigned).",
+      "as_a": "staff member",
+      "i_want": "an in-app notification centre for events relevant to my role",
+      "so_that": "I don't miss time-sensitive things",
+      "acceptance": [
+        "Notifications surface role-relevant events (bookings, failed payments, expiries, AE/recall, job assignment).",
+        "Read/unread state and a badge count are maintained per user.",
+        "Each notification deep-links to its source.",
+        "Channels are consistent with PRD-07 (in-app is one delivery target of INotifier)."
+      ],
+      "refs": {"req": ["REQ-NOTIF-1"]},
+      "labels": ["type:story", "PLATFORM", "phase:1", "area:web"],
+      "priority": "P2",
+      "depends_on": ["PLATFORM/APP-NAV", "PRD-07/CHANNELS"]
+    },
+    {
+      "key": "ROLE-CONTEXT",
+      "title": "Active-role context, scope display & multi-role switching",
+      "context": "The prototype shows the current persona, role + a scope-of-practice tooltip, and a 'switch user' control. Real users may hold multiple roles (e.g. NP who is also owner) and need to act under a chosen role with the correct scope.",
+      "as_a": "staff member with more than one role",
+      "i_want": "to see my current role and scope and switch active role where I hold several",
+      "so_that": "the app applies the right permissions and shows why an action is blocked",
+      "acceptance": [
+        "Header shows the signed-in user, active role and a scope-of-practice summary.",
+        "A user holding multiple roles can switch active role; capabilities update accordingly.",
+        "The active role is recorded on actions and in the audit trail.",
+        "Scope is sourced from PRD-01 RBAC, not hard-coded per screen."
+      ],
+      "refs": {"req": ["REQ-TEN-3", "REQ-TEN-4"], "compliance": ["C4"], "adr": ["0017"]},
+      "labels": ["type:story", "PLATFORM", "phase:1", "area:web", "compliance"],
+      "priority": "P1",
+      "depends_on": ["PRD-01/RBAC", "PRD-01/MULTI-ROLE"]
+    },
+    {
+      "key": "FIN-GATING",
+      "title": "Owner-only financial (.fin) capability gating",
+      "context": "Project rule + prototype: revenue, MRR and pricing figures must stay gated behind the owner financial capability; non-owner roles (e.g. reception) see memberships but no money figures. The prototype tags these with a .fin class toggled by capability.",
+      "as_a": "owner",
+      "i_want": "all revenue/MRR/pricing figures hidden from non-owner roles across the app and API",
+      "so_that": "financials stay owner-only",
+      "acceptance": [
+        "A financial capability gates money figures in dashboards, checkout, finance, memberships and reports.",
+        "Non-owner roles see operational data (e.g. membership status) but no revenue/MRR/pricing.",
+        "Gating is enforced server-side (API never returns gated figures to unauthorised roles), not just hidden in UI.",
+        "Attempted access is denied and audited."
+      ],
+      "refs": {"req": ["REQ-TEN-3"], "compliance": ["C4", "C10"], "adr": ["0017"]},
+      "labels": ["type:story", "PLATFORM", "phase:1", "area:backend", "compliance"],
+      "priority": "P0",
+      "depends_on": ["PRD-01/RBAC"]
+    },
+    {
+      "key": "CLINIC-SWITCH",
+      "title": "Clinic / location switcher",
+      "context": "The prototype's sidebar switches between clinics/locations (Brisbane, Gold Coast, a locum site). The in-product switcher is demonstrated; full multi-location data depth is PHASE-2/MULTI-LOCATION.",
+      "as_a": "owner / multi-site staff",
+      "i_want": "to switch the active clinic/location",
+      "so_that": "I work in the right location's data",
+      "acceptance": [
+        "A switcher lists the locations the user can access and sets the active location context.",
+        "Data shown is scoped to the active location (RLS/tenant + location).",
+        "The active location is reflected in audit and reporting.",
+        "Builds on PHASE-2/MULTI-LOCATION data model where deeper multi-site features are needed."
+      ],
+      "refs": {"req": ["REQ-TEN-1"]},
+      "labels": ["type:story", "PLATFORM", "phase:1", "area:web"],
+      "priority": "P2",
+      "depends_on": ["PRD-01/TENANT"]
+    }
+  ]
+}

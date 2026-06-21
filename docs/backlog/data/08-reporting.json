@@ -149,6 +149,78 @@
       "refs": {"req": ["REQ-RPT-1"]},
       "labels": ["type:story", "PRD-08", "phase:2plus", "area:web"],
       "priority": "P2"
+    },
+    {
+      "key": "SCORECARD",
+      "title": "Practitioner scorecard",
+      "context": "The prototype's Reports → Scorecard view shows per-practitioner performance (revenue, retention, rebooking, utilisation, outcomes).",
+      "as_a": "owner",
+      "i_want": "a per-practitioner scorecard",
+      "so_that": "I can coach the team and see who drives retention",
+      "acceptance": [
+        "Scorecard shows per-practitioner revenue, retention/rebooking, utilisation and outcome/revision signals.",
+        "Date-filterable; financial figures are owner-gated.",
+        "Drills into the underlying clients/appointments.",
+        "Reads from the reporting read-models (PRD-08/READ-MODELS)."
+      ],
+      "refs": {"req": ["REQ-RPT-1", "REQ-RPT-2"]},
+      "labels": ["type:story", "PRD-08", "phase:1", "area:web"],
+      "priority": "P2",
+      "depends_on": ["PRD-08/BUSINESS-DASH"]
+    },
+    {
+      "key": "CAPACITY",
+      "title": "Capacity & utilisation report",
+      "context": "The prototype's Reports → Capacity view reports chair/room/practitioner utilisation and quiet windows (overview/trends).",
+      "as_a": "owner",
+      "i_want": "capacity and utilisation reporting",
+      "so_that": "I can fill quiet windows and right-size rosters",
+      "acceptance": [
+        "Utilisation by practitioner, room/chair and device over a date range, with trend view.",
+        "Quiet windows are highlighted (feeds waitlist/recall fill).",
+        "Reads from the reporting read-models.",
+        "Matches the prototype's capacity metrics."
+      ],
+      "refs": {"req": ["REQ-RPT-1", "REQ-RPT-2"]},
+      "labels": ["type:story", "PRD-08", "phase:1", "area:web"],
+      "priority": "P2",
+      "depends_on": ["PRD-08/READ-MODELS"]
+    },
+    {
+      "key": "TRUE-COST",
+      "title": "True-cost / margin (COGS) reporting",
+      "context": "The prototype adds true-cost reporting — cost of goods (units/vial cost, consumables) per treatment to show real margin, not just revenue.",
+      "as_a": "owner",
+      "i_want": "true-cost and margin reporting per treatment/service",
+      "so_that": "I price and plan on real profitability",
+      "acceptance": [
+        "Cost of goods (product units/vial cost, consumables) is attributed per treatment/service.",
+        "Margin = revenue − COGS surfaces per service and per practitioner.",
+        "Feeds pricing & what-if (PRD-06/PRICING-WHATIF); figures are owner-gated.",
+        "Detailed accounting still defers to Xero (attribution, not a ledger)."
+      ],
+      "refs": {"req": ["REQ-RPT-6"], "adr": ["0027"]},
+      "labels": ["type:story", "PRD-08", "phase:1", "area:web"],
+      "priority": "P2",
+      "depends_on": ["PRD-08/READ-MODELS", "PRD-04/VIAL-RECON"]
+    },
+    {
+      "key": "POLICIES",
+      "title": "Policies & procedures sign-off",
+      "context": "The prototype's Governance → Policies screen (signPolicy) tracks staff acknowledgement/sign-off of clinic policies and procedures, part of the Governance hub.",
+      "as_a": "owner / compliance officer",
+      "i_want": "to publish policies and track staff sign-off",
+      "so_that": "I can evidence that the team has read current procedures",
+      "acceptance": [
+        "Policies are versioned and published to relevant roles.",
+        "Staff sign-off is recorded per policy version with date; outstanding sign-offs surface.",
+        "Sign-off status is included in the inspection-readiness pack.",
+        "Changes to a policy require re-acknowledgement."
+      ],
+      "refs": {"req": ["REQ-RPT-7"], "compliance": ["C10", "C20"], "adr": ["0030"]},
+      "labels": ["type:story", "PRD-08", "phase:1", "area:web", "compliance"],
+      "priority": "P1",
+      "depends_on": ["PRD-08/INSPECTION-PACK"]
     }
   ]
 }

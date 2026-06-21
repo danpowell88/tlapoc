@@ -131,6 +131,76 @@
       "refs": {"req": ["REQ-NOTIF-6", "REQ-NOTIF-8", "REQ-NOTIF-9"], "adr": ["0018", "0032", "0033"]},
       "labels": ["type:story", "PRD-07", "phase:2plus", "area:integration"],
       "priority": "P2"
+    },
+    {
+      "key": "AUTOMATIONS",
+      "title": "Automation builder (triggers → timed messages)",
+      "context": "The prototype's Comms → Automations screen (toggleAuto) configures the reminder/aftercare/recall sequences as toggleable automations. This is the management UI over PRD-07's sequence engine.",
+      "as_a": "owner / front desk",
+      "i_want": "to configure automations that send the right message at the right time per trigger",
+      "so_that": "reminders, aftercare and recall run hands-off",
+      "acceptance": [
+        "Automations map a trigger (booking, visit, interval) to a timed sequence of messages.",
+        "Each automation can be enabled/disabled and edited per treatment type.",
+        "Marketing automations respect opt-in/unsubscribe (C23); transactional ones always send.",
+        "Drives the same sequence engine as PRD-07/REMINDERS-CARE and PRD-07/RECALL."
+      ],
+      "refs": {"req": ["REQ-NOTIF-2", "REQ-NOTIF-3"], "compliance": ["C23"]},
+      "labels": ["type:story", "PRD-07", "phase:1", "area:web"],
+      "priority": "P2",
+      "depends_on": ["PRD-07/REMINDERS-CARE"]
+    },
+    {
+      "key": "REVIEWS",
+      "title": "Reviews & reputation (request, acknowledge, flag, auto-follow-up)",
+      "context": "The prototype's Growth → Reviews screen (scanReviews/reviewReply/reviewFlag/reviewAck) requests reviews, replies/acknowledges, and auto-raises follow-up jobs for negative reviews (≤3★) — with a staff caution against resharing an S4-endorsing review as a prohibited testimonial.",
+      "as_a": "owner",
+      "i_want": "to request reviews and manage replies, with negative ones auto-raising follow-ups",
+      "so_that": "reputation is managed and problems are caught early",
+      "acceptance": [
+        "Review requests sent to consented clients; replies/acknowledge supported.",
+        "Negative reviews (≤3★) and complaint matches auto-raise review jobs into the Follow-ups queue.",
+        "A caution warns against resharing an S4-endorsing review as a testimonial (C9).",
+        "No sentiment-gating of who is asked (request-all)."
+      ],
+      "refs": {"req": ["REQ-NOTIF-9"], "compliance": ["C9", "C23"], "adr": ["0032"]},
+      "labels": ["type:story", "PRD-07", "phase:2plus", "area:web", "compliance"],
+      "priority": "P2",
+      "depends_on": ["PRD-07/FOLLOWUPS"]
+    },
+    {
+      "key": "LEADS-CRM",
+      "title": "Lead / prospect CRM",
+      "context": "The prototype's Growth → Leads (CRM) screen tracks enquiries who haven't booked yet, over the inbox (ADR-0033).",
+      "as_a": "front desk / owner",
+      "i_want": "to track leads/prospects through to booking",
+      "so_that": "enquiries don't get lost and convert better",
+      "acceptance": [
+        "Leads are captured with source, status and next action.",
+        "A lead can convert to a client/booking, preserving history.",
+        "Lead follow-ups surface in the Follow-ups queue.",
+        "Marketing to leads respects Spam-Act consent (C23)."
+      ],
+      "refs": {"req": ["REQ-NOTIF-8"], "compliance": ["C23"], "adr": ["0033"]},
+      "labels": ["type:story", "PRD-07", "phase:2plus", "area:web", "compliance"],
+      "priority": "P2",
+      "depends_on": ["PRD-07/FOLLOWUPS"]
+    },
+    {
+      "key": "CAMPAIGNS",
+      "title": "Campaigns (external-tool handoff) (placeholder)",
+      "context": "The prototype shows a Comms → Campaigns screen, but advertising/campaign tooling was withdrawn from scope (ADR-0034 withdrawn) — email campaigns and social belong in the clinic's external tools (Mailchimp, Meta Business Suite). Tracked as a placeholder to reconcile prototype vs scope.",
+      "as_a": "owner",
+      "i_want": "campaign capability",
+      "so_that": "I can run promotions",
+      "acceptance": [
+        "Placeholder — advertising/campaign content is produced in external tools, not the platform.",
+        "The platform exposes consented audience export / segments for those tools where appropriate (C23).",
+        "If ever built in-app, it must honour TGA/AHPRA advertising rules and the no-public-S4-pricing rule (C9)."
+      ],
+      "refs": {"compliance": ["C9", "C23"], "adr": ["0034"]},
+      "labels": ["type:story", "PRD-07", "phase:2plus", "area:integration", "compliance"],
+      "priority": "P2"
     }
   ]
 }

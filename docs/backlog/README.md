@@ -17,7 +17,7 @@ This backlog slices the 11 PRDs (+ a Sprint 0) into **epics** and **stories**. E
 | M6 | Facility & complaints (PRD-11) | Facility accreditation, infection-control logs, emergency kit, complaints register (lightweight in v1). |
 | M7 | Phase 2+ (later / placeholders) | Deliberately deferred capability — tracked as placeholders so scope is visible and can be pulled forward. |
 
-**13 epics · 118 stories.**
+**14 epics · 157 stories.**
 
 ## Labels
 
@@ -26,7 +26,7 @@ Type: `type:epic` `type:story` `type:spike` `type:chore` · Phase: `phase:0` `ph
 ---
 
 ## SPRINT-0 — Sprint 0 — Foundations & setup
-*M0 · Sprint 0 — Foundations & setup · Phase 0 · 24 stories*
+*M0 · Sprint 0 — Foundations & setup · Phase 0 · 28 stories*
 
 Everything the team needs in place before feature work begins: repositories and solution structure, CI/CD, cloud environments in Australia East, identity wiring for staff and clients, the Postgres + RLS data baseline, the API/web/app shells, a shared design system, observability, a security baseline, and the four de-risk spikes called out in the docs index. Nothing here ships clinical value on its own — it makes M1+ possible and safe.
 
@@ -434,10 +434,78 @@ Treatment rooms drop Wi-Fi; the provider app must queue notes/photos encrypted a
 
 **Compliance:** C14 · **ADR:** ADR-0009, ADR-0010, ADR-0015
 
+### JOBS-SCHEDULER — Background jobs & scheduler infrastructure
+`P0` · type:chore, SPRINT-0, phase:0, area:backend, area:infra
+
+Many features are time-driven, not user-driven: reminders/recall sends, membership autopay + dunning retries, retention timers, temperature polling, expiry alerts, read-model projections. A reliable background worker + scheduler is needed before those features land.
+
+> **As a platform engineer**, I want a background-job framework with scheduling, retries, idempotency and dead-lettering, so that time-driven and async work runs reliably and observably.
+
+**Acceptance criteria**
+
+- [ ] A worker host runs scheduled + queued jobs with retry, back-off and dead-letter handling.
+- [ ] Jobs are tenant-aware and run under an audited elevated context (per RLS bypass path).
+- [ ] Job runs are observable (metrics/logs/alerts) via the Sprint 0 observability stack.
+- [ ] A sample recurring job (e.g. expiry scan) and a sample queued job are demonstrated.
+
+**Depends on:** SPRINT-0/API, SPRINT-0/RLS
+
+### MEDIA-STORAGE — Media storage & signed-URL service
+`P1` · type:chore, SPRINT-0, phase:0, area:backend, area:infra, compliance
+
+Clinical photos and documents must be stored centrally in AU, served via short-lived signed URLs, and never persisted on personal devices (C14/ADR-0009). A shared media service underpins PRD-05 photos and PRD-09 capture.
+
+> **As a backend developer**, I want a media service for encrypted AU-resident blob storage with signed-URL upload/download, so that photos/documents are stored and served securely and consistently.
+
+**Acceptance criteria**
+
+- [ ] Blob storage is AU-resident and encrypted at rest; access is via short-lived signed URLs only.
+- [ ] Upload + download flows are demonstrated from web and Flutter.
+- [ ] Media access is consent- and capability-checked and audited.
+- [ ] No public/unsigned access to media is possible.
+
+**Compliance:** C14, C21 · **ADR:** ADR-0009, ADR-0016
+
+**Depends on:** SPRINT-0/IAC, SPRINT-0/API
+
+### DOMAIN-EVENTS — Domain-event / messaging backbone
+`P1` · type:chore, SPRINT-0, phase:0, area:backend, area:data
+
+Reporting read-models, the follow-up job queue, notifications and cross-module reactions all consume domain events. A lightweight event backbone (outbox + dispatch) decouples modules.
+
+> **As a backend developer**, I want a domain-event mechanism (transactional outbox + dispatch) modules can publish to and subscribe from, so that read-models, jobs and notifications react to changes without tight coupling.
+
+**Acceptance criteria**
+
+- [ ] Modules publish domain events transactionally (outbox) with at-least-once dispatch.
+- [ ] Subscribers (read-models, jobs, notifications) can consume events idempotently.
+- [ ] Events carry tenant context and are observable.
+- [ ] A sample event flows from a write to a read-model projection.
+
+**ADR:** ADR-0013, ADR-0010
+
+**Depends on:** SPRINT-0/AUDIT-INFRA
+
+### FEATURE-FLAGS — Feature flags & per-tenant configuration
+`P2` · type:chore, SPRINT-0, phase:0, area:backend
+
+The build is staged and many capabilities are configurable per tenant (cooling-off policy, S4 naming, telehealth path risk, modality availability, deferred features). A flag + config mechanism lets features ship dark and toggle per tenant.
+
+> **As a platform engineer**, I want feature flags and a typed per-tenant configuration store, so that we can ship features progressively and tailor behaviour per clinic.
+
+**Acceptance criteria**
+
+- [ ] Feature flags can be toggled globally and per tenant.
+- [ ] Per-tenant configuration (e.g. cooling-off N days, S4 naming, modality availability) is typed and validated.
+- [ ] Flag/config reads are cached and observable.
+- [ ] Changing a flag/config is audited.
+
+**Depends on:** SPRINT-0/API
+
 ---
 
 ## PRD-01 — Foundations & tenancy (auth, RBAC, audit, data model)
-*M1 · Foundations & tenancy (PRD-01) · Phase 0 · 12 stories*
+*M1 · Foundations & tenancy (PRD-01) · Phase 0 · 16 stories*
 
 The domain backbone on top of the Sprint 0 plumbing: tenant provisioning, RBAC + scope-of-practice enforcement, the credential/PII compliance gate that decides who can inject, the exportable audit trail, retention & destruction, the data-breach workflow, and client privacy rights. Everything else builds on this.
 
@@ -651,10 +719,82 @@ Beyond the preset personas, a future custom-role builder lets owners define besp
 
 **REQ:** REQ-TEN-5 · **ADR:** ADR-0017
 
+### SIGNIN-UI — Sign-in / sign-out screens & session management
+`P0` · type:story, PRD-01, phase:1, area:web, compliance
+
+The prototype demos a login/persona screen; the real product needs proper sign-in/out UI for staff (Entra) and clients (External ID), plus session lifecycle — built on the Sprint 0 auth wiring.
+
+> **As a user**, I want clear sign-in and sign-out screens and a session that behaves safely, so that I can authenticate and trust my session.
+
+**Acceptance criteria**
+
+- [ ] Staff sign-in via Entra SSO; client sign-in/up via social, email+password and OTP, with account recovery.
+- [ ] Sign-out clears the session everywhere; token refresh is seamless.
+- [ ] Idle-timeout and absolute session limits apply; expiry returns to sign-in without data loss.
+- [ ] Sign-in, sign-out and failed attempts are recorded as auth audit events.
+
+**REQ:** REQ-TEN-2 · **Compliance:** C10 · **ADR:** ADR-0004 · **PRD AC:** AC3
+
+**Depends on:** SPRINT-0/AUTH-STAFF, SPRINT-0/AUTH-CLIENT
+
+### MFA-STEPUP — MFA & step-up authentication for sensitive actions
+`P1` · type:story, PRD-01, phase:1, area:backend, compliance
+
+Staff MFA is required; sensitive clinical/medicines/financial actions (e.g. prescribing, S4 custody changes, destruction, data export) may require step-up re-auth. Client MFA policy is an open question.
+
+> **As a security-conscious clinic**, I want MFA for staff and step-up re-authentication on the most sensitive actions, so that high-risk operations can't be performed on a walk-up or hijacked session.
+
+**Acceptance criteria**
+
+- [ ] Staff sign-in enforces MFA (via Entra).
+- [ ] Configured sensitive actions require a recent/step-up auth or are blocked with a clear prompt.
+- [ ] Step-up events are audited.
+- [ ] Client MFA policy (optional vs required for sensitive actions) is configurable (open question resolved per clinic).
+
+**REQ:** REQ-TEN-2, REQ-SEC-1 · **Compliance:** C10 · **ADR:** ADR-0004
+
+**Depends on:** PRD-01/SIGNIN-UI
+
+### MULTI-ROLE — Multi-role staff & active-role context
+`P1` · type:story, PRD-01, phase:1, area:backend, compliance
+
+Some users legitimately hold several roles (e.g. an NP who is also the business owner, or a lead nurse covering reception). The model must allow multiple role assignments and an active-role context that the authorisation pipeline honours.
+
+> **As a staff member with multiple roles**, I want to be assigned more than one role and act under a chosen active role, so that my permissions reflect what I'm doing without separate logins.
+
+**Acceptance criteria**
+
+- [ ] A staff profile can hold multiple roles; the union/active-role model is well-defined.
+- [ ] The authorisation pipeline evaluates capabilities for the active role (consumed by PLATFORM/ROLE-CONTEXT).
+- [ ] Switching active role is recorded; actions capture the role used.
+- [ ] Owner-only financial capability is independent of clinical roles (an NP isn't automatically owner).
+
+**REQ:** REQ-TEN-3, REQ-TEN-4 · **Compliance:** C4 · **ADR:** ADR-0017
+
+**Depends on:** PRD-01/RBAC
+
+### AUTH-AUDIT — Authentication & authorisation audit events
+`P1` · type:story, PRD-01, phase:1, area:backend, compliance
+
+Beyond data-access audit, security needs a record of authentication and authorisation events: sign-in success/failure, lockouts, MFA/step-up, role switches and every scope-block (a blocked out-of-scope action).
+
+> **As a compliance officer**, I want an audit of authentication and authorisation events, including blocked out-of-scope attempts, so that we can investigate access and prove the gates work.
+
+**Acceptance criteria**
+
+- [ ] Sign-in success/failure, lockout, MFA/step-up and role-switch events are recorded.
+- [ ] Every blocked out-of-scope or lapsed-registration action writes an audit event with the reason.
+- [ ] These events are queryable/exportable alongside the data-access audit.
+- [ ] Suspicious patterns can feed the breach workflow (PRD-01/BREACH).
+
+**REQ:** REQ-SEC-3 · **Compliance:** C10, C4, C19 · **ADR:** ADR-0010 · **PRD AC:** AC1, AC4
+
+**Depends on:** PRD-01/AUDIT, PRD-01/RBAC
+
 ---
 
 ## PRD-02 — Booking & scheduling (+ client/CRM basics)
-*M2 · Booking, CRM, intake & consent (PRD-02, PRD-03) · Phase 1 · 10 stories*
+*M2 · Booking, CRM, intake & consent (PRD-02, PRD-03) · Phase 1 · 12 stories*
 
 The calendar that runs the front desk and the 360° client record everything hangs off. Bookings are scope-aware (only cleared RN/NP can be booked for injectables) and an injectable booking is gated so it can't proceed to charting without a consult. Includes online self-booking, the visit lifecycle, reminders/reschedule/cancel, waitlist, walk-ins, resources and the client directory.
 
@@ -833,6 +973,42 @@ An opt-in, ACL-fair booking deposit / card-on-file hold, suppressed during cooli
 - [ ] Design must keep the cooling-off suppression invariant (F14): no hold during a cooling-off period.
 
 **REQ:** REQ-BOOK-3 · **ADR:** ADR-0036
+
+### BOOKING-WIZARD — Staff booking wizard (service → practitioner → time → client → confirm)
+`P1` · type:story, PRD-02, phase:1, area:web, compliance
+
+The prototype's front-desk 'New booking' wizard (service select, slot pick, client attach, confirm) is the staff counterpart to client self-booking, and the entry point most bookings flow through.
+
+> **As a front desk**, I want a guided booking wizard to create an appointment in a few steps, so that I can book clients quickly at the desk or over the phone.
+
+**Acceptance criteria**
+
+- [ ] Wizard steps: service → practitioner → time slot → client → confirm.
+- [ ] Scope-aware: injectable services offer only cleared RN/NP (C4); slots reflect roster ∩ availability.
+- [ ] An existing client can be attached or a new one created inline; under-18 is flagged.
+- [ ] Confirmation shows the cancellation policy and schedules reminders (PRD-07).
+
+**REQ:** REQ-BOOK-2 · **Compliance:** C4 · **PRD AC:** AC1
+
+**Depends on:** PRD-02/CALENDAR, PRD-02/SERVICE-CATALOGUE
+
+### SERVICE-CATALOGUE — Services & treatment-menu admin (durations, eligible roles, S4 flag)
+`P1` · type:story, PRD-02, phase:1, area:web, compliance
+
+The prototype's clinical Treatment menu + admin services list defines bookable services with durations, eligible roles, and the S4/non-S4 flag that drives scope-aware booking, rewards eligibility and public-page naming.
+
+> **As a owner / manager**, I want to manage the menu of services with durations, eligible roles and the S4 flag, so that booking, rewards and the public page all behave correctly per service.
+
+**Acceptance criteria**
+
+- [ ] Services carry duration/buffer, eligible roles, price and the S4/non-S4 flag.
+- [ ] The S4 flag drives scope-aware booking (C4), rewards eligibility (C9) and public naming (PRD-07).
+- [ ] Capability-gated admin; changes are audited.
+- [ ] Linked to the medicines/products catalogue (PRD-04) where a service consumes a product.
+
+**REQ:** REQ-BOOK-2 · **Compliance:** C4, C9 · **ADR:** ADR-0014
+
+**Depends on:** PRD-04/PRODUCT-CATALOGUE
 
 ---
 
@@ -1169,7 +1345,7 @@ An alternative dispensing model where a pharmacy partner holds/dispenses stock. 
 ---
 
 ## PRD-05 — Clinical charting: injection mapping & before/after
-*M3 · Consult, prescribing, S4 & charting (PRD-04, PRD-05) · Phase 1 · 9 stories*
+*M3 · Consult, prescribing, S4 & charting (PRD-04, PRD-05) · Phase 1 · 13 stories*
 
 The clinical record that matches the Aesthetic Record / Pabau bar: a guided charting flow opening with product & lot selection, on-image/diagram injection mapping (product · units · depth · site · batch-lot), standardised before/after photos with comparison, immutable finalised notes with audited amendments, and adverse-event logging that feeds the TGA/DAEN pathway — usable room-side on the provider app, even offline.
 
@@ -1327,10 +1503,82 @@ AI scribe and advisory auto-detection of injection points are explicitly out for
 
 **REQ:** REQ-CLIN-6 · **ADR:** ADR-0020
 
+### SKIN-ANALYSIS — Skin analysis & assessment (with AI scan, advisory)
+`P2` · type:story, PRD-05, phase:2plus, area:provider-app
+
+The prototype's Clinical → Skin analysis screen captures a structured skin assessment with zone scoring, an AI scan (simulateScan) and a push-to-client summary (pushSkinToClient). Per the no-AI-in-v1 stance, AI scoring is advisory/Phase 2; the manual assessment record can be v1.
+
+> **As a dermal therapist / injector**, I want to record a structured skin assessment (and optionally an AI-assisted scan) and share results with the client, so that skin treatment is planned and tracked, and clients see their progress.
+
+**Acceptance criteria**
+
+- [ ] A structured skin assessment (concerns, zones, scores) can be recorded against the client.
+- [ ] AI auto-scoring is advisory and human-confirmed, and is gated to Phase 2 (no AI in v1).
+- [ ] An assessment summary can be pushed to the client app (consent-respecting).
+- [ ] Assessments feed treatment planning (PRD-05/TREATMENT-PLANS) and outcomes.
+
+**REQ:** REQ-CLIN-1, REQ-CLIN-7 · **ADR:** ADR-0020, ADR-0025
+
+**Depends on:** PRD-05/NOTE-TEMPLATE
+
+### BODY-CONTOURING — Body contouring charting (e.g. CoolSculpting)
+`P2` · type:story, PRD-05, phase:2plus, area:provider-app
+
+The prototype's Clinical → Body contouring screen charts body treatments on a body map (bodyAdd/bodyDel/bodyCyc) with applicator/cycle settings — a distinct modality beyond the face.
+
+> **As a therapist**, I want to chart body-contouring treatments on a body map with per-area applicator/cycle settings, so that non-facial treatments are recorded with the same rigour.
+
+**Acceptance criteria**
+
+- [ ] A body map supports adding/removing/cycling treatment areas with per-area settings (applicator, cycles, parameters).
+- [ ] Sessions feed multi-session plans and outcomes.
+- [ ] Device-gated where a licence/patch-test applies (per modality rules).
+- [ ] Part of the modality-aware charting model (extends PRD-05/MODALITY).
+
+**REQ:** REQ-CLIN-10, REQ-CLIN-12 · **ADR:** ADR-0025
+
+**Depends on:** PRD-05/MODALITY
+
+### COMPLICATION-LIBRARY — Complication protocol library & response kits
+`P1` · type:story, PRD-05, phase:1, area:provider-app, compliance
+
+The prototype's Clinical → Complication protocols (openComplication/completeComplication) provides step-by-step VO/anaphylaxis protocols and links the emergency kit — the reference side of the adverse-event response.
+
+> **As a clinician**, I want a library of complication protocols with guided response steps and kit links, so that in an emergency I follow the correct, documented steps.
+
+**Acceptance criteria**
+
+- [ ] Protocols (e.g. vascular occlusion, anaphylaxis) present guided steps and required kit items.
+- [ ] Launching a protocol logs the response and can raise an adverse event (PRD-05/ADVERSE-EVENT).
+- [ ] Completion is recorded with timing and outcome.
+- [ ] Links to the emergency-kit register (PRD-11/EMERGENCY-KIT).
+
+**REQ:** REQ-CLIN-13, REQ-FAC-3 · **Compliance:** C12, C20
+
+**Depends on:** PRD-05/ADVERSE-EVENT
+
+### OUTCOMES — Outcomes & revision tracking
+`P2` · type:story, PRD-05, phase:2plus, area:provider-app
+
+The prototype's Photography & outcomes view tracks before/after outcomes and a revision/touch-up signal that feeds reporting (REQ-CLIN-13).
+
+> **As a injector / owner**, I want to track treatment outcomes and any revisions/touch-ups, so that we can measure quality and feed it to reporting.
+
+**Acceptance criteria**
+
+- [ ] Outcomes are captured against treatments (e.g. result rating, before/after linkage).
+- [ ] Revision/touch-up events are recorded and linked to the original treatment.
+- [ ] Outcome/revision signals feed reporting (PRD-08).
+- [ ] Respects image-use consent for any photo-based outcome.
+
+**REQ:** REQ-CLIN-13 · **Compliance:** C14
+
+**Depends on:** PRD-05/PHOTOS
+
 ---
 
 ## PRD-06 — Payments (in-person POS + autopay), memberships & non-S4 rewards
-*M4 · Commerce, comms & integrations (PRD-06, PRD-07, PRD-10) · Phase 1 · 9 stories*
+*M4 · Commerce, comms & integrations (PRD-06, PRD-07, PRD-10) · Phase 1 · 10 stories*
 
 Commerce for the clinic: in-person POS (Square card-present + recorded cash + gift cards), automatic recurring membership autopay via stored card-on-file, packages/series, and a rewards engine that only ever applies to non-S4 items — driving repeat visits without eroding margin or breaching advertising law. Financials stay owner-only; the ledger defers to Xero.
 
@@ -1496,10 +1744,25 @@ An owner pricing + what-if planner over the reporting read-models (REQ-MEMB-9, A
 
 **Depends on:** PRD-06/POS
 
+### REFERRALS — Referrals & affiliate credit (non-S4) (placeholder)
+`P2` · type:story, PRD-06, phase:2plus, area:web
+
+The prototype's Memberships → Referrals screen shows referral/affiliate credit. Per scope, advanced loyalty/referrals are Phase 2 and referral/affiliate credit is non-S4 only (REQ-MEMB-10).
+
+> **As a client / owner**, I want to refer friends and earn non-S4 credit, so that word-of-mouth growth is rewarded compliantly.
+
+**Acceptance criteria**
+
+- [ ] Placeholder — Phase 2; core membership/rewards mechanics ship first.
+- [ ] Referral/affiliate credit is non-S4 only (no S4 incentive), reusing the rewards engine guardrail (C9).
+- [ ] Captured so the rewards model stays referral-ready.
+
+**REQ:** REQ-MEMB-10 · **Compliance:** C9 · **ADR:** ADR-0014
+
 ---
 
 ## PRD-07 — Communications, reminders & recall
-*M4 · Commerce, comms & integrations (PRD-06, PRD-07, PRD-10) · Phase 1 · 7 stories*
+*M4 · Commerce, comms & integrations (PRD-06, PRD-07, PRD-10) · Phase 1 · 11 stories*
 
 The engine that keeps the book full and clients coming back at the right cadence: reminders, pre-/after-care sequences, and recall (~12-week toxin re-care) over SMS/email/push — with Spam Act consent/unsubscribe baked in. Advertising content is produced in the clinic's external tools; the platform has no advertising linter, and the public booking page uses generic names with S4 prices withheld by configuration.
 
@@ -1624,10 +1887,79 @@ The omnichannel inbox (IG/FB/SMS/email), lead/prospect CRM and reviews/reputatio
 
 **REQ:** REQ-NOTIF-6, REQ-NOTIF-8, REQ-NOTIF-9 · **ADR:** ADR-0018, ADR-0032, ADR-0033
 
+### AUTOMATIONS — Automation builder (triggers → timed messages)
+`P2` · type:story, PRD-07, phase:1, area:web
+
+The prototype's Comms → Automations screen (toggleAuto) configures the reminder/aftercare/recall sequences as toggleable automations. This is the management UI over PRD-07's sequence engine.
+
+> **As a owner / front desk**, I want to configure automations that send the right message at the right time per trigger, so that reminders, aftercare and recall run hands-off.
+
+**Acceptance criteria**
+
+- [ ] Automations map a trigger (booking, visit, interval) to a timed sequence of messages.
+- [ ] Each automation can be enabled/disabled and edited per treatment type.
+- [ ] Marketing automations respect opt-in/unsubscribe (C23); transactional ones always send.
+- [ ] Drives the same sequence engine as PRD-07/REMINDERS-CARE and PRD-07/RECALL.
+
+**REQ:** REQ-NOTIF-2, REQ-NOTIF-3 · **Compliance:** C23
+
+**Depends on:** PRD-07/REMINDERS-CARE
+
+### REVIEWS — Reviews & reputation (request, acknowledge, flag, auto-follow-up)
+`P2` · type:story, PRD-07, phase:2plus, area:web, compliance
+
+The prototype's Growth → Reviews screen (scanReviews/reviewReply/reviewFlag/reviewAck) requests reviews, replies/acknowledges, and auto-raises follow-up jobs for negative reviews (≤3★) — with a staff caution against resharing an S4-endorsing review as a prohibited testimonial.
+
+> **As a owner**, I want to request reviews and manage replies, with negative ones auto-raising follow-ups, so that reputation is managed and problems are caught early.
+
+**Acceptance criteria**
+
+- [ ] Review requests sent to consented clients; replies/acknowledge supported.
+- [ ] Negative reviews (≤3★) and complaint matches auto-raise review jobs into the Follow-ups queue.
+- [ ] A caution warns against resharing an S4-endorsing review as a testimonial (C9).
+- [ ] No sentiment-gating of who is asked (request-all).
+
+**REQ:** REQ-NOTIF-9 · **Compliance:** C9, C23 · **ADR:** ADR-0032
+
+**Depends on:** PRD-07/FOLLOWUPS
+
+### LEADS-CRM — Lead / prospect CRM
+`P2` · type:story, PRD-07, phase:2plus, area:web, compliance
+
+The prototype's Growth → Leads (CRM) screen tracks enquiries who haven't booked yet, over the inbox (ADR-0033).
+
+> **As a front desk / owner**, I want to track leads/prospects through to booking, so that enquiries don't get lost and convert better.
+
+**Acceptance criteria**
+
+- [ ] Leads are captured with source, status and next action.
+- [ ] A lead can convert to a client/booking, preserving history.
+- [ ] Lead follow-ups surface in the Follow-ups queue.
+- [ ] Marketing to leads respects Spam-Act consent (C23).
+
+**REQ:** REQ-NOTIF-8 · **Compliance:** C23 · **ADR:** ADR-0033
+
+**Depends on:** PRD-07/FOLLOWUPS
+
+### CAMPAIGNS — Campaigns (external-tool handoff) (placeholder)
+`P2` · type:story, PRD-07, phase:2plus, area:integration, compliance
+
+The prototype shows a Comms → Campaigns screen, but advertising/campaign tooling was withdrawn from scope (ADR-0034 withdrawn) — email campaigns and social belong in the clinic's external tools (Mailchimp, Meta Business Suite). Tracked as a placeholder to reconcile prototype vs scope.
+
+> **As a owner**, I want campaign capability, so that I can run promotions.
+
+**Acceptance criteria**
+
+- [ ] Placeholder — advertising/campaign content is produced in external tools, not the platform.
+- [ ] The platform exposes consented audience export / segments for those tools where appropriate (C23).
+- [ ] If ever built in-app, it must honour TGA/AHPRA advertising rules and the no-public-S4-pricing rule (C9).
+
+**Compliance:** C9, C23 · **ADR:** ADR-0034
+
 ---
 
 ## PRD-08 — Reporting & compliance dashboards (Governance hub)
-*M5 · Reporting & apps (PRD-08, PRD-09) · Phase 1 · 8 stories*
+*M5 · Reporting & apps (PRD-08, PRD-09) · Phase 1 · 12 stories*
 
 Turns the platform's data into the business intelligence the clinic relies on and the audit-ready compliance evidence that makes the moat real — consent coverage, the S4 register, lot recall, registration/retention watch, breach & complaints registers, the DAEN adverse-event prefill, plus a one-click inspection-readiness pack. Built on dedicated read-models/materialized views. Financial figures stay owner-gated.
 
@@ -1771,10 +2103,82 @@ A custom report builder, external BI warehouse and cross-clinic benchmarking are
 
 **REQ:** REQ-RPT-1
 
+### SCORECARD — Practitioner scorecard
+`P2` · type:story, PRD-08, phase:1, area:web
+
+The prototype's Reports → Scorecard view shows per-practitioner performance (revenue, retention, rebooking, utilisation, outcomes).
+
+> **As a owner**, I want a per-practitioner scorecard, so that I can coach the team and see who drives retention.
+
+**Acceptance criteria**
+
+- [ ] Scorecard shows per-practitioner revenue, retention/rebooking, utilisation and outcome/revision signals.
+- [ ] Date-filterable; financial figures are owner-gated.
+- [ ] Drills into the underlying clients/appointments.
+- [ ] Reads from the reporting read-models (PRD-08/READ-MODELS).
+
+**REQ:** REQ-RPT-1, REQ-RPT-2
+
+**Depends on:** PRD-08/BUSINESS-DASH
+
+### CAPACITY — Capacity & utilisation report
+`P2` · type:story, PRD-08, phase:1, area:web
+
+The prototype's Reports → Capacity view reports chair/room/practitioner utilisation and quiet windows (overview/trends).
+
+> **As a owner**, I want capacity and utilisation reporting, so that I can fill quiet windows and right-size rosters.
+
+**Acceptance criteria**
+
+- [ ] Utilisation by practitioner, room/chair and device over a date range, with trend view.
+- [ ] Quiet windows are highlighted (feeds waitlist/recall fill).
+- [ ] Reads from the reporting read-models.
+- [ ] Matches the prototype's capacity metrics.
+
+**REQ:** REQ-RPT-1, REQ-RPT-2
+
+**Depends on:** PRD-08/READ-MODELS
+
+### TRUE-COST — True-cost / margin (COGS) reporting
+`P2` · type:story, PRD-08, phase:1, area:web
+
+The prototype adds true-cost reporting — cost of goods (units/vial cost, consumables) per treatment to show real margin, not just revenue.
+
+> **As a owner**, I want true-cost and margin reporting per treatment/service, so that I price and plan on real profitability.
+
+**Acceptance criteria**
+
+- [ ] Cost of goods (product units/vial cost, consumables) is attributed per treatment/service.
+- [ ] Margin = revenue − COGS surfaces per service and per practitioner.
+- [ ] Feeds pricing & what-if (PRD-06/PRICING-WHATIF); figures are owner-gated.
+- [ ] Detailed accounting still defers to Xero (attribution, not a ledger).
+
+**REQ:** REQ-RPT-6 · **ADR:** ADR-0027
+
+**Depends on:** PRD-08/READ-MODELS, PRD-04/VIAL-RECON
+
+### POLICIES — Policies & procedures sign-off
+`P1` · type:story, PRD-08, phase:1, area:web, compliance
+
+The prototype's Governance → Policies screen (signPolicy) tracks staff acknowledgement/sign-off of clinic policies and procedures, part of the Governance hub.
+
+> **As a owner / compliance officer**, I want to publish policies and track staff sign-off, so that I can evidence that the team has read current procedures.
+
+**Acceptance criteria**
+
+- [ ] Policies are versioned and published to relevant roles.
+- [ ] Staff sign-off is recorded per policy version with date; outstanding sign-offs surface.
+- [ ] Sign-off status is included in the inspection-readiness pack.
+- [ ] Changes to a policy require re-acknowledgement.
+
+**REQ:** REQ-RPT-7 · **Compliance:** C10, C20 · **ADR:** ADR-0030
+
+**Depends on:** PRD-08/INSPECTION-PACK
+
 ---
 
 ## PRD-09 — Apps (Flutter): client & provider
-*M5 · Reporting & apps (PRD-08, PRD-09) · Phase 1 · 7 stories*
+*M5 · Reporting & apps (PRD-08, PRD-09) · Phase 1 · 10 stories*
 
 Two Flutter apps over the shared .NET API: a client app (book, intake/consent, photos, memberships, rewards, balances, card-on-file) and a provider app (room-side charting, injection mapping, camera capture, consult/Rx, finalise) — the latter resilient to treatment-room connectivity. One codebase, two flavours, sharing auth, the API client and the design system.
 
@@ -1904,6 +2308,60 @@ Store distribution + code-push (e.g. Shorebird) where the compliance posture all
 
 **Depends on:** SPRINT-0/FLUTTER
 
+### CHECKIN-KIOSK — Reception self-check-in surface (tablet)
+`P2` · type:story, PRD-09, phase:1, area:web
+
+The prototype's checkin surface is a reception-desk tablet where clients check themselves in (confirm details, complete any outstanding intake/consent), updating the Today board.
+
+> **As a client arriving for a visit**, I want to check myself in on the reception tablet, so that the team knows I've arrived and I complete anything outstanding.
+
+**Acceptance criteria**
+
+- [ ] A client can self-check-in (verify identity/appointment) on a shared tablet surface.
+- [ ] Outstanding intake/consent is prompted and completable at check-in.
+- [ ] Check-in updates the visit lifecycle/Today board (PRD-02).
+- [ ] The surface is locked-down (no access to other clients' data) and times out between clients.
+
+**REQ:** REQ-BOOK-4 · **Compliance:** C10
+
+**Depends on:** PRD-02/LIFECYCLE, PRD-03/GATING
+
+### BACKOFFICE-TABLET — Back-office / bench tablet surface
+`P2` · type:story, PRD-09, phase:1, area:web
+
+The prototype's backroom surface is a bench tablet for behind-the-scenes work: open/close, cold-chain, stock on hand, S4 drug register, waste/disposal log, tasks and shift handover — a focused operations view.
+
+> **As a clinic staff**, I want a bench-tablet view of the day's operational jobs, so that behind-the-scenes work (logs, stock, handover) is quick at the bench.
+
+**Acceptance criteria**
+
+- [ ] Surfaces open/close checklist, cold-chain log, stock on hand, S4 register, waste log, tasks and shift handover.
+- [ ] Each panel reuses the underlying modules (PRD-04 medicines, PRD-11 operations, PRD-07 jobs).
+- [ ] Role/financial gating applies; actions are audited.
+- [ ] Usable on a shared device with appropriate session handling.
+
+**REQ:** REQ-MED-2, REQ-FAC-2 · **Compliance:** C8, C20
+
+**Depends on:** PRD-11/OPENCLOSE, PRD-07/FOLLOWUPS
+
+### CLIENT-CONCERN — Client 'report a concern' → follow-up / AE bridge
+`P1` · type:story, PRD-09, phase:1, area:client-app, compliance
+
+The prototype's client app lets a client report a post-treatment concern, which bridges into staff follow-ups (and can escalate to an adverse event/complaint). A safety-critical client→clinic channel.
+
+> **As a client**, I want to report a concern after my treatment from the app, so that the clinic responds quickly if something's wrong.
+
+**Acceptance criteria**
+
+- [ ] A client can submit a concern (with optional photo, consent-respecting) from the app.
+- [ ] The concern raises a follow-up job for staff (PRD-07) with the client/treatment linked.
+- [ ] Staff can call back, resolve, or escalate to an adverse event (PRD-05) / complaint (PRD-11).
+- [ ] The client sees acknowledgement; the exchange is recorded and audited.
+
+**REQ:** REQ-CLIN-5, REQ-CLI-4 · **Compliance:** C12, C24
+
+**Depends on:** PRD-07/FOLLOWUPS, PRD-05/ADVERSE-EVENT
+
 ---
 
 ## PRD-10 — Integrations: Xero & calendar
@@ -1984,7 +2442,7 @@ Online checkout & deposits (S4 never priced/sold online), e-prescribing (eRx/ETP
 ---
 
 ## PRD-11 — Facility, infection-control, emergency & complaints
-*M6 · Facility & complaints (PRD-11) · Phase 1 · 5 stories*
+*M6 · Facility & complaints (PRD-11) · Phase 1 · 11 stories*
 
 The record-keeping that evidences AHPRA's facility, infection-control and emergency obligations, plus a complaints register with the mandated AHPRA pathway. Lightweight registers + reminders in v1, with fuller workflows (cold-chain log, open/close checklist, sterilisation register, waste manifests, complication-response) layered on.
 
@@ -2065,6 +2523,247 @@ Open/close checklist, sterilisation & equipment maintenance register (autoclave 
 - [ ] Captured so the facility model anticipates them.
 
 **REQ:** REQ-FAC-4, REQ-FAC-10 · **ADR:** ADR-0026, ADR-0030
+
+### OPENCLOSE — Daily open/close checklist & fridge log
+`P1` · type:story, PRD-11, phase:1, area:web, compliance
+
+The prototype's Operations → Open/close & fridge log (openFridge/saveFridge) is a twice-daily routine: an open/close checklist plus a manual fridge-temperature log with a breach pathway.
+
+> **As a staff member**, I want a daily open/close checklist and a twice-daily fridge-temperature log, so that the clinic opens/closes safely and cold-chain is evidenced.
+
+**Acceptance criteria**
+
+- [ ] Configurable open and close checklists are completed and recorded with who/when.
+- [ ] A twice-daily fridge log captures temperature; an out-of-range reading triggers the breach pathway (quarantine lot + job).
+- [ ] Logs are audited and feed the inspection pack (PRD-08).
+- [ ] Ties into automated temperature monitors (PRD-11/TEMP-MONITORS, PRD-04/COLD-CHAIN).
+
+**REQ:** REQ-FAC-2 · **Compliance:** C13, C20 · **ADR:** ADR-0026
+
+**Depends on:** PRD-04/COLD-CHAIN
+
+### TEMP-MONITORS — Temperature monitor management
+`P1` · type:story, PRD-11, phase:1, area:web, area:integration, compliance
+
+The prototype's Operations → Temperature monitors (openMonitor/monitorJob) manages wireless cold-chain sensors (the ESP32 design), charts readings and raises breach jobs.
+
+> **As a owner / staff**, I want to manage temperature monitors, see their readings and act on breaches, so that cold-chain is continuously evidenced without manual logging.
+
+**Acceptance criteria**
+
+- [ ] Monitors can be registered/provisioned per fridge/location and authenticate to the per-clinic API.
+- [ ] Readings chart over time; a breach raises a job and flags affected stock.
+- [ ] Missing heartbeats (dead monitor) are detected and surfaced.
+- [ ] Manual fridge log (OPENCLOSE) and monitors reconcile into one cold-chain record (C13).
+
+**REQ:** REQ-MED-7 · **Compliance:** C13 · **ADR:** ADR-0026
+
+**Depends on:** PRD-04/COLD-CHAIN
+
+### ROOMS-DEVICES — Rooms & devices register
+`P2` · type:story, PRD-11, phase:1, area:web
+
+The prototype's Operations → Rooms & devices manages the bookable rooms/chairs/devices that the calendar schedules against (resource conflict-flagging in PRD-02).
+
+> **As a manager**, I want to manage the clinic's rooms, chairs and devices as bookable resources, so that scheduling reflects real capacity and avoids conflicts.
+
+**Acceptance criteria**
+
+- [ ] Rooms/chairs/devices can be created/edited with attributes (type, location, status).
+- [ ] Resources are available to the calendar for booking + conflict-flagging (PRD-02/WALKINS).
+- [ ] Out-of-service status removes a resource from availability.
+- [ ] Device records link to equipment maintenance (PRD-11/EQUIPMENT).
+
+**REQ:** REQ-BOOK-1 · **ADR:** ADR-0026
+
+**Depends on:** PRD-02/CALENDAR
+
+### EQUIPMENT — Equipment & maintenance register
+`P2` · type:story, PRD-11, phase:1, area:web, compliance
+
+The prototype's Operations → Equipment & maintenance tracks sterilisation/equipment servicing (autoclave validation, spore testing, laser service/calibration) with due dates — promoted from the FAC-WORKFLOWS placeholder.
+
+> **As a owner**, I want to track equipment servicing, validation and calibration with reminders, so that devices stay safe, validated and within service.
+
+**Acceptance criteria**
+
+- [ ] Equipment records hold service/validation/calibration schedules (e.g. autoclave validation, spore testing, laser service).
+- [ ] Due/overdue items raise alerts and surface on the operations view.
+- [ ] Service events are logged with evidence and audited.
+- [ ] Feeds the inspection-readiness pack (PRD-08).
+
+**REQ:** REQ-FAC-2, REQ-FAC-4 · **Compliance:** C20 · **ADR:** ADR-0026
+
+**Depends on:** PRD-11/ROOMS-DEVICES
+
+### CALL-LOG — Call / phone log
+`P2` · type:story, PRD-11, phase:1, area:web
+
+The prototype's Operations → Call log records inbound/outbound phone interactions against clients and raises follow-ups (the phone is still a primary clinic channel).
+
+> **As a front desk**, I want to log phone calls against a client and raise a follow-up if needed, so that phone interactions aren't lost and callbacks happen.
+
+**Acceptance criteria**
+
+- [ ] Calls can be logged (direction, client link, summary, outcome).
+- [ ] A call can raise a follow-up job (PRD-07) and appears in the client's comms history.
+- [ ] Logs are tenant-scoped and audited.
+- [ ] A missed-call/callback can be tracked to resolution.
+
+**REQ:** REQ-CLI-1 · **Compliance:** C10
+
+**Depends on:** PRD-07/FOLLOWUPS
+
+### SHIFT-HANDOVER — Shift handover notes
+`P2` · type:story, PRD-11, phase:1, area:web
+
+The prototype's back-office tablet includes a shift-handover panel so the team passes on what the next shift needs to know.
+
+> **As a staff member**, I want to record and read shift-handover notes, so that the next shift knows outstanding tasks and issues.
+
+**Acceptance criteria**
+
+- [ ] Handover notes can be added and are visible to the next shift, tenant/location-scoped.
+- [ ] Outstanding follow-ups/jobs are surfaced alongside the handover.
+- [ ] Handover entries are timestamped and attributed.
+- [ ] Accessible from the back-office tablet (PRD-09/BACKOFFICE-TABLET).
+
+**REQ:** REQ-FAC-2
+
+**Depends on:** PRD-07/FOLLOWUPS
+
+---
+
+## PLATFORM — Platform shell, navigation & cross-cutting UX
+*M1 · Foundations & tenancy (PRD-01) · Phase 1 · 7 stories*
+
+The cross-cutting product surfaces the prototype exercises that don't belong to a single feature PRD: the app shell + collapsible workspace navigation, the role-tailored Today dashboard, global search, the in-app notification centre, the clinic switcher, the persona/active-role + scope-of-practice display, and the owner-only financial (.fin) gating that hides money figures from non-owner roles. These tie all the feature modules together into one coherent, role-aware app.
+
+### APP-NAV — App shell & collapsible workspace navigation
+`P1` · type:story, PLATFORM, phase:1, area:web
+
+The prototype's sidebar groups screens into workspaces (Clinical, Front desk, Comms & growth, Memberships, Business, Team, Governance, Settings) plus top-level Today/Schedule/Clients/Follow-ups/Checkout, with collapsible sections and a mobile drawer. Nav entries are capability-gated (data-allow).
+
+> **As a staff member**, I want a navigation shell that groups screens into workspaces and only shows what my role can access, so that I find my tools fast and never see screens I can't use.
+
+**Acceptance criteria**
+
+- [ ] Top-level items (Today, Schedule, Clients, Follow-ups, Checkout) + collapsible workspaces render per the IA.
+- [ ] Each nav entry is capability-gated; entries outside the user's role are hidden.
+- [ ] Active screen + section state persist; mobile uses a drawer + overlay.
+- [ ] A Follow-ups badge and a Governance badge show outstanding counts.
+
+**REQ:** REQ-TEN-3 · **ADR:** ADR-0017
+
+**Depends on:** SPRINT-0/WEB-SHELL, PRD-01/RBAC
+
+### TODAY — Role-tailored Today dashboard
+`P1` · type:story, PLATFORM, phase:1, area:web
+
+The prototype opens on a Today board: waiting / in-room / checked-out columns, the day's appointments, the jobs/needs-attention digest and alerts — tailored to the signed-in role's 'concerns' (ADR-0017).
+
+> **As a staff member**, I want a Today landing page showing the live state of the clinic and what needs my attention, tailored to my role, so that I start the day knowing exactly what to do.
+
+**Acceptance criteria**
+
+- [ ] Today shows waiting / in-room / checked-out and the day's schedule at a glance.
+- [ ] The content is role-tailored by concern (e.g. reception sees front-desk tasks, NP sees clinical).
+- [ ] Surfaces the follow-up/needs-attention digest and key alerts (expiries, failed payments).
+- [ ] Quick links jump to chart/profile/checkout for in-flight visits.
+
+**REQ:** REQ-RPT-5 · **ADR:** ADR-0017
+
+**Depends on:** PLATFORM/APP-NAV
+
+### SEARCH — Global search (clients, appointments, invoices)
+`P2` · type:story, PLATFORM, phase:1, area:web
+
+The prototype header has a global search across clients, appointments and invoices — a core front-desk speed feature absent from the backlog.
+
+> **As a front desk**, I want one search box that finds clients, appointments and invoices, so that I can jump to anything in a couple of keystrokes.
+
+**Acceptance criteria**
+
+- [ ] Search returns matching clients, appointments and invoices, grouped by type.
+- [ ] Results are tenant-scoped and respect role/financial gating (no money to non-owner).
+- [ ] Selecting a result deep-links to the relevant screen.
+- [ ] Search is keyboard-accessible and fast on clinic data volumes.
+
+**REQ:** REQ-CLI-1 · **Compliance:** C10
+
+**Depends on:** PLATFORM/APP-NAV
+
+### NOTIFICATIONS — In-app notification centre
+`P2` · type:story, PLATFORM, phase:1, area:web
+
+The header bell + badges imply an in-app notification surface for alerts (new bookings, failed payments, expiries, AE/recall, jobs assigned).
+
+> **As a staff member**, I want an in-app notification centre for events relevant to my role, so that I don't miss time-sensitive things.
+
+**Acceptance criteria**
+
+- [ ] Notifications surface role-relevant events (bookings, failed payments, expiries, AE/recall, job assignment).
+- [ ] Read/unread state and a badge count are maintained per user.
+- [ ] Each notification deep-links to its source.
+- [ ] Channels are consistent with PRD-07 (in-app is one delivery target of INotifier).
+
+**REQ:** REQ-NOTIF-1
+
+**Depends on:** PLATFORM/APP-NAV, PRD-07/CHANNELS
+
+### ROLE-CONTEXT — Active-role context, scope display & multi-role switching
+`P1` · type:story, PLATFORM, phase:1, area:web, compliance
+
+The prototype shows the current persona, role + a scope-of-practice tooltip, and a 'switch user' control. Real users may hold multiple roles (e.g. NP who is also owner) and need to act under a chosen role with the correct scope.
+
+> **As a staff member with more than one role**, I want to see my current role and scope and switch active role where I hold several, so that the app applies the right permissions and shows why an action is blocked.
+
+**Acceptance criteria**
+
+- [ ] Header shows the signed-in user, active role and a scope-of-practice summary.
+- [ ] A user holding multiple roles can switch active role; capabilities update accordingly.
+- [ ] The active role is recorded on actions and in the audit trail.
+- [ ] Scope is sourced from PRD-01 RBAC, not hard-coded per screen.
+
+**REQ:** REQ-TEN-3, REQ-TEN-4 · **Compliance:** C4 · **ADR:** ADR-0017
+
+**Depends on:** PRD-01/RBAC, PRD-01/MULTI-ROLE
+
+### FIN-GATING — Owner-only financial (.fin) capability gating
+`P0` · type:story, PLATFORM, phase:1, area:backend, compliance
+
+Project rule + prototype: revenue, MRR and pricing figures must stay gated behind the owner financial capability; non-owner roles (e.g. reception) see memberships but no money figures. The prototype tags these with a .fin class toggled by capability.
+
+> **As a owner**, I want all revenue/MRR/pricing figures hidden from non-owner roles across the app and API, so that financials stay owner-only.
+
+**Acceptance criteria**
+
+- [ ] A financial capability gates money figures in dashboards, checkout, finance, memberships and reports.
+- [ ] Non-owner roles see operational data (e.g. membership status) but no revenue/MRR/pricing.
+- [ ] Gating is enforced server-side (API never returns gated figures to unauthorised roles), not just hidden in UI.
+- [ ] Attempted access is denied and audited.
+
+**REQ:** REQ-TEN-3 · **Compliance:** C4, C10 · **ADR:** ADR-0017
+
+**Depends on:** PRD-01/RBAC
+
+### CLINIC-SWITCH — Clinic / location switcher
+`P2` · type:story, PLATFORM, phase:1, area:web
+
+The prototype's sidebar switches between clinics/locations (Brisbane, Gold Coast, a locum site). The in-product switcher is demonstrated; full multi-location data depth is PHASE-2/MULTI-LOCATION.
+
+> **As a owner / multi-site staff**, I want to switch the active clinic/location, so that I work in the right location's data.
+
+**Acceptance criteria**
+
+- [ ] A switcher lists the locations the user can access and sets the active location context.
+- [ ] Data shown is scoped to the active location (RLS/tenant + location).
+- [ ] The active location is reflected in audit and reporting.
+- [ ] Builds on PHASE-2/MULTI-LOCATION data model where deeper multi-site features are needed.
+
+**REQ:** REQ-TEN-1
+
+**Depends on:** PRD-01/TENANT
 
 ---
 
