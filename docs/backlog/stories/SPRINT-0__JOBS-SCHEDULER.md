@@ -1,6 +1,6 @@
 # Background jobs & scheduler infrastructure
 
-> **Epic:** [SPRINT-0 — Sprint 0 — Foundations & setup](../epics/SPRINT-0.md)  ·  **Key:** `SPRINT-0/JOBS-SCHEDULER`  ·  **Type:** Chore  ·  **Stage:** M0  ·  **Priority:** P0  ·  **Estimate:** 3 pts  ·  **Area:** backend, infra
+> **Epic:** [SPRINT-0 — Engineering foundations & setup](../epics/SPRINT-0.md)  ·  **Key:** `SPRINT-0/JOBS-SCHEDULER`  ·  **Type:** Chore  ·  **Stage:** M0  ·  **Priority:** P0  ·  **Estimate:** 3 pts  ·  **Area:** backend, infra
 >
 > **Depends on:** `SPRINT-0/API`, `SPRINT-0/RLS`
 

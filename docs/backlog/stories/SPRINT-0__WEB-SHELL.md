@@ -1,6 +1,6 @@
 # Angular web shell: routing, auth guard, layout
 
-> **Epic:** [SPRINT-0 — Sprint 0 — Foundations & setup](../epics/SPRINT-0.md)  ·  **Key:** `SPRINT-0/WEB-SHELL`  ·  **Type:** Chore  ·  **Stage:** M0  ·  **Priority:** P1  ·  **Estimate:** 3 pts  ·  **Area:** web
+> **Epic:** [SPRINT-0 — Engineering foundations & setup](../epics/SPRINT-0.md)  ·  **Key:** `SPRINT-0/WEB-SHELL`  ·  **Type:** Chore  ·  **Stage:** M0  ·  **Priority:** P1  ·  **Estimate:** 3 pts  ·  **Area:** web
 >
 > **Depends on:** `SPRINT-0/AUTH-STAFF`, `SPRINT-0/DESIGN`
 

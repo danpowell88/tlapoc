@@ -1,7 +1,7 @@
 {
   "epic": {
     "key": "SPRINT-0",
-    "title": "Sprint 0 — Foundations & setup",
+    "title": "Engineering foundations & setup",
     "milestone": "M0",
     "phase": "0",
     "prd": "docs/prds/PRD-01-foundations-tenancy.md",

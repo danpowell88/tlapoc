@@ -7,7 +7,7 @@
 
 | Epic | Stage | Stories |
 |---|---|---|
-| [SPRINT-0 — Sprint 0 — Foundations & setup](epics/SPRINT-0.md) | M0 | 28 |
+| [SPRINT-0 — Engineering foundations & setup](epics/SPRINT-0.md) | M0 | 28 |
 | [PRD-01 — Foundations & tenancy (auth, RBAC, audit, data model)](epics/PRD-01.md) | M1 | 16 |
 | [PRD-02 — Booking & scheduling (+ client/CRM basics)](epics/PRD-02.md) | M2 | 12 |
 | [PRD-03 — Intake, consent & compliance gating](epics/PRD-03.md) | M2 | 6 |

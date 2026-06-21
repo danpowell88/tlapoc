@@ -1,4 +1,4 @@
-# SPRINT-0 — Sprint 0 — Foundations & setup
+# SPRINT-0 — Engineering foundations & setup
 
 > **Stage / Milestone:** M0 · Sprint 0 — Foundations & setup  ·  **Phase:** 0  ·  **Stories:** 28
 

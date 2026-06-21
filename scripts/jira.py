@@ -210,11 +210,40 @@ def story_desc(ep, s):
     return {"type": "doc", "version": 1, "content": c}
 
 
-def epic_desc(ep):
+def epic_compliance_pairs(ep):
+    pairs, seen = [], set()
+    for s in ep["stories"]:
+        for lbl, url in compliance_links(s):
+            if lbl not in seen:
+                seen.add(lbl)
+                pairs.append((lbl, url))
+    return pairs
+
+
+def epic_dep_pairs(ep, epics_by_key, st, site):
+    this = ep["epic"]["key"]
+    deps = set()
+    for s in ep["stories"]:
+        for d in s.get("depends_on", []):
+            dk = d.split("/")[0]
+            if dk != this and dk in epics_by_key:
+                deps.add(dk)
+    pairs = []
+    for dk in sorted(deps):
+        jk = st.get(f"epic:{dk}")
+        if jk:
+            pairs.append((epics_by_key[dk]["epic"]["title"], f"https://{site}/browse/{jk}"))
+    return pairs
+
+
+def epic_desc(ep, comp_pairs=None, dep_pairs=None):
     e = ep["epic"]
-    return {"type": "doc", "version": 1, "content": [
-        _p(_t(e["summary"])), _h("Stories"),
-        _ul([s["title"] for s in ep["stories"]])]}
+    c = [_p(_t(p)) for p in e["summary"].split("\n") if p.strip()]
+    if comp_pairs:
+        c.append(_linked("Compliance criteria: ", comp_pairs))
+    if dep_pairs:
+        c.append(_linked("Depends on: ", dep_pairs))
+    return {"type": "doc", "version": 1, "content": c}
 
 
 def labels_clean(s):
@@ -433,14 +462,10 @@ def cmd_refresh():
     cap = editmeta_caps(sample)
     print(f"caps: priority={cap['priority']} sp_field={cap['sp_field']} "
           f"type_editable={cap['type_editable']} prio_map={cap['prio_map']}")
+    ebk = {e["epic"]["key"]: e for e in epics}
+    site = cfg()[0]
     for ep in epics:
-        ek = st.get(f"epic:{ep['epic']['key']}")
-        if not ek:
-            continue
-        api("PUT", f"issue/{ek}", {"fields": {"summary": ep["epic"]["title"],
-            "description": epic_desc(ep), "labels": ["tla-backlog"]}})
-        add_weblink(ek, prd_link(ep), st)
-        time.sleep(0.2)
+        update_epic(ep, st, ebk, site)
     print("epics refreshed")
     n = 0
     for ep in epics:
@@ -505,6 +530,29 @@ def cmd_sprints():
     print("sprint mapping done (Backlog group left unscheduled).")
 
 
+def update_epic(ep, st, ebk, site):
+    ek = st.get(f"epic:{ep['epic']['key']}")
+    if not ek:
+        return
+    desc = epic_desc(ep, epic_compliance_pairs(ep), epic_dep_pairs(ep, ebk, st, site))
+    api("PUT", f"issue/{ek}", {"fields": {"summary": ep["epic"]["title"],
+        "description": desc, "labels": ["tla-backlog"]}})
+    add_weblink(ek, prd_link(ep), st)
+    time.sleep(0.2)
+
+
+def cmd_epics():
+    """Update only the epics: proper context description (no story list) + rename."""
+    st = load_state()
+    epics = load()
+    ebk = {e["epic"]["key"]: e for e in epics}
+    site = cfg()[0]
+    for ep in epics:
+        update_epic(ep, st, ebk, site)
+        print("epic updated:", st.get(f"epic:{ep['epic']['key']}"), "-", ep["epic"]["title"])
+    print("done.")
+
+
 def cmd_whoami():
     me = api("GET", "myself")
     print(f"Auth OK: {me.get('displayName')} <{me.get('emailAddress')}>")
@@ -547,7 +595,7 @@ def main():
     cmd = sys.argv[1] if len(sys.argv) > 1 else "whoami"
     {"whoami": cmd_whoami, "plan": cmd_plan, "create": cmd_create,
      "links": cmd_links, "all": lambda: (cmd_create(), cmd_links()),
-     "refresh": cmd_refresh, "sprints": cmd_sprints,
+     "refresh": cmd_refresh, "sprints": cmd_sprints, "epics": cmd_epics,
      "wipe": cmd_wipe}.get(cmd, lambda: (_ for _ in ()).throw(SystemExit(__doc__)))()
 
 
