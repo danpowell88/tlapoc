@@ -32,7 +32,6 @@ A media service: AU-resident, encrypted blob storage served only via short-lived
 
 ## Technical notes (high level)
 
-- Stack: .NET API (domain/services); Azure / CI-CD / IaC
 - Architecture decisions: [ADR-0009](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md), [ADR-0016](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

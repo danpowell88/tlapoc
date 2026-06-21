@@ -37,10 +37,6 @@ Granted/withdrawn state shows as a chip on the patient header.
 - **ImageConsent** — id, client_id, scope, granted_at, withdrawn_at, status
   - _Withdrawn_at immediately blocks media use; audited (C14)._
 
-## Technical notes (high level)
-
-- Stack: .NET API (domain/services)
-
 ## Other
 
 - Source PRD: [PRD-03-intake-consent-gating.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-03-intake-consent-gating.md)

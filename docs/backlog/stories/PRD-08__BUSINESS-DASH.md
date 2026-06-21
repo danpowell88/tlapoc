@@ -39,10 +39,6 @@ _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Po
 - **(read) BusinessMetrics** — revenue, retention, churn, no_shows, cancellations, conversion, at_risk, big_spenders, mrr by date/practitioner
   - _From read-models; owner-gated._
 
-## Technical notes (high level)
-
-- Stack: Angular web (admin/front-desk/public)
-
 ## Other
 
 - Source PRD: [PRD-08-reporting-compliance.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-08-reporting-compliance.md)

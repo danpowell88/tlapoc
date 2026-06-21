@@ -38,10 +38,6 @@ Off-label is flagged on the script and requires consent that covers off-label us
 - **Prescription** — id, tenant_id, client_id, consult_id, prescriber_id, product_id, dose_units, off_label(bool), status(active|consumed|expired), created_at
   - _One per client per consult; no batch/async (C2). Designated RN prescriber records partnered_prescriber_id._
 
-## Technical notes (high level)
-
-- Stack: .NET API (domain/services)
-
 ## Other
 
 - Source PRD: [PRD-04-consult-prescribing-s4.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-04-consult-prescribing-s4.md)

@@ -27,7 +27,6 @@ The baseline security posture: TLS everywhere, encryption at rest, hardened HTTP
 
 ## Technical notes (high level)
 
-- Stack: Azure / CI-CD / IaC
 - Architecture decisions: [ADR-0016](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

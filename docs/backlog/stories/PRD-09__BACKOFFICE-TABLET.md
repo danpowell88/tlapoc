@@ -40,10 +40,6 @@ _Prototype screen: backroom.html._
 - **(reuses)** — OpenCloseChecklist/TempLog/StockItem/StockLedger/StockDestruction/Job/ShiftHandover
   - _Aggregates operations + medicines + jobs._
 
-## Technical notes (high level)
-
-- Stack: Angular web (admin/front-desk/public)
-
 ## Other
 
 - Source PRD: [PRD-09-apps-client-provider.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-09-apps-client-provider.md)

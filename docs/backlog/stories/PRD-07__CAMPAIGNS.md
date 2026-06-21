@@ -37,7 +37,6 @@ Tracked to reconcile the prototype's Campaigns screen with the scope cut.
 
 ## Technical notes (high level)
 
-- Stack: Ports-and-adapters integration
 - Architecture decisions: [ADR-0034](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

@@ -26,7 +26,6 @@ A consistent API skeleton (clean/layered architecture, request pipeline, problem
 
 ## Technical notes (high level)
 
-- Stack: .NET API (domain/services)
 - Architecture decisions: [ADR-0005](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

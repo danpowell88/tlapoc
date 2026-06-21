@@ -40,10 +40,6 @@ Ensures the clinic only holds lawfully-supplied, approved medicine, with provena
 - **PurchaseOrder** — id, tenant_id, supplier, lines[], prescriber_signer_id, status
   - _S4 POs require a prescriber signer + approved wholesaler._
 
-## Technical notes (high level)
-
-- Stack: .NET API (domain/services)
-
 ## Other
 
 - Source PRD: [PRD-04-consult-prescribing-s4.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-04-consult-prescribing-s4.md)

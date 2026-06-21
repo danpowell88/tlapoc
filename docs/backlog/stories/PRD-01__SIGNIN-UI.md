@@ -40,7 +40,6 @@ _Prototype screen: prototype.html — header 'Switch user' (sign-in/persona), Te
 
 ## Technical notes (high level)
 
-- Stack: Angular web (admin/front-desk/public)
 - Architecture decisions: [ADR-0004](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

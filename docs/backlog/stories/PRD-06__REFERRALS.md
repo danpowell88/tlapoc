@@ -39,7 +39,6 @@ _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rew
 
 ## Technical notes (high level)
 
-- Stack: Angular web (admin/front-desk/public)
 - Architecture decisions: [ADR-0014](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

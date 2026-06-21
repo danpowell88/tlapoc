@@ -31,7 +31,6 @@ Postgres row-level-security policies keyed on tenant_id, with EF Core setting th
 
 ## Technical notes (high level)
 
-- Stack: Postgres + EF Core (RLS)
 - Architecture decisions: [ADR-0003](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

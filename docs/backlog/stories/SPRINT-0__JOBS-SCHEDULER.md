@@ -29,10 +29,6 @@ A background-job framework (scheduler + queue) with retry, back-off, idempotency
 - **JobRun** — id, type, payload, scheduled_for, attempts, status(queued|running|done|dead), tenant_id
   - _Retry/back-off; dead-letter; audited elevated context._
 
-## Technical notes (high level)
-
-- Stack: .NET API (domain/services); Azure / CI-CD / IaC
-
 ## Other
 
 - Source PRD: [PRD-01-foundations-tenancy.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-01-foundations-tenancy.md)

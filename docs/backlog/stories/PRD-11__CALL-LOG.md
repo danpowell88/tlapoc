@@ -39,10 +39,6 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 - **CallLog** — id, tenant_id, client_id, direction(in|out), summary, outcome, at, actor_id
   - _Can raise a Job (PRD-07); in comms history._
 
-## Technical notes (high level)
-
-- Stack: Angular web (admin/front-desk/public)
-
 ## Other
 
 - Source PRD: [PRD-11-facility-complaints.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-11-facility-complaints.md)

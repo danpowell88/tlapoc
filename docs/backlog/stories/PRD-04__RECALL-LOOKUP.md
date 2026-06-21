@@ -40,10 +40,6 @@ This is the payoff of recording per-point lot in charting — a recall that woul
 - **Recall** — id, tenant_id, lot, reason, started_at, acknowledgements[]
   - _Tracks per-client acknowledgement._
 
-## Technical notes (high level)
-
-- Stack: .NET API (domain/services)
-
 ## Other
 
 - Source PRD: [PRD-04-consult-prescribing-s4.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-04-consult-prescribing-s4.md)

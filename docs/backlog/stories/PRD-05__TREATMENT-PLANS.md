@@ -43,7 +43,6 @@ _Prototype screen: prototype.html — Charting + Clinical (Skin analysis, Body c
 
 ## Technical notes (high level)
 
-- Stack: Flutter provider app
 - Architecture decisions: [ADR-0024](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

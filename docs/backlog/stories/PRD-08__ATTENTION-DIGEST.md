@@ -38,10 +38,6 @@ _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Po
 - **(read) AttentionDigest** — aggregates CredentialAlert + Excursion + Stocktake discrepancy + DataQualityFinding + DunningAttempt + overdue Job
   - _Role/financial-gated._
 
-## Technical notes (high level)
-
-- Stack: Angular web (admin/front-desk/public)
-
 ## Other
 
 - Source PRD: [PRD-08-reporting-compliance.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-08-reporting-compliance.md)

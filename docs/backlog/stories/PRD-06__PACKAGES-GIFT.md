@@ -43,10 +43,6 @@ _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rew
 - **AccountBalance** — client_id, credit, ar_ageing
   - _Client credit + receivables ageing._
 
-## Technical notes (high level)
-
-- Stack: Angular web (admin/front-desk/public)
-
 ## Other
 
 - Source PRD: [PRD-06-payments-memberships-rewards.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-06-payments-memberships-rewards.md)

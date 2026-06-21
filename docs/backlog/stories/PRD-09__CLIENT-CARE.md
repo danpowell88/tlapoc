@@ -40,10 +40,6 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 - **(reuses)** — Photo (PRD-05), Membership/RewardLedger/AccountBalance (PRD-06), PaymentMethodToken
   - _Card-on-file feeds PRD-06 autopay; no one-off checkout._
 
-## Technical notes (high level)
-
-- Stack: Flutter client app
-
 ## Other
 
 - Source PRD: [PRD-09-apps-client-provider.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-09-apps-client-provider.md)

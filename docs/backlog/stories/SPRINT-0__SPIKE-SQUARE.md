@@ -24,7 +24,6 @@ Spike confirming Square AU can tokenise a card and run recurring charges with fa
 
 ## Technical notes (high level)
 
-- Stack: Ports-and-adapters integration
 - Architecture decisions: [ADR-0007](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 - Time-boxed spike — produce findings + a go/no-go, not production code.
 

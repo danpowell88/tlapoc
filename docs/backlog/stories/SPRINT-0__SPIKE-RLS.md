@@ -24,7 +24,6 @@ Spike proving EF Core reliably sets the Postgres session tenant for RLS under co
 
 ## Technical notes (high level)
 
-- Stack: Postgres + EF Core (RLS)
 - Architecture decisions: [ADR-0002](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md), [ADR-0003](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 - Time-boxed spike — produce findings + a go/no-go, not production code.
 

@@ -33,10 +33,6 @@ prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack).
 - **(future) CustomReport** — user-defined query over read-models
   - _Phase 2+._
 
-## Technical notes (high level)
-
-- Stack: Angular web (admin/front-desk/public)
-
 ## Other
 
 - Source PRD: [PRD-08-reporting-compliance.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-08-reporting-compliance.md)

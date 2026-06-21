@@ -42,7 +42,6 @@ Drives repeat visits without eroding margin or breaching advertising law. The ca
 
 ## Technical notes (high level)
 
-- Stack: .NET API (domain/services)
 - Architecture decisions: [ADR-0014](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

@@ -40,10 +40,6 @@ _Prototype screen: prototype.html — Charting + Clinical (Skin analysis, Body c
 - **AdverseEvent** — id, tenant_id, client_id, chart_entry_id, product_id, lot_id, seriousness, daen_target(medicine|device), description, at
   - _Feeds DAEN prefill (PRD-08); raises jobs._
 
-## Technical notes (high level)
-
-- Stack: Flutter provider app
-
 ## Other
 
 - Source PRD: [PRD-05-clinical-charting.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-05-clinical-charting.md)

@@ -38,10 +38,6 @@ This guarantees no S4 treatment can begin without the consult, complementing the
 - **Appointment.consult_id** — FK Consult (PRD-04), nullable until consult recorded
   - _Charting open is blocked while null for S4 services._
 
-## Technical notes (high level)
-
-- Stack: .NET API (domain/services)
-
 ## Other
 
 - Source PRD: [PRD-02-booking-scheduling.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-02-booking-scheduling.md)

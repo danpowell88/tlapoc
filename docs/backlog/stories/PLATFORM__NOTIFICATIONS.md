@@ -38,10 +38,6 @@ _Prototype screen: prototype.html — sidebar/app shell, Today dashboard, header
 - **Notification** — id, tenant_id, user_id, kind, source_ref, read(bool), at
   - _Per-user; in-app channel of INotifier._
 
-## Technical notes (high level)
-
-- Stack: Angular web (admin/front-desk/public)
-
 ## Other
 
 - Source PRD: [README.md](https://github.com/danpowell88/tlapoc/blob/main/docs/ux/README.md)

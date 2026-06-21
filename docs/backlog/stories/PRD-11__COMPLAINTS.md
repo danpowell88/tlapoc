@@ -37,10 +37,6 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 - **Complaint** — id, tenant_id, client_id, treatment_ref, status, pathway(ahpra|internal), opened_at, resolution
   - _Sets indefinite retention flag (C18); feeds reporting._
 
-## Technical notes (high level)
-
-- Stack: Angular web (admin/front-desk/public)
-
 ## Other
 
 - Source PRD: [PRD-11-facility-complaints.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-11-facility-complaints.md)

@@ -41,10 +41,6 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 - **CancellationPolicy** — tenant_id, window_hours, no_show_rule
   - _No deposit/auto-charge in v1._
 
-## Technical notes (high level)
-
-- Stack: Angular web (admin/front-desk/public)
-
 ## Other
 
 - Source PRD: [PRD-02-booking-scheduling.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-02-booking-scheduling.md)

@@ -40,7 +40,6 @@ Engagement type (employee/contractor) is recorded for downstream commission/pay 
 
 ## Technical notes (high level)
 
-- Stack: .NET API (domain/services)
 - Architecture decisions: [ADR-0028](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md), [ADR-0029](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

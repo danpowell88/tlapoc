@@ -39,10 +39,6 @@ _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rew
 - **Closeout** — id, tenant_id, location_id, date, card_total, cash_total, variance, closed_by
   - _Reconciles to Xero (PRD-10)._
 
-## Technical notes (high level)
-
-- Stack: Angular web (admin/front-desk/public)
-
 ## Other
 
 - Source PRD: [PRD-06-payments-memberships-rewards.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-06-payments-memberships-rewards.md)

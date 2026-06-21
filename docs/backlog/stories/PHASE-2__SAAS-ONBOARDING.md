@@ -26,10 +26,6 @@ Placeholder (Phase 3): self-service tenant sign-up, subscription billing and per
 - **(future) Subscription** — tenant_id, plan, billing_status
   - _Phase 3._
 
-## Technical notes (high level)
-
-- Stack: .NET API (domain/services)
-
 ## Other
 
 - Source PRD: [PRD-01-foundations-tenancy.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-01-foundations-tenancy.md)

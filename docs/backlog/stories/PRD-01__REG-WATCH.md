@@ -40,7 +40,6 @@ Feeds the owner 'needs attention' digest and the compliance board.
 
 ## Technical notes (high level)
 
-- Stack: .NET API (domain/services)
 - Architecture decisions: [ADR-0029](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

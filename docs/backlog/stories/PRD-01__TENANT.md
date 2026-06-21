@@ -39,7 +39,6 @@ Every row carries tenant_id and is isolated by Postgres row-level security (ADR-
 
 ## Technical notes (high level)
 
-- Stack: .NET API (domain/services)
 - Architecture decisions: [ADR-0003](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md), [ADR-0004](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

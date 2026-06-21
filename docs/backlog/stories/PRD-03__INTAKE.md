@@ -42,10 +42,6 @@ _Prototype screen: prototype.html — Forms & consent; client-app.html intake/co
 - **IntakeResponse** — id, tenant_id, client_id, appointment_id, form_version, answers(json), submitted_at
   - _Auto-linked to the chart; contributes to the gate._
 
-## Technical notes (high level)
-
-- Stack: Flutter client app; .NET API (domain/services)
-
 ## Other
 
 - Source PRD: [PRD-03-intake-consent-gating.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-03-intake-consent-gating.md)

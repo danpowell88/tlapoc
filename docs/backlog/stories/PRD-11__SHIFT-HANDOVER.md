@@ -38,10 +38,6 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 - **ShiftHandover** — id, tenant_id, location_id, note, created_by, at
   - _Shown with outstanding Jobs (PRD-07)._
 
-## Technical notes (high level)
-
-- Stack: Angular web (admin/front-desk/public)
-
 ## Other
 
 - Source PRD: [PRD-11-facility-complaints.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-11-facility-complaints.md)

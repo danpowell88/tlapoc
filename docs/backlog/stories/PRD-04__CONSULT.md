@@ -40,7 +40,6 @@ The remote-prescriber path links an externally-conducted consult to the resultin
 
 ## Technical notes (high level)
 
-- Stack: .NET API (domain/services)
 - Architecture decisions: [ADR-0011](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

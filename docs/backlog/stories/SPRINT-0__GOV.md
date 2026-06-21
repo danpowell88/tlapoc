@@ -24,10 +24,6 @@ Repo governance: protected main requiring passing checks + a review before merge
 - [ ] Production deploys require an approval gate.
 - [ ] CODEOWNERS routes reviews for sensitive areas (auth, medicines, compliance).
 
-## Technical notes (high level)
-
-- Stack: Azure / CI-CD / IaC
-
 ## Other
 
 - Source PRD: [PRD-01-foundations-tenancy.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-01-foundations-tenancy.md)

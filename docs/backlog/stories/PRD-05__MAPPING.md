@@ -56,10 +56,6 @@ _Prototype screen: prototype.html — Charting + Clinical (Skin analysis, Body c
   - _Append-only edits after finalise; original preserved._
 - **Links / derived** — InjectionPoint.lot_id → StockItem/StockLedger (PRD-04): finalise writes an administration movement per lot, decrements on-hand, and powers lot→client recall + vial reconciliation. ChartEntry.consult_id → Consult/Prescription gate (PRD-04). Photos link to ChartEntry (PRD-05/PHOTOS). total_units = Σ InjectionPoint.units (shown live; reconciled on finalise).
 
-## Technical notes (high level)
-
-- Stack: Flutter provider app
-
 ## Other
 
 - Source PRD: [PRD-05-clinical-charting.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-05-clinical-charting.md)

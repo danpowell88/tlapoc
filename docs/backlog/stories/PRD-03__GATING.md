@@ -40,7 +40,6 @@ This is the mechanism PRD-04 (consult/Rx) and PRD-05 (charting) consume; gate de
 
 ## Technical notes (high level)
 
-- Stack: .NET API (domain/services)
 - Architecture decisions: [ADR-0008](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

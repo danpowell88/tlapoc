@@ -40,7 +40,6 @@ Built on the SPIKE-SQUARE findings; keeps the platform provider-swappable.
 
 ## Technical notes (high level)
 
-- Stack: .NET API (domain/services); Ports-and-adapters integration
 - Architecture decisions: [ADR-0007](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

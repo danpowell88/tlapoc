@@ -39,10 +39,6 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 - **ContinuityContact** — id, tenant_id, name, role, phone
   - _Surfaced when prescriber unavailable._
 
-## Technical notes (high level)
-
-- Stack: Angular web (admin/front-desk/public)
-
 ## Other
 
 - Source PRD: [PRD-11-facility-complaints.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-11-facility-complaints.md)

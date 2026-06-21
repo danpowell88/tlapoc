@@ -41,7 +41,6 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 
 ## Technical notes (high level)
 
-- Stack: Flutter client app
 - Architecture decisions: [ADR-0004](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

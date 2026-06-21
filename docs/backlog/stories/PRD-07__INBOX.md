@@ -38,7 +38,6 @@ Inbound webhooks + provider Send/Conversations APIs behind an IMessagingChannel 
 
 ## Technical notes (high level)
 
-- Stack: Ports-and-adapters integration
 - Architecture decisions: [ADR-0018](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md), [ADR-0032](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md), [ADR-0033](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

@@ -37,7 +37,6 @@ Keeps dashboards fast and avoids hammering OLTP — the foundation every report 
 
 ## Technical notes (high level)
 
-- Stack: Postgres + EF Core (RLS)
 - Architecture decisions: [ADR-0013](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md), [ADR-0010](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

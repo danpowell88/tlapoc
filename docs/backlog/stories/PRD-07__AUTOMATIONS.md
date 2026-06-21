@@ -39,10 +39,6 @@ _Prototype screen: prototype.html — Comms & growth (Inbox/Automations/Campaign
 - **Automation** — id, tenant_id, trigger, treatment_type, sequence_id, enabled(bool)
   - _UI over Sequence; respects consent for marketing._
 
-## Technical notes (high level)
-
-- Stack: Angular web (admin/front-desk/public)
-
 ## Other
 
 - Source PRD: [PRD-07-comms-reminders-recall.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-07-comms-reminders-recall.md)

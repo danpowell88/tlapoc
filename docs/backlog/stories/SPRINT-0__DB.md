@@ -31,7 +31,6 @@ Postgres + EF Core with a migrations-first pipeline and a base-entity convention
 
 ## Technical notes (high level)
 
-- Stack: Postgres + EF Core (RLS)
 - Architecture decisions: [ADR-0002](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

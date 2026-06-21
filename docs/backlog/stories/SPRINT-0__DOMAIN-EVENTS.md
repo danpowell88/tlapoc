@@ -31,7 +31,6 @@ A domain-event backbone (transactional outbox + at-least-once dispatch) modules 
 
 ## Technical notes (high level)
 
-- Stack: .NET API (domain/services); Postgres + EF Core (RLS)
 - Architecture decisions: [ADR-0013](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md), [ADR-0010](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

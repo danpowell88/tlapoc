@@ -40,10 +40,6 @@ Treatment is blocked until a current, version-matched consent is signed; changin
 - **ConsentSignature** — id, client_id, appointment_id, template_version, signed_at, signature_ref, verbal_confirmed
   - _Retained (C18); drives the treatment gate._
 
-## Technical notes (high level)
-
-- Stack: .NET API (domain/services)
-
 ## Other
 
 - Source PRD: [PRD-03-intake-consent-gating.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-03-intake-consent-gating.md)

@@ -41,7 +41,6 @@ This tamper-evidence is what makes the clinical record trustworthy in an inspect
 
 ## Technical notes (high level)
 
-- Stack: .NET API (domain/services)
 - Architecture decisions: [ADR-0010](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

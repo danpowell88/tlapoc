@@ -39,10 +39,6 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 - **WasteManifest** — id, tenant_id, stream(clinical|sharps), carrier, certificate_ref, at
   - _NSW CA+TC / QLD WTC (v2 expansion)._
 
-## Technical notes (high level)
-
-- Stack: Angular web (admin/front-desk/public)
-
 ## Other
 
 - Source PRD: [PRD-11-facility-complaints.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-11-facility-complaints.md)

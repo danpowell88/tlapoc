@@ -42,7 +42,6 @@ Every API action checks a capability server-side; an out-of-scope attempt is blo
 
 ## Technical notes (high level)
 
-- Stack: .NET API (domain/services)
 - Architecture decisions: [ADR-0017](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

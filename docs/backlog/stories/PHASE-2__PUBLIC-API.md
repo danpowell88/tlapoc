@@ -26,10 +26,6 @@ Placeholder (Phase 3): an outbound/inbound public API + webhooks for third parti
 - **(future) ApiKey / Webhook** — tenant_id, scopes, secret / url, events[]
   - _Phase 3._
 
-## Technical notes (high level)
-
-- Stack: Ports-and-adapters integration
-
 ## Other
 
 - Source PRD: [PRD-01-foundations-tenancy.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-01-foundations-tenancy.md)

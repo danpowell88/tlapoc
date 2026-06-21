@@ -24,10 +24,6 @@ Pipelines build + test the API/web/apps on every PR (blocking merge on failure) 
 - [ ] Mobile app builds produce installable artifacts for internal distribution.
 - [ ] Pipeline status is required for merge (branch protection ties in via S0-GOV).
 
-## Technical notes (high level)
-
-- Stack: Azure / CI-CD / IaC
-
 ## Other
 
 - Source PRD: [PRD-01-foundations-tenancy.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-01-foundations-tenancy.md)

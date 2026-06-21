@@ -42,7 +42,6 @@ _Prototype screen: prototype.html — Clinical → Skin analysis (scan + push-to
 
 ## Technical notes (high level)
 
-- Stack: Flutter provider app
 - Architecture decisions: [ADR-0020](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md), [ADR-0025](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

@@ -24,7 +24,6 @@ Time-boxed spike proving end-to-end auth: staff (Entra) + client (External ID) s
 
 ## Technical notes (high level)
 
-- Stack: .NET API (domain/services)
 - Architecture decisions: [ADR-0004](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 - Time-boxed spike — produce findings + a go/no-go, not production code.
 

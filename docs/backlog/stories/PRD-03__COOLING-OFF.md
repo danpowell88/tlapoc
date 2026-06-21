@@ -38,10 +38,6 @@ The payment block coordinates with PRD-06; the booking deposit/hold is suppresse
 - **CoolingOffTimer** — id, client_id, appointment_id, consent_at, eligible_at, payment_blocked(bool), second_consult_offered_at
   - _Under-18 mandatory 7d; adult optional/config._
 
-## Technical notes (high level)
-
-- Stack: .NET API (domain/services)
-
 ## Other
 
 - Source PRD: [PRD-03-intake-consent-gating.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-03-intake-consent-gating.md)

@@ -39,10 +39,6 @@ _Prototype screen: prototype.html — header search box._
 - **(index) SearchIndex** — client/appointment/invoice projections, tenant-scoped
   - _Role/financial-filtered results._
 
-## Technical notes (high level)
-
-- Stack: Angular web (admin/front-desk/public)
-
 ## Other
 
 - Source PRD: [README.md](https://github.com/danpowell88/tlapoc/blob/main/docs/ux/README.md)

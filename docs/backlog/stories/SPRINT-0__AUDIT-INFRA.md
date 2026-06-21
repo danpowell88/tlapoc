@@ -32,7 +32,6 @@ The append-only AuditEvent store + a reusable interceptor/helper so any module r
 
 ## Technical notes (high level)
 
-- Stack: Postgres + EF Core (RLS)
 - Architecture decisions: [ADR-0010](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

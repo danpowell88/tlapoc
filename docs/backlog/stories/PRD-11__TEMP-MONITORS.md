@@ -43,7 +43,6 @@ _Prototype screen: prototype.html — Operations → Temperature monitors._
 
 ## Technical notes (high level)
 
-- Stack: Angular web (admin/front-desk/public); Ports-and-adapters integration
 - Architecture decisions: [ADR-0026](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

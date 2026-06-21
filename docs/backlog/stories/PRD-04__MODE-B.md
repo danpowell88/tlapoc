@@ -29,10 +29,6 @@ Placeholder (Phase 2): a pharmacy-dispensing model where a pharmacy partner hold
 - **DispensedItem** — (reserved for Mode B)
   - _Placeholder._
 
-## Technical notes (high level)
-
-- Stack: .NET API (domain/services)
-
 ## Other
 
 - Source PRD: [PRD-04-consult-prescribing-s4.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-04-consult-prescribing-s4.md)

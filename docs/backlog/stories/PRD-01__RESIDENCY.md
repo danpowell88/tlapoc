@@ -37,7 +37,6 @@ Enforced at the infra level (Sprint-0 IAC policy) and checked by integrations (P
 
 ## Technical notes (high level)
 
-- Stack: Azure / CI-CD / IaC
 - Architecture decisions: [ADR-0016](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

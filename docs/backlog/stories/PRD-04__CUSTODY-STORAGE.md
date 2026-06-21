@@ -40,10 +40,6 @@ A custodian + exclusive-custody attestation + designated medicine-store contact 
 - **AccessLog** — id, location_id, actor_id, at, event(open|close|tamper)
   - _Feeds the optional ESP32 cabinet sensor + audit._
 
-## Technical notes (high level)
-
-- Stack: .NET API (domain/services)
-
 ## Other
 
 - Source PRD: [PRD-04-consult-prescribing-s4.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-04-consult-prescribing-s4.md)

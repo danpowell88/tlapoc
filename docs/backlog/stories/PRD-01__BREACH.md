@@ -34,10 +34,6 @@ There is a legal clock, so the workflow tracks assessment and notification dates
 
 - **DataBreach** — id, tenant_id, detected_at, description, assessment(json), eligible(bool), oaic_notified_at, individuals_notified_at, status
 
-## Technical notes (high level)
-
-- Stack: .NET API (domain/services)
-
 ## Other
 
 - Source PRD: [PRD-01-foundations-tenancy.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-01-foundations-tenancy.md)

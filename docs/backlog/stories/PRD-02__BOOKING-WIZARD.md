@@ -40,10 +40,6 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 - **Appointment** — (as CALENDAR) source=desk
   - _Created via the wizard; same entity/flow._
 
-## Technical notes (high level)
-
-- Stack: Angular web (admin/front-desk/public)
-
 ## Other
 
 - Source PRD: [PRD-02-booking-scheduling.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-02-booking-scheduling.md)

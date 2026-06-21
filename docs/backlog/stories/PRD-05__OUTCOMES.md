@@ -40,10 +40,6 @@ _Prototype screen: prototype.html — Clinical → Photography & outcomes._
 - **Outcome** — id, chart_entry_id, client_id, rating, before_photo_id, after_photo_id, revision_of?
   - _Revision links to the original treatment; feeds reporting._
 
-## Technical notes (high level)
-
-- Stack: Flutter provider app
-
 ## Other
 
 - Source PRD: [PRD-05-clinical-charting.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-05-clinical-charting.md)

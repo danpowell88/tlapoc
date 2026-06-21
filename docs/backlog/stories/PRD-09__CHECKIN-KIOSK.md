@@ -39,10 +39,6 @@ _Prototype screen: checkin.html._
 - **(reuses)** — Appointment.status -> checked_in (PRD-02); IntakeResponse/ConsentSignature (PRD-03)
   - _Kiosk session is single-client + auto-timeout._
 
-## Technical notes (high level)
-
-- Stack: Angular web (admin/front-desk/public)
-
 ## Other
 
 - Source PRD: [PRD-09-apps-client-provider.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-09-apps-client-provider.md)

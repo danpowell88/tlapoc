@@ -41,10 +41,6 @@ _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rew
 - **Payment** — id, invoice_id, tender(card|cash|giftcard), amount, token_ref?, tip, surcharge, at
   - _Appears in Closeout; posts to Xero (PRD-10)._
 
-## Technical notes (high level)
-
-- Stack: Angular web (admin/front-desk/public)
-
 ## Other
 
 - Source PRD: [PRD-06-payments-memberships-rewards.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-06-payments-memberships-rewards.md)

@@ -37,7 +37,6 @@ The shared delivery layer every reminder/aftercare/recall/marketing message goes
 
 ## Technical notes (high level)
 
-- Stack: .NET API (domain/services); Ports-and-adapters integration
 - Architecture decisions: [ADR-0012](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

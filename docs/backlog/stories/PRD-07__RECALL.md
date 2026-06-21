@@ -37,10 +37,6 @@ Integrates with treatment plans (PRD-05) and rebooking (PRD-06); keeps the book 
 - **RecallTask** — id, tenant_id, client_id, due_at, reason(interval|unbooked_plan), status, last_nudge_at
   - _Generated at interval by a scheduled job; works the worklist._
 
-## Technical notes (high level)
-
-- Stack: .NET API (domain/services)
-
 ## Other
 
 - Source PRD: [PRD-07-comms-reminders-recall.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-07-comms-reminders-recall.md)

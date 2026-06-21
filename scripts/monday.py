@@ -535,9 +535,9 @@ def ui_text(ep, s):
 
 
 def tech_blocks(ep, s):
-    stack = "; ".join(AREA_TECH[a] for a in s.get("labels", []) if a in AREA_TECH)
-    return {"stack": stack or None, "adrs": adr_links(s),
-            "spike": "type:spike" in s.get("labels", [])}
+    # Stack (.NET/Angular/Flutter/Postgres/Azure) is a platform-wide given — not repeated per story.
+    # Only story-specific technical info: the relevant ADRs and the spike caveat.
+    return {"adrs": adr_links(s), "spike": "type:spike" in s.get("labels", [])}
 
 
 # ---------------------------------------------------------------- board ops

@@ -38,10 +38,6 @@ _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Po
 - **(read) CapacityMetrics** — utilisation by practitioner/room/device, quiet_windows, by date
   - _Feeds waitlist/recall fill._
 
-## Technical notes (high level)
-
-- Stack: Angular web (admin/front-desk/public)
-
 ## Other
 
 - Source PRD: [PRD-08-reporting-compliance.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-08-reporting-compliance.md)

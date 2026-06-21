@@ -248,8 +248,6 @@ def story_desc(ep, s):
         c.append({"type": "bulletList", "content": items})
     tb = tech_blocks(ep, s)
     tech = []
-    if tb["stack"]:
-        tech.append(_p(_t("Stack: " + tb["stack"])))
     if tb["adrs"]:
         tech.append(_linked("Architecture decisions: ", tb["adrs"]))
     if tb["spike"]:

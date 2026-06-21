@@ -32,7 +32,6 @@ _Prototype screen: Non-UI / platform scaffolding — no prototype screen._
 
 ## Technical notes (high level)
 
-- Stack: Angular web (admin/front-desk/public)
 - Architecture decisions: [ADR-0005](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

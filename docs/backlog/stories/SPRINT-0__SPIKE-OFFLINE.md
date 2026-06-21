@@ -29,7 +29,6 @@ Non-UI / platform scaffolding — no prototype screen.
 
 ## Technical notes (high level)
 
-- Stack: Flutter provider app
 - Architecture decisions: [ADR-0009](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md), [ADR-0010](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md), [ADR-0015](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 - Time-boxed spike — produce findings + a go/no-go, not production code.
 

@@ -39,10 +39,6 @@ Keeps stock integrity provable and losses reported.
 - **LossReport** — id, stocktake_id, lot_id, units, kind(loss|theft), reported_at
   - _Triggerable from a discrepancy (C17)._
 
-## Technical notes (high level)
-
-- Stack: .NET API (domain/services)
-
 ## Other
 
 - Source PRD: [PRD-04-consult-prescribing-s4.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-04-consult-prescribing-s4.md)

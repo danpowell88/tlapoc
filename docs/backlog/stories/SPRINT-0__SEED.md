@@ -24,10 +24,6 @@ A one-command local environment seeded with a synthetic tenant: staff roles/cred
 - [ ] All seed data is clearly synthetic; no real client/staff/business info.
 - [ ] Seed is reproducible and used by integration/e2e tests.
 
-## Technical notes (high level)
-
-- Stack: Postgres + EF Core (RLS)
-
 ## Other
 
 - Source PRD: [PRD-01-foundations-tenancy.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-01-foundations-tenancy.md)

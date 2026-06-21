@@ -38,10 +38,6 @@ Partial-vial handling is supported (one vial may treat several patients).
 - **StockLedger** — id, lot_id, movement(receive|administer|waste|adjust), units, ref(administration_id?), at, actor_id
   - _Sum reconciles on_hand; partial-vial waste recorded; discrepancies flagged (C8)._
 
-## Technical notes (high level)
-
-- Stack: .NET API (domain/services)
-
 ## Other
 
 - Source PRD: [PRD-04-consult-prescribing-s4.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-04-consult-prescribing-s4.md)

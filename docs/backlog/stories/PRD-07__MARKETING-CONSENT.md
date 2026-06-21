@@ -40,10 +40,6 @@ Transactional reminders/aftercare are exempt and always send.
 - **SuppressionList** — tenant_id, contact, reason, at
   - _Honoured across all marketing/reward comms._
 
-## Technical notes (high level)
-
-- Stack: .NET API (domain/services)
-
 ## Other
 
 - Source PRD: [PRD-07-comms-reminders-recall.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-07-comms-reminders-recall.md)

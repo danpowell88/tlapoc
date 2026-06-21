@@ -39,10 +39,6 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 - **(reuses)** — PrivacyRequest (PRD-01) — access/correction/deletion with DSAR clock
   - _Self-service entry point; staff resolve via Governance._
 
-## Technical notes (high level)
-
-- Stack: Flutter client app
-
 ## Other
 
 - Source PRD: [PRD-09-apps-client-provider.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-09-apps-client-provider.md)

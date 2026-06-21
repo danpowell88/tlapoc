@@ -41,10 +41,6 @@ _Prototype screen: prototype.html — Clinical → Complication protocols._
 - **ComplicationResponse** — id, protocol_id, client_id, chart_entry_id, started_at, completed_at, outcome, kit_used[]
   - _Can raise an AdverseEvent + jobs._
 
-## Technical notes (high level)
-
-- Stack: Flutter provider app
-
 ## Other
 
 - Source PRD: [PRD-05-clinical-charting.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-05-clinical-charting.md)

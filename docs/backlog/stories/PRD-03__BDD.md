@@ -38,10 +38,6 @@ Which validated instrument to embed is an open question to confirm clinically.
 - **ScreeningResult** — id, tenant_id, client_id, instrument, answers(json), score, flag(bool), reviewed_by, reviewed_at
   - _Positive flag surfaced to prescriber; required before treatment (C3)._
 
-## Technical notes (high level)
-
-- Stack: .NET API (domain/services)
-
 ## Other
 
 - Source PRD: [PRD-03-intake-consent-gating.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-03-intake-consent-gating.md)

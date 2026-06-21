@@ -38,10 +38,6 @@ Under-18 status appears as an age chip on the patient header so staff always see
 - **Client** — id, tenant_id, name, dob, contacts, flags(json), under18(derived), deleted_at
   - _under18 recomputed across birthdays; soft-delete excluded from active views._
 
-## Technical notes (high level)
-
-- Stack: .NET API (domain/services)
-
 ## Other
 
 - Source PRD: [PRD-01-foundations-tenancy.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-01-foundations-tenancy.md)

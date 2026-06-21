@@ -24,7 +24,6 @@ A single, well-structured workspace for the .NET API, Angular web, two Flutter a
 
 ## Technical notes (high level)
 
-- Stack: Azure / CI-CD / IaC
 - Architecture decisions: [ADR-0005](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md), [ADR-0006](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

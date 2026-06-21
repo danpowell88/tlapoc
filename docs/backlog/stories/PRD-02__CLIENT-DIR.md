@@ -42,10 +42,6 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 - **MergeLog** — id, primary_id, merged_id, at, actor_id
   - _Audited; reversible reference._
 
-## Technical notes (high level)
-
-- Stack: Angular web (admin/front-desk/public)
-
 ## Other
 
 - Source PRD: [PRD-02-booking-scheduling.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-02-booking-scheduling.md)

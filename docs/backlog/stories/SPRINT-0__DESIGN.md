@@ -30,7 +30,6 @@ _Prototype screen: Non-UI / platform scaffolding — no prototype screen._
 
 ## Technical notes (high level)
 
-- Stack: Shared design system
 - Architecture decisions: [ADR-0006](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

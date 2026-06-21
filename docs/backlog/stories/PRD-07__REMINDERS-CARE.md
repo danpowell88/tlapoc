@@ -39,10 +39,6 @@ Keeps clients prepared and cared-for around each visit.
 - **SequenceRun** — id, sequence_id, client_id, appointment_id, step_status[]
   - _Transactional; exempt from opt-in._
 
-## Technical notes (high level)
-
-- Stack: .NET API (domain/services)
-
 ## Other
 
 - Source PRD: [PRD-07-comms-reminders-recall.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-07-comms-reminders-recall.md)

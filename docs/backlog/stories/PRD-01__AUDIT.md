@@ -37,7 +37,6 @@ This is the evidentiary spine for AHPRA/QLD Health inspections and underpins the
 
 ## Technical notes (high level)
 
-- Stack: Postgres + EF Core (RLS)
 - Architecture decisions: [ADR-0010](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

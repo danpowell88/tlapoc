@@ -37,7 +37,6 @@ Captured so the architecture stays extension-ready (ADR-0035/0036).
 
 ## Technical notes (high level)
 
-- Stack: Ports-and-adapters integration
 - Architecture decisions: [ADR-0035](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md), [ADR-0036](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

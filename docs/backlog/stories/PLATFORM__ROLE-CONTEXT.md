@@ -41,7 +41,6 @@ _Prototype screen: prototype.html — sidebar/app shell, Today dashboard, header
 
 ## Technical notes (high level)
 
-- Stack: Angular web (admin/front-desk/public)
 - Architecture decisions: [ADR-0017](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

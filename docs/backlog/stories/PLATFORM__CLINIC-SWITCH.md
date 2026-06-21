@@ -38,10 +38,6 @@ _Prototype screen: prototype.html — sidebar clinic switcher._
 - **(session) ActiveLocation** — session.location_id within tenant
   - _Scopes data + audit + reporting._
 
-## Technical notes (high level)
-
-- Stack: Angular web (admin/front-desk/public)
-
 ## Other
 
 - Source PRD: [README.md](https://github.com/danpowell88/tlapoc/blob/main/docs/ux/README.md)

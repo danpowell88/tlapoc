@@ -42,10 +42,6 @@ _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Po
 - **RegisterExport** — type(s4_register|lot_recall|breach|complaints), generated_at, ref
   - _Exportable evidence (C8/C22/C24)._
 
-## Technical notes (high level)
-
-- Stack: Angular web (admin/front-desk/public)
-
 ## Other
 
 - Source PRD: [PRD-08-reporting-compliance.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-08-reporting-compliance.md)

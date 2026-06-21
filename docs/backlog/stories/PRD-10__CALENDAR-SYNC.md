@@ -40,7 +40,6 @@ Gives practitioners one source of truth for their time.
 
 ## Technical notes (high level)
 
-- Stack: Ports-and-adapters integration
 - Architecture decisions: [ADR-0012](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

@@ -40,10 +40,6 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 - **Client (aggregate view)** — joins Client + IntakeResponse + ConsentSignature + Photo + Appointment + Membership + AccountBalance + Complaint
   - _Read aggregation; each part owned by its module. RBAC filters fields._
 
-## Technical notes (high level)
-
-- Stack: Angular web (admin/front-desk/public)
-
 ## Other
 
 - Source PRD: [PRD-02-booking-scheduling.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-02-booking-scheduling.md)

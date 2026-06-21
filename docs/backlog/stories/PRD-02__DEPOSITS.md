@@ -28,7 +28,6 @@ Placeholder (Phase 2): an opt-in booking deposit / card-on-file hold to reduce n
 
 ## Technical notes (high level)
 
-- Stack: .NET API (domain/services)
 - Architecture decisions: [ADR-0036](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

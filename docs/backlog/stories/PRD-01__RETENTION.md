@@ -37,10 +37,6 @@ A transfer log records records handed to another provider.
   - _Immutable + audited._
 - **TransferLog** — id, record_ref, to_provider, at
 
-## Technical notes (high level)
-
-- Stack: .NET API (domain/services)
-
 ## Other
 
 - Source PRD: [PRD-01-foundations-tenancy.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-01-foundations-tenancy.md)

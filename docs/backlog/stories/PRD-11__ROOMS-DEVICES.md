@@ -40,7 +40,6 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 
 ## Technical notes (high level)
 
-- Stack: Angular web (admin/front-desk/public)
 - Architecture decisions: [ADR-0026](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

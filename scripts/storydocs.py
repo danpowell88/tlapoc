@@ -97,8 +97,6 @@ def write_story(ep, s):
     # Technical notes — only if there's something to say
     tb = tech_blocks(ep, s)
     tech = []
-    if tb["stack"]:
-        tech.append(f"- Stack: {tb['stack']}")
     if tb["adrs"]:
         tech.append(f"- Architecture decisions: {md_links(tb['adrs'])}")
     if tb["spike"]:

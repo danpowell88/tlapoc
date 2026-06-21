@@ -42,7 +42,6 @@ _Prototype screen: prototype.html — Comms & growth (Inbox/Automations/Campaign
 
 ## Technical notes (high level)
 
-- Stack: Angular web (admin/front-desk/public)
 - Architecture decisions: [ADR-0033](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

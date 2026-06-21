@@ -30,10 +30,6 @@ Future — not built in the prototype (some shown as concept cards in Settings �
 - **(future) TenantTheme** — tenant_id, tokens(json)
   - _Design system already token-driven._
 
-## Technical notes (high level)
-
-- Stack: Shared design system
-
 ## Other
 
 - Source PRD: [PRD-01-foundations-tenancy.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-01-foundations-tenancy.md)

@@ -37,10 +37,6 @@ Closes the medicines loop alongside reconciliation and stocktake.
 - **StockDestruction** — id, lot_id, units, reason, pathway(RUM|licensed), certificate_ref, at, actor_id
   - _Partial-vial supported; immutable + audited (C16)._
 
-## Technical notes (high level)
-
-- Stack: .NET API (domain/services)
-
 ## Other
 
 - Source PRD: [PRD-04-consult-prescribing-s4.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-04-consult-prescribing-s4.md)

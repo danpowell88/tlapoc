@@ -37,10 +37,6 @@ Keeps loyalty profitable and compliant; rule config is owner-gated.
 - **RewardRule.value_cap / eligible_items** — + reporting: reward_cost vs retention
   - _Owner-gated; reward comms consented-only._
 
-## Technical notes (high level)
-
-- Stack: .NET API (domain/services)
-
 ## Other
 
 - Source PRD: [PRD-06-payments-memberships-rewards.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-06-payments-memberships-rewards.md)

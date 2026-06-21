@@ -24,10 +24,6 @@ Structured logging, distributed tracing (correlation ids across web/app/API), ke
 - [ ] Alerts fire for error-rate and availability thresholds.
 - [ ] Audit/security-relevant signals are distinguishable to feed the breach workflow (PRD-01).
 
-## Technical notes (high level)
-
-- Stack: Azure / CI-CD / IaC
-
 ## Other
 
 - Source PRD: [PRD-01-foundations-tenancy.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-01-foundations-tenancy.md)

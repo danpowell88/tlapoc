@@ -40,10 +40,6 @@ Excursion history is retained and visible — evidence that cold-chain held for 
 - **Excursion** — id, location_id, started_at, ended_at, min, max, affected_lots[], action(quarantine)
   - _Raises alert + job; flags stock (C13)._
 
-## Technical notes (high level)
-
-- Stack: .NET API (domain/services); Ports-and-adapters integration
-
 ## Other
 
 - Source PRD: [PRD-04-consult-prescribing-s4.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-04-consult-prescribing-s4.md)

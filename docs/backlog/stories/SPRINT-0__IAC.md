@@ -30,7 +30,6 @@ dev/staging/prod provisioned as code, all pinned to Australia East so data resid
 
 ## Technical notes (high level)
 
-- Stack: Azure / CI-CD / IaC
 - Architecture decisions: [ADR-0001](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md), [ADR-0016](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

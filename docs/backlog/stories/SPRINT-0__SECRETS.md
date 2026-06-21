@@ -24,10 +24,6 @@ A managed secret store (Key Vault) wired into each environment with typed, envir
 - [ ] Config is environment-specific and typed; missing required config fails fast at startup.
 - [ ] Rotating a secret requires no code change.
 
-## Technical notes (high level)
-
-- Stack: Azure / CI-CD / IaC
-
 ## Other
 
 - Source PRD: [PRD-01-foundations-tenancy.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-01-foundations-tenancy.md)

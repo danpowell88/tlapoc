@@ -41,7 +41,6 @@ _Prototype screen: prototype.html — Clinical → Body contouring (body map)._
 
 ## Technical notes (high level)
 
-- Stack: Flutter provider app
 - Architecture decisions: [ADR-0025](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other

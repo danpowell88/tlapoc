@@ -37,10 +37,6 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 - **FacilityAccreditation** — id, tenant_id, location_id, scheme, status, expiry, evidence_ref
   - _Expiry alerts; blocking vs advisory configurable._
 
-## Technical notes (high level)
-
-- Stack: Angular web (admin/front-desk/public)
-
 ## Other
 
 - Source PRD: [PRD-11-facility-complaints.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-11-facility-complaints.md)

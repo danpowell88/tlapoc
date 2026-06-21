@@ -31,10 +31,6 @@ Feature flags + a typed per-tenant configuration store so features ship dark and
 - **TenantConfig** — tenant_id, key, value(typed)
   - _e.g. cooling_off_days, s4_naming, modalities._
 
-## Technical notes (high level)
-
-- Stack: .NET API (domain/services)
-
 ## Other
 
 - Source PRD: [PRD-01-foundations-tenancy.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-01-foundations-tenancy.md)

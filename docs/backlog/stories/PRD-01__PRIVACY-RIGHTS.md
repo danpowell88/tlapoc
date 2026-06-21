@@ -40,10 +40,6 @@ Self-service lives in the client app privacy area; staff handle requests via Gov
 - **ConsentToCollect** — id, client_id, notice_version, granted_at
   - _Captured at sign-up._
 
-## Technical notes (high level)
-
-- Stack: .NET API (domain/services)
-
 ## Other
 
 - Source PRD: [PRD-01-foundations-tenancy.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-01-foundations-tenancy.md)

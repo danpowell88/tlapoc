@@ -24,10 +24,6 @@ Test harnesses for API (unit + integration against a real Postgres with RLS), we
 - [ ] Coverage threshold enforced in CI.
 - [ ] A documented convention for writing 'compliance invariant' tests (gate must block) exists.
 
-## Technical notes (high level)
-
-- Stack: .NET API (domain/services)
-
 ## Other
 
 - Source PRD: [PRD-01-foundations-tenancy.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-01-foundations-tenancy.md)

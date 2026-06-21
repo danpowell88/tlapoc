@@ -39,10 +39,6 @@ _Prototype screen: client-app.html — Report a concern; prototype Follow-ups._
 - **Concern** — id, tenant_id, client_id, treatment_ref, body, photo_ref?, status, raised_at
   - _Raises a Job (PRD-07); escalate -> AdverseEvent/Complaint._
 
-## Technical notes (high level)
-
-- Stack: Flutter client app
-
 ## Other
 
 - Source PRD: [PRD-09-apps-client-provider.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-09-apps-client-provider.md)

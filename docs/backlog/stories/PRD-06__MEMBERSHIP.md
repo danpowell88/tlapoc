@@ -40,10 +40,6 @@ The recurring-revenue engine; autopay built on the Square recurring spike.
 - **DunningAttempt** — id, membership_id, attempt, at, result
   - _Retry/recover on failed charge._
 
-## Technical notes (high level)
-
-- Stack: .NET API (domain/services)
-
 ## Other
 
 - Source PRD: [PRD-06-payments-memberships-rewards.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-06-payments-memberships-rewards.md)
