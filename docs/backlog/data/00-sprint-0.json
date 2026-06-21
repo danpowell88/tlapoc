@@ -1,0 +1,431 @@
+{
+  "epic": {
+    "key": "SPRINT-0",
+    "title": "Sprint 0 — Foundations & setup",
+    "milestone": "M0",
+    "phase": "0",
+    "prd": "docs/prds/PRD-01-foundations-tenancy.md",
+    "summary": "Everything the team needs in place before feature work begins: repositories and solution structure, CI/CD, cloud environments in Australia East, identity wiring for staff and clients, the Postgres + RLS data baseline, the API/web/app shells, a shared design system, observability, a security baseline, and the four de-risk spikes called out in the docs index. Nothing here ships clinical value on its own — it makes M1+ possible and safe.",
+    "labels": ["type:epic", "SPRINT-0", "phase:0", "area:infra"]
+  },
+  "stories": [
+    {
+      "key": "REPO",
+      "title": "Monorepo & solution scaffolding",
+      "context": "A single, well-structured repo (or workspace) for the .NET API, Angular web, two Flutter apps and shared packages keeps versioning, CI and code-sharing sane from day one.",
+      "as_a": "developer",
+      "i_want": "a scaffolded repo with the API, web, app and shared-package folders, a clean .NET solution, an Angular workspace and a Flutter workspace wired together",
+      "so_that": "everyone builds against one consistent structure and shared code has an obvious home",
+      "acceptance": [
+        "Repo layout documented in a top-level README (api/, web/, apps/, packages/, infra/, scripts/).",
+        ".NET solution builds; Angular workspace serves; both Flutter app shells run on a simulator.",
+        "Shared design-system and API-client packages exist as empty-but-buildable libraries.",
+        "Editorconfig, formatter and linter configs committed and enforced locally."
+      ],
+      "refs": {"adr": ["0005", "0006"]},
+      "labels": ["type:chore", "SPRINT-0", "phase:0", "area:infra"],
+      "priority": "P0"
+    },
+    {
+      "key": "CICD",
+      "title": "CI/CD pipelines (build, test, deploy)",
+      "context": "Continuous build/test on every PR and automated deploys to environments prevent integration drift and make the compliance posture (tests, scans) enforceable.",
+      "as_a": "developer",
+      "i_want": "pipelines that build and test the API, web and apps on every PR and deploy to dev/staging on merge",
+      "so_that": "broken code is caught early and releases are repeatable",
+      "acceptance": [
+        "PR pipeline runs build + unit/integration tests for API, web and apps and blocks merge on failure.",
+        "Merge to main deploys API + web to the dev environment automatically.",
+        "Mobile app builds produce installable artifacts for internal distribution.",
+        "Pipeline status is required for merge (branch protection ties in via S0-GOV)."
+      ],
+      "labels": ["type:chore", "SPRINT-0", "phase:0", "area:infra"],
+      "priority": "P0",
+      "depends_on": ["SPRINT-0/REPO"]
+    },
+    {
+      "key": "IAC",
+      "title": "Cloud environments & infrastructure-as-code (AU East)",
+      "context": "All PII/PHI must resolve to Australia East (C21/ADR-0016). Defining dev/staging/prod as code makes residency, isolation and reproducibility provable.",
+      "as_a": "platform engineer",
+      "i_want": "dev, staging and prod environments provisioned via IaC, all pinned to Australia East",
+      "so_that": "data residency is guaranteed and environments are reproducible",
+      "acceptance": [
+        "IaC provisions compute, Postgres, blob storage and networking in Australia East for each environment.",
+        "A non-AU region for any PII/PHI resource fails the IaC policy check.",
+        "Environments are isolated (separate data stores, secrets, identities).",
+        "Tear-down/re-create of a non-prod environment is a single command."
+      ],
+      "refs": {"compliance": ["C21"], "adr": ["0001", "0016"]},
+      "labels": ["type:chore", "SPRINT-0", "phase:0", "area:infra", "compliance"],
+      "priority": "P0"
+    },
+    {
+      "key": "DB",
+      "title": "Postgres + EF Core baseline & migrations",
+      "context": "A migrations-first data layer with a base entity convention (tenant_id, audit columns) underpins every module.",
+      "as_a": "backend developer",
+      "i_want": "a Postgres database with EF Core, a migration pipeline and base entity/columns conventions",
+      "so_that": "every module adds schema consistently and migrations run automatically per environment",
+      "acceptance": [
+        "EF Core connects to Postgres; migrations apply automatically on deploy.",
+        "Base entity convention includes tenant_id and created/updated audit columns.",
+        "A sample entity round-trips through repository + migration in tests.",
+        "Local dev uses a containerised Postgres seeded by S0-SEED."
+      ],
+      "refs": {"adr": ["0002"]},
+      "labels": ["type:chore", "SPRINT-0", "phase:0", "area:data"],
+      "priority": "P0",
+      "depends_on": ["SPRINT-0/IAC"]
+    },
+    {
+      "key": "RLS",
+      "title": "Row-level-security multi-tenancy baseline",
+      "context": "Tenant isolation is enforced in the database via RLS, with the API setting tenant context per request (ADR-0003). This is the single most important safety property of the data layer.",
+      "as_a": "platform engineer",
+      "i_want": "Postgres RLS policies keyed on tenant_id, with EF Core setting the session tenant context on every request",
+      "so_that": "a query can never return another tenant's rows, even on a developer mistake",
+      "acceptance": [
+        "RLS policies are applied to all tenant-scoped tables.",
+        "API middleware sets the session tenant from the authenticated principal on every request.",
+        "An integration test proves Tenant A cannot read Tenant B rows and a cross-tenant id returns not-found.",
+        "Bypassing tenant context (e.g. background jobs) uses an explicit, audited elevated path."
+      ],
+      "refs": {"adr": ["0003"], "prd_ac": ["PRD-01 AC2"]},
+      "labels": ["type:chore", "SPRINT-0", "phase:0", "area:data", "compliance"],
+      "priority": "P0",
+      "depends_on": ["SPRINT-0/DB", "SPRINT-0/SPIKE-RLS"]
+    },
+    {
+      "key": "AUTH-STAFF",
+      "title": "Staff identity: Entra ID SSO + MFA wiring",
+      "context": "Staff sign in with the clinic's existing Microsoft 365 accounts via Entra ID with MFA (ADR-0004). This is the plumbing; the RBAC/scope rules are PRD-01.",
+      "as_a": "staff member",
+      "i_want": "to sign in to the web and provider app with my Microsoft 365 account and MFA",
+      "so_that": "I use one secure corporate identity and no extra password",
+      "acceptance": [
+        "Entra ID app registration configured; web + provider app complete SSO + MFA.",
+        "Tokens carry the tenant and a stable user id usable by the API.",
+        "Sign-out and token refresh work across web and app.",
+        "Sessions are scoped to a single tenant."
+      ],
+      "refs": {"adr": ["0004"], "prd_ac": ["PRD-01 AC3"]},
+      "labels": ["type:chore", "SPRINT-0", "phase:0", "area:backend"],
+      "priority": "P0",
+      "depends_on": ["SPRINT-0/SPIKE-AUTH"]
+    },
+    {
+      "key": "AUTH-CLIENT",
+      "title": "Client identity: Entra External ID (social / email / OTP) wiring",
+      "context": "Clients create accounts with Google/Apple, email+password, or email/SMS OTP via Entra External ID (CIAM).",
+      "as_a": "client",
+      "i_want": "to create an account and sign in with social login, email+password, or a one-time code",
+      "so_that": "I can access booking, intake and my records easily and securely",
+      "acceptance": [
+        "Entra External ID configured for social, local (email+password) and OTP flows.",
+        "Client app and public web complete each of the three sign-in methods.",
+        "Client identities are tenant-scoped and distinct from staff identities.",
+        "Account recovery (password reset / OTP resend) works."
+      ],
+      "refs": {"adr": ["0004"], "prd_ac": ["PRD-01 AC3"]},
+      "labels": ["type:chore", "SPRINT-0", "phase:0", "area:backend"],
+      "priority": "P0",
+      "depends_on": ["SPRINT-0/SPIKE-AUTH"]
+    },
+    {
+      "key": "API",
+      "title": ".NET API skeleton: architecture, tenant context, error model",
+      "context": "A consistent API skeleton (clean/layered architecture, request pipeline, problem-details errors, pagination) means every feature module plugs in the same way.",
+      "as_a": "backend developer",
+      "i_want": "an API skeleton with auth middleware, tenant-context resolution, a standard error/response model and health checks",
+      "so_that": "feature modules are added consistently and cross-cutting concerns are solved once",
+      "acceptance": [
+        "Auth middleware validates Entra tokens (staff + client) and resolves tenant context for RLS.",
+        "Standard problem-details error responses and consistent pagination/filtering conventions.",
+        "Health/readiness endpoints and structured request logging in place.",
+        "A vertical-slice sample endpoint demonstrates the full pattern end-to-end."
+      ],
+      "refs": {"adr": ["0005"]},
+      "labels": ["type:chore", "SPRINT-0", "phase:0", "area:backend"],
+      "priority": "P0",
+      "depends_on": ["SPRINT-0/RLS", "SPRINT-0/AUTH-STAFF"]
+    },
+    {
+      "key": "AUDIT-INFRA",
+      "title": "Append-only audit infrastructure baseline",
+      "context": "C10/ADR-0010 require an immutable record of who read/changed clinical, medicines and PII data. Building the append-only AuditEvent plumbing now lets every later module just emit events.",
+      "as_a": "platform engineer",
+      "i_want": "an append-only AuditEvent store and a simple API/interceptor for modules to record reads and writes",
+      "so_that": "auditability is a built-in default rather than a per-feature afterthought",
+      "acceptance": [
+        "AuditEvent table is append-only (no update/delete path) and carries who/what/when/tenant.",
+        "A reusable interceptor/helper records create/update/read for annotated entities or endpoints.",
+        "Events are queryable and exportable (full register UI is PRD-01/PRD-08).",
+        "Tampering attempts (update/delete) are rejected at the data layer."
+      ],
+      "refs": {"compliance": ["C10"], "adr": ["0010"]},
+      "labels": ["type:chore", "SPRINT-0", "phase:0", "area:data", "compliance"],
+      "priority": "P0",
+      "depends_on": ["SPRINT-0/DB"]
+    },
+    {
+      "key": "OPENAPI",
+      "title": "OpenAPI contract + typed client generation",
+      "context": "Generating typed clients for Angular and Flutter from the API's OpenAPI spec keeps the three surfaces in lock-step and removes hand-written DTO drift (ADR-0006).",
+      "as_a": "developer",
+      "i_want": "the API to publish an OpenAPI document and CI to generate typed clients for web and Flutter",
+      "so_that": "front-ends always match the API contract",
+      "acceptance": [
+        "API serves a versioned OpenAPI document.",
+        "Typed clients are generated for Angular and Flutter and published to the shared packages.",
+        "Client generation runs in CI and fails on a breaking contract change without a version bump.",
+        "The sample endpoint is consumed via the generated client in both web and app."
+      ],
+      "refs": {"adr": ["0006"]},
+      "labels": ["type:chore", "SPRINT-0", "phase:0", "area:backend"],
+      "priority": "P1",
+      "depends_on": ["SPRINT-0/API"]
+    },
+    {
+      "key": "WEB-SHELL",
+      "title": "Angular web shell: routing, auth guard, layout",
+      "context": "The admin/front-desk web app needs a shell — auth guard, role-aware nav, layout — before feature screens land.",
+      "as_a": "front-end developer",
+      "i_want": "an Angular shell with the Entra auth guard, top-level routing, a role-aware navigation frame and the design-system theme applied",
+      "so_that": "feature screens drop into a consistent, authenticated layout",
+      "acceptance": [
+        "Unauthenticated users are redirected to Entra sign-in; authenticated users land on a shell.",
+        "Navigation is driven by capabilities/role (placeholder until PRD-01 RBAC lands).",
+        "Design-system theme + tokens applied globally.",
+        "A sample feature route renders inside the shell using the generated API client."
+      ],
+      "refs": {"adr": ["0005"]},
+      "labels": ["type:chore", "SPRINT-0", "phase:0", "area:web"],
+      "priority": "P1",
+      "depends_on": ["SPRINT-0/AUTH-STAFF", "SPRINT-0/DESIGN"]
+    },
+    {
+      "key": "DESIGN",
+      "title": "Design system / shared component library + tokens",
+      "context": "One design system (tokens, components) shared across web and the two Flutter apps delivers the 'fast and modern, thumb-first' UX the docs demand and avoids re-styling per surface.",
+      "as_a": "designer/developer",
+      "i_want": "a shared set of design tokens and core components (buttons, inputs, banners, the blocked-action banner, chips, tables)",
+      "so_that": "all surfaces look consistent and the compliance UX patterns are reusable",
+      "acceptance": [
+        "Tokens (colour, type, spacing) defined once and consumed by web + Flutter.",
+        "Core components include the cross-cutting patterns from UX §4 (blocked-action banner, consent/age chips, S4 guardrail tag, offline indicator).",
+        "Components are documented in a simple gallery/storybook.",
+        "Accessibility basics (contrast, focus, hit-target size) verified for core components."
+      ],
+      "refs": {"adr": ["0006"]},
+      "labels": ["type:chore", "SPRINT-0", "phase:0", "area:design"],
+      "priority": "P1"
+    },
+    {
+      "key": "FLUTTER",
+      "title": "Flutter app shells (client + provider) + shared packages",
+      "context": "One Flutter codebase, two flavours (client, provider), sharing auth, the API client and the design system (ADR-0006).",
+      "as_a": "mobile developer",
+      "i_want": "client and provider app shells with bottom-tab navigation, shared auth/API/design packages and secure token storage",
+      "so_that": "the two apps are built from one codebase with consistent plumbing",
+      "acceptance": [
+        "Client app shell has the Home/Book/My care/Membership/Account tabs; provider app shell has Schedule/Patient/Medicines/Tasks tabs (empty screens).",
+        "Both apps sign in (client = External ID, provider = Entra) and call the sample endpoint.",
+        "Auth tokens stored in secure storage; design-system theme applied.",
+        "Builds are produced by CI for internal distribution."
+      ],
+      "refs": {"adr": ["0004", "0006"]},
+      "labels": ["type:chore", "SPRINT-0", "phase:0", "area:client-app", "area:provider-app"],
+      "priority": "P1",
+      "depends_on": ["SPRINT-0/AUTH-STAFF", "SPRINT-0/AUTH-CLIENT", "SPRINT-0/DESIGN"]
+    },
+    {
+      "key": "SECRETS",
+      "title": "Secrets & configuration management",
+      "context": "Connection strings, provider keys (Square, SMS, Xero) and signing secrets must live in a managed vault, never in code or config files.",
+      "as_a": "platform engineer",
+      "i_want": "a managed secret store (Key Vault) wired into each environment and a typed config story for the API and apps",
+      "so_that": "no secret is ever committed and rotation is possible",
+      "acceptance": [
+        "API and pipelines read secrets from the vault per environment; none in source control.",
+        "A secret-scanning check fails the build on a committed secret.",
+        "Config is environment-specific and typed; missing required config fails fast at startup.",
+        "Rotating a secret requires no code change."
+      ],
+      "labels": ["type:chore", "SPRINT-0", "phase:0", "area:infra"],
+      "priority": "P1",
+      "depends_on": ["SPRINT-0/IAC"]
+    },
+    {
+      "key": "OBS",
+      "title": "Observability: logging, tracing, metrics, alerting",
+      "context": "You cannot run a compliance-critical platform blind. Centralised logs, distributed traces, metrics and alerting are needed from the first deploy.",
+      "as_a": "platform engineer",
+      "i_want": "structured logging, distributed tracing, key metrics dashboards and alerting wired across API and apps",
+      "so_that": "we can diagnose issues and detect incidents (feeding the breach workflow) quickly",
+      "acceptance": [
+        "Structured logs and traces flow to a central store with correlation ids across web/app/API.",
+        "Dashboards cover request rate, latency, errors and key resource health.",
+        "Alerts fire for error-rate and availability thresholds.",
+        "Audit/security-relevant signals are distinguishable to feed the breach workflow (PRD-01)."
+      ],
+      "labels": ["type:chore", "SPRINT-0", "phase:0", "area:infra"],
+      "priority": "P1",
+      "depends_on": ["SPRINT-0/API"]
+    },
+    {
+      "key": "SEC-BASE",
+      "title": "Security baseline: encryption, headers, dependency & secret scanning",
+      "context": "Encryption in transit + at rest, least-privilege, secure headers and automated scanning establish the security posture the compliance docs assume (C10/C21).",
+      "as_a": "security-minded engineer",
+      "i_want": "TLS everywhere, encryption at rest, hardened HTTP headers, least-privilege identities and dependency/secret/code scanning in CI",
+      "so_that": "the platform meets its baseline security obligations from day one",
+      "acceptance": [
+        "All traffic is TLS; data stores are encrypted at rest.",
+        "Security headers (CSP, HSTS, etc.) applied to web; CORS locked down.",
+        "Dependency, secret and SAST scans run in CI and gate merges on high-severity findings.",
+        "Service identities follow least-privilege; no shared admin credentials."
+      ],
+      "refs": {"compliance": ["C10", "C21"], "adr": ["0016"]},
+      "labels": ["type:chore", "SPRINT-0", "phase:0", "area:infra", "compliance"],
+      "priority": "P0",
+      "depends_on": ["SPRINT-0/CICD"]
+    },
+    {
+      "key": "TEST",
+      "title": "Test strategy & harness + quality gates",
+      "context": "A clinical platform needs a serious automated-test culture: unit, integration (incl. RLS/auth/audit invariants) and end-to-end, with coverage gates.",
+      "as_a": "developer",
+      "i_want": "test harnesses for API (unit + integration), web and apps, plus an e2e smoke suite and coverage gates in CI",
+      "so_that": "compliance invariants are protected by tests and regressions are caught automatically",
+      "acceptance": [
+        "Unit + integration test projects exist for the API (integration tests run against a real Postgres with RLS).",
+        "Web and app unit/widget test setups in place; an e2e smoke test covers sign-in + the sample flow.",
+        "Coverage threshold enforced in CI.",
+        "A documented convention for writing 'compliance invariant' tests (gate must block) exists."
+      ],
+      "labels": ["type:chore", "SPRINT-0", "phase:0", "area:backend"],
+      "priority": "P1",
+      "depends_on": ["SPRINT-0/CICD", "SPRINT-0/RLS"]
+    },
+    {
+      "key": "SEED",
+      "title": "Synthetic seed data & local dev environment",
+      "context": "Realistic synthetic data (clinic, staff with credentials, clients, services incl. S4/non-S4, stock) lets every module be developed and demoed without real PII. All data must stay synthetic (project rule).",
+      "as_a": "developer",
+      "i_want": "a one-command local environment seeded with synthetic tenant, staff, clients, catalogue and stock",
+      "so_that": "I can run and demo any module locally without touching real data",
+      "acceptance": [
+        "A script spins up Postgres + API + web locally and seeds a synthetic tenant.",
+        "Seed covers staff roles/credentials, clients (incl. an under-18), services flagged S4/non-S4, and stock lots.",
+        "All seed data is clearly synthetic; no real client/staff/business info.",
+        "Seed is reproducible and used by integration/e2e tests."
+      ],
+      "labels": ["type:chore", "SPRINT-0", "phase:0", "area:data"],
+      "priority": "P2",
+      "depends_on": ["SPRINT-0/DB"]
+    },
+    {
+      "key": "GOV",
+      "title": "Repo governance: branch protection, PR & env protection",
+      "context": "Branch protection, required checks, PR templates and environment protection rules keep the main branch deployable and reviewable.",
+      "as_a": "maintainer",
+      "i_want": "protected main with required status checks and reviews, PR/issue templates, and protected prod deployments",
+      "so_that": "quality gates can't be bypassed and changes are traceable",
+      "acceptance": [
+        "main requires passing checks + at least one review before merge.",
+        "PR and issue templates committed (PR template references the backlog item).",
+        "Production deploys require an approval gate.",
+        "CODEOWNERS routes reviews for sensitive areas (auth, medicines, compliance)."
+      ],
+      "labels": ["type:chore", "SPRINT-0", "phase:0", "area:infra"],
+      "priority": "P2",
+      "depends_on": ["SPRINT-0/CICD"]
+    },
+    {
+      "key": "SPIKE-AUTH",
+      "title": "Spike — Entra External ID ↔ Flutter ↔ .NET auth",
+      "context": "End-to-end auth across Entra (staff), Entra External ID (clients), Flutter and .NET is novel enough to de-risk before committing the auth wiring stories.",
+      "as_a": "engineer",
+      "i_want": "a time-boxed spike proving staff + client sign-in from Flutter and web through to authorised .NET API calls",
+      "so_that": "the auth wiring stories proceed on a proven approach",
+      "acceptance": [
+        "A throwaway prototype completes Entra (staff) and External ID (client) sign-in from Flutter and web.",
+        "An authorised call reaches a .NET endpoint with tenant + role claims usable for RLS/RBAC.",
+        "Findings, library choices and gotchas written up; risks/decisions captured (ADR if needed).",
+        "Outcome explicitly feeds AUTH-STAFF / AUTH-CLIENT."
+      ],
+      "refs": {"adr": ["0004"]},
+      "labels": ["type:spike", "spike", "SPRINT-0", "phase:0", "area:backend"],
+      "priority": "P0"
+    },
+    {
+      "key": "SPIKE-RLS",
+      "title": "Spike — Postgres RLS with EF Core session context",
+      "context": "Setting the per-request tenant for RLS through EF Core's connection/session lifecycle has known sharp edges (pooling, background jobs). Prove it before building on it.",
+      "as_a": "engineer",
+      "i_want": "a spike proving EF Core reliably sets the Postgres session tenant for RLS under connection pooling and async",
+      "so_that": "the RLS baseline is built on a verified pattern",
+      "acceptance": [
+        "Prototype shows RLS isolation holds across pooled connections and async requests.",
+        "A safe elevated/bypass path for background jobs is demonstrated and audited.",
+        "Performance impact measured and acceptable.",
+        "Pattern documented and feeds SPRINT-0/RLS."
+      ],
+      "refs": {"adr": ["0002", "0003"]},
+      "labels": ["type:spike", "spike", "SPRINT-0", "phase:0", "area:data"],
+      "priority": "P0"
+    },
+    {
+      "key": "SPIKE-SQUARE",
+      "title": "Spike — Square AU card-on-file recurring autopay",
+      "context": "Membership autopay depends on Square AU supporting tokenised card-on-file recurring charges with dunning — flagged 🔬 in the docs. De-risk before committing PRD-06 memberships.",
+      "as_a": "engineer",
+      "i_want": "a spike confirming Square AU can tokenise a card and run recurring charges with failure/dunning handling",
+      "so_that": "the membership autopay design is viable (or an alternative is chosen early)",
+      "acceptance": [
+        "Prototype tokenises a test card and runs a scheduled recurring charge in Square AU sandbox.",
+        "Failed-charge / retry behaviour observed; dunning approach outlined.",
+        "PCI posture confirmed: no PAN stored, only provider tokens (ADR-0007).",
+        "Go/no-go + findings recorded; feeds PRD-06 memberships."
+      ],
+      "refs": {"adr": ["0007"]},
+      "labels": ["type:spike", "spike", "SPRINT-0", "phase:0", "area:integration"],
+      "priority": "P1"
+    },
+    {
+      "key": "SPIKE-CANVAS",
+      "title": "Spike — Flutter injection-mapping canvas",
+      "context": "The injection-mapping canvas is the hero clinical screen and the highest app risk (tap-to-add + drag points on a facial diagram/photo, per-point metadata). Prove the approach before PRD-05.",
+      "as_a": "mobile engineer",
+      "i_want": "a spike of the Flutter canvas: tap-to-add and drag injection points over a facial diagram and a photo, each holding metadata",
+      "so_that": "PRD-05 charting builds on a proven, performant canvas",
+      "acceptance": [
+        "Prototype supports tap-to-add, drag-to-move and per-point metadata over both a diagram and an image.",
+        "Performs smoothly on a mid-range device with many points.",
+        "Coordinate model survives image scaling/rotation and is persistable.",
+        "Approach documented; feeds PRD-05 mapping stories."
+      ],
+      "refs": {"adr": ["0006"]},
+      "labels": ["type:spike", "spike", "SPRINT-0", "phase:0", "area:provider-app"],
+      "priority": "P1"
+    },
+    {
+      "key": "SPIKE-OFFLINE",
+      "title": "Spike — offline queue & sync integrity (provider app)",
+      "context": "Treatment rooms drop Wi-Fi; the provider app must queue notes/photos encrypted and sync without loss, with server-side finalisation (ADR-0015/0010). De-risk before PRD-05/09.",
+      "as_a": "mobile engineer",
+      "i_want": "a spike proving an encrypted local queue for drafts/photos that syncs with no data loss and last-write-wins drafts",
+      "so_that": "the offline-tolerant charting design is viable",
+      "acceptance": [
+        "Prototype queues drafts + a photo offline (encrypted) and syncs cleanly on reconnect with no loss.",
+        "Conflict handling (last-write-wins for drafts) demonstrated; finalisation is server-side.",
+        "Photos never persist on device beyond a transient sync cache (C14/ADR-0009).",
+        "Approach documented; feeds PRD-05 / PRD-09."
+      ],
+      "refs": {"compliance": ["C14"], "adr": ["0009", "0010", "0015"]},
+      "labels": ["type:spike", "spike", "SPRINT-0", "phase:0", "area:provider-app"],
+      "priority": "P1"
+    }
+  ]
+}

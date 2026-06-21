@@ -1,0 +1,225 @@
+{
+  "epic": {
+    "key": "PRD-01",
+    "title": "Foundations & tenancy (auth, RBAC, audit, data model)",
+    "milestone": "M1",
+    "phase": "0",
+    "prd": "docs/prds/PRD-01-foundations-tenancy.md",
+    "summary": "The domain backbone on top of the Sprint 0 plumbing: tenant provisioning, RBAC + scope-of-practice enforcement, the credential/PII compliance gate that decides who can inject, the exportable audit trail, retention & destruction, the data-breach workflow, and client privacy rights. Everything else builds on this.",
+    "labels": ["type:epic", "PRD-01", "phase:0", "area:backend", "compliance"]
+  },
+  "stories": [
+    {
+      "key": "TENANT",
+      "title": "Tenant provisioning & staff invitation",
+      "context": "An owner provisions their clinic (tenant) and invites staff to sign in with existing Microsoft 365 accounts.",
+      "as_a": "owner",
+      "i_want": "to provision my clinic and invite staff who then sign in with our Microsoft 365 accounts",
+      "so_that": "my team can access the platform under one isolated tenant",
+      "acceptance": [
+        "Provisioning creates a tenant with locations and an owner account.",
+        "Invited staff complete Entra SSO and are bound to the tenant.",
+        "All records created carry tenant_id and are RLS-isolated.",
+        "Re-inviting / deactivating a staff member is supported and audited."
+      ],
+      "refs": {"req": ["REQ-TEN-1", "REQ-TEN-2"], "adr": ["0003", "0004"], "prd_ac": ["AC2", "AC3"]},
+      "labels": ["type:story", "PRD-01", "phase:0", "area:backend"],
+      "priority": "P0"
+    },
+    {
+      "key": "RBAC",
+      "title": "RBAC + scope-of-practice matrix enforcement",
+      "context": "Roles map to the §3 scope matrix; the auth pipeline blocks actions outside a user's scope. Capabilities gate API actions, concerns drive role-tailored dashboards (ADR-0017).",
+      "as_a": "owner",
+      "i_want": "roles mapped to capabilities so the system blocks any action outside a user's scope of practice",
+      "so_that": "people can only do what they're trained and legally allowed to do",
+      "acceptance": [
+        "Capabilities × concerns model implemented; each API action checks a capability.",
+        "The persona set (NP, Lead RN, RN, dermal, reception, owner-business) maps to the matrix.",
+        "An out-of-scope action is blocked with a clear reason and an audit event.",
+        "Owner-business is read-only for clinical/stock unless they hold the credential."
+      ],
+      "refs": {"req": ["REQ-TEN-3", "REQ-TEN-4"], "compliance": ["C4", "C19"], "adr": ["0017"], "prd_ac": ["AC1"]},
+      "labels": ["type:story", "PRD-01", "phase:1", "area:backend", "compliance"],
+      "priority": "P0",
+      "depends_on": ["PRD-01/TENANT"]
+    },
+    {
+      "key": "CREDENTIALS",
+      "title": "Staff credentials + canInject compliance gate",
+      "context": "Staff profiles hold AHPRA reg #, type, status/expiry, conditions, ≥1yr-experience flag, CPD and cosmetic-cover PII; these derive a single canInject gate. Must accept the new designated RN prescriber role.",
+      "as_a": "owner",
+      "i_want": "structured credential + CPD + cosmetic-cover-insurance records that derive whether each practitioner is cleared to treat/inject",
+      "so_that": "only registered, insured, in-scope staff can be booked and can treat",
+      "acceptance": [
+        "Profiles capture AHPRA reg/type/status/expiry/conditions, ≥1yr-experience flag, CPD and cosmetic-cover PII.",
+        "A practitioner whose PII excludes cosmetic, or whose registration has lapsed, is flagged not-cleared.",
+        "The designated RN prescriber role is supported (endorsement + recorded partnered prescriber).",
+        "canInject is a single derived signal consumed by booking (PRD-02) and treatment gates."
+      ],
+      "refs": {"req": ["REQ-TEN-6", "REQ-TEN-7", "REQ-TEN-8", "REQ-TEN-9"], "compliance": ["C4", "C19"], "adr": ["0028", "0029"], "prd_ac": ["AC1"]},
+      "labels": ["type:story", "PRD-01", "phase:1", "area:backend", "compliance"],
+      "priority": "P0",
+      "depends_on": ["PRD-01/RBAC"]
+    },
+    {
+      "key": "REG-WATCH",
+      "title": "Registration / PII / CPD expiry alerting",
+      "context": "Staff must be alerted before registration, insurance or CPD lapses so the clinic is never unknowingly non-compliant.",
+      "as_a": "owner",
+      "i_want": "to be alerted before a practitioner's registration, cosmetic insurance or CPD lapses",
+      "so_that": "we never treat with an unregistered or uninsured practitioner",
+      "acceptance": [
+        "Items within N days of expiry surface on an alert/watchlist (also feeds PRD-08).",
+        "On lapse, the practitioner's canInject flips to not-cleared automatically.",
+        "Alerts are role-targeted and dismiss/acknowledge is audited.",
+        "AHPRA register auto-verification (PIE) is supported with a first-class manual-verify fallback."
+      ],
+      "refs": {"req": ["REQ-TEN-7"], "compliance": ["C19"], "adr": ["0029"], "prd_ac": ["AC1"]},
+      "labels": ["type:story", "PRD-01", "phase:1", "area:backend", "compliance"],
+      "priority": "P1",
+      "depends_on": ["PRD-01/CREDENTIALS"]
+    },
+    {
+      "key": "ROSTER",
+      "title": "Rosters & engagement type",
+      "context": "A roster (plus employee/contractor engagement type) drives booking availability and feeds commission/pay attribution downstream.",
+      "as_a": "manager",
+      "i_want": "to record staff rosters/time-off and each person's engagement type",
+      "so_that": "booking availability reflects who is actually working and cleared",
+      "acceptance": [
+        "Rosters and time-off are recorded per staff member and location.",
+        "Booking availability is derived from roster ∩ canInject (consumed by PRD-02).",
+        "Engagement type (employee/contractor) is recorded per staff member.",
+        "Roster changes are audited."
+      ],
+      "refs": {"req": ["REQ-TEN-8", "REQ-TEN-9"], "adr": ["0028", "0029"]},
+      "labels": ["type:story", "PRD-01", "phase:1", "area:backend"],
+      "priority": "P1",
+      "depends_on": ["PRD-01/CREDENTIALS"]
+    },
+    {
+      "key": "AUDIT",
+      "title": "Exportable audit trail for clinical / medicines / PII",
+      "context": "Every read/write of clinical, medicines and PII data must produce an immutable AuditEvent that a compliance officer can export (C10/ADR-0010). Built on the Sprint 0 audit infra.",
+      "as_a": "compliance officer",
+      "i_want": "to export an audit trail of who viewed or changed clinical, medicines and PII data",
+      "so_that": "we can evidence access and changes in an inspection",
+      "acceptance": [
+        "Every read/write of clinical/medicines/PII produces an immutable AuditEvent (who/what/when/tenant).",
+        "The log cannot be edited or deleted.",
+        "A compliance officer can filter and export the trail.",
+        "Sensitive-data reads (not just writes) are captured."
+      ],
+      "refs": {"req": ["REQ-SEC-3"], "compliance": ["C10"], "adr": ["0010"], "prd_ac": ["AC4"]},
+      "labels": ["type:story", "PRD-01", "phase:1", "area:data", "compliance"],
+      "priority": "P0",
+      "depends_on": ["PRD-01/TENANT"]
+    },
+    {
+      "key": "RETENTION",
+      "title": "Retention policy engine & destruction register",
+      "context": "Records must be retained per legal periods (adults ≥7y from last contact; minors to age 25; indefinite on complaint/litigation) and destroyed with a register + certificate (C18).",
+      "as_a": "admin",
+      "i_want": "retention timers and a destruction register that surfaces records due for destruction and logs their destruction",
+      "so_that": "we keep records exactly as long as the law requires, no more, no less",
+      "acceptance": [
+        "Retention rules: adults ≥7y from last contact; minors to age 25; indefinite on complaint/litigation.",
+        "Records past retention surface for destruction with their retention basis.",
+        "Destroying a record writes a destruction-register entry (patient, period, date) + certificate reference.",
+        "A transfer log records records handed to another provider."
+      ],
+      "refs": {"req": ["REQ-SEC-4"], "compliance": ["C18"], "prd_ac": ["AC5"]},
+      "labels": ["type:story", "PRD-01", "phase:1", "area:backend", "compliance"],
+      "priority": "P1",
+      "depends_on": ["PRD-01/AUDIT"]
+    },
+    {
+      "key": "BREACH",
+      "title": "Data-breach assessment & notification workflow",
+      "context": "An eligible data breach (NDB scheme) must be assessed and, if eligible, notified to OAIC + individuals, with a breach register (C22).",
+      "as_a": "admin",
+      "i_want": "a workflow that, when a breach is flagged, guides assessment and produces OAIC + individual notifications and a register entry",
+      "so_that": "we meet Notifiable Data Breaches obligations",
+      "acceptance": [
+        "Flagging a breach starts an assessment workflow.",
+        "If assessed eligible, it produces OAIC + individual notification drafts.",
+        "A breach-register entry is created and retained.",
+        "Observability/security signals (Sprint 0 OBS) can seed a breach case."
+      ],
+      "refs": {"req": ["REQ-SEC-7"], "compliance": ["C22"], "prd_ac": ["AC7"]},
+      "labels": ["type:story", "PRD-01", "phase:1", "area:backend", "compliance"],
+      "priority": "P1",
+      "depends_on": ["PRD-01/AUDIT"]
+    },
+    {
+      "key": "PRIVACY-RIGHTS",
+      "title": "Client privacy: collection notice, access & correction (DSAR)",
+      "context": "Clients have APP 12/13 rights: a collection notice/consent at sign-up, and the ability to access and request correction of their own data (DSAR clock ≤30 days).",
+      "as_a": "client",
+      "i_want": "to see a clear collection notice, access a copy of my data and request a correction",
+      "so_that": "my privacy rights under the Privacy Act are respected",
+      "acceptance": [
+        "Collection notice + consent shown and recorded at sign-up.",
+        "A client can view/export their own personal/health data.",
+        "A correction request is tracked to resolution against the DSAR clock.",
+        "All access/correction actions are audited."
+      ],
+      "refs": {"req": ["REQ-SEC-5", "REQ-SEC-8", "REQ-SEC-9"], "compliance": ["C21"], "prd_ac": ["AC6"]},
+      "labels": ["type:story", "PRD-01", "phase:1", "area:backend", "compliance"],
+      "priority": "P1",
+      "depends_on": ["PRD-01/TENANT"]
+    },
+    {
+      "key": "RESIDENCY",
+      "title": "Data residency & sub-processor controls",
+      "context": "All PII/PHI storage + compute must resolve to Australia East; a sub-processor outside AU is blocked unless an APP-8 assessment + consent exists (C21/ADR-0016).",
+      "as_a": "compliance officer",
+      "i_want": "assurance and enforcement that PII/PHI stays in Australia and never flows to a non-AU sub-processor without an APP-8 assessment",
+      "so_that": "we meet residency and cross-border obligations",
+      "acceptance": [
+        "All PII/PHI resources resolve to Australia East (verified, ties to Sprint 0 IAC policy).",
+        "An integration to a non-AU sub-processor is blocked unless an APP-8 assessment + consent record exists.",
+        "Sub-processor data flows are documented in a register.",
+        "Signed-URL media access enforces the same residency."
+      ],
+      "refs": {"req": ["REQ-SEC-1", "REQ-SEC-2", "REQ-SEC-6"], "compliance": ["C21"], "adr": ["0016"], "prd_ac": ["AC8"]},
+      "labels": ["type:story", "PRD-01", "phase:1", "area:infra", "compliance"],
+      "priority": "P1",
+      "depends_on": ["SPRINT-0/IAC"]
+    },
+    {
+      "key": "CLIENT-CORE",
+      "title": "Client core record: DOB & under-18 flag",
+      "context": "The client record captures DOB and derives an under-18 flag that feeds cooling-off (C6) and advertising/pricing (C9) elsewhere.",
+      "as_a": "system",
+      "i_want": "to capture client DOB and derive an under-18 flag",
+      "so_that": "downstream cooling-off and pricing rules can enforce age-based requirements",
+      "acceptance": [
+        "DOB captured; under-18 flag derived and exposed to PRD-03/PRD-06/PRD-07.",
+        "The flag updates correctly across a birthday.",
+        "Soft-delete with audit and duplicate handling supported (full CRM in PRD-02).",
+        "Under-18 status is visible on the patient header (consumed by UX age chip)."
+      ],
+      "refs": {"req": ["REQ-CLI-3"], "compliance": ["C6"]},
+      "labels": ["type:story", "PRD-01", "phase:1", "area:backend"],
+      "priority": "P1",
+      "depends_on": ["PRD-01/TENANT"]
+    },
+    {
+      "key": "ROLE-BUILDER",
+      "title": "Custom-role builder (placeholder)",
+      "context": "Beyond the preset personas, a future custom-role builder lets owners define bespoke capability sets. Deferred — placeholder.",
+      "as_a": "owner",
+      "i_want": "to define custom roles from capabilities",
+      "so_that": "I can model staff arrangements that don't fit the presets",
+      "acceptance": [
+        "Placeholder — design only in v1; presets are sufficient for launch.",
+        "Captured so the capability model stays builder-ready."
+      ],
+      "refs": {"req": ["REQ-TEN-5"], "adr": ["0017"]},
+      "labels": ["type:story", "PRD-01", "phase:2plus", "area:backend"],
+      "priority": "P2"
+    }
+  ]
+}

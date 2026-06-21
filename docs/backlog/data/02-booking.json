@@ -1,0 +1,190 @@
+{
+  "epic": {
+    "key": "PRD-02",
+    "title": "Booking & scheduling (+ client/CRM basics)",
+    "milestone": "M2",
+    "phase": "1",
+    "prd": "docs/prds/PRD-02-booking-scheduling.md",
+    "summary": "The calendar that runs the front desk and the 360° client record everything hangs off. Bookings are scope-aware (only cleared RN/NP can be booked for injectables) and an injectable booking is gated so it can't proceed to charting without a consult. Includes online self-booking, the visit lifecycle, reminders/reschedule/cancel, waitlist, walk-ins, resources and the client directory.",
+    "labels": ["type:epic", "PRD-02", "phase:1", "area:web", "area:backend"]
+  },
+  "stories": [
+    {
+      "key": "CALENDAR",
+      "title": "Multi-resource calendar (practitioner + room)",
+      "context": "Front desk needs a fast day/week/room calendar with service durations, buffers and rosters — the core of the diary.",
+      "as_a": "front desk",
+      "i_want": "a day/week/room calendar showing practitioners and rooms with correct service durations and buffers",
+      "so_that": "I can run the diary at a glance and book without clashes",
+      "acceptance": [
+        "Resources = practitioner + room; service durations include buffer/processing/turnaround.",
+        "Day, week and room views render; rosters and time-off block availability.",
+        "Drag to move an appointment; conflicts on room/chair/device are flagged.",
+        "Per-day and per-treatment-type counts + utilisation surfaced."
+      ],
+      "refs": {"req": ["REQ-BOOK-1"], "adr": ["0024", "0026"]},
+      "labels": ["type:story", "PRD-02", "phase:1", "area:web"],
+      "priority": "P0",
+      "depends_on": ["PRD-01/ROSTER"]
+    },
+    {
+      "key": "ONLINE-BOOK",
+      "title": "Online self-booking (scope-aware)",
+      "context": "Clients self-book service → practitioner → slot online; injectable services only offer cleared RN/NP and the public page uses generic names (C4/C9).",
+      "as_a": "client",
+      "i_want": "to book a consult/treatment online by choosing service, practitioner and time",
+      "so_that": "I can book without calling the clinic",
+      "acceptance": [
+        "Booking wizard: service → practitioner → time → client → confirm.",
+        "Injectable services offer only cleared RN/NP (scope-aware, per C4); others never appear bookable for it.",
+        "Public service names are generic and S4 prices withheld by configuration (C9, see PRD-07).",
+        "Under-18 bookings are flagged for downstream cooling-off (feeds PRD-03)."
+      ],
+      "refs": {"req": ["REQ-BOOK-2"], "compliance": ["C4", "C6", "C9"], "prd_ac": ["AC1", "AC5"]},
+      "labels": ["type:story", "PRD-02", "phase:1", "area:web", "compliance"],
+      "priority": "P0",
+      "depends_on": ["PRD-02/CALENDAR", "PRD-01/CREDENTIALS"]
+    },
+    {
+      "key": "CONSULT-GATE",
+      "title": "Consult gate on injectable appointments",
+      "context": "An injectable appointment cannot move to charting without a linked Consult — the booking-side half of the moat (REQ-BOOK-5).",
+      "as_a": "system",
+      "i_want": "to block a checked-in injectable appointment from opening charting unless a consult is linked",
+      "so_that": "no S4 treatment can proceed without the required consult",
+      "acceptance": [
+        "A checked-in injectable appointment with no linked consult cannot open the charting screen.",
+        "The blocked-action banner explains what's missing and who can resolve it.",
+        "Once a consult is recorded the gate clears (handoff to PRD-04).",
+        "The block is server-enforced, not just UI."
+      ],
+      "refs": {"req": ["REQ-BOOK-5"], "compliance": ["C1"], "prd_ac": ["AC2"]},
+      "labels": ["type:story", "PRD-02", "phase:1", "area:backend", "compliance"],
+      "priority": "P0",
+      "depends_on": ["PRD-02/ONLINE-BOOK"]
+    },
+    {
+      "key": "LIFECYCLE",
+      "title": "Visit lifecycle & status state-machine",
+      "context": "Bookings move through booked → reminded → checked-in → in-room → checked-out, with late/no-show flags and role hand-offs (REQ-BOOK-7).",
+      "as_a": "front desk",
+      "i_want": "a clear visit status flow with check-in, an in-room-now indicator and late/no-show flags",
+      "so_that": "the team always knows where each client is in the visit",
+      "acceptance": [
+        "Status state-machine with role hand-offs; check-in on arrival.",
+        "An 'in-room now' indicator with quick links to chart/profile.",
+        "Late and no-show flags; a no-show raises a follow-up call (feeds PRD-07 jobs).",
+        "New-vs-returning, reason and roster captured on the booking."
+      ],
+      "refs": {"req": ["REQ-BOOK-4", "REQ-BOOK-7"], "adr": ["0024"]},
+      "labels": ["type:story", "PRD-02", "phase:1", "area:web"],
+      "priority": "P1",
+      "depends_on": ["PRD-02/CALENDAR"]
+    },
+    {
+      "key": "REMINDERS",
+      "title": "Reminders & self-service reschedule/cancel",
+      "context": "Clients get reminders they can confirm/decline and can self-reschedule or cancel within policy without calling.",
+      "as_a": "client",
+      "i_want": "appointment reminders I can confirm/decline and the ability to reschedule or cancel within policy myself",
+      "so_that": "I don't need to call and the clinic's diary stays accurate",
+      "acceptance": [
+        "Reminders fire per template (SMS/app/email); confirm/decline updates status.",
+        "Self-reschedule/cancel within policy; outside policy the configured rule applies (no auto-charge in v1).",
+        "Cancellation/no-show policy is configurable.",
+        "Reminder channel is provided by PRD-07."
+      ],
+      "refs": {"req": ["REQ-BOOK-3", "REQ-BOOK-4"], "prd_ac": ["AC3", "AC6"]},
+      "labels": ["type:story", "PRD-02", "phase:1", "area:web"],
+      "priority": "P1",
+      "depends_on": ["PRD-02/LIFECYCLE"]
+    },
+    {
+      "key": "WAITLIST",
+      "title": "Waitlist & cancellation backfill",
+      "context": "Clients can join a waitlist; cancellations/no-shows auto-offer the freed slot to fill quiet windows.",
+      "as_a": "front desk",
+      "i_want": "a waitlist that auto-offers a freed slot when an appointment cancels or no-shows",
+      "so_that": "we keep the diary full",
+      "acceptance": [
+        "Clients can be added to a waitlist for a service/window.",
+        "Cancelling/no-showing a slot offers it to the waitlist.",
+        "Quiet-window fill suggestions surface from utilisation data.",
+        "Offered/accepted/expired waitlist states are tracked."
+      ],
+      "refs": {"req": ["REQ-BOOK-4"], "adr": ["0026"], "prd_ac": ["AC4"]},
+      "labels": ["type:story", "PRD-02", "phase:1", "area:web"],
+      "priority": "P1",
+      "depends_on": ["PRD-02/REMINDERS"]
+    },
+    {
+      "key": "WALKINS",
+      "title": "Walk-ins, same-day add-ons & resources",
+      "context": "Walk-ins and same-day add-ons are supported but gate-respecting (an injectable walk-in still needs a consult first); room/chair/device resources are scheduled with conflict-flagging.",
+      "as_a": "front desk",
+      "i_want": "to add walk-ins and same-day add-ons against available rooms/chairs/devices",
+      "so_that": "we capture opportunistic demand without breaking the rules or double-booking resources",
+      "acceptance": [
+        "Walk-in and same-day add-on flows exist; an injectable walk-in still requires a consult first.",
+        "Room/chair/device resources are bookable with conflict-flagging and utilisation.",
+        "VIP / first-time appointment tags supported.",
+        "Resource conflicts are surfaced before confirmation."
+      ],
+      "refs": {"req": ["REQ-BOOK-3", "REQ-BOOK-6"], "adr": ["0026"]},
+      "labels": ["type:story", "PRD-02", "phase:1", "area:web"],
+      "priority": "P2",
+      "depends_on": ["PRD-02/CALENDAR"]
+    },
+    {
+      "key": "CLIENT-360",
+      "title": "Client 360° profile",
+      "context": "Any staff member can open a client's full profile: history, contacts, medical flags, consents, photos, memberships, balances, comms and complaints.",
+      "as_a": "staff member",
+      "i_want": "a single 360° client profile pulling together history, medical flags, consents, photos, memberships, balances and comms",
+      "so_that": "I have the full picture in one place",
+      "acceptance": [
+        "Profile aggregates overview, medical/contraindications, consents, photos, visits, memberships, balance, comms, complaints.",
+        "Consent/age chips render on the header (consent ✓ / image-use ✓ / under-18 cooling-off).",
+        "Access is RBAC-scoped (reception sees limited clinical info) and audited.",
+        "Surfaces data owned by PRD-03/04/05/06/11 via the API."
+      ],
+      "refs": {"req": ["REQ-CLI-1", "REQ-CLI-2"], "compliance": ["C10"]},
+      "labels": ["type:story", "PRD-02", "phase:1", "area:web"],
+      "priority": "P1",
+      "depends_on": ["PRD-01/CLIENT-CORE"]
+    },
+    {
+      "key": "CLIENT-DIR",
+      "title": "Client directory: search, filter, merge, soft-delete",
+      "context": "A searchable client directory with duplicate merge and audited soft-delete keeps the record clean.",
+      "as_a": "front desk",
+      "i_want": "to search and filter clients, merge duplicates and soft-delete with audit",
+      "so_that": "the client list stays accurate and findable",
+      "acceptance": [
+        "Fast search/filter across the directory.",
+        "Duplicate detection + merge that preserves history and audit.",
+        "Soft-delete with audit; deleted clients excluded from active views.",
+        "Quick client search is reachable from the front-desk shell."
+      ],
+      "refs": {"req": ["REQ-CLI-1", "REQ-CLI-2"], "compliance": ["C10"]},
+      "labels": ["type:story", "PRD-02", "phase:1", "area:web"],
+      "priority": "P2",
+      "depends_on": ["PRD-02/CLIENT-360"]
+    },
+    {
+      "key": "DEPOSITS",
+      "title": "Booking deposits / card-on-file hold (placeholder)",
+      "context": "An opt-in, ACL-fair booking deposit / card-on-file hold, suppressed during cooling-off (F14 invariant). Deferred to Phase 2 — placeholder.",
+      "as_a": "owner",
+      "i_want": "to optionally require a booking deposit or card-on-file hold",
+      "so_that": "no-shows cost less",
+      "acceptance": [
+        "Placeholder — not in v1 (no deposits/holds in v1).",
+        "Design must keep the cooling-off suppression invariant (F14): no hold during a cooling-off period."
+      ],
+      "refs": {"req": ["REQ-BOOK-3"], "adr": ["0036"]},
+      "labels": ["type:story", "PRD-02", "phase:2plus", "area:backend"],
+      "priority": "P2"
+    }
+  ]
+}

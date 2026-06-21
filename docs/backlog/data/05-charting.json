@@ -1,0 +1,169 @@
+{
+  "epic": {
+    "key": "PRD-05",
+    "title": "Clinical charting: injection mapping & before/after",
+    "milestone": "M3",
+    "phase": "1",
+    "prd": "docs/prds/PRD-05-clinical-charting.md",
+    "summary": "The clinical record that matches the Aesthetic Record / Pabau bar: a guided charting flow opening with product & lot selection, on-image/diagram injection mapping (product · units · depth · site · batch-lot), standardised before/after photos with comparison, immutable finalised notes with audited amendments, and adverse-event logging that feeds the TGA/DAEN pathway — usable room-side on the provider app, even offline.",
+    "labels": ["type:epic", "PRD-05", "phase:1", "area:provider-app", "area:backend"]
+  },
+  "stories": [
+    {
+      "key": "NOTE-TEMPLATE",
+      "title": "Guided toxin treatment note & pre-treatment review",
+      "context": "Charting is a guided, treatment-type-aware flow: a pre-treatment review (safety + last-treatment + consult/Rx surfaced) then a configurable toxin note (structured + free text + snippets) (REQ-CLIN-1/9).",
+      "as_a": "injector",
+      "i_want": "a guided note that first surfaces safety, last treatment and the consult/Rx, then a toxin template",
+      "so_that": "I chart quickly and safely with the right context in front of me",
+      "acceptance": [
+        "Pre-treatment review surfaces safety flags, last treatment and the linked consult/Rx (verified before opening).",
+        "Configurable toxin template with structured fields, free text and reusable phrases/snippets.",
+        "A non-S4 skin note variant exists (treatment-type-aware).",
+        "Charting cannot open unless the consult+consent gate is satisfied (PRD-03/04)."
+      ],
+      "refs": {"req": ["REQ-CLIN-1", "REQ-CLIN-9"], "adr": ["0024"]},
+      "labels": ["type:story", "PRD-05", "phase:1", "area:provider-app"],
+      "priority": "P0",
+      "depends_on": ["PRD-04/ADMIN-GATE"]
+    },
+    {
+      "key": "MAPPING",
+      "title": "Injection-mapping canvas (per-point lot)",
+      "context": "On a facial diagram and/or patient photo, tap-to-add and drag injection points, each capturing product, units, depth, technique and batch-lot/expiry; charted units deduct from the selected lot on finalise (REQ-CLIN-2, C8).",
+      "as_a": "injector",
+      "i_want": "to drop and drag injection points on a facial diagram or photo, each recording product, units, depth, technique and lot",
+      "so_that": "the treatment is precisely charted and traceable to a batch",
+      "acceptance": [
+        "Charting opens with product & batch (lot) selection, restricted to in-date/ARTG/in-custody stock.",
+        "Each point records product, units, depth, technique and batch-lot/expiry.",
+        "On finalise, charted units deduct from the selected lot and link to the medicine register + recall (PRD-04).",
+        "Built on the SPIKE-CANVAS approach; performs smoothly with many points."
+      ],
+      "refs": {"req": ["REQ-CLIN-2", "REQ-MED-4"], "compliance": ["C8"], "prd_ac": ["AC1"]},
+      "labels": ["type:story", "PRD-05", "phase:1", "area:provider-app", "compliance"],
+      "priority": "P0",
+      "depends_on": ["SPRINT-0/SPIKE-CANVAS", "PRD-04/RECALL-LOOKUP"]
+    },
+    {
+      "key": "PHOTOS",
+      "title": "Standardised before/after photos + compare",
+      "context": "Capture standardised before/after photos room-side (framing/ghosting guide), compare side-by-side across visits; media stored centrally via signed URLs, never on personal devices, gated by image-use consent (REQ-CLIN-3, C14/ADR-0009).",
+      "as_a": "injector",
+      "i_want": "to capture standardised before/after photos and compare them against prior visits",
+      "so_that": "I can track outcomes consistently",
+      "acceptance": [
+        "Camera/upload with standardised framing/ghosting guide; side-by-side compare across visits.",
+        "Capture requires current image-use consent (PRD-03).",
+        "Photos stored centrally via signed URLs; never persisted on device beyond a transient sync cache.",
+        "Annotation supported."
+      ],
+      "refs": {"req": ["REQ-CLIN-3"], "compliance": ["C14"], "adr": ["0009"], "prd_ac": ["AC2", "AC6"]},
+      "labels": ["type:story", "PRD-05", "phase:1", "area:provider-app", "compliance"],
+      "priority": "P1",
+      "depends_on": ["PRD-03/IMAGE-CONSENT"]
+    },
+    {
+      "key": "IMMUTABILITY",
+      "title": "Immutable finalisation & audited amendments",
+      "context": "A finalised note is locked; any later change is an appended, audited amendment preserving the original (REQ-CLIN-4, ADR-0010).",
+      "as_a": "injector",
+      "i_want": "my finalised note to be locked, with later changes added as visible audited amendments",
+      "so_that": "the clinical record is trustworthy and tamper-evident",
+      "acceptance": [
+        "A finalised note cannot be edited.",
+        "An amendment creates a new linked, audited entry preserving the original.",
+        "Finalisation happens server-side.",
+        "The finalise close-out captures aftercare, recall, the 2-day wellbeing call and any adverse event."
+      ],
+      "refs": {"req": ["REQ-CLIN-4"], "adr": ["0010"], "prd_ac": ["AC3"]},
+      "labels": ["type:story", "PRD-05", "phase:1", "area:backend", "compliance"],
+      "priority": "P0",
+      "depends_on": ["PRD-05/MAPPING"]
+    },
+    {
+      "key": "OFFLINE",
+      "title": "Offline queue & sync for room-side charting",
+      "context": "If Wi-Fi drops mid-visit, notes/photos queue locally (encrypted) and sync on reconnect with no loss; finalisation is server-side (REQ-CLIN/APP, ADR-0015).",
+      "as_a": "injector",
+      "i_want": "my notes and photos to queue locally and sync when back online if the room loses Wi-Fi",
+      "so_that": "I never lose work mid-treatment",
+      "acceptance": [
+        "With connectivity dropped, notes/photos queue locally (encrypted) and sync on reconnect with no loss.",
+        "Drafts use last-write-wins; finalisation occurs server-side.",
+        "A sync/offline indicator shows queued count + last-sync time; finalise disabled until synced.",
+        "Built on SPIKE-OFFLINE."
+      ],
+      "refs": {"req": ["REQ-APP-3"], "adr": ["0015", "0010"], "prd_ac": ["AC4"]},
+      "labels": ["type:story", "PRD-05", "phase:1", "area:provider-app"],
+      "priority": "P1",
+      "depends_on": ["SPRINT-0/SPIKE-OFFLINE", "PRD-05/IMMUTABILITY"]
+    },
+    {
+      "key": "ADVERSE-EVENT",
+      "title": "Adverse-event capture → DAEN pathway",
+      "context": "Log an adverse event/complication linked to the treatment, product and lot, classify seriousness and target the correct DAEN database (REQ-CLIN-5, C12). Includes the VO/anaphylaxis complication-response flow.",
+      "as_a": "injector",
+      "i_want": "to log an adverse event linked to the treatment, product and lot",
+      "so_that": "it feeds the TGA report and the right follow-ups happen",
+      "acceptance": [
+        "An adverse event captures the data a TGA report needs, classifies seriousness and targets the correct DAEN database (medicine vs device).",
+        "It links to the treatment, product and lot.",
+        "A complication-response flow (VO/anaphylaxis → log hyaluronidase/adrenaline) routes the AE + raises jobs.",
+        "Full submission/prefill lives in the Governance hub (PRD-08)."
+      ],
+      "refs": {"req": ["REQ-CLIN-5"], "compliance": ["C12"], "prd_ac": ["AC5"]},
+      "labels": ["type:story", "PRD-05", "phase:1", "area:provider-app", "compliance"],
+      "priority": "P1",
+      "depends_on": ["PRD-05/IMMUTABILITY"]
+    },
+    {
+      "key": "TREATMENT-PLANS",
+      "title": "Treatment plans & protocol templates",
+      "context": "Multi-session treatment plans + applyable protocol templates feed recall and structure ongoing care (REQ-CLIN-7).",
+      "as_a": "injector",
+      "i_want": "to build multi-session treatment plans from protocol templates",
+      "so_that": "ongoing care is structured and drives recall",
+      "acceptance": [
+        "Protocol templates can be applied to create a multi-session plan.",
+        "Plans feed the recall worklist (PRD-07).",
+        "Plan progress is visible on the client 360.",
+        "A charting overview / 'in-room now' entry point lists active plans."
+      ],
+      "refs": {"req": ["REQ-CLIN-7"], "adr": ["0024"]},
+      "labels": ["type:story", "PRD-05", "phase:1", "area:provider-app"],
+      "priority": "P2",
+      "depends_on": ["PRD-05/NOTE-TEMPLATE"]
+    },
+    {
+      "key": "MODALITY",
+      "title": "Other-modality charting: filler / energy / weight-loss (placeholder)",
+      "context": "Phase 2 adds dermal filler (multi-area, per-area lot, VO/blindness consent gate), energy-device charting (per-pass settings, laser-licence gated), weight-loss titration and ghost-overlay photo alignment (REQ-CLIN-10..13). Placeholder.",
+      "as_a": "injector",
+      "i_want": "modality-aware charting for filler, energy devices and weight-loss",
+      "so_that": "the platform covers the full treatment menu",
+      "acceptance": [
+        "Placeholder — v1 ships toxin + non-S4 skin notes; the modality model already anticipates these.",
+        "Each modality's specific gates (e.g. filler VO consent, laser licence) are captured for later build."
+      ],
+      "refs": {"req": ["REQ-CLIN-10", "REQ-CLIN-11", "REQ-CLIN-12", "REQ-CLIN-13"], "adr": ["0025"]},
+      "labels": ["type:story", "PRD-05", "phase:2plus", "area:provider-app"],
+      "priority": "P2"
+    },
+    {
+      "key": "AI-SCRIBE",
+      "title": "AI note dictation / auto-detect injection points (placeholder)",
+      "context": "AI scribe and advisory auto-detection of injection points are explicitly out for v1 (no AI; everything manual + human-confirmed). Placeholder (REQ-CLIN-6, ADR-0020).",
+      "as_a": "injector",
+      "i_want": "optional AI assistance for notes and injection-point suggestions",
+      "so_that": "charting is faster (with human confirmation)",
+      "acceptance": [
+        "Placeholder — explicitly no AI in v1; any future feature is advisory + human-confirmed only.",
+        "Captured to keep the data model ready."
+      ],
+      "refs": {"req": ["REQ-CLIN-6"], "adr": ["0020"]},
+      "labels": ["type:story", "PRD-05", "phase:2plus", "area:provider-app"],
+      "priority": "P2"
+    }
+  ]
+}

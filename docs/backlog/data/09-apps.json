@@ -1,0 +1,139 @@
+{
+  "epic": {
+    "key": "PRD-09",
+    "title": "Apps (Flutter): client & provider",
+    "milestone": "M5",
+    "phase": "1",
+    "prd": "docs/prds/PRD-09-apps-client-provider.md",
+    "summary": "Two Flutter apps over the shared .NET API: a client app (book, intake/consent, photos, memberships, rewards, balances, card-on-file) and a provider app (room-side charting, injection mapping, camera capture, consult/Rx, finalise) — the latter resilient to treatment-room connectivity. One codebase, two flavours, sharing auth, the API client and the design system.",
+    "labels": ["type:epic", "PRD-09", "phase:1", "area:client-app", "area:provider-app"]
+  },
+  "stories": [
+    {
+      "key": "CLIENT-JOURNEY",
+      "title": "Client app: book → intake → consent journey",
+      "context": "A client can complete the full pre-visit journey entirely in-app (REQ-APP-1).",
+      "as_a": "client",
+      "i_want": "to book, complete intake and e-sign consent entirely in the app",
+      "so_that": "I'm ready for my visit without paperwork",
+      "acceptance": [
+        "A client completes book → intake → consent (incl. image-use) fully in-app.",
+        "Surfaces PRD-02 booking and PRD-03 intake/consent.",
+        "Sign-in via social/email/OTP, tenant-scoped.",
+        "Reminders/recall (PRD-07) are received in-app."
+      ],
+      "refs": {"req": ["REQ-APP-1"], "adr": ["0004"], "prd_ac": ["AC1", "AC4"]},
+      "labels": ["type:story", "PRD-09", "phase:1", "area:client-app"],
+      "priority": "P1",
+      "depends_on": ["PRD-02/ONLINE-BOOK", "PRD-03/CONSENT"]
+    },
+    {
+      "key": "CLIENT-CARE",
+      "title": "Client app: my care, memberships, rewards & card-on-file",
+      "context": "Clients view consented before/after photos, memberships, rewards/perks and balances, and add a card-on-file for autopay (REQ-APP-1).",
+      "as_a": "client",
+      "i_want": "to view my photos, memberships, rewards and balance and add a card-on-file",
+      "so_that": "I can self-serve my care and payments",
+      "acceptance": [
+        "Consent-gated before/after photo viewing.",
+        "Memberships, rewards/perks and balances visible.",
+        "Card-on-file can be added in-app (feeds PRD-06 autopay).",
+        "No one-off online checkout is exposed."
+      ],
+      "refs": {"req": ["REQ-APP-1"], "compliance": ["C14"], "prd_ac": ["AC5"]},
+      "labels": ["type:story", "PRD-09", "phase:1", "area:client-app"],
+      "priority": "P2",
+      "depends_on": ["PRD-06/MEMBERSHIP", "PRD-05/PHOTOS"]
+    },
+    {
+      "key": "CLIENT-PRIVACY",
+      "title": "Client app: account, privacy & access/correction",
+      "context": "The Account area exposes profile, balances, card-on-file and a 'Your data & privacy' surface (residency note, access copy, request correction) (C21).",
+      "as_a": "client",
+      "i_want": "an account area where I can see my data, know it stays in Australia, and request access or correction",
+      "so_that": "I'm in control of my information",
+      "acceptance": [
+        "Account shows profile, balances and card-on-file.",
+        "'Your data & privacy' shows the residency note and access-copy/correction actions (PRD-01).",
+        "Requests are tracked to resolution.",
+        "Actions are audited."
+      ],
+      "refs": {"req": ["REQ-APP-1"], "compliance": ["C21"]},
+      "labels": ["type:story", "PRD-09", "phase:1", "area:client-app", "compliance"],
+      "priority": "P2",
+      "depends_on": ["PRD-01/PRIVACY-RIGHTS"]
+    },
+    {
+      "key": "PROVIDER-DAY",
+      "title": "Provider app: day schedule & open patient",
+      "context": "The provider sees their day and opens a patient with consult+consent status verified before charting (REQ-APP-2).",
+      "as_a": "injector/prescriber",
+      "i_want": "to see my day and open a patient with consult/consent status shown before I chart",
+      "so_that": "I work room-side with the right context and gates",
+      "acceptance": [
+        "Schedule shows the practitioner's day; opening a patient shows consult+consent status.",
+        "Provider signs in via Entra SSO, tenant-scoped.",
+        "The consult+consent gate (PRD-03/04) is enforced before charting opens.",
+        "Quick links to map/photos/finalise."
+      ],
+      "refs": {"req": ["REQ-APP-2"], "adr": ["0004"], "prd_ac": ["AC1"]},
+      "labels": ["type:story", "PRD-09", "phase:1", "area:provider-app"],
+      "priority": "P1",
+      "depends_on": ["PRD-05/NOTE-TEMPLATE"]
+    },
+    {
+      "key": "PROVIDER-ROOMSIDE",
+      "title": "Provider app: room-side charting, camera & finalise",
+      "context": "Map injections, capture photos via signed URLs (never on device), record consult/link script and finalise — all surfacing PRD-04/05 (REQ-APP-2, C14/ADR-0009).",
+      "as_a": "injector",
+      "i_want": "to map injections, capture photos and finalise the chart room-side",
+      "so_that": "the full clinical record is captured at the chair",
+      "acceptance": [
+        "Provider app surfaces PRD-05 mapping/photos and PRD-04 consult/Rx/administration.",
+        "Photos capture to central storage via signed URLs; none persist on device after sync (C14).",
+        "Finalisation is server-side; once finalised the entry is read-only.",
+        "Thumb-first, gloves-on usability (UX §1)."
+      ],
+      "refs": {"req": ["REQ-APP-2"], "compliance": ["C14"], "adr": ["0009"], "prd_ac": ["AC2", "AC6"]},
+      "labels": ["type:story", "PRD-09", "phase:1", "area:provider-app", "compliance"],
+      "priority": "P1",
+      "depends_on": ["PRD-05/MAPPING", "PRD-05/PHOTOS"]
+    },
+    {
+      "key": "PROVIDER-OFFLINE",
+      "title": "Provider app: offline-tolerant workflows + sync indicator",
+      "context": "Charting/photos queue locally encrypted and sync on reconnect with no loss; a persistent sync/offline indicator shows queued count + last sync (REQ-APP-3, ADR-0015).",
+      "as_a": "injector",
+      "i_want": "the app to keep working offline and clearly show my sync state",
+      "so_that": "treatment-room Wi-Fi drops never cost me data",
+      "acceptance": [
+        "Charting/photos queue locally (encrypted) offline and sync on reconnect with no loss.",
+        "Persistent indicator shows queued-items count + last-sync time.",
+        "Finalise is disabled until synced.",
+        "Built on SPIKE-OFFLINE and PRD-05/OFFLINE."
+      ],
+      "refs": {"req": ["REQ-APP-3"], "adr": ["0015"], "prd_ac": ["AC3"]},
+      "labels": ["type:story", "PRD-09", "phase:1", "area:provider-app"],
+      "priority": "P1",
+      "depends_on": ["PRD-05/OFFLINE"]
+    },
+    {
+      "key": "APP-DISTRIBUTION",
+      "title": "App distribution & code-push posture",
+      "context": "Store distribution + code-push (e.g. Shorebird) where the compliance posture allows (open question) (ADR-0006).",
+      "as_a": "mobile developer",
+      "i_want": "a store-distribution and (where viable) code-push pipeline for both apps",
+      "so_that": "we can ship and patch the apps responsibly",
+      "acceptance": [
+        "Both apps distribute via internal/store channels from CI.",
+        "Code-push viability for the compliance posture is assessed and documented.",
+        "Versioning + minimum-supported-version handling in place.",
+        "Crash/usage telemetry feeds observability."
+      ],
+      "refs": {"req": ["REQ-APP-1", "REQ-APP-2"], "adr": ["0006"]},
+      "labels": ["type:story", "PRD-09", "phase:1", "area:client-app", "area:provider-app"],
+      "priority": "P2",
+      "depends_on": ["SPRINT-0/FLUTTER"]
+    }
+  ]
+}

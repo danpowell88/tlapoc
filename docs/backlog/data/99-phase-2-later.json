@@ -1,0 +1,88 @@
+{
+  "epic": {
+    "key": "PHASE-2",
+    "title": "Phase 2+ / scale (cross-cutting placeholders)",
+    "milestone": "M7",
+    "phase": "2+",
+    "prd": "docs/prds/PRD-01-foundations-tenancy.md",
+    "summary": "Program-level capability deliberately deferred beyond v1 and not owned by a single feature PRD — the SaaS/scale layer. Tracked as placeholders so scope is visible and can be pulled forward if the business case appears. (Per-feature deferrals live as placeholder stories inside their own PRD epics.)",
+    "labels": ["type:epic", "PHASE-2", "phase:2plus", "area:backend"]
+  },
+  "stories": [
+    {
+      "key": "MULTI-LOCATION",
+      "title": "Multi-location switching UI (placeholder)",
+      "context": "Switching between locations/clinics in one tenant. The data model is location-aware; the switching UX is deferred.",
+      "as_a": "owner of multiple sites",
+      "i_want": "to switch between locations in one place",
+      "so_that": "I run several clinics from one login",
+      "acceptance": [
+        "Placeholder — Phase 2+; data model already carries Location.",
+        "Captured so reporting/booking stay location-aware."
+      ],
+      "refs": {"req": ["REQ-TEN-1"]},
+      "labels": ["type:story", "PHASE-2", "phase:2plus", "area:web"],
+      "priority": "P2"
+    },
+    {
+      "key": "SAAS-ONBOARDING",
+      "title": "SaaS onboarding & billing UI (placeholder)",
+      "context": "Self-service tenant sign-up, subscription billing and per-tenant Entra federation for selling the platform as SaaS (PRD-01 non-goal; Phase 3).",
+      "as_a": "prospective clinic",
+      "i_want": "to sign up for the platform myself and pay a subscription",
+      "so_that": "onboarding doesn't need manual provisioning",
+      "acceptance": [
+        "Placeholder — Phase 3; v1 provisions tenants manually.",
+        "Captured so tenancy/identity stay SaaS-ready."
+      ],
+      "refs": {"req": ["REQ-TEN-1", "REQ-TEN-2"]},
+      "labels": ["type:story", "PHASE-2", "phase:2plus", "area:backend"],
+      "priority": "P2"
+    },
+    {
+      "key": "WHITE-LABEL",
+      "title": "Per-tenant white-label theming (placeholder)",
+      "context": "Per-tenant branding/theming of web and apps (PRD-01 non-goal).",
+      "as_a": "clinic owner",
+      "i_want": "to brand the platform with my clinic's look",
+      "so_that": "clients see my brand",
+      "acceptance": [
+        "Placeholder — Phase 2+; design tokens are themeable by construction.",
+        "Captured so the design system stays token-driven."
+      ],
+      "refs": {"req": ["REQ-TEN-1"]},
+      "labels": ["type:story", "PHASE-2", "phase:2plus", "area:design"],
+      "priority": "P2"
+    },
+    {
+      "key": "PUBLIC-API",
+      "title": "Public API & webhooks (placeholder)",
+      "context": "Outbound/inbound public API + webhooks for third parties (PRD-10 deferred; Phase 3).",
+      "as_a": "integrator",
+      "i_want": "a public API and webhooks",
+      "so_that": "third-party tools can integrate",
+      "acceptance": [
+        "Placeholder — Phase 3; internal API is OpenAPI-described already.",
+        "Captured so the API stays contract-first."
+      ],
+      "refs": {"req": ["REQ-INT-3"]},
+      "labels": ["type:story", "PHASE-2", "phase:2plus", "area:integration"],
+      "priority": "P2"
+    },
+    {
+      "key": "NATIVE-POS-KIOSK",
+      "title": "Native POS hardware & tablet kiosk mode (placeholder)",
+      "context": "Native POS hardware integration and a tablet kiosk mode (PRD-06/09 non-goals).",
+      "as_a": "front desk",
+      "i_want": "native POS hardware and a kiosk check-in mode",
+      "so_that": "the desk and waiting room are smoother",
+      "acceptance": [
+        "Placeholder — Phase 2+; v1 uses Square card-present + in-app flows.",
+        "Captured so checkout/check-in stay hardware-friendly."
+      ],
+      "refs": {"req": ["REQ-PAY-2", "REQ-APP-1"]},
+      "labels": ["type:story", "PHASE-2", "phase:2plus", "area:web"],
+      "priority": "P2"
+    }
+  ]
+}

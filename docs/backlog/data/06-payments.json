@@ -1,0 +1,175 @@
+{
+  "epic": {
+    "key": "PRD-06",
+    "title": "Payments (in-person POS + autopay), memberships & non-S4 rewards",
+    "milestone": "M4",
+    "phase": "1",
+    "prd": "docs/prds/PRD-06-payments-memberships-rewards.md",
+    "summary": "Commerce for the clinic: in-person POS (Square card-present + recorded cash + gift cards), automatic recurring membership autopay via stored card-on-file, packages/series, and a rewards engine that only ever applies to non-S4 items — driving repeat visits without eroding margin or breaching advertising law. Financials stay owner-only; the ledger defers to Xero.",
+    "labels": ["type:epic", "PRD-06", "phase:1", "area:web", "area:backend"]
+  },
+  "stories": [
+    {
+      "key": "PAYMENT-PROVIDER",
+      "title": "Payment provider abstraction + Square adapter",
+      "context": "An IPaymentProvider port (authorize/capture, refund, void, tokenize, recurring, gift-card) with a Square adapter first and cash as an internal tender; no PAN stored, only tokens (ADR-0007).",
+      "as_a": "developer",
+      "i_want": "a payment-provider abstraction with a Square adapter and cash tender",
+      "so_that": "payments are swappable and PCI-safe",
+      "acceptance": [
+        "IPaymentProvider exposes authorize/capture, refund, void, tokenize, recurring and gift-card.",
+        "Square adapter implemented; cash is an internal tender.",
+        "No PAN is ever stored — only provider tokens.",
+        "Built on SPIKE-SQUARE findings."
+      ],
+      "refs": {"req": ["REQ-PAY-1"], "adr": ["0007"], "prd_ac": ["AC5"]},
+      "labels": ["type:story", "PRD-06", "phase:1", "area:backend", "area:integration"],
+      "priority": "P0",
+      "depends_on": ["SPRINT-0/SPIKE-SQUARE"]
+    },
+    {
+      "key": "POS",
+      "title": "In-person POS checkout (card + cash)",
+      "context": "Front desk takes payment in person via Square card-present or recorded cash, with receipts, partial/split, tips and surcharge config (REQ-PAY-2). Financial figures are owner-gated.",
+      "as_a": "front desk",
+      "i_want": "to take payment in person by Square card or recorded cash with receipts and split/partial support",
+      "so_that": "I can check clients out at the desk",
+      "acceptance": [
+        "A sale completes by Square card or recorded cash; both appear in the daily closeout.",
+        "Receipts, partial/split payments, tips and surcharge config supported.",
+        "Money figures respect the owner-only financial capability (reception sees no money totals beyond the sale).",
+        "Online one-off checkout is not exposed (deferred)."
+      ],
+      "refs": {"req": ["REQ-PAY-2"], "prd_ac": ["AC1"]},
+      "labels": ["type:story", "PRD-06", "phase:1", "area:web"],
+      "priority": "P0",
+      "depends_on": ["PRD-06/PAYMENT-PROVIDER"]
+    },
+    {
+      "key": "PACKAGES-GIFT",
+      "title": "Packages/series, gift cards & client balances",
+      "context": "Sell/redeem packages (visits remaining) and gift cards, track client balances/credit and AR ageing (REQ-PAY-3/5).",
+      "as_a": "front desk",
+      "i_want": "to sell and redeem packages and gift cards and track client balances",
+      "so_that": "clients can pre-pay and carry credit",
+      "acceptance": [
+        "Package/series sale + redemption with 'visits remaining'.",
+        "Gift cards can be sold, balance-tracked and redeemed.",
+        "Client balance/credit and AR ageing tracked.",
+        "Redemptions appear in the closeout and post to Xero (PRD-10)."
+      ],
+      "refs": {"req": ["REQ-PAY-3", "REQ-PAY-5"], "prd_ac": ["AC6"]},
+      "labels": ["type:story", "PRD-06", "phase:1", "area:web"],
+      "priority": "P1",
+      "depends_on": ["PRD-06/POS"]
+    },
+    {
+      "key": "CLOSEOUT",
+      "title": "Daily closeout & reconciliation",
+      "context": "End-of-day closeout balances card + cash (REQ-PAY-4).",
+      "as_a": "owner",
+      "i_want": "a daily closeout that balances card and cash",
+      "so_that": "the till reconciles every day",
+      "acceptance": [
+        "Closeout summarises card + cash tenders for the day.",
+        "Variances are surfaced.",
+        "Closeout figures are owner-gated.",
+        "Closeout reconciles to the Xero posting (PRD-10)."
+      ],
+      "refs": {"req": ["REQ-PAY-4"], "prd_ac": ["AC1"]},
+      "labels": ["type:story", "PRD-06", "phase:1", "area:web"],
+      "priority": "P1",
+      "depends_on": ["PRD-06/POS"]
+    },
+    {
+      "key": "MEMBERSHIP",
+      "title": "Memberships with automatic autopay & dunning",
+      "context": "Membership plans/tiers with automatic recurring billing from a tokenised card-on-file (added online/in-app or at desk) and failed-payment dunning (REQ-MEMB-1/2/3).",
+      "as_a": "client",
+      "i_want": "to join a membership and have my card auto-charged on schedule",
+      "so_that": "I get member perks without manual payments",
+      "acceptance": [
+        "A membership auto-charges on schedule from a stored token (card added online/in-app or in person).",
+        "A failed charge triggers dunning/recovery.",
+        "Lifecycle (join/pause/cancel/win-back) tracked → MRR/churn reporting (PRD-08).",
+        "Benefits/credits auto-apply at checkout."
+      ],
+      "refs": {"req": ["REQ-MEMB-1", "REQ-MEMB-2", "REQ-MEMB-3"], "prd_ac": ["AC2"]},
+      "labels": ["type:story", "PRD-06", "phase:1", "area:backend"],
+      "priority": "P0",
+      "depends_on": ["PRD-06/PAYMENT-PROVIDER"]
+    },
+    {
+      "key": "REWARDS-ENGINE",
+      "title": "Rewards engine — non-S4 only",
+      "context": "Visit-based + membership rewards that the engine blocks from ever applying to S4 items; configuring an S4 reward is blocked (REQ-MEMB-4/5/7, C9/ADR-0014).",
+      "as_a": "client",
+      "i_want": "to earn and redeem rewards on non-S4 items only",
+      "so_that": "I'm rewarded without breaching S4 advertising rules",
+      "acceptance": [
+        "Visit-based rewards (milestones/every-Nth-visit) + membership perks on non-S4 items, add-ons or account/gift credit.",
+        "The engine refuses to earn, redeem or discount against any S4-flagged item.",
+        "Attempting to configure an S4 reward is blocked.",
+        "Catalog schedule flag (from PRD-04) drives eligibility."
+      ],
+      "refs": {"req": ["REQ-MEMB-4", "REQ-MEMB-5", "REQ-MEMB-7"], "compliance": ["C9"], "adr": ["0014"], "prd_ac": ["AC3"]},
+      "labels": ["type:story", "PRD-06", "phase:1", "area:backend", "compliance"],
+      "priority": "P0",
+      "depends_on": ["PRD-04/PRODUCT-CATALOGUE"]
+    },
+    {
+      "key": "MARGIN-RULES",
+      "title": "Margin-aware reward rules",
+      "context": "Owners set value caps and eligible items; reporting shows reward-cost vs retention (REQ-MEMB-6). Reward comms respect advertising rules (C9/C23).",
+      "as_a": "owner",
+      "i_want": "to set margin-aware reward rules with caps and eligible items and see reward-cost vs retention",
+      "so_that": "rewards drive retention without eroding margin",
+      "acceptance": [
+        "Reward rules enforce value caps and eligible-item lists.",
+        "Reward-cost vs retention surfaces in reporting (PRD-08).",
+        "Reward communications go only to consented, logged-in clients (no public S4 price promotion).",
+        "Rule config is owner-gated."
+      ],
+      "refs": {"req": ["REQ-MEMB-6"], "compliance": ["C9", "C23"], "prd_ac": ["AC4"]},
+      "labels": ["type:story", "PRD-06", "phase:1", "area:backend", "compliance"],
+      "priority": "P1",
+      "depends_on": ["PRD-06/REWARDS-ENGINE"]
+    },
+    {
+      "key": "CHECKOUT-ASSIST",
+      "title": "Checkout assist & post-visit rebooking",
+      "context": "Subtle membership/restock upsell + client rapport panel + post-checkout rebooking on the treatment interval (REQ-PAY-6, ADR-0022).",
+      "as_a": "front desk",
+      "i_want": "checkout to suggest relevant non-S4 upsells and prompt rebooking at the right interval",
+      "so_that": "I help clients and keep them on cadence",
+      "acceptance": [
+        "Checkout shows a subtle membership/restock upsell and a client rapport panel.",
+        "Post-checkout rebooking is offered on the treatment interval.",
+        "Upsell suggestions never include S4 discounting.",
+        "Rebooking integrates with the calendar (PRD-02) and recall (PRD-07)."
+      ],
+      "refs": {"req": ["REQ-PAY-6"], "adr": ["0022"]},
+      "labels": ["type:story", "PRD-06", "phase:1", "area:web"],
+      "priority": "P2",
+      "depends_on": ["PRD-06/POS"]
+    },
+    {
+      "key": "PRICING-WHATIF",
+      "title": "Pricing & what-if planning (owner)",
+      "context": "An owner pricing + what-if planner over the reporting read-models (REQ-MEMB-9, ADR-0022). The Finance screen is a light pricing + reporting hub; the ledger defers to Xero.",
+      "as_a": "owner",
+      "i_want": "to model pricing and run what-if scenarios",
+      "so_that": "I can set prices and plan membership economics",
+      "acceptance": [
+        "Pricing/what-if planner uses the same read-models as reporting (PRD-08).",
+        "Scenario outputs are owner-gated.",
+        "The Finance area is a pricing + reporting hub; in-app ledger/payroll/AP/BAS tooling is out of scope (Xero).",
+        "Invoices/payments still sync to Xero from checkout."
+      ],
+      "refs": {"req": ["REQ-MEMB-9"], "adr": ["0022", "0027"]},
+      "labels": ["type:story", "PRD-06", "phase:1", "area:web"],
+      "priority": "P2",
+      "depends_on": ["PRD-06/POS"]
+    }
+  ]
+}

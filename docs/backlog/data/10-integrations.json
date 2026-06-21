@@ -1,0 +1,84 @@
+{
+  "epic": {
+    "key": "PRD-10",
+    "title": "Integrations: Xero & calendar",
+    "milestone": "M4",
+    "phase": "1",
+    "prd": "docs/prds/PRD-10-integrations.md",
+    "summary": "Outbound integrations that remove double-entry: push sales/payments to Xero, and keep appointments in sync with staff calendars (M365 / Google) — each behind a swappable adapter, with an AU/APP-8 sub-processor posture.",
+    "labels": ["type:epic", "PRD-10", "phase:1", "area:integration", "area:backend"]
+  },
+  "stories": [
+    {
+      "key": "XERO",
+      "title": "Xero invoice/payment sync",
+      "context": "On checkout, create/sync invoice + payment (and payouts) in Xero with account/GST mapping, retries and reconciliation status, behind IAccountingExport (REQ-INT-1).",
+      "as_a": "owner",
+      "i_want": "completed sales/payments to post to Xero with the right account and GST",
+      "so_that": "my books reconcile without re-keying",
+      "acceptance": [
+        "A completed sale creates the corresponding Xero invoice + payment with correct account + GST.",
+        "Failures retry and show a reconciliation status.",
+        "Services vs retail vs memberships map to the right accounts (defaults are an open question).",
+        "Implemented behind IAccountingExport (swappable)."
+      ],
+      "refs": {"req": ["REQ-INT-1"], "adr": ["0012"], "prd_ac": ["AC1", "AC4"]},
+      "labels": ["type:story", "PRD-10", "phase:1", "area:integration"],
+      "priority": "P1",
+      "depends_on": ["PRD-06/POS"]
+    },
+    {
+      "key": "CALENDAR-SYNC",
+      "title": "Two-way calendar sync (M365 / Google)",
+      "context": "Appointments sync both ways with Outlook/Google; external busy events block availability, behind ICalendarProvider (REQ-INT-2).",
+      "as_a": "practitioner",
+      "i_want": "my appointments to appear in Outlook/Google and external busy-time to block my availability",
+      "so_that": "I have one source of truth for my time",
+      "acceptance": [
+        "Creating/moving/cancelling an appointment reflects in the linked Outlook/Google calendar and vice-versa.",
+        "External busy events block availability in booking (PRD-02).",
+        "Per-staff opt-in and conflict-resolution rules (open question) supported.",
+        "Implemented behind ICalendarProvider (swappable)."
+      ],
+      "refs": {"req": ["REQ-INT-2"], "adr": ["0012"], "prd_ac": ["AC2", "AC4"]},
+      "labels": ["type:story", "PRD-10", "phase:1", "area:integration"],
+      "priority": "P2",
+      "depends_on": ["PRD-02/CALENDAR"]
+    },
+    {
+      "key": "SUBPROCESSOR-POSTURE",
+      "title": "Sub-processor residency posture (APP-8)",
+      "context": "No integration sends PII to a non-AU sub-processor unless an APP-8 assessment + consent record exists (REQ-INT-3, C21/ADR-0016).",
+      "as_a": "owner",
+      "i_want": "assurance that any data leaving the platform goes only to AU-resident or APP-8-assessed sub-processors",
+      "so_that": "integrations don't breach cross-border rules",
+      "acceptance": [
+        "No integration sends PII to a non-AU sub-processor unless an APP-8 assessment + consent record exists.",
+        "Sub-processor data flows are registered.",
+        "All integrations are outbound and swappable.",
+        "Ties into PRD-01/RESIDENCY enforcement."
+      ],
+      "refs": {"req": ["REQ-INT-3"], "compliance": ["C21"], "adr": ["0016"], "prd_ac": ["AC3"]},
+      "labels": ["type:story", "PRD-10", "phase:1", "area:integration", "compliance"],
+      "priority": "P2",
+      "depends_on": ["PRD-01/RESIDENCY"]
+    },
+    {
+      "key": "INTEGRATIONS-LATER",
+      "title": "Online checkout, e-prescribing, webhooks/API (placeholder)",
+      "context": "Online checkout & deposits (S4 never priced/sold online), e-prescribing (eRx/ETP, 🔬), public API/webhooks (Phase 3) and Medicare/HICAPS (non-applicable to cosmetic). Placeholder (REQ-INT-2a/4/5/6/7, ADR-0035/0036).",
+      "as_a": "owner",
+      "i_want": "future integrations: online checkout/deposits, e-prescribing and a public API",
+      "so_that": "the platform extends as we scale",
+      "acceptance": [
+        "Placeholder — Phase 2/3; each behind its existing port (IPaymentProvider, IPrescribingProvider).",
+        "S4 is never priced or sold online (invariant carried forward).",
+        "Medicare/HICAPS recorded as non-applicable to cosmetic.",
+        "e-prescribing flagged for feasibility validation."
+      ],
+      "refs": {"req": ["REQ-INT-4", "REQ-INT-5", "REQ-INT-6", "REQ-INT-7"], "adr": ["0035", "0036"]},
+      "labels": ["type:story", "PRD-10", "phase:2plus", "area:integration"],
+      "priority": "P2"
+    }
+  ]
+}

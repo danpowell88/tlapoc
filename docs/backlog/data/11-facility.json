@@ -1,0 +1,96 @@
+{
+  "epic": {
+    "key": "PRD-11",
+    "title": "Facility, infection-control, emergency & complaints",
+    "milestone": "M6",
+    "phase": "1",
+    "prd": "docs/prds/PRD-11-facility-complaints.md",
+    "summary": "The record-keeping that evidences AHPRA's facility, infection-control and emergency obligations, plus a complaints register with the mandated AHPRA pathway. Lightweight registers + reminders in v1, with fuller workflows (cold-chain log, open/close checklist, sterilisation register, waste manifests, complication-response) layered on.",
+    "labels": ["type:epic", "PRD-11", "phase:1", "area:web", "area:backend"]
+  },
+  "stories": [
+    {
+      "key": "FACILITY",
+      "title": "Facility accreditation & expiry alerts",
+      "context": "Per-location accreditation status + expiry alerts before lapse (REQ-FAC-1, C20).",
+      "as_a": "owner",
+      "i_want": "to record facility accreditation and be alerted before it expires",
+      "so_that": "we never lapse on accreditation",
+      "acceptance": [
+        "Per-location accreditation status recorded.",
+        "Expiry alerts fire before lapse.",
+        "Whether accreditation is blocking or advisory is configurable (open question).",
+        "Records are audited."
+      ],
+      "refs": {"req": ["REQ-FAC-1"], "compliance": ["C20"], "prd_ac": ["AC1"]},
+      "labels": ["type:story", "PRD-11", "phase:1", "area:web", "compliance"],
+      "priority": "P2"
+    },
+    {
+      "key": "IPC-LOGS",
+      "title": "Infection-control & waste logs",
+      "context": "Sterilisation/single-use, sharps & clinical-waste disposal logs, all audited (REQ-FAC-2, C20). Fuller v2 adds manifests + sterilisation register.",
+      "as_a": "staff member",
+      "i_want": "to keep infection-control logs for sterilisation/single-use and sharps/clinical-waste disposal",
+      "so_that": "we evidence safe practice",
+      "acceptance": [
+        "Sterilisation/single-use and sharps/clinical-waste disposals can be logged and are audited.",
+        "Logs are retrievable for inspection (feeds PRD-08 pack).",
+        "A twice-daily cold-chain log with a breach pathway is supported (links PRD-04 cold-chain).",
+        "Waste manifests/sterilisation register are captured for v2 expansion."
+      ],
+      "refs": {"req": ["REQ-FAC-2"], "compliance": ["C20"], "prd_ac": ["AC2"]},
+      "labels": ["type:story", "PRD-11", "phase:1", "area:web", "compliance"],
+      "priority": "P2"
+    },
+    {
+      "key": "EMERGENCY-KIT",
+      "title": "Emergency kit & continuity-of-care",
+      "context": "Track the emergency kit (hyaluronidase, anaphylaxis) with expiry alerts and record a continuity-of-care contact (REQ-FAC-3, C20).",
+      "as_a": "owner",
+      "i_want": "to track the emergency kit with expiry alerts and record a continuity-of-care contact",
+      "so_that": "we're prepared for complications and cover when a prescriber is unavailable",
+      "acceptance": [
+        "Emergency-kit items (incl. hyaluronidase, anaphylaxis) raise expiry alerts before lapse.",
+        "A continuity-of-care contact is recorded and visible when the treating practitioner/prescriber is unavailable.",
+        "Emergency/complication protocol links are surfaced.",
+        "Ties into the complication-response flow (PRD-05)."
+      ],
+      "refs": {"req": ["REQ-FAC-3"], "compliance": ["C20"], "prd_ac": ["AC1", "AC4"]},
+      "labels": ["type:story", "PRD-11", "phase:1", "area:web", "compliance"],
+      "priority": "P2"
+    },
+    {
+      "key": "COMPLAINTS",
+      "title": "Complaints register with AHPRA pathway",
+      "context": "A complaints/adverse-outcome register linked to client/treatment that surfaces complaint mechanisms incl. AHPRA (NDA doesn't remove the right), feeds retention (complaint → indefinite) and reporting (REQ-CLI-4, C24).",
+      "as_a": "manager",
+      "i_want": "to log a complaint against a client/treatment and have the system surface the AHPRA pathway",
+      "so_that": "complaints are handled correctly and retained",
+      "acceptance": [
+        "A complaint links to the client/treatment and surfaces complaint mechanisms incl. AHPRA (noting NDA doesn't remove the right).",
+        "A complaint flag drives indefinite retention of the related record (C18, PRD-01).",
+        "Complaints feed the register/reporting (PRD-08).",
+        "A complaint can be raised from a conversation (links PRD-07)."
+      ],
+      "refs": {"req": ["REQ-CLI-4"], "compliance": ["C24", "C18"], "prd_ac": ["AC3"]},
+      "labels": ["type:story", "PRD-11", "phase:1", "area:web", "compliance"],
+      "priority": "P1"
+    },
+    {
+      "key": "FAC-WORKFLOWS",
+      "title": "Fuller facility workflows (placeholder)",
+      "context": "Open/close checklist, sterilisation & equipment maintenance register (autoclave validation, spore testing, laser service), deep incident & mandatory-reporting case management — Phase 2 (REQ-FAC-4..10). Placeholder.",
+      "as_a": "owner",
+      "i_want": "fuller facility workflows: checklists, maintenance registers and incident case management",
+      "so_that": "operations and safety are fully systematised",
+      "acceptance": [
+        "Placeholder — v1 is lightweight registers; these workflows are Phase 2.",
+        "Captured so the facility model anticipates them."
+      ],
+      "refs": {"req": ["REQ-FAC-4", "REQ-FAC-10"], "adr": ["0026", "0030"]},
+      "labels": ["type:story", "PRD-11", "phase:2plus", "area:web"],
+      "priority": "P2"
+    }
+  ]
+}

@@ -1,0 +1,121 @@
+{
+  "epic": {
+    "key": "PRD-03",
+    "title": "Intake, consent & compliance gating",
+    "milestone": "M2",
+    "phase": "1",
+    "prd": "docs/prds/PRD-03-intake-consent-gating.md",
+    "summary": "Turns AHPRA's patient-safety rules into enforced workflow: pre-visit intake (medical history, contraindications, BDD/psychological screen), versioned e-signed consent with mandated content, separate withdrawable image-use consent, and cooling-off + payment blocks for under-18s. Treatment is blocked until required intake/consent is complete and current.",
+    "labels": ["type:epic", "PRD-03", "phase:1", "area:backend", "compliance"]
+  },
+  "stories": [
+    {
+      "key": "INTAKE",
+      "title": "Pre-visit intake forms",
+      "context": "Clients complete medical history, meds, allergies and contraindications on their phone before the visit; responses auto-link to the chart.",
+      "as_a": "client",
+      "i_want": "to complete my medical history, medications, allergies and contraindications before my visit on my phone",
+      "so_that": "my practitioner has what they need and my treatment is safe",
+      "acceptance": [
+        "Configurable pre-visit forms capture history, meds, allergies/contraindications.",
+        "Intake is sent on booking and completable in the client app/web.",
+        "Responses auto-link to the client's chart.",
+        "Incomplete required intake contributes to the treatment block."
+      ],
+      "refs": {"req": ["REQ-CONS-2", "REQ-CONS-3"]},
+      "labels": ["type:story", "PRD-03", "phase:1", "area:client-app", "area:backend"],
+      "priority": "P0",
+      "depends_on": ["PRD-02/ONLINE-BOOK"]
+    },
+    {
+      "key": "BDD",
+      "title": "BDD / psychological screening instrument",
+      "context": "Cosmetic guidelines require BDD screening; a positive result must be surfaced to the prescriber before treatment (C3).",
+      "as_a": "RN/NP",
+      "i_want": "a BDD/psychological screen completed and surfaced before I proceed",
+      "so_that": "I can avoid harm for at-risk patients per the guidelines",
+      "acceptance": [
+        "A validated BDD/psychological screening instrument is embedded in intake.",
+        "A completed screen authored/reviewed by an RN/NP is present before treatment.",
+        "A positive flag is surfaced to the prescriber and recorded.",
+        "Which instrument is used is configurable (open question to confirm)."
+      ],
+      "refs": {"req": ["REQ-CONS-2"], "compliance": ["C3"], "prd_ac": ["AC2"]},
+      "labels": ["type:story", "PRD-03", "phase:1", "area:backend", "compliance"],
+      "priority": "P0",
+      "depends_on": ["PRD-03/INTAKE"]
+    },
+    {
+      "key": "CONSENT",
+      "title": "Versioned e-signed consent with mandated content",
+      "context": "Consent must be versioned, e-signed, plain-language and contain mandated content (nature, risks/benefits/alternatives, practitioner qualifications, costs, realistic-outcome language, complaint mechanisms incl. AHPRA-despite-NDA) (C5).",
+      "as_a": "client",
+      "i_want": "to read plain-language consent covering the procedure, risks, alternatives, the practitioner's qualifications and costs, and e-sign it",
+      "so_that": "I give genuinely informed consent",
+      "acceptance": [
+        "Consent is versioned, e-signed and contains all mandated content.",
+        "Treatment is blocked until a current, version-matched consent is signed; the block states what's missing.",
+        "Changing a template creates a new version; previously signed consents stay bound to their version.",
+        "Consent versions are retained per the retention policy (C18)."
+      ],
+      "refs": {"req": ["REQ-CONS-1"], "compliance": ["C5", "C18"], "prd_ac": ["AC1", "AC6"]},
+      "labels": ["type:story", "PRD-03", "phase:1", "area:backend", "compliance"],
+      "priority": "P0",
+      "depends_on": ["PRD-03/INTAKE"]
+    },
+    {
+      "key": "IMAGE-CONSENT",
+      "title": "Separate, withdrawable image-use consent",
+      "context": "Photo use requires its own scoped consent, withdrawable at any time, which immediately stops downstream use (C14).",
+      "as_a": "client",
+      "i_want": "to give separate consent for photo use and withdraw it whenever I want",
+      "so_that": "I control how my images are used",
+      "acceptance": [
+        "Image-use consent is separate from treatment consent and scoped.",
+        "Withdrawing it immediately stops further use and is audited.",
+        "Downstream media features (PRD-05/09) check this consent.",
+        "Granted/withdrawn state is visible on the patient header chip."
+      ],
+      "refs": {"req": ["REQ-CONS-5"], "compliance": ["C14"], "prd_ac": ["AC4"]},
+      "labels": ["type:story", "PRD-03", "phase:1", "area:backend", "compliance"],
+      "priority": "P1",
+      "depends_on": ["PRD-03/CONSENT"]
+    },
+    {
+      "key": "COOLING-OFF",
+      "title": "Cooling-off & under-18 payment block",
+      "context": "Under-18s require ≥7 days between consent and procedure plus a payment block (except the consult) and a recorded second consultation; an optional adult cooling-off is configurable (C6).",
+      "as_a": "system",
+      "i_want": "to enforce a 7-day cooling-off and payment block for under-18s and record a second consultation",
+      "so_that": "minors are protected per the rules",
+      "acceptance": [
+        "For under-18: ≥7 days enforced between consent and procedure; payment blocked except the consult until elapsed.",
+        "A second-consultation offer is recorded.",
+        "Optional adult cooling-off is configurable (default per legal read).",
+        "Payment block coordinates with PRD-06."
+      ],
+      "refs": {"req": ["REQ-CONS-4"], "compliance": ["C6"], "prd_ac": ["AC3"]},
+      "labels": ["type:story", "PRD-03", "phase:1", "area:backend", "compliance"],
+      "priority": "P1",
+      "depends_on": ["PRD-01/CLIENT-CORE", "PRD-03/CONSENT"]
+    },
+    {
+      "key": "GATING",
+      "title": "Server-enforced treatment gating",
+      "context": "Treatment cannot start unless required intake + consent are complete and current — enforced server-side, surfaced via the blocked-action banner (ADR-0008).",
+      "as_a": "RN/NP",
+      "i_want": "the system to block treatment until required intake and consent are complete and current, telling me exactly what's missing",
+      "so_that": "the compliant path is the only path",
+      "acceptance": [
+        "Treatment is blocked server-side unless required intake + current consent exist.",
+        "The block states what's missing and how to resolve it (never a dead-end).",
+        "The gate is the shared mechanism consumed by PRD-04/05.",
+        "Gate decisions are audited."
+      ],
+      "refs": {"compliance": ["C5"], "adr": ["0008"], "prd_ac": ["AC1"]},
+      "labels": ["type:story", "PRD-03", "phase:1", "area:backend", "compliance"],
+      "priority": "P0",
+      "depends_on": ["PRD-03/CONSENT", "PRD-03/BDD"]
+    }
+  ]
+}

@@ -1,0 +1,136 @@
+{
+  "epic": {
+    "key": "PRD-07",
+    "title": "Communications, reminders & recall",
+    "milestone": "M4",
+    "phase": "1",
+    "prd": "docs/prds/PRD-07-comms-reminders-recall.md",
+    "summary": "The engine that keeps the book full and clients coming back at the right cadence: reminders, pre-/after-care sequences, and recall (~12-week toxin re-care) over SMS/email/push — with Spam Act consent/unsubscribe baked in. Advertising content is produced in the clinic's external tools; the platform has no advertising linter, and the public booking page uses generic names with S4 prices withheld by configuration.",
+    "labels": ["type:epic", "PRD-07", "phase:1", "area:backend", "area:integration"]
+  },
+  "stories": [
+    {
+      "key": "CHANNELS",
+      "title": "Notification channels (SMS / email / push)",
+      "context": "An INotifier port over an AU SMS provider + email + app push, with per-tenant templates (REQ-NOTIF-1, ADR-0012).",
+      "as_a": "developer",
+      "i_want": "a notification abstraction over SMS, email and push with per-tenant templates",
+      "so_that": "all messaging is consistent and provider-swappable",
+      "acceptance": [
+        "INotifier supports SMS (AU provider), email and app push.",
+        "Per-tenant message templates supported.",
+        "Provider is swappable behind the port.",
+        "All sends log to the client's comms history."
+      ],
+      "refs": {"req": ["REQ-NOTIF-1"], "adr": ["0012"], "prd_ac": ["AC5"]},
+      "labels": ["type:story", "PRD-07", "phase:1", "area:backend", "area:integration"],
+      "priority": "P0"
+    },
+    {
+      "key": "REMINDERS-CARE",
+      "title": "Reminders, confirmations & care sequences",
+      "context": "Appointment reminders/confirmations plus pre-care and aftercare sequences (multi-touch, timed per treatment type) (REQ-NOTIF-2). Transactional messages are exempt from opt-in.",
+      "as_a": "client",
+      "i_want": "timely reminders I can confirm/decline and pre-/after-care instructions for my treatment",
+      "so_that": "I'm prepared and cared for around my visit",
+      "acceptance": [
+        "Appointment reminders/confirmations send per template; confirm/decline updates the appointment (PRD-02).",
+        "Pre-care + aftercare sequences are multi-touch and timed per treatment type.",
+        "Transactional messages send regardless of marketing opt-in and avoid S4 references.",
+        "Sends are logged to comms history."
+      ],
+      "refs": {"req": ["REQ-NOTIF-2"], "prd_ac": ["AC3"]},
+      "labels": ["type:story", "PRD-07", "phase:1", "area:backend"],
+      "priority": "P1",
+      "depends_on": ["PRD-07/CHANNELS"]
+    },
+    {
+      "key": "RECALL",
+      "title": "Recall / recare worklist",
+      "context": "Recare at the treatment interval (toxin ~12 weeks) + unbooked-rebook prompts, with a recall worklist for front desk (REQ-NOTIF-3).",
+      "as_a": "front desk",
+      "i_want": "a recall worklist of clients due to rebook and automatic recall nudges at the treatment interval",
+      "so_that": "clients return on cadence and the book stays full",
+      "acceptance": [
+        "A toxin client with no future booking enters the recall worklist at the configured interval and receives the nudge.",
+        "Unbooked recommended sessions prompt a rebook.",
+        "Front desk can work the recall/rebook worklist.",
+        "Recall integrates with treatment plans (PRD-05) and rebooking (PRD-06)."
+      ],
+      "refs": {"req": ["REQ-NOTIF-3"], "prd_ac": ["AC4"]},
+      "labels": ["type:story", "PRD-07", "phase:1", "area:backend"],
+      "priority": "P1",
+      "depends_on": ["PRD-07/CHANNELS"]
+    },
+    {
+      "key": "MARKETING-CONSENT",
+      "title": "Marketing consent & functional unsubscribe (Spam Act)",
+      "context": "Opt-in for commercial electronic messages, sender identification and a functional unsubscribe that suppresses immediately on withdrawal (REQ-NOTIF-5, C23).",
+      "as_a": "client",
+      "i_want": "to only receive marketing I opted into, with a working unsubscribe on every message",
+      "so_that": "my consent is respected per the Spam Act",
+      "acceptance": [
+        "Marketing sends only to opted-in clients and always include a working unsubscribe.",
+        "Unsubscribing suppresses future marketing immediately.",
+        "Sender identification is included.",
+        "Suppression list is honoured across channels (and by PRD-06 reward comms)."
+      ],
+      "refs": {"req": ["REQ-NOTIF-5"], "compliance": ["C23"], "prd_ac": ["AC1"]},
+      "labels": ["type:story", "PRD-07", "phase:1", "area:backend", "compliance"],
+      "priority": "P1",
+      "depends_on": ["PRD-07/CHANNELS"]
+    },
+    {
+      "key": "BOOKING-PAGE",
+      "title": "Public booking page: generic names, S4 prices withheld",
+      "context": "The public booking page uses generic service names and withholds S4 prices by configuration (catalog schedule flag), with no advertising linter (REQ-NOTIF-12, C9).",
+      "as_a": "owner",
+      "i_want": "my public booking page to use generic service names and withhold S4 prices automatically",
+      "so_that": "we don't reference S4 in public advertising",
+      "acceptance": [
+        "The booking page renders generic service names and withholds S4 prices for any S4-flagged service (configuration-driven).",
+        "No brands, 'anti-wrinkle injections', prices or #botox appear for S4 services.",
+        "Configuration is driven by the catalog schedule flag (PRD-04).",
+        "Advertising compliance beyond this is clinic-owned (external tools)."
+      ],
+      "refs": {"req": ["REQ-NOTIF-12"], "compliance": ["C9"], "adr": ["0014"], "prd_ac": ["AC2"]},
+      "labels": ["type:story", "PRD-07", "phase:1", "area:web", "compliance"],
+      "priority": "P1",
+      "depends_on": ["PRD-02/ONLINE-BOOK"]
+    },
+    {
+      "key": "FOLLOWUPS",
+      "title": "Unified follow-up / job queue",
+      "context": "Scattered recall / needs-attention / unanswered-comms items merge into one queue; staff can flag any message; inbound comms auto-categorise into jobs (rules/keyword, no AI) (REQ-NOTIF-7, ADR-0023).",
+      "as_a": "staff member",
+      "i_want": "one follow-up queue that merges recalls, needs-attention items and flagged messages",
+      "so_that": "nothing falls through the cracks",
+      "acceptance": [
+        "Recall, needs-attention and unanswered-comms items merge into a single queue.",
+        "Any message can be flagged so it isn't lost.",
+        "Inbound comms auto-categorise into jobs by rules/keyword (no AI).",
+        "A no-show (PRD-02) and negative reviews raise jobs into this queue."
+      ],
+      "refs": {"req": ["REQ-NOTIF-7"], "adr": ["0023"]},
+      "labels": ["type:story", "PRD-07", "phase:1", "area:web"],
+      "priority": "P2",
+      "depends_on": ["PRD-07/CHANNELS"]
+    },
+    {
+      "key": "INBOX",
+      "title": "Omnichannel inbox + lead/reviews (placeholder)",
+      "context": "The omnichannel inbox (IG/FB/SMS/email), lead/prospect CRM and reviews/reputation are scoped to Phase 2; marketing DMs are out (Meta 24-h window). Placeholder (REQ-NOTIF-6/8/9, ADR-0018/0019/0032/0033).",
+      "as_a": "staff member",
+      "i_want": "a unified inbox with lead tracking and review management",
+      "so_that": "all client conversations live in one place",
+      "acceptance": [
+        "Placeholder — Phase 2; IG/FB/WhatsApp are reactive/service channels only (no cold-DM marketing).",
+        "Reviews acknowledge/flag/auto-detect-follow-up and the lead CRM are captured for later.",
+        "Meta feasibility (App Review, Business Verification, 24-h window) flagged for validation."
+      ],
+      "refs": {"req": ["REQ-NOTIF-6", "REQ-NOTIF-8", "REQ-NOTIF-9"], "adr": ["0018", "0032", "0033"]},
+      "labels": ["type:story", "PRD-07", "phase:2plus", "area:integration"],
+      "priority": "P2"
+    }
+  ]
+}
