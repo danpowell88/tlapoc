@@ -31,9 +31,13 @@ import urllib.error
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from backlog import load, MS_TITLE
-from monday import (estimate, type_label, tasks_for, plan_sprints,
+from monday import (estimate, type_label, tasks_for, plan_sprints, MS_ORDER,
                     bg_text, req_bullets, ui_text, tech_blocks,
                     compliance_links, prd_link)
+
+SPRINT_THEME = {"M0": "Setup", "M1": "Foundations", "M2": "Booking",
+                "M3": "Clinical", "M4": "Commerce", "M5": "Reporting & apps",
+                "M6": "Facility", "M7": "Backlog"}
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CFG = os.path.join(HERE, ".jira-config")
@@ -475,22 +479,28 @@ def cmd_sprints():
     bid = scrum["id"]
     print(f"board {bid} ({scrum['name']}, type={scrum.get('type')})")
     named, _cap, _total = plan_sprints(load())
+    i = 0
     for title, items in named:
         if not title.lower().startswith("sprint"):
             continue
-        sk = f"sprint:{title}"
+        i += 1
+        ms = [ep["epic"]["milestone"] for ep, _s in items]
+        dom = min(ms, key=lambda m: (-ms.count(m), MS_ORDER[m]))
+        name = f"Sprint {i:02d} · {SPRINT_THEME.get(dom, '')}".strip()[:29]
+        sk = f"sprint:{name}"
         if sk in st:
             sid = st[sk]
         else:
-            sid = api("POST", "sprint", {"name": title, "originBoardId": bid},
+            sid = api("POST", "sprint",
+                      {"name": name, "originBoardId": bid, "goal": MS_TITLE[dom]},
                       base="rest/agile/1.0")["id"]
             st[sk] = sid
             save_state(st)
         keys = [st.get(f"story:{ep['epic']['key']}/{s['key']}") for ep, s in items]
         keys = [k for k in keys if k]
-        for i in range(0, len(keys), 50):
-            api("POST", f"sprint/{sid}/issue", {"issues": keys[i:i + 50]}, base="rest/agile/1.0")
-        print(f"{title}: {len(keys)} stories -> sprint {sid}")
+        for off in range(0, len(keys), 50):
+            api("POST", f"sprint/{sid}/issue", {"issues": keys[off:off + 50]}, base="rest/agile/1.0")
+        print(f"{name}: {len(keys)} stories -> sprint {sid}")
         time.sleep(0.2)
     print("sprint mapping done (Backlog group left unscheduled).")
 
