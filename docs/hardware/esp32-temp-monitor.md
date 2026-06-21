@@ -428,6 +428,134 @@ flowchart TD
 - **Excursion → breach pathway:** an out-of-range reading quarantines the affected lot ("Do not use") and raises a **facility breach job** to the Lead Nurse — the same pathway a manual excursion triggers.
 - **Offline / firmware-behind / battery-low** monitors raise a **facility job** so they get fixed before they matter.
 
+## 12. Integrating commercial / validated loggers
+
+The TM-01 is deliberately the **cheap, dense, real-time early-warning layer** — not the instrument of
+record (see the disclaimer at the top: it is *not* a TGA-registered device). For the **calibrated,
+type-tested device an inspector trusts**, you pair it with an off-the-shelf logger inside a purpose-built
+fridge. The good news: **every reading lands in the same place.** The platform doesn't care whether a
+reading came from an $8 ESP32 or a $400 Testo — both end up in the readings store and both fire the same
+breach/quarantine pathway. This is the path that turns *"monitoring aid"* into *"monitoring aid **plus**
+instrument of record"* without a second app.
+
+### 12.1 Fridge vs logger — two different things
+
+A "smart vaccine fridge" is really **two products**: a calibrated cold box, and a logger bolted into it.
+**The fridge has no data API** — you never talk to the compressor. The logger is the part that speaks to
+the network. So the buying decision is *"which logger"*, and the fridge is chosen for cold-chain hardware
+(glass door, lock, fan-forced even temperature, digital min/max, ideally a NATA calibration certificate).
+
+| Purpose-built fridge (AU) | Why it's chosen | Data API? |
+|---|---|---|
+| **Vacc-Safe** (e.g. VS200P) | Australian, ubiquitous in vaccine storage; min/max + lock | **No** — add a logger |
+| **Nuline** pharmacy/vaccine (NLM series) | AU pharmacy standard, glass door | **No** — add a logger |
+| **Thermoline** vaccine/pharmacy | AU-made, fan-forced even temp | **No** — add a logger |
+| **Dometic** medical (HC/DS) · **Liebherr Mediline** · **Vestfrost** | Medical-grade, tight ±°C | **No** — add a logger |
+
+> Verify the current model range with the supplier — line-ups change. The constant is: **the fridge is
+> dumb hardware; the logger is where integration happens.**
+
+### 12.2 Loggers — and how each reaches our API
+
+| Logger / platform | Collector model | Into **our** API | Compliance fit | Notes |
+|---|---|---|---|---|
+| **Testo Saveris 2** | WiFi loggers → Testo Cloud | **Webhook (push) + REST API** | High | Strongest alerting/escalation; the only one with confirmed native webhooks |
+| **Disruptive Technologies** | Stick-on sensors → **Cloud Connector** (gateway) → DT cloud | **Webhook** ("Data Connector") + REST (`api.d21s.com`) | EN12830 variants | Cleanest "collector + API"; 10-yr battery, peel-and-stick, no probe through the gasket |
+| **DicksonOne** | Ethernet/WiFi logger → DicksonOne cloud | **REST API (we poll)**, Bearer token | CDC/VFC, 21 CFR 11 | No native webhook → poll on a timer. Stores **°F** (convert). NA vs APAC base URL differs |
+| **Clever Logger** (AU) | Loggers → gateway → Clever cloud | API **on roadmap**; today: scheduled export/email | AU vaccine-clinic default | Confirm live API status before relying on it; otherwise ingest the daily export |
+| **LogTag / LogTag Online** | Logger + wireless cradle → LTO cloud | **No public API/webhook** → CSV/Excel export | WHO-PQS, 21 CFR 11 | AU's cheap default; integrate via **export ingest**, not a live feed |
+
+### 12.3 Do we need our own local collector? (short answer: almost never)
+
+This is the key architecture question. For **every commercial system above, the vendor already ships the
+collector/gateway and runs the cloud** — so we do **not** add hardware of our own. We integrate at *their*
+cloud:
+
+- **DIY ESP32 (TM-01):** no separate collector — **the device *is* the collector**, POSTing straight to our
+  API over WiFi/TLS (§8). This is the only path where we own the on-prem hardware.
+- **Testo · Disruptive · Dickson · Clever · LogTag-cradle:** the **vendor's** gateway is already on the
+  clinic LAN and already uploads to the **vendor cloud**. We **pull from / receive webhooks from that cloud**
+  — *we add nothing locally.*
+- **Build our own local collector only** if you want a fully self-hosted path with no vendor cloud at all
+  (e.g. reading BLE/Modbus sensors on-prem) — rarely worth it versus just using the ESP32.
+
+### 12.4 The adapter pattern — one endpoint, many sources
+
+```mermaid
+flowchart LR
+  TM[TM-01 ESP32<br/>is its own collector] -->|POST /readings| ING
+  subgraph Vendor cloud
+    GW[Vendor gateway/collector] --> VC[(Vendor cloud)]
+  end
+  SEN[Commercial logger] --> GW
+  VC -->|webhook push| AD[Per-vendor adapter<br/>normalise unit/ts/fridge]
+  VC -->|or we poll REST| AD
+  AD -->|same shape| ING[Our ingest /readings]
+  ING --> DB[(Readings store)]
+  ING --> RULE{In 2-8 C?}
+  RULE -->|No| JOB[Breach job + quarantine lot]
+  RULE -->|Yes| OK[Store + chart]
+```
+
+Each vendor gets a thin **adapter** that maps its payload into the canonical reading shape from §8 (their
+device → our `fridgeId`, their unit → °C, their timestamp → ISO-8601). Everything downstream — charts,
+breach jobs, the audit trail — is shared with the ESP32 fleet.
+
+**Webhook in (vendor pushes — preferred).** You paste *our* URL into the vendor's webhook/Data-Connector
+config; their cloud calls us whenever a reading arrives:
+
+```js
+// POST https://api.clinicplatform.au/v1/integrations/disruptive/{clinicSlug}
+// (the endpoint you register as a Disruptive "Data Connector")
+app.post('/v1/integrations/disruptive/:clinic', verifyDtSignature, (req, res) => {
+  const ev = req.body.event;
+  if (ev.eventType !== 'temperature') return res.sendStatus(204);   // ignore non-temp events
+  ingestReading({                                                   // same call the public POST uses
+    clinic:   req.params.clinic,
+    fridgeId: FRIDGE_MAP[ev.targetName],          // DT sensor id → our fridge
+    device_id: ev.targetName,
+    temp_c:   ev.data.temperature.value,          // DT already reports °C
+    unit:     'C',
+    ts:       ev.data.temperature.updateTime,     // ISO-8601
+    source:   'disruptive'
+  });
+  res.sendStatus(200);
+});
+```
+
+**Poll out (we pull — when the vendor has no webhook, e.g. DicksonOne).** A scheduled job reads new
+datapoints and normalises them:
+
+```js
+// every 5 min, per logger — DicksonOne has no webhook, so we pull
+const r = await fetch(
+  `https://www.dicksonone.com/api/rest/devices/${deviceId}/channels/${ch}/datapoints?after=${since}`,
+  { headers: { Authorization: `Bearer ${DICKSON_TOKEN}` } });        // NA vs APAC base URL!
+for (const dp of (await r.json()).datapoints) {
+  ingestReading({
+    clinic, fridgeId,
+    device_id: deviceId,
+    temp_c: fToC(dp.value),                        // DicksonOne stores °F → convert
+    unit:   'C',
+    ts:     new Date(dp.at * 1000).toISOString(),
+    source: 'dicksonone'
+  });
+}
+```
+
+`ingestReading()` is the **same internal call** behind the public `POST /fridges/{fridgeId}/readings` (§8),
+so commercial and DIY sources converge on one store, one 2–8 °C rule, one breach pathway.
+
+### 12.5 Recommended split
+
+- **Instrument of record:** one **validated logger per fridge** — **Testo Saveris 2** or **DicksonOne** if
+  you want a live API/webhook feed; **LogTag** or **Clever Logger** if cost-first and you accept
+  export-based ingest. NATA-calibrated, certificate on file.
+- **Early warning:** the **ESP32 fleet** for dense, cheap, real-time coverage and the breach/quarantine
+  automation.
+- **Either way the manual twice-daily min/max log stays** (§11) — the smart layer is a safety net, never a
+  replacement for the human check or the calibrated record.
+
 ## Related
 
 - App area: [Front desk & operations (plain-language review)](../review/01-front-desk-and-operations.md)
