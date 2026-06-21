@@ -32,6 +32,8 @@ _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Po
 
 - Prototype: Governance -> Policies (gov-policies.png) — policy list with versions + per-staff sign-off status (signPolicy); outstanding highlighted.
 
+![gov-policies — prototype screen](../screens/gov-policies.png)
+
 ## Suggested data model
 
 - **Policy** — id, tenant_id, name, version, body, roles[]

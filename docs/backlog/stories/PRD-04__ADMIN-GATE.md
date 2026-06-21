@@ -31,6 +31,8 @@ This is the central invariant of the moat — every dose is provably lawful and 
 - Prototype: Charting (charting.png) — administration is the act of finalising the injection map against the selected lot; the gate chips (consult/consent) and lot selection must be satisfied first.
 - Over-draw or missing prerequisites block finalise with an explanatory banner.
 
+![charting — prototype screen](../screens/charting.png)
+
 ## Suggested data model
 
 - **Administration** — id, tenant_id, client_id, prescription_id, product_id, lot_id, units, site, depth, administrator_id, at

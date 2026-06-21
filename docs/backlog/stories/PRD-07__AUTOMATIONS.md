@@ -32,6 +32,8 @@ _Prototype screen: prototype.html — Comms & growth (Inbox/Automations/Campaign
 
 - Prototype: Comms -> Automations (marketing-auto.png) — a list of automations with trigger -> timed steps, on/off toggles (toggleAuto), per-treatment editing.
 
+![marketing-auto — prototype screen](../screens/marketing-auto.png)
+
 ## Suggested data model
 
 - **Automation** — id, tenant_id, trigger, treatment_type, sequence_id, enabled(bool)

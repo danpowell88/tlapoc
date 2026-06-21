@@ -26,6 +26,8 @@ Captured so operations can be fully systematised later.
 
 prototype.html — Front desk/Operations (Open/close & fridge log, Temperature monitors, Rooms & devices, Equipment, Call log); backroom.html.
 
+![ops-equipment — prototype screen](../screens/ops-equipment.png)
+
 ## Suggested data model
 
 - **IncidentCase** — id, tenant_id, type, mandatory_reportable(bool), steps[], status

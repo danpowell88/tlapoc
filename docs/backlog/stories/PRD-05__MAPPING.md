@@ -42,6 +42,8 @@ _Prototype screen: prototype.html — Charting + Clinical (Skin analysis, Body c
 - New vs the prototype (build these too): per-point depth and technique/needle fields, optional per-point product/lot for multi-product sessions, and an amendment trail for post-finalise edits.
 - Prototype reference: prototype.html → Clinical → Charting (section #chart), step 3 'Injection map' (faceClick / renderInj / finaliseChart).
 
+![charting — prototype screen](../screens/charting.png)
+
 ## Suggested data model
 
 - **ChartEntry** — id, tenant_id, client_id, appointment_id, consult_id, treatment_type (toxin|skin|filler|…), status (draft|final), author_id (RN/NP), finalised_at, locked

@@ -31,6 +31,8 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 
 - Prototype: Schedule (schedule.png) — waitlist management + a backfill prompt on cancellation; quiet-window fill suggestions from utilisation.
 
+![schedule — prototype screen](../screens/schedule.png)
+
 ## Suggested data model
 
 - **WaitlistEntry** — id, tenant_id, client_id, service_id, window, status(waiting|offered|accepted|expired), offered_at

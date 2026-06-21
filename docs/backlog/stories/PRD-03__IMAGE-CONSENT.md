@@ -30,6 +30,8 @@ Granted/withdrawn state shows as a chip on the patient header.
 
 - Client app: a separate image-use consent toggle with scope + a withdraw control (client-app.png); staff see the image-use chip on the Client 360 / charting header (charting.png).
 
+![forms-consent — prototype screen](../screens/forms-consent.png)
+
 ## Suggested data model
 
 - **ImageConsent** — id, client_id, scope, granted_at, withdrawn_at, status

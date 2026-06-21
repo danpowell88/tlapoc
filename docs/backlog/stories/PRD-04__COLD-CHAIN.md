@@ -31,6 +31,8 @@ Excursion history is retained and visible — evidence that cold-chain held for 
 - Prototype: Front desk/Operations -> Temperature monitors (ops-monitors.png) — live/charted fridge temps per location, breach alerts; the stock table shows a per-lot temp (e.g. '4.2C').
 - An excursion visibly quarantines the lot and raises a follow-up job.
 
+![ops-monitors — prototype screen](../screens/ops-monitors.png)
+
 ## Suggested data model
 
 - **TempLog** — id, tenant_id, location_id, monitor_id, temp, at, source(manual|device)

@@ -33,6 +33,8 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 - Prototype: provider app (treatment-room.png) — 'Treatment record', 'Treatment settings', the injection map + camera; finalise locks the note.
 - Photos capture to central storage; none persist on device after sync (C14).
 
+![treatment-room — prototype screen](../screens/treatment-room.png)
+
 ## Suggested data model
 
 - **(reuses)** — ChartEntry/InjectionPoint/Photo (PRD-05), Administration (PRD-04)

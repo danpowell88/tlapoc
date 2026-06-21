@@ -33,6 +33,8 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 - Prototype: Clients (clients.png) — searchable/filterable directory list; row -> opens Client 360; merge-duplicates and soft-delete actions.
 - Global header search jumps straight to a client.
 
+![clients — prototype screen](../screens/clients.png)
+
 ## Suggested data model
 
 - **Client** — (as PRD-01 CLIENT-CORE) + search index

@@ -30,6 +30,8 @@ This tamper-evidence is what makes the clinical record trustworthy in an inspect
 - Prototype: Charting 'Finalise & checkout' (charting.png) — 'Finalising locks the note and deducts the units used from the selected lot'; finalised notes render read-only with an amendment trail.
 - Read-only oversight view for non-editors (e.g. owner).
 
+![charting — prototype screen](../screens/charting.png)
+
 ## Suggested data model
 
 - **ChartEntry.locked** — + finalised_at

@@ -31,6 +31,8 @@ _Prototype screen: prototype.html — sidebar clinic switcher._
 
 - Prototype: the sidebar clinic switcher (dashboard.png) — lists clinics (Brisbane, Gold Coast, locum site); selecting one sets the active location.
 
+![dashboard — prototype screen](../screens/dashboard.png)
+
 ## Suggested data model
 
 - **(session) ActiveLocation** — session.location_id within tenant

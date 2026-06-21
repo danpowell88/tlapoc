@@ -32,6 +32,8 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 
 - Prototype: Operations -> Call log (ops-phone.png) — log a call against a client; raise a follow-up; appears in comms history.
 
+![ops-phone — prototype screen](../screens/ops-phone.png)
+
 ## Suggested data model
 
 - **CallLog** — id, tenant_id, client_id, direction(in|out), summary, outcome, at, actor_id

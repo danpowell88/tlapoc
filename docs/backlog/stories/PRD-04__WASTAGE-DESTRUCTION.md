@@ -30,6 +30,8 @@ Closes the medicines loop alongside reconciliation and stocktake.
 
 - Prototype: Stock & medicines -> record wastage/destruction (stock.png) — quantity, reason, pathway, certificate ref; also surfaced in the back-office waste log (backroom.png).
 
+![stock — prototype screen](../screens/stock.png)
+
 ## Suggested data model
 
 - **StockDestruction** — id, lot_id, units, reason, pathway(RUM|licensed), certificate_ref, at, actor_id

@@ -28,6 +28,8 @@ _Prototype screen: prototype.html — Charting + Clinical (Skin analysis, Body c
 
 - Prototype: Clinical -> Body contouring (clinical-body.png) and the skin note demonstrate the modality model; filler/energy/weight-loss are concept-level for v1.
 
+![clinical-body — prototype screen](../screens/clinical-body.png)
+
 ## Suggested data model
 
 - **ChartEntry.treatment_type** — + modality-specific payloads (filler areas, device passes, titration)

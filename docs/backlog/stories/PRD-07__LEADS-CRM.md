@@ -33,6 +33,8 @@ _Prototype screen: prototype.html — Comms & growth (Inbox/Automations/Campaign
 
 - Prototype: Growth -> Leads (CRM) (growth-leads.png) — lead list with source/status/next-action; convert-to-client/booking action.
 
+![growth-leads — prototype screen](../screens/growth-leads.png)
+
 ## Suggested data model
 
 - **Lead** — id, tenant_id, name, contact, source, status(new|nurturing|won|lost), next_action, converted_client_id?

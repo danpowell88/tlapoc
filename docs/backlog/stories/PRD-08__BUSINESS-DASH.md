@@ -32,6 +32,8 @@ _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Po
 - Prototype: Reports (reports.png) — revenue trend, treatment mix, top treatments, new-vs-returning, retention, membership MRR; date-range presets + custom; per-practitioner.
 - Money figures hidden for non-owner roles (.fin gating).
 
+![reports — prototype screen](../screens/reports.png)
+
 ## Suggested data model
 
 - **(read) BusinessMetrics** — revenue, retention, churn, no_shows, cancellations, conversion, at_risk, big_spenders, mrr by date/practitioner

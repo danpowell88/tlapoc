@@ -33,6 +33,8 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 - Prototype: 'New booking' wizard (booking-wizard.png) — stepper (service, practitioner, slot, client, confirm); attach existing client or create inline; slot grid reflects roster + availability.
 - Confirmation shows policy + schedules reminders.
 
+![booking-wizard — prototype screen](../screens/booking-wizard.png)
+
 ## Suggested data model
 
 - **Appointment** — (as CALENDAR) source=desk

@@ -31,6 +31,8 @@ _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Po
 
 - Prototype: Reports -> Scorecard (reports.png, goRep('scorecard')) — per-practitioner metrics with drill-down.
 
+![reports — prototype screen](../screens/reports.png)
+
 ## Suggested data model
 
 - **(read) PractitionerScorecard** — practitioner_id, revenue, retention, rebooking, utilisation, outcomes by date

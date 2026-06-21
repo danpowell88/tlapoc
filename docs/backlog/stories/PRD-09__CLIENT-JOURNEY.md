@@ -32,6 +32,8 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 - Prototype: client app (client-app.png) bottom-tabs — Home/For you, Book, then the intake + consent flow ('You're booked!', 'All set — thank you').
 - Reminders/recall received in-app.
 
+![client-app — prototype screen](../screens/client-app.png)
+
 ## Suggested data model
 
 - **(reuses)** — Appointment (PRD-02) + IntakeResponse/ConsentSignature (PRD-03) via the API

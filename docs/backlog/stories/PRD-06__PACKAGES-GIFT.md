@@ -32,6 +32,8 @@ _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rew
 - Prototype: Checkout (checkout.png) for sale/redeem; Memberships -> Gift cards (memb-gifts.png) for issuing/tracking gift-card balances; package 'visits remaining' on the Client 360.
 - Balance/credit + AR ageing visible to owner/manager.
 
+![memb-gifts — prototype screen](../screens/memb-gifts.png)
+
 ## Suggested data model
 
 - **Package** — id, tenant_id, client_id, service_id, total_visits, remaining, purchased_at

@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from backlog import load, MILESTONES, MS_TITLE, ROOT
 from monday import (sec_ac, estimate, type_label, area_labels, stage_label,
                     plan_sprints, tasks_for, bg_text, req_bullets, ui_text,
-                    tech_blocks, compliance_links, prd_link)
+                    tech_blocks, compliance_links, prd_link, screen_rel_path, screen_name)
 
 
 def md_links(pairs):
@@ -70,15 +70,21 @@ def write_story(ep, s):
     # Acceptance Criteria
     L += ["", "## Acceptance Criteria", "", sec_ac(s)]
 
-    # UI — spec (prototype-derived) + screen pointer
+    # UI — spec (prototype-derived) + screen pointer + inline screenshot
     uit = ui_text(ep, s)
+    ui_added = False
     if s.get("ui_spec"):
         L += ["", "## UI designs / screenshots", ""]
+        ui_added = True
         if uit:
             L += [f"_Prototype screen: {uit}_", ""]
         L += [f"- {b}" for b in s["ui_spec"]]
     elif uit:
         L += ["", "## UI designs / screenshots", "", uit]
+        ui_added = True
+    rel = screen_rel_path(ep, s)
+    if rel and ui_added:
+        L += ["", f"![{screen_name(ep, s)} — prototype screen]({rel})"]
 
     # Suggested data model
     if s.get("data_model"):

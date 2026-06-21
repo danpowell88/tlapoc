@@ -33,65 +33,12 @@ import uuid
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from backlog import load, MS_TITLE
 from monday import (estimate, type_label, tasks_for, plan_sprints,
-                    EPIC_TRACK, EPIC_THEME,
+                    EPIC_TRACK, EPIC_THEME, screen_for, screen_raw_url,
                     bg_text, req_bullets, ui_text, tech_blocks,
                     compliance_links, prd_link)
 
 SCREENS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
                            "docs", "backlog", "screens")
-
-# story -> prototype screen PNG (captured by scripts/capture.py). Epic default + overrides.
-EPIC_SCREEN = {
-    "SPRINT-0": None, "PRD-01": None, "PRD-02": "schedule", "PRD-03": "forms-consent",
-    "PRD-04": "stock", "PRD-05": "charting", "PRD-06": "checkout", "PRD-07": "marketing-inbox",
-    "PRD-08": "reports", "PRD-09": "client-app", "PRD-10": "settings-integrations",
-    "PRD-11": "ops-openclose", "PLATFORM": "dashboard", "PHASE-2": None,
-}
-SCREEN_OVERRIDE = {
-    "PRD-01/CREDENTIALS": "team-people", "PRD-01/REG-WATCH": "team-compliance",
-    "PRD-01/ROSTER": "team-roster", "PRD-01/CLIENT-CORE": "client-360",
-    "PRD-01/PRIVACY-RIGHTS": "client-app",
-    "PRD-02/BOOKING-WIZARD": "booking-wizard", "PRD-02/ONLINE-BOOK": "public-booking",
-    "PRD-02/CLIENT-360": "client-360", "PRD-02/CLIENT-DIR": "clients",
-    "PRD-02/SERVICE-CATALOGUE": "clinical-menu", "PRD-02/CONSULT-GATE": "charting",
-    "PRD-02/LIFECYCLE": "dashboard", "PRD-02/DEPOSITS": None,
-    "PRD-03/GATING": "charting",
-    "PRD-04/COLD-CHAIN": "ops-monitors", "PRD-04/RECALL-LOOKUP": "gov-recalls",
-    "PRD-04/ADMIN-GATE": "charting", "PRD-04/CONSULT": "charting",
-    "PRD-04/PRESCRIPTION": "charting", "PRD-04/MODE-B": None,
-    "PRD-05/PHOTOS": "clinical-imaging", "PRD-05/OFFLINE": "treatment-room",
-    "PRD-05/ADVERSE-EVENT": "clinical-safety", "PRD-05/SKIN-ANALYSIS": "clinical-skin",
-    "PRD-05/BODY-CONTOURING": "clinical-body", "PRD-05/COMPLICATION-LIBRARY": "clinical-safety",
-    "PRD-05/OUTCOMES": "clinical-imaging", "PRD-05/MODALITY": "clinical-body",
-    "PRD-06/PACKAGES-GIFT": "memb-gifts", "PRD-06/MEMBERSHIP": "memb-members",
-    "PRD-06/REWARDS-ENGINE": "memb-loyalty", "PRD-06/MARGIN-RULES": "memb-pricing",
-    "PRD-06/PRICING-WHATIF": "memb-pricing", "PRD-06/REFERRALS": "memb-referrals",
-    "PRD-07/FOLLOWUPS": "followups", "PRD-07/RECALL": "followups",
-    "PRD-07/AUTOMATIONS": "marketing-auto", "PRD-07/REMINDERS-CARE": "marketing-auto",
-    "PRD-07/CAMPAIGNS": "marketing-camp", "PRD-07/REVIEWS": "growth-reviews",
-    "PRD-07/LEADS-CRM": "growth-leads", "PRD-07/BOOKING-PAGE": "settings-booking",
-    "PRD-07/MARKETING-CONSENT": "settings-booking", "PRD-07/CHANNELS": None,
-    "PRD-08/COMPLIANCE-DASH": "gov-overview", "PRD-08/DAEN": "gov-ae",
-    "PRD-08/INSPECTION-PACK": "gov-audit", "PRD-08/POLICIES": "gov-policies",
-    "PRD-08/TRUE-COST": "finance", "PRD-08/ATTENTION-DIGEST": "dashboard",
-    "PRD-08/READ-MODELS": None,
-    "PRD-09/PROVIDER-DAY": "treatment-room", "PRD-09/PROVIDER-ROOMSIDE": "treatment-room",
-    "PRD-09/PROVIDER-OFFLINE": "treatment-room", "PRD-09/CHECKIN-KIOSK": "checkin",
-    "PRD-09/BACKOFFICE-TABLET": "backroom", "PRD-09/APP-DISTRIBUTION": None,
-    "PRD-11/TEMP-MONITORS": "ops-monitors", "PRD-11/ROOMS-DEVICES": "ops-resources",
-    "PRD-11/EQUIPMENT": "ops-equipment", "PRD-11/CALL-LOG": "ops-phone",
-    "PRD-11/SHIFT-HANDOVER": "backroom", "PRD-11/COMPLAINTS": "gov-overview",
-    "PRD-11/EMERGENCY-KIT": "clinical-safety", "PRD-11/FACILITY": "ops-equipment",
-    "PRD-11/FAC-WORKFLOWS": "ops-equipment",
-    "PLATFORM/FIN-GATING": "finance",
-}
-
-
-def screen_for(epic_key, story_key):
-    k = f"{epic_key}/{story_key}"
-    if k in SCREEN_OVERRIDE:
-        return SCREEN_OVERRIDE[k]
-    return EPIC_SCREEN.get(epic_key)
 
 
 def attach_file(issue_key, path):
@@ -257,6 +204,11 @@ def _linked(prefix, pairs):
     return _p(*content)
 
 
+def _media(url):
+    return {"type": "mediaSingle", "attrs": {"layout": "center"},
+            "content": [{"type": "media", "attrs": {"type": "external", "url": url}}]}
+
+
 def story_desc(ep, s):
     c = [_h("Background")]
     c += [_p(_t(p)) for p in bg_text(ep, s)]
@@ -271,13 +223,20 @@ def story_desc(ep, s):
     c.append(_h("Acceptance Criteria"))
     c.append(_ul(list(s["acceptance"])))
     uit = ui_text(ep, s)
+    ui_added = False
     if s.get("ui_spec"):
         c.append(_h("UI designs / screenshots"))
+        ui_added = True
         if uit:
             c.append(_p(_t("Prototype screen: " + uit, [{"type": "em"}])))
         c.append(_ul(s["ui_spec"]))
     elif uit:
         c += [_h("UI designs / screenshots"), _p(_t(uit))]
+        ui_added = True
+    url = screen_raw_url(ep, s)
+    if url and ui_added:
+        c.append(_media(url))
+        c.append(_p(_t("Prototype screenshot (also attached to this issue).", [{"type": "em"}])))
     if s.get("data_model"):
         c.append(_h("Suggested data model"))
         items = []

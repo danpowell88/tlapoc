@@ -33,6 +33,8 @@ _Prototype screen: prototype.html — Comms & growth (Inbox/Automations/Campaign
 
 - Prototype: Growth -> Reviews (growth-reviews.png) — request/scan reviews, reply/acknowledge/flag (scanReviews/reviewReply/reviewFlag/reviewAck); negative ones raise jobs into Follow-ups with the testimonial caution.
 
+![growth-reviews — prototype screen](../screens/growth-reviews.png)
+
 ## Suggested data model
 
 - **Review** — id, tenant_id, client_id?, source, rating, body, status(new|acknowledged|replied|flagged), at

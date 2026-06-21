@@ -32,6 +32,8 @@ _Prototype screen: prototype.html — sidebar/app shell, Today dashboard, header
 
 - Prototype: header user chip + scope tooltip + 'Switch user' (dashboard.png) — active role + scope summary; switch-active-role for multi-role users.
 
+![dashboard — prototype screen](../screens/dashboard.png)
+
 ## Suggested data model
 
 - **(session) ActiveRole** — session.active_role_id (from StaffRole)

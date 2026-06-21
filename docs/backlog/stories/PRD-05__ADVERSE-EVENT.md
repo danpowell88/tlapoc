@@ -33,6 +33,8 @@ _Prototype screen: prototype.html — Charting + Clinical (Skin analysis, Body c
 - Prototype: Clinical -> Complication protocols (clinical-safety.png) — launch a protocol, log the response/kit used; an adverse-event capture linked to the treatment/product/lot.
 - Routes to Governance -> Adverse events & DAEN (gov-ae) with seriousness set.
 
+![clinical-safety — prototype screen](../screens/clinical-safety.png)
+
 ## Suggested data model
 
 - **AdverseEvent** — id, tenant_id, client_id, chart_entry_id, product_id, lot_id, seriousness, daen_target(medicine|device), description, at

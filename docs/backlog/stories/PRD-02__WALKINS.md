@@ -31,6 +31,8 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 
 - Prototype: Schedule (schedule.png) — add walk-in / same-day add-on against an available resource; resource conflicts flagged before confirm; VIP / first-time appointment tags.
 
+![schedule — prototype screen](../screens/schedule.png)
+
 ## Suggested data model
 
 - **Appointment** — (as CALENDAR) source=walkin; tags[](vip|first_time)

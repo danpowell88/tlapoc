@@ -32,6 +32,8 @@ _Prototype screen: prototype.html — Today (waiting / in-room / checked-out)._
 - Prototype: Today (dashboard.png) — waiting/in-room/checked-out columns, the day at a glance, role-tailored widgets, and the exceptions digest.
 - Reception sees front-desk tasks; NP sees clinical; owner sees the business digest.
 
+![dashboard — prototype screen](../screens/dashboard.png)
+
 ## Suggested data model
 
 - **(read) TodayBoard** — from Appointment.status + Job + AttentionDigest, filtered by role concern

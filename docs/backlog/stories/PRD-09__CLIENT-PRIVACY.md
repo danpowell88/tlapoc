@@ -32,6 +32,8 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 
 - Prototype: client app Account (client-app.png) — 'Edit profile', 'Update card on file', 'Request account deletion', privacy/access-correction; residency trust note.
 
+![client-app — prototype screen](../screens/client-app.png)
+
 ## Suggested data model
 
 - **(reuses)** — PrivacyRequest (PRD-01) — access/correction/deletion with DSAR clock

@@ -31,6 +31,8 @@ Partial-vial handling is supported (one vial may treat several patients).
 - Prototype: Stock & medicines (stock.png) — per-lot on-hand vs received vs wasted columns; usage history; reconciliation surfaced when draws don't match.
 - Charting finalise deducts charted units from the lot (see charting.png).
 
+![stock — prototype screen](../screens/stock.png)
+
 ## Suggested data model
 
 - **StockLedger** — id, lot_id, movement(receive|administer|waste|adjust), units, ref(administration_id?), at, actor_id

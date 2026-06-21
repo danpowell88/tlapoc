@@ -32,6 +32,8 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 - Prototype: Today (dashboard.png) — waiting / in-room / checked-out columns; an 'in-room now' indicator with quick links to chart/profile.
 - Check-in on arrival; late/no-show flags; status chips on each appointment.
 
+![dashboard — prototype screen](../screens/dashboard.png)
+
 ## Suggested data model
 
 - **Appointment.status** — booked|reminded|checked_in|in_room|checked_out|late|no_show|cancelled

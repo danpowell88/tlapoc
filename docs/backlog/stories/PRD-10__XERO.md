@@ -29,6 +29,8 @@ Removes double-entry so the books reconcile without re-keying; the app keeps pri
 
 - Prototype: Settings -> Integrations (settings-integrations.png) — Xero connection card + account/GST mapping + sync/reconciliation status; per-sale posting is automatic from Checkout.
 
+![settings-integrations — prototype screen](../screens/settings-integrations.png)
+
 ## Suggested data model
 
 - **IntegrationConnection** — id, tenant_id, provider(xero), tokens, status

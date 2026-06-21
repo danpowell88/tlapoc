@@ -31,6 +31,8 @@ Transactional reminders/aftercare are exempt and always send.
 - Client app/profile: marketing opt-in toggle + unsubscribe in every marketing message; staff see consent state on the Client 360.
 - Admin: suppression list.
 
+![settings-booking — prototype screen](../screens/settings-booking.png)
+
 ## Suggested data model
 
 - **MarketingConsent** — id, client_id, channel, opted_in(bool), updated_at

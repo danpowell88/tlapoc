@@ -30,6 +30,8 @@ Keeps loyalty profitable and compliant; rule config is owner-gated.
 
 - Prototype: Memberships -> Pricing & what-if (memb-pricing.png, owner-only .fin) — caps + eligible items; reward-cost vs retention surfaces in Reports (PRD-08).
 
+![memb-pricing — prototype screen](../screens/memb-pricing.png)
+
 ## Suggested data model
 
 - **RewardRule.value_cap / eligible_items** — + reporting: reward_cost vs retention

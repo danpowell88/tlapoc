@@ -34,6 +34,8 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 - Drag an appointment to move it; conflicting room/chair/device usage is flagged inline.
 - Time-off and unrostered periods render as unavailable.
 
+![schedule — prototype screen](../screens/schedule.png)
+
 ## Suggested data model
 
 - **Appointment** — id, tenant_id, location_id, client_id, service_id, practitioner_id, room_id, start, end, status, reason, source(online|desk|walkin)

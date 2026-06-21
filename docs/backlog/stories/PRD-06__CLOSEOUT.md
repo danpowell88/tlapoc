@@ -32,6 +32,8 @@ _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rew
 - Prototype: Checkout -> daily closeout (checkout.png) — card vs cash totals for the day, variance highlight; owner-only figures.
 - Also surfaced on the back-office tablet (backroom.png).
 
+![checkout — prototype screen](../screens/checkout.png)
+
 ## Suggested data model
 
 - **Closeout** — id, tenant_id, location_id, date, card_total, cash_total, variance, closed_by

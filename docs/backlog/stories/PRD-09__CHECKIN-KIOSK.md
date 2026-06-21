@@ -32,6 +32,8 @@ _Prototype screen: checkin.html._
 
 - Prototype: check-in tablet (checkin.png) — 'Welcome in' self-check-in; verify appointment, complete outstanding intake/consent; returns to a neutral state between clients.
 
+![checkin — prototype screen](../screens/checkin.png)
+
 ## Suggested data model
 
 - **(reuses)** — Appointment.status -> checked_in (PRD-02); IntakeResponse/ConsentSignature (PRD-03)

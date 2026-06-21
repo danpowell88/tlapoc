@@ -31,6 +31,8 @@ _Prototype screen: prototype.html — sidebar/app shell, Today dashboard, header
 
 - Prototype: the header bell + badge (dashboard.png) -> a notification list; each item deep-links to its source.
 
+![dashboard — prototype screen](../screens/dashboard.png)
+
 ## Suggested data model
 
 - **Notification** — id, tenant_id, user_id, kind, source_ref, read(bool), at

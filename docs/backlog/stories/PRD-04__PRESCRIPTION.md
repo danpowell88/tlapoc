@@ -31,6 +31,8 @@ Off-label is flagged on the script and requires consent that covers off-label us
 - Prototype: Charting -> 'Write prescription' (charting.png) — product, dose/units, off-label flag; tied to the just-recorded consult and this single client.
 - Attempting a batch/standing-order or applying one script to multiple clients is rejected with a reason.
 
+![charting — prototype screen](../screens/charting.png)
+
 ## Suggested data model
 
 - **Prescription** — id, tenant_id, client_id, consult_id, prescriber_id, product_id, dose_units, off_label(bool), status(active|consumed|expired), created_at

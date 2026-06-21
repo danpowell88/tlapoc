@@ -32,6 +32,8 @@ _Prototype screen: prototype.html — header search box._
 
 - Prototype: the header search box (dashboard.png, 'Search clients, appointments, invoices…') — grouped results; select -> deep link.
 
+![dashboard — prototype screen](../screens/dashboard.png)
+
 ## Suggested data model
 
 - **(index) SearchIndex** — client/appointment/invoice projections, tenant-scoped

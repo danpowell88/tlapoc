@@ -29,6 +29,8 @@ Built on the SPIKE-SQUARE findings; keeps the platform provider-swappable.
 
 - No dedicated screen — surfaces through Checkout (checkout.png) and membership card-on-file capture; this story is the backend port + Square adapter.
 
+![checkout — prototype screen](../screens/checkout.png)
+
 ## Suggested data model
 
 - **PaymentMethodToken** — id, tenant_id, client_id, provider(square), token_ref, brand, last4, exp

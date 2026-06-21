@@ -30,6 +30,8 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 
 - Prototype: Governance -> Overview (gov-overview.png) complaints register; raise a complaint linked to client/treatment with the AHPRA pathway surfaced.
 
+![gov-overview — prototype screen](../screens/gov-overview.png)
+
 ## Suggested data model
 
 - **Complaint** — id, tenant_id, client_id, treatment_ref, status, pathway(ahpra|internal), opened_at, resolution

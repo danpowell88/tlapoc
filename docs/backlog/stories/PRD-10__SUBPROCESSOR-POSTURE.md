@@ -30,6 +30,8 @@ Keeps integrations inside cross-border privacy rules (C21).
 
 - Prototype: Settings -> Integrations (settings-integrations.png) — each integration shows its data-residency posture; an admin sub-processor register lists flows + APP-8 status.
 
+![settings-integrations — prototype screen](../screens/settings-integrations.png)
+
 ## Suggested data model
 
 - **SubProcessor** — (shared with PRD-01) id, name, region, app8_assessment_ref, consent_ref

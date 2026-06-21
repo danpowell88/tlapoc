@@ -32,6 +32,8 @@ _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rew
 - Prototype: Memberships -> Pricing & what-if (memb-pricing.png) and Finance (finance.png) — pricing model + scenario sliders; owner-only.
 - Reads the same read-models as Reports (PRD-08).
 
+![memb-pricing — prototype screen](../screens/memb-pricing.png)
+
 ## Suggested data model
 
 - **PricingScenario** — id, tenant_id, inputs(json), outputs(json)

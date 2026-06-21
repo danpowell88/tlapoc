@@ -32,6 +32,8 @@ _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Po
 
 - Prototype: Governance -> Audit pack (gov-audit.png) — buildAuditPack assembles the evidence bundle; the hub links policies sign-off, DSAR and breach drill.
 
+![gov-audit — prototype screen](../screens/gov-audit.png)
+
 ## Suggested data model
 
 - **InspectionPack** — id, tenant_id, generated_at, contents[](register refs + logs + status), actor_id

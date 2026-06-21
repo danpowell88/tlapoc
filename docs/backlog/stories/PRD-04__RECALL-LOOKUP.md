@@ -31,6 +31,8 @@ This is the payoff of recording per-point lot in charting — a recall that woul
 - Prototype: Governance -> Recalls (gov-recalls.png) — enter a lot -> list of affected clients/administrations; start a recall with acknowledgement tracking.
 - The medicine register is queryable by date, product, prescriber, administrator and exportable.
 
+![gov-recalls — prototype screen](../screens/gov-recalls.png)
+
 ## Suggested data model
 
 - **(query) LotRecall** — lot -> [Administration{client, at, units, administrator}]

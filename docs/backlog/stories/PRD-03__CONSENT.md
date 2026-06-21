@@ -31,6 +31,8 @@ Treatment is blocked until a current, version-matched consent is signed; changin
 - Client app: plain-language consent reader + e-signature (client-app.png); staff see consent status in Forms & consent (forms-consent.png) and as a chip on the charting/patient header (charting.png).
 - Mandated-content sections are explicit; the block states exactly what is missing.
 
+![forms-consent — prototype screen](../screens/forms-consent.png)
+
 ## Suggested data model
 
 - **ConsentTemplate** — id, tenant_id, treatment_type, version, content(sections), mandated_fields[]

@@ -30,6 +30,8 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 
 - Prototype: Operations + Clinical -> Complication protocols (clinical-safety.png) — emergency-kit register with expiry alerts (saveKit/newKit/removeKit); continuity-of-care contact.
 
+![clinical-safety — prototype screen](../screens/clinical-safety.png)
+
 ## Suggested data model
 
 - **EmergencyKitItem** — id, tenant_id, location_id, name(hyaluronidase|adrenaline|...), expiry, quantity

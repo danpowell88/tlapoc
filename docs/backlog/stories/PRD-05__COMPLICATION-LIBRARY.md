@@ -32,6 +32,8 @@ _Prototype screen: prototype.html — Clinical → Complication protocols._
 
 - Prototype: Clinical -> Complication protocols (clinical-safety.png) — protocol cards with step-by-step guidance and kit links; openComplication/completeComplication actions.
 
+![clinical-safety — prototype screen](../screens/clinical-safety.png)
+
 ## Suggested data model
 
 - **ComplicationProtocol** — id, tenant_id, name, steps[], required_kit[]

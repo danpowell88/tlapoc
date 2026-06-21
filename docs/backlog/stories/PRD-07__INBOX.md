@@ -27,6 +27,8 @@ Inbound webhooks + provider Send/Conversations APIs behind an IMessagingChannel 
 
 - Prototype: Comms -> Inbox (marketing-inbox.png) — conversation list with channel + category, client linking, flag, templated/keyword replies (scanInbox/openConvo/sendMsg/linkConvo/flagConvo).
 
+![marketing-inbox — prototype screen](../screens/marketing-inbox.png)
+
 ## Suggested data model
 
 - **Conversation** — id, tenant_id, channel, client_id?, category, status, last_at

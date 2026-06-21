@@ -33,6 +33,8 @@ _Prototype screen: prototype.html — Comms & growth (Inbox/Automations/Campaign
 - Prototype: Settings -> Public booking page (settings-booking.png) — toggle generic names + withhold S4 prices; the public page (public-booking.png) reflects it.
 - Configuration-driven, not a linter.
 
+![settings-booking — prototype screen](../screens/settings-booking.png)
+
 ## Suggested data model
 
 - **PublicBookingConfig** — tenant_id, generic_names(bool), withhold_s4_prices(bool)

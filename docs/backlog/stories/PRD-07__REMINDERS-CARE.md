@@ -30,6 +30,8 @@ Keeps clients prepared and cared-for around each visit.
 - Prototype: Comms -> Automations (marketing-auto.png) configures the reminder/aftercare sequences; sends appear in the client's comms history.
 - Reminder includes confirm/decline + reschedule links (PRD-02 REMINDERS).
 
+![marketing-auto — prototype screen](../screens/marketing-auto.png)
+
 ## Suggested data model
 
 - **Sequence** — id, tenant_id, trigger(booking|visit), treatment_type, steps[]{offset, channel, template_key}

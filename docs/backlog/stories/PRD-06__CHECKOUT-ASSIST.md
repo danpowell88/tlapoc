@@ -31,6 +31,8 @@ _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rew
 
 - Prototype: Checkout (checkout.png) — a subtle upsell card (e.g. 'Slow-moving retail: bundle SPF with facials'), a client-rapport panel, and a rebook prompt at the interval after payment.
 
+![checkout — prototype screen](../screens/checkout.png)
+
 ## Suggested data model
 
 - **(derived) CheckoutSuggestion** — from RewardRule + stock aging + treatment interval

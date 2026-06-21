@@ -31,6 +31,8 @@ The remote-prescriber path links an externally-conducted consult to the resultin
 - Prototype: Charting pre-treatment review (charting.png) — the 'Consult & prescription' card with a 'Record consult' action and status tick; consult must be ticked before 'Write prescription' is usable.
 - Modality toggle (in-person / telehealth-external) with an external-reference field for telehealth.
 
+![charting — prototype screen](../screens/charting.png)
+
 ## Suggested data model
 
 - **Consult** — id, tenant_id, client_id, appointment_id, prescriber_id, modality(in_person|telehealth_ext), at, external_ref, notes

@@ -33,6 +33,8 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 - Prototype: client app (client-app.png) tabs — My care (visit history, photos with consent), Rewards (redeem points, gift cards), Account (update card on file).
 - Photo viewing is image-use-consent-gated.
 
+![client-app — prototype screen](../screens/client-app.png)
+
 ## Suggested data model
 
 - **(reuses)** — Photo (PRD-05), Membership/RewardLedger/AccountBalance (PRD-06), PaymentMethodToken

@@ -32,6 +32,8 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 - Prototype: provider app (treatment-room.png) — 'Today · Room 2' schedule; open a patient -> 'Consent & prescriber authorisation' status; quick links to map/photos/finalise.
 - Bottom tabs: Schedule / Patient / Medicines / Tasks.
 
+![treatment-room — prototype screen](../screens/treatment-room.png)
+
 ## Suggested data model
 
 - **(reuses)** — Appointment (PRD-02) + gate (PRD-03/04)

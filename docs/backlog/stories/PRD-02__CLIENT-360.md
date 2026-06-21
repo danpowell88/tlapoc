@@ -33,6 +33,8 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 - Prototype: Client 360 (client-360.png) — header with consent/age chips (consent / image-use / under-18 cooling-off), tabbed sections for medical, consents, photos, visits, memberships, balance, comms, complaints.
 - Quick links into charting, checkout and follow-ups.
 
+![client-360 — prototype screen](../screens/client-360.png)
+
 ## Suggested data model
 
 - **Client (aggregate view)** — joins Client + IntakeResponse + ConsentSignature + Photo + Appointment + Membership + AccountBalance + Complaint

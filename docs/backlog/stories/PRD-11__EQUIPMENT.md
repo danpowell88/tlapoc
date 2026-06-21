@@ -32,6 +32,8 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 
 - Prototype: Operations -> Equipment & maintenance (ops-equipment.png) — equipment list with service/validation schedules + due/overdue alerts.
 
+![ops-equipment — prototype screen](../screens/ops-equipment.png)
+
 ## Suggested data model
 
 - **Equipment** — id, tenant_id, location_id, name, type, linked_resource_id?

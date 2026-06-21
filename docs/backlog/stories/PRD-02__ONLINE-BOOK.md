@@ -33,6 +33,8 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 - Prototype: public booking page (public-booking.png) and the booking widget (booking-widget.png) — generic service list, practitioner choice, slot grid, account create, then intake/consent.
 - No S4 brand names or prices shown; injectables present consult+treatment as a gated flow.
 
+![public-booking — prototype screen](../screens/public-booking.png)
+
 ## Suggested data model
 
 - **Appointment** — (as CALENDAR) source=online

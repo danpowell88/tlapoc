@@ -30,6 +30,8 @@ The recurring-revenue engine; autopay built on the Square recurring spike.
 - Prototype: Memberships -> Members & billing (memb-members.png) — member list, plan, card-on-file status, next charge, dunning state; Plans & packages (memb-plans.png) to define tiers.
 - Client app: join + add card-on-file (client-app.png).
 
+![memb-members — prototype screen](../screens/memb-members.png)
+
 ## Suggested data model
 
 - **MembershipPlan** — id, tenant_id, name, tier, price, period, benefits[]

@@ -31,6 +31,8 @@ The payment block coordinates with PRD-06; the booking deposit/hold is suppresse
 - Patient header shows an 'under-18 cooling-off' chip with the elapse date; checkout is blocked (except consult) until then.
 - A recorded second-consultation offer appears on the client timeline.
 
+![forms-consent — prototype screen](../screens/forms-consent.png)
+
 ## Suggested data model
 
 - **CoolingOffTimer** — id, client_id, appointment_id, consent_at, eligible_at, payment_blocked(bool), second_consult_offered_at

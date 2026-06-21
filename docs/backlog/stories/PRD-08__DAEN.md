@@ -32,6 +32,8 @@ _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Po
 
 - Prototype: Governance -> Adverse events & DAEN (gov-ae.png) — AE list, open a case, prefilled DAEN form routed medicine/device, mandatory-trigger flag, submit/export (openDaen/submitDaen).
 
+![gov-ae — prototype screen](../screens/gov-ae.png)
+
 ## Suggested data model
 
 - **DaenReport** — id, adverse_event_id, target(medicine|device), seriousness, mandatory(bool), prefilled(json), submitted_at

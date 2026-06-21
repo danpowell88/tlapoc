@@ -32,6 +32,8 @@ _Prototype screen: prototype.html — Comms & growth (Inbox/Automations/Campaign
 - Prototype: Follow-ups (followups.png) — a job list with type, client link, assignee, status; actions: open, done, snooze, reopen, reassign, callback; a count badge in the nav.
 - Jobs created from recalls, no-shows, flagged messages, reviews, AE.
 
+![followups — prototype screen](../screens/followups.png)
+
 ## Suggested data model
 
 - **Job** — id, tenant_id, type(recall|callback|review|ae|attention|message), client_id?, source_ref, assignee_id, status(open|snoozed|done), due_at

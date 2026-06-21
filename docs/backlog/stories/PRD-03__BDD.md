@@ -31,6 +31,8 @@ Which validated instrument to embed is an open question to confirm clinically.
 - Client app: the BDD/wellbeing screen within the intake wizard (client-app.png).
 - Charting pre-treatment review (charting.png) shows a 'BDD screen: clear' / flagged chip to the prescriber.
 
+![forms-consent — prototype screen](../screens/forms-consent.png)
+
 ## Suggested data model
 
 - **ScreeningResult** — id, tenant_id, client_id, instrument, answers(json), score, flag(bool), reviewed_by, reviewed_at

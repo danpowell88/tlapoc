@@ -32,6 +32,8 @@ _Prototype screen: prototype.html — Charting + Clinical (Skin analysis, Body c
 - Prototype: Charting (charting.png) — apply a protocol to create a multi-session plan; plan progress on Client 360 (client-360.png).
 - Active plans listed on the charting overview / in-room entry.
 
+![charting — prototype screen](../screens/charting.png)
+
 ## Suggested data model
 
 - **TreatmentPlan** — id, tenant_id, client_id, protocol_id, sessions[]{service, interval, status}, created_at

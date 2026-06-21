@@ -31,6 +31,8 @@ Ensures the clinic only holds lawfully-supplied, approved medicine, with provena
 - Prototype: Stock & medicines -> 'Receive stock' (stock.png) — a modal capturing lot, expiry, units received, supplier, ARTG; the lot then appears in the stock table with on-hand/expiry/temp/status.
 - ARTG validation supports manual entry (dataset lookup is an open option).
 
+![stock — prototype screen](../screens/stock.png)
+
 ## Suggested data model
 
 - **StockItem** — id, tenant_id, product_id, lot, expiry, received_units, on_hand, supplier, artg_verified(bool), supply_source, location_id, custodian_id, status

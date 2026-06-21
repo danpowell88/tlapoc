@@ -32,6 +32,8 @@ _Prototype screen: prototype.html — Operations → Open/close & fridge log; ba
 
 - Prototype: Operations -> Open / close & fridge log (ops-openclose.png); also on the back-office tablet (backroom.png) — checklist items + a fridge temp entry with breach handling (openFridge/saveFridge).
 
+![ops-openclose — prototype screen](../screens/ops-openclose.png)
+
 ## Suggested data model
 
 - **OpenCloseChecklist** — id, tenant_id, location_id, type(open|close), items[]{label, done}, completed_by, at

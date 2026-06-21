@@ -31,6 +31,8 @@ Under-18 status appears as an age chip on the patient header so staff always see
 - Prototype: the Client 360 header (client-360.png) shows the age/under-18 chip alongside consent chips; DOB on the profile.
 - Directory + profile are PRD-02; this story is the underlying record + age derivation.
 
+![client-360 — prototype screen](../screens/client-360.png)
+
 ## Suggested data model
 
 - **Client** — id, tenant_id, name, dob, contacts, flags(json), under18(derived), deleted_at

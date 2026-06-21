@@ -31,6 +31,8 @@ _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Po
 
 - Prototype: Reports -> data-quality findings (reports.png) — a list of anomalies with a jump-to-fix; feeds the owner digest.
 
+![reports — prototype screen](../screens/reports.png)
+
 ## Suggested data model
 
 - **DataQualityFinding** — id, tenant_id, check, entity_ref, detail, detected_at, resolved_at

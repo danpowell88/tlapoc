@@ -31,6 +31,8 @@ These derive a single canInject signal: a practitioner whose PII excludes cosmet
 - Prototype: Team -> People & credentials (team-people.png) — staff cards with reg #, type, status, expiry, CPD, PII cover, engagement type and a derived 'cleared to treat' badge.
 - AHPRA register auto-verification (PIE) shown as a verify action with a first-class manual-verify fallback.
 
+![team-people — prototype screen](../screens/team-people.png)
+
 ## Suggested data model
 
 - **StaffProfile** — id, tenant_id, user_id, role_id, ahpra_no, ahpra_type, ahpra_status, ahpra_expiry, conditions, experience_1yr, engagement_type(employee|contractor)

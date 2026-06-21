@@ -31,6 +31,8 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 
 - Prototype: back-office tablet -> Shift handover (backroom.png) — add/read handover notes; outstanding jobs surfaced alongside.
 
+![backroom — prototype screen](../screens/backroom.png)
+
 ## Suggested data model
 
 - **ShiftHandover** — id, tenant_id, location_id, note, created_by, at

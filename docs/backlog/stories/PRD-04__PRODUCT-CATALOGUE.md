@@ -28,6 +28,8 @@ regClass/compounded enable blocking prohibited compounded GLP-1 and routing adve
 - Prototype: Stock & medicines -> Products (stock.png, 'Products' button opens the catalogue) — typed products with unit, par, ARTG status, S4 flag toggle; capability-gated admin.
 - Retail (non-S4) SKUs sit alongside medicines.
 
+![stock — prototype screen](../screens/stock.png)
+
 ## Suggested data model
 
 - **Product** — id, tenant_id, name, type(toxin|filler|skin|retail), unit(units|syringes|each), schedule(S4|non-S4), reg_class, artg_no, sponsor, compounded(bool), par_level

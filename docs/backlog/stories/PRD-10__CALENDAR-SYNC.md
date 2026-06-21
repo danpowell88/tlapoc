@@ -29,6 +29,8 @@ Gives practitioners one source of truth for their time.
 
 - Prototype: Settings -> Integrations (settings-integrations.png) — per-staff calendar connect (M365/Google) + two-way sync toggle; external busy time shows as unavailable in Schedule.
 
+![settings-integrations — prototype screen](../screens/settings-integrations.png)
+
 ## Suggested data model
 
 - **CalendarLink** — id, staff_id, provider(m365|google), tokens, sync_mode(two_way), status

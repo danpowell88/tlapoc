@@ -33,6 +33,8 @@ _Prototype screen: prototype.html — Charting + Clinical (Skin analysis, Body c
 - Treatment-type toggle: Anti-wrinkle (toxin) / Skin treatment.
 - A finalise close-out captures aftercare, recall, the 2-day wellbeing call and any adverse event before checkout.
 
+![charting — prototype screen](../screens/charting.png)
+
 ## Suggested data model
 
 - **ChartEntry** — id, tenant_id, client_id, appointment_id, consult_id, treatment_type, status(draft|final), author_id, finalised_at

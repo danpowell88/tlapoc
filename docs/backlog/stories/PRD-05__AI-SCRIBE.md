@@ -26,6 +26,8 @@ Captured to keep the data model ready.
 
 prototype.html — Charting + Clinical (Skin analysis, Body contouring, Complication protocols, Photography & outcomes); treatment-room.html.
 
+![charting — prototype screen](../screens/charting.png)
+
 ## Suggested data model
 
 - **(future) AIAssist** — advisory suggestions attached to a draft ChartEntry; human confirms

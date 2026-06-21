@@ -28,6 +28,8 @@ Tracked to reconcile the prototype's Campaigns screen with the scope cut.
 
 - Prototype: Comms -> Campaigns (marketing-camp.png) exists as a concept; real campaigns run in external tools.
 
+![marketing-camp — prototype screen](../screens/marketing-camp.png)
+
 ## Suggested data model
 
 - **AudienceSegment (export)** — consented clients matching filters

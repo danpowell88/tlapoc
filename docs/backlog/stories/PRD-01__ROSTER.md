@@ -29,6 +29,8 @@ Engagement type (employee/contractor) is recorded for downstream commission/pay 
 
 - Prototype: Team -> Roster & leave (team-roster.png) — a weekly roster grid per practitioner with shifts and leave; drives availability in Schedule.
 
+![team-roster — prototype screen](../screens/team-roster.png)
+
 ## Suggested data model
 
 - **RosterShift** — id, tenant_id, staff_id, location_id, start, end, role

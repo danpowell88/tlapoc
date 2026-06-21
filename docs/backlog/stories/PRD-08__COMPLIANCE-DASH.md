@@ -33,6 +33,8 @@ _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Po
 - Prototype: Governance -> Overview (gov-overview.png) — compliance metrics + register links; exports for the S4 register, lot-recall and the breach/complaints registers.
 - Registration-expiry watch + records-due lists with their basis.
 
+![gov-overview — prototype screen](../screens/gov-overview.png)
+
 ## Suggested data model
 
 - **ComplianceMetric** — key(consent_coverage|consult_adherence|cooling_off|reg_expiry|retention_due|stock_discrepancy), value, exceptions[]

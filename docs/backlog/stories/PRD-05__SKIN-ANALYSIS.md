@@ -33,6 +33,8 @@ _Prototype screen: prototype.html — Clinical → Skin analysis (scan + push-to
 - Prototype: Clinical -> Skin analysis (clinical-skin.png) — zone scoring, a scan action (simulateScan), and a push-to-client summary (pushSkinToClient); appears in the client app.
 - AI scoring shown as advisory; clinician confirms.
 
+![clinical-skin — prototype screen](../screens/clinical-skin.png)
+
 ## Suggested data model
 
 - **SkinAssessment** — id, tenant_id, client_id, zones[]{area, concern, score}, source(manual|ai_advisory), pushed_to_client_at

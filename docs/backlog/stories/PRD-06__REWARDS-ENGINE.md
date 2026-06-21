@@ -31,6 +31,8 @@ Drives repeat visits without eroding margin or breaching advertising law. The ca
 - Prototype: Memberships -> Loyalty (memb-loyalty.png) — reward rules + ledger; S4 items in the catalog show disabled reward/discount controls with a tooltip (the S4 guardrail).
 - Earn/redeem visible on the Client 360 + client app rewards.
 
+![memb-loyalty — prototype screen](../screens/memb-loyalty.png)
+
 ## Suggested data model
 
 - **RewardRule** — id, tenant_id, basis(milestone|nth_visit|membership), eligible_items(non-S4), value_cap

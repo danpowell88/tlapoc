@@ -33,6 +33,8 @@ _Prototype screen: prototype.html — Forms & consent; client-app.html intake/co
 - Staff: Forms & consent (forms-consent.png) shows intake status per client and lets the desk send/chase it.
 - Forms are configurable (admin-defined fields).
 
+![forms-consent — prototype screen](../screens/forms-consent.png)
+
 ## Suggested data model
 
 - **IntakeForm** — id, tenant_id, name, version, fields(json schema)

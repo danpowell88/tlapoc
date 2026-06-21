@@ -32,6 +32,8 @@ _Prototype screen: prototype.html — sidebar/app shell, Today dashboard, header
 - Prototype: the left sidebar (dashboard.png) — top-level items + collapsible 'Workspaces'; active screen/section persist; mobile uses a drawer + overlay.
 - Follow-ups and Governance show count badges; entries outside the role are hidden.
 
+![dashboard — prototype screen](../screens/dashboard.png)
+
 ## Suggested data model
 
 - **(derived) NavModel** — from Role.capabilities -> visible nav entries + badge counts

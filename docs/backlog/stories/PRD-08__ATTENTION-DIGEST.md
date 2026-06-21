@@ -31,6 +31,8 @@ _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Po
 
 - Prototype: Today (dashboard.png) surfaces the owner exceptions digest; each item deep-links to its source screen.
 
+![dashboard — prototype screen](../screens/dashboard.png)
+
 ## Suggested data model
 
 - **(read) AttentionDigest** — aggregates CredentialAlert + Excursion + Stocktake discrepancy + DataQualityFinding + DunningAttempt + overdue Job

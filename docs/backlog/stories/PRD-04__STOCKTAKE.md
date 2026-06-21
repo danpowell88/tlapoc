@@ -30,6 +30,8 @@ Keeps stock integrity provable and losses reported.
 
 - Prototype: Stock & medicines (stock.png) — a stocktake action comparing counted vs expected per lot; discrepancies highlighted with a loss/theft report path; expiry alerts on near-expiry lots.
 
+![stock — prototype screen](../screens/stock.png)
+
 ## Suggested data model
 
 - **Stocktake** — id, tenant_id, at, actor_id, lines[]{lot_id, expected, counted, variance}

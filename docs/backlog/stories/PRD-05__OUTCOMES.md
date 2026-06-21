@@ -33,6 +33,8 @@ _Prototype screen: prototype.html — Clinical → Photography & outcomes._
 
 - Prototype: Clinical -> Photography & outcomes (clinical-imaging.png) — before/after outcomes + a revision/touch-up signal feeding reporting.
 
+![clinical-imaging — prototype screen](../screens/clinical-imaging.png)
+
 ## Suggested data model
 
 - **Outcome** — id, chart_entry_id, client_id, rating, before_photo_id, after_photo_id, revision_of?

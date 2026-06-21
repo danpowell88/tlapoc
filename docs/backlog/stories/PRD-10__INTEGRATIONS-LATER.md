@@ -28,6 +28,8 @@ Captured so the architecture stays extension-ready (ADR-0035/0036).
 
 - Prototype: Settings -> Integrations (settings-integrations.png) shows these as concept cards (mostly disabled).
 
+![settings-integrations — prototype screen](../screens/settings-integrations.png)
+
 ## Suggested data model
 
 - **(future)** — OnlineOrder / EPrescription / Webhook / ApiKey

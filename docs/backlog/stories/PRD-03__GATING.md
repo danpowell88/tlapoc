@@ -31,6 +31,8 @@ This is the mechanism PRD-04 (consult/Rx) and PRD-05 (charting) consume; gate de
 - Prototype: the Charting pre-treatment review (charting.png) shows the gate chips and blocks opening the map until satisfied; the banner explains and links the fix.
 - Same gate reused on the provider app (treatment-room.png).
 
+![charting — prototype screen](../screens/charting.png)
+
 ## Suggested data model
 
 - **(derived) TreatmentGate** — = required IntakeResponse present AND current ConsentSignature AND ScreeningResult present (AND consult/Rx for S4)

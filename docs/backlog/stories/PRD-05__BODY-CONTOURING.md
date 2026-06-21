@@ -32,6 +32,8 @@ _Prototype screen: prototype.html — Clinical → Body contouring (body map)._
 
 - Prototype: Clinical -> Body contouring (clinical-body.png) — a body map with add/remove/cycle areas (bodyAdd/bodyDel/bodyCyc) and per-area settings (applicator, cycles, parameters).
 
+![clinical-body — prototype screen](../screens/clinical-body.png)
+
 ## Suggested data model
 
 - **BodyChart** — id, chart_entry_id, areas[]{region, applicator, cycles, params}

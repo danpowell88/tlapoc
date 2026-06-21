@@ -33,6 +33,8 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 - Prototype: Clinical -> Treatment menu (clinical-menu.png) and admin Services & products — each service row shows duration, eligible roles, price, S4 flag; capability-gated admin; changes audited.
 - The S4 tag visibly marks services and disables reward/discount controls on them.
 
+![clinical-menu — prototype screen](../screens/clinical-menu.png)
+
 ## Suggested data model
 
 - **Service** — id, tenant_id, name, public_name, duration, buffer, price, schedule(S4|non-S4), eligible_roles[], product_id?

@@ -33,6 +33,8 @@ _Prototype screen: backroom.html._
 - Prototype: back-office tablet (backroom.png) — 'Good morning', Open & close, Cold chain, Stock on hand, Schedule 4 drug register, Waste & disposal log, Tasks, Shift handover.
 - Shared-device session handling.
 
+![backroom — prototype screen](../screens/backroom.png)
+
 ## Suggested data model
 
 - **(reuses)** — OpenCloseChecklist/TempLog/StockItem/StockLedger/StockDestruction/Job/ShiftHandover

@@ -31,6 +31,8 @@ Self-service lives in the client app privacy area; staff handle requests via Gov
 - Client app: Account -> 'Your data & privacy' (residency note, request a copy, request correction) — client-app.png.
 - Staff side: a DSAR queue in Governance with the response clock.
 
+![client-app — prototype screen](../screens/client-app.png)
+
 ## Suggested data model
 
 - **PrivacyRequest** — id, tenant_id, client_id, type(access|correction|deletion), opened_at, due_at, status, resolution

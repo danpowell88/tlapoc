@@ -31,6 +31,8 @@ Feeds the owner 'needs attention' digest and the compliance board.
 - Prototype: Team -> Compliance board (team-compliance.png) — the 'cleared to treat' board with per-practitioner status chips and expiry countdowns; alerts on items due.
 - Role-targeted alerts; acknowledge/dismiss is audited.
 
+![team-compliance — prototype screen](../screens/team-compliance.png)
+
 ## Suggested data model
 
 - **CredentialAlert** — id, tenant_id, credential_id, type(expiring|lapsed), due_date, acknowledged_by, acknowledged_at

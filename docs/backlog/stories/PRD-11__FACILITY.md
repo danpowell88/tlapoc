@@ -30,6 +30,8 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 
 - Prototype: Operations (ops-equipment.png area) / facility profile — accreditation status per location with expiry alerts.
 
+![ops-equipment — prototype screen](../screens/ops-equipment.png)
+
 ## Suggested data model
 
 - **FacilityAccreditation** — id, tenant_id, location_id, scheme, status, expiry, evidence_ref

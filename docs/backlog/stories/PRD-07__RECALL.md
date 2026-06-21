@@ -30,6 +30,8 @@ Integrates with treatment plans (PRD-05) and rebooking (PRD-06); keeps the book 
 - Prototype: Follow-ups (followups.png) includes the recall/rebook worklist of clients due; automatic recall nudges via the channels.
 - Unbooked recommended sessions prompt a rebook.
 
+![followups — prototype screen](../screens/followups.png)
+
 ## Suggested data model
 
 - **RecallTask** — id, tenant_id, client_id, due_at, reason(interval|unbooked_plan), status, last_nudge_at

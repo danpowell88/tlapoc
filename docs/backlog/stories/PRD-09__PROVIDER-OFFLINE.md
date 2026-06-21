@@ -31,6 +31,8 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 
 - Prototype: provider app (treatment-room.png) — a persistent sync/offline indicator; queued-items count + last-sync; finalise disabled until synced.
 
+![treatment-room — prototype screen](../screens/treatment-room.png)
+
 ## Suggested data model
 
 - **(reuses)** — LocalQueue (PRD-05/OFFLINE) on-device

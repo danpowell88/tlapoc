@@ -31,6 +31,8 @@ _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Po
 
 - Prototype: Finance (finance.png) — true-cost/margin per treatment using vial/consumable cost; owner-only.
 
+![finance — prototype screen](../screens/finance.png)
+
 ## Suggested data model
 
 - **(read) MarginByService** — service_id, revenue, cogs(vial+consumables), margin by date

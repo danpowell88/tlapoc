@@ -31,6 +31,8 @@ _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Po
 
 - Prototype: Reports -> Capacity (reports.png, goRep('capacity'), overview/trends) — utilisation by resource with quiet-window highlights.
 
+![reports — prototype screen](../screens/reports.png)
+
 ## Suggested data model
 
 - **(read) CapacityMetrics** — utilisation by practitioner/room/device, quiet_windows, by date

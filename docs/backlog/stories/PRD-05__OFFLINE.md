@@ -32,6 +32,8 @@ _Prototype screen: prototype.html — Charting + Clinical (Skin analysis, Body c
 - Prototype: provider app (treatment-room.png) shows a sync/offline indicator; finalise disabled until synced.
 - Queued drafts/photos visibly pending; no data loss on reconnect.
 
+![treatment-room — prototype screen](../screens/treatment-room.png)
+
 ## Suggested data model
 
 - **LocalQueue (device)** — draft chart edits + pending photos, encrypted; sync cursor

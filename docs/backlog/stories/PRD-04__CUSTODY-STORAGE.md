@@ -31,6 +31,8 @@ A custodian + exclusive-custody attestation + designated medicine-store contact 
 - Prototype: Stock & medicines header (stock.png) shows 'custody Dr Lee NP · locked fridge'; the custodian + secure-location binding is visible; access is logged.
 - Custody-change is capability-gated and audited.
 
+![stock — prototype screen](../screens/stock.png)
+
 ## Suggested data model
 
 - **StockLocation** — id, tenant_id, name(locked cabinet/fridge), custodian_id, exclusive_custody_attested(bool), store_contact

@@ -32,6 +32,8 @@ _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rew
 - Prototype: Checkout (checkout.png) — line items (service/retail/package), tender selection (Square card / cash / gift card), receipt, partial/split, tips; S4 items show no reward/discount controls (C9).
 - Reception sees the sale but not owner-only money totals.
 
+![checkout — prototype screen](../screens/checkout.png)
+
 ## Suggested data model
 
 - **Invoice** — id, tenant_id, client_id, lines[]{type, ref, qty, price, gst}, total, status

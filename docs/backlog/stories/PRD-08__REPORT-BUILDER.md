@@ -26,6 +26,8 @@ Captured to keep the architecture builder-ready.
 
 prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack).
 
+![reports — prototype screen](../screens/reports.png)
+
 ## Suggested data model
 
 - **(future) CustomReport** — user-defined query over read-models

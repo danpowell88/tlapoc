@@ -31,6 +31,8 @@ This guarantees no S4 treatment can begin without the consult, complementing the
 - Prototype: the Charting screen (charting.png) shows the gate chips (Consult / Consent / screening) and the Consult & prescription card; a checked-in injectable with no consult cannot open charting and shows why.
 - On the schedule/Today board, an injectable visit shows its gate status.
 
+![charting — prototype screen](../screens/charting.png)
+
 ## Suggested data model
 
 - **Appointment.consult_id** — FK Consult (PRD-04), nullable until consult recorded

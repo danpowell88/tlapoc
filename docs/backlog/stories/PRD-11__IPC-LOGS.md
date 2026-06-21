@@ -30,6 +30,8 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 
 - Prototype: Operations -> Open/close & fridge log (ops-openclose.png) + the back-office waste log (backroom.png) — sterilisation/single-use, sharps & clinical-waste entries.
 
+![ops-openclose — prototype screen](../screens/ops-openclose.png)
+
 ## Suggested data model
 
 - **InfectionControlLog** — id, tenant_id, location_id, kind(sterilisation|single_use|sharps|clinical_waste), detail, at, actor_id

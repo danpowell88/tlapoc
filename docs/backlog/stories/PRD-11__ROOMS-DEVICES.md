@@ -31,6 +31,8 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 
 - Prototype: Operations -> Rooms & devices (ops-resources.png) — create/edit rooms/chairs/devices (type, location, status); out-of-service toggles availability.
 
+![ops-resources — prototype screen](../screens/ops-resources.png)
+
 ## Suggested data model
 
 - **Resource** — (shared with PRD-02) id, type(room|chair|device), name, location_id, status

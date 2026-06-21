@@ -31,6 +31,8 @@ The project's owner-only financials rule, made structural (the .fin capability).
 - Prototype: money figures tagged .fin are hidden for reception/clinical roles across dashboards, checkout totals, finance, memberships and reports; visible only to the owner.
 - A non-owner never sees revenue/MRR/pricing.
 
+![finance — prototype screen](../screens/finance.png)
+
 ## Suggested data model
 
 - **Capability finance.read** — gates money fields server-side

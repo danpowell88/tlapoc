@@ -33,6 +33,8 @@ _Prototype screen: prototype.html — Charting + Clinical (Skin analysis, Body c
 - Prototype: Charting 'Before / after' compare with a drag slider ('12 weeks apart · stored securely, never on device') — see charting.png; and Clinical -> Photography & outcomes (clinical-imaging.png) for the gallery/compare.
 - Camera/upload with a framing/ghost overlay; capture blocked without image-use consent.
 
+![clinical-imaging — prototype screen](../screens/clinical-imaging.png)
+
 ## Suggested data model
 
 - **Photo** — id, tenant_id, client_id, chart_entry_id, blob_ref(signed-url), framing_meta(json), taken_at, image_consent_id

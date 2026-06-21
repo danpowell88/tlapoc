@@ -30,6 +30,8 @@ _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rew
 
 - Prototype: Memberships -> Referrals (memb-referrals.png) — referral/affiliate credit concept.
 
+![memb-referrals — prototype screen](../screens/memb-referrals.png)
+
 ## Suggested data model
 
 - **Referral** — id, referrer_id, referee_id, credit(non-S4), status

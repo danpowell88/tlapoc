@@ -32,6 +32,8 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 - Client app / email-SMS: reminder with confirm/decline + reschedule/cancel links; the desk sees confirm/decline status on the appointment (schedule.png).
 - Cancellation/no-show policy is configurable in settings.
 
+![schedule — prototype screen](../screens/schedule.png)
+
 ## Suggested data model
 
 - **ReminderSchedule** — id, appointment_id, channel, send_at, status(sent|confirmed|declined)

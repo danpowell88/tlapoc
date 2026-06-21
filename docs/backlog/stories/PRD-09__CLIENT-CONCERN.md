@@ -32,6 +32,8 @@ _Prototype screen: client-app.html — Report a concern; prototype Follow-ups._
 
 - Prototype: client app 'Report a concern' (client-app.png) -> appears in staff Follow-ups (followups.png) as a job (openConcern/concernCall).
 
+![client-app — prototype screen](../screens/client-app.png)
+
 ## Suggested data model
 
 - **Concern** — id, tenant_id, client_id, treatment_ref, body, photo_ref?, status, raised_at

@@ -32,6 +32,8 @@ _Prototype screen: prototype.html — Operations → Temperature monitors._
 
 - Prototype: Operations -> Temperature monitors (ops-monitors.png) — monitor list per fridge, live/charted temps, breach alerts, dead-monitor detection (openMonitor/monitorJob).
 
+![ops-monitors — prototype screen](../screens/ops-monitors.png)
+
 ## Suggested data model
 
 - **Monitor** — id, tenant_id, location_id, fridge, api_key_ref, last_heartbeat, status
