@@ -1,2 +1,4 @@
 scripts/.backlog-state.json
 scripts/.monday-token
+__pycache__/
+*.pyc
