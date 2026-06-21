@@ -391,6 +391,7 @@ tailwind.config={theme:{extend:{
                     <button onclick="go('cplan')" class="card p-4 text-left"><span class="material-symbols-rounded text-brand-600">map</span><div class="font-semibold text-sm mt-1">Treatment plan</div><div class="text-mute text-xs">Your journey &amp; next due</div></button>
                     <button onclick="go('caftercare')" class="card p-4 text-left"><span class="material-symbols-rounded text-emerald-500">healing</span><div class="font-semibold text-sm mt-1">Aftercare</div><div class="text-mute text-xs">Active: skin needling</div></button>
                     <button onclick="go('cscripts')" class="card p-4 text-left"><span class="material-symbols-rounded text-rose-500">medication</span><div class="font-semibold text-sm mt-1">My medicines</div><div class="text-mute text-xs">Prescribed record</div></button>
+                    <button onclick="go('creport')" class="card p-4 text-left col-span-2 flex items-center gap-3"><span class="material-symbols-rounded text-rose-500">report</span><div class="flex-1"><div class="font-semibold text-sm">Report a concern</div><div class="text-mute text-xs">Symptom + photo after a treatment — straight to your nurse</div></div><span class="material-symbols-rounded text-slate-300">chevron_right</span></button>
                   </div>
                   <div class="flex items-center justify-between px-1 pt-1"><h2 class="font-semibold text-sm">Visit history</h2><button onclick="go('cdocs')" class="text-brand-700 text-xs font-semibold">Documents</button></div>
                   <div id="histList" class="space-y-2"></div>
@@ -475,12 +476,28 @@ tailwind.config={theme:{extend:{
                       <li>Retinol &amp; acids (actives)</li><li>Saunas, heavy exercise &amp; swimming</li><li>Direct sun &amp; make-up for 24–48h</li>
                     </ul>
                   </div>
-                  <div class="card p-4 flex items-center gap-3">
-                    <span class="material-symbols-rounded text-amber-500">contact_support</span>
-                    <div class="flex-1 text-sm"><div class="font-medium">Something not right?</div><div class="text-mute text-xs">Unusual redness, pain or swelling — tell us straight away.</div></div>
-                    <button onclick="go('cmsg')" class="px-3 py-1.5 rounded-lg bg-brand-600 text-white text-xs font-semibold">Message</button>
+                  <div class="card p-4">
+                    <div class="text-sm font-semibold mb-1 flex items-center gap-1"><span class="material-symbols-rounded text-[18px] text-brand-600">recommend</span>Recommended for your recovery</div>
+                    <div class="text-mute text-xs mb-3">Matched to your skin needling — gentle on healing skin.</div>
+                    <div id="aftercareRecs" class="space-y-2"></div>
+                  </div>
+                  <div class="card p-4 border border-rose-100 bg-rose-50/40">
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-rounded text-rose-500">e911_emergency</span>
+                      <div class="flex-1 text-sm"><div class="font-medium">Something not right?</div><div class="text-mute text-xs">Unusual pain, swelling, paleness or anything worrying — tell your care team with a photo.</div></div>
+                    </div>
+                    <button onclick="go('creport')" class="w-full mt-3 py-2.5 rounded-xl bg-rose-600 text-white text-sm font-semibold flex items-center justify-center gap-1"><span class="material-symbols-rounded text-[18px]">photo_camera</span>Report a concern</button>
                   </div>
                 </div>
+              </section>
+
+              <!-- ---------- REPORT A CONCERN ---------- -->
+              <section data-scr id="creport" data-root="ccare" class="hidden">
+                <div class="subhead px-3 h-12 flex items-center gap-1">
+                  <button onclick="go('caftercare')" class="size-9 grid place-items-center rounded-full hover:bg-slate-100"><span class="material-symbols-rounded">arrow_back_ios_new</span></button>
+                  <div class="font-semibold">Report a concern</div>
+                </div>
+                <div id="reportBody" class="px-4 py-3 space-y-3"></div>
               </section>
 
               <!-- ---------- MY MEDICINES ---------- -->
@@ -894,7 +911,8 @@ var captions={
  ccare:['My care','The client’s health hub: history, photos, plan, aftercare, medicines, documents.'],
  cphotos:['Before & after','Consent-gated progress photos with a drag-to-compare slider.'],
  cplan:['Treatment plan','The ongoing journey — what’s due, course progress and shared goals.'],
- caftercare:['Aftercare','Day-by-day recovery guidance with a “something’s wrong” escalation.'],
+ caftercare:['Aftercare','Day-by-day recovery guidance, matched product picks and a “something’s wrong” escalation.'],
+ creport:['Report a concern','Send the clinic a symptom + photo after a treatment — triaged into the staff queue.'],
  cscripts:['My medicines','S4 record, shown privately — never advertised or priced.'],
  cdocs:['Documents','Signed consents, treatment records, receipts and aftercare PDFs.'],
  crewards:['Rewards','Membership card, points, perks, milestones, referrals and gift cards.'],
@@ -922,6 +940,8 @@ function go(id){
   if(id==='cappts')renderPast();
   if(id==='ccare')renderHistory();
   if(id==='cdocs')renderDocs();
+  if(id==='caftercare')renderAftercare();
+  if(id==='creport'){reportState.sent=false;renderReport();}
   if(id==='crewards')renderLedger();
   if(id==='cpay')renderReceipts();
   if(id==='cprefs')renderPrefs();
@@ -1115,6 +1135,48 @@ function toast(m){var t=document.getElementById('toast');document.getElementById
 
 /* before/after slider */
 function baMove(v){document.getElementById('baTop').style.width=v+'%';document.getElementById('baLine').style.left=v+'%';}
+
+/* =================== AFTERCARE: treatment-linked recommendations =================== */
+var aftercareRecs=[
+ {n:'SPF 50 mineral',why:'Daily — protects healing skin',p:45},
+ {n:'Post-treatment recovery balm',why:'Calms & repairs the barrier',p:54},
+ {n:'Hyaluronic acid serum',why:'Rehydrates after needling',p:72}];
+function renderAftercare(){var b=document.getElementById('aftercareRecs');if(!b)return;
+ b.innerHTML=aftercareRecs.map(function(r){return '<div class="flex items-center gap-3"><div class="size-9 rounded-xl bg-emerald-50 grid place-items-center shrink-0"><span class="material-symbols-rounded text-emerald-600 text-[20px]">spa</span></div><div class="flex-1 min-w-0"><div class="text-sm font-medium truncate">'+r.n+'</div><div class="text-mute text-xs truncate">'+r.why+'</div></div><div class="text-sm font-semibold mr-1">$'+r.p+'</div><button onclick="toast(\'Added to your next order\')" class="px-2.5 py-1 rounded-lg bg-brand-600 text-white text-xs font-semibold shrink-0">Add</button></div>';}).join('');}
+
+/* =================== REPORT A CONCERN (→ clinic queue) =================== */
+var reportState={treat:'Lip filler · 19 Jun',sym:[],urgency:'',note:'',photos:[],sent:false};
+var reportTreats=['Lip filler · 19 Jun','Skin needling · 16 Jun','Anti-wrinkle · 12 Mar','Other / general'];
+var reportSymList=['Pain','Swelling','Redness','Paleness / white patch','Lump or hardness','Bruising','Itching','Other'];
+function rSym(s){var i=reportState.sym.indexOf(s);if(i>-1)reportState.sym.splice(i,1);else reportState.sym.push(s);renderReport();}
+function rUrg(v){reportState.urgency=v;renderReport();}
+function rTreat(v){reportState.treat=v;}
+function rNote(v){reportState.note=v;}
+function rAddSample(kind){reportState.photos.push({sample:kind});renderReport();}
+function rPhotoFiles(input){var fs=input.files||[];for(var i=0;i<fs.length;i++){try{reportState.photos.push({url:URL.createObjectURL(fs[i])});}catch(e){reportState.photos.push({sample:'other'});}}renderReport();}
+function rRemovePhoto(i){reportState.photos.splice(i,1);renderReport();}
+function rPhotoKind(){var s=reportState.sym.join(' ').toLowerCase();if(/pale|white|pain/.test(s))return 'vo';if(/swell/.test(s))return 'swelling';if(/red|itch/.test(s))return 'skin';return 'other';}
+var rPhotoGrad={vo:'from-rose-200 to-rose-400',skin:'from-amber-100 to-orange-200',swelling:'from-pink-100 to-rose-200',other:'from-slate-200 to-slate-300'};
+function submitReport(){if(!reportState.urgency){toast('Please tell us how urgent it feels');return;}if(!reportState.note&&!reportState.sym.length){toast('Add a short description or symptom');return;}
+ var rec={id:'cr'+Date.now(),cid:0,name:'Sarah Mitchell',treat:reportState.treat,when:'just now',urgency:reportState.urgency,sym:reportState.sym.slice(),note:reportState.note||'(no extra detail)',photo:reportState.photos.length?rPhotoKind():'other'};
+ try{var arr=JSON.parse(localStorage.getItem('tla_client_reports')||'[]');arr.push(rec);localStorage.setItem('tla_client_reports',JSON.stringify(arr));}catch(e){}
+ reportState.sent=true;renderReport();}
+function renderReport(){var b=document.getElementById('reportBody');if(!b)return;
+ if(reportState.sent){b.innerHTML='<div class="card p-6 text-center"><div class="size-16 rounded-full bg-emerald-50 grid place-items-center mx-auto"><span class="material-symbols-rounded text-emerald-500" style="font-size:38px">task_alt</span></div><div class="font-semibold text-lg mt-3">Sent to your care team</div><p class="text-mute text-sm mt-1">'+(reportState.urgency==='urgent'?'Because you marked this urgent, your nurse is being alerted now and will call you shortly.':'A nurse will review it and get back to you, usually within a few hours.')+'</p></div>'
+  +(reportState.urgency==='urgent'?'<div class="card p-4 border border-rose-100 bg-rose-50/50 flex items-start gap-2 text-sm text-rose-700"><span class="material-symbols-rounded text-[20px]">emergency</span><div>If you have <b>vision changes</b>, severe pain, or trouble breathing, this is an emergency — <b>call 000</b> now.</div></div>':'')
+  +'<button onclick="go(\'caftercare\')" class="w-full py-3 rounded-xl bg-white shadow-soft font-semibold text-sm">Back to aftercare</button>';return;}
+ var treatOpts=reportTreats.map(function(t){return '<option'+(t===reportState.treat?' selected':'')+'>'+t+'</option>';}).join('');
+ var chips=reportSymList.map(function(s){var on=reportState.sym.indexOf(s)>-1;return '<button onclick="rSym(\''+s+'\')" class="px-3 py-1.5 rounded-full text-sm '+(on?'bg-brand-600 text-white':'bg-white border border-slate-200 text-mute')+'">'+s+'</button>';}).join('');
+ var urg=[['mild','I’m just checking','info','slate'],['moderate','I’m a bit worried','warning','amber'],['urgent','I need help soon','priority_high','rose']].map(function(u){var on=reportState.urgency===u[0];return '<button onclick="rUrg(\''+u[0]+'\')" class="w-full flex items-center gap-3 p-3 rounded-xl border text-left '+(on?'border-'+u[3]+'-400 bg-'+u[3]+'-50':'border-slate-200')+'"><span class="material-symbols-rounded text-'+u[3]+'-500">'+u[2]+'</span><span class="text-sm font-medium">'+u[1]+'</span>'+(on?'<span class="material-symbols-rounded text-'+u[3]+'-500 ml-auto">check_circle</span>':'')+'</button>';}).join('');
+ var photos=reportState.photos.map(function(p,i){var inner=p.url?'<img src="'+p.url+'" class="w-full h-full object-cover"/>':'<div class="w-full h-full bg-gradient-to-br '+(rPhotoGrad[p.sample]||rPhotoGrad.other)+' grid place-items-center"><span class="material-symbols-rounded text-white/70">image</span></div>';return '<div class="relative size-16 rounded-xl overflow-hidden shrink-0">'+inner+'<button onclick="rRemovePhoto('+i+')" class="absolute -top-1 -right-1 size-5 rounded-full bg-rose-500 text-white text-xs grid place-items-center">&times;</button></div>';}).join('');
+ b.innerHTML=
+  '<div class="rounded-2xl bg-rose-50 border border-rose-100 p-3 flex items-start gap-2 text-xs text-rose-700"><span class="material-symbols-rounded text-[18px]">info</span>This goes to your nurse — not 000. If it’s an emergency (vision changes, severe pain, breathing trouble) call <b>000</b>.</div>'
+  +'<div class="card p-4"><div class="text-sm font-semibold mb-2">Which treatment?</div><select onchange="rTreat(this.value)" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm bg-white">'+treatOpts+'</select></div>'
+  +'<div class="card p-4"><div class="text-sm font-semibold mb-2">What are you noticing?</div><div class="flex flex-wrap gap-2">'+chips+'</div></div>'
+  +'<div class="card p-4"><div class="text-sm font-semibold mb-2">Add photos</div><div class="flex items-center gap-2 flex-wrap">'+photos+'<label class="size-16 rounded-xl border-2 border-dashed border-slate-300 grid place-items-center text-slate-400 cursor-pointer shrink-0"><span class="material-symbols-rounded">add_a_photo</span><input type="file" accept="image/*" multiple class="hidden" onchange="rPhotoFiles(this)"/></label></div><div class="flex gap-2 mt-2"><button onclick="rAddSample(\'vo\')" class="text-xs text-brand-700 font-semibold">+ Sample photo</button><span class="text-[11px] text-mute">stored securely in Australia · only your care team sees it</span></div></div>'
+  +'<div class="card p-4"><div class="text-sm font-semibold mb-2">Anything to add?</div><textarea oninput="rNote(this.value)" rows="3" placeholder="Describe what’s happening and when it started…" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm">'+reportState.note+'</textarea></div>'
+  +'<div class="card p-4"><div class="text-sm font-semibold mb-2">How urgent does it feel?</div><div class="space-y-2">'+urg+'</div></div>'
+  +'<button onclick="submitReport()" class="w-full py-3 rounded-xl bg-rose-600 text-white font-semibold flex items-center justify-center gap-1"><span class="material-symbols-rounded text-[18px]">send</span>Send to my care team</button>';}
 
 /* feature chips */
 var chips=[['Notifications','cnotif'],['Booking','cbook'],['Reminders','capptDetail'],['Forms & consent','cforms'],['History','ccare'],['Before & after','cphotos'],['Aftercare','caftercare'],['Membership','crewards'],['Payments','cpay'],['Privacy','cprivacy']];
