@@ -6,17 +6,13 @@
 
 ## Background
 
-Consult, prescribing & S4 medicines governance (the moat) — The defensible core.
-
 As a owner, I want to run a stocktake and have discrepancies surfaced with a loss/theft reporting path, so that stock integrity is provable and losses are reported.
-
 Stocktakes and discrepancy handling, with loss/theft reporting, close the medicines-governance loop (C17).
 
 ## Requirements
 
 - To run a stocktake and have discrepancies surfaced with a loss/theft reporting path.
-- Traces to requirement(s): REQ-MED-10.
-- Must satisfy compliance obligation(s): C17.
+- Compliance: [C17](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -25,22 +21,13 @@ Stocktakes and discrepancy handling, with loss/theft reporting, close the medici
 - [ ] Expiry alerts surface near-expiry lots.
 - [ ] Stocktake results feed the compliance dashboard (PRD-08).
 
-## UI designs / screenshots
-
-prototype.html — Stock & medicines, Charting (lot select), Governance → Recalls.
-
 ## Technical notes (high level)
 
-Stack: .NET API (domain/services).
-Depends on: PRD-04/CUSTODY-STORAGE.
+- Stack: .NET API (domain/services)
 
 ## Other
 
-Epic: PRD-04 — Consult, prescribing & S4 medicines governance (the moat).
-Source PRD: docs/prds/PRD-04-consult-prescribing-s4.md.
-Backlog key: PRD-04/STOCKTAKE.
-Phase: 1 · Priority: P1 · Estimate: 3 pts.
-Compliance criteria: C17.
+- Source PRD: [PRD-04-consult-prescribing-s4.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-04-consult-prescribing-s4.md)
 
 ## Tasks (dev pickup)
 

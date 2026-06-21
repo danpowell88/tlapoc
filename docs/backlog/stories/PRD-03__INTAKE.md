@@ -6,16 +6,12 @@
 
 ## Background
 
-Intake, consent & compliance gating — Turns AHPRA's patient-safety rules into enforced workflow: pre-visit intake (medical history, contraindications, BDD/psychological screen), versioned e-signed consent with mandated content, separate withdrawable image-use consent, and cooling-off + payment blocks for under-18s.
-
 As a client, I want to complete my medical history, medications, allergies and contraindications before my visit on my phone, so that my practitioner has what they need and my treatment is safe.
-
 Clients complete medical history, meds, allergies and contraindications on their phone before the visit; responses auto-link to the chart.
 
 ## Requirements
 
 - To complete my medical history, medications, allergies and contraindications before my visit on my phone.
-- Traces to requirement(s): REQ-CONS-2, REQ-CONS-3.
 
 ## Acceptance Criteria
 
@@ -30,15 +26,11 @@ prototype.html — Forms & consent; client-app.html intake/consent; checkin.html
 
 ## Technical notes (high level)
 
-Stack: Flutter client app; .NET API (domain/services).
-Depends on: PRD-02/ONLINE-BOOK.
+- Stack: Flutter client app; .NET API (domain/services)
 
 ## Other
 
-Epic: PRD-03 — Intake, consent & compliance gating.
-Source PRD: docs/prds/PRD-03-intake-consent-gating.md.
-Backlog key: PRD-03/INTAKE.
-Phase: 1 · Priority: P0 · Estimate: 5 pts.
+- Source PRD: [PRD-03-intake-consent-gating.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-03-intake-consent-gating.md)
 
 ## Tasks (dev pickup)
 

@@ -6,17 +6,13 @@
 
 ## Background
 
-Integrations: Xero & calendar — Outbound integrations that remove double-entry: push sales/payments to Xero, and keep appointments in sync with staff calendars (M365 / Google)
-
 As a owner, I want assurance that any data leaving the platform goes only to AU-resident or APP-8-assessed sub-processors, so that integrations don't breach cross-border rules.
-
 No integration sends PII to a non-AU sub-processor unless an APP-8 assessment + consent record exists (REQ-INT-3, C21/ADR-0016).
 
 ## Requirements
 
 - Assurance that any data leaving the platform goes only to AU-resident or APP-8-assessed sub-processors.
-- Traces to requirement(s): REQ-INT-3.
-- Must satisfy compliance obligation(s): C21.
+- Compliance: [C21](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -25,23 +21,14 @@ No integration sends PII to a non-AU sub-processor unless an APP-8 assessment + 
 - [ ] All integrations are outbound and swappable.
 - [ ] Ties into PRD-01/RESIDENCY enforcement.
 
-## UI designs / screenshots
-
-prototype.html — Settings → Integrations.
-
 ## Technical notes (high level)
 
-Stack: Ports-and-adapters integration.
-Architecture decisions: ADR-0016 (see docs/adr/decision-log.md).
-Depends on: PRD-01/RESIDENCY.
+- Stack: Ports-and-adapters integration
+- Architecture decisions: [ADR-0016](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: PRD-10 — Integrations: Xero & calendar.
-Source PRD: docs/prds/PRD-10-integrations.md.
-Backlog key: PRD-10/SUBPROCESSOR-POSTURE.
-Phase: 1 · Priority: P2 · Estimate: 2 pts.
-Compliance criteria: C21.
+- Source PRD: [PRD-10-integrations.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-10-integrations.md)
 
 ## Tasks (dev pickup)
 

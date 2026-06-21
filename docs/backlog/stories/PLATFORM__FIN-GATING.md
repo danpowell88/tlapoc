@@ -6,17 +6,13 @@
 
 ## Background
 
-Platform shell, navigation & cross-cutting UX — The cross-cutting product surfaces the prototype exercises that don't belong to a single feature PRD: the app shell + collapsible workspace navigation, the role-tailored Today dashboard, global search, the in-app notification centre, the clinic switcher, the persona/active-role + scope-of-practice display, and the owner-only financial (.fin) gating that hides money figures from non-owner roles.
-
 As a owner, I want all revenue/MRR/pricing figures hidden from non-owner roles across the app and API, so that financials stay owner-only.
-
 Project rule + prototype: revenue, MRR and pricing figures must stay gated behind the owner financial capability; non-owner roles (e.g. reception) see memberships but no money figures. The prototype tags these with a .fin class toggled by capability.
 
 ## Requirements
 
 - All revenue/MRR/pricing figures hidden from non-owner roles across the app and API.
-- Traces to requirement(s): REQ-TEN-3.
-- Must satisfy compliance obligation(s): C4, C10.
+- Compliance: [C4](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria), [C10](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -25,23 +21,14 @@ Project rule + prototype: revenue, MRR and pricing figures must stay gated behin
 - [ ] Gating is enforced server-side (API never returns gated figures to unauthorised roles), not just hidden in UI.
 - [ ] Attempted access is denied and audited.
 
-## UI designs / screenshots
-
-prototype.html — sidebar/app shell, Today dashboard, header (global search, clinic switcher, switch-user, scope tooltip).
-
 ## Technical notes (high level)
 
-Stack: .NET API (domain/services).
-Architecture decisions: ADR-0017 (see docs/adr/decision-log.md).
-Depends on: PRD-01/RBAC.
+- Stack: .NET API (domain/services)
+- Architecture decisions: [ADR-0017](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: PLATFORM — Platform shell, navigation & cross-cutting UX.
-Source PRD: docs/ux/README.md.
-Backlog key: PLATFORM/FIN-GATING.
-Phase: 1 · Priority: P0 · Estimate: 5 pts.
-Compliance criteria: C4, C10.
+- Source PRD: [README.md](https://github.com/danpowell88/tlapoc/blob/main/docs/ux/README.md)
 
 ## Tasks (dev pickup)
 

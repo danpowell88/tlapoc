@@ -4,17 +4,12 @@
 
 ## Background
 
-Consult, prescribing & S4 medicines governance (the moat) — The defensible core.
-
 As a owner, I want a product catalogue where each product has a type, unit, S4 flag and regulatory metadata, so that the right rules apply to each product across the platform.
-
 A typed, multi-unit catalogue (toxin/filler/skin/retail) with the S4 flag — the single classification driving rewards eligibility and public-page naming — plus regClass/ARTG/compounded for GLP-1 handling (ADR-0014/0021).
 
 ## Requirements
 
 - A product catalogue where each product has a type, unit, S4 flag and regulatory metadata.
-- Traces to requirement(s): REQ-MED-11, REQ-MED-12, REQ-MED-13.
-- Must satisfy compliance obligation(s): see Other.
 
 ## Acceptance Criteria
 
@@ -23,21 +18,14 @@ A typed, multi-unit catalogue (toxin/filler/skin/retail) with the S4 flag — th
 - [ ] Products carry regClass/artg/compounded; prohibited compounded GLP-1 is blocked.
 - [ ] Retail (non-S4) SKUs supported alongside medicines.
 
-## UI designs / screenshots
-
-prototype.html — Stock & medicines, Charting (lot select), Governance → Recalls.
-
 ## Technical notes (high level)
 
-Stack: .NET API (domain/services).
-Architecture decisions: ADR-0014, ADR-0021, ADR-0025 (see docs/adr/decision-log.md).
+- Stack: .NET API (domain/services)
+- Architecture decisions: [ADR-0014](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md), [ADR-0021](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md), [ADR-0025](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: PRD-04 — Consult, prescribing & S4 medicines governance (the moat).
-Source PRD: docs/prds/PRD-04-consult-prescribing-s4.md.
-Backlog key: PRD-04/PRODUCT-CATALOGUE.
-Phase: 1 · Priority: P0 · Estimate: 5 pts.
+- Source PRD: [PRD-04-consult-prescribing-s4.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-04-consult-prescribing-s4.md)
 
 ## Tasks (dev pickup)
 

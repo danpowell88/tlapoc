@@ -6,17 +6,14 @@
 
 ## Background
 
-Clinical charting: injection mapping & before/after — The clinical record that matches the Aesthetic Record / Pabau bar: a guided charting flow opening with product & lot selection, on-image/diagram injection mapping (product · units · depth · site · batch-lot), standardised before/after photos with comparison, immutable finalised notes with audited amendments, and adverse-event logging that feeds the TGA/DAEN pathway
-
 As a injector / owner, I want to track treatment outcomes and any revisions/touch-ups, so that we can measure quality and feed it to reporting.
-
 The prototype's Photography & outcomes view tracks before/after outcomes and a revision/touch-up signal that feeds reporting (REQ-CLIN-13).
 
 ## Requirements
 
 - To track treatment outcomes and any revisions/touch-ups.
-- Traces to requirement(s): REQ-CLIN-13.
-- Deferred (Phase 2+): placeholder — design-only for now.
+- Deferred (Phase 2+): placeholder, design-only for now.
+- Compliance: [C14](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -31,16 +28,11 @@ prototype.html — Clinical → Photography & outcomes.
 
 ## Technical notes (high level)
 
-Stack: Flutter provider app.
-Depends on: PRD-05/PHOTOS.
+- Stack: Flutter provider app
 
 ## Other
 
-Epic: PRD-05 — Clinical charting: injection mapping & before/after.
-Source PRD: docs/prds/PRD-05-clinical-charting.md.
-Backlog key: PRD-05/OUTCOMES.
-Phase: 2+ · Priority: P2 · Estimate: 1 pts.
-Compliance criteria: C14.
+- Source PRD: [PRD-05-clinical-charting.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-05-clinical-charting.md)
 
 ## Tasks (dev pickup)
 

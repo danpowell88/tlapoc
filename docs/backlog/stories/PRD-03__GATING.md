@@ -6,16 +6,13 @@
 
 ## Background
 
-Intake, consent & compliance gating — Turns AHPRA's patient-safety rules into enforced workflow: pre-visit intake (medical history, contraindications, BDD/psychological screen), versioned e-signed consent with mandated content, separate withdrawable image-use consent, and cooling-off + payment blocks for under-18s.
-
 As a RN/NP, I want the system to block treatment until required intake and consent are complete and current, telling me exactly what's missing, so that the compliant path is the only path.
-
 Treatment cannot start unless required intake + consent are complete and current — enforced server-side, surfaced via the blocked-action banner (ADR-0008).
 
 ## Requirements
 
 - The system to block treatment until required intake and consent are complete and current, telling me exactly what's missing.
-- Must satisfy compliance obligation(s): C5.
+- Compliance: [C5](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -24,23 +21,14 @@ Treatment cannot start unless required intake + consent are complete and current
 - [ ] The gate is the shared mechanism consumed by PRD-04/05.
 - [ ] Gate decisions are audited.
 
-## UI designs / screenshots
-
-prototype.html — Forms & consent; client-app.html intake/consent; checkin.html.
-
 ## Technical notes (high level)
 
-Stack: .NET API (domain/services).
-Architecture decisions: ADR-0008 (see docs/adr/decision-log.md).
-Depends on: PRD-03/CONSENT, PRD-03/BDD.
+- Stack: .NET API (domain/services)
+- Architecture decisions: [ADR-0008](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: PRD-03 — Intake, consent & compliance gating.
-Source PRD: docs/prds/PRD-03-intake-consent-gating.md.
-Backlog key: PRD-03/GATING.
-Phase: 1 · Priority: P0 · Estimate: 5 pts.
-Compliance criteria: C5.
+- Source PRD: [PRD-03-intake-consent-gating.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-03-intake-consent-gating.md)
 
 ## Tasks (dev pickup)
 

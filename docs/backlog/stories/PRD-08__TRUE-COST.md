@@ -6,16 +6,12 @@
 
 ## Background
 
-Reporting & compliance dashboards (Governance hub) — Turns the platform's data into the business intelligence the clinic relies on and the audit-ready compliance evidence that makes the moat real — consent coverage, the S4 register, lot recall, registration/retention watch, breach & complaints registers, the DAEN adverse-event prefill, plus a one-click inspection-readiness pack.
-
 As a owner, I want true-cost and margin reporting per treatment/service, so that I price and plan on real profitability.
-
 The prototype adds true-cost reporting — cost of goods (units/vial cost, consumables) per treatment to show real margin, not just revenue.
 
 ## Requirements
 
 - True-cost and margin reporting per treatment/service.
-- Traces to requirement(s): REQ-RPT-6.
 
 ## Acceptance Criteria
 
@@ -30,16 +26,12 @@ prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack).
 
 ## Technical notes (high level)
 
-Stack: Angular web (admin/front-desk/public).
-Architecture decisions: ADR-0027 (see docs/adr/decision-log.md).
-Depends on: PRD-08/READ-MODELS, PRD-04/VIAL-RECON.
+- Stack: Angular web (admin/front-desk/public)
+- Architecture decisions: [ADR-0027](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: PRD-08 — Reporting & compliance dashboards (Governance hub).
-Source PRD: docs/prds/PRD-08-reporting-compliance.md.
-Backlog key: PRD-08/TRUE-COST.
-Phase: 1 · Priority: P2 · Estimate: 2 pts.
+- Source PRD: [PRD-08-reporting-compliance.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-08-reporting-compliance.md)
 
 ## Tasks (dev pickup)
 

@@ -6,17 +6,13 @@
 
 ## Background
 
-Intake, consent & compliance gating — Turns AHPRA's patient-safety rules into enforced workflow: pre-visit intake (medical history, contraindications, BDD/psychological screen), versioned e-signed consent with mandated content, separate withdrawable image-use consent, and cooling-off + payment blocks for under-18s.
-
 As a client, I want to read plain-language consent covering the procedure, risks, alternatives, the practitioner's qualifications and costs, and e-sign it, so that I give genuinely informed consent.
-
 Consent must be versioned, e-signed, plain-language and contain mandated content (nature, risks/benefits/alternatives, practitioner qualifications, costs, realistic-outcome language, complaint mechanisms incl. AHPRA-despite-NDA) (C5).
 
 ## Requirements
 
 - To read plain-language consent covering the procedure, risks, alternatives, the practitioner's qualifications and costs, and e-sign it.
-- Traces to requirement(s): REQ-CONS-1.
-- Must satisfy compliance obligation(s): C5, C18.
+- Compliance: [C5](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria), [C18](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -25,22 +21,13 @@ Consent must be versioned, e-signed, plain-language and contain mandated content
 - [ ] Changing a template creates a new version; previously signed consents stay bound to their version.
 - [ ] Consent versions are retained per the retention policy (C18).
 
-## UI designs / screenshots
-
-prototype.html — Forms & consent; client-app.html intake/consent; checkin.html.
-
 ## Technical notes (high level)
 
-Stack: .NET API (domain/services).
-Depends on: PRD-03/INTAKE.
+- Stack: .NET API (domain/services)
 
 ## Other
 
-Epic: PRD-03 — Intake, consent & compliance gating.
-Source PRD: docs/prds/PRD-03-intake-consent-gating.md.
-Backlog key: PRD-03/CONSENT.
-Phase: 1 · Priority: P0 · Estimate: 5 pts.
-Compliance criteria: C5, C18.
+- Source PRD: [PRD-03-intake-consent-gating.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-03-intake-consent-gating.md)
 
 ## Tasks (dev pickup)
 

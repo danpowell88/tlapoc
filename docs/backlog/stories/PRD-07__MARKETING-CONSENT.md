@@ -6,17 +6,13 @@
 
 ## Background
 
-Communications, reminders & recall — The engine that keeps the book full and clients coming back at the right cadence: reminders, pre-/after-care sequences, and recall (~12-week toxin re-care) over SMS/email/push — with Spam Act consent/unsubscribe baked in.
-
 As a client, I want to only receive marketing I opted into, with a working unsubscribe on every message, so that my consent is respected per the Spam Act.
-
 Opt-in for commercial electronic messages, sender identification and a functional unsubscribe that suppresses immediately on withdrawal (REQ-NOTIF-5, C23).
 
 ## Requirements
 
 - To only receive marketing I opted into, with a working unsubscribe on every message.
-- Traces to requirement(s): REQ-NOTIF-5.
-- Must satisfy compliance obligation(s): C23.
+- Compliance: [C23](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -25,22 +21,13 @@ Opt-in for commercial electronic messages, sender identification and a functiona
 - [ ] Sender identification is included.
 - [ ] Suppression list is honoured across channels (and by PRD-06 reward comms).
 
-## UI designs / screenshots
-
-prototype.html — Comms & growth (Inbox/Automations/Campaigns), Growth (Leads/Reviews), Follow-ups, Settings → Public booking page; booking-widget.html.
-
 ## Technical notes (high level)
 
-Stack: .NET API (domain/services).
-Depends on: PRD-07/CHANNELS.
+- Stack: .NET API (domain/services)
 
 ## Other
 
-Epic: PRD-07 — Communications, reminders & recall.
-Source PRD: docs/prds/PRD-07-comms-reminders-recall.md.
-Backlog key: PRD-07/MARKETING-CONSENT.
-Phase: 1 · Priority: P1 · Estimate: 3 pts.
-Compliance criteria: C23.
+- Source PRD: [PRD-07-comms-reminders-recall.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-07-comms-reminders-recall.md)
 
 ## Tasks (dev pickup)
 

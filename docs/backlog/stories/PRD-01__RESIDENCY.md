@@ -6,17 +6,13 @@
 
 ## Background
 
-Foundations & tenancy (auth, RBAC, audit, data model) — The domain backbone on top of the Sprint 0 plumbing: tenant provisioning, RBAC + scope-of-practice enforcement, the credential/PII compliance gate that decides who can inject, the exportable audit trail, retention & destruction, the data-breach workflow, and client privacy rights.
-
 As a compliance officer, I want assurance and enforcement that PII/PHI stays in Australia and never flows to a non-AU sub-processor without an APP-8 assessment, so that we meet residency and cross-border obligations.
-
 All PII/PHI storage + compute must resolve to Australia East; a sub-processor outside AU is blocked unless an APP-8 assessment + consent exists (C21/ADR-0016).
 
 ## Requirements
 
 - Assurance and enforcement that PII/PHI stays in Australia and never flows to a non-AU sub-processor without an APP-8 assessment.
-- Traces to requirement(s): REQ-SEC-1, REQ-SEC-2, REQ-SEC-6.
-- Must satisfy compliance obligation(s): C21.
+- Compliance: [C21](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -25,23 +21,14 @@ All PII/PHI storage + compute must resolve to Australia East; a sub-processor ou
 - [ ] Sub-processor data flows are documented in a register.
 - [ ] Signed-URL media access enforces the same residency.
 
-## UI designs / screenshots
-
-prototype.html — header 'Switch user' (sign-in/persona), Team → People & credentials / Compliance board, Settings.
-
 ## Technical notes (high level)
 
-Stack: Azure / CI-CD / IaC.
-Architecture decisions: ADR-0016 (see docs/adr/decision-log.md).
-Depends on: SPRINT-0/IAC.
+- Stack: Azure / CI-CD / IaC
+- Architecture decisions: [ADR-0016](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: PRD-01 — Foundations & tenancy (auth, RBAC, audit, data model).
-Source PRD: docs/prds/PRD-01-foundations-tenancy.md.
-Backlog key: PRD-01/RESIDENCY.
-Phase: 0 · Priority: P1 · Estimate: 3 pts.
-Compliance criteria: C21.
+- Source PRD: [PRD-01-foundations-tenancy.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-01-foundations-tenancy.md)
 
 ## Tasks (dev pickup)
 

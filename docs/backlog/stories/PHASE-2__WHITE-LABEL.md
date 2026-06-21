@@ -4,17 +4,13 @@
 
 ## Background
 
-Phase 2+ / scale (cross-cutting placeholders) — Program-level capability deliberately deferred beyond v1 and not owned by a single feature PRD — the SaaS/scale layer.
-
 As a clinic owner, I want to brand the platform with my clinic's look, so that clients see my brand.
-
 Per-tenant branding/theming of web and apps (PRD-01 non-goal).
 
 ## Requirements
 
 - To brand the platform with my clinic's look.
-- Traces to requirement(s): REQ-TEN-1.
-- Deferred (Phase 2+): placeholder — design-only for now.
+- Deferred (Phase 2+): placeholder, design-only for now.
 
 ## Acceptance Criteria
 
@@ -27,14 +23,11 @@ Future — not built in the prototype (some shown as concept cards in Settings �
 
 ## Technical notes (high level)
 
-Stack: Shared design system.
+- Stack: Shared design system
 
 ## Other
 
-Epic: PHASE-2 — Phase 2+ / scale (cross-cutting placeholders).
-Source PRD: docs/prds/PRD-01-foundations-tenancy.md.
-Backlog key: PHASE-2/WHITE-LABEL.
-Phase: 2+ · Priority: P2 · Estimate: 1 pts.
+- Source PRD: [PRD-01-foundations-tenancy.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-01-foundations-tenancy.md)
 
 ## Tasks (dev pickup)
 

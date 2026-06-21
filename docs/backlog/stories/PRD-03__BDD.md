@@ -6,17 +6,13 @@
 
 ## Background
 
-Intake, consent & compliance gating — Turns AHPRA's patient-safety rules into enforced workflow: pre-visit intake (medical history, contraindications, BDD/psychological screen), versioned e-signed consent with mandated content, separate withdrawable image-use consent, and cooling-off + payment blocks for under-18s.
-
 As a RN/NP, I want a BDD/psychological screen completed and surfaced before I proceed, so that I can avoid harm for at-risk patients per the guidelines.
-
 Cosmetic guidelines require BDD screening; a positive result must be surfaced to the prescriber before treatment (C3).
 
 ## Requirements
 
 - A BDD/psychological screen completed and surfaced before I proceed.
-- Traces to requirement(s): REQ-CONS-2.
-- Must satisfy compliance obligation(s): C3.
+- Compliance: [C3](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -25,22 +21,13 @@ Cosmetic guidelines require BDD screening; a positive result must be surfaced to
 - [ ] A positive flag is surfaced to the prescriber and recorded.
 - [ ] Which instrument is used is configurable (open question to confirm).
 
-## UI designs / screenshots
-
-prototype.html — Forms & consent; client-app.html intake/consent; checkin.html.
-
 ## Technical notes (high level)
 
-Stack: .NET API (domain/services).
-Depends on: PRD-03/INTAKE.
+- Stack: .NET API (domain/services)
 
 ## Other
 
-Epic: PRD-03 — Intake, consent & compliance gating.
-Source PRD: docs/prds/PRD-03-intake-consent-gating.md.
-Backlog key: PRD-03/BDD.
-Phase: 1 · Priority: P0 · Estimate: 5 pts.
-Compliance criteria: C3.
+- Source PRD: [PRD-03-intake-consent-gating.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-03-intake-consent-gating.md)
 
 ## Tasks (dev pickup)
 

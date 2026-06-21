@@ -19,9 +19,13 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from backlog import load, MILESTONES, MS_TITLE, ROOT
-from monday import (sec_background, sec_requirements, sec_ac, sec_ui, sec_tech,
-                    sec_other, estimate, type_label, area_labels, stage_label,
-                    plan_sprints, tasks_for)
+from monday import (sec_ac, estimate, type_label, area_labels, stage_label,
+                    plan_sprints, tasks_for, bg_text, req_bullets, ui_text,
+                    tech_blocks, compliance_links, prd_link)
+
+
+def md_links(pairs):
+    return ", ".join(f"[{lbl}]({url})" for lbl, url in pairs)
 
 OUT = os.path.join(ROOT, "docs", "backlog")
 STORIES = os.path.join(OUT, "stories")
@@ -48,13 +52,43 @@ def write_story(ep, s):
     if s.get("depends_on"):
         L.append(">")
         L.append("> **Depends on:** " + ", ".join(f"`{d}`" for d in s["depends_on"]))
-    L += ["", "## Background", "", sec_background(ep, s),
-          "", "## Requirements", "", sec_requirements(ep, s),
-          "", "## Acceptance Criteria", "", sec_ac(s),
-          "", "## UI designs / screenshots", "", sec_ui(ep, s),
-          "", "## Technical notes (high level)", "", sec_tech(ep, s),
-          "", "## Other", "", sec_other(ep, s),
-          "", "## Tasks (dev pickup)", ""]
+
+    # Background
+    L += ["", "## Background", ""] + bg_text(ep, s)
+
+    # Requirements (+ linked compliance)
+    L += ["", "## Requirements", ""]
+    L += [f"- {b}" for b in req_bullets(ep, s)]
+    cl = compliance_links(s)
+    if cl:
+        L.append(f"- Compliance: {md_links(cl)}")
+
+    # Acceptance Criteria
+    L += ["", "## Acceptance Criteria", "", sec_ac(s)]
+
+    # UI — only if it's a UI story
+    uit = ui_text(ep, s)
+    if uit:
+        L += ["", "## UI designs / screenshots", "", uit]
+
+    # Technical notes — only if there's something to say
+    tb = tech_blocks(ep, s)
+    tech = []
+    if tb["stack"]:
+        tech.append(f"- Stack: {tb['stack']}")
+    if tb["adrs"]:
+        tech.append(f"- Architecture decisions: {md_links(tb['adrs'])}")
+    if tb["spike"]:
+        tech.append("- Time-boxed spike — produce findings + a go/no-go, not production code.")
+    if tech:
+        L += ["", "## Technical notes (high level)", ""] + tech
+
+    # Other — relevant documents (PRD link) only
+    pl = prd_link(ep)
+    if pl:
+        L += ["", "## Other", "", f"- Source PRD: [{pl[0]}]({pl[1]})"]
+
+    L += ["", "## Tasks (dev pickup)", ""]
     for t in tks:
         note = f" — {t['note']}" if t.get("note") else ""
         L.append(f"- [ ] **{t['title']}**{note}")

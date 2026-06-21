@@ -6,16 +6,12 @@
 
 ## Background
 
-Payments (in-person POS + autopay), memberships & non-S4 rewards — Commerce for the clinic: in-person POS (Square card-present + recorded cash + gift cards), automatic recurring membership autopay via stored card-on-file, packages/series, and a rewards engine that only ever applies to non-S4 items — driving repeat visits without eroding margin or breaching advertising law.
-
 As a front desk, I want to sell and redeem packages and gift cards and track client balances, so that clients can pre-pay and carry credit.
-
 Sell/redeem packages (visits remaining) and gift cards, track client balances/credit and AR ageing (REQ-PAY-3/5).
 
 ## Requirements
 
 - To sell and redeem packages and gift cards and track client balances.
-- Traces to requirement(s): REQ-PAY-3, REQ-PAY-5.
 
 ## Acceptance Criteria
 
@@ -30,15 +26,11 @@ prototype.html — Checkout, Memberships; client-app.html Rewards/Account.
 
 ## Technical notes (high level)
 
-Stack: Angular web (admin/front-desk/public).
-Depends on: PRD-06/POS.
+- Stack: Angular web (admin/front-desk/public)
 
 ## Other
 
-Epic: PRD-06 — Payments (in-person POS + autopay), memberships & non-S4 rewards.
-Source PRD: docs/prds/PRD-06-payments-memberships-rewards.md.
-Backlog key: PRD-06/PACKAGES-GIFT.
-Phase: 1 · Priority: P1 · Estimate: 3 pts.
+- Source PRD: [PRD-06-payments-memberships-rewards.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-06-payments-memberships-rewards.md)
 
 ## Tasks (dev pickup)
 

@@ -6,16 +6,12 @@
 
 ## Background
 
-Apps (Flutter): client & provider — Two Flutter apps over the shared .NET API: a client app (book, intake/consent, photos, memberships, rewards, balances, card-on-file) and a provider app (room-side charting, injection mapping, camera capture, consult/Rx, finalise) — the latter resilient to treatment-room connectivity.
-
 As a injector, I want the app to keep working offline and clearly show my sync state, so that treatment-room Wi-Fi drops never cost me data.
-
 Charting/photos queue locally encrypted and sync on reconnect with no loss; a persistent sync/offline indicator shows queued count + last sync (REQ-APP-3, ADR-0015).
 
 ## Requirements
 
 - The app to keep working offline and clearly show my sync state.
-- Traces to requirement(s): REQ-APP-3.
 
 ## Acceptance Criteria
 
@@ -30,16 +26,12 @@ client-app.html, treatment-room.html, checkin.html, backroom.html.
 
 ## Technical notes (high level)
 
-Stack: Flutter provider app.
-Architecture decisions: ADR-0015 (see docs/adr/decision-log.md).
-Depends on: PRD-05/OFFLINE.
+- Stack: Flutter provider app
+- Architecture decisions: [ADR-0015](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: PRD-09 — Apps (Flutter): client & provider.
-Source PRD: docs/prds/PRD-09-apps-client-provider.md.
-Backlog key: PRD-09/PROVIDER-OFFLINE.
-Phase: 1 · Priority: P1 · Estimate: 3 pts.
+- Source PRD: [PRD-09-apps-client-provider.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-09-apps-client-provider.md)
 
 ## Tasks (dev pickup)
 

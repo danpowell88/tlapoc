@@ -6,10 +6,7 @@
 
 ## Background
 
-Sprint 0 — Foundations & setup — Everything the team needs in place before feature work begins: repositories and solution structure, CI/CD, cloud environments in Australia East, identity wiring for staff and clients, the Postgres + RLS data baseline, the API/web/app shells, a shared design system, observability, a security baseline, and the four de-risk spikes called out in the docs index.
-
 As a backend developer, I want a domain-event mechanism (transactional outbox + dispatch) modules can publish to and subscribe from, so that read-models, jobs and notifications react to changes without tight coupling.
-
 Reporting read-models, the follow-up job queue, notifications and cross-module reactions all consume domain events. A lightweight event backbone (outbox + dispatch) decouples modules.
 
 ## Requirements
@@ -23,22 +20,14 @@ Reporting read-models, the follow-up job queue, notifications and cross-module r
 - [ ] Events carry tenant context and are observable.
 - [ ] A sample event flows from a write to a read-model projection.
 
-## UI designs / screenshots
-
-Non-UI / platform scaffolding — no prototype screen.
-
 ## Technical notes (high level)
 
-Stack: .NET API (domain/services); Postgres + EF Core (RLS).
-Architecture decisions: ADR-0013, ADR-0010 (see docs/adr/decision-log.md).
-Depends on: SPRINT-0/AUDIT-INFRA.
+- Stack: .NET API (domain/services); Postgres + EF Core (RLS)
+- Architecture decisions: [ADR-0013](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md), [ADR-0010](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: SPRINT-0 — Sprint 0 — Foundations & setup.
-Source PRD: docs/prds/PRD-01-foundations-tenancy.md.
-Backlog key: SPRINT-0/DOMAIN-EVENTS.
-Phase: 0 · Priority: P1 · Estimate: 3 pts.
+- Source PRD: [PRD-01-foundations-tenancy.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-01-foundations-tenancy.md)
 
 ## Tasks (dev pickup)
 

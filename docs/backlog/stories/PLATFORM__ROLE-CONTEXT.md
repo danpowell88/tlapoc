@@ -6,17 +6,13 @@
 
 ## Background
 
-Platform shell, navigation & cross-cutting UX — The cross-cutting product surfaces the prototype exercises that don't belong to a single feature PRD: the app shell + collapsible workspace navigation, the role-tailored Today dashboard, global search, the in-app notification centre, the clinic switcher, the persona/active-role + scope-of-practice display, and the owner-only financial (.fin) gating that hides money figures from non-owner roles.
-
 As a staff member with more than one role, I want to see my current role and scope and switch active role where I hold several, so that the app applies the right permissions and shows why an action is blocked.
-
 The prototype shows the current persona, role + a scope-of-practice tooltip, and a 'switch user' control. Real users may hold multiple roles (e.g. NP who is also owner) and need to act under a chosen role with the correct scope.
 
 ## Requirements
 
 - To see my current role and scope and switch active role where I hold several.
-- Traces to requirement(s): REQ-TEN-3, REQ-TEN-4.
-- Must satisfy compliance obligation(s): C4.
+- Compliance: [C4](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -31,17 +27,12 @@ prototype.html — sidebar/app shell, Today dashboard, header (global search, cl
 
 ## Technical notes (high level)
 
-Stack: Angular web (admin/front-desk/public).
-Architecture decisions: ADR-0017 (see docs/adr/decision-log.md).
-Depends on: PRD-01/RBAC, PRD-01/MULTI-ROLE.
+- Stack: Angular web (admin/front-desk/public)
+- Architecture decisions: [ADR-0017](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: PLATFORM — Platform shell, navigation & cross-cutting UX.
-Source PRD: docs/ux/README.md.
-Backlog key: PLATFORM/ROLE-CONTEXT.
-Phase: 1 · Priority: P1 · Estimate: 3 pts.
-Compliance criteria: C4.
+- Source PRD: [README.md](https://github.com/danpowell88/tlapoc/blob/main/docs/ux/README.md)
 
 ## Tasks (dev pickup)
 

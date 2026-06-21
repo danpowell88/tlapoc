@@ -6,17 +6,13 @@
 
 ## Background
 
-Consult, prescribing & S4 medicines governance (the moat) — The defensible core.
-
 As a owner, I want stock custody limited to an on-site prescriber and bound to a secure, access-logged location, so that S4 custody meets the exclusive-custody rule.
-
 Only NP/prescriber roles may take custody; stock is bound to a secure, access-logged location. Mode-A custodian must physically work at the clinic with exclusive custody (C7/C15).
 
 ## Requirements
 
 - Stock custody limited to an on-site prescriber and bound to a secure, access-logged location.
-- Traces to requirement(s): REQ-MED-2, REQ-MED-8.
-- Must satisfy compliance obligation(s): C7, C15.
+- Compliance: [C7](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria), [C15](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -25,22 +21,13 @@ Only NP/prescriber roles may take custody; stock is bound to a secure, access-lo
 - [ ] A custodian + exclusive-custody attestation + designated medicine-store contact are recorded.
 - [ ] A remote prescriber consigning stock is flagged non-compliant.
 
-## UI designs / screenshots
-
-prototype.html — Stock & medicines, Charting (lot select), Governance → Recalls.
-
 ## Technical notes (high level)
 
-Stack: .NET API (domain/services).
-Depends on: PRD-04/STOCK-RECEIVE.
+- Stack: .NET API (domain/services)
 
 ## Other
 
-Epic: PRD-04 — Consult, prescribing & S4 medicines governance (the moat).
-Source PRD: docs/prds/PRD-04-consult-prescribing-s4.md.
-Backlog key: PRD-04/CUSTODY-STORAGE.
-Phase: 1 · Priority: P0 · Estimate: 5 pts.
-Compliance criteria: C7, C15.
+- Source PRD: [PRD-04-consult-prescribing-s4.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-04-consult-prescribing-s4.md)
 
 ## Tasks (dev pickup)
 

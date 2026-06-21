@@ -6,10 +6,7 @@
 
 ## Background
 
-Sprint 0 — Foundations & setup — Everything the team needs in place before feature work begins: repositories and solution structure, CI/CD, cloud environments in Australia East, identity wiring for staff and clients, the Postgres + RLS data baseline, the API/web/app shells, a shared design system, observability, a security baseline, and the four de-risk spikes called out in the docs index.
-
 As a developer, I want the API to publish an OpenAPI document and CI to generate typed clients for web and Flutter, so that front-ends always match the API contract.
-
 Generating typed clients for Angular and Flutter from the API's OpenAPI spec keeps the three surfaces in lock-step and removes hand-written DTO drift (ADR-0006).
 
 ## Requirements
@@ -23,22 +20,14 @@ Generating typed clients for Angular and Flutter from the API's OpenAPI spec kee
 - [ ] Client generation runs in CI and fails on a breaking contract change without a version bump.
 - [ ] The sample endpoint is consumed via the generated client in both web and app.
 
-## UI designs / screenshots
-
-Non-UI / platform scaffolding — no prototype screen.
-
 ## Technical notes (high level)
 
-Stack: .NET API (domain/services).
-Architecture decisions: ADR-0006 (see docs/adr/decision-log.md).
-Depends on: SPRINT-0/API.
+- Stack: .NET API (domain/services)
+- Architecture decisions: [ADR-0006](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: SPRINT-0 — Sprint 0 — Foundations & setup.
-Source PRD: docs/prds/PRD-01-foundations-tenancy.md.
-Backlog key: SPRINT-0/OPENAPI.
-Phase: 0 · Priority: P1 · Estimate: 3 pts.
+- Source PRD: [PRD-01-foundations-tenancy.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-01-foundations-tenancy.md)
 
 ## Tasks (dev pickup)
 

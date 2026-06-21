@@ -4,17 +4,13 @@
 
 ## Background
 
-Clinical charting: injection mapping & before/after — The clinical record that matches the Aesthetic Record / Pabau bar: a guided charting flow opening with product & lot selection, on-image/diagram injection mapping (product · units · depth · site · batch-lot), standardised before/after photos with comparison, immutable finalised notes with audited amendments, and adverse-event logging that feeds the TGA/DAEN pathway
-
 As a injector, I want optional AI assistance for notes and injection-point suggestions, so that charting is faster (with human confirmation).
-
 AI scribe and advisory auto-detection of injection points are explicitly out for v1 (no AI; everything manual + human-confirmed). Placeholder (REQ-CLIN-6, ADR-0020).
 
 ## Requirements
 
 - Optional AI assistance for notes and injection-point suggestions.
-- Traces to requirement(s): REQ-CLIN-6.
-- Deferred (Phase 2+): placeholder — design-only for now.
+- Deferred (Phase 2+): placeholder, design-only for now.
 
 ## Acceptance Criteria
 
@@ -27,15 +23,12 @@ prototype.html — Charting + Clinical (Skin analysis, Body contouring, Complica
 
 ## Technical notes (high level)
 
-Stack: Flutter provider app.
-Architecture decisions: ADR-0020 (see docs/adr/decision-log.md).
+- Stack: Flutter provider app
+- Architecture decisions: [ADR-0020](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: PRD-05 — Clinical charting: injection mapping & before/after.
-Source PRD: docs/prds/PRD-05-clinical-charting.md.
-Backlog key: PRD-05/AI-SCRIBE.
-Phase: 2+ · Priority: P2 · Estimate: 1 pts.
+- Source PRD: [PRD-05-clinical-charting.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-05-clinical-charting.md)
 
 ## Tasks (dev pickup)
 

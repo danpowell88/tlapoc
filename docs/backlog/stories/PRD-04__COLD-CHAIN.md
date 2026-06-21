@@ -6,17 +6,13 @@
 
 ## Background
 
-Consult, prescribing & S4 medicines governance (the moat) — The defensible core.
-
 As a owner, I want temperature logging for the medicine fridge with excursion alerts, so that we never use medicine that breached cold-chain.
-
 Toxin must stay 2–8°C; temperature logging raises excursion alerts and flags affected stock (C13). Integrates with the optional ESP32 cold-chain monitor.
 
 ## Requirements
 
 - Temperature logging for the medicine fridge with excursion alerts.
-- Traces to requirement(s): REQ-MED-7.
-- Must satisfy compliance obligation(s): C13.
+- Compliance: [C13](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -25,22 +21,13 @@ Toxin must stay 2–8°C; temperature logging raises excursion alerts and flags 
 - [ ] A breach pathway can quarantine a lot and raise a job (links PRD-11).
 - [ ] Excursion history is retained and visible.
 
-## UI designs / screenshots
-
-prototype.html — Stock & medicines, Charting (lot select), Governance → Recalls.
-
 ## Technical notes (high level)
 
-Stack: .NET API (domain/services); Ports-and-adapters integration.
-Depends on: PRD-04/CUSTODY-STORAGE.
+- Stack: .NET API (domain/services); Ports-and-adapters integration
 
 ## Other
 
-Epic: PRD-04 — Consult, prescribing & S4 medicines governance (the moat).
-Source PRD: docs/prds/PRD-04-consult-prescribing-s4.md.
-Backlog key: PRD-04/COLD-CHAIN.
-Phase: 1 · Priority: P1 · Estimate: 3 pts.
-Compliance criteria: C13.
+- Source PRD: [PRD-04-consult-prescribing-s4.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-04-consult-prescribing-s4.md)
 
 ## Tasks (dev pickup)
 

@@ -6,16 +6,12 @@
 
 ## Background
 
-Facility, infection-control, emergency & complaints — The record-keeping that evidences AHPRA's facility, infection-control and emergency obligations, plus a complaints register with the mandated AHPRA pathway.
-
 As a staff member, I want to record and read shift-handover notes, so that the next shift knows outstanding tasks and issues.
-
 The prototype's back-office tablet includes a shift-handover panel so the team passes on what the next shift needs to know.
 
 ## Requirements
 
 - To record and read shift-handover notes.
-- Traces to requirement(s): REQ-FAC-2.
 
 ## Acceptance Criteria
 
@@ -30,15 +26,11 @@ prototype.html — Front desk/Operations (Open/close & fridge log, Temperature m
 
 ## Technical notes (high level)
 
-Stack: Angular web (admin/front-desk/public).
-Depends on: PRD-07/FOLLOWUPS.
+- Stack: Angular web (admin/front-desk/public)
 
 ## Other
 
-Epic: PRD-11 — Facility, infection-control, emergency & complaints.
-Source PRD: docs/prds/PRD-11-facility-complaints.md.
-Backlog key: PRD-11/SHIFT-HANDOVER.
-Phase: 1 · Priority: P2 · Estimate: 2 pts.
+- Source PRD: [PRD-11-facility-complaints.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-11-facility-complaints.md)
 
 ## Tasks (dev pickup)
 

@@ -6,17 +6,13 @@
 
 ## Background
 
-Clinical charting: injection mapping & before/after — The clinical record that matches the Aesthetic Record / Pabau bar: a guided charting flow opening with product & lot selection, on-image/diagram injection mapping (product · units · depth · site · batch-lot), standardised before/after photos with comparison, immutable finalised notes with audited amendments, and adverse-event logging that feeds the TGA/DAEN pathway
-
 As a injector, I want to capture standardised before/after photos and compare them against prior visits, so that I can track outcomes consistently.
-
 Capture standardised before/after photos room-side (framing/ghosting guide), compare side-by-side across visits; media stored centrally via signed URLs, never on personal devices, gated by image-use consent (REQ-CLIN-3, C14/ADR-0009).
 
 ## Requirements
 
 - To capture standardised before/after photos and compare them against prior visits.
-- Traces to requirement(s): REQ-CLIN-3.
-- Must satisfy compliance obligation(s): C14.
+- Compliance: [C14](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -31,17 +27,12 @@ prototype.html — Charting + Clinical (Skin analysis, Body contouring, Complica
 
 ## Technical notes (high level)
 
-Stack: Flutter provider app.
-Architecture decisions: ADR-0009 (see docs/adr/decision-log.md).
-Depends on: PRD-03/IMAGE-CONSENT.
+- Stack: Flutter provider app
+- Architecture decisions: [ADR-0009](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: PRD-05 — Clinical charting: injection mapping & before/after.
-Source PRD: docs/prds/PRD-05-clinical-charting.md.
-Backlog key: PRD-05/PHOTOS.
-Phase: 1 · Priority: P1 · Estimate: 3 pts.
-Compliance criteria: C14.
+- Source PRD: [PRD-05-clinical-charting.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-05-clinical-charting.md)
 
 ## Tasks (dev pickup)
 

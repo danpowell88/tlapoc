@@ -6,16 +6,12 @@
 
 ## Background
 
-Integrations: Xero & calendar — Outbound integrations that remove double-entry: push sales/payments to Xero, and keep appointments in sync with staff calendars (M365 / Google)
-
 As a practitioner, I want my appointments to appear in Outlook/Google and external busy-time to block my availability, so that I have one source of truth for my time.
-
 Appointments sync both ways with Outlook/Google; external busy events block availability, behind ICalendarProvider (REQ-INT-2).
 
 ## Requirements
 
 - My appointments to appear in Outlook/Google and external busy-time to block my availability.
-- Traces to requirement(s): REQ-INT-2.
 
 ## Acceptance Criteria
 
@@ -24,22 +20,14 @@ Appointments sync both ways with Outlook/Google; external busy events block avai
 - [ ] Per-staff opt-in and conflict-resolution rules (open question) supported.
 - [ ] Implemented behind ICalendarProvider (swappable).
 
-## UI designs / screenshots
-
-prototype.html — Settings → Integrations.
-
 ## Technical notes (high level)
 
-Stack: Ports-and-adapters integration.
-Architecture decisions: ADR-0012 (see docs/adr/decision-log.md).
-Depends on: PRD-02/CALENDAR.
+- Stack: Ports-and-adapters integration
+- Architecture decisions: [ADR-0012](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: PRD-10 — Integrations: Xero & calendar.
-Source PRD: docs/prds/PRD-10-integrations.md.
-Backlog key: PRD-10/CALENDAR-SYNC.
-Phase: 1 · Priority: P2 · Estimate: 2 pts.
+- Source PRD: [PRD-10-integrations.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-10-integrations.md)
 
 ## Tasks (dev pickup)
 

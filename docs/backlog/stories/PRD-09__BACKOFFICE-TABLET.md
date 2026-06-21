@@ -6,16 +6,13 @@
 
 ## Background
 
-Apps (Flutter): client & provider — Two Flutter apps over the shared .NET API: a client app (book, intake/consent, photos, memberships, rewards, balances, card-on-file) and a provider app (room-side charting, injection mapping, camera capture, consult/Rx, finalise) — the latter resilient to treatment-room connectivity.
-
 As a clinic staff, I want a bench-tablet view of the day's operational jobs, so that behind-the-scenes work (logs, stock, handover) is quick at the bench.
-
 The prototype's backroom surface is a bench tablet for behind-the-scenes work: open/close, cold-chain, stock on hand, S4 drug register, waste/disposal log, tasks and shift handover — a focused operations view.
 
 ## Requirements
 
 - A bench-tablet view of the day's operational jobs.
-- Traces to requirement(s): REQ-MED-2, REQ-FAC-2.
+- Compliance: [C8](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria), [C20](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -30,16 +27,11 @@ backroom.html.
 
 ## Technical notes (high level)
 
-Stack: Angular web (admin/front-desk/public).
-Depends on: PRD-11/OPENCLOSE, PRD-07/FOLLOWUPS.
+- Stack: Angular web (admin/front-desk/public)
 
 ## Other
 
-Epic: PRD-09 — Apps (Flutter): client & provider.
-Source PRD: docs/prds/PRD-09-apps-client-provider.md.
-Backlog key: PRD-09/BACKOFFICE-TABLET.
-Phase: 1 · Priority: P2 · Estimate: 2 pts.
-Compliance criteria: C8, C20.
+- Source PRD: [PRD-09-apps-client-provider.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-09-apps-client-provider.md)
 
 ## Tasks (dev pickup)
 

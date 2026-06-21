@@ -4,17 +4,13 @@
 
 ## Background
 
-Facility, infection-control, emergency & complaints — The record-keeping that evidences AHPRA's facility, infection-control and emergency obligations, plus a complaints register with the mandated AHPRA pathway.
-
 As a manager, I want to log a complaint against a client/treatment and have the system surface the AHPRA pathway, so that complaints are handled correctly and retained.
-
 A complaints/adverse-outcome register linked to client/treatment that surfaces complaint mechanisms incl. AHPRA (NDA doesn't remove the right), feeds retention (complaint → indefinite) and reporting (REQ-CLI-4, C24).
 
 ## Requirements
 
 - To log a complaint against a client/treatment and have the system surface the AHPRA pathway.
-- Traces to requirement(s): REQ-CLI-4.
-- Must satisfy compliance obligation(s): C24, C18.
+- Compliance: [C24](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria), [C18](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -29,15 +25,11 @@ prototype.html — Front desk/Operations (Open/close & fridge log, Temperature m
 
 ## Technical notes (high level)
 
-Stack: Angular web (admin/front-desk/public).
+- Stack: Angular web (admin/front-desk/public)
 
 ## Other
 
-Epic: PRD-11 — Facility, infection-control, emergency & complaints.
-Source PRD: docs/prds/PRD-11-facility-complaints.md.
-Backlog key: PRD-11/COMPLAINTS.
-Phase: 1 · Priority: P1 · Estimate: 3 pts.
-Compliance criteria: C24, C18.
+- Source PRD: [PRD-11-facility-complaints.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-11-facility-complaints.md)
 
 ## Tasks (dev pickup)
 

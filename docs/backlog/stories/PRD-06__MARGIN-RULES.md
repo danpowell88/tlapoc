@@ -6,17 +6,13 @@
 
 ## Background
 
-Payments (in-person POS + autopay), memberships & non-S4 rewards — Commerce for the clinic: in-person POS (Square card-present + recorded cash + gift cards), automatic recurring membership autopay via stored card-on-file, packages/series, and a rewards engine that only ever applies to non-S4 items — driving repeat visits without eroding margin or breaching advertising law.
-
 As a owner, I want to set margin-aware reward rules with caps and eligible items and see reward-cost vs retention, so that rewards drive retention without eroding margin.
-
 Owners set value caps and eligible items; reporting shows reward-cost vs retention (REQ-MEMB-6). Reward comms respect advertising rules (C9/C23).
 
 ## Requirements
 
 - To set margin-aware reward rules with caps and eligible items and see reward-cost vs retention.
-- Traces to requirement(s): REQ-MEMB-6.
-- Must satisfy compliance obligation(s): C9, C23.
+- Compliance: [C9](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria), [C23](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -25,22 +21,13 @@ Owners set value caps and eligible items; reporting shows reward-cost vs retenti
 - [ ] Reward communications go only to consented, logged-in clients (no public S4 price promotion).
 - [ ] Rule config is owner-gated.
 
-## UI designs / screenshots
-
-prototype.html — Checkout, Memberships; client-app.html Rewards/Account.
-
 ## Technical notes (high level)
 
-Stack: .NET API (domain/services).
-Depends on: PRD-06/REWARDS-ENGINE.
+- Stack: .NET API (domain/services)
 
 ## Other
 
-Epic: PRD-06 — Payments (in-person POS + autopay), memberships & non-S4 rewards.
-Source PRD: docs/prds/PRD-06-payments-memberships-rewards.md.
-Backlog key: PRD-06/MARGIN-RULES.
-Phase: 1 · Priority: P1 · Estimate: 3 pts.
-Compliance criteria: C9, C23.
+- Source PRD: [PRD-06-payments-memberships-rewards.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-06-payments-memberships-rewards.md)
 
 ## Tasks (dev pickup)
 

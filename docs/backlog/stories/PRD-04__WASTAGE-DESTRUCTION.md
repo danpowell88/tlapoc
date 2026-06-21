@@ -6,17 +6,13 @@
 
 ## Background
 
-Consult, prescribing & S4 medicines governance (the moat) — The defensible core.
-
 As a owner, I want to record wastage, disposal and destruction (including partial vials) with certificates, so that we evidence lawful disposal of S4 medicine.
-
 Wastage and destruction (incl. partial vials) must be recorded via a licensed/RUM pathway with certificates (C16).
 
 ## Requirements
 
 - To record wastage, disposal and destruction (including partial vials) with certificates.
-- Traces to requirement(s): REQ-MED-9.
-- Must satisfy compliance obligation(s): C16.
+- Compliance: [C16](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -25,22 +21,13 @@ Wastage and destruction (incl. partial vials) must be recorded via a licensed/RU
 - [ ] Licensed/RUM disposal pathway is recorded.
 - [ ] Records are immutable and audited.
 
-## UI designs / screenshots
-
-prototype.html — Stock & medicines, Charting (lot select), Governance → Recalls.
-
 ## Technical notes (high level)
 
-Stack: .NET API (domain/services).
-Depends on: PRD-04/CUSTODY-STORAGE.
+- Stack: .NET API (domain/services)
 
 ## Other
 
-Epic: PRD-04 — Consult, prescribing & S4 medicines governance (the moat).
-Source PRD: docs/prds/PRD-04-consult-prescribing-s4.md.
-Backlog key: PRD-04/WASTAGE-DESTRUCTION.
-Phase: 1 · Priority: P1 · Estimate: 3 pts.
-Compliance criteria: C16.
+- Source PRD: [PRD-04-consult-prescribing-s4.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-04-consult-prescribing-s4.md)
 
 ## Tasks (dev pickup)
 

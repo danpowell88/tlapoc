@@ -6,17 +6,13 @@
 
 ## Background
 
-Booking & scheduling (+ client/CRM basics) — The calendar that runs the front desk and the 360° client record everything hangs off.
-
 As a front desk, I want a guided booking wizard to create an appointment in a few steps, so that I can book clients quickly at the desk or over the phone.
-
 The prototype's front-desk 'New booking' wizard (service select, slot pick, client attach, confirm) is the staff counterpart to client self-booking, and the entry point most bookings flow through.
 
 ## Requirements
 
 - A guided booking wizard to create an appointment in a few steps.
-- Traces to requirement(s): REQ-BOOK-2.
-- Must satisfy compliance obligation(s): C4.
+- Compliance: [C4](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -31,16 +27,11 @@ prototype.html — Schedule, 'New booking' wizard, Clients directory & 360.
 
 ## Technical notes (high level)
 
-Stack: Angular web (admin/front-desk/public).
-Depends on: PRD-02/CALENDAR, PRD-02/SERVICE-CATALOGUE.
+- Stack: Angular web (admin/front-desk/public)
 
 ## Other
 
-Epic: PRD-02 — Booking & scheduling (+ client/CRM basics).
-Source PRD: docs/prds/PRD-02-booking-scheduling.md.
-Backlog key: PRD-02/BOOKING-WIZARD.
-Phase: 1 · Priority: P1 · Estimate: 3 pts.
-Compliance criteria: C4.
+- Source PRD: [PRD-02-booking-scheduling.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-02-booking-scheduling.md)
 
 ## Tasks (dev pickup)
 

@@ -6,17 +6,13 @@
 
 ## Background
 
-Consult, prescribing & S4 medicines governance (the moat) — The defensible core.
-
 As a prescriber/owner, I want to enter a lot number and instantly see every client who received it, plus export the medicine register, so that we can run a recall in minutes and evidence the register.
-
 Given a lot, the system must instantly list every client/administration for that lot, and export an audit-ready medicine register (C8).
 
 ## Requirements
 
 - To enter a lot number and instantly see every client who received it, plus export the medicine register.
-- Traces to requirement(s): REQ-MED-4.
-- Must satisfy compliance obligation(s): C8.
+- Compliance: [C8](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -25,22 +21,13 @@ Given a lot, the system must instantly list every client/administration for that
 - [ ] Recall execution + acknowledgement tracking is available (full hub in PRD-08/11).
 - [ ] The register is queryable by date, product, prescriber, administrator.
 
-## UI designs / screenshots
-
-prototype.html — Stock & medicines, Charting (lot select), Governance → Recalls.
-
 ## Technical notes (high level)
 
-Stack: .NET API (domain/services).
-Depends on: PRD-04/ADMIN-GATE.
+- Stack: .NET API (domain/services)
 
 ## Other
 
-Epic: PRD-04 — Consult, prescribing & S4 medicines governance (the moat).
-Source PRD: docs/prds/PRD-04-consult-prescribing-s4.md.
-Backlog key: PRD-04/RECALL-LOOKUP.
-Phase: 1 · Priority: P0 · Estimate: 5 pts.
-Compliance criteria: C8.
+- Source PRD: [PRD-04-consult-prescribing-s4.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-04-consult-prescribing-s4.md)
 
 ## Tasks (dev pickup)
 

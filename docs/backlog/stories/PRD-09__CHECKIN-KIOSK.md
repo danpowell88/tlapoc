@@ -6,16 +6,13 @@
 
 ## Background
 
-Apps (Flutter): client & provider — Two Flutter apps over the shared .NET API: a client app (book, intake/consent, photos, memberships, rewards, balances, card-on-file) and a provider app (room-side charting, injection mapping, camera capture, consult/Rx, finalise) — the latter resilient to treatment-room connectivity.
-
 As a client arriving for a visit, I want to check myself in on the reception tablet, so that the team knows I've arrived and I complete anything outstanding.
-
 The prototype's checkin surface is a reception-desk tablet where clients check themselves in (confirm details, complete any outstanding intake/consent), updating the Today board.
 
 ## Requirements
 
 - To check myself in on the reception tablet.
-- Traces to requirement(s): REQ-BOOK-4.
+- Compliance: [C10](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -30,16 +27,11 @@ checkin.html.
 
 ## Technical notes (high level)
 
-Stack: Angular web (admin/front-desk/public).
-Depends on: PRD-02/LIFECYCLE, PRD-03/GATING.
+- Stack: Angular web (admin/front-desk/public)
 
 ## Other
 
-Epic: PRD-09 — Apps (Flutter): client & provider.
-Source PRD: docs/prds/PRD-09-apps-client-provider.md.
-Backlog key: PRD-09/CHECKIN-KIOSK.
-Phase: 1 · Priority: P2 · Estimate: 2 pts.
-Compliance criteria: C10.
+- Source PRD: [PRD-09-apps-client-provider.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-09-apps-client-provider.md)
 
 ## Tasks (dev pickup)
 

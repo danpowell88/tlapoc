@@ -6,16 +6,13 @@
 
 ## Background
 
-Booking & scheduling (+ client/CRM basics) — The calendar that runs the front desk and the 360° client record everything hangs off.
-
 As a staff member, I want a single 360° client profile pulling together history, medical flags, consents, photos, memberships, balances and comms, so that I have the full picture in one place.
-
 Any staff member can open a client's full profile: history, contacts, medical flags, consents, photos, memberships, balances, comms and complaints.
 
 ## Requirements
 
 - A single 360° client profile pulling together history, medical flags, consents, photos, memberships, balances and comms.
-- Traces to requirement(s): REQ-CLI-1, REQ-CLI-2.
+- Compliance: [C10](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -30,16 +27,11 @@ prototype.html — Schedule, 'New booking' wizard, Clients directory & 360.
 
 ## Technical notes (high level)
 
-Stack: Angular web (admin/front-desk/public).
-Depends on: PRD-01/CLIENT-CORE.
+- Stack: Angular web (admin/front-desk/public)
 
 ## Other
 
-Epic: PRD-02 — Booking & scheduling (+ client/CRM basics).
-Source PRD: docs/prds/PRD-02-booking-scheduling.md.
-Backlog key: PRD-02/CLIENT-360.
-Phase: 1 · Priority: P1 · Estimate: 3 pts.
-Compliance criteria: C10.
+- Source PRD: [PRD-02-booking-scheduling.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-02-booking-scheduling.md)
 
 ## Tasks (dev pickup)
 

@@ -6,17 +6,13 @@
 
 ## Background
 
-Foundations & tenancy (auth, RBAC, audit, data model) — The domain backbone on top of the Sprint 0 plumbing: tenant provisioning, RBAC + scope-of-practice enforcement, the credential/PII compliance gate that decides who can inject, the exportable audit trail, retention & destruction, the data-breach workflow, and client privacy rights.
-
 As a staff member with multiple roles, I want to be assigned more than one role and act under a chosen active role, so that my permissions reflect what I'm doing without separate logins.
-
 Some users legitimately hold several roles (e.g. an NP who is also the business owner, or a lead nurse covering reception). The model must allow multiple role assignments and an active-role context that the authorisation pipeline honours.
 
 ## Requirements
 
 - To be assigned more than one role and act under a chosen active role.
-- Traces to requirement(s): REQ-TEN-3, REQ-TEN-4.
-- Must satisfy compliance obligation(s): C4.
+- Compliance: [C4](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -25,23 +21,14 @@ Some users legitimately hold several roles (e.g. an NP who is also the business 
 - [ ] Switching active role is recorded; actions capture the role used.
 - [ ] Owner-only financial capability is independent of clinical roles (an NP isn't automatically owner).
 
-## UI designs / screenshots
-
-prototype.html — header 'Switch user' (sign-in/persona), Team → People & credentials / Compliance board, Settings.
-
 ## Technical notes (high level)
 
-Stack: .NET API (domain/services).
-Architecture decisions: ADR-0017 (see docs/adr/decision-log.md).
-Depends on: PRD-01/RBAC.
+- Stack: .NET API (domain/services)
+- Architecture decisions: [ADR-0017](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: PRD-01 — Foundations & tenancy (auth, RBAC, audit, data model).
-Source PRD: docs/prds/PRD-01-foundations-tenancy.md.
-Backlog key: PRD-01/MULTI-ROLE.
-Phase: 0 · Priority: P1 · Estimate: 3 pts.
-Compliance criteria: C4.
+- Source PRD: [PRD-01-foundations-tenancy.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-01-foundations-tenancy.md)
 
 ## Tasks (dev pickup)
 

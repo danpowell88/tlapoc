@@ -6,17 +6,13 @@
 
 ## Background
 
-Consult, prescribing & S4 medicines governance (the moat) — The defensible core.
-
 As a RN, I want to administer S4 only against a valid unconsumed script for this client, recording product, units, depth, site and batch-lot/expiry, so that every dose is lawful, traceable and tamper-proof.
-
 An RN can only administer S4 against a valid, unconsumed prescription for that same client, with current consent and a selected in-date lot; the record is immutable once saved (C8).
 
 ## Requirements
 
 - To administer S4 only against a valid unconsumed script for this client, recording product, units, depth, site and batch-lot/expiry.
-- Traces to requirement(s): REQ-RX-3, REQ-MED-4.
-- Must satisfy compliance obligation(s): C8.
+- Compliance: [C8](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -25,23 +21,14 @@ An RN can only administer S4 against a valid, unconsumed prescription for that s
 - [ ] A blocked attempt shows the reason and writes an audit event.
 - [ ] The administration appears in the medicine register.
 
-## UI designs / screenshots
-
-prototype.html — Stock & medicines, Charting (lot select), Governance → Recalls.
-
 ## Technical notes (high level)
 
-Stack: .NET API (domain/services).
-Architecture decisions: ADR-0010 (see docs/adr/decision-log.md).
-Depends on: PRD-04/PRESCRIPTION, PRD-04/STOCK-RECEIVE.
+- Stack: .NET API (domain/services)
+- Architecture decisions: [ADR-0010](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: PRD-04 — Consult, prescribing & S4 medicines governance (the moat).
-Source PRD: docs/prds/PRD-04-consult-prescribing-s4.md.
-Backlog key: PRD-04/ADMIN-GATE.
-Phase: 1 · Priority: P0 · Estimate: 5 pts.
-Compliance criteria: C8.
+- Source PRD: [PRD-04-consult-prescribing-s4.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-04-consult-prescribing-s4.md)
 
 ## Tasks (dev pickup)
 

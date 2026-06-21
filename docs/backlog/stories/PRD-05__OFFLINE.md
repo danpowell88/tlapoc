@@ -6,16 +6,12 @@
 
 ## Background
 
-Clinical charting: injection mapping & before/after — The clinical record that matches the Aesthetic Record / Pabau bar: a guided charting flow opening with product & lot selection, on-image/diagram injection mapping (product · units · depth · site · batch-lot), standardised before/after photos with comparison, immutable finalised notes with audited amendments, and adverse-event logging that feeds the TGA/DAEN pathway
-
 As a injector, I want my notes and photos to queue locally and sync when back online if the room loses Wi-Fi, so that I never lose work mid-treatment.
-
 If Wi-Fi drops mid-visit, notes/photos queue locally (encrypted) and sync on reconnect with no loss; finalisation is server-side (REQ-CLIN/APP, ADR-0015).
 
 ## Requirements
 
 - My notes and photos to queue locally and sync when back online if the room loses Wi-Fi.
-- Traces to requirement(s): REQ-APP-3.
 
 ## Acceptance Criteria
 
@@ -30,16 +26,12 @@ prototype.html — Charting + Clinical (Skin analysis, Body contouring, Complica
 
 ## Technical notes (high level)
 
-Stack: Flutter provider app.
-Architecture decisions: ADR-0015, ADR-0010 (see docs/adr/decision-log.md).
-Depends on: SPRINT-0/SPIKE-OFFLINE, PRD-05/IMMUTABILITY.
+- Stack: Flutter provider app
+- Architecture decisions: [ADR-0015](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md), [ADR-0010](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: PRD-05 — Clinical charting: injection mapping & before/after.
-Source PRD: docs/prds/PRD-05-clinical-charting.md.
-Backlog key: PRD-05/OFFLINE.
-Phase: 1 · Priority: P1 · Estimate: 3 pts.
+- Source PRD: [PRD-05-clinical-charting.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-05-clinical-charting.md)
 
 ## Tasks (dev pickup)
 

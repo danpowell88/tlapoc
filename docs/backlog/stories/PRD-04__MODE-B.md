@@ -4,38 +4,27 @@
 
 ## Background
 
-Consult, prescribing & S4 medicines governance (the moat) — The defensible core.
-
 As a owner, I want a pharmacy-dispensing mode for clinics without on-site custody, so that the platform fits a pharmacy-partner arrangement.
-
 An alternative dispensing model where a pharmacy partner holds/dispenses stock. No pharmacy partner yet — deferred, placeholder. (DispensedItem entity reserved.)
 
 ## Requirements
 
 - A pharmacy-dispensing mode for clinics without on-site custody.
-- Traces to requirement(s): REQ-MED-1.
-- Deferred (Phase 2+): placeholder — design-only for now.
+- Deferred (Phase 2+): placeholder, design-only for now.
+- Compliance: [C7](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
 - [ ] Placeholder — v1 is Mode A only; tenant mode switch already anticipates Mode B.
 - [ ] Captured so the medicines model stays mode-aware.
 
-## UI designs / screenshots
-
-prototype.html — Stock & medicines, Charting (lot select), Governance → Recalls.
-
 ## Technical notes (high level)
 
-Stack: .NET API (domain/services).
+- Stack: .NET API (domain/services)
 
 ## Other
 
-Epic: PRD-04 — Consult, prescribing & S4 medicines governance (the moat).
-Source PRD: docs/prds/PRD-04-consult-prescribing-s4.md.
-Backlog key: PRD-04/MODE-B.
-Phase: 2+ · Priority: P2 · Estimate: 1 pts.
-Compliance criteria: C7.
+- Source PRD: [PRD-04-consult-prescribing-s4.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-04-consult-prescribing-s4.md)
 
 ## Tasks (dev pickup)
 

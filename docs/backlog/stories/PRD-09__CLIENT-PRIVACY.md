@@ -6,17 +6,13 @@
 
 ## Background
 
-Apps (Flutter): client & provider — Two Flutter apps over the shared .NET API: a client app (book, intake/consent, photos, memberships, rewards, balances, card-on-file) and a provider app (room-side charting, injection mapping, camera capture, consult/Rx, finalise) — the latter resilient to treatment-room connectivity.
-
 As a client, I want an account area where I can see my data, know it stays in Australia, and request access or correction, so that I'm in control of my information.
-
 The Account area exposes profile, balances, card-on-file and a 'Your data & privacy' surface (residency note, access copy, request correction) (C21).
 
 ## Requirements
 
 - An account area where I can see my data, know it stays in Australia, and request access or correction.
-- Traces to requirement(s): REQ-APP-1.
-- Must satisfy compliance obligation(s): C21.
+- Compliance: [C21](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -31,16 +27,11 @@ client-app.html, treatment-room.html, checkin.html, backroom.html.
 
 ## Technical notes (high level)
 
-Stack: Flutter client app.
-Depends on: PRD-01/PRIVACY-RIGHTS.
+- Stack: Flutter client app
 
 ## Other
 
-Epic: PRD-09 — Apps (Flutter): client & provider.
-Source PRD: docs/prds/PRD-09-apps-client-provider.md.
-Backlog key: PRD-09/CLIENT-PRIVACY.
-Phase: 1 · Priority: P2 · Estimate: 2 pts.
-Compliance criteria: C21.
+- Source PRD: [PRD-09-apps-client-provider.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-09-apps-client-provider.md)
 
 ## Tasks (dev pickup)
 

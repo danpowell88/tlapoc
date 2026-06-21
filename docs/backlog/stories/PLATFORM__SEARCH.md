@@ -6,16 +6,13 @@
 
 ## Background
 
-Platform shell, navigation & cross-cutting UX — The cross-cutting product surfaces the prototype exercises that don't belong to a single feature PRD: the app shell + collapsible workspace navigation, the role-tailored Today dashboard, global search, the in-app notification centre, the clinic switcher, the persona/active-role + scope-of-practice display, and the owner-only financial (.fin) gating that hides money figures from non-owner roles.
-
 As a front desk, I want one search box that finds clients, appointments and invoices, so that I can jump to anything in a couple of keystrokes.
-
 The prototype header has a global search across clients, appointments and invoices — a core front-desk speed feature absent from the backlog.
 
 ## Requirements
 
 - One search box that finds clients, appointments and invoices.
-- Traces to requirement(s): REQ-CLI-1.
+- Compliance: [C10](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -30,16 +27,11 @@ prototype.html — header search box.
 
 ## Technical notes (high level)
 
-Stack: Angular web (admin/front-desk/public).
-Depends on: PLATFORM/APP-NAV.
+- Stack: Angular web (admin/front-desk/public)
 
 ## Other
 
-Epic: PLATFORM — Platform shell, navigation & cross-cutting UX.
-Source PRD: docs/ux/README.md.
-Backlog key: PLATFORM/SEARCH.
-Phase: 1 · Priority: P2 · Estimate: 2 pts.
-Compliance criteria: C10.
+- Source PRD: [README.md](https://github.com/danpowell88/tlapoc/blob/main/docs/ux/README.md)
 
 ## Tasks (dev pickup)
 

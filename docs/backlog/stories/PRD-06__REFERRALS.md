@@ -4,17 +4,14 @@
 
 ## Background
 
-Payments (in-person POS + autopay), memberships & non-S4 rewards — Commerce for the clinic: in-person POS (Square card-present + recorded cash + gift cards), automatic recurring membership autopay via stored card-on-file, packages/series, and a rewards engine that only ever applies to non-S4 items — driving repeat visits without eroding margin or breaching advertising law.
-
 As a client / owner, I want to refer friends and earn non-S4 credit, so that word-of-mouth growth is rewarded compliantly.
-
 The prototype's Memberships → Referrals screen shows referral/affiliate credit. Per scope, advanced loyalty/referrals are Phase 2 and referral/affiliate credit is non-S4 only (REQ-MEMB-10).
 
 ## Requirements
 
 - To refer friends and earn non-S4 credit.
-- Traces to requirement(s): REQ-MEMB-10.
-- Deferred (Phase 2+): placeholder — design-only for now.
+- Deferred (Phase 2+): placeholder, design-only for now.
+- Compliance: [C9](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -28,16 +25,12 @@ prototype.html — Checkout, Memberships; client-app.html Rewards/Account.
 
 ## Technical notes (high level)
 
-Stack: Angular web (admin/front-desk/public).
-Architecture decisions: ADR-0014 (see docs/adr/decision-log.md).
+- Stack: Angular web (admin/front-desk/public)
+- Architecture decisions: [ADR-0014](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: PRD-06 — Payments (in-person POS + autopay), memberships & non-S4 rewards.
-Source PRD: docs/prds/PRD-06-payments-memberships-rewards.md.
-Backlog key: PRD-06/REFERRALS.
-Phase: 2+ · Priority: P2 · Estimate: 1 pts.
-Compliance criteria: C9.
+- Source PRD: [PRD-06-payments-memberships-rewards.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-06-payments-memberships-rewards.md)
 
 ## Tasks (dev pickup)
 

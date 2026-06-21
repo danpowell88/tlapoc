@@ -6,16 +6,12 @@
 
 ## Background
 
-Platform shell, navigation & cross-cutting UX — The cross-cutting product surfaces the prototype exercises that don't belong to a single feature PRD: the app shell + collapsible workspace navigation, the role-tailored Today dashboard, global search, the in-app notification centre, the clinic switcher, the persona/active-role + scope-of-practice display, and the owner-only financial (.fin) gating that hides money figures from non-owner roles.
-
 As a staff member, I want an in-app notification centre for events relevant to my role, so that I don't miss time-sensitive things.
-
 The header bell + badges imply an in-app notification surface for alerts (new bookings, failed payments, expiries, AE/recall, jobs assigned).
 
 ## Requirements
 
 - An in-app notification centre for events relevant to my role.
-- Traces to requirement(s): REQ-NOTIF-1.
 
 ## Acceptance Criteria
 
@@ -30,15 +26,11 @@ prototype.html — sidebar/app shell, Today dashboard, header (global search, cl
 
 ## Technical notes (high level)
 
-Stack: Angular web (admin/front-desk/public).
-Depends on: PLATFORM/APP-NAV, PRD-07/CHANNELS.
+- Stack: Angular web (admin/front-desk/public)
 
 ## Other
 
-Epic: PLATFORM — Platform shell, navigation & cross-cutting UX.
-Source PRD: docs/ux/README.md.
-Backlog key: PLATFORM/NOTIFICATIONS.
-Phase: 1 · Priority: P2 · Estimate: 2 pts.
+- Source PRD: [README.md](https://github.com/danpowell88/tlapoc/blob/main/docs/ux/README.md)
 
 ## Tasks (dev pickup)
 

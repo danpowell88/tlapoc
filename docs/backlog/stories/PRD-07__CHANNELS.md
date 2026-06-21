@@ -4,16 +4,12 @@
 
 ## Background
 
-Communications, reminders & recall — The engine that keeps the book full and clients coming back at the right cadence: reminders, pre-/after-care sequences, and recall (~12-week toxin re-care) over SMS/email/push — with Spam Act consent/unsubscribe baked in.
-
 As a developer, I want a notification abstraction over SMS, email and push with per-tenant templates, so that all messaging is consistent and provider-swappable.
-
 An INotifier port over an AU SMS provider + email + app push, with per-tenant templates (REQ-NOTIF-1, ADR-0012).
 
 ## Requirements
 
 - A notification abstraction over SMS, email and push with per-tenant templates.
-- Traces to requirement(s): REQ-NOTIF-1.
 
 ## Acceptance Criteria
 
@@ -22,21 +18,14 @@ An INotifier port over an AU SMS provider + email + app push, with per-tenant te
 - [ ] Provider is swappable behind the port.
 - [ ] All sends log to the client's comms history.
 
-## UI designs / screenshots
-
-prototype.html — Comms & growth (Inbox/Automations/Campaigns), Growth (Leads/Reviews), Follow-ups, Settings → Public booking page; booking-widget.html.
-
 ## Technical notes (high level)
 
-Stack: .NET API (domain/services); Ports-and-adapters integration.
-Architecture decisions: ADR-0012 (see docs/adr/decision-log.md).
+- Stack: .NET API (domain/services); Ports-and-adapters integration
+- Architecture decisions: [ADR-0012](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: PRD-07 — Communications, reminders & recall.
-Source PRD: docs/prds/PRD-07-comms-reminders-recall.md.
-Backlog key: PRD-07/CHANNELS.
-Phase: 1 · Priority: P0 · Estimate: 5 pts.
+- Source PRD: [PRD-07-comms-reminders-recall.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-07-comms-reminders-recall.md)
 
 ## Tasks (dev pickup)
 

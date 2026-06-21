@@ -6,17 +6,13 @@
 
 ## Background
 
-Clinical charting: injection mapping & before/after — The clinical record that matches the Aesthetic Record / Pabau bar: a guided charting flow opening with product & lot selection, on-image/diagram injection mapping (product · units · depth · site · batch-lot), standardised before/after photos with comparison, immutable finalised notes with audited amendments, and adverse-event logging that feeds the TGA/DAEN pathway
-
 As a dermal therapist / injector, I want to record a structured skin assessment (and optionally an AI-assisted scan) and share results with the client, so that skin treatment is planned and tracked, and clients see their progress.
-
 The prototype's Clinical → Skin analysis screen captures a structured skin assessment with zone scoring, an AI scan (simulateScan) and a push-to-client summary (pushSkinToClient). Per the no-AI-in-v1 stance, AI scoring is advisory/Phase 2; the manual assessment record can be v1.
 
 ## Requirements
 
 - To record a structured skin assessment (and optionally an AI-assisted scan) and share results with the client.
-- Traces to requirement(s): REQ-CLIN-1, REQ-CLIN-7.
-- Deferred (Phase 2+): placeholder — design-only for now.
+- Deferred (Phase 2+): placeholder, design-only for now.
 
 ## Acceptance Criteria
 
@@ -31,16 +27,12 @@ prototype.html — Clinical → Skin analysis (scan + push-to-client); client-ap
 
 ## Technical notes (high level)
 
-Stack: Flutter provider app.
-Architecture decisions: ADR-0020, ADR-0025 (see docs/adr/decision-log.md).
-Depends on: PRD-05/NOTE-TEMPLATE.
+- Stack: Flutter provider app
+- Architecture decisions: [ADR-0020](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md), [ADR-0025](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: PRD-05 — Clinical charting: injection mapping & before/after.
-Source PRD: docs/prds/PRD-05-clinical-charting.md.
-Backlog key: PRD-05/SKIN-ANALYSIS.
-Phase: 2+ · Priority: P2 · Estimate: 1 pts.
+- Source PRD: [PRD-05-clinical-charting.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-05-clinical-charting.md)
 
 ## Tasks (dev pickup)
 

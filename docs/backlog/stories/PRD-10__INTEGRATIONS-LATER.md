@@ -4,17 +4,13 @@
 
 ## Background
 
-Integrations: Xero & calendar — Outbound integrations that remove double-entry: push sales/payments to Xero, and keep appointments in sync with staff calendars (M365 / Google)
-
 As a owner, I want future integrations: online checkout/deposits, e-prescribing and a public API, so that the platform extends as we scale.
-
 Online checkout & deposits (S4 never priced/sold online), e-prescribing (eRx/ETP, 🔬), public API/webhooks (Phase 3) and Medicare/HICAPS (non-applicable to cosmetic). Placeholder (REQ-INT-2a/4/5/6/7, ADR-0035/0036).
 
 ## Requirements
 
 - Future integrations: online checkout/deposits, e-prescribing and a public API.
-- Traces to requirement(s): REQ-INT-4, REQ-INT-5, REQ-INT-6, REQ-INT-7.
-- Deferred (Phase 2+): placeholder — design-only for now.
+- Deferred (Phase 2+): placeholder, design-only for now.
 
 ## Acceptance Criteria
 
@@ -23,21 +19,14 @@ Online checkout & deposits (S4 never priced/sold online), e-prescribing (eRx/ETP
 - [ ] Medicare/HICAPS recorded as non-applicable to cosmetic.
 - [ ] e-prescribing flagged for feasibility validation.
 
-## UI designs / screenshots
-
-prototype.html — Settings → Integrations.
-
 ## Technical notes (high level)
 
-Stack: Ports-and-adapters integration.
-Architecture decisions: ADR-0035, ADR-0036 (see docs/adr/decision-log.md).
+- Stack: Ports-and-adapters integration
+- Architecture decisions: [ADR-0035](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md), [ADR-0036](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: PRD-10 — Integrations: Xero & calendar.
-Source PRD: docs/prds/PRD-10-integrations.md.
-Backlog key: PRD-10/INTEGRATIONS-LATER.
-Phase: 2+ · Priority: P2 · Estimate: 1 pts.
+- Source PRD: [PRD-10-integrations.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-10-integrations.md)
 
 ## Tasks (dev pickup)
 

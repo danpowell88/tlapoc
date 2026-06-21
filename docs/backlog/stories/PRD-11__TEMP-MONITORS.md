@@ -6,17 +6,13 @@
 
 ## Background
 
-Facility, infection-control, emergency & complaints — The record-keeping that evidences AHPRA's facility, infection-control and emergency obligations, plus a complaints register with the mandated AHPRA pathway.
-
 As a owner / staff, I want to manage temperature monitors, see their readings and act on breaches, so that cold-chain is continuously evidenced without manual logging.
-
 The prototype's Operations → Temperature monitors (openMonitor/monitorJob) manages wireless cold-chain sensors (the ESP32 design), charts readings and raises breach jobs.
 
 ## Requirements
 
 - To manage temperature monitors, see their readings and act on breaches.
-- Traces to requirement(s): REQ-MED-7.
-- Must satisfy compliance obligation(s): C13.
+- Compliance: [C13](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -31,17 +27,12 @@ prototype.html — Operations → Temperature monitors.
 
 ## Technical notes (high level)
 
-Stack: Angular web (admin/front-desk/public); Ports-and-adapters integration.
-Architecture decisions: ADR-0026 (see docs/adr/decision-log.md).
-Depends on: PRD-04/COLD-CHAIN.
+- Stack: Angular web (admin/front-desk/public); Ports-and-adapters integration
+- Architecture decisions: [ADR-0026](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: PRD-11 — Facility, infection-control, emergency & complaints.
-Source PRD: docs/prds/PRD-11-facility-complaints.md.
-Backlog key: PRD-11/TEMP-MONITORS.
-Phase: 1 · Priority: P1 · Estimate: 3 pts.
-Compliance criteria: C13.
+- Source PRD: [PRD-11-facility-complaints.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-11-facility-complaints.md)
 
 ## Tasks (dev pickup)
 

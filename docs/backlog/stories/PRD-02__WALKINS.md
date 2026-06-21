@@ -6,16 +6,12 @@
 
 ## Background
 
-Booking & scheduling (+ client/CRM basics) — The calendar that runs the front desk and the 360° client record everything hangs off.
-
 As a front desk, I want to add walk-ins and same-day add-ons against available rooms/chairs/devices, so that we capture opportunistic demand without breaking the rules or double-booking resources.
-
 Walk-ins and same-day add-ons are supported but gate-respecting (an injectable walk-in still needs a consult first); room/chair/device resources are scheduled with conflict-flagging.
 
 ## Requirements
 
 - To add walk-ins and same-day add-ons against available rooms/chairs/devices.
-- Traces to requirement(s): REQ-BOOK-3, REQ-BOOK-6.
 
 ## Acceptance Criteria
 
@@ -30,16 +26,12 @@ prototype.html — Schedule, 'New booking' wizard, Clients directory & 360.
 
 ## Technical notes (high level)
 
-Stack: Angular web (admin/front-desk/public).
-Architecture decisions: ADR-0026 (see docs/adr/decision-log.md).
-Depends on: PRD-02/CALENDAR.
+- Stack: Angular web (admin/front-desk/public)
+- Architecture decisions: [ADR-0026](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: PRD-02 — Booking & scheduling (+ client/CRM basics).
-Source PRD: docs/prds/PRD-02-booking-scheduling.md.
-Backlog key: PRD-02/WALKINS.
-Phase: 1 · Priority: P2 · Estimate: 2 pts.
+- Source PRD: [PRD-02-booking-scheduling.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-02-booking-scheduling.md)
 
 ## Tasks (dev pickup)
 

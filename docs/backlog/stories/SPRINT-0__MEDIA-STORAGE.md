@@ -6,16 +6,13 @@
 
 ## Background
 
-Sprint 0 — Foundations & setup — Everything the team needs in place before feature work begins: repositories and solution structure, CI/CD, cloud environments in Australia East, identity wiring for staff and clients, the Postgres + RLS data baseline, the API/web/app shells, a shared design system, observability, a security baseline, and the four de-risk spikes called out in the docs index.
-
 As a backend developer, I want a media service for encrypted AU-resident blob storage with signed-URL upload/download, so that photos/documents are stored and served securely and consistently.
-
 Clinical photos and documents must be stored centrally in AU, served via short-lived signed URLs, and never persisted on personal devices (C14/ADR-0009). A shared media service underpins PRD-05 photos and PRD-09 capture.
 
 ## Requirements
 
 - A media service for encrypted AU-resident blob storage with signed-URL upload/download.
-- Must satisfy compliance obligation(s): C14, C21.
+- Compliance: [C14](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria), [C21](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -24,23 +21,14 @@ Clinical photos and documents must be stored centrally in AU, served via short-l
 - [ ] Media access is consent- and capability-checked and audited.
 - [ ] No public/unsigned access to media is possible.
 
-## UI designs / screenshots
-
-Non-UI / platform scaffolding — no prototype screen.
-
 ## Technical notes (high level)
 
-Stack: .NET API (domain/services); Azure / CI-CD / IaC.
-Architecture decisions: ADR-0009, ADR-0016 (see docs/adr/decision-log.md).
-Depends on: SPRINT-0/IAC, SPRINT-0/API.
+- Stack: .NET API (domain/services); Azure / CI-CD / IaC
+- Architecture decisions: [ADR-0009](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md), [ADR-0016](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: SPRINT-0 — Sprint 0 — Foundations & setup.
-Source PRD: docs/prds/PRD-01-foundations-tenancy.md.
-Backlog key: SPRINT-0/MEDIA-STORAGE.
-Phase: 0 · Priority: P1 · Estimate: 3 pts.
-Compliance criteria: C14, C21.
+- Source PRD: [PRD-01-foundations-tenancy.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-01-foundations-tenancy.md)
 
 ## Tasks (dev pickup)
 

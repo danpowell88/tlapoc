@@ -6,17 +6,13 @@
 
 ## Background
 
-Consult, prescribing & S4 medicines governance (the moat) — The defensible core.
-
 As a owner, I want vial/unit reconciliation across draws and wastage, so that stock, billing and the medicine register always agree.
-
 Units drawn vs vial size + wastage must reconcile so stock, billing and the register agree (C8).
 
 ## Requirements
 
 - Vial/unit reconciliation across draws and wastage.
-- Traces to requirement(s): REQ-MED-5.
-- Must satisfy compliance obligation(s): C8.
+- Compliance: [C8](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -25,22 +21,13 @@ Units drawn vs vial size + wastage must reconcile so stock, billing and the regi
 - [ ] Reconciliation data feeds reporting (PRD-08).
 - [ ] Partial-vial handling is supported.
 
-## UI designs / screenshots
-
-prototype.html — Stock & medicines, Charting (lot select), Governance → Recalls.
-
 ## Technical notes (high level)
 
-Stack: .NET API (domain/services).
-Depends on: PRD-04/ADMIN-GATE.
+- Stack: .NET API (domain/services)
 
 ## Other
 
-Epic: PRD-04 — Consult, prescribing & S4 medicines governance (the moat).
-Source PRD: docs/prds/PRD-04-consult-prescribing-s4.md.
-Backlog key: PRD-04/VIAL-RECON.
-Phase: 1 · Priority: P1 · Estimate: 3 pts.
-Compliance criteria: C8.
+- Source PRD: [PRD-04-consult-prescribing-s4.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-04-consult-prescribing-s4.md)
 
 ## Tasks (dev pickup)
 

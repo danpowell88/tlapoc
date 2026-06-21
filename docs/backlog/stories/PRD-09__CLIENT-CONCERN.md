@@ -6,17 +6,13 @@
 
 ## Background
 
-Apps (Flutter): client & provider — Two Flutter apps over the shared .NET API: a client app (book, intake/consent, photos, memberships, rewards, balances, card-on-file) and a provider app (room-side charting, injection mapping, camera capture, consult/Rx, finalise) — the latter resilient to treatment-room connectivity.
-
 As a client, I want to report a concern after my treatment from the app, so that the clinic responds quickly if something's wrong.
-
 The prototype's client app lets a client report a post-treatment concern, which bridges into staff follow-ups (and can escalate to an adverse event/complaint). A safety-critical client→clinic channel.
 
 ## Requirements
 
 - To report a concern after my treatment from the app.
-- Traces to requirement(s): REQ-CLIN-5, REQ-CLI-4.
-- Must satisfy compliance obligation(s): C12, C24.
+- Compliance: [C12](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria), [C24](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -31,16 +27,11 @@ client-app.html — Report a concern; prototype Follow-ups.
 
 ## Technical notes (high level)
 
-Stack: Flutter client app.
-Depends on: PRD-07/FOLLOWUPS, PRD-05/ADVERSE-EVENT.
+- Stack: Flutter client app
 
 ## Other
 
-Epic: PRD-09 — Apps (Flutter): client & provider.
-Source PRD: docs/prds/PRD-09-apps-client-provider.md.
-Backlog key: PRD-09/CLIENT-CONCERN.
-Phase: 1 · Priority: P1 · Estimate: 3 pts.
-Compliance criteria: C12, C24.
+- Source PRD: [PRD-09-apps-client-provider.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-09-apps-client-provider.md)
 
 ## Tasks (dev pickup)
 

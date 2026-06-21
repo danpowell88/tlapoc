@@ -6,17 +6,13 @@
 
 ## Background
 
-Clinical charting: injection mapping & before/after — The clinical record that matches the Aesthetic Record / Pabau bar: a guided charting flow opening with product & lot selection, on-image/diagram injection mapping (product · units · depth · site · batch-lot), standardised before/after photos with comparison, immutable finalised notes with audited amendments, and adverse-event logging that feeds the TGA/DAEN pathway
-
 As a clinician, I want a library of complication protocols with guided response steps and kit links, so that in an emergency I follow the correct, documented steps.
-
 The prototype's Clinical → Complication protocols (openComplication/completeComplication) provides step-by-step VO/anaphylaxis protocols and links the emergency kit — the reference side of the adverse-event response.
 
 ## Requirements
 
 - A library of complication protocols with guided response steps and kit links.
-- Traces to requirement(s): REQ-CLIN-13, REQ-FAC-3.
-- Must satisfy compliance obligation(s): C12, C20.
+- Compliance: [C12](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria), [C20](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -31,16 +27,11 @@ prototype.html — Clinical → Complication protocols.
 
 ## Technical notes (high level)
 
-Stack: Flutter provider app.
-Depends on: PRD-05/ADVERSE-EVENT.
+- Stack: Flutter provider app
 
 ## Other
 
-Epic: PRD-05 — Clinical charting: injection mapping & before/after.
-Source PRD: docs/prds/PRD-05-clinical-charting.md.
-Backlog key: PRD-05/COMPLICATION-LIBRARY.
-Phase: 1 · Priority: P1 · Estimate: 3 pts.
-Compliance criteria: C12, C20.
+- Source PRD: [PRD-05-clinical-charting.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-05-clinical-charting.md)
 
 ## Tasks (dev pickup)
 

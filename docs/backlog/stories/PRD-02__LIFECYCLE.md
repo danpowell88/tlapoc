@@ -6,16 +6,12 @@
 
 ## Background
 
-Booking & scheduling (+ client/CRM basics) — The calendar that runs the front desk and the 360° client record everything hangs off.
-
 As a front desk, I want a clear visit status flow with check-in, an in-room-now indicator and late/no-show flags, so that the team always knows where each client is in the visit.
-
 Bookings move through booked → reminded → checked-in → in-room → checked-out, with late/no-show flags and role hand-offs (REQ-BOOK-7).
 
 ## Requirements
 
 - A clear visit status flow with check-in, an in-room-now indicator and late/no-show flags.
-- Traces to requirement(s): REQ-BOOK-4, REQ-BOOK-7.
 
 ## Acceptance Criteria
 
@@ -30,16 +26,12 @@ prototype.html — Schedule, 'New booking' wizard, Clients directory & 360.
 
 ## Technical notes (high level)
 
-Stack: Angular web (admin/front-desk/public).
-Architecture decisions: ADR-0024 (see docs/adr/decision-log.md).
-Depends on: PRD-02/CALENDAR.
+- Stack: Angular web (admin/front-desk/public)
+- Architecture decisions: [ADR-0024](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: PRD-02 — Booking & scheduling (+ client/CRM basics).
-Source PRD: docs/prds/PRD-02-booking-scheduling.md.
-Backlog key: PRD-02/LIFECYCLE.
-Phase: 1 · Priority: P1 · Estimate: 3 pts.
+- Source PRD: [PRD-02-booking-scheduling.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-02-booking-scheduling.md)
 
 ## Tasks (dev pickup)
 

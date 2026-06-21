@@ -6,17 +6,13 @@
 
 ## Background
 
-Reporting & compliance dashboards (Governance hub) — Turns the platform's data into the business intelligence the clinic relies on and the audit-ready compliance evidence that makes the moat real — consent coverage, the S4 register, lot recall, registration/retention watch, breach & complaints registers, the DAEN adverse-event prefill, plus a one-click inspection-readiness pack.
-
 As a owner, I want a one-click pack that assembles the evidence an inspector would ask for, so that we're always inspection-ready.
-
 A one-click inspection-readiness pack and the cross-case Governance hub (policies sign-off, waste manifests/IPC, DSAR + breach drill) (REQ-RPT-7, ADR-0030, REQ-SEC-8/9).
 
 ## Requirements
 
 - A one-click pack that assembles the evidence an inspector would ask for.
-- Traces to requirement(s): REQ-RPT-7, REQ-SEC-8, REQ-SEC-9.
-- Must satisfy compliance obligation(s): C10.
+- Compliance: [C10](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -31,17 +27,12 @@ prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack).
 
 ## Technical notes (high level)
 
-Stack: Angular web (admin/front-desk/public).
-Architecture decisions: ADR-0030 (see docs/adr/decision-log.md).
-Depends on: PRD-08/COMPLIANCE-DASH.
+- Stack: Angular web (admin/front-desk/public)
+- Architecture decisions: [ADR-0030](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: PRD-08 — Reporting & compliance dashboards (Governance hub).
-Source PRD: docs/prds/PRD-08-reporting-compliance.md.
-Backlog key: PRD-08/INSPECTION-PACK.
-Phase: 1 · Priority: P2 · Estimate: 2 pts.
-Compliance criteria: C10.
+- Source PRD: [PRD-08-reporting-compliance.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-08-reporting-compliance.md)
 
 ## Tasks (dev pickup)
 

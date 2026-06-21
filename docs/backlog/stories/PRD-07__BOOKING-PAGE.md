@@ -6,17 +6,13 @@
 
 ## Background
 
-Communications, reminders & recall — The engine that keeps the book full and clients coming back at the right cadence: reminders, pre-/after-care sequences, and recall (~12-week toxin re-care) over SMS/email/push — with Spam Act consent/unsubscribe baked in.
-
 As a owner, I want my public booking page to use generic service names and withhold S4 prices automatically, so that we don't reference S4 in public advertising.
-
 The public booking page uses generic service names and withholds S4 prices by configuration (catalog schedule flag), with no advertising linter (REQ-NOTIF-12, C9).
 
 ## Requirements
 
 - My public booking page to use generic service names and withhold S4 prices automatically.
-- Traces to requirement(s): REQ-NOTIF-12.
-- Must satisfy compliance obligation(s): C9.
+- Compliance: [C9](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -31,17 +27,12 @@ prototype.html — Comms & growth (Inbox/Automations/Campaigns), Growth (Leads/R
 
 ## Technical notes (high level)
 
-Stack: Angular web (admin/front-desk/public).
-Architecture decisions: ADR-0014 (see docs/adr/decision-log.md).
-Depends on: PRD-02/ONLINE-BOOK.
+- Stack: Angular web (admin/front-desk/public)
+- Architecture decisions: [ADR-0014](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: PRD-07 — Communications, reminders & recall.
-Source PRD: docs/prds/PRD-07-comms-reminders-recall.md.
-Backlog key: PRD-07/BOOKING-PAGE.
-Phase: 1 · Priority: P1 · Estimate: 3 pts.
-Compliance criteria: C9.
+- Source PRD: [PRD-07-comms-reminders-recall.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-07-comms-reminders-recall.md)
 
 ## Tasks (dev pickup)
 

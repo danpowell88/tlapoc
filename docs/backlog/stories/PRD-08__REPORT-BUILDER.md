@@ -4,17 +4,13 @@
 
 ## Background
 
-Reporting & compliance dashboards (Governance hub) — Turns the platform's data into the business intelligence the clinic relies on and the audit-ready compliance evidence that makes the moat real — consent coverage, the S4 register, lot recall, registration/retention watch, breach & complaints registers, the DAEN adverse-event prefill, plus a one-click inspection-readiness pack.
-
 As a owner, I want to build custom reports and benchmark against other clinics, so that I can answer bespoke questions.
-
 A custom report builder, external BI warehouse and cross-clinic benchmarking are Phase 2+. Placeholder.
 
 ## Requirements
 
 - To build custom reports and benchmark against other clinics.
-- Traces to requirement(s): REQ-RPT-1.
-- Deferred (Phase 2+): placeholder — design-only for now.
+- Deferred (Phase 2+): placeholder, design-only for now.
 
 ## Acceptance Criteria
 
@@ -27,14 +23,11 @@ prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack).
 
 ## Technical notes (high level)
 
-Stack: Angular web (admin/front-desk/public).
+- Stack: Angular web (admin/front-desk/public)
 
 ## Other
 
-Epic: PRD-08 — Reporting & compliance dashboards (Governance hub).
-Source PRD: docs/prds/PRD-08-reporting-compliance.md.
-Backlog key: PRD-08/REPORT-BUILDER.
-Phase: 2+ · Priority: P2 · Estimate: 1 pts.
+- Source PRD: [PRD-08-reporting-compliance.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-08-reporting-compliance.md)
 
 ## Tasks (dev pickup)
 

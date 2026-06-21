@@ -6,16 +6,12 @@
 
 ## Background
 
-Platform shell, navigation & cross-cutting UX — The cross-cutting product surfaces the prototype exercises that don't belong to a single feature PRD: the app shell + collapsible workspace navigation, the role-tailored Today dashboard, global search, the in-app notification centre, the clinic switcher, the persona/active-role + scope-of-practice display, and the owner-only financial (.fin) gating that hides money figures from non-owner roles.
-
 As a staff member, I want a Today landing page showing the live state of the clinic and what needs my attention, tailored to my role, so that I start the day knowing exactly what to do.
-
 The prototype opens on a Today board: waiting / in-room / checked-out columns, the day's appointments, the jobs/needs-attention digest and alerts — tailored to the signed-in role's 'concerns' (ADR-0017).
 
 ## Requirements
 
 - A Today landing page showing the live state of the clinic and what needs my attention, tailored to my role.
-- Traces to requirement(s): REQ-RPT-5.
 
 ## Acceptance Criteria
 
@@ -30,16 +26,12 @@ prototype.html — Today (waiting / in-room / checked-out).
 
 ## Technical notes (high level)
 
-Stack: Angular web (admin/front-desk/public).
-Architecture decisions: ADR-0017 (see docs/adr/decision-log.md).
-Depends on: PLATFORM/APP-NAV.
+- Stack: Angular web (admin/front-desk/public)
+- Architecture decisions: [ADR-0017](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: PLATFORM — Platform shell, navigation & cross-cutting UX.
-Source PRD: docs/ux/README.md.
-Backlog key: PLATFORM/TODAY.
-Phase: 1 · Priority: P1 · Estimate: 3 pts.
+- Source PRD: [README.md](https://github.com/danpowell88/tlapoc/blob/main/docs/ux/README.md)
 
 ## Tasks (dev pickup)
 

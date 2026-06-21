@@ -6,17 +6,13 @@
 
 ## Background
 
-Facility, infection-control, emergency & complaints — The record-keeping that evidences AHPRA's facility, infection-control and emergency obligations, plus a complaints register with the mandated AHPRA pathway.
-
 As a staff member, I want a daily open/close checklist and a twice-daily fridge-temperature log, so that the clinic opens/closes safely and cold-chain is evidenced.
-
 The prototype's Operations → Open/close & fridge log (openFridge/saveFridge) is a twice-daily routine: an open/close checklist plus a manual fridge-temperature log with a breach pathway.
 
 ## Requirements
 
 - A daily open/close checklist and a twice-daily fridge-temperature log.
-- Traces to requirement(s): REQ-FAC-2.
-- Must satisfy compliance obligation(s): C13, C20.
+- Compliance: [C13](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria), [C20](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -31,17 +27,12 @@ prototype.html — Operations → Open/close & fridge log; backroom.html.
 
 ## Technical notes (high level)
 
-Stack: Angular web (admin/front-desk/public).
-Architecture decisions: ADR-0026 (see docs/adr/decision-log.md).
-Depends on: PRD-04/COLD-CHAIN.
+- Stack: Angular web (admin/front-desk/public)
+- Architecture decisions: [ADR-0026](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: PRD-11 — Facility, infection-control, emergency & complaints.
-Source PRD: docs/prds/PRD-11-facility-complaints.md.
-Backlog key: PRD-11/OPENCLOSE.
-Phase: 1 · Priority: P1 · Estimate: 3 pts.
-Compliance criteria: C13, C20.
+- Source PRD: [PRD-11-facility-complaints.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-11-facility-complaints.md)
 
 ## Tasks (dev pickup)
 

@@ -6,16 +6,12 @@
 
 ## Background
 
-Sprint 0 — Foundations & setup — Everything the team needs in place before feature work begins: repositories and solution structure, CI/CD, cloud environments in Australia East, identity wiring for staff and clients, the Postgres + RLS data baseline, the API/web/app shells, a shared design system, observability, a security baseline, and the four de-risk spikes called out in the docs index.
-
 As a platform engineer, I want Postgres RLS policies keyed on tenant_id, with EF Core setting the session tenant context on every request, so that a query can never return another tenant's rows, even on a developer mistake.
-
 Tenant isolation is enforced in the database via RLS, with the API setting tenant context per request (ADR-0003). This is the single most important safety property of the data layer.
 
 ## Requirements
 
 - Postgres RLS policies keyed on tenant_id, with EF Core setting the session tenant context on every request.
-- Must satisfy compliance obligation(s): see Other.
 
 ## Acceptance Criteria
 
@@ -24,22 +20,14 @@ Tenant isolation is enforced in the database via RLS, with the API setting tenan
 - [ ] An integration test proves Tenant A cannot read Tenant B rows and a cross-tenant id returns not-found.
 - [ ] Bypassing tenant context (e.g. background jobs) uses an explicit, audited elevated path.
 
-## UI designs / screenshots
-
-Non-UI / platform scaffolding — no prototype screen.
-
 ## Technical notes (high level)
 
-Stack: Postgres + EF Core (RLS).
-Architecture decisions: ADR-0003 (see docs/adr/decision-log.md).
-Depends on: SPRINT-0/DB, SPRINT-0/SPIKE-RLS.
+- Stack: Postgres + EF Core (RLS)
+- Architecture decisions: [ADR-0003](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: SPRINT-0 — Sprint 0 — Foundations & setup.
-Source PRD: docs/prds/PRD-01-foundations-tenancy.md.
-Backlog key: SPRINT-0/RLS.
-Phase: 0 · Priority: P0 · Estimate: 3 pts.
+- Source PRD: [PRD-01-foundations-tenancy.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-01-foundations-tenancy.md)
 
 ## Tasks (dev pickup)
 

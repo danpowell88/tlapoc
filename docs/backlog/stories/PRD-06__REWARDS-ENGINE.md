@@ -6,17 +6,13 @@
 
 ## Background
 
-Payments (in-person POS + autopay), memberships & non-S4 rewards — Commerce for the clinic: in-person POS (Square card-present + recorded cash + gift cards), automatic recurring membership autopay via stored card-on-file, packages/series, and a rewards engine that only ever applies to non-S4 items — driving repeat visits without eroding margin or breaching advertising law.
-
 As a client, I want to earn and redeem rewards on non-S4 items only, so that I'm rewarded without breaching S4 advertising rules.
-
 Visit-based + membership rewards that the engine blocks from ever applying to S4 items; configuring an S4 reward is blocked (REQ-MEMB-4/5/7, C9/ADR-0014).
 
 ## Requirements
 
 - To earn and redeem rewards on non-S4 items only.
-- Traces to requirement(s): REQ-MEMB-4, REQ-MEMB-5, REQ-MEMB-7.
-- Must satisfy compliance obligation(s): C9.
+- Compliance: [C9](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -25,23 +21,14 @@ Visit-based + membership rewards that the engine blocks from ever applying to S4
 - [ ] Attempting to configure an S4 reward is blocked.
 - [ ] Catalog schedule flag (from PRD-04) drives eligibility.
 
-## UI designs / screenshots
-
-prototype.html — Checkout, Memberships; client-app.html Rewards/Account.
-
 ## Technical notes (high level)
 
-Stack: .NET API (domain/services).
-Architecture decisions: ADR-0014 (see docs/adr/decision-log.md).
-Depends on: PRD-04/PRODUCT-CATALOGUE.
+- Stack: .NET API (domain/services)
+- Architecture decisions: [ADR-0014](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: PRD-06 — Payments (in-person POS + autopay), memberships & non-S4 rewards.
-Source PRD: docs/prds/PRD-06-payments-memberships-rewards.md.
-Backlog key: PRD-06/REWARDS-ENGINE.
-Phase: 1 · Priority: P0 · Estimate: 5 pts.
-Compliance criteria: C9.
+- Source PRD: [PRD-06-payments-memberships-rewards.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-06-payments-memberships-rewards.md)
 
 ## Tasks (dev pickup)
 

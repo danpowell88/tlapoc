@@ -4,10 +4,7 @@
 
 ## Background
 
-Sprint 0 — Foundations & setup — Everything the team needs in place before feature work begins: repositories and solution structure, CI/CD, cloud environments in Australia East, identity wiring for staff and clients, the Postgres + RLS data baseline, the API/web/app shells, a shared design system, observability, a security baseline, and the four de-risk spikes called out in the docs index.
-
 As a designer/developer, I want a shared set of design tokens and core components (buttons, inputs, banners, the blocked-action banner, chips, tables), so that all surfaces look consistent and the compliance UX patterns are reusable.
-
 One design system (tokens, components) shared across web and the two Flutter apps delivers the 'fast and modern, thumb-first' UX the docs demand and avoids re-styling per surface.
 
 ## Requirements
@@ -27,15 +24,12 @@ Non-UI / platform scaffolding — no prototype screen.
 
 ## Technical notes (high level)
 
-Stack: Shared design system.
-Architecture decisions: ADR-0006 (see docs/adr/decision-log.md).
+- Stack: Shared design system
+- Architecture decisions: [ADR-0006](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: SPRINT-0 — Sprint 0 — Foundations & setup.
-Source PRD: docs/prds/PRD-01-foundations-tenancy.md.
-Backlog key: SPRINT-0/DESIGN.
-Phase: 0 · Priority: P1 · Estimate: 3 pts.
+- Source PRD: [PRD-01-foundations-tenancy.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-01-foundations-tenancy.md)
 
 ## Tasks (dev pickup)
 

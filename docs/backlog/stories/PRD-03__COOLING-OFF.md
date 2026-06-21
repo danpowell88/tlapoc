@@ -6,17 +6,13 @@
 
 ## Background
 
-Intake, consent & compliance gating — Turns AHPRA's patient-safety rules into enforced workflow: pre-visit intake (medical history, contraindications, BDD/psychological screen), versioned e-signed consent with mandated content, separate withdrawable image-use consent, and cooling-off + payment blocks for under-18s.
-
 As a system, I want to enforce a 7-day cooling-off and payment block for under-18s and record a second consultation, so that minors are protected per the rules.
-
 Under-18s require ≥7 days between consent and procedure plus a payment block (except the consult) and a recorded second consultation; an optional adult cooling-off is configurable (C6).
 
 ## Requirements
 
 - To enforce a 7-day cooling-off and payment block for under-18s and record a second consultation.
-- Traces to requirement(s): REQ-CONS-4.
-- Must satisfy compliance obligation(s): C6.
+- Compliance: [C6](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -25,22 +21,13 @@ Under-18s require ≥7 days between consent and procedure plus a payment block (
 - [ ] Optional adult cooling-off is configurable (default per legal read).
 - [ ] Payment block coordinates with PRD-06.
 
-## UI designs / screenshots
-
-prototype.html — Forms & consent; client-app.html intake/consent; checkin.html.
-
 ## Technical notes (high level)
 
-Stack: .NET API (domain/services).
-Depends on: PRD-01/CLIENT-CORE, PRD-03/CONSENT.
+- Stack: .NET API (domain/services)
 
 ## Other
 
-Epic: PRD-03 — Intake, consent & compliance gating.
-Source PRD: docs/prds/PRD-03-intake-consent-gating.md.
-Backlog key: PRD-03/COOLING-OFF.
-Phase: 1 · Priority: P1 · Estimate: 3 pts.
-Compliance criteria: C6.
+- Source PRD: [PRD-03-intake-consent-gating.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-03-intake-consent-gating.md)
 
 ## Tasks (dev pickup)
 

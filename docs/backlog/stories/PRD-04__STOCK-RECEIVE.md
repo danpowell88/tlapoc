@@ -6,17 +6,13 @@
 
 ## Background
 
-Consult, prescribing & S4 medicines governance (the moat) — The defensible core.
-
 As a prescriber/owner, I want to receive S4 stock and record its ARTG status, brand, sponsor and lawful supply source, so that we only hold lawfully-supplied, approved medicine.
-
 S4 stock is received from a TGA-approved wholesaler with ARTG status, brand, sponsor and lawful supply source recorded; non-ARTG/unverified source is warned/blocked (C11). S4 POs require a prescriber signer.
 
 ## Requirements
 
 - To receive S4 stock and record its ARTG status, brand, sponsor and lawful supply source.
-- Traces to requirement(s): REQ-MED-6, REQ-MED-2.
-- Must satisfy compliance obligation(s): C11.
+- Compliance: [C11](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -25,22 +21,13 @@ S4 stock is received from a TGA-approved wholesaler with ARTG status, brand, spo
 - [ ] S4 purchase orders require a prescriber signer + TGA-approved wholesaler.
 - [ ] ARTG validation supports manual entry (lookup against an ARTG dataset is an open option).
 
-## UI designs / screenshots
-
-prototype.html — Stock & medicines, Charting (lot select), Governance → Recalls.
-
 ## Technical notes (high level)
 
-Stack: .NET API (domain/services).
-Depends on: PRD-04/PRODUCT-CATALOGUE.
+- Stack: .NET API (domain/services)
 
 ## Other
 
-Epic: PRD-04 — Consult, prescribing & S4 medicines governance (the moat).
-Source PRD: docs/prds/PRD-04-consult-prescribing-s4.md.
-Backlog key: PRD-04/STOCK-RECEIVE.
-Phase: 1 · Priority: P0 · Estimate: 5 pts.
-Compliance criteria: C11.
+- Source PRD: [PRD-04-consult-prescribing-s4.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-04-consult-prescribing-s4.md)
 
 ## Tasks (dev pickup)
 

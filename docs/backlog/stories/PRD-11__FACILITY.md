@@ -4,17 +4,13 @@
 
 ## Background
 
-Facility, infection-control, emergency & complaints — The record-keeping that evidences AHPRA's facility, infection-control and emergency obligations, plus a complaints register with the mandated AHPRA pathway.
-
 As a owner, I want to record facility accreditation and be alerted before it expires, so that we never lapse on accreditation.
-
 Per-location accreditation status + expiry alerts before lapse (REQ-FAC-1, C20).
 
 ## Requirements
 
 - To record facility accreditation and be alerted before it expires.
-- Traces to requirement(s): REQ-FAC-1.
-- Must satisfy compliance obligation(s): C20.
+- Compliance: [C20](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -29,15 +25,11 @@ prototype.html — Front desk/Operations (Open/close & fridge log, Temperature m
 
 ## Technical notes (high level)
 
-Stack: Angular web (admin/front-desk/public).
+- Stack: Angular web (admin/front-desk/public)
 
 ## Other
 
-Epic: PRD-11 — Facility, infection-control, emergency & complaints.
-Source PRD: docs/prds/PRD-11-facility-complaints.md.
-Backlog key: PRD-11/FACILITY.
-Phase: 1 · Priority: P2 · Estimate: 2 pts.
-Compliance criteria: C20.
+- Source PRD: [PRD-11-facility-complaints.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-11-facility-complaints.md)
 
 ## Tasks (dev pickup)
 

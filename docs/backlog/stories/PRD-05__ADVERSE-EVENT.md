@@ -6,17 +6,13 @@
 
 ## Background
 
-Clinical charting: injection mapping & before/after — The clinical record that matches the Aesthetic Record / Pabau bar: a guided charting flow opening with product & lot selection, on-image/diagram injection mapping (product · units · depth · site · batch-lot), standardised before/after photos with comparison, immutable finalised notes with audited amendments, and adverse-event logging that feeds the TGA/DAEN pathway
-
 As a injector, I want to log an adverse event linked to the treatment, product and lot, so that it feeds the TGA report and the right follow-ups happen.
-
 Log an adverse event/complication linked to the treatment, product and lot, classify seriousness and target the correct DAEN database (REQ-CLIN-5, C12). Includes the VO/anaphylaxis complication-response flow.
 
 ## Requirements
 
 - To log an adverse event linked to the treatment, product and lot.
-- Traces to requirement(s): REQ-CLIN-5.
-- Must satisfy compliance obligation(s): C12.
+- Compliance: [C12](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -31,16 +27,11 @@ prototype.html — Charting + Clinical (Skin analysis, Body contouring, Complica
 
 ## Technical notes (high level)
 
-Stack: Flutter provider app.
-Depends on: PRD-05/IMMUTABILITY.
+- Stack: Flutter provider app
 
 ## Other
 
-Epic: PRD-05 — Clinical charting: injection mapping & before/after.
-Source PRD: docs/prds/PRD-05-clinical-charting.md.
-Backlog key: PRD-05/ADVERSE-EVENT.
-Phase: 1 · Priority: P1 · Estimate: 3 pts.
-Compliance criteria: C12.
+- Source PRD: [PRD-05-clinical-charting.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-05-clinical-charting.md)
 
 ## Tasks (dev pickup)
 

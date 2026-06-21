@@ -390,6 +390,54 @@ def _dedup(tasks, cap):
     return out[:cap]
 
 
+# ---- clean, link-aware content helpers (used by storydocs.py + jira.py) ------
+REPO_BLOB = "https://github.com/danpowell88/tlapoc/blob/main"
+
+
+def is_ui(s):
+    return any(a in s.get("labels", []) for a in
+              ("area:web", "area:client-app", "area:provider-app", "area:design"))
+
+
+def adr_links(s):
+    raw = (s.get("refs", {}) or {}).get("adr", [])
+    return [(f"ADR-{x}", f"{REPO_BLOB}/docs/adr/decision-log.md") for x in raw]
+
+
+def compliance_links(s):
+    return [(c, f"{REPO_BLOB}/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria")
+            for c in refs(s, "compliance")]
+
+
+def prd_link(ep):
+    p = ep["epic"].get("prd")
+    return (os.path.basename(p), f"{REPO_BLOB}/{p}") if p else None
+
+
+def bg_text(ep, s):
+    return [f"As a {s['as_a']}, I want {s['i_want']}, so that {s['so_that']}.",
+            s["context"]]
+
+
+def req_bullets(ep, s):
+    bs = [s["i_want"][0].upper() + s["i_want"][1:] + "."]
+    if s.get("notes"):
+        bs.append(s["notes"])
+    if "phase:2plus" in s.get("labels", []):
+        bs.append("Deferred (Phase 2+): placeholder, design-only for now.")
+    return bs
+
+
+def ui_text(ep, s):
+    return sec_ui(ep, s) if (is_ui(s) or f"{ep['epic']['key']}/{s['key']}" in STORY_UI) else None
+
+
+def tech_blocks(ep, s):
+    stack = "; ".join(AREA_TECH[a] for a in s.get("labels", []) if a in AREA_TECH)
+    return {"stack": stack or None, "adrs": adr_links(s),
+            "spike": "type:spike" in s.get("labels", [])}
+
+
 # ---------------------------------------------------------------- board ops
 def board_state():
     q = """query($id:[ID!]){ boards(ids:$id){ name

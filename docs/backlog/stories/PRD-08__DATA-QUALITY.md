@@ -6,16 +6,12 @@
 
 ## Background
 
-Reporting & compliance dashboards (Governance hub) — Turns the platform's data into the business intelligence the clinic relies on and the audit-ready compliance evidence that makes the moat real — consent coverage, the S4 register, lot recall, registration/retention watch, breach & complaints registers, the DAEN adverse-event prefill, plus a one-click inspection-readiness pack.
-
 As a owner, I want data-quality checks that flag anomalies in my records, so that the data stays clean and trustworthy.
-
 Carry over anomaly checks: active-but-unseen, completed-not-checked-in, duplicates, missing contacts, implausible dates (REQ-RPT-4).
 
 ## Requirements
 
 - Data-quality checks that flag anomalies in my records.
-- Traces to requirement(s): REQ-RPT-4.
 
 ## Acceptance Criteria
 
@@ -30,15 +26,11 @@ prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack).
 
 ## Technical notes (high level)
 
-Stack: Angular web (admin/front-desk/public).
-Depends on: PRD-08/READ-MODELS.
+- Stack: Angular web (admin/front-desk/public)
 
 ## Other
 
-Epic: PRD-08 — Reporting & compliance dashboards (Governance hub).
-Source PRD: docs/prds/PRD-08-reporting-compliance.md.
-Backlog key: PRD-08/DATA-QUALITY.
-Phase: 1 · Priority: P2 · Estimate: 2 pts.
+- Source PRD: [PRD-08-reporting-compliance.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-08-reporting-compliance.md)
 
 ## Tasks (dev pickup)
 

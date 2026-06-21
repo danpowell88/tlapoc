@@ -6,18 +6,14 @@
 
 ## Background
 
-Communications, reminders & recall — The engine that keeps the book full and clients coming back at the right cadence: reminders, pre-/after-care sequences, and recall (~12-week toxin re-care) over SMS/email/push — with Spam Act consent/unsubscribe baked in.
-
 As a front desk / owner, I want to track leads/prospects through to booking, so that enquiries don't get lost and convert better.
-
 The prototype's Growth → Leads (CRM) screen tracks enquiries who haven't booked yet, over the inbox (ADR-0033).
 
 ## Requirements
 
 - To track leads/prospects through to booking.
-- Traces to requirement(s): REQ-NOTIF-8.
-- Must satisfy compliance obligation(s): C23.
-- Deferred (Phase 2+): placeholder — design-only for now.
+- Deferred (Phase 2+): placeholder, design-only for now.
+- Compliance: [C23](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -32,17 +28,12 @@ prototype.html — Comms & growth (Inbox/Automations/Campaigns), Growth (Leads/R
 
 ## Technical notes (high level)
 
-Stack: Angular web (admin/front-desk/public).
-Architecture decisions: ADR-0033 (see docs/adr/decision-log.md).
-Depends on: PRD-07/FOLLOWUPS.
+- Stack: Angular web (admin/front-desk/public)
+- Architecture decisions: [ADR-0033](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: PRD-07 — Communications, reminders & recall.
-Source PRD: docs/prds/PRD-07-comms-reminders-recall.md.
-Backlog key: PRD-07/LEADS-CRM.
-Phase: 2+ · Priority: P2 · Estimate: 1 pts.
-Compliance criteria: C23.
+- Source PRD: [PRD-07-comms-reminders-recall.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-07-comms-reminders-recall.md)
 
 ## Tasks (dev pickup)
 

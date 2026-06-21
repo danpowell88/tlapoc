@@ -6,17 +6,13 @@
 
 ## Background
 
-Reporting & compliance dashboards (Governance hub) — Turns the platform's data into the business intelligence the clinic relies on and the audit-ready compliance evidence that makes the moat real — consent coverage, the S4 register, lot recall, registration/retention watch, breach & complaints registers, the DAEN adverse-event prefill, plus a one-click inspection-readiness pack.
-
 As a owner / compliance officer, I want to publish policies and track staff sign-off, so that I can evidence that the team has read current procedures.
-
 The prototype's Governance → Policies screen (signPolicy) tracks staff acknowledgement/sign-off of clinic policies and procedures, part of the Governance hub.
 
 ## Requirements
 
 - To publish policies and track staff sign-off.
-- Traces to requirement(s): REQ-RPT-7.
-- Must satisfy compliance obligation(s): C10, C20.
+- Compliance: [C10](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria), [C20](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
@@ -31,17 +27,12 @@ prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack).
 
 ## Technical notes (high level)
 
-Stack: Angular web (admin/front-desk/public).
-Architecture decisions: ADR-0030 (see docs/adr/decision-log.md).
-Depends on: PRD-08/INSPECTION-PACK.
+- Stack: Angular web (admin/front-desk/public)
+- Architecture decisions: [ADR-0030](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: PRD-08 — Reporting & compliance dashboards (Governance hub).
-Source PRD: docs/prds/PRD-08-reporting-compliance.md.
-Backlog key: PRD-08/POLICIES.
-Phase: 1 · Priority: P1 · Estimate: 3 pts.
-Compliance criteria: C10, C20.
+- Source PRD: [PRD-08-reporting-compliance.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-08-reporting-compliance.md)
 
 ## Tasks (dev pickup)
 

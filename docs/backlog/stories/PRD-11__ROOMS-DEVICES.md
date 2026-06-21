@@ -6,16 +6,12 @@
 
 ## Background
 
-Facility, infection-control, emergency & complaints — The record-keeping that evidences AHPRA's facility, infection-control and emergency obligations, plus a complaints register with the mandated AHPRA pathway.
-
 As a manager, I want to manage the clinic's rooms, chairs and devices as bookable resources, so that scheduling reflects real capacity and avoids conflicts.
-
 The prototype's Operations → Rooms & devices manages the bookable rooms/chairs/devices that the calendar schedules against (resource conflict-flagging in PRD-02).
 
 ## Requirements
 
 - To manage the clinic's rooms, chairs and devices as bookable resources.
-- Traces to requirement(s): REQ-BOOK-1.
 
 ## Acceptance Criteria
 
@@ -30,16 +26,12 @@ prototype.html — Front desk/Operations (Open/close & fridge log, Temperature m
 
 ## Technical notes (high level)
 
-Stack: Angular web (admin/front-desk/public).
-Architecture decisions: ADR-0026 (see docs/adr/decision-log.md).
-Depends on: PRD-02/CALENDAR.
+- Stack: Angular web (admin/front-desk/public)
+- Architecture decisions: [ADR-0026](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: PRD-11 — Facility, infection-control, emergency & complaints.
-Source PRD: docs/prds/PRD-11-facility-complaints.md.
-Backlog key: PRD-11/ROOMS-DEVICES.
-Phase: 1 · Priority: P2 · Estimate: 2 pts.
+- Source PRD: [PRD-11-facility-complaints.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-11-facility-complaints.md)
 
 ## Tasks (dev pickup)
 

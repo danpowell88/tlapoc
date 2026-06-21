@@ -6,16 +6,12 @@
 
 ## Background
 
-Communications, reminders & recall — The engine that keeps the book full and clients coming back at the right cadence: reminders, pre-/after-care sequences, and recall (~12-week toxin re-care) over SMS/email/push — with Spam Act consent/unsubscribe baked in.
-
 As a staff member, I want one follow-up queue that merges recalls, needs-attention items and flagged messages, so that nothing falls through the cracks.
-
 Scattered recall / needs-attention / unanswered-comms items merge into one queue; staff can flag any message; inbound comms auto-categorise into jobs (rules/keyword, no AI) (REQ-NOTIF-7, ADR-0023).
 
 ## Requirements
 
 - One follow-up queue that merges recalls, needs-attention items and flagged messages.
-- Traces to requirement(s): REQ-NOTIF-7.
 
 ## Acceptance Criteria
 
@@ -30,16 +26,12 @@ prototype.html — Comms & growth (Inbox/Automations/Campaigns), Growth (Leads/R
 
 ## Technical notes (high level)
 
-Stack: Angular web (admin/front-desk/public).
-Architecture decisions: ADR-0023 (see docs/adr/decision-log.md).
-Depends on: PRD-07/CHANNELS.
+- Stack: Angular web (admin/front-desk/public)
+- Architecture decisions: [ADR-0023](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: PRD-07 — Communications, reminders & recall.
-Source PRD: docs/prds/PRD-07-comms-reminders-recall.md.
-Backlog key: PRD-07/FOLLOWUPS.
-Phase: 1 · Priority: P2 · Estimate: 2 pts.
+- Source PRD: [PRD-07-comms-reminders-recall.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-07-comms-reminders-recall.md)
 
 ## Tasks (dev pickup)
 

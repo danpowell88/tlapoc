@@ -6,16 +6,12 @@
 
 ## Background
 
-Booking & scheduling (+ client/CRM basics) — The calendar that runs the front desk and the 360° client record everything hangs off.
-
 As a front desk, I want a day/week/room calendar showing practitioners and rooms with correct service durations and buffers, so that I can run the diary at a glance and book without clashes.
-
 Front desk needs a fast day/week/room calendar with service durations, buffers and rosters — the core of the diary.
 
 ## Requirements
 
 - A day/week/room calendar showing practitioners and rooms with correct service durations and buffers.
-- Traces to requirement(s): REQ-BOOK-1.
 
 ## Acceptance Criteria
 
@@ -30,16 +26,12 @@ prototype.html — Schedule, 'New booking' wizard, Clients directory & 360.
 
 ## Technical notes (high level)
 
-Stack: Angular web (admin/front-desk/public).
-Architecture decisions: ADR-0024, ADR-0026 (see docs/adr/decision-log.md).
-Depends on: PRD-01/ROSTER.
+- Stack: Angular web (admin/front-desk/public)
+- Architecture decisions: [ADR-0024](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md), [ADR-0026](https://github.com/danpowell88/tlapoc/blob/main/docs/adr/decision-log.md)
 
 ## Other
 
-Epic: PRD-02 — Booking & scheduling (+ client/CRM basics).
-Source PRD: docs/prds/PRD-02-booking-scheduling.md.
-Backlog key: PRD-02/CALENDAR.
-Phase: 1 · Priority: P0 · Estimate: 5 pts.
+- Source PRD: [PRD-02-booking-scheduling.md](https://github.com/danpowell88/tlapoc/blob/main/docs/prds/PRD-02-booking-scheduling.md)
 
 ## Tasks (dev pickup)
 
