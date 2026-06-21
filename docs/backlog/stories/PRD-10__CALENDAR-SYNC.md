@@ -49,5 +49,5 @@ Gives practitioners one source of truth for their time.
 
 ## Tasks (dev pickup)
 
-- [ ] **Integration adapter + config** — Behind the port; AU / APP-8 posture.
-- [ ] **Tests (unit + integration)** — Cover acceptance criteria, incl. any gate/invariant.
+- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
+- [ ] **Integration adapter, sync & config** — Behind the port; trigger + retries/reconciliation; AU/APP-8 posture.

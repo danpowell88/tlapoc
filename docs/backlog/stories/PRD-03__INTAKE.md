@@ -52,7 +52,6 @@ _Prototype screen: prototype.html — Forms & consent; client-app.html intake/co
 
 ## Tasks (dev pickup)
 
-- [ ] **Domain logic & business rules** — Core behaviour + invariants.
-- [ ] **API endpoint(s) + OpenAPI contract** — Wire request/response; regenerate clients.
+- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
+- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
 - [ ] **Client app UI (Flutter)**
-- [ ] **Tests (unit + integration)** — Cover acceptance criteria, incl. any gate/invariant.

@@ -50,4 +50,3 @@ _Prototype screen: checkin.html._
 ## Tasks (dev pickup)
 
 - [ ] **Web UI** — checkin.html.
-- [ ] **Tests (unit + integration)** — Cover acceptance criteria, incl. any gate/invariant.

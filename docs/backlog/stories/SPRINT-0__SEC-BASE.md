@@ -39,4 +39,3 @@ The baseline security posture: TLS everywhere, encryption at rest, hardened HTTP
 - [ ] **Implement: Security baseline: encryption, headers, dependency & secret scanning**
 - [ ] **Wire into CI/CD + per-environment config**
 - [ ] **Document setup & usage**
-- [ ] **Validate in dev + add a smoke test**

@@ -49,7 +49,5 @@ This is the mechanism PRD-04 (consult/Rx) and PRD-05 (charting) consume; gate de
 
 ## Tasks (dev pickup)
 
-- [ ] **Domain logic & business rules** — Core behaviour + invariants.
-- [ ] **API endpoint(s) + OpenAPI contract** — Wire request/response; regenerate clients.
+- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
 - [ ] **Enforce compliance gate + audit events** — Server-side (C5); blocked path explains why.
-- [ ] **Tests (unit + integration)** — Cover acceptance criteria, incl. any gate/invariant.

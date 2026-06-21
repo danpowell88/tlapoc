@@ -37,4 +37,3 @@ Clients create accounts and sign in via Entra External ID (CIAM) with Google/App
 
 - [ ] **Implement: Client identity: Entra External ID (social / email / OTP) wiring**
 - [ ] **Document setup & usage**
-- [ ] **Validate in dev + add a smoke test**

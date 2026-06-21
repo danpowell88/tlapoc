@@ -10,17 +10,17 @@ The defensible core. Every S4 administration is provably tied to a synchronous c
 
 | Key | Story | Type | Priority | Est | Tasks |
 |---|---|---|---|---|---|
-| `CONSULT` | [Synchronous consult record](../stories/PRD-04__CONSULT.md) | Story | P0 | 5 | 4 |
-| `PRESCRIPTION` | [Individual prescription (no batch / no async)](../stories/PRD-04__PRESCRIPTION.md) | Story | P0 | 5 | 4 |
-| `PRODUCT-CATALOGUE` | [Medicines & product catalogue (S4 classification)](../stories/PRD-04__PRODUCT-CATALOGUE.md) | Story | P0 | 5 | 4 |
-| `ADMIN-GATE` | [Administration gating & immutable record](../stories/PRD-04__ADMIN-GATE.md) | Story | P0 | 5 | 4 |
-| `STOCK-RECEIVE` | [Stock receipt, ARTG & lawful-supply provenance](../stories/PRD-04__STOCK-RECEIVE.md) | Story | P0 | 5 | 4 |
-| `CUSTODY-STORAGE` | [Custody & secure storage](../stories/PRD-04__CUSTODY-STORAGE.md) | Story | P0 | 5 | 4 |
-| `COLD-CHAIN` | [Temperature logging & excursion alerts](../stories/PRD-04__COLD-CHAIN.md) | Story | P1 | 3 | 5 |
-| `VIAL-RECON` | [Vial / unit reconciliation](../stories/PRD-04__VIAL-RECON.md) | Story | P1 | 3 | 4 |
-| `RECALL-LOOKUP` | [Lot → clients recall lookup & medicine register](../stories/PRD-04__RECALL-LOOKUP.md) | Story | P0 | 5 | 4 |
-| `WASTAGE-DESTRUCTION` | [Wastage, disposal & destruction records](../stories/PRD-04__WASTAGE-DESTRUCTION.md) | Story | P1 | 3 | 4 |
-| `STOCKTAKE` | [Stocktake, discrepancy & loss/theft reporting](../stories/PRD-04__STOCKTAKE.md) | Story | P1 | 3 | 4 |
+| `CONSULT` | [Synchronous consult record](../stories/PRD-04__CONSULT.md) | Story | P0 | 5 | 3 |
+| `PRESCRIPTION` | [Individual prescription (no batch / no async)](../stories/PRD-04__PRESCRIPTION.md) | Story | P0 | 5 | 3 |
+| `PRODUCT-CATALOGUE` | [Medicines & product catalogue (S4 classification)](../stories/PRD-04__PRODUCT-CATALOGUE.md) | Story | P0 | 5 | 3 |
+| `ADMIN-GATE` | [Administration gating & immutable record](../stories/PRD-04__ADMIN-GATE.md) | Story | P0 | 5 | 3 |
+| `STOCK-RECEIVE` | [Stock receipt, ARTG & lawful-supply provenance](../stories/PRD-04__STOCK-RECEIVE.md) | Story | P0 | 5 | 3 |
+| `CUSTODY-STORAGE` | [Custody & secure storage](../stories/PRD-04__CUSTODY-STORAGE.md) | Story | P0 | 5 | 3 |
+| `COLD-CHAIN` | [Temperature logging & excursion alerts](../stories/PRD-04__COLD-CHAIN.md) | Story | P1 | 3 | 4 |
+| `VIAL-RECON` | [Vial / unit reconciliation](../stories/PRD-04__VIAL-RECON.md) | Story | P1 | 3 | 3 |
+| `RECALL-LOOKUP` | [Lot → clients recall lookup & medicine register](../stories/PRD-04__RECALL-LOOKUP.md) | Story | P0 | 5 | 3 |
+| `WASTAGE-DESTRUCTION` | [Wastage, disposal & destruction records](../stories/PRD-04__WASTAGE-DESTRUCTION.md) | Story | P1 | 3 | 3 |
+| `STOCKTAKE` | [Stocktake, discrepancy & loss/theft reporting](../stories/PRD-04__STOCKTAKE.md) | Story | P1 | 3 | 3 |
 | `MODE-B` | [Mode B pharmacy-dispensing model (placeholder)](../stories/PRD-04__MODE-B.md) | Story | P2 | 1 | 2 |
 
-_Totals: 12 stories · 47 tasks._
+_Totals: 12 stories · 36 tasks._

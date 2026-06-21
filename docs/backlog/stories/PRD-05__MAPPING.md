@@ -72,4 +72,3 @@ _Prototype screen: prototype.html — Charting + Clinical (Skin analysis, Body c
 - [ ] **Injection-map canvas (web)** — Facial diagram/photo with tap-to-add + drag pins (SPIKE-CANVAS approach); selected-point editor (units/depth/technique), point list, live total, product·lot label; crosshair + read-only mode.
 - [ ] **Product & batch (lot) selector** — Step-2 dropdowns restricted to in-date/in-custody/ARTG lots; lot-info line; wire the selected lot into point deductions.
 - [ ] **Skin-note (non-S4) variant** — Areas multi-select, device/modality, settings, consumables; no lot/Rx; the treatment-type toggle switches map vs note.
-- [ ] **Tests: gate, immutability, lot deduction, recall link** — Cannot open without consult+consent; finalise deducts correct units; over-draw blocked; finalised note immutable (amend only); lot→client recall returns this administration.

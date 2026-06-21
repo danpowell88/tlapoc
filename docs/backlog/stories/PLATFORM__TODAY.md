@@ -50,5 +50,5 @@ _Prototype screen: prototype.html — Today (waiting / in-room / checked-out)._
 
 ## Tasks (dev pickup)
 
+- [ ] **Read-model / projection** — Materialised view fed by domain events.
 - [ ] **Web UI** — prototype.html — Today (waiting / in-room / checked-out).
-- [ ] **Tests (unit + integration)** — Cover acceptance criteria, incl. any gate/invariant.

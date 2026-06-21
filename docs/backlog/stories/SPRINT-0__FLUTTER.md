@@ -43,4 +43,3 @@ _Prototype screen: Non-UI / platform scaffolding — no prototype screen._
 
 - [ ] **Implement: Flutter app shells (client + provider) + shared packages**
 - [ ] **Document setup & usage**
-- [ ] **Validate in dev + add a smoke test**

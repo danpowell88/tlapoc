@@ -43,4 +43,3 @@ _Prototype screen: Non-UI / platform scaffolding — no prototype screen._
 
 - [ ] **Implement: Angular web shell: routing, auth guard, layout**
 - [ ] **Document setup & usage**
-- [ ] **Validate in dev + add a smoke test**

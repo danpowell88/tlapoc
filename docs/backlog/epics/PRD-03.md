@@ -10,11 +10,11 @@ Turns AHPRA's patient-safety rules into enforced workflow: pre-visit intake (med
 
 | Key | Story | Type | Priority | Est | Tasks |
 |---|---|---|---|---|---|
-| `INTAKE` | [Pre-visit intake forms](../stories/PRD-03__INTAKE.md) | Story | P0 | 5 | 4 |
-| `BDD` | [BDD / psychological screening instrument](../stories/PRD-03__BDD.md) | Story | P0 | 5 | 4 |
-| `CONSENT` | [Versioned e-signed consent with mandated content](../stories/PRD-03__CONSENT.md) | Story | P0 | 5 | 4 |
-| `IMAGE-CONSENT` | [Separate, withdrawable image-use consent](../stories/PRD-03__IMAGE-CONSENT.md) | Story | P1 | 3 | 4 |
-| `COOLING-OFF` | [Cooling-off & under-18 payment block](../stories/PRD-03__COOLING-OFF.md) | Story | P1 | 3 | 4 |
-| `GATING` | [Server-enforced treatment gating](../stories/PRD-03__GATING.md) | Story | P0 | 5 | 4 |
+| `INTAKE` | [Pre-visit intake forms](../stories/PRD-03__INTAKE.md) | Story | P0 | 5 | 3 |
+| `BDD` | [BDD / psychological screening instrument](../stories/PRD-03__BDD.md) | Story | P0 | 5 | 3 |
+| `CONSENT` | [Versioned e-signed consent with mandated content](../stories/PRD-03__CONSENT.md) | Story | P0 | 5 | 3 |
+| `IMAGE-CONSENT` | [Separate, withdrawable image-use consent](../stories/PRD-03__IMAGE-CONSENT.md) | Story | P1 | 3 | 3 |
+| `COOLING-OFF` | [Cooling-off & under-18 payment block](../stories/PRD-03__COOLING-OFF.md) | Story | P1 | 3 | 3 |
+| `GATING` | [Server-enforced treatment gating](../stories/PRD-03__GATING.md) | Story | P0 | 5 | 2 |
 
-_Totals: 6 stories · 24 tasks._
+_Totals: 6 stories · 17 tasks._

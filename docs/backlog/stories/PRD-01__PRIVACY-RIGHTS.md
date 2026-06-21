@@ -50,7 +50,6 @@ Self-service lives in the client app privacy area; staff handle requests via Gov
 
 ## Tasks (dev pickup)
 
-- [ ] **Domain logic & business rules** — Core behaviour + invariants.
-- [ ] **API endpoint(s) + OpenAPI contract** — Wire request/response; regenerate clients.
+- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
+- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
 - [ ] **Enforce compliance gate + audit events** — Server-side (C21); blocked path explains why.
-- [ ] **Tests (unit + integration)** — Cover acceptance criteria, incl. any gate/invariant.

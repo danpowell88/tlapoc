@@ -635,6 +635,44 @@ def cmd_attach():
     print(f"attached {n}; skipped {skipped} (already done); {missing} missing PNGs.")
 
 
+def cmd_resync_tasks():
+    """Delete existing dev sub-tasks and recreate from tasks_for (no test tasks; full slice)."""
+    meta = resolve_meta()
+    st = load_state()
+    epics = load()
+    pj = meta["project"]
+    old = [(k, v) for k, v in list(st.items()) if k.startswith("task:") and isinstance(v, str)]
+    for k, jk in old:
+        try:
+            api("DELETE", f"issue/{jk}")
+        except SystemExit as e:
+            print("  del skip", jk, str(e)[:50])
+        del st[k]
+        time.sleep(0.2)
+    save_state(st)
+    print(f"deleted {len(old)} old sub-tasks")
+    n = 0
+    for ep in epics:
+        for s in ep["stories"]:
+            parent = st.get(f"story:{ep['epic']['key']}/{s['key']}")
+            if not parent:
+                continue
+            for i, t in enumerate(tasks_for(ep, s)):
+                body = t["title"] + (f"\n\n{t['note']}" if t.get("note") else "") + \
+                    f"\n\nPart of story: {s['title']}."
+                fields = {"project": {"key": pj}, "issuetype": {"id": meta["sub"]},
+                          "summary": t["title"][:250], "description": adf_text(body),
+                          "parent": {"key": parent}, "labels": ["tla-backlog", "dev-task"]}
+                st[f"task:{ep['epic']['key']}/{s['key']}#{i}"] = create_issue(fields)
+                n += 1
+                if n % 25 == 0:
+                    print(f"  …{n} created")
+                    save_state(st)
+                time.sleep(0.3)
+    save_state(st)
+    print(f"created {n} sub-tasks")
+
+
 def cmd_whoami():
     me = api("GET", "myself")
     print(f"Auth OK: {me.get('displayName')} <{me.get('emailAddress')}>")
@@ -678,7 +716,7 @@ def main():
     {"whoami": cmd_whoami, "plan": cmd_plan, "create": cmd_create,
      "links": cmd_links, "all": lambda: (cmd_create(), cmd_links()),
      "refresh": cmd_refresh, "sprints": cmd_sprints, "epics": cmd_epics,
-     "attach": cmd_attach, "wipe": cmd_wipe}.get(
+     "attach": cmd_attach, "resync-tasks": cmd_resync_tasks, "wipe": cmd_wipe}.get(
         cmd, lambda: (_ for _ in ()).throw(SystemExit(__doc__)))()
 
 

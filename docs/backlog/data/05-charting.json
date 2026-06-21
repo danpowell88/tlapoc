@@ -174,10 +174,6 @@
         {
           "title": "Skin-note (non-S4) variant",
           "note": "Areas multi-select, device/modality, settings, consumables; no lot/Rx; the treatment-type toggle switches map vs note."
-        },
-        {
-          "title": "Tests: gate, immutability, lot deduction, recall link",
-          "note": "Cannot open without consult+consent; finalise deducts correct units; over-draw blocked; finalised note immutable (amend only); lot→client recall returns this administration."
         }
       ]
     },

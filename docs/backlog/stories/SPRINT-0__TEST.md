@@ -36,4 +36,3 @@ Test harnesses for API (unit + integration against a real Postgres with RLS), we
 
 - [ ] **Implement: Test strategy & harness + quality gates**
 - [ ] **Document setup & usage**
-- [ ] **Validate in dev + add a smoke test**

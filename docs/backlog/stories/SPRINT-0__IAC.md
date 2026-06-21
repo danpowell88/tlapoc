@@ -42,4 +42,3 @@ dev/staging/prod provisioned as code, all pinned to Australia East so data resid
 - [ ] **Implement: Cloud environments & infrastructure-as-code (AU East)**
 - [ ] **Wire into CI/CD + per-environment config**
 - [ ] **Document setup & usage**
-- [ ] **Validate in dev + add a smoke test**

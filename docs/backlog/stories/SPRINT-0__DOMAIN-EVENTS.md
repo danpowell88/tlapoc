@@ -43,4 +43,3 @@ A domain-event backbone (transactional outbox + at-least-once dispatch) modules 
 - [ ] **Implement: Domain-event / messaging backbone**
 - [ ] **Apply via migrations; verify RLS/tenancy**
 - [ ] **Document setup & usage**
-- [ ] **Validate in dev + add a smoke test**

@@ -43,4 +43,3 @@ Feature flags + a typed per-tenant configuration store so features ship dark and
 
 - [ ] **Implement: Feature flags & per-tenant configuration**
 - [ ] **Document setup & usage**
-- [ ] **Validate in dev + add a smoke test**

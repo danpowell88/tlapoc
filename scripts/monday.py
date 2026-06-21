@@ -444,35 +444,41 @@ def tasks_for(ep, s):
         if "area:data" in labs:
             add("Apply via migrations; verify RLS/tenancy")
         add("Document setup & usage")
-        add("Validate in dev + add a smoke test")
-        return _dedup(out, 6)
+        return _dedup(out, 4)
 
-    # regular story implementation spine
-    if "area:data" in labs:
-        add("Data model & migrations", "Entities/columns; tenant_id + RLS.")
-    if "area:backend" in labs:
-        add("Domain logic & business rules", "Core behaviour + invariants.")
-        add("API endpoint(s) + OpenAPI contract", "Wire request/response; regenerate clients.")
+    # regular feature story — everything needed to deliver it end to end (UI -> API -> DB ->
+    # integrations). Tests are implicit (not listed); keep tasks coarse, not granular.
+    dm = s.get("data_model") or []
+    real = [e for e in dm if not e["entity"].startswith("(")]
+    read_model = any(e["entity"].lower().startswith("(read") or "reportingview" in e["entity"].lower()
+                     for e in dm)
+    integ = "area:integration" in labs
+    if real:
+        add("Data model & migrations", "Entities/columns + relationships; tenant_id + RLS.")
+    elif read_model:
+        add("Read-model / projection", "Materialised view fed by domain events.")
+    if "area:backend" in labs or (real and not integ):
+        add("Backend: domain logic, rules & API endpoint(s)",
+            "Behaviour + invariants + the OpenAPI contract the UI/clients consume.")
     if "compliance" in labs:
         cs = ", ".join(refs(s, "compliance")) or "see Other"
         add("Enforce compliance gate + audit events", f"Server-side ({cs}); blocked path explains why.")
+    if integ:
+        add("Integration adapter, sync & config",
+            "Behind the port; trigger + retries/reconciliation; AU/APP-8 posture.")
     if "area:web" in labs:
         add("Web UI", sec_ui(ep, s))
     if "area:client-app" in labs:
         add("Client app UI (Flutter)")
     if "area:provider-app" in labs:
         add("Provider app UI (Flutter)")
-    if "area:integration" in labs:
-        add("Integration adapter + config", "Behind the port; AU / APP-8 posture.")
     if "area:design" in labs:
         add("Design-system component(s)")
     if "offline" in text or ("queue" in text and "sync" in text):
         add("Offline queue + sync handling", "Encrypted local queue; finalise server-side.")
-    add("Tests (unit + integration)", "Cover acceptance criteria, incl. any gate/invariant.")
-
-    out = _dedup(out, 7)
-    if len(out) < 2:
-        out.insert(0, {"title": f"Implement: {s['title']}", "note": ""})
+    out = _dedup(out, 6)
+    if not out:
+        add(f"Implement: {s['title']}")
     return out
 
 

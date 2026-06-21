@@ -51,4 +51,3 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 ## Tasks (dev pickup)
 
 - [ ] **Provider app UI (Flutter)**
-- [ ] **Tests (unit + integration)** — Cover acceptance criteria, incl. any gate/invariant.

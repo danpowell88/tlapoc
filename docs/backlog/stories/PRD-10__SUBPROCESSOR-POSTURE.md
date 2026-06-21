@@ -48,6 +48,6 @@ Keeps integrations inside cross-border privacy rules (C21).
 
 ## Tasks (dev pickup)
 
+- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
 - [ ] **Enforce compliance gate + audit events** — Server-side (C21); blocked path explains why.
-- [ ] **Integration adapter + config** — Behind the port; AU / APP-8 posture.
-- [ ] **Tests (unit + integration)** — Cover acceptance criteria, incl. any gate/invariant.
+- [ ] **Integration adapter, sync & config** — Behind the port; trigger + retries/reconciliation; AU/APP-8 posture.

@@ -50,4 +50,3 @@ _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rew
 ## Tasks (dev pickup)
 
 - [ ] **Web UI** — prototype.html — Checkout, Memberships; client-app.html Rewards/Account.
-- [ ] **Tests (unit + integration)** — Cover acceptance criteria, incl. any gate/invariant.

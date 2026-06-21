@@ -36,4 +36,3 @@ A single, well-structured workspace for the .NET API, Angular web, two Flutter a
 - [ ] **Implement: Monorepo & solution scaffolding**
 - [ ] **Wire into CI/CD + per-environment config**
 - [ ] **Document setup & usage**
-- [ ] **Validate in dev + add a smoke test**

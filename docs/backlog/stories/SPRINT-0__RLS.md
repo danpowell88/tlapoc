@@ -43,4 +43,3 @@ Postgres row-level-security policies keyed on tenant_id, with EF Core setting th
 - [ ] **Implement: Row-level-security multi-tenancy baseline**
 - [ ] **Apply via migrations; verify RLS/tenancy**
 - [ ] **Document setup & usage**
-- [ ] **Validate in dev + add a smoke test**

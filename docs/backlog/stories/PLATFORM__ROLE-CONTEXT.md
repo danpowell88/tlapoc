@@ -52,4 +52,3 @@ _Prototype screen: prototype.html — sidebar/app shell, Today dashboard, header
 
 - [ ] **Enforce compliance gate + audit events** — Server-side (C4); blocked path explains why.
 - [ ] **Web UI** — prototype.html — sidebar/app shell, Today dashboard, header (global search, clinic switcher, switch-user, scope tooltip).
-- [ ] **Tests (unit + integration)** — Cover acceptance criteria, incl. any gate/invariant.

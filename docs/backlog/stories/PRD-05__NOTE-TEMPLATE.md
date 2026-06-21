@@ -53,5 +53,6 @@ _Prototype screen: prototype.html — Charting + Clinical (Skin analysis, Body c
 
 ## Tasks (dev pickup)
 
+- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
+- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
 - [ ] **Provider app UI (Flutter)**
-- [ ] **Tests (unit + integration)** — Cover acceptance criteria, incl. any gate/invariant.

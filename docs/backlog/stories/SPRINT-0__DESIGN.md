@@ -41,4 +41,3 @@ _Prototype screen: Non-UI / platform scaffolding — no prototype screen._
 
 - [ ] **Implement: Design system / shared component library + tokens**
 - [ ] **Document setup & usage**
-- [ ] **Validate in dev + add a smoke test**

@@ -44,4 +44,3 @@ A media service: AU-resident, encrypted blob storage served only via short-lived
 - [ ] **Implement: Media storage & signed-URL service**
 - [ ] **Wire into CI/CD + per-environment config**
 - [ ] **Document setup & usage**
-- [ ] **Validate in dev + add a smoke test**

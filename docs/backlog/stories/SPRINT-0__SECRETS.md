@@ -37,4 +37,3 @@ A managed secret store (Key Vault) wired into each environment with typed, envir
 - [ ] **Implement: Secrets & configuration management**
 - [ ] **Wire into CI/CD + per-environment config**
 - [ ] **Document setup & usage**
-- [ ] **Validate in dev + add a smoke test**

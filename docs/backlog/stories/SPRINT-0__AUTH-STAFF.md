@@ -37,4 +37,3 @@ Staff sign in with the clinic's existing Microsoft 365 accounts via Entra ID SSO
 
 - [ ] **Implement: Staff identity: Entra ID SSO + MFA wiring**
 - [ ] **Document setup & usage**
-- [ ] **Validate in dev + add a smoke test**

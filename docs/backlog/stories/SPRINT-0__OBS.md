@@ -37,4 +37,3 @@ Structured logging, distributed tracing (correlation ids across web/app/API), ke
 - [ ] **Implement: Observability: logging, tracing, metrics, alerting**
 - [ ] **Wire into CI/CD + per-environment config**
 - [ ] **Document setup & usage**
-- [ ] **Validate in dev + add a smoke test**

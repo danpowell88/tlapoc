@@ -49,5 +49,5 @@ _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Po
 
 ## Tasks (dev pickup)
 
+- [ ] **Read-model / projection** — Materialised view fed by domain events.
 - [ ] **Web UI** — prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack).
-- [ ] **Tests (unit + integration)** — Cover acceptance criteria, incl. any gate/invariant.

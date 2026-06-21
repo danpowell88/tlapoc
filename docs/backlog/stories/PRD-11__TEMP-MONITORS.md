@@ -52,7 +52,7 @@ _Prototype screen: prototype.html — Operations → Temperature monitors._
 
 ## Tasks (dev pickup)
 
+- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
 - [ ] **Enforce compliance gate + audit events** — Server-side (C13); blocked path explains why.
+- [ ] **Integration adapter, sync & config** — Behind the port; trigger + retries/reconciliation; AU/APP-8 posture.
 - [ ] **Web UI** — prototype.html — Operations → Temperature monitors.
-- [ ] **Integration adapter + config** — Behind the port; AU / APP-8 posture.
-- [ ] **Tests (unit + integration)** — Cover acceptance criteria, incl. any gate/invariant.

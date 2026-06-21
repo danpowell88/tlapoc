@@ -37,4 +37,3 @@ A consistent API skeleton (clean/layered architecture, request pipeline, problem
 
 - [ ] **Implement: .NET API skeleton: architecture, tenant context, error model**
 - [ ] **Document setup & usage**
-- [ ] **Validate in dev + add a smoke test**

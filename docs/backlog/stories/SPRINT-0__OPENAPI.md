@@ -37,4 +37,3 @@ The API publishes a versioned OpenAPI document and CI generates typed clients fo
 
 - [ ] **Implement: OpenAPI contract + typed client generation**
 - [ ] **Document setup & usage**
-- [ ] **Validate in dev + add a smoke test**

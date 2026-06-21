@@ -49,4 +49,3 @@ _Prototype screen: prototype.html — sidebar clinic switcher._
 ## Tasks (dev pickup)
 
 - [ ] **Web UI** — prototype.html — sidebar clinic switcher.
-- [ ] **Tests (unit + integration)** — Cover acceptance criteria, incl. any gate/invariant.

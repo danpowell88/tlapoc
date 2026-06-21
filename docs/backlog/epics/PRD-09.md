@@ -10,15 +10,15 @@ Two Flutter apps over the shared .NET API: a client app (book, intake/consent, p
 
 | Key | Story | Type | Priority | Est | Tasks |
 |---|---|---|---|---|---|
-| `CLIENT-JOURNEY` | [Client app: book → intake → consent journey](../stories/PRD-09__CLIENT-JOURNEY.md) | Story | P1 | 3 | 2 |
-| `CLIENT-CARE` | [Client app: my care, memberships, rewards & card-on-file](../stories/PRD-09__CLIENT-CARE.md) | Story | P2 | 2 | 2 |
-| `CLIENT-PRIVACY` | [Client app: account, privacy & access/correction](../stories/PRD-09__CLIENT-PRIVACY.md) | Story | P2 | 2 | 3 |
-| `PROVIDER-DAY` | [Provider app: day schedule & open patient](../stories/PRD-09__PROVIDER-DAY.md) | Story | P1 | 3 | 2 |
-| `PROVIDER-ROOMSIDE` | [Provider app: room-side charting, camera & finalise](../stories/PRD-09__PROVIDER-ROOMSIDE.md) | Story | P1 | 3 | 3 |
-| `PROVIDER-OFFLINE` | [Provider app: offline-tolerant workflows + sync indicator](../stories/PRD-09__PROVIDER-OFFLINE.md) | Story | P1 | 3 | 3 |
-| `APP-DISTRIBUTION` | [App distribution & code-push posture](../stories/PRD-09__APP-DISTRIBUTION.md) | Story | P2 | 2 | 3 |
-| `CHECKIN-KIOSK` | [Reception self-check-in surface (tablet)](../stories/PRD-09__CHECKIN-KIOSK.md) | Story | P2 | 2 | 2 |
-| `BACKOFFICE-TABLET` | [Back-office / bench tablet surface](../stories/PRD-09__BACKOFFICE-TABLET.md) | Story | P2 | 2 | 2 |
-| `CLIENT-CONCERN` | [Client 'report a concern' → follow-up / AE bridge](../stories/PRD-09__CLIENT-CONCERN.md) | Story | P1 | 3 | 3 |
+| `CLIENT-JOURNEY` | [Client app: book → intake → consent journey](../stories/PRD-09__CLIENT-JOURNEY.md) | Story | P1 | 3 | 1 |
+| `CLIENT-CARE` | [Client app: my care, memberships, rewards & card-on-file](../stories/PRD-09__CLIENT-CARE.md) | Story | P2 | 2 | 1 |
+| `CLIENT-PRIVACY` | [Client app: account, privacy & access/correction](../stories/PRD-09__CLIENT-PRIVACY.md) | Story | P2 | 2 | 2 |
+| `PROVIDER-DAY` | [Provider app: day schedule & open patient](../stories/PRD-09__PROVIDER-DAY.md) | Story | P1 | 3 | 1 |
+| `PROVIDER-ROOMSIDE` | [Provider app: room-side charting, camera & finalise](../stories/PRD-09__PROVIDER-ROOMSIDE.md) | Story | P1 | 3 | 2 |
+| `PROVIDER-OFFLINE` | [Provider app: offline-tolerant workflows + sync indicator](../stories/PRD-09__PROVIDER-OFFLINE.md) | Story | P1 | 3 | 2 |
+| `APP-DISTRIBUTION` | [App distribution & code-push posture](../stories/PRD-09__APP-DISTRIBUTION.md) | Story | P2 | 2 | 4 |
+| `CHECKIN-KIOSK` | [Reception self-check-in surface (tablet)](../stories/PRD-09__CHECKIN-KIOSK.md) | Story | P2 | 2 | 1 |
+| `BACKOFFICE-TABLET` | [Back-office / bench tablet surface](../stories/PRD-09__BACKOFFICE-TABLET.md) | Story | P2 | 2 | 1 |
+| `CLIENT-CONCERN` | [Client 'report a concern' → follow-up / AE bridge](../stories/PRD-09__CLIENT-CONCERN.md) | Story | P1 | 3 | 4 |
 
-_Totals: 10 stories · 25 tasks._
+_Totals: 10 stories · 19 tasks._

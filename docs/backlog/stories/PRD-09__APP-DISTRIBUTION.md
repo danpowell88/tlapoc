@@ -47,6 +47,7 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 
 ## Tasks (dev pickup)
 
+- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
+- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
 - [ ] **Client app UI (Flutter)**
 - [ ] **Provider app UI (Flutter)**
-- [ ] **Tests (unit + integration)** — Cover acceptance criteria, incl. any gate/invariant.

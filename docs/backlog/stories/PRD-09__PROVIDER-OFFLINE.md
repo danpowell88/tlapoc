@@ -51,4 +51,3 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 
 - [ ] **Provider app UI (Flutter)**
 - [ ] **Offline queue + sync handling** — Encrypted local queue; finalise server-side.
-- [ ] **Tests (unit + integration)** — Cover acceptance criteria, incl. any gate/invariant.

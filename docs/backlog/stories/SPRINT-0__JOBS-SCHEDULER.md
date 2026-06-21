@@ -42,4 +42,3 @@ A background-job framework (scheduler + queue) with retry, back-off, idempotency
 - [ ] **Implement: Background jobs & scheduler infrastructure**
 - [ ] **Wire into CI/CD + per-environment config**
 - [ ] **Document setup & usage**
-- [ ] **Validate in dev + add a smoke test**

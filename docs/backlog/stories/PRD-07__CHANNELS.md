@@ -46,7 +46,6 @@ The shared delivery layer every reminder/aftercare/recall/marketing message goes
 
 ## Tasks (dev pickup)
 
-- [ ] **Domain logic & business rules** — Core behaviour + invariants.
-- [ ] **API endpoint(s) + OpenAPI contract** — Wire request/response; regenerate clients.
-- [ ] **Integration adapter + config** — Behind the port; AU / APP-8 posture.
-- [ ] **Tests (unit + integration)** — Cover acceptance criteria, incl. any gate/invariant.
+- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
+- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
+- [ ] **Integration adapter, sync & config** — Behind the port; trigger + retries/reconciliation; AU/APP-8 posture.

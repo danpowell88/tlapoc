@@ -51,4 +51,3 @@ _Prototype screen: backroom.html._
 ## Tasks (dev pickup)
 
 - [ ] **Web UI** — backroom.html.
-- [ ] **Tests (unit + integration)** — Cover acceptance criteria, incl. any gate/invariant.

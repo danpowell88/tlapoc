@@ -43,4 +43,3 @@ Postgres + EF Core with a migrations-first pipeline and a base-entity convention
 - [ ] **Implement: Postgres + EF Core baseline & migrations**
 - [ ] **Apply via migrations; verify RLS/tenancy**
 - [ ] **Document setup & usage**
-- [ ] **Validate in dev + add a smoke test**

@@ -37,4 +37,3 @@ A one-command local environment seeded with a synthetic tenant: staff roles/cred
 - [ ] **Implement: Synthetic seed data & local dev environment**
 - [ ] **Apply via migrations; verify RLS/tenancy**
 - [ ] **Document setup & usage**
-- [ ] **Validate in dev + add a smoke test**

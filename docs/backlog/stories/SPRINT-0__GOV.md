@@ -37,4 +37,3 @@ Repo governance: protected main requiring passing checks + a review before merge
 - [ ] **Implement: Repo governance: branch protection, PR & env protection**
 - [ ] **Wire into CI/CD + per-environment config**
 - [ ] **Document setup & usage**
-- [ ] **Validate in dev + add a smoke test**

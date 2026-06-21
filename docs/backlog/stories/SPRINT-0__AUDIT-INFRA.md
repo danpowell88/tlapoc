@@ -44,4 +44,3 @@ The append-only AuditEvent store + a reusable interceptor/helper so any module r
 - [ ] **Implement: Append-only audit infrastructure baseline**
 - [ ] **Apply via migrations; verify RLS/tenancy**
 - [ ] **Document setup & usage**
-- [ ] **Validate in dev + add a smoke test**

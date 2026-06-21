@@ -50,4 +50,3 @@ _Prototype screen: prototype.html — header search box._
 ## Tasks (dev pickup)
 
 - [ ] **Web UI** — prototype.html — header search box.
-- [ ] **Tests (unit + integration)** — Cover acceptance criteria, incl. any gate/invariant.

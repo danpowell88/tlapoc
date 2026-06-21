@@ -53,4 +53,3 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 
 - [ ] **Enforce compliance gate + audit events** — Server-side (C14); blocked path explains why.
 - [ ] **Provider app UI (Flutter)**
-- [ ] **Tests (unit + integration)** — Cover acceptance criteria, incl. any gate/invariant.

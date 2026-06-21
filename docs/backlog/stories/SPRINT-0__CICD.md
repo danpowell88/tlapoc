@@ -37,4 +37,3 @@ Pipelines build + test the API/web/apps on every PR (blocking merge on failure) 
 - [ ] **Implement: CI/CD pipelines (build, test, deploy)**
 - [ ] **Wire into CI/CD + per-environment config**
 - [ ] **Document setup & usage**
-- [ ] **Validate in dev + add a smoke test**

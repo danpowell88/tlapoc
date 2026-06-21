@@ -49,6 +49,7 @@ _Prototype screen: client-app.html — Report a concern; prototype Follow-ups._
 
 ## Tasks (dev pickup)
 
+- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
+- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
 - [ ] **Enforce compliance gate + audit events** — Server-side (C12, C24); blocked path explains why.
 - [ ] **Client app UI (Flutter)**
-- [ ] **Tests (unit + integration)** — Cover acceptance criteria, incl. any gate/invariant.

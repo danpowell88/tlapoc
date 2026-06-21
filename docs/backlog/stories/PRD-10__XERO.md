@@ -51,5 +51,5 @@ Removes double-entry so the books reconcile without re-keying; the app keeps pri
 
 ## Tasks (dev pickup)
 
-- [ ] **Integration adapter + config** — Behind the port; AU / APP-8 posture.
-- [ ] **Tests (unit + integration)** — Cover acceptance criteria, incl. any gate/invariant.
+- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
+- [ ] **Integration adapter, sync & config** — Behind the port; trigger + retries/reconciliation; AU/APP-8 posture.
