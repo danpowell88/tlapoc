@@ -31,8 +31,9 @@ import urllib.error
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from backlog import load, MS_TITLE
-from monday import (sec_background, sec_requirements, sec_ac, sec_ui, sec_tech,
-                    sec_other, estimate, type_label, area_labels, stage_label, tasks_for)
+from monday import (estimate, type_label, tasks_for, plan_sprints,
+                    bg_text, req_bullets, ui_text, tech_blocks,
+                    compliance_links, prd_link)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CFG = os.path.join(HERE, ".jira-config")
@@ -67,9 +68,9 @@ def token():
     return t
 
 
-def api(method, path, payload=None, _tries=0):
+def api(method, path, payload=None, base="rest/api/3", _tries=0):
     site, email, _p = cfg()
-    url = f"https://{site}/rest/api/3/{path.lstrip('/')}"
+    url = f"https://{site}/{base}/{path.lstrip('/')}"
     data = json.dumps(payload).encode("utf-8") if payload is not None else None
     req = urllib.request.Request(url, data=data, method=method)
     auth = base64.b64encode(f"{email}:{token()}".encode()).decode()
@@ -85,10 +86,10 @@ def api(method, path, payload=None, _tries=0):
         txt = e.read().decode("utf-8")
         if e.code == 429 and _tries < 6:
             time.sleep(int(e.headers.get("Retry-After", 2 ** _tries)) + 1)
-            return api(method, path, payload, _tries + 1)
+            return api(method, path, payload, base, _tries + 1)
         if e.code in (500, 502, 503) and _tries < 5:
             time.sleep(2 ** _tries)
-            return api(method, path, payload, _tries + 1)
+            return api(method, path, payload, base, _tries + 1)
         raise SystemExit(f"HTTP {e.code} {method} {path}: {txt[:600]}")
 
 
@@ -148,22 +149,115 @@ def adf_text(text):
     return {"type": "doc", "version": 1, "content": _block_lines(text)}
 
 
+# ---- rich ADF nodes (headings, bullet lists, inline links) ------------------
+def _t(text, marks=None):
+    n = {"type": "text", "text": text}
+    if marks:
+        n["marks"] = marks
+    return n
+
+
+def _p(*nodes):
+    return {"type": "paragraph", "content": list(nodes)}
+
+
+def _h(title):
+    return {"type": "heading", "attrs": {"level": 3}, "content": [_t(title)]}
+
+
+def _ul(items):
+    return {"type": "bulletList", "content": [
+        {"type": "listItem", "content": [_p(_t(i))]} for i in items if i]}
+
+
+def _linked(prefix, pairs):
+    content = [_t(prefix)]
+    for i, (label, url) in enumerate(pairs):
+        if i:
+            content.append(_t(", "))
+        content.append(_t(label, [{"type": "link", "attrs": {"href": url}}]))
+    return _p(*content)
+
+
+def story_desc(ep, s):
+    c = [_h("Background")]
+    c += [_p(_t(p)) for p in bg_text(ep, s)]
+    c.append(_h("Requirements"))
+    c.append(_ul(req_bullets(ep, s)))
+    cl = compliance_links(s)
+    if cl:
+        c.append(_linked("Compliance: ", cl))
+    c.append(_h("Acceptance Criteria"))
+    c.append(_ul(list(s["acceptance"])))
+    uit = ui_text(ep, s)
+    if uit:
+        c += [_h("UI designs / screenshots"), _p(_t(uit))]
+    tb = tech_blocks(ep, s)
+    tech = []
+    if tb["stack"]:
+        tech.append(_p(_t("Stack: " + tb["stack"])))
+    if tb["adrs"]:
+        tech.append(_linked("Architecture decisions: ", tb["adrs"]))
+    if tb["spike"]:
+        tech.append(_p(_t("Time-boxed spike — produce findings + a go/no-go, not production code.")))
+    if tech:
+        c.append(_h("Technical notes (high level)"))
+        c += tech
+    return {"type": "doc", "version": 1, "content": c}
+
+
+def epic_desc(ep):
+    e = ep["epic"]
+    return {"type": "doc", "version": 1, "content": [
+        _p(_t(e["summary"])), _h("Stories"),
+        _ul([s["title"] for s in ep["stories"]])]}
+
+
+def labels_clean(s):
+    out = ["tla-backlog"]
+    if "compliance" in s.get("labels", []):
+        out.append("compliance")
+    if "phase:2plus" in s.get("labels", []):
+        out.append("phase-2plus")
+    return out
+
+
+def story_type_id(meta, s):
+    if "type:chore" in s.get("labels", []) or "type:spike" in s.get("labels", []):
+        return meta["task"]
+    return meta["story"]
+
+
 # ---------------------------------------------------------------- labels
 def sanitize(label):
     out = "".join(ch if ch.isalnum() or ch in "-_." else "-" for ch in label)
     return out.strip("-")[:255]
 
 
-def story_labels(ep, s):
-    labs = ["tla-backlog", sanitize("key-" + ep["epic"]["key"] + "__" + s["key"]),
-            sanitize(s.get("priority", "P1")), sanitize("stage-" + stage_label(ep)),
-            sanitize("type-" + type_label(s))]
-    labs += [sanitize(a) for a in s.get("labels", []) if a.startswith("area:")]
-    if "compliance" in s.get("labels", []):
-        labs.append("compliance")
-    if "phase:2plus" in s.get("labels", []):
-        labs.append("phase-2plus")
-    return sorted(set(labs))
+def add_weblink(key, pair, st):
+    """Attach the source PRD as a Jira web link (proper data, not description text)."""
+    if not pair:
+        return
+    lk = f"prdlink:{key}"
+    if lk in st:
+        return
+    api("POST", f"issue/{key}/remotelink",
+        {"object": {"url": pair[1], "title": "Source PRD: " + pair[0]}})
+    st[lk] = True
+    save_state(st)
+    time.sleep(0.15)
+
+
+def editmeta_caps(sample_key):
+    em = api("GET", f"issue/{sample_key}/editmeta").get("fields", {})
+    sp = next((fid for fid, m in em.items() if "story point" in m.get("name", "").lower()), None)
+    names = [p["name"] for p in api("GET", "priority")]
+    def pk(*prefs):
+        return next((n for n in prefs if n in names), (names[0] if names else "Medium"))
+    return {"priority": "priority" in em, "sp_field": sp,
+            "type_editable": "issuetype" in em,
+            "prio_map": {"P0": pk("Highest", "High"), "P1": pk("High", "Medium"),
+                         "P2": pk("Low", "Lowest", "Medium")}}
 
 
 # ---------------------------------------------------------------- meta
@@ -185,6 +279,7 @@ def resolve_meta():
         return None
     epic = pick("epic")
     story = pick("story") or pick("task", subtask=False)
+    task = pick("task", subtask=False) or story
     sub = pick("sub-task", "subtask", subtask=True)
     if not (epic and story and sub):
         raise SystemExit(f"Could not resolve issue types. Available: {list(its)}")
@@ -202,7 +297,8 @@ def resolve_meta():
             blocks = lt
             break
     return {"project": project, "style": style, "epic": epic["id"], "story": story["id"],
-            "sub": sub["id"], "epic_link_field": epic_link_field, "blocks": blocks}
+            "task": task["id"], "sub": sub["id"], "epic_link_field": epic_link_field,
+            "blocks": blocks}
 
 
 # ---------------------------------------------------------------- create
@@ -223,13 +319,9 @@ def cmd_create():
         k = f"epic:{e['key']}"
         if k in st:
             continue
-        desc = adf([("Background", e["summary"]),
-                    ("Stage / Milestone", MS_TITLE[e["milestone"]]),
-                    ("Stories", "\n".join("- " + s["title"] for s in ep["stories"])),
-                    ("Other", f"Source PRD: {e.get('prd','')}\nBacklog key: {e['key']}")])
         fields = {"project": {"key": pj}, "issuetype": {"id": meta["epic"]},
-                  "summary": e["title"], "description": desc,
-                  "labels": ["tla-backlog", sanitize("key-" + e["key"])]}
+                  "summary": e["title"], "description": epic_desc(ep),
+                  "labels": ["tla-backlog"]}
         st[k] = create_issue(fields)
         save_state(st)
         print(f"epic  {st[k]}  {e['title']}")
@@ -243,15 +335,9 @@ def cmd_create():
             k = f"story:{e['key']}/{s['key']}"
             if k in st:
                 continue
-            desc = adf([("Background", sec_background(ep, s)),
-                        ("Requirements", sec_requirements(ep, s)),
-                        ("Acceptance Criteria", sec_ac(s)),
-                        ("UI designs / screenshots", sec_ui(ep, s)),
-                        ("Technical notes (high level)", sec_tech(ep, s)),
-                        ("Other", sec_other(ep, s))])
-            fields = {"project": {"key": pj}, "issuetype": {"id": meta["story"]},
-                      "summary": s["title"], "description": desc,
-                      "labels": story_labels(ep, s)}
+            fields = {"project": {"key": pj}, "issuetype": {"id": story_type_id(meta, s)},
+                      "summary": s["title"], "description": story_desc(ep, s),
+                      "labels": labels_clean(s)}
             if meta["style"] == "next-gen" or not meta["epic_link_field"]:
                 fields["parent"] = {"key": epic_key}
             else:
@@ -331,6 +417,84 @@ def cmd_links():
     print(f"created {made} dependency links this run.")
 
 
+def cmd_refresh():
+    """Update existing epics + stories: clean description, real fields, trimmed labels,
+    proper issue type (chore/spike -> Task), and PRD web link."""
+    meta = resolve_meta()
+    st = load_state()
+    epics = load()
+    sample = next((v for k, v in st.items() if k.startswith("story:")), None)
+    if not sample:
+        raise SystemExit("No stories in state; run create first.")
+    cap = editmeta_caps(sample)
+    print(f"caps: priority={cap['priority']} sp_field={cap['sp_field']} "
+          f"type_editable={cap['type_editable']} prio_map={cap['prio_map']}")
+    for ep in epics:
+        ek = st.get(f"epic:{ep['epic']['key']}")
+        if not ek:
+            continue
+        api("PUT", f"issue/{ek}", {"fields": {"summary": ep["epic"]["title"],
+            "description": epic_desc(ep), "labels": ["tla-backlog"]}})
+        add_weblink(ek, prd_link(ep), st)
+        time.sleep(0.2)
+    print("epics refreshed")
+    n = 0
+    for ep in epics:
+        for s in ep["stories"]:
+            k = st.get(f"story:{ep['epic']['key']}/{s['key']}")
+            if not k:
+                continue
+            f = {"summary": s["title"], "description": story_desc(ep, s),
+                 "labels": labels_clean(s)}
+            if cap["priority"]:
+                f["priority"] = {"name": cap["prio_map"][s.get("priority", "P1")]}
+            if cap["sp_field"]:
+                f[cap["sp_field"]] = estimate(s)
+            if cap["type_editable"]:
+                f["issuetype"] = {"id": story_type_id(meta, s)}
+            try:
+                api("PUT", f"issue/{k}", {"fields": f})
+            except SystemExit:
+                f.pop("issuetype", None)
+                api("PUT", f"issue/{k}", {"fields": f})
+            add_weblink(k, prd_link(ep), st)
+            n += 1
+            if n % 20 == 0:
+                print(f"  …{n} stories")
+            time.sleep(0.25)
+    print(f"refreshed {n} stories")
+
+
+def cmd_sprints():
+    _s, _e, project = cfg()
+    st = load_state()
+    boards = api("GET", f"board?projectKeyOrId={project}", base="rest/agile/1.0")["values"]
+    scrum = next((b for b in boards if b.get("type") == "scrum"), boards[0] if boards else None)
+    if not scrum:
+        raise SystemExit("No board found for project.")
+    bid = scrum["id"]
+    print(f"board {bid} ({scrum['name']}, type={scrum.get('type')})")
+    named, _cap, _total = plan_sprints(load())
+    for title, items in named:
+        if not title.lower().startswith("sprint"):
+            continue
+        sk = f"sprint:{title}"
+        if sk in st:
+            sid = st[sk]
+        else:
+            sid = api("POST", "sprint", {"name": title, "originBoardId": bid},
+                      base="rest/agile/1.0")["id"]
+            st[sk] = sid
+            save_state(st)
+        keys = [st.get(f"story:{ep['epic']['key']}/{s['key']}") for ep, s in items]
+        keys = [k for k in keys if k]
+        for i in range(0, len(keys), 50):
+            api("POST", f"sprint/{sid}/issue", {"issues": keys[i:i + 50]}, base="rest/agile/1.0")
+        print(f"{title}: {len(keys)} stories -> sprint {sid}")
+        time.sleep(0.2)
+    print("sprint mapping done (Backlog group left unscheduled).")
+
+
 def cmd_whoami():
     me = api("GET", "myself")
     print(f"Auth OK: {me.get('displayName')} <{me.get('emailAddress')}>")
@@ -373,6 +537,7 @@ def main():
     cmd = sys.argv[1] if len(sys.argv) > 1 else "whoami"
     {"whoami": cmd_whoami, "plan": cmd_plan, "create": cmd_create,
      "links": cmd_links, "all": lambda: (cmd_create(), cmd_links()),
+     "refresh": cmd_refresh, "sprints": cmd_sprints,
      "wipe": cmd_wipe}.get(cmd, lambda: (_ for _ in ()).throw(SystemExit(__doc__)))()
 
 
