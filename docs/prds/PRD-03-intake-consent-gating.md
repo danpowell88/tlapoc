@@ -1,6 +1,6 @@
 # PRD-03 — Intake, Consent & Compliance Gating
 
-> **▸ Option A alignment (rev 2, 2026-06-19).** The prototype's **pre-visit intake wizard** — medical history → **BDD/wellbeing screen** → treatment consent + e-sign → **separate image-use consent** → done, with the **under-18 cooling-off** note — validates REQ-CONS-1..5 (C5/C6/C14) end-to-end. No change to the gating model. See [requirements §12](../02-requirements.md#12-option-a-prototype-alignment--feasibility-register).
+> **▸ Prototype alignment (rev 2, 2026-06-19).** The prototype's **pre-visit intake wizard** — medical history → **BDD/wellbeing screen** → treatment consent + e-sign → **separate image-use consent** → done, with the **under-18 cooling-off** note — validates REQ-CONS-1..5 (C5/C6/C14) end-to-end. No change to the gating model. See [requirements §12](../02-requirements.md#12-prototype-alignment--feasibility-register).
 
 > **Phase:** 1 · **Status:** Draft<br>
 > **Requirements:** REQ-CONS-1…5, REQ-CLI-3 · **Compliance:** C3, C5, C6, C14, C18<br>

@@ -5,7 +5,7 @@ injectable & cosmetic clinics — a clinical/compliance-first alternative to gen
 booking software.
 
 - **[`index.html`](index.html)** — landing page.
-- **[`prototype.html`](prototype.html)** — the interactive "Option A — Clinical Calm"
+- **[`prototype.html`](prototype.html)** — the interactive "Clinical Calm"
   prototype (dashboard, booking, client 360, charting with injection mapping &
   before/after, stock & medicines, checkout, memberships, marketing inbox,
   scheduling, reporting; with a role/persona switcher).

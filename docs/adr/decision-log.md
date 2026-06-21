@@ -127,20 +127,20 @@ into individual `ADR-NNNN-*.md` files later; kept as one log for a lean team.
 
 ---
 
-> **ADRs 0017–0022 added rev 2 (2026-06-19)** after building the **Option A** clickable prototype.
+> **ADRs 0017–0022 added rev 2 (2026-06-19)** after building the clickable prototype.
 > They record decisions the prototype surfaced and flag items that **need feasibility research**
 > before commit (🔬). See `02-requirements.md` §12 for the full alignment & feasibility register.
 
 ## ADR-0017 — Access model: **capability flags + "concerns"**, with custom roles (future)
 **Status:** Accepted<br>
-**Context:** Option A prototyped a richer role set than the original §3 matrix — **NP, Lead Nurse (RN), RN, Dermal/laser tech, Reception, Owner (non-clinical business owner)**, plus combined **Solo-NP** and **Nurse-led-RN** presets. The owner is non-clinical (read-only clinical/stock oversight, full financials); clinical staff should mostly see information *concerning them* (e.g. stock-expiry matters to Lead/NP/owner, not every RN). (REQ-TEN-3/4, §3.)<br>
+**Context:** The prototype introduced a richer role set than the original §3 matrix — **NP, Lead Nurse (RN), RN, Dermal/laser tech, Reception, Owner (non-clinical business owner)**, plus combined **Solo-NP** and **Nurse-led-RN** presets. The owner is non-clinical (read-only clinical/stock oversight, full financials); clinical staff should mostly see information *concerning them* (e.g. stock-expiry matters to Lead/NP/owner, not every RN). (REQ-TEN-3/4, §3.)<br>
 **Decision:** Model access on two orthogonal axes: **capabilities** (atomic permissions — `chart`, `chartView`, `prescribe`, `stock`, `receiveStock`, `financials`, `takePayment`, `configure`…) and **concerns** (relevance tags that drive what a role sees first — `ops, clinical, stock, stockAlert, financial, business, recall, consent`). Built-in roles are presets of (capabilities × concerns); a future **custom-role builder** lets a tenant compose roles by ticking capabilities + concern tiles. **Owner = business role:** financials + read-only clinical/stock, no prescribe/chart/custody.<br>
 **Consequences:** Implements the §3 scope matrix while supporting per-tenant roles and role-tailored dashboards. Enforcement stays server-side (ADR-0008): **capabilities gate API actions; concerns only affect presentation.**<br>
 **Alternatives:** Fixed role enum (less flexible); full ABAC/policy engine (overkill for v1).
 
 ## ADR-0018 — Omnichannel conversations: unified-inbox **sync model** — 🔬 *feasibility research required*
 **Status:** Proposed (Phase 2 for social channels; v1 stays SMS/email — see PRD-07)<br>
-**Context:** Option A prototypes a **unified inbox** across **Instagram, Facebook/Messenger, SMS and email** with categorisation and suggested replies. Real platform support — especially Meta — is constrained, and staff often reply on the native platform too.<br>
+**Context:** The prototype includes a **unified inbox** across **Instagram, Facebook/Messenger, SMS and email** with categorisation and suggested replies. Real platform support — especially Meta — is constrained, and staff often reply on the native platform too.<br>
 **Decision:** Model conversations channel-agnostically — `Conversation`/`Message` with `channel`, `direction`, `sentVia` — behind an **`IMessagingChannel`** adapter per channel (extends the `INotifier` port, ADR-0012). **Inbound** via provider **webhooks**; **outbound** via each provider's Send API; **reconcile/backfill** (incl. replies staff send natively + pre-connection history) via the provider **Conversations/history API**; capture native-sent replies via **message echoes**; coexist with the platform's own inbox via Meta's **Handover Protocol** (secondary receiver + standby). Enforce **send-time guardrails**: messaging window, message tags, opt-in, and the advertising linter (ADR-0014, C9). **Suggested replies are templated/keyword-based in v1 (no AI, decision §2); LLM-assisted drafting deferred.**<br>
 **🔬 Feasibility / research (validate before commit):** Meta requires **Professional accounts**, (often) a linked Page, **App Review + Business Verification**; a **24-hour messaging window** limits outbound to specific tags — **promotional/marketing DMs are largely *not* permitted** outside it; you can't cold-DM; IG echo/standby support is weaker than Messenger and changes often. **Implication:** treat **IG/FB/WhatsApp as reactive/service** channels; do **proactive marketing (recall/promos) via SMS/email (consented)** or **WhatsApp templates**. Assess WhatsApp Business Cloud API, per-channel rate limits, and validate scopes against current Meta docs.<br>
 **Consequences:** A faithful "mirror" inbox is achievable for *service* conversations; *marketing* automation stays on SMS/email. Adds per-clinic OAuth onboarding, token lifecycle and webhook infra.<br>
@@ -170,7 +170,7 @@ into individual `ADR-NNNN-*.md` files later; kept as one log for a lean team.
 
 ## ADR-0022 — **Pricing & "what-if" planning** on read models
 **Status:** Accepted<br>
-**Context:** The Option A owner view includes a **pricing & what-if simulator** — edit plan/service prices and see projected MRR/revenue impact under a churn-sensitivity assumption.<br>
+**Context:** The owner view includes a **pricing & what-if simulator** — edit plan/service prices and see projected MRR/revenue impact under a churn-sensitivity assumption.<br>
 **Decision:** A **read-only planning tool** computed over the reporting read models (ADR-0013) + configurable elasticity/churn assumptions; it **proposes** changes and projects impact but does **not** mutate live pricing until explicitly **applied** through the normal catalogue/membership admin (capability-gated, audited — ADR-0010).<br>
 **Consequences:** Owners plan price/membership changes safely; reuses analytics; clean apply/audit path.<br>
 **Alternatives:** Off-platform spreadsheet (loses live data); auto-apply (unsafe).
@@ -191,7 +191,7 @@ into individual `ADR-NNNN-*.md` files later; kept as one log for a lean team.
 
 ---
 
-> **ADR-0025…0036 (rev 4, 2026-06-20)** — the **gap-area build**. Six research/design passes (treatments & clinical depth, front desk & operations, money & retail, staff & HR, compliance & governance, growth & integrations) extended the Option A prototype with new POC flows. Each agent independently proposed "ADR-0025"; the numbers below are the **reconciled, canonical** assignment. The client app remains out of scope.
+> **ADR-0025…0036 (rev 4, 2026-06-20)** — the **gap-area build**. Six research/design passes (treatments & clinical depth, front desk & operations, money & retail, staff & HR, compliance & governance, growth & integrations) extended the staff prototype with new POC flows. Each agent independently proposed "ADR-0025"; the numbers below are the **reconciled, canonical** assignment. The client app remains out of scope.
 
 ## ADR-0025 — Treatment **modality model**: typed charts, product-class routing & licence gating
 **Status:** Proposed (Phase 2; v1 ships toxin + non-S4 skin only)<br>

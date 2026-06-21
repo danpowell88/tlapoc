@@ -432,14 +432,14 @@ Each becomes a focused PRD (problem, user stories, flows, data, acceptance crite
 
 ---
 
-## 12. Option A prototype alignment & feasibility register
+## 12. Prototype alignment & feasibility register
 
-> Added rev 3 (2026-06-19) after building the **Option A — "Clinical Calm"** clickable prototype
+> Added rev 3 (2026-06-19) after building the **"Clinical Calm"** clickable prototype
 > (`prototype.html`). Reconciles this spec with what the prototype demonstrates and lists the items that
 > **need feasibility research** before commit. Legend: ✅ aligned/spec'd · ➕ new (this rev) · 🔬 needs research · ⏭ Phase 2+ (prototype shows the concept).
 
 ### 12.1 Feature → requirement / ADR map
-| Option A prototype feature | Maps to | Status |
+| Prototype feature | Maps to | Status |
 |---|---|---|
 | Persona switcher (NP, Lead RN, RN, dermal, reception, owner-business + Solo/Nurse-led); role-tailored dashboards | REQ-TEN-3/5, ADR-0017 | ✅ ➕ |
 | Booking wizard, scope-limited to RN/NP for injectables | REQ-BOOK-2/5 | ✅ |
@@ -502,7 +502,7 @@ Each becomes a focused PRD (problem, user stories, flows, data, acceptance crite
 
 **12.1 map additions**
 
-| Option A prototype feature | Maps to | Status |
+| Prototype feature | Maps to | Status |
 |---|---|---|
 | **Clinical** area: treatment-menu modality model; complication-response modal (VO/anaphylaxis → AE + job); photography/ghost-overlay; outcomes | REQ-CLIN-10..13 ➕, REQ-FAC-4 ➕, ADR-0025 | ✅ ➕ (⏭ deep charting) |
 | **Operations** area: twice-daily **fridge log + breach → quarantine + job**; open/close checklist; rooms/devices + utilisation; equipment register; call log + walk-in/waitlist | REQ-FAC-5/6/7 ➕, REQ-BOOK-8/9/10 ➕, REQ-MED-13 ➕, REQ-NOTIF-8(phone) ➕, ADR-0026 | ✅ ➕ (hard-conflict ⏭) |
