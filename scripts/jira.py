@@ -183,6 +183,9 @@ def _linked(prefix, pairs):
 def story_desc(ep, s):
     c = [_h("Background")]
     c += [_p(_t(p)) for p in bg_text(ep, s)]
+    if s.get("detail"):
+        c.append(_h("How it works"))
+        c += [_p(_t(p)) for p in s["detail"]]
     c.append(_h("Requirements"))
     c.append(_ul(req_bullets(ep, s)))
     cl = compliance_links(s)
@@ -191,8 +194,22 @@ def story_desc(ep, s):
     c.append(_h("Acceptance Criteria"))
     c.append(_ul(list(s["acceptance"])))
     uit = ui_text(ep, s)
-    if uit:
+    if s.get("ui_spec"):
+        c.append(_h("UI designs / screenshots"))
+        if uit:
+            c.append(_p(_t("Prototype screen: " + uit, [{"type": "em"}])))
+        c.append(_ul(s["ui_spec"]))
+    elif uit:
         c += [_h("UI designs / screenshots"), _p(_t(uit))]
+    if s.get("data_model"):
+        c.append(_h("Suggested data model"))
+        items = []
+        for d in s["data_model"]:
+            paras = [_p(_t(d["entity"], [{"type": "strong"}]), _t(" — " + d["fields"]))]
+            if d.get("notes"):
+                paras.append(_p(_t(d["notes"], [{"type": "em"}])))
+            items.append({"type": "listItem", "content": paras})
+        c.append({"type": "bulletList", "content": items})
     tb = tech_blocks(ep, s)
     tech = []
     if tb["stack"]:

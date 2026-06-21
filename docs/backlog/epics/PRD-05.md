@@ -11,7 +11,7 @@ The clinical record that matches the Aesthetic Record / Pabau bar: a guided char
 | Key | Story | Type | Priority | Est | Tasks |
 |---|---|---|---|---|---|
 | `NOTE-TEMPLATE` | [Guided toxin treatment note & pre-treatment review](../stories/PRD-05__NOTE-TEMPLATE.md) | Story | P0 | 5 | 2 |
-| `MAPPING` | [Injection-mapping canvas (per-point lot)](../stories/PRD-05__MAPPING.md) | Story | P0 | 5 | 3 |
+| `MAPPING` | [Injection-mapping canvas (per-point lot)](../stories/PRD-05__MAPPING.md) | Story | P0 | 5 | 7 |
 | `PHOTOS` | [Standardised before/after photos + compare](../stories/PRD-05__PHOTOS.md) | Story | P1 | 3 | 3 |
 | `IMMUTABILITY` | [Immutable finalisation & audited amendments](../stories/PRD-05__IMMUTABILITY.md) | Story | P0 | 5 | 4 |
 | `OFFLINE` | [Offline queue & sync for room-side charting](../stories/PRD-05__OFFLINE.md) | Story | P1 | 3 | 3 |
@@ -24,4 +24,4 @@ The clinical record that matches the Aesthetic Record / Pabau bar: a guided char
 | `COMPLICATION-LIBRARY` | [Complication protocol library & response kits](../stories/PRD-05__COMPLICATION-LIBRARY.md) | Story | P1 | 3 | 3 |
 | `OUTCOMES` | [Outcomes & revision tracking](../stories/PRD-05__OUTCOMES.md) | Story | P2 | 1 | 2 |
 
-_Totals: 13 stories · 33 tasks._
+_Totals: 13 stories · 37 tasks._

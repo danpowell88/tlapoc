@@ -56,6 +56,10 @@ def write_story(ep, s):
     # Background
     L += ["", "## Background", ""] + bg_text(ep, s)
 
+    # How it works (deep detail)
+    if s.get("detail"):
+        L += ["", "## How it works", ""] + list(s["detail"])
+
     # Requirements (+ linked compliance)
     L += ["", "## Requirements", ""]
     L += [f"- {b}" for b in req_bullets(ep, s)]
@@ -66,10 +70,23 @@ def write_story(ep, s):
     # Acceptance Criteria
     L += ["", "## Acceptance Criteria", "", sec_ac(s)]
 
-    # UI — only if it's a UI story
+    # UI — spec (prototype-derived) + screen pointer
     uit = ui_text(ep, s)
-    if uit:
+    if s.get("ui_spec"):
+        L += ["", "## UI designs / screenshots", ""]
+        if uit:
+            L += [f"_Prototype screen: {uit}_", ""]
+        L += [f"- {b}" for b in s["ui_spec"]]
+    elif uit:
         L += ["", "## UI designs / screenshots", "", uit]
+
+    # Suggested data model
+    if s.get("data_model"):
+        L += ["", "## Suggested data model", ""]
+        for d in s["data_model"]:
+            L.append(f"- **{d['entity']}** — {d['fields']}")
+            if d.get("notes"):
+                L.append(f"  - _{d['notes']}_")
 
     # Technical notes — only if there's something to say
     tb = tech_blocks(ep, s)

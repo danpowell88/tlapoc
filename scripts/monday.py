@@ -347,7 +347,9 @@ def area_labels(s):
 
 
 def tasks_for(ep, s):
-    """Deterministic dev-task breakdown for a story (what devs pick up)."""
+    """Dev-task breakdown for a story. A hand-authored s['tasks'] override wins."""
+    if s.get("tasks"):
+        return s["tasks"]
     labs = s.get("labels", [])
     areas = area_labels(s)
     text = (s.get("context", "") + " " + " ".join(s.get("acceptance", []))).lower()
