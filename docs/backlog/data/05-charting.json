@@ -135,7 +135,8 @@
         "PRD-05/NOTE-TEMPLATE"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -186,7 +187,8 @@
         "PRD-05/NOTE-TEMPLATE"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -333,7 +335,8 @@
       ],
       "labels": [
         "tla-backlog",
-        "compliance"
+        "compliance",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -379,7 +382,8 @@
         "PRD-05/MAPPING"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -425,7 +429,8 @@
         "PRD-05/MAPPING"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -479,7 +484,8 @@
       ],
       "labels": [
         "tla-backlog",
-        "compliance"
+        "compliance",
+        "tier:followup"
       ],
       "priority": "P0",
       "tasks": [
@@ -534,7 +540,8 @@
       ],
       "labels": [
         "tla-backlog",
-        "compliance"
+        "compliance",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -666,7 +673,8 @@
       ],
       "labels": [
         "tla-backlog",
-        "compliance"
+        "compliance",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -713,7 +721,8 @@
       ],
       "labels": [
         "tla-backlog",
-        "compliance"
+        "compliance",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -1010,7 +1019,8 @@
       ],
       "labels": [
         "tla-backlog",
-        "compliance"
+        "compliance",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -1128,7 +1138,8 @@
         "PRD-05/TREATMENT-PLANS"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -1174,7 +1185,8 @@
         "PRD-05/TREATMENT-PLANS"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -1404,7 +1416,8 @@
         "PRD-05/SKIN-ANALYSIS"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -1451,7 +1464,8 @@
       ],
       "labels": [
         "tla-backlog",
-        "compliance"
+        "compliance",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -1567,7 +1581,8 @@
         "PRD-05/BODY-CONTOURING"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -1614,7 +1629,8 @@
       ],
       "labels": [
         "tla-backlog",
-        "compliance"
+        "compliance",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -1740,7 +1756,8 @@
       ],
       "labels": [
         "tla-backlog",
-        "compliance"
+        "compliance",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -1848,7 +1865,8 @@
         "PRD-05/OUTCOMES"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [

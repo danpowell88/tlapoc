@@ -122,7 +122,8 @@
         "PRD-10/XERO"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P1",
       "tasks": [
@@ -167,7 +168,8 @@
         "PRD-10/XERO-SYNCJOB"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -286,7 +288,8 @@
         "PRD-02/CALENDAR"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [

@@ -201,7 +201,8 @@
         "PRD-06/POS"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -248,7 +249,8 @@
         "PRD-06/POS"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -296,7 +298,8 @@
       ],
       "labels": [
         "tla-backlog",
-        "compliance"
+        "compliance",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -343,7 +346,8 @@
         "PRD-06/POS"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -390,7 +394,8 @@
         "PRD-06/POS"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -510,7 +515,8 @@
       ],
       "labels": [
         "tla-backlog",
-        "compliance"
+        "compliance",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -557,7 +563,8 @@
         "PRD-06/PACKAGES-GIFT"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -669,7 +676,8 @@
         "PRD-06/CLOSEOUT"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -716,7 +724,8 @@
         "PRD-06/CLOSEOUT"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -759,7 +768,8 @@
         "PRD-06/CLOSEOUT"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -876,7 +886,8 @@
         "PRD-06/MEMBERSHIP"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -924,7 +935,8 @@
         "PRD-06/MEMBERSHIP-AUTOPAY"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -971,7 +983,8 @@
         "PRD-06/MEMBERSHIP"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -1015,7 +1028,8 @@
       ],
       "labels": [
         "tla-backlog",
-        "compliance"
+        "compliance",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -1058,7 +1072,8 @@
         "PRD-06/MEMBERSHIP"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -1108,7 +1123,8 @@
       ],
       "labels": [
         "tla-backlog",
-        "compliance"
+        "compliance",
+        "tier:followup"
       ],
       "priority": "P1",
       "tasks": [
@@ -1156,7 +1172,8 @@
       ],
       "labels": [
         "tla-backlog",
-        "compliance"
+        "compliance",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -1199,7 +1216,8 @@
         "PRD-06/MEMBERSHIP-PLANS"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -1322,7 +1340,8 @@
         "PRD-06/REWARDS-ENGINE"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -1366,7 +1385,8 @@
       ],
       "labels": [
         "tla-backlog",
-        "compliance"
+        "compliance",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -1539,7 +1559,8 @@
         "PRD-06/CHECKOUT-ASSIST"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -1582,7 +1603,8 @@
         "PRD-06/CHECKOUT-ASSIST"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -1625,7 +1647,8 @@
         "PRD-06/CHECKOUT-ASSIST"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -1729,7 +1752,8 @@
         "PRD-06/PRICING-WHATIF"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -1772,7 +1796,8 @@
         "PRD-06/PRICING-WHATIF"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -1815,7 +1840,8 @@
         "PRD-06/PRICING-WHATIF"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -1858,7 +1884,8 @@
         "PRD-06/PRICING-WHATIF"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [

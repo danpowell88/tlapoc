@@ -185,7 +185,8 @@
       ],
       "labels": [
         "tla-backlog",
-        "compliance"
+        "compliance",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -229,7 +230,8 @@
       ],
       "labels": [
         "tla-backlog",
-        "compliance"
+        "compliance",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -480,7 +482,8 @@
       ],
       "labels": [
         "tla-backlog",
-        "compliance"
+        "compliance",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -587,7 +590,8 @@
         "PRD-07/FOLLOWUPS"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -630,7 +634,8 @@
         "PRD-07/FOLLOWUPS"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -799,7 +804,8 @@
         "PRD-07/AUTOMATIONS"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -842,7 +848,8 @@
         "PRD-07/AUTOMATIONS"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -955,7 +962,8 @@
       ],
       "labels": [
         "tla-backlog",
-        "compliance"
+        "compliance",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -999,7 +1007,8 @@
       ],
       "labels": [
         "tla-backlog",
-        "compliance"
+        "compliance",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -1111,7 +1120,8 @@
       ],
       "labels": [
         "tla-backlog",
-        "compliance"
+        "compliance",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [
@@ -1154,7 +1164,8 @@
         "PRD-07/LEADS-CRM"
       ],
       "labels": [
-        "tla-backlog"
+        "tla-backlog",
+        "tier:followup"
       ],
       "priority": "P2",
       "tasks": [

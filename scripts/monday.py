@@ -265,7 +265,11 @@ def plan_sprints(epics):
 
     def rank(ep, s):
         k = f"{ep['epic']['key']}/{s['key']}"
-        return (EPIC_TRACK.get(ep["epic"]["key"], 50),
+        # MVP-first: every basic-implementation story is scheduled before any
+        # follow-up/enhancement (tier:followup), then clinic-first within each tier.
+        tier = 1 if "tier:followup" in s.get("labels", []) else 0
+        return (tier,
+                EPIC_TRACK.get(ep["epic"]["key"], 50),
                 prio.get(s.get("priority", "P1"), 1), seq[k])
 
     # Kahn topo sort honouring depends_on within the sprintable set

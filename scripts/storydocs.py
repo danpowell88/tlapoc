@@ -153,23 +153,27 @@ def write_sprints(epics):
     L += ["",
           "**Assumptions.** One developer, AI-assisted, ~1–2 days/week (a side project — "
           "elapsed time is not the constraint). Sprints are *work-sized*, not calendar-boxed: "
-          f"~{cap} story points each (≈5–6 items). Sequencing is dependency-ordered "
-          "(a story never precedes something it depends on) and grouped by delivery stage.",
+          f"~{cap} story points each. Sequencing is dependency-ordered "
+          "(a story never precedes something it depends on).",
           "",
           f"**Totals.** {sum(len(i) for _t, i in sprints)} scheduled stories across "
           f"{len(sprints)} sprints (~{total} pts), plus {len(backlog)} deferred items in the backlog.",
           "",
           "## Sequence rationale", "",
-          "1. **Sprints 1–5 — Sprint 0 foundations:** repo/CI/CD/IaC, Postgres+RLS, auth wiring, "
-          "API/web/app shells, design system, observability, security + the de-risk spikes. Nothing "
-          "clinical ships until the platform is safe to build on.",
-          "2. **Foundations & tenancy:** RBAC + scope-of-practice, the canInject gate, audit, "
-          "retention, breach, sign-in/MFA and owner-only financial gating — unblocks everything.",
-          "3. **Booking → intake/consent:** front-of-house + the pre-visit gates.",
-          "4. **Consult → prescribing → S4 → charting:** the compliance moat and the clinical record.",
-          "5. **Commerce, comms & integrations**, then **reporting & the apps**, then "
-          "**facility & complaints**.",
-          "6. **Backlog (Phase 2+):** deferred placeholders, pulled forward only if the case appears.",
+          "**MVP-first.** The plan is sliced into two tiers. The earlier sprints deliver the "
+          "**basic implementation of every core feature — the MVP** — and only once that is complete "
+          "do the later sprints add the **follow-up enhancements**. Within each tier, work is "
+          "clinic-first and dependency-ordered, so a follow-up never precedes its own basic.",
+          "",
+          "1. **MVP — basics (earlier sprints):** Sprint 0 setup (repo/CI/CD/IaC, Postgres+RLS, "
+          "auth, app shells, security, de-risk spikes); then tenancy + RBAC + the canInject gate + "
+          "audit; booking → intake/consent gates; consult → prescribing → S4 → charting (the "
+          "compliance moat + clinical record); then the basic reporting, compliance-ops, payments, "
+          "comms and app surfaces. End state: a working end-to-end clinic platform.",
+          "2. **Enhancements — follow-ups (later sprints):** each feature's additional capabilities "
+          "(e.g. calendar drag-to-book, quiet-windows, charting finalise/photos, autopay/dunning, "
+          "dashboards' extra bands), layered on top of the MVP in the same clinic-first order.",
+          "3. **Backlog (Phase 2+):** deferred placeholders, pulled forward only if the case appears.",
           "",
           "## Sprints", "",
           "| Sprint | Theme | Items | Points |", "|---|---|---|---|"]
