@@ -45,6 +45,21 @@ Queryable/exportable alongside the data-access audit; can seed the breach workfl
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
-- [ ] **Enforce compliance gate + audit events** — Server-side (C10, C4, C19); blocked path explains why.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - AuthEvent — id, tenant_id, actor_id, kind(signin_ok|signin_fail|lockout|mfa|stepup|role_switch|scope_block), reason, at (Peer of AuditEvent; scope_block records the blocked capability.)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Backend: domain logic, rules & API endpoint(s)**
+  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
+  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
+  - Rule: Sign-in success/failure, lockout, MFA/step-up and role-switch events are recorded.
+  - Rule: Every blocked out-of-scope or lapsed-registration action writes an audit event with the reason.
+  - Rule: These events are queryable/exportable alongside the data-access audit.
+  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
+  - Publish the OpenAPI contract so the generated clients update.
+  - Depends on: PRD-01/AUDIT, PRD-01/RBAC.
+- [ ] **Enforce compliance gate + audit events**
+  Enforce C10, C4, C19 as a server-side invariant that cannot be bypassed via the API:
+  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
+  - Write an immutable AuditEvent for the attempt and its outcome.
+  - Every blocked out-of-scope or lapsed-registration action writes an audit event with the reason.

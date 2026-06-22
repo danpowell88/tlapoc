@@ -55,6 +55,24 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
-- [ ] **Web UI** — prototype.html — Schedule, 'New booking' wizard, Clients directory & 360.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - Appointment — id, tenant_id, location_id, client_id, service_id, practitioner_id, room_id, start, end, status, reason, source(online|desk|walkin) (Status drives the visit lifecycle (LIFECYCLE).)
+  - Resource — id, tenant_id, type(room|chair|device), name, status (Booked alongside the practitioner; conflict-checked.)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Backend: domain logic, rules & API endpoint(s)**
+  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
+  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
+  - Rule: Resources = practitioner + room; service durations include buffer/processing/turnaround.
+  - Rule: Day, week and room views render; rosters and time-off block availability.
+  - Rule: Drag to move an appointment; conflicts on room/chair/device are flagged.
+  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
+  - Publish the OpenAPI contract so the generated clients update.
+  - Depends on: PRD-01/ROSTER.
+- [ ] **Web UI**
+  Build on the Angular web app: the schedule per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
+  Key elements (from the prototype):
+  - Prototype: Schedule (schedule.png) — day/week/room views with practitioner columns; appointment blocks colour-coded by type/status.
+  - Per-day and per-treatment-type counts + utilisation; quiet-window fill suggestions.
+  - Drag an appointment to move it; conflicting room/chair/device usage is flagged inline.
+  - Time-off and unrostered periods render as unavailable.

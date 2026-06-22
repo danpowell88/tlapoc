@@ -40,5 +40,12 @@ Postgres + EF Core with a migrations-first pipeline and a base-entity convention
 ## Tasks (dev pickup)
 
 - [ ] **Implement: Postgres + EF Core baseline & migrations**
+  Deliver per the acceptance criteria:
+  - EF Core connects to Postgres; migrations apply automatically on deploy.
+  - Base entity convention includes tenant_id and created/updated audit columns.
+  - A sample entity round-trips through repository + migration in tests.
+  - Local dev uses a containerised Postgres seeded by S0-SEED.
 - [ ] **Apply via migrations; verify RLS/tenancy**
+  Migration runs per environment; prove tenant isolation holds.
 - [ ] **Document setup & usage**
+  How to run/operate it; runbook notes for the team.

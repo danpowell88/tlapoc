@@ -50,7 +50,26 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
-- [ ] **Enforce compliance gate + audit events** — Server-side (C4, C9); blocked path explains why.
-- [ ] **Web UI** — prototype.html — Schedule, 'New booking' wizard, Clients directory & 360.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - Service — id, tenant_id, name, public_name, duration, buffer, price, schedule(S4|non-S4), eligible_roles[], product_id? (schedule flag is the master classification (ADR-0014).)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Backend: domain logic, rules & API endpoint(s)**
+  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
+  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
+  - Rule: Services carry duration/buffer, eligible roles, price and the S4/non-S4 flag.
+  - Rule: The S4 flag drives scope-aware booking (C4), rewards eligibility (C9) and public naming (PRD-07).
+  - Rule: Capability-gated admin; changes are audited.
+  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
+  - Publish the OpenAPI contract so the generated clients update.
+  - Depends on: PRD-04/PRODUCT-CATALOGUE.
+- [ ] **Enforce compliance gate + audit events**
+  Enforce C4, C9 as a server-side invariant that cannot be bypassed via the API:
+  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
+  - Write an immutable AuditEvent for the attempt and its outcome.
+  - Capability-gated admin; changes are audited.
+- [ ] **Web UI**
+  Build on the Angular web app: the clinical-menu per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
+  Key elements (from the prototype):
+  - Prototype: Clinical -> Treatment menu (clinical-menu.png) and admin Services & products — each service row shows duration, eligible roles, price, S4 flag; capability-gated admin; changes audited.
+  - The S4 tag visibly marks services and disables reward/discount controls on them.

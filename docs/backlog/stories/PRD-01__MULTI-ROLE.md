@@ -45,6 +45,21 @@ Owner-only financial capability is independent of clinical roles — an NP is no
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
-- [ ] **Enforce compliance gate + audit events** — Server-side (C4); blocked path explains why.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - StaffRole — staff_id, role_id, is_default (Many-to-many; active role chosen per session and stamped on actions.)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Backend: domain logic, rules & API endpoint(s)**
+  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
+  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
+  - Rule: A staff profile can hold multiple roles; the union/active-role model is well-defined.
+  - Rule: The authorisation pipeline evaluates capabilities for the active role (consumed by PLATFORM/ROLE-CONTEXT).
+  - Rule: Switching active role is recorded; actions capture the role used.
+  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
+  - Publish the OpenAPI contract so the generated clients update.
+  - Depends on: PRD-01/RBAC.
+- [ ] **Enforce compliance gate + audit events**
+  Enforce C4 as a server-side invariant that cannot be bypassed via the API:
+  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
+  - Write an immutable AuditEvent for the attempt and its outcome.
+  - Owner-only financial capability is independent of clinical roles (an NP isn't automatically owner).

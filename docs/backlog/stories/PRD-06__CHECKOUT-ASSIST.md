@@ -48,4 +48,7 @@ _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rew
 
 ## Tasks (dev pickup)
 
-- [ ] **Web UI** — prototype.html — Checkout, Memberships; client-app.html Rewards/Account.
+- [ ] **Web UI**
+  Build on the Angular web app: the checkout per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
+  Key elements (from the prototype):
+  - Prototype: Checkout (checkout.png) — a subtle upsell card (e.g. 'Slow-moving retail: bundle SPF with facials'), a client-rapport panel, and a rebook prompt at the interval after payment.

@@ -49,4 +49,11 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 ## Tasks (dev pickup)
 
 - [ ] **Provider app UI (Flutter)**
-- [ ] **Offline queue + sync handling** — Encrypted local queue; finalise server-side.
+  Build on the Flutter provider app: the treatment-room per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
+  Key elements (from the prototype):
+  - Prototype: provider app (treatment-room.png) — a persistent sync/offline indicator; queued-items count + last-sync; finalise disabled until synced.
+- [ ] **Offline queue + sync handling**
+  Offline-tolerant capture (provider app):
+  - Encrypted on-device queue for drafts + pending media; last-write-wins for drafts.
+  - Sync on reconnect with no data loss; finalisation happens server-side.
+  - Persistent sync indicator (queued count + last-sync); finalise disabled until synced.

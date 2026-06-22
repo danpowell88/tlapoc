@@ -44,5 +44,16 @@ Under-18 status appears as an age chip on the patient header so staff always see
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - Client — id, tenant_id, name, dob, contacts, flags(json), under18(derived), deleted_at (under18 recomputed across birthdays; soft-delete excluded from active views.)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Backend: domain logic, rules & API endpoint(s)**
+  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
+  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
+  - Rule: DOB captured; under-18 flag derived and exposed to PRD-03/PRD-06/PRD-07.
+  - Rule: The flag updates correctly across a birthday.
+  - Rule: Soft-delete with audit and duplicate handling supported (full CRM in PRD-02).
+  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
+  - Publish the OpenAPI contract so the generated clients update.
+  - Depends on: PRD-01/TENANT.

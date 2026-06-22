@@ -46,5 +46,18 @@ The recurring-revenue engine; autopay built on the Square recurring spike.
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - MembershipPlan — id, tenant_id, name, tier, price, period, benefits[]
+  - Membership — id, client_id, plan_id, token_ref, schedule, status(active|paused|cancelled), next_charge_at (Autopay; dunning on failure -> MRR/churn (PRD-08).)
+  - DunningAttempt — id, membership_id, attempt, at, result (Retry/recover on failed charge.)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Backend: domain logic, rules & API endpoint(s)**
+  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
+  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
+  - Rule: A membership auto-charges on schedule from a stored token (card added online/in-app or in person).
+  - Rule: A failed charge triggers dunning/recovery.
+  - Rule: Lifecycle (join/pause/cancel/win-back) tracked → MRR/churn reporting (PRD-08).
+  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
+  - Publish the OpenAPI contract so the generated clients update.
+  - Depends on: PRD-06/PAYMENT-PROVIDER.

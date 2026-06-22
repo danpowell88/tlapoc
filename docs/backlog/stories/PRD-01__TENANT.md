@@ -47,5 +47,17 @@ Every row carries tenant_id and is isolated by Postgres row-level security (ADR-
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - Tenant — id, name, status, created_at, settings(json) (Root of isolation; everything FKs an owning tenant_id.)
+  - Location — id, tenant_id, name, address, timezone (A tenant has 1+ locations (Brisbane, Gold Coast in the proto).)
+  - StaffInvite — id, tenant_id, email, role, status(pending|accepted|revoked), invited_at (Invite -> Entra SSO bind -> StaffProfile.)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Backend: domain logic, rules & API endpoint(s)**
+  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
+  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
+  - Rule: Provisioning creates a tenant with locations and an owner account.
+  - Rule: Invited staff complete Entra SSO and are bound to the tenant.
+  - Rule: All records created carry tenant_id and are RLS-isolated.
+  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
+  - Publish the OpenAPI contract so the generated clients update.

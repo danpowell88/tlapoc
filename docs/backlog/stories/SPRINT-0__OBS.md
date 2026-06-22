@@ -31,5 +31,12 @@ Structured logging, distributed tracing (correlation ids across web/app/API), ke
 ## Tasks (dev pickup)
 
 - [ ] **Implement: Observability: logging, tracing, metrics, alerting**
+  Deliver per the acceptance criteria:
+  - Structured logs and traces flow to a central store with correlation ids across web/app/API.
+  - Dashboards cover request rate, latency, errors and key resource health.
+  - Alerts fire for error-rate and availability thresholds.
+  - Audit/security-relevant signals are distinguishable to feed the breach workflow (PRD-01).
 - [ ] **Wire into CI/CD + per-environment config**
+  Build/test/deploy steps + env-specific config & secrets; required for merge.
 - [ ] **Document setup & usage**
+  How to run/operate it; runbook notes for the team.

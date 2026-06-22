@@ -33,5 +33,12 @@ A single, well-structured workspace for the .NET API, Angular web, two Flutter a
 ## Tasks (dev pickup)
 
 - [ ] **Implement: Monorepo & solution scaffolding**
+  Deliver per the acceptance criteria:
+  - Repo layout documented in a top-level README (api/, web/, apps/, packages/, infra/, scripts/).
+  - .NET solution builds; Angular workspace serves; both Flutter app shells run on a simulator.
+  - Shared design-system and API-client packages exist as empty-but-buildable libraries.
+  - Editorconfig, formatter and linter configs committed and enforced locally.
 - [ ] **Wire into CI/CD + per-environment config**
+  Build/test/deploy steps + env-specific config & secrets; required for merge.
 - [ ] **Document setup & usage**
+  How to run/operate it; runbook notes for the team.

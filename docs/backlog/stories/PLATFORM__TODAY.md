@@ -49,5 +49,13 @@ _Prototype screen: prototype.html — Today (waiting / in-room / checked-out)._
 
 ## Tasks (dev pickup)
 
-- [ ] **Read-model / projection** — Materialised view fed by domain events.
-- [ ] **Web UI** — prototype.html — Today (waiting / in-room / checked-out).
+- [ ] **Read-model / projection**
+  Build a materialised read-model/projection (don't query OLTP directly):
+  - Shape: from Appointment.status + Job + AttentionDigest, filtered by role concern.
+  - Populate from domain events + the audit stream; eventual consistency is fine; support rebuild/backfill.
+  - Expose a query API with this story's date/role filters; respect owner-only .fin gating.
+- [ ] **Web UI**
+  Build on the Angular web app: the dashboard per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
+  Key elements (from the prototype):
+  - Prototype: Today (dashboard.png) — waiting/in-room/checked-out columns, the day at a glance, role-tailored widgets, and the exceptions digest.
+  - Reception sees front-desk tasks; NP sees clinical; owner sees the business digest.

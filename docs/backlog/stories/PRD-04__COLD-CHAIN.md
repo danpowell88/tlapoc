@@ -46,7 +46,27 @@ Excursion history is retained and visible — evidence that cold-chain held for 
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
-- [ ] **Enforce compliance gate + audit events** — Server-side (C13); blocked path explains why.
-- [ ] **Integration adapter, sync & config** — Behind the port; trigger + retries/reconciliation; AU/APP-8 posture.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - TempLog — id, tenant_id, location_id, monitor_id, temp, at, source(manual|device) (2-8C range; out-of-range -> Excursion.)
+  - Excursion — id, location_id, started_at, ended_at, min, max, affected_lots[], action(quarantine) (Raises alert + job; flags stock (C13).)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Backend: domain logic, rules & API endpoint(s)**
+  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
+  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
+  - Rule: Temperature can be logged (manual + via the device API) for storage locations.
+  - Rule: An excursion raises an alert and flags affected stock for quarantine.
+  - Rule: A breach pathway can quarantine a lot and raise a job (links PRD-11).
+  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
+  - Publish the OpenAPI contract so the generated clients update.
+  - Depends on: PRD-04/CUSTODY-STORAGE.
+- [ ] **Enforce compliance gate + audit events**
+  Enforce C13 as a server-side invariant that cannot be bypassed via the API:
+  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
+  - Write an immutable AuditEvent for the attempt and its outcome.
+- [ ] **Integration adapter, sync & config**
+  Implement the provider behind its swappable port:
+  - Connection/config (OAuth tokens stored encrypted) + the field mapping this story needs.
+  - Trigger on the relevant event; idempotent sync with retries, back-off and a visible reconciliation/status.
+  - Handle partial failures + replays; surface errors to the user.
+  - Residency: AU-resident or APP-8-assessed + consented before any PII leaves (C21).

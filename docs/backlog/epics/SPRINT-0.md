@@ -29,14 +29,14 @@ Everything the team needs in place before feature work begins: repositories and 
 | `TEST` | [Test strategy & harness + quality gates](../stories/SPRINT-0__TEST.md) | Chore | P1 | 3 | 2 |
 | `SEED` | [Synthetic seed data & local dev environment](../stories/SPRINT-0__SEED.md) | Chore | P2 | 3 | 3 |
 | `GOV` | [Repo governance: branch protection, PR & env protection](../stories/SPRINT-0__GOV.md) | Chore | P2 | 3 | 3 |
-| `SPIKE-AUTH` | [Spike — Entra External ID ↔ Flutter ↔ .NET auth](../stories/SPRINT-0__SPIKE-AUTH.md) | Spike | P0 | 2 | 4 |
-| `SPIKE-RLS` | [Spike — Postgres RLS with EF Core session context](../stories/SPRINT-0__SPIKE-RLS.md) | Spike | P0 | 2 | 4 |
-| `SPIKE-SQUARE` | [Spike — Square AU card-on-file recurring autopay](../stories/SPRINT-0__SPIKE-SQUARE.md) | Spike | P1 | 2 | 4 |
-| `SPIKE-CANVAS` | [Spike — Flutter injection-mapping canvas](../stories/SPRINT-0__SPIKE-CANVAS.md) | Spike | P1 | 2 | 4 |
-| `SPIKE-OFFLINE` | [Spike — offline queue & sync integrity (provider app)](../stories/SPRINT-0__SPIKE-OFFLINE.md) | Spike | P1 | 2 | 4 |
+| `SPIKE-AUTH` | [Spike — Entra External ID ↔ Flutter ↔ .NET auth](../stories/SPRINT-0__SPIKE-AUTH.md) | Spike | P0 | 2 | 3 |
+| `SPIKE-RLS` | [Spike — Postgres RLS with EF Core session context](../stories/SPRINT-0__SPIKE-RLS.md) | Spike | P0 | 2 | 3 |
+| `SPIKE-SQUARE` | [Spike — Square AU card-on-file recurring autopay](../stories/SPRINT-0__SPIKE-SQUARE.md) | Spike | P1 | 2 | 3 |
+| `SPIKE-CANVAS` | [Spike — Flutter injection-mapping canvas](../stories/SPRINT-0__SPIKE-CANVAS.md) | Spike | P1 | 2 | 3 |
+| `SPIKE-OFFLINE` | [Spike — offline queue & sync integrity (provider app)](../stories/SPRINT-0__SPIKE-OFFLINE.md) | Spike | P1 | 2 | 3 |
 | `JOBS-SCHEDULER` | [Background jobs & scheduler infrastructure](../stories/SPRINT-0__JOBS-SCHEDULER.md) | Chore | P0 | 3 | 3 |
 | `MEDIA-STORAGE` | [Media storage & signed-URL service](../stories/SPRINT-0__MEDIA-STORAGE.md) | Chore | P1 | 3 | 3 |
 | `DOMAIN-EVENTS` | [Domain-event / messaging backbone](../stories/SPRINT-0__DOMAIN-EVENTS.md) | Chore | P1 | 3 | 3 |
 | `FEATURE-FLAGS` | [Feature flags & per-tenant configuration](../stories/SPRINT-0__FEATURE-FLAGS.md) | Chore | P2 | 3 | 2 |
 
-_Totals: 28 stories · 80 tasks._
+_Totals: 28 stories · 75 tasks._

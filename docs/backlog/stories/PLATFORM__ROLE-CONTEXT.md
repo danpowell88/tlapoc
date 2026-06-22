@@ -49,5 +49,11 @@ _Prototype screen: prototype.html — sidebar/app shell, Today dashboard, header
 
 ## Tasks (dev pickup)
 
-- [ ] **Enforce compliance gate + audit events** — Server-side (C4); blocked path explains why.
-- [ ] **Web UI** — prototype.html — sidebar/app shell, Today dashboard, header (global search, clinic switcher, switch-user, scope tooltip).
+- [ ] **Enforce compliance gate + audit events**
+  Enforce C4 as a server-side invariant that cannot be bypassed via the API:
+  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
+  - Write an immutable AuditEvent for the attempt and its outcome.
+- [ ] **Web UI**
+  Build on the Angular web app: the dashboard per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
+  Key elements (from the prototype):
+  - Prototype: header user chip + scope tooltip + 'Switch user' (dashboard.png) — active role + scope summary; switch-active-role for multi-role users.

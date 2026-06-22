@@ -51,7 +51,21 @@ _Prototype screen: prototype.html — Operations → Temperature monitors._
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Enforce compliance gate + audit events** — Server-side (C13); blocked path explains why.
-- [ ] **Integration adapter, sync & config** — Behind the port; trigger + retries/reconciliation; AU/APP-8 posture.
-- [ ] **Web UI** — prototype.html — Operations → Temperature monitors.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - Monitor — id, tenant_id, location_id, fridge, api_key_ref, last_heartbeat, status (ESP32; missing heartbeat -> alert.)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Enforce compliance gate + audit events**
+  Enforce C13 as a server-side invariant that cannot be bypassed via the API:
+  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
+  - Write an immutable AuditEvent for the attempt and its outcome.
+- [ ] **Integration adapter, sync & config**
+  Implement the provider behind its swappable port:
+  - Connection/config (OAuth tokens stored encrypted) + the field mapping this story needs.
+  - Trigger on the relevant event; idempotent sync with retries, back-off and a visible reconciliation/status.
+  - Handle partial failures + replays; surface errors to the user.
+  - Residency: AU-resident or APP-8-assessed + consented before any PII leaves (C21).
+- [ ] **Web UI**
+  Build on the Angular web app: the ops-monitors per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
+  Key elements (from the prototype):
+  - Prototype: Operations -> Temperature monitors (ops-monitors.png) — monitor list per fridge, live/charted temps, breach alerts, dead-monitor detection (openMonitor/monitorJob).

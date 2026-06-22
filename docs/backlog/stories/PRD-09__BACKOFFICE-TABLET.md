@@ -46,4 +46,8 @@ _Prototype screen: backroom.html._
 
 ## Tasks (dev pickup)
 
-- [ ] **Web UI** — backroom.html.
+- [ ] **Web UI**
+  Build on the Angular web app: the backroom per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
+  Key elements (from the prototype):
+  - Prototype: back-office tablet (backroom.png) — 'Good morning', Open & close, Cold chain, Stock on hand, Schedule 4 drug register, Waste & disposal log, Tasks, Shift handover.
+  - Shared-device session handling.

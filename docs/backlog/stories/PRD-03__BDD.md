@@ -44,6 +44,21 @@ Which validated instrument to embed is an open question to confirm clinically.
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
-- [ ] **Enforce compliance gate + audit events** — Server-side (C3); blocked path explains why.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - ScreeningResult — id, tenant_id, client_id, instrument, answers(json), score, flag(bool), reviewed_by, reviewed_at (Positive flag surfaced to prescriber; required before treatment (C3).)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Backend: domain logic, rules & API endpoint(s)**
+  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
+  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
+  - Rule: A validated BDD/psychological screening instrument is embedded in intake.
+  - Rule: A completed screen authored/reviewed by an RN/NP is present before treatment.
+  - Rule: A positive flag is surfaced to the prescriber and recorded.
+  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
+  - Publish the OpenAPI contract so the generated clients update.
+  - Depends on: PRD-03/INTAKE.
+- [ ] **Enforce compliance gate + audit events**
+  Enforce C3 as a server-side invariant that cannot be bypassed via the API:
+  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
+  - Write an immutable AuditEvent for the attempt and its outcome.
+  - A validated BDD/psychological screening instrument is embedded in intake.

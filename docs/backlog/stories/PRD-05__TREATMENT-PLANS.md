@@ -51,6 +51,22 @@ _Prototype screen: prototype.html — Charting + Clinical (Skin analysis, Body c
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - TreatmentPlan — id, tenant_id, client_id, protocol_id, sessions[]{service, interval, status}, created_at (Feeds recall; progress on Client 360.)
+  - Protocol — id, tenant_id, name, steps[] (Applyable template.)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Backend: domain logic, rules & API endpoint(s)**
+  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
+  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
+  - Rule: Protocol templates can be applied to create a multi-session plan.
+  - Rule: Plans feed the recall worklist (PRD-07).
+  - Rule: Plan progress is visible on the client 360.
+  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
+  - Publish the OpenAPI contract so the generated clients update.
+  - Depends on: PRD-05/NOTE-TEMPLATE.
 - [ ] **Provider app UI (Flutter)**
+  Build on the Flutter provider app: the charting per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
+  Key elements (from the prototype):
+  - Prototype: Charting (charting.png) — apply a protocol to create a multi-session plan; plan progress on Client 360 (client-360.png).
+  - Active plans listed on the charting overview / in-room entry.

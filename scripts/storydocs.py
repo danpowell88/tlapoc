@@ -111,8 +111,12 @@ def write_story(ep, s):
 
     L += ["", "## Tasks (dev pickup)", ""]
     for t in tks:
-        note = f" — {t['note']}" if t.get("note") else ""
-        L.append(f"- [ ] **{t['title']}**{note}")
+        L.append(f"- [ ] **{t['title']}**")
+        for nl in (t.get("note") or "").split("\n"):
+            nl = nl.rstrip()
+            if not nl.strip():
+                continue
+            L.append("  " + nl.lstrip() if nl.lstrip().startswith("- ") else "  " + nl)
     write(os.path.join(STORIES, story_file(ep, s)), "\n".join(L))
     return len(tks)
 

@@ -45,4 +45,7 @@ _Prototype screen: prototype.html — header search box._
 
 ## Tasks (dev pickup)
 
-- [ ] **Web UI** — prototype.html — header search box.
+- [ ] **Web UI**
+  Build on the Angular web app: the dashboard per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
+  Key elements (from the prototype):
+  - Prototype: the header search box (dashboard.png, 'Search clients, appointments, invoices…') — grouped results; select -> deep link.

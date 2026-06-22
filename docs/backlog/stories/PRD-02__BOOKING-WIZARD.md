@@ -46,7 +46,26 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
-- [ ] **Enforce compliance gate + audit events** — Server-side (C4); blocked path explains why.
-- [ ] **Web UI** — prototype.html — Schedule, 'New booking' wizard, Clients directory & 360.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - Appointment — (as CALENDAR) source=desk (Created via the wizard; same entity/flow.)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Backend: domain logic, rules & API endpoint(s)**
+  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
+  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
+  - Rule: Wizard steps: service → practitioner → time slot → client → confirm.
+  - Rule: Scope-aware: injectable services offer only cleared RN/NP (C4); slots reflect roster ∩ availability.
+  - Rule: An existing client can be attached or a new one created inline; under-18 is flagged.
+  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
+  - Publish the OpenAPI contract so the generated clients update.
+  - Depends on: PRD-02/CALENDAR, PRD-02/SERVICE-CATALOGUE.
+- [ ] **Enforce compliance gate + audit events**
+  Enforce C4 as a server-side invariant that cannot be bypassed via the API:
+  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
+  - Write an immutable AuditEvent for the attempt and its outcome.
+  - Scope-aware: injectable services offer only cleared RN/NP (C4); slots reflect roster ∩ availability.
+- [ ] **Web UI**
+  Build on the Angular web app: the booking-wizard per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
+  Key elements (from the prototype):
+  - Prototype: 'New booking' wizard (booking-wizard.png) — stepper (service, practitioner, slot, client, confirm); attach existing client or create inline; slot grid reflects roster + availability.
+  - Confirmation shows policy + schedules reminders.

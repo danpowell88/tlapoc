@@ -10,10 +10,10 @@ Program-level capability deliberately deferred beyond v1 and not owned by a sing
 
 | Key | Story | Type | Priority | Est | Tasks |
 |---|---|---|---|---|---|
-| `MULTI-LOCATION` | [Multi-location switching UI (placeholder)](../stories/PHASE-2__MULTI-LOCATION.md) | Story | P2 | 1 | 2 |
-| `SAAS-ONBOARDING` | [SaaS onboarding & billing UI (placeholder)](../stories/PHASE-2__SAAS-ONBOARDING.md) | Story | P2 | 1 | 2 |
-| `WHITE-LABEL` | [Per-tenant white-label theming (placeholder)](../stories/PHASE-2__WHITE-LABEL.md) | Story | P2 | 1 | 2 |
-| `PUBLIC-API` | [Public API & webhooks (placeholder)](../stories/PHASE-2__PUBLIC-API.md) | Story | P2 | 1 | 2 |
-| `NATIVE-POS-KIOSK` | [Native POS hardware & tablet kiosk mode (placeholder)](../stories/PHASE-2__NATIVE-POS-KIOSK.md) | Story | P2 | 1 | 2 |
+| `MULTI-LOCATION` | [Multi-location switching UI (placeholder)](../stories/PHASE-2__MULTI-LOCATION.md) | Story | P2 | 1 | 1 |
+| `SAAS-ONBOARDING` | [SaaS onboarding & billing UI (placeholder)](../stories/PHASE-2__SAAS-ONBOARDING.md) | Story | P2 | 1 | 1 |
+| `WHITE-LABEL` | [Per-tenant white-label theming (placeholder)](../stories/PHASE-2__WHITE-LABEL.md) | Story | P2 | 1 | 1 |
+| `PUBLIC-API` | [Public API & webhooks (placeholder)](../stories/PHASE-2__PUBLIC-API.md) | Story | P2 | 1 | 1 |
+| `NATIVE-POS-KIOSK` | [Native POS hardware & tablet kiosk mode (placeholder)](../stories/PHASE-2__NATIVE-POS-KIOSK.md) | Story | P2 | 1 | 1 |
 
-_Totals: 5 stories · 10 tasks._
+_Totals: 5 stories · 5 tasks._

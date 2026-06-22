@@ -413,6 +413,93 @@ def area_labels(s):
     return [a.split(":", 1)[1] for a in s.get("labels", []) if a.startswith("area:")]
 
 
+def _accept(s, n=3):
+    return list(s.get("acceptance", []))[:n]
+
+
+def _dm_note(s):
+    real = [e for e in (s.get("data_model") or []) if not e["entity"].startswith("(")]
+    if not real:
+        return "Define/extend persistence for this story; EF Core migrations; every table tenant_id + RLS."
+    out = ["Model + migrate (EF Core; every table carries tenant_id with an RLS policy):"]
+    for e in real:
+        out.append(f"- {e['entity']} — {e['fields']}" + (f" ({e['notes']})" if e.get("notes") else ""))
+    out.append("- Add the FKs/relationships above; index the columns this story filters or looks up on; "
+               "make records append-only/immutable where the story requires it.")
+    return "\n".join(out)
+
+
+def _readmodel_note(s):
+    reads = [e for e in (s.get("data_model") or [])
+             if e["entity"].lower().startswith("(read") or "reportingview" in e["entity"].lower()]
+    shape = reads[0]["fields"] if reads else "the metrics this screen shows"
+    return ("Build a materialised read-model/projection (don't query OLTP directly):\n"
+            f"- Shape: {shape}.\n"
+            "- Populate from domain events + the audit stream; eventual consistency is fine; support rebuild/backfill.\n"
+            "- Expose a query API with this story's date/role filters; respect owner-only .fin gating.")
+
+
+def _backend_note(ep, s):
+    out = ["Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):",
+           "- Endpoints: the commands + queries for the entities above and each action in the acceptance criteria."]
+    for a in _accept(s, 3):
+        out.append(f"- Rule: {a}")
+    out.append("- Emit domain events for read-models / notifications / follow-up jobs where relevant.")
+    out.append("- Publish the OpenAPI contract so the generated clients update.")
+    if s.get("depends_on"):
+        out.append("- Depends on: " + ", ".join(s["depends_on"]) + ".")
+    return "\n".join(out)
+
+
+def _compliance_note(s):
+    cs = ", ".join(refs(s, "compliance")) or "the relevant criteria"
+    out = [f"Enforce {cs} as a server-side invariant that cannot be bypassed via the API:",
+           "- Block the action when prerequisites are missing; return a clear reason for the blocked-action "
+           "banner (what's blocked / which rule / how to resolve / who can resolve).",
+           "- Write an immutable AuditEvent for the attempt and its outcome."]
+    for a in [a for a in s.get("acceptance", []) if any(
+            w in a.lower() for w in ("block", "cannot", "reject", "valid", "consent", "immutab", "gate", "only"))][:3]:
+        out.append(f"- {a}")
+    return "\n".join(out)
+
+
+def _integration_note(ep, s):
+    return ("Implement the provider behind its swappable port:\n"
+            "- Connection/config (OAuth tokens stored encrypted) + the field mapping this story needs.\n"
+            "- Trigger on the relevant event; idempotent sync with retries, back-off and a visible reconciliation/status.\n"
+            "- Handle partial failures + replays; surface errors to the user.\n"
+            "- Residency: AU-resident or APP-8-assessed + consented before any PII leaves (C21).")
+
+
+def _ui_note(ep, s, platform):
+    out = [f"Build on {platform}: the {screen_name(ep, s) or 'screen'} per the UI spec. Wire to the API with "
+           "loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / "
+           "gate chips where gated; respect owner-only .fin gating for money figures."]
+    spec = s.get("ui_spec") or []
+    if spec:
+        out.append("Key elements (from the prototype):")
+        out += [f"- {b}" for b in spec[:5]]
+    return "\n".join(out)
+
+
+def _design_note(s):
+    return ("Build/extend the shared design-system component(s) this story needs (use tokens, not bespoke CSS); "
+            "cover all states + accessibility (contrast, focus order, hit-target size); document in the gallery.")
+
+
+def _offline_note(s):
+    return ("Offline-tolerant capture (provider app):\n"
+            "- Encrypted on-device queue for drafts + pending media; last-write-wins for drafts.\n"
+            "- Sync on reconnect with no data loss; finalisation happens server-side.\n"
+            "- Persistent sync indicator (queued count + last-sync); finalise disabled until synced.")
+
+
+def _chore_note(s):
+    out = ["Deliver per the acceptance criteria:"]
+    out += [f"- {a}" for a in _accept(s, 4)]
+    return "\n".join(out)
+
+
 def tasks_for(ep, s):
     """Dev-task breakdown for a story. A hand-authored s['tasks'] override wins."""
     if s.get("tasks"):
@@ -426,59 +513,59 @@ def tasks_for(ep, s):
         out.append({"title": title, "note": note})
 
     if "type:spike" in labs:
-        add("Define spike scope, questions & success criteria", "What we must learn before building.")
-        add("Build a throwaway prototype", "Smallest thing that answers the question.")
-        add("Evaluate results, risks & options")
-        add("Write up findings + go/no-go recommendation (ADR if warranted)")
+        add("Define spike scope, questions & success criteria",
+            "List the unknowns to resolve and the pass/fail bar before building; time-box it.")
+        add("Build a throwaway prototype",
+            "Smallest end-to-end slice that answers the questions (not production code); measure the risky bits.")
+        add("Write up findings + go/no-go recommendation (ADR if warranted)",
+            "What worked, the gotchas, the chosen approach + its impact on the dependent stories.")
         return out
 
     if "phase:2plus" in labs:
-        add("Scope & design when pulled into a sprint", "Deferred placeholder — no build yet.")
-        add("Confirm it still fits scope / regulatory stance")
+        add("Scope & design when pulled into a sprint",
+            "Deferred placeholder — no build in v1; confirm it still fits scope/regulatory stance, then break down.")
         return out
 
     if "type:chore" in labs:
-        add(f"Implement: {s['title']}")
+        add(f"Implement: {s['title']}", _chore_note(s))
         if "area:infra" in labs:
-            add("Wire into CI/CD + per-environment config")
+            add("Wire into CI/CD + per-environment config",
+                "Build/test/deploy steps + env-specific config & secrets; required for merge.")
         if "area:data" in labs:
-            add("Apply via migrations; verify RLS/tenancy")
-        add("Document setup & usage")
+            add("Apply via migrations; verify RLS/tenancy",
+                "Migration runs per environment; prove tenant isolation holds.")
+        add("Document setup & usage", "How to run/operate it; runbook notes for the team.")
         return _dedup(out, 4)
 
-    # regular feature story — everything needed to deliver it end to end (UI -> API -> DB ->
-    # integrations). Tests are implicit (not listed); keep tasks coarse, not granular.
+    # regular feature story — full slice (UI -> API -> DB -> integrations), coarse, tests implicit
     dm = s.get("data_model") or []
     real = [e for e in dm if not e["entity"].startswith("(")]
     read_model = any(e["entity"].lower().startswith("(read") or "reportingview" in e["entity"].lower()
                      for e in dm)
     integ = "area:integration" in labs
     if real:
-        add("Data model & migrations", "Entities/columns + relationships; tenant_id + RLS.")
+        add("Data model & migrations", _dm_note(s))
     elif read_model:
-        add("Read-model / projection", "Materialised view fed by domain events.")
+        add("Read-model / projection", _readmodel_note(s))
     if "area:backend" in labs or (real and not integ):
-        add("Backend: domain logic, rules & API endpoint(s)",
-            "Behaviour + invariants + the OpenAPI contract the UI/clients consume.")
+        add("Backend: domain logic, rules & API endpoint(s)", _backend_note(ep, s))
     if "compliance" in labs:
-        cs = ", ".join(refs(s, "compliance")) or "see Other"
-        add("Enforce compliance gate + audit events", f"Server-side ({cs}); blocked path explains why.")
+        add("Enforce compliance gate + audit events", _compliance_note(s))
     if integ:
-        add("Integration adapter, sync & config",
-            "Behind the port; trigger + retries/reconciliation; AU/APP-8 posture.")
+        add("Integration adapter, sync & config", _integration_note(ep, s))
     if "area:web" in labs:
-        add("Web UI", sec_ui(ep, s))
+        add("Web UI", _ui_note(ep, s, "the Angular web app"))
     if "area:client-app" in labs:
-        add("Client app UI (Flutter)")
+        add("Client app UI (Flutter)", _ui_note(ep, s, "the Flutter client app"))
     if "area:provider-app" in labs:
-        add("Provider app UI (Flutter)")
+        add("Provider app UI (Flutter)", _ui_note(ep, s, "the Flutter provider app"))
     if "area:design" in labs:
-        add("Design-system component(s)")
+        add("Design-system component(s)", _design_note(s))
     if "offline" in text or ("queue" in text and "sync" in text):
-        add("Offline queue + sync handling", "Encrypted local queue; finalise server-side.")
+        add("Offline queue + sync handling", _offline_note(s))
     out = _dedup(out, 6)
     if not out:
-        add(f"Implement: {s['title']}")
+        add(f"Implement: {s['title']}", _chore_note(s))
     return out
 
 

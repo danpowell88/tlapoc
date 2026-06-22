@@ -48,5 +48,19 @@ This is the mechanism PRD-04 (consult/Rx) and PRD-05 (charting) consume; gate de
 
 ## Tasks (dev pickup)
 
-- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
-- [ ] **Enforce compliance gate + audit events** — Server-side (C5); blocked path explains why.
+- [ ] **Backend: domain logic, rules & API endpoint(s)**
+  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
+  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
+  - Rule: Treatment is blocked server-side unless required intake + current consent exist.
+  - Rule: The block states what's missing and how to resolve it (never a dead-end).
+  - Rule: The gate is the shared mechanism consumed by PRD-04/05.
+  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
+  - Publish the OpenAPI contract so the generated clients update.
+  - Depends on: PRD-03/CONSENT, PRD-03/BDD.
+- [ ] **Enforce compliance gate + audit events**
+  Enforce C5 as a server-side invariant that cannot be bypassed via the API:
+  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
+  - Write an immutable AuditEvent for the attempt and its outcome.
+  - Treatment is blocked server-side unless required intake + current consent exist.
+  - The block states what's missing and how to resolve it (never a dead-end).
+  - The gate is the shared mechanism consumed by PRD-04/05.

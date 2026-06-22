@@ -45,6 +45,21 @@ regClass/compounded enable blocking prohibited compounded GLP-1 and routing adve
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
-- [ ] **Enforce compliance gate + audit events** — Server-side (see Other); blocked path explains why.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - Product — id, tenant_id, name, type(toxin|filler|skin|retail), unit(units|syringes|each), schedule(S4|non-S4), reg_class, artg_no, sponsor, compounded(bool), par_level (schedule flag is the master classification (ADR-0014/0021).)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Backend: domain logic, rules & API endpoint(s)**
+  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
+  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
+  - Rule: Typed products each with their own unit (units vs syringes), par, expiry tracking.
+  - Rule: Capability-gated product admin sets the S4 flag (drives PRD-06 rewards + PRD-07 naming).
+  - Rule: Products carry regClass/artg/compounded; prohibited compounded GLP-1 is blocked.
+  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
+  - Publish the OpenAPI contract so the generated clients update.
+- [ ] **Enforce compliance gate + audit events**
+  Enforce the relevant criteria as a server-side invariant that cannot be bypassed via the API:
+  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
+  - Write an immutable AuditEvent for the attempt and its outcome.
+  - Capability-gated product admin sets the S4 flag (drives PRD-06 rewards + PRD-07 naming).
+  - Products carry regClass/artg/compounded; prohibited compounded GLP-1 is blocked.

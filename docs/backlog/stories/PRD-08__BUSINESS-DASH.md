@@ -45,5 +45,13 @@ _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Po
 
 ## Tasks (dev pickup)
 
-- [ ] **Read-model / projection** — Materialised view fed by domain events.
-- [ ] **Web UI** — prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack).
+- [ ] **Read-model / projection**
+  Build a materialised read-model/projection (don't query OLTP directly):
+  - Shape: revenue, retention, churn, no_shows, cancellations, conversion, at_risk, big_spenders, mrr by date/practitioner.
+  - Populate from domain events + the audit stream; eventual consistency is fine; support rebuild/backfill.
+  - Expose a query API with this story's date/role filters; respect owner-only .fin gating.
+- [ ] **Web UI**
+  Build on the Angular web app: the reports per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
+  Key elements (from the prototype):
+  - Prototype: Reports (reports.png) — revenue trend, treatment mix, top treatments, new-vs-returning, retention, membership MRR; date-range presets + custom; per-practitioner.
+  - Money figures hidden for non-owner roles (.fin gating).

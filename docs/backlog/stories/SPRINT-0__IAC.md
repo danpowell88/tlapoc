@@ -39,5 +39,12 @@ dev/staging/prod provisioned as code, all pinned to Australia East so data resid
 ## Tasks (dev pickup)
 
 - [ ] **Implement: Cloud environments & infrastructure-as-code (AU East)**
+  Deliver per the acceptance criteria:
+  - IaC provisions compute, Postgres, blob storage and networking in Australia East for each environment.
+  - A non-AU region for any PII/PHI resource fails the IaC policy check.
+  - Environments are isolated (separate data stores, secrets, identities).
+  - Tear-down/re-create of a non-prod environment is a single command.
 - [ ] **Wire into CI/CD + per-environment config**
+  Build/test/deploy steps + env-specific config & secrets; required for merge.
 - [ ] **Document setup & usage**
+  How to run/operate it; runbook notes for the team.

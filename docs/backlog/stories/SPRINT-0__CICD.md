@@ -31,5 +31,12 @@ Pipelines build + test the API/web/apps on every PR (blocking merge on failure) 
 ## Tasks (dev pickup)
 
 - [ ] **Implement: CI/CD pipelines (build, test, deploy)**
+  Deliver per the acceptance criteria:
+  - PR pipeline runs build + unit/integration tests for API, web and apps and blocks merge on failure.
+  - Merge to main deploys API + web to the dev environment automatically.
+  - Mobile app builds produce installable artifacts for internal distribution.
+  - Pipeline status is required for merge (branch protection ties in via S0-GOV).
 - [ ] **Wire into CI/CD + per-environment config**
+  Build/test/deploy steps + env-specific config & secrets; required for merge.
 - [ ] **Document setup & usage**
+  How to run/operate it; runbook notes for the team.

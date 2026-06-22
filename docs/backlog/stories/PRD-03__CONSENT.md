@@ -46,6 +46,24 @@ Treatment is blocked until a current, version-matched consent is signed; changin
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
-- [ ] **Enforce compliance gate + audit events** — Server-side (C5, C18); blocked path explains why.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - ConsentTemplate — id, tenant_id, treatment_type, version, content(sections), mandated_fields[] (New version on change; old signatures stay bound.)
+  - ConsentSignature — id, client_id, appointment_id, template_version, signed_at, signature_ref, verbal_confirmed (Retained (C18); drives the treatment gate.)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Backend: domain logic, rules & API endpoint(s)**
+  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
+  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
+  - Rule: Consent is versioned, e-signed and contains all mandated content.
+  - Rule: Treatment is blocked until a current, version-matched consent is signed; the block states what's missing.
+  - Rule: Changing a template creates a new version; previously signed consents stay bound to their version.
+  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
+  - Publish the OpenAPI contract so the generated clients update.
+  - Depends on: PRD-03/INTAKE.
+- [ ] **Enforce compliance gate + audit events**
+  Enforce C5, C18 as a server-side invariant that cannot be bypassed via the API:
+  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
+  - Write an immutable AuditEvent for the attempt and its outcome.
+  - Consent is versioned, e-signed and contains all mandated content.
+  - Treatment is blocked until a current, version-matched consent is signed; the block states what's missing.
+  - Changing a template creates a new version; previously signed consents stay bound to their version.

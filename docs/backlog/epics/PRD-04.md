@@ -21,6 +21,6 @@ The defensible core. Every S4 administration is provably tied to a synchronous c
 | `RECALL-LOOKUP` | [Lot → clients recall lookup & medicine register](../stories/PRD-04__RECALL-LOOKUP.md) | Story | P0 | 5 | 3 |
 | `WASTAGE-DESTRUCTION` | [Wastage, disposal & destruction records](../stories/PRD-04__WASTAGE-DESTRUCTION.md) | Story | P1 | 3 | 3 |
 | `STOCKTAKE` | [Stocktake, discrepancy & loss/theft reporting](../stories/PRD-04__STOCKTAKE.md) | Story | P1 | 3 | 3 |
-| `MODE-B` | [Mode B pharmacy-dispensing model (placeholder)](../stories/PRD-04__MODE-B.md) | Story | P2 | 1 | 2 |
+| `MODE-B` | [Mode B pharmacy-dispensing model (placeholder)](../stories/PRD-04__MODE-B.md) | Story | P2 | 1 | 1 |
 
-_Totals: 12 stories · 36 tasks._
+_Totals: 12 stories · 35 tasks._

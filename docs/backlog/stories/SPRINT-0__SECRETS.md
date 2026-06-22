@@ -31,5 +31,12 @@ A managed secret store (Key Vault) wired into each environment with typed, envir
 ## Tasks (dev pickup)
 
 - [ ] **Implement: Secrets & configuration management**
+  Deliver per the acceptance criteria:
+  - API and pipelines read secrets from the vault per environment; none in source control.
+  - A secret-scanning check fails the build on a committed secret.
+  - Config is environment-specific and typed; missing required config fails fast at startup.
+  - Rotating a secret requires no code change.
 - [ ] **Wire into CI/CD + per-environment config**
+  Build/test/deploy steps + env-specific config & secrets; required for merge.
 - [ ] **Document setup & usage**
+  How to run/operate it; runbook notes for the team.

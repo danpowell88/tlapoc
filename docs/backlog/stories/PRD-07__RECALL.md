@@ -43,5 +43,16 @@ Integrates with treatment plans (PRD-05) and rebooking (PRD-06); keeps the book 
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - RecallTask — id, tenant_id, client_id, due_at, reason(interval|unbooked_plan), status, last_nudge_at (Generated at interval by a scheduled job; works the worklist.)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Backend: domain logic, rules & API endpoint(s)**
+  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
+  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
+  - Rule: A toxin client with no future booking enters the recall worklist at the configured interval and receives the nudge.
+  - Rule: Unbooked recommended sessions prompt a rebook.
+  - Rule: Front desk can work the recall/rebook worklist.
+  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
+  - Publish the OpenAPI contract so the generated clients update.
+  - Depends on: PRD-07/CHANNELS.

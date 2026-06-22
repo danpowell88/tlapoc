@@ -50,5 +50,15 @@ Removes double-entry so the books reconcile without re-keying; the app keeps pri
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Integration adapter, sync & config** — Behind the port; trigger + retries/reconciliation; AU/APP-8 posture.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - IntegrationConnection — id, tenant_id, provider(xero), tokens, status (OAuth connection; AU/APP-8 posture.)
+  - AccountMapping — tenant_id, item_type(service|retail|membership), xero_account, gst_code (Drives the posting.)
+  - SyncJob — id, provider, ref(invoice/payment), status, retries, reconciled(bool) (Retry + reconciliation status.)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Integration adapter, sync & config**
+  Implement the provider behind its swappable port:
+  - Connection/config (OAuth tokens stored encrypted) + the field mapping this story needs.
+  - Trigger on the relevant event; idempotent sync with retries, back-off and a visible reconciliation/status.
+  - Handle partial failures + replays; surface errors to the user.
+  - Residency: AU-resident or APP-8-assessed + consented before any PII leaves (C21).

@@ -41,5 +41,12 @@ A media service: AU-resident, encrypted blob storage served only via short-lived
 ## Tasks (dev pickup)
 
 - [ ] **Implement: Media storage & signed-URL service**
+  Deliver per the acceptance criteria:
+  - Blob storage is AU-resident and encrypted at rest; access is via short-lived signed URLs only.
+  - Upload + download flows are demonstrated from web and Flutter.
+  - Media access is consent- and capability-checked and audited.
+  - No public/unsigned access to media is possible.
 - [ ] **Wire into CI/CD + per-environment config**
+  Build/test/deploy steps + env-specific config & secrets; required for merge.
 - [ ] **Document setup & usage**
+  How to run/operate it; runbook notes for the team.

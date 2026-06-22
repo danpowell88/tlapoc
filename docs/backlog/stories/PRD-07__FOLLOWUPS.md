@@ -49,6 +49,21 @@ _Prototype screen: prototype.html — Comms & growth (Inbox/Automations/Campaign
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
-- [ ] **Web UI** — prototype.html — Comms & growth (Inbox/Automations/Campaigns), Growth (Leads/Reviews), Follow-ups, Settings → Public booking page; booking-widget.html.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - Job — id, tenant_id, type(recall|callback|review|ae|attention|message), client_id?, source_ref, assignee_id, status(open|snoozed|done), due_at (Merged queue; auto-categorised by rules/keyword.)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Backend: domain logic, rules & API endpoint(s)**
+  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
+  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
+  - Rule: Recall, needs-attention and unanswered-comms items merge into a single queue.
+  - Rule: Any message can be flagged so it isn't lost.
+  - Rule: Inbound comms auto-categorise into jobs by rules/keyword (no AI).
+  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
+  - Publish the OpenAPI contract so the generated clients update.
+  - Depends on: PRD-07/CHANNELS.
+- [ ] **Web UI**
+  Build on the Angular web app: the followups per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
+  Key elements (from the prototype):
+  - Prototype: Follow-ups (followups.png) — a job list with type, client link, assignee, status; actions: open, done, snooze, reopen, reassign, callback; a count badge in the nav.
+  - Jobs created from recalls, no-shows, flagged messages, reviews, AE.

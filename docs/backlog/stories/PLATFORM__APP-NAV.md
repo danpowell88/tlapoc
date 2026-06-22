@@ -49,4 +49,8 @@ _Prototype screen: prototype.html — sidebar/app shell, Today dashboard, header
 
 ## Tasks (dev pickup)
 
-- [ ] **Web UI** — prototype.html — sidebar/app shell, Today dashboard, header (global search, clinic switcher, switch-user, scope tooltip).
+- [ ] **Web UI**
+  Build on the Angular web app: the dashboard per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
+  Key elements (from the prototype):
+  - Prototype: the left sidebar (dashboard.png) — top-level items + collapsible 'Workspaces'; active screen/section persist; mobile uses a drawer + overlay.
+  - Follow-ups and Governance show count badges; entries outside the role are hidden.

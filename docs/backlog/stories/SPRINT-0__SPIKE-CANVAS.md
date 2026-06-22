@@ -37,7 +37,9 @@ Non-UI / platform scaffolding — no prototype screen.
 
 ## Tasks (dev pickup)
 
-- [ ] **Define spike scope, questions & success criteria** — What we must learn before building.
-- [ ] **Build a throwaway prototype** — Smallest thing that answers the question.
-- [ ] **Evaluate results, risks & options**
+- [ ] **Define spike scope, questions & success criteria**
+  List the unknowns to resolve and the pass/fail bar before building; time-box it.
+- [ ] **Build a throwaway prototype**
+  Smallest end-to-end slice that answers the questions (not production code); measure the risky bits.
 - [ ] **Write up findings + go/no-go recommendation (ADR if warranted)**
+  What worked, the gotchas, the chosen approach + its impact on the dependent stories.

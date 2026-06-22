@@ -40,5 +40,12 @@ A domain-event backbone (transactional outbox + at-least-once dispatch) modules 
 ## Tasks (dev pickup)
 
 - [ ] **Implement: Domain-event / messaging backbone**
+  Deliver per the acceptance criteria:
+  - Modules publish domain events transactionally (outbox) with at-least-once dispatch.
+  - Subscribers (read-models, jobs, notifications) can consume events idempotently.
+  - Events carry tenant context and are observable.
+  - A sample event flows from a write to a read-model projection.
 - [ ] **Apply via migrations; verify RLS/tenancy**
+  Migration runs per environment; prove tenant isolation holds.
 - [ ] **Document setup & usage**
+  How to run/operate it; runbook notes for the team.

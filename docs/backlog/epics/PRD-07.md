@@ -16,10 +16,10 @@ The engine that keeps the book full and clients coming back at the right cadence
 | `MARKETING-CONSENT` | [Marketing consent & functional unsubscribe (Spam Act)](../stories/PRD-07__MARKETING-CONSENT.md) | Story | P1 | 3 | 3 |
 | `BOOKING-PAGE` | [Public booking page: generic names, S4 prices withheld](../stories/PRD-07__BOOKING-PAGE.md) | Story | P1 | 3 | 4 |
 | `FOLLOWUPS` | [Unified follow-up / job queue](../stories/PRD-07__FOLLOWUPS.md) | Story | P2 | 2 | 3 |
-| `INBOX` | [Omnichannel inbox + lead/reviews (placeholder)](../stories/PRD-07__INBOX.md) | Story | P2 | 1 | 2 |
+| `INBOX` | [Omnichannel inbox + lead/reviews (placeholder)](../stories/PRD-07__INBOX.md) | Story | P2 | 1 | 1 |
 | `AUTOMATIONS` | [Automation builder (triggers → timed messages)](../stories/PRD-07__AUTOMATIONS.md) | Story | P2 | 2 | 3 |
-| `REVIEWS` | [Reviews & reputation (request, acknowledge, flag, auto-follow-up)](../stories/PRD-07__REVIEWS.md) | Story | P2 | 1 | 2 |
-| `LEADS-CRM` | [Lead / prospect CRM](../stories/PRD-07__LEADS-CRM.md) | Story | P2 | 1 | 2 |
-| `CAMPAIGNS` | [Campaigns (external-tool handoff) (placeholder)](../stories/PRD-07__CAMPAIGNS.md) | Story | P2 | 1 | 2 |
+| `REVIEWS` | [Reviews & reputation (request, acknowledge, flag, auto-follow-up)](../stories/PRD-07__REVIEWS.md) | Story | P2 | 1 | 1 |
+| `LEADS-CRM` | [Lead / prospect CRM](../stories/PRD-07__LEADS-CRM.md) | Story | P2 | 1 | 1 |
+| `CAMPAIGNS` | [Campaigns (external-tool handoff) (placeholder)](../stories/PRD-07__CAMPAIGNS.md) | Story | P2 | 1 | 1 |
 
-_Totals: 11 stories · 28 tasks._
+_Totals: 11 stories · 24 tasks._

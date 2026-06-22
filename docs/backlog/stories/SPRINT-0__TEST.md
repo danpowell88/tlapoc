@@ -31,4 +31,10 @@ Test harnesses for API (unit + integration against a real Postgres with RLS), we
 ## Tasks (dev pickup)
 
 - [ ] **Implement: Test strategy & harness + quality gates**
+  Deliver per the acceptance criteria:
+  - Unit + integration test projects exist for the API (integration tests run against a real Postgres with RLS).
+  - Web and app unit/widget test setups in place; an e2e smoke test covers sign-in + the sample flow.
+  - Coverage threshold enforced in CI.
+  - A documented convention for writing 'compliance invariant' tests (gate must block) exists.
 - [ ] **Document setup & usage**
+  How to run/operate it; runbook notes for the team.

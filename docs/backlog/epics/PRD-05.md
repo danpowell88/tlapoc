@@ -17,11 +17,11 @@ The clinical record that matches the Aesthetic Record / Pabau bar: a guided char
 | `OFFLINE` | [Offline queue & sync for room-side charting](../stories/PRD-05__OFFLINE.md) | Story | P1 | 3 | 4 |
 | `ADVERSE-EVENT` | [Adverse-event capture → DAEN pathway](../stories/PRD-05__ADVERSE-EVENT.md) | Story | P1 | 3 | 4 |
 | `TREATMENT-PLANS` | [Treatment plans & protocol templates](../stories/PRD-05__TREATMENT-PLANS.md) | Story | P2 | 2 | 3 |
-| `MODALITY` | [Other-modality charting: filler / energy / weight-loss (placeholder)](../stories/PRD-05__MODALITY.md) | Story | P2 | 1 | 2 |
-| `AI-SCRIBE` | [AI note dictation / auto-detect injection points (placeholder)](../stories/PRD-05__AI-SCRIBE.md) | Story | P2 | 1 | 2 |
-| `SKIN-ANALYSIS` | [Skin analysis & assessment (with AI scan, advisory)](../stories/PRD-05__SKIN-ANALYSIS.md) | Story | P2 | 1 | 2 |
-| `BODY-CONTOURING` | [Body contouring charting (e.g. CoolSculpting)](../stories/PRD-05__BODY-CONTOURING.md) | Story | P2 | 1 | 2 |
+| `MODALITY` | [Other-modality charting: filler / energy / weight-loss (placeholder)](../stories/PRD-05__MODALITY.md) | Story | P2 | 1 | 1 |
+| `AI-SCRIBE` | [AI note dictation / auto-detect injection points (placeholder)](../stories/PRD-05__AI-SCRIBE.md) | Story | P2 | 1 | 1 |
+| `SKIN-ANALYSIS` | [Skin analysis & assessment (with AI scan, advisory)](../stories/PRD-05__SKIN-ANALYSIS.md) | Story | P2 | 1 | 1 |
+| `BODY-CONTOURING` | [Body contouring charting (e.g. CoolSculpting)](../stories/PRD-05__BODY-CONTOURING.md) | Story | P2 | 1 | 1 |
 | `COMPLICATION-LIBRARY` | [Complication protocol library & response kits](../stories/PRD-05__COMPLICATION-LIBRARY.md) | Story | P1 | 3 | 4 |
-| `OUTCOMES` | [Outcomes & revision tracking](../stories/PRD-05__OUTCOMES.md) | Story | P2 | 1 | 2 |
+| `OUTCOMES` | [Outcomes & revision tracking](../stories/PRD-05__OUTCOMES.md) | Story | P2 | 1 | 1 |
 
-_Totals: 13 stories · 41 tasks._
+_Totals: 13 stories · 36 tasks._

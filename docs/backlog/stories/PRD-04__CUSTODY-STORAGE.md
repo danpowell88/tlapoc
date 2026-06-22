@@ -46,6 +46,22 @@ A custodian + exclusive-custody attestation + designated medicine-store contact 
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
-- [ ] **Enforce compliance gate + audit events** — Server-side (C7, C15); blocked path explains why.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - StockLocation — id, tenant_id, name(locked cabinet/fridge), custodian_id, exclusive_custody_attested(bool), store_contact (Custody limited to on-site prescriber (C7); access logged.)
+  - AccessLog — id, location_id, actor_id, at, event(open|close|tamper) (Feeds the optional ESP32 cabinet sensor + audit.)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Backend: domain logic, rules & API endpoint(s)**
+  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
+  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
+  - Rule: Only NP/prescriber roles can take custody of stock.
+  - Rule: Stock is bound to a secure location; access is logged.
+  - Rule: A custodian + exclusive-custody attestation + designated medicine-store contact are recorded.
+  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
+  - Publish the OpenAPI contract so the generated clients update.
+  - Depends on: PRD-04/STOCK-RECEIVE.
+- [ ] **Enforce compliance gate + audit events**
+  Enforce C7, C15 as a server-side invariant that cannot be bypassed via the API:
+  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
+  - Write an immutable AuditEvent for the attempt and its outcome.
+  - Only NP/prescriber roles can take custody of stock.

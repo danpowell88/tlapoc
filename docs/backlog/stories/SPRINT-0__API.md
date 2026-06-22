@@ -35,4 +35,10 @@ A consistent API skeleton (clean/layered architecture, request pipeline, problem
 ## Tasks (dev pickup)
 
 - [ ] **Implement: .NET API skeleton: architecture, tenant context, error model**
+  Deliver per the acceptance criteria:
+  - Auth middleware validates Entra tokens (staff + client) and resolves tenant context for RLS.
+  - Standard problem-details error responses and consistent pagination/filtering conventions.
+  - Health/readiness endpoints and structured request logging in place.
+  - A vertical-slice sample endpoint demonstrates the full pattern end-to-end.
 - [ ] **Document setup & usage**
+  How to run/operate it; runbook notes for the team.

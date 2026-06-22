@@ -21,10 +21,10 @@ The domain backbone on top of the Sprint 0 plumbing: tenant provisioning, RBAC +
 | `PRIVACY-RIGHTS` | [Client privacy: collection notice, access & correction (DSAR)](../stories/PRD-01__PRIVACY-RIGHTS.md) | Story | P1 | 3 | 3 |
 | `RESIDENCY` | [Data residency & sub-processor controls](../stories/PRD-01__RESIDENCY.md) | Story | P1 | 3 | 3 |
 | `CLIENT-CORE` | [Client core record: DOB & under-18 flag](../stories/PRD-01__CLIENT-CORE.md) | Story | P1 | 3 | 2 |
-| `ROLE-BUILDER` | [Custom-role builder (placeholder)](../stories/PRD-01__ROLE-BUILDER.md) | Story | P2 | 1 | 2 |
+| `ROLE-BUILDER` | [Custom-role builder (placeholder)](../stories/PRD-01__ROLE-BUILDER.md) | Story | P2 | 1 | 1 |
 | `SIGNIN-UI` | [Sign-in / sign-out screens & session management](../stories/PRD-01__SIGNIN-UI.md) | Story | P0 | 5 | 4 |
 | `MFA-STEPUP` | [MFA & step-up authentication for sensitive actions](../stories/PRD-01__MFA-STEPUP.md) | Story | P1 | 3 | 3 |
 | `MULTI-ROLE` | [Multi-role staff & active-role context](../stories/PRD-01__MULTI-ROLE.md) | Story | P1 | 3 | 3 |
 | `AUTH-AUDIT` | [Authentication & authorisation audit events](../stories/PRD-01__AUTH-AUDIT.md) | Story | P1 | 3 | 3 |
 
-_Totals: 16 stories · 45 tasks._
+_Totals: 16 stories · 44 tasks._

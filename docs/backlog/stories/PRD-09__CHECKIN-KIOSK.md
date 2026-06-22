@@ -45,4 +45,7 @@ _Prototype screen: checkin.html._
 
 ## Tasks (dev pickup)
 
-- [ ] **Web UI** — checkin.html.
+- [ ] **Web UI**
+  Build on the Angular web app: the checkin per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
+  Key elements (from the prototype):
+  - Prototype: check-in tablet (checkin.png) — 'Welcome in' self-check-in; verify appointment, complete outstanding intake/consent; returns to a neutral state between clients.

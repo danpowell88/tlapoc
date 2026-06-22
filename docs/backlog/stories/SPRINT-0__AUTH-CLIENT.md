@@ -35,4 +35,10 @@ Clients create accounts and sign in via Entra External ID (CIAM) with Google/App
 ## Tasks (dev pickup)
 
 - [ ] **Implement: Client identity: Entra External ID (social / email / OTP) wiring**
+  Deliver per the acceptance criteria:
+  - Entra External ID configured for social, local (email+password) and OTP flows.
+  - Client app and public web complete each of the three sign-in methods.
+  - Client identities are tenant-scoped and distinct from staff identities.
+  - Account recovery (password reset / OTP resend) works.
 - [ ] **Document setup & usage**
+  How to run/operate it; runbook notes for the team.

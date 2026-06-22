@@ -48,6 +48,23 @@ _Prototype screen: prototype.html — Forms & consent; client-app.html intake/co
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - IntakeForm — id, tenant_id, name, version, fields(json schema) (Configurable; versioned.)
+  - IntakeResponse — id, tenant_id, client_id, appointment_id, form_version, answers(json), submitted_at (Auto-linked to the chart; contributes to the gate.)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Backend: domain logic, rules & API endpoint(s)**
+  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
+  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
+  - Rule: Configurable pre-visit forms capture history, meds, allergies/contraindications.
+  - Rule: Intake is sent on booking and completable in the client app/web.
+  - Rule: Responses auto-link to the client's chart.
+  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
+  - Publish the OpenAPI contract so the generated clients update.
+  - Depends on: PRD-02/ONLINE-BOOK.
 - [ ] **Client app UI (Flutter)**
+  Build on the Flutter client app: the forms-consent per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
+  Key elements (from the prototype):
+  - Client app / public: a pre-visit intake wizard (medical history -> meds -> allergies/contraindications) — see client-app.png; also completable at the reception check-in tablet (checkin.png).
+  - Staff: Forms & consent (forms-consent.png) shows intake status per client and lets the desk send/chase it.
+  - Forms are configurable (admin-defined fields).

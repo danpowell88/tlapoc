@@ -39,4 +39,10 @@ _Prototype screen: Non-UI / platform scaffolding — no prototype screen._
 ## Tasks (dev pickup)
 
 - [ ] **Implement: Design system / shared component library + tokens**
+  Deliver per the acceptance criteria:
+  - Tokens (colour, type, spacing) defined once and consumed by web + Flutter.
+  - Core components include the cross-cutting patterns from UX §4 (blocked-action banner, consent/age chips, S4 guardrail tag, offline indicator).
+  - Components are documented in a simple gallery/storybook.
+  - Accessibility basics (contrast, focus, hit-target size) verified for core components.
 - [ ] **Document setup & usage**
+  How to run/operate it; runbook notes for the team.

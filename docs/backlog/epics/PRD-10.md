@@ -13,6 +13,6 @@ Outbound integrations that remove double-entry: push sales/payments to Xero, and
 | `XERO` | [Xero invoice/payment sync](../stories/PRD-10__XERO.md) | Story | P1 | 3 | 2 |
 | `CALENDAR-SYNC` | [Two-way calendar sync (M365 / Google)](../stories/PRD-10__CALENDAR-SYNC.md) | Story | P2 | 2 | 2 |
 | `SUBPROCESSOR-POSTURE` | [Sub-processor residency posture (APP-8)](../stories/PRD-10__SUBPROCESSOR-POSTURE.md) | Story | P2 | 2 | 3 |
-| `INTEGRATIONS-LATER` | [Online checkout, e-prescribing, webhooks/API (placeholder)](../stories/PRD-10__INTEGRATIONS-LATER.md) | Story | P2 | 1 | 2 |
+| `INTEGRATIONS-LATER` | [Online checkout, e-prescribing, webhooks/API (placeholder)](../stories/PRD-10__INTEGRATIONS-LATER.md) | Story | P2 | 1 | 1 |
 
-_Totals: 4 stories · 9 tasks._
+_Totals: 4 stories · 8 tasks._

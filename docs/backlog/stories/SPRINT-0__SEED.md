@@ -31,5 +31,12 @@ A one-command local environment seeded with a synthetic tenant: staff roles/cred
 ## Tasks (dev pickup)
 
 - [ ] **Implement: Synthetic seed data & local dev environment**
+  Deliver per the acceptance criteria:
+  - A script spins up Postgres + API + web locally and seeds a synthetic tenant.
+  - Seed covers staff roles/credentials, clients (incl. an under-18), services flagged S4/non-S4, and stock lots.
+  - All seed data is clearly synthetic; no real client/staff/business info.
+  - Seed is reproducible and used by integration/e2e tests.
 - [ ] **Apply via migrations; verify RLS/tenancy**
+  Migration runs per environment; prove tenant isolation holds.
 - [ ] **Document setup & usage**
+  How to run/operate it; runbook notes for the team.

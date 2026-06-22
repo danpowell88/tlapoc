@@ -19,8 +19,8 @@ The calendar that runs the front desk and the 360° client record everything han
 | `WALKINS` | [Walk-ins, same-day add-ons & resources](../stories/PRD-02__WALKINS.md) | Story | P2 | 2 | 3 |
 | `CLIENT-360` | [Client 360° profile](../stories/PRD-02__CLIENT-360.md) | Story | P1 | 3 | 3 |
 | `CLIENT-DIR` | [Client directory: search, filter, merge, soft-delete](../stories/PRD-02__CLIENT-DIR.md) | Story | P2 | 2 | 3 |
-| `DEPOSITS` | [Booking deposits / card-on-file hold (placeholder)](../stories/PRD-02__DEPOSITS.md) | Story | P2 | 1 | 2 |
+| `DEPOSITS` | [Booking deposits / card-on-file hold (placeholder)](../stories/PRD-02__DEPOSITS.md) | Story | P2 | 1 | 1 |
 | `BOOKING-WIZARD` | [Staff booking wizard (service → practitioner → time → client → confirm)](../stories/PRD-02__BOOKING-WIZARD.md) | Story | P1 | 3 | 4 |
 | `SERVICE-CATALOGUE` | [Services & treatment-menu admin (durations, eligible roles, S4 flag)](../stories/PRD-02__SERVICE-CATALOGUE.md) | Story | P1 | 3 | 4 |
 
-_Totals: 12 stories · 38 tasks._
+_Totals: 12 stories · 37 tasks._

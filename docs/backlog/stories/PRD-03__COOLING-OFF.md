@@ -44,6 +44,22 @@ The payment block coordinates with PRD-06; the booking deposit/hold is suppresse
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
-- [ ] **Enforce compliance gate + audit events** — Server-side (C6); blocked path explains why.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - CoolingOffTimer — id, client_id, appointment_id, consent_at, eligible_at, payment_blocked(bool), second_consult_offered_at (Under-18 mandatory 7d; adult optional/config.)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Backend: domain logic, rules & API endpoint(s)**
+  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
+  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
+  - Rule: For under-18: ≥7 days enforced between consent and procedure; payment blocked except the consult until elapsed.
+  - Rule: A second-consultation offer is recorded.
+  - Rule: Optional adult cooling-off is configurable (default per legal read).
+  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
+  - Publish the OpenAPI contract so the generated clients update.
+  - Depends on: PRD-01/CLIENT-CORE, PRD-03/CONSENT.
+- [ ] **Enforce compliance gate + audit events**
+  Enforce C6 as a server-side invariant that cannot be bypassed via the API:
+  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
+  - Write an immutable AuditEvent for the attempt and its outcome.
+  - For under-18: ≥7 days enforced between consent and procedure; payment blocked except the consult until elapsed.
+  - Payment block coordinates with PRD-06.

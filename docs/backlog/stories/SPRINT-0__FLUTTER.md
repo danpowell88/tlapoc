@@ -41,4 +41,10 @@ _Prototype screen: Non-UI / platform scaffolding — no prototype screen._
 ## Tasks (dev pickup)
 
 - [ ] **Implement: Flutter app shells (client + provider) + shared packages**
+  Deliver per the acceptance criteria:
+  - Client app shell has the Home/Book/My care/Membership/Account tabs; provider app shell has Schedule/Patient/Medicines/Tasks tabs (empty screens).
+  - Both apps sign in (client = External ID, provider = Entra) and call the sample endpoint.
+  - Auth tokens stored in secure storage; design-system theme applied.
+  - Builds are produced by CI for internal distribution.
 - [ ] **Document setup & usage**
+  How to run/operate it; runbook notes for the team.

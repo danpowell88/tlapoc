@@ -45,6 +45,21 @@ Enforced at the infra level (Sprint-0 IAC policy) and checked by integrations (P
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
-- [ ] **Enforce compliance gate + audit events** — Server-side (C21); blocked path explains why.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - SubProcessor — id, tenant_id, name, region, app8_assessment_ref, consent_ref, status (Non-AU blocked unless assessed + consented.)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Backend: domain logic, rules & API endpoint(s)**
+  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
+  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
+  - Rule: All PII/PHI resources resolve to Australia East (verified, ties to Sprint 0 IAC policy).
+  - Rule: An integration to a non-AU sub-processor is blocked unless an APP-8 assessment + consent record exists.
+  - Rule: Sub-processor data flows are documented in a register.
+  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
+  - Publish the OpenAPI contract so the generated clients update.
+  - Depends on: SPRINT-0/IAC.
+- [ ] **Enforce compliance gate + audit events**
+  Enforce C21 as a server-side invariant that cannot be bypassed via the API:
+  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
+  - Write an immutable AuditEvent for the attempt and its outcome.
+  - An integration to a non-AU sub-processor is blocked unless an APP-8 assessment + consent record exists.

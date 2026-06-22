@@ -19,6 +19,6 @@ Commerce for the clinic: in-person POS (Square card-present + recorded cash + gi
 | `MARGIN-RULES` | [Margin-aware reward rules](../stories/PRD-06__MARGIN-RULES.md) | Story | P1 | 3 | 3 |
 | `CHECKOUT-ASSIST` | [Checkout assist & post-visit rebooking](../stories/PRD-06__CHECKOUT-ASSIST.md) | Story | P2 | 2 | 1 |
 | `PRICING-WHATIF` | [Pricing & what-if planning (owner)](../stories/PRD-06__PRICING-WHATIF.md) | Story | P2 | 2 | 3 |
-| `REFERRALS` | [Referrals & affiliate credit (non-S4) (placeholder)](../stories/PRD-06__REFERRALS.md) | Story | P2 | 1 | 2 |
+| `REFERRALS` | [Referrals & affiliate credit (non-S4) (placeholder)](../stories/PRD-06__REFERRALS.md) | Story | P2 | 1 | 1 |
 
-_Totals: 10 stories · 26 tasks._
+_Totals: 10 stories · 25 tasks._

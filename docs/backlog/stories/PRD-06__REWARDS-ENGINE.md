@@ -50,6 +50,22 @@ Drives repeat visits without eroding margin or breaching advertising law. The ca
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
-- [ ] **Enforce compliance gate + audit events** — Server-side (C9); blocked path explains why.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - RewardRule — id, tenant_id, basis(milestone|nth_visit|membership), eligible_items(non-S4), value_cap (S4 eligibility blocked (C9).)
+  - RewardLedger — id, client_id, earned, redeemed, balance, ref (Non-S4 redemptions only.)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Backend: domain logic, rules & API endpoint(s)**
+  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
+  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
+  - Rule: Visit-based rewards (milestones/every-Nth-visit) + membership perks on non-S4 items, add-ons or account/gift credit.
+  - Rule: The engine refuses to earn, redeem or discount against any S4-flagged item.
+  - Rule: Attempting to configure an S4 reward is blocked.
+  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
+  - Publish the OpenAPI contract so the generated clients update.
+  - Depends on: PRD-04/PRODUCT-CATALOGUE.
+- [ ] **Enforce compliance gate + audit events**
+  Enforce C9 as a server-side invariant that cannot be bypassed via the API:
+  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
+  - Write an immutable AuditEvent for the attempt and its outcome.
+  - Attempting to configure an S4 reward is blocked.

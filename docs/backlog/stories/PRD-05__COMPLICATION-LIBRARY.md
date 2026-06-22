@@ -47,7 +47,25 @@ _Prototype screen: prototype.html — Clinical → Complication protocols._
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
-- [ ] **Enforce compliance gate + audit events** — Server-side (C12, C20); blocked path explains why.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - ComplicationProtocol — id, tenant_id, name, steps[], required_kit[] (Reference library.)
+  - ComplicationResponse — id, protocol_id, client_id, chart_entry_id, started_at, completed_at, outcome, kit_used[] (Can raise an AdverseEvent + jobs.)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Backend: domain logic, rules & API endpoint(s)**
+  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
+  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
+  - Rule: Protocols (e.g. vascular occlusion, anaphylaxis) present guided steps and required kit items.
+  - Rule: Launching a protocol logs the response and can raise an adverse event (PRD-05/ADVERSE-EVENT).
+  - Rule: Completion is recorded with timing and outcome.
+  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
+  - Publish the OpenAPI contract so the generated clients update.
+  - Depends on: PRD-05/ADVERSE-EVENT.
+- [ ] **Enforce compliance gate + audit events**
+  Enforce C12, C20 as a server-side invariant that cannot be bypassed via the API:
+  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
+  - Write an immutable AuditEvent for the attempt and its outcome.
 - [ ] **Provider app UI (Flutter)**
+  Build on the Flutter provider app: the clinical-safety per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
+  Key elements (from the prototype):
+  - Prototype: Clinical -> Complication protocols (clinical-safety.png) — protocol cards with step-by-step guidance and kit links; openComplication/completeComplication actions.

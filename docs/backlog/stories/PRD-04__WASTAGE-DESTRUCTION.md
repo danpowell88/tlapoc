@@ -43,6 +43,21 @@ Closes the medicines loop alongside reconciliation and stocktake.
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
-- [ ] **Enforce compliance gate + audit events** — Server-side (C16); blocked path explains why.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - StockDestruction — id, lot_id, units, reason, pathway(RUM|licensed), certificate_ref, at, actor_id (Partial-vial supported; immutable + audited (C16).)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Backend: domain logic, rules & API endpoint(s)**
+  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
+  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
+  - Rule: Wastage/destruction records capture quantity, reason, pathway and certificate reference.
+  - Rule: Partial-vial destruction is supported.
+  - Rule: Licensed/RUM disposal pathway is recorded.
+  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
+  - Publish the OpenAPI contract so the generated clients update.
+  - Depends on: PRD-04/CUSTODY-STORAGE.
+- [ ] **Enforce compliance gate + audit events**
+  Enforce C16 as a server-side invariant that cannot be bypassed via the API:
+  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
+  - Write an immutable AuditEvent for the attempt and its outcome.
+  - Records are immutable and audited.

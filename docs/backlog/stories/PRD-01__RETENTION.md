@@ -43,6 +43,22 @@ A transfer log records records handed to another provider.
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
-- [ ] **Enforce compliance gate + audit events** — Server-side (C18); blocked path explains why.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - RetentionPolicy — id, tenant_id, record_type, basis(adult7y|minor25|indefinite_on_flag), period
+  - DestructionRecord — id, tenant_id, record_ref, patient, period, destroyed_at, certificate_ref (Immutable + audited.)
+  - TransferLog — id, record_ref, to_provider, at
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Backend: domain logic, rules & API endpoint(s)**
+  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
+  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
+  - Rule: Retention rules: adults ≥7y from last contact; minors to age 25; indefinite on complaint/litigation.
+  - Rule: Records past retention surface for destruction with their retention basis.
+  - Rule: Destroying a record writes a destruction-register entry (patient, period, date) + certificate reference.
+  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
+  - Publish the OpenAPI contract so the generated clients update.
+  - Depends on: PRD-01/AUDIT.
+- [ ] **Enforce compliance gate + audit events**
+  Enforce C18 as a server-side invariant that cannot be bypassed via the API:
+  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
+  - Write an immutable AuditEvent for the attempt and its outcome.

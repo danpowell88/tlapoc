@@ -41,4 +41,10 @@ _Prototype screen: Non-UI / platform scaffolding — no prototype screen._
 ## Tasks (dev pickup)
 
 - [ ] **Implement: Angular web shell: routing, auth guard, layout**
+  Deliver per the acceptance criteria:
+  - Unauthenticated users are redirected to Entra sign-in; authenticated users land on a shell.
+  - Navigation is driven by capabilities/role (placeholder until PRD-01 RBAC lands).
+  - Design-system theme + tokens applied globally.
+  - A sample feature route renders inside the shell using the generated API client.
 - [ ] **Document setup & usage**
+  How to run/operate it; runbook notes for the team.

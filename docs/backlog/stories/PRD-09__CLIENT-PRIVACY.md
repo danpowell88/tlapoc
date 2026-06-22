@@ -45,5 +45,11 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 
 ## Tasks (dev pickup)
 
-- [ ] **Enforce compliance gate + audit events** — Server-side (C21); blocked path explains why.
+- [ ] **Enforce compliance gate + audit events**
+  Enforce C21 as a server-side invariant that cannot be bypassed via the API:
+  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
+  - Write an immutable AuditEvent for the attempt and its outcome.
 - [ ] **Client app UI (Flutter)**
+  Build on the Flutter client app: the client-app per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
+  Key elements (from the prototype):
+  - Prototype: client app Account (client-app.png) — 'Edit profile', 'Update card on file', 'Request account deletion', privacy/access-correction; residency trust note.

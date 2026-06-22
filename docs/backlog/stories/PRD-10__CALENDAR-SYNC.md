@@ -48,5 +48,14 @@ Gives practitioners one source of truth for their time.
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Integration adapter, sync & config** — Behind the port; trigger + retries/reconciliation; AU/APP-8 posture.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - CalendarLink — id, staff_id, provider(m365|google), tokens, sync_mode(two_way), status (Per-staff opt-in.)
+  - SyncLog — id, calendar_link_id, appointment_id, direction, at, result (Busy events block availability.)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Integration adapter, sync & config**
+  Implement the provider behind its swappable port:
+  - Connection/config (OAuth tokens stored encrypted) + the field mapping this story needs.
+  - Trigger on the relevant event; idempotent sync with retries, back-off and a visible reconciliation/status.
+  - Handle partial failures + replays; surface errors to the user.
+  - Residency: AU-resident or APP-8-assessed + consented before any PII leaves (C21).

@@ -50,5 +50,13 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 
 ## Tasks (dev pickup)
 
-- [ ] **Enforce compliance gate + audit events** — Server-side (C14); blocked path explains why.
+- [ ] **Enforce compliance gate + audit events**
+  Enforce C14 as a server-side invariant that cannot be bypassed via the API:
+  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
+  - Write an immutable AuditEvent for the attempt and its outcome.
+  - Finalisation is server-side; once finalised the entry is read-only.
 - [ ] **Provider app UI (Flutter)**
+  Build on the Flutter provider app: the treatment-room per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
+  Key elements (from the prototype):
+  - Prototype: provider app (treatment-room.png) — 'Treatment record', 'Treatment settings', the injection map + camera; finalise locks the note.
+  - Photos capture to central storage; none persist on device after sync (C14).

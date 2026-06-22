@@ -50,5 +50,5 @@ _Prototype screen: prototype.html — Clinical → Skin analysis (scan + push-to
 
 ## Tasks (dev pickup)
 
-- [ ] **Scope & design when pulled into a sprint** — Deferred placeholder — no build yet.
-- [ ] **Confirm it still fits scope / regulatory stance**
+- [ ] **Scope & design when pulled into a sprint**
+  Deferred placeholder — no build in v1; confirm it still fits scope/regulatory stance, then break down.

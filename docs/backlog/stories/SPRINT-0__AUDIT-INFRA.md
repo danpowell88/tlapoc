@@ -41,5 +41,12 @@ The append-only AuditEvent store + a reusable interceptor/helper so any module r
 ## Tasks (dev pickup)
 
 - [ ] **Implement: Append-only audit infrastructure baseline**
+  Deliver per the acceptance criteria:
+  - AuditEvent table is append-only (no update/delete path) and carries who/what/when/tenant.
+  - A reusable interceptor/helper records create/update/read for annotated entities or endpoints.
+  - Events are queryable and exportable (full register UI is PRD-01/PRD-08).
+  - Tampering attempts (update/delete) are rejected at the data layer.
 - [ ] **Apply via migrations; verify RLS/tenancy**
+  Migration runs per environment; prove tenant isolation holds.
 - [ ] **Document setup & usage**
+  How to run/operate it; runbook notes for the team.

@@ -50,7 +50,26 @@ _Prototype screen: prototype.html — Charting + Clinical (Skin analysis, Body c
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
-- [ ] **Enforce compliance gate + audit events** — Server-side (C14); blocked path explains why.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - Photo — id, tenant_id, client_id, chart_entry_id, blob_ref(signed-url), framing_meta(json), taken_at, image_consent_id (Central storage; never on device (C14/ADR-0009).)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Backend: domain logic, rules & API endpoint(s)**
+  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
+  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
+  - Rule: Camera/upload with standardised framing/ghosting guide; side-by-side compare across visits.
+  - Rule: Capture requires current image-use consent (PRD-03).
+  - Rule: Photos stored centrally via signed URLs; never persisted on device beyond a transient sync cache.
+  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
+  - Publish the OpenAPI contract so the generated clients update.
+  - Depends on: PRD-03/IMAGE-CONSENT.
+- [ ] **Enforce compliance gate + audit events**
+  Enforce C14 as a server-side invariant that cannot be bypassed via the API:
+  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
+  - Write an immutable AuditEvent for the attempt and its outcome.
+  - Capture requires current image-use consent (PRD-03).
 - [ ] **Provider app UI (Flutter)**
+  Build on the Flutter provider app: the clinical-imaging per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
+  Key elements (from the prototype):
+  - Prototype: Charting 'Before / after' compare with a drag slider ('12 weeks apart · stored securely, never on device') — see charting.png; and Clinical -> Photography & outcomes (clinical-imaging.png) for the gallery/compare.
+  - Camera/upload with a framing/ghost overlay; capture blocked without image-use consent.

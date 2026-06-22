@@ -47,6 +47,22 @@ _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rew
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
-- [ ] **Web UI** — prototype.html — Checkout, Memberships; client-app.html Rewards/Account.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - Invoice — id, tenant_id, client_id, lines[]{type, ref, qty, price, gst}, total, status (Lines carry the service/product schedule flag.)
+  - Payment — id, invoice_id, tender(card|cash|giftcard), amount, token_ref?, tip, surcharge, at (Appears in Closeout; posts to Xero (PRD-10).)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Backend: domain logic, rules & API endpoint(s)**
+  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
+  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
+  - Rule: A sale completes by Square card or recorded cash; both appear in the daily closeout.
+  - Rule: Receipts, partial/split payments, tips and surcharge config supported.
+  - Rule: Money figures respect the owner-only financial capability (reception sees no money totals beyond the sale).
+  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
+  - Publish the OpenAPI contract so the generated clients update.
+  - Depends on: PRD-06/PAYMENT-PROVIDER.
+- [ ] **Web UI**
+  Build on the Angular web app: the checkout per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
+  Key elements (from the prototype):
+  - Prototype: Checkout (checkout.png) — line items (service/retail/package), tender selection (Square card / cash / gift card), receipt, partial/split, tips; S4 items show no reward/discount controls (C9).
+  - Reception sees the sale but not owner-only money totals.

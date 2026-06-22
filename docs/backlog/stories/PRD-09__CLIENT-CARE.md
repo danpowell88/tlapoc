@@ -47,3 +47,7 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 ## Tasks (dev pickup)
 
 - [ ] **Client app UI (Flutter)**
+  Build on the Flutter client app: the client-app per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
+  Key elements (from the prototype):
+  - Prototype: client app (client-app.png) tabs — My care (visit history, photos with consent), Rewards (redeem points, gift cards), Account (update card on file).
+  - Photo viewing is image-use-consent-gated.

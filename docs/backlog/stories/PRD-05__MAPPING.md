@@ -62,9 +62,15 @@ _Prototype screen: prototype.html — Charting + Clinical (Skin analysis, Body c
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations: ChartEntry + InjectionPoint** — ChartEntry (treatment_type, status, consult/consent links) + InjectionPoint (product, lot, units, depth, technique, coord_x/y). tenant_id + RLS; index by client and by lot for recall.
-- [ ] **Charting API: open draft, add/move/delete points** — Gate-checked draft open; CRUD points; live total. Validate the lot is in-date/in-custody/ARTG and product matches.
-- [ ] **Finalise endpoint (transactional, immutable)** — Validate gate, lock the note, deduct Σunits from the lot (StockLedger administration movement), write the lot→client register link, reject if units > on-hand. Idempotent + audited (ADR-0010).
-- [ ] **Injection-map canvas (web)** — Facial diagram/photo with tap-to-add + drag pins (SPIKE-CANVAS approach); selected-point editor (units/depth/technique), point list, live total, product·lot label; crosshair + read-only mode.
-- [ ] **Product & batch (lot) selector** — Step-2 dropdowns restricted to in-date/in-custody/ARTG lots; lot-info line; wire the selected lot into point deductions.
-- [ ] **Skin-note (non-S4) variant** — Areas multi-select, device/modality, settings, consumables; no lot/Rx; the treatment-type toggle switches map vs note.
+- [ ] **Data model & migrations: ChartEntry + InjectionPoint**
+  ChartEntry (treatment_type, status, consult/consent links) + InjectionPoint (product, lot, units, depth, technique, coord_x/y). tenant_id + RLS; index by client and by lot for recall.
+- [ ] **Charting API: open draft, add/move/delete points**
+  Gate-checked draft open; CRUD points; live total. Validate the lot is in-date/in-custody/ARTG and product matches.
+- [ ] **Finalise endpoint (transactional, immutable)**
+  Validate gate, lock the note, deduct Σunits from the lot (StockLedger administration movement), write the lot→client register link, reject if units > on-hand. Idempotent + audited (ADR-0010).
+- [ ] **Injection-map canvas (web)**
+  Facial diagram/photo with tap-to-add + drag pins (SPIKE-CANVAS approach); selected-point editor (units/depth/technique), point list, live total, product·lot label; crosshair + read-only mode.
+- [ ] **Product & batch (lot) selector**
+  Step-2 dropdowns restricted to in-date/in-custody/ARTG lots; lot-info line; wire the selected lot into point deductions.
+- [ ] **Skin-note (non-S4) variant**
+  Areas multi-select, device/modality, settings, consumables; no lot/Rx; the treatment-type toggle switches map vs note.

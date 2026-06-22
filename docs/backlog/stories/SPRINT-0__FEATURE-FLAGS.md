@@ -38,4 +38,10 @@ Feature flags + a typed per-tenant configuration store so features ship dark and
 ## Tasks (dev pickup)
 
 - [ ] **Implement: Feature flags & per-tenant configuration**
+  Deliver per the acceptance criteria:
+  - Feature flags can be toggled globally and per tenant.
+  - Per-tenant configuration (e.g. cooling-off N days, S4 naming, modality availability) is typed and validated.
+  - Flag/config reads are cached and observable.
+  - Changing a flag/config is audited.
 - [ ] **Document setup & usage**
+  How to run/operate it; runbook notes for the team.

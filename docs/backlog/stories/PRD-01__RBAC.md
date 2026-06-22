@@ -50,6 +50,24 @@ Every API action checks a capability server-side; an out-of-scope attempt is blo
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
-- [ ] **Enforce compliance gate + audit events** — Server-side (C4, C19); blocked path explains why.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - Role — id, tenant_id, name, capabilities[] (Preset roles map to the scope matrix; custom builder is later.)
+  - Capability — key, description (e.g. chart.write, stock.custody, finance.read; checked per API action.)
+  - Concern — key (Drives which dashboard widgets a role sees.)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Backend: domain logic, rules & API endpoint(s)**
+  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
+  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
+  - Rule: Capabilities × concerns model implemented; each API action checks a capability.
+  - Rule: The persona set (NP, Lead RN, RN, dermal, reception, owner-business) maps to the matrix.
+  - Rule: An out-of-scope action is blocked with a clear reason and an audit event.
+  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
+  - Publish the OpenAPI contract so the generated clients update.
+  - Depends on: PRD-01/TENANT.
+- [ ] **Enforce compliance gate + audit events**
+  Enforce C4, C19 as a server-side invariant that cannot be bypassed via the API:
+  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
+  - Write an immutable AuditEvent for the attempt and its outcome.
+  - An out-of-scope action is blocked with a clear reason and an audit event.
+  - Owner-business is read-only for clinical/stock unless they hold the credential.

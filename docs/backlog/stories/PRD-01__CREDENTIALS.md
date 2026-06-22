@@ -52,6 +52,22 @@ These derive a single canInject signal: a practitioner whose PII excludes cosmet
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
-- [ ] **Enforce compliance gate + audit events** — Server-side (C4, C19); blocked path explains why.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - StaffProfile — id, tenant_id, user_id, role_id, ahpra_no, ahpra_type, ahpra_status, ahpra_expiry, conditions, experience_1yr, engagement_type(employee|contractor) (Derives canInject.)
+  - Credential — id, staff_id, kind(registration|insurance|cpd|training), reference, status, expiry, evidence_ref, cosmetic_cover(bool) (Insurance must flag cosmetic_cover for canInject.)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Backend: domain logic, rules & API endpoint(s)**
+  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
+  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
+  - Rule: Profiles capture AHPRA reg/type/status/expiry/conditions, ≥1yr-experience flag, CPD and cosmetic-cover PII.
+  - Rule: A practitioner whose PII excludes cosmetic, or whose registration has lapsed, is flagged not-cleared.
+  - Rule: The designated RN prescriber role is supported (endorsement + recorded partnered prescriber).
+  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
+  - Publish the OpenAPI contract so the generated clients update.
+  - Depends on: PRD-01/RBAC.
+- [ ] **Enforce compliance gate + audit events**
+  Enforce C4, C19 as a server-side invariant that cannot be bypassed via the API:
+  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
+  - Write an immutable AuditEvent for the attempt and its outcome.
+  - canInject is a single derived signal consumed by booking (PRD-02) and treatment gates.

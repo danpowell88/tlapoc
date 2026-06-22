@@ -17,10 +17,10 @@ Turns the platform's data into the business intelligence the clinic relies on an
 | `DATA-QUALITY` | [Data-quality checks](../stories/PRD-08__DATA-QUALITY.md) | Story | P2 | 2 | 3 |
 | `ATTENTION-DIGEST` | [Owner 'needs attention' exceptions digest](../stories/PRD-08__ATTENTION-DIGEST.md) | Story | P2 | 2 | 2 |
 | `INSPECTION-PACK` | [Inspection-readiness pack & governance hub](../stories/PRD-08__INSPECTION-PACK.md) | Story | P2 | 2 | 4 |
-| `REPORT-BUILDER` | [Custom report builder / external BI (placeholder)](../stories/PRD-08__REPORT-BUILDER.md) | Story | P2 | 1 | 2 |
+| `REPORT-BUILDER` | [Custom report builder / external BI (placeholder)](../stories/PRD-08__REPORT-BUILDER.md) | Story | P2 | 1 | 1 |
 | `SCORECARD` | [Practitioner scorecard](../stories/PRD-08__SCORECARD.md) | Story | P2 | 2 | 2 |
 | `CAPACITY` | [Capacity & utilisation report](../stories/PRD-08__CAPACITY.md) | Story | P2 | 2 | 2 |
 | `TRUE-COST` | [True-cost / margin (COGS) reporting](../stories/PRD-08__TRUE-COST.md) | Story | P2 | 2 | 2 |
 | `POLICIES` | [Policies & procedures sign-off](../stories/PRD-08__POLICIES.md) | Story | P1 | 3 | 4 |
 
-_Totals: 12 stories · 33 tasks._
+_Totals: 12 stories · 32 tasks._

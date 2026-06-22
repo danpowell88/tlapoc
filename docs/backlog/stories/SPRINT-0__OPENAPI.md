@@ -35,4 +35,10 @@ The API publishes a versioned OpenAPI document and CI generates typed clients fo
 ## Tasks (dev pickup)
 
 - [ ] **Implement: OpenAPI contract + typed client generation**
+  Deliver per the acceptance criteria:
+  - API serves a versioned OpenAPI document.
+  - Typed clients are generated for Angular and Flutter and published to the shared packages.
+  - Client generation runs in CI and fails on a breaking contract change without a version bump.
+  - The sample endpoint is consumed via the generated client in both web and app.
 - [ ] **Document setup & usage**
+  How to run/operate it; runbook notes for the team.

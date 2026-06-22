@@ -44,4 +44,7 @@ _Prototype screen: prototype.html — sidebar clinic switcher._
 
 ## Tasks (dev pickup)
 
-- [ ] **Web UI** — prototype.html — sidebar clinic switcher.
+- [ ] **Web UI**
+  Build on the Angular web app: the dashboard per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
+  Key elements (from the prototype):
+  - Prototype: the sidebar clinic switcher (dashboard.png) — lists clinics (Brisbane, Gold Coast, locum site); selecting one sets the active location.

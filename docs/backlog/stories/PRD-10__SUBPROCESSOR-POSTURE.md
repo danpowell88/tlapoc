@@ -47,6 +47,18 @@ Keeps integrations inside cross-border privacy rules (C21).
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Enforce compliance gate + audit events** — Server-side (C21); blocked path explains why.
-- [ ] **Integration adapter, sync & config** — Behind the port; trigger + retries/reconciliation; AU/APP-8 posture.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - SubProcessor — (shared with PRD-01) id, name, region, app8_assessment_ref, consent_ref (Non-AU blocked unless assessed + consented.)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Enforce compliance gate + audit events**
+  Enforce C21 as a server-side invariant that cannot be bypassed via the API:
+  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
+  - Write an immutable AuditEvent for the attempt and its outcome.
+  - No integration sends PII to a non-AU sub-processor unless an APP-8 assessment + consent record exists.
+- [ ] **Integration adapter, sync & config**
+  Implement the provider behind its swappable port:
+  - Connection/config (OAuth tokens stored encrypted) + the field mapping this story needs.
+  - Trigger on the relevant event; idempotent sync with retries, back-off and a visible reconciliation/status.
+  - Handle partial failures + replays; surface errors to the user.
+  - Residency: AU-resident or APP-8-assessed + consented before any PII leaves (C21).

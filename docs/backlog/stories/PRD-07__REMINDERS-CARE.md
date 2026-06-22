@@ -45,5 +45,17 @@ Keeps clients prepared and cared-for around each visit.
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - Sequence — id, tenant_id, trigger(booking|visit), treatment_type, steps[]{offset, channel, template_key} (Multi-touch, timed per treatment.)
+  - SequenceRun — id, sequence_id, client_id, appointment_id, step_status[] (Transactional; exempt from opt-in.)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Backend: domain logic, rules & API endpoint(s)**
+  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
+  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
+  - Rule: Appointment reminders/confirmations send per template; confirm/decline updates the appointment (PRD-02).
+  - Rule: Pre-care + aftercare sequences are multi-touch and timed per treatment type.
+  - Rule: Transactional messages send regardless of marketing opt-in and avoid S4 references.
+  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
+  - Publish the OpenAPI contract so the generated clients update.
+  - Depends on: PRD-07/CHANNELS.

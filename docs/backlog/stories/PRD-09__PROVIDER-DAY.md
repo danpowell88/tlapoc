@@ -50,3 +50,7 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 ## Tasks (dev pickup)
 
 - [ ] **Provider app UI (Flutter)**
+  Build on the Flutter provider app: the treatment-room per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
+  Key elements (from the prototype):
+  - Prototype: provider app (treatment-room.png) — 'Today · Room 2' schedule; open a patient -> 'Consent & prescriber authorisation' status; quick links to map/photos/finalise.
+  - Bottom tabs: Schedule / Patient / Medicines / Tasks.

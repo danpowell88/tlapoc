@@ -36,5 +36,12 @@ A background-job framework (scheduler + queue) with retry, back-off, idempotency
 ## Tasks (dev pickup)
 
 - [ ] **Implement: Background jobs & scheduler infrastructure**
+  Deliver per the acceptance criteria:
+  - A worker host runs scheduled + queued jobs with retry, back-off and dead-letter handling.
+  - Jobs are tenant-aware and run under an audited elevated context (per RLS bypass path).
+  - Job runs are observable (metrics/logs/alerts) via the Sprint 0 observability stack.
+  - A sample recurring job (e.g. expiry scan) and a sample queued job are demonstrated.
 - [ ] **Wire into CI/CD + per-environment config**
+  Build/test/deploy steps + env-specific config & secrets; required for merge.
 - [ ] **Document setup & usage**
+  How to run/operate it; runbook notes for the team.

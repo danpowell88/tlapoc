@@ -31,5 +31,12 @@ Repo governance: protected main requiring passing checks + a review before merge
 ## Tasks (dev pickup)
 
 - [ ] **Implement: Repo governance: branch protection, PR & env protection**
+  Deliver per the acceptance criteria:
+  - main requires passing checks + at least one review before merge.
+  - PR and issue templates committed (PR template references the backlog item).
+  - Production deploys require an approval gate.
+  - CODEOWNERS routes reviews for sensitive areas (auth, medicines, compliance).
 - [ ] **Wire into CI/CD + per-environment config**
+  Build/test/deploy steps + env-specific config & secrets; required for merge.
 - [ ] **Document setup & usage**
+  How to run/operate it; runbook notes for the team.

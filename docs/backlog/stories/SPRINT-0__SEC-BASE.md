@@ -36,5 +36,12 @@ The baseline security posture: TLS everywhere, encryption at rest, hardened HTTP
 ## Tasks (dev pickup)
 
 - [ ] **Implement: Security baseline: encryption, headers, dependency & secret scanning**
+  Deliver per the acceptance criteria:
+  - All traffic is TLS; data stores are encrypted at rest.
+  - Security headers (CSP, HSTS, etc.) applied to web; CORS locked down.
+  - Dependency, secret and SAST scans run in CI and gate merges on high-severity findings.
+  - Service identities follow least-privilege; no shared admin credentials.
 - [ ] **Wire into CI/CD + per-environment config**
+  Build/test/deploy steps + env-specific config & secrets; required for merge.
 - [ ] **Document setup & usage**
+  How to run/operate it; runbook notes for the team.

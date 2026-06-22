@@ -35,4 +35,10 @@ Staff sign in with the clinic's existing Microsoft 365 accounts via Entra ID SSO
 ## Tasks (dev pickup)
 
 - [ ] **Implement: Staff identity: Entra ID SSO + MFA wiring**
+  Deliver per the acceptance criteria:
+  - Entra ID app registration configured; web + provider app complete SSO + MFA.
+  - Tokens carry the tenant and a stable user id usable by the API.
+  - Sign-out and token refresh work across web and app.
+  - Sessions are scoped to a single tenant.
 - [ ] **Document setup & usage**
+  How to run/operate it; runbook notes for the team.

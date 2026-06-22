@@ -48,7 +48,25 @@ _Prototype screen: prototype.html — header 'Switch user' (sign-in/persona), Te
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations** — Entities/columns + relationships; tenant_id + RLS.
-- [ ] **Backend: domain logic, rules & API endpoint(s)** — Behaviour + invariants + the OpenAPI contract the UI/clients consume.
-- [ ] **Enforce compliance gate + audit events** — Server-side (C10); blocked path explains why.
-- [ ] **Web UI** — prototype.html — header 'Switch user' (sign-in/persona), Team → People & credentials / Compliance board, Settings.
+- [ ] **Data model & migrations**
+  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
+  - Session — id, user_id, tenant_id, started_at, last_seen, expires_at, device (Idle + absolute limits; revoked on sign-out.)
+  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
+- [ ] **Backend: domain logic, rules & API endpoint(s)**
+  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
+  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
+  - Rule: Staff sign-in via Entra SSO; client sign-in/up via social, email+password and OTP, with account recovery.
+  - Rule: Sign-out clears the session everywhere; token refresh is seamless.
+  - Rule: Idle-timeout and absolute session limits apply; expiry returns to sign-in without data loss.
+  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
+  - Publish the OpenAPI contract so the generated clients update.
+  - Depends on: SPRINT-0/AUTH-STAFF, SPRINT-0/AUTH-CLIENT.
+- [ ] **Enforce compliance gate + audit events**
+  Enforce C10 as a server-side invariant that cannot be bypassed via the API:
+  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
+  - Write an immutable AuditEvent for the attempt and its outcome.
+- [ ] **Web UI**
+  Build on the Angular web app: the screen per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
+  Key elements (from the prototype):
+  - Staff: an Entra SSO sign-in screen; clients: social/email/OTP sign-in + sign-up + recovery (the prototype persona picker stands in for this).
+  - Session-expiry returns to sign-in, preserving unsaved drafts where possible.

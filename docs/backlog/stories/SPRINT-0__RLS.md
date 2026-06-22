@@ -40,5 +40,12 @@ Postgres row-level-security policies keyed on tenant_id, with EF Core setting th
 ## Tasks (dev pickup)
 
 - [ ] **Implement: Row-level-security multi-tenancy baseline**
+  Deliver per the acceptance criteria:
+  - RLS policies are applied to all tenant-scoped tables.
+  - API middleware sets the session tenant from the authenticated principal on every request.
+  - An integration test proves Tenant A cannot read Tenant B rows and a cross-tenant id returns not-found.
+  - Bypassing tenant context (e.g. background jobs) uses an explicit, audited elevated path.
 - [ ] **Apply via migrations; verify RLS/tenancy**
+  Migration runs per environment; prove tenant isolation holds.
 - [ ] **Document setup & usage**
+  How to run/operate it; runbook notes for the team.
