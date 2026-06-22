@@ -44,7 +44,8 @@
         "type:story",
         "PRD-09",
         "phase:1",
-        "area:client-app"
+        "area:client-app",
+        "tier:followup"
       ],
       "priority": "P1",
       "depends_on": [
@@ -258,7 +259,8 @@
         "type:story",
         "PRD-09",
         "phase:1",
-        "area:client-app"
+        "area:client-app",
+        "tier:followup"
       ],
       "priority": "P2",
       "depends_on": [
@@ -550,7 +552,8 @@
         "PRD-09",
         "phase:1",
         "area:client-app",
-        "compliance"
+        "compliance",
+        "tier:followup"
       ],
       "priority": "P2",
       "depends_on": [
@@ -614,7 +617,8 @@
         "type:story",
         "PRD-09",
         "phase:1",
-        "area:provider-app"
+        "area:provider-app",
+        "tier:followup"
       ],
       "priority": "P1",
       "depends_on": [
@@ -683,7 +687,8 @@
         "type:story",
         "PRD-09",
         "phase:1",
-        "area:provider-app"
+        "area:provider-app",
+        "tier:followup"
       ],
       "priority": "P1",
       "depends_on": [
@@ -844,7 +849,8 @@
         "type:story",
         "PRD-09",
         "phase:1",
-        "area:provider-app"
+        "area:provider-app",
+        "tier:followup"
       ],
       "priority": "P1",
       "depends_on": [
@@ -908,7 +914,8 @@
         "PRD-09",
         "phase:1",
         "area:client-app",
-        "area:provider-app"
+        "area:provider-app",
+        "tier:followup"
       ],
       "priority": "P2",
       "depends_on": [
@@ -972,7 +979,8 @@
         "type:story",
         "PRD-09",
         "phase:1",
-        "area:web"
+        "area:web",
+        "tier:followup"
       ],
       "priority": "P2",
       "depends_on": [
@@ -1170,7 +1178,8 @@
         "type:story",
         "PRD-09",
         "phase:1",
-        "area:web"
+        "area:web",
+        "tier:followup"
       ],
       "priority": "P2",
       "depends_on": [
@@ -1367,7 +1376,8 @@
         "PRD-09",
         "phase:1",
         "area:client-app",
-        "compliance"
+        "compliance",
+        "tier:followup"
       ],
       "priority": "P1",
       "depends_on": [

@@ -166,8 +166,7 @@
         "PLATFORM/TODAY"
       ],
       "labels": [
-        "tla-backlog",
-        "tier:followup"
+        "tla-backlog"
       ],
       "priority": "P2",
       "tasks": [
@@ -215,8 +214,7 @@
         "PLATFORM/TODAY"
       ],
       "labels": [
-        "tla-backlog",
-        "tier:followup"
+        "tla-backlog"
       ],
       "priority": "P2",
       "tasks": [
@@ -265,8 +263,7 @@
         "PLATFORM/TODAY"
       ],
       "labels": [
-        "tla-backlog",
-        "tier:followup"
+        "tla-backlog"
       ],
       "priority": "P2",
       "tasks": [
@@ -361,8 +358,7 @@
       ],
       "priority": "P2",
       "depends_on": [
-        "PLATFORM/APP-NAV",
-        "PRD-07/CHANNELS"
+        "PLATFORM/APP-NAV"
       ],
       "detail": [
         "The header bell + badge implies an in-app notification centre (prototype header notifications icon with the rose dot). It surfaces role-relevant events so time-sensitive things aren't missed: new bookings, failed payments, credential/stock expiries (REG-WATCH), adverse-event/recall actions, and job assignments (ADR-0023).",

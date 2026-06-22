@@ -1055,7 +1055,8 @@
         "type:story",
         "PRD-05",
         "phase:1",
-        "area:provider-app"
+        "area:provider-app",
+        "tier:followup"
       ],
       "priority": "P2",
       "depends_on": [

@@ -2,7 +2,7 @@
 
 > **Epic:** [PRD-02 — Booking & scheduling (+ client/CRM basics)](../epics/PRD-02.md)  ·  **Key:** `PRD-02/WAITLIST`  ·  **Type:** Story  ·  **Stage:** M2  ·  **Priority:** P1  ·  **Estimate:** 3 pts  ·  **Area:** web
 >
-> **Depends on:** `PRD-02/REMINDERS`
+> **Depends on:** `PRD-02/CALENDAR`
 
 ## Background
 

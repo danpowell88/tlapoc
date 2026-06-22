@@ -2,7 +2,7 @@
 
 > **Epic:** [PRD-03 — Intake, consent & compliance gating](../epics/PRD-03.md)  ·  **Key:** `PRD-03/INTAKE`  ·  **Type:** Story  ·  **Stage:** M2  ·  **Priority:** P0  ·  **Estimate:** 5 pts  ·  **Area:** client-app, backend
 >
-> **Depends on:** `PRD-02/ONLINE-BOOK`
+> **Depends on:** `PRD-02/BOOKING-WIZARD`
 
 ## Background
 

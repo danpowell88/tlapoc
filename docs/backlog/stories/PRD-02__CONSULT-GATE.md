@@ -2,7 +2,7 @@
 
 > **Epic:** [PRD-02 — Booking & scheduling (+ client/CRM basics)](../epics/PRD-02.md)  ·  **Key:** `PRD-02/CONSULT-GATE`  ·  **Type:** Story  ·  **Stage:** M2  ·  **Priority:** P0  ·  **Estimate:** 5 pts  ·  **Area:** backend
 >
-> **Depends on:** `PRD-02/ONLINE-BOOK`
+> **Depends on:** `PRD-02/CALENDAR`
 
 ## Background
 

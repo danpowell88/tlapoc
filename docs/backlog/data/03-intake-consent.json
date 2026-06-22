@@ -43,7 +43,7 @@
       ],
       "priority": "P0",
       "depends_on": [
-        "PRD-02/ONLINE-BOOK"
+        "PRD-02/BOOKING-WIZARD"
       ],
       "detail": [
         "Pre-visit intake collects the medical history, current medications, allergies and contraindications a practitioner must see before treating — pregnancy/breastfeeding, blood thinners, cold-sore history, latex/lidocaine allergies, etc. It is sent on booking (BOOKING-WIZARD / ONLINE-BOOK) and completed by the client on their phone in the client app, or at the reception check-in tablet on arrival. A returning client gets a quick re-screen; a new client gets the full form.",

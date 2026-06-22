@@ -304,8 +304,7 @@
       ],
       "labels": [
         "tla-backlog",
-        "compliance",
-        "tier:followup"
+        "compliance"
       ],
       "priority": "P2",
       "tasks": [
@@ -422,8 +421,7 @@
       ],
       "labels": [
         "tla-backlog",
-        "compliance",
-        "tier:followup"
+        "compliance"
       ],
       "priority": "P2",
       "tasks": [
@@ -473,8 +471,7 @@
       ],
       "labels": [
         "tla-backlog",
-        "compliance",
-        "tier:followup"
+        "compliance"
       ],
       "priority": "P2",
       "tasks": [
@@ -519,8 +516,7 @@
       ],
       "labels": [
         "tla-backlog",
-        "compliance",
-        "tier:followup"
+        "compliance"
       ],
       "priority": "P2",
       "tasks": [
@@ -631,8 +627,7 @@
         "PRD-01/ROSTER"
       ],
       "labels": [
-        "tla-backlog",
-        "tier:followup"
+        "tla-backlog"
       ],
       "priority": "P2",
       "tasks": [
@@ -680,8 +675,7 @@
         "PRD-01/ROSTER"
       ],
       "labels": [
-        "tla-backlog",
-        "tier:followup"
+        "tla-backlog"
       ],
       "priority": "P2",
       "tasks": [
@@ -1156,8 +1150,7 @@
         "PRD-01/CLIENT-CORE"
       ],
       "labels": [
-        "tla-backlog",
-        "tier:followup"
+        "tla-backlog"
       ],
       "priority": "P2",
       "tasks": [
@@ -1201,8 +1194,7 @@
         "PRD-01/CLIENT-CORE"
       ],
       "labels": [
-        "tla-backlog",
-        "tier:followup"
+        "tla-backlog"
       ],
       "priority": "P2",
       "tasks": [
@@ -1246,8 +1238,7 @@
         "PRD-01/CLIENT-CORE"
       ],
       "labels": [
-        "tla-backlog",
-        "tier:followup"
+        "tla-backlog"
       ],
       "priority": "P2",
       "tasks": [

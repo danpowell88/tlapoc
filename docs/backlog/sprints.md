@@ -21,26 +21,26 @@
 | 01 | Setup | 13 | 37 |
 | 02 | Setup | 13 | 36 |
 | 03 | Foundations | 9 | 37 |
-| 04 | Foundations | 11 | 35 |
-| 05 | Reception | 11 | 36 |
-| 06 | Consent | 8 | 33 |
-| 07 | Injectables | 8 | 36 |
-| 08 | Charting | 10 | 36 |
-| 09 | Reporting | 14 | 35 |
-| 10 | Compliance ops | 11 | 36 |
-| 11 | Comms & growth | 13 | 36 |
-| 12 | Apps | 15 | 36 |
-| 13 | Foundations | 18 | 37 |
-| 14 | Reception | 18 | 36 |
-| 15 | Reception | 18 | 36 |
-| 16 | Consent | 17 | 37 |
-| 17 | Injectables | 17 | 35 |
-| 18 | Charting | 17 | 37 |
-| 19 | Reporting | 17 | 35 |
-| 20 | Compliance ops | 17 | 37 |
-| 21 | Payments | 18 | 36 |
-| 22 | Comms & growth | 18 | 37 |
-| 23 | Apps | 16 | 36 |
+| 04 | Foundations | 14 | 36 |
+| 05 | App shell | 14 | 37 |
+| 06 | Reception | 10 | 34 |
+| 07 | Consent | 8 | 36 |
+| 08 | Injectables | 9 | 37 |
+| 09 | Reporting | 12 | 36 |
+| 10 | Compliance ops | 8 | 25 |
+| 11 | Reception | 16 | 37 |
+| 12 | Reception | 18 | 36 |
+| 13 | Reception | 17 | 37 |
+| 14 | Consent | 18 | 37 |
+| 15 | Injectables | 17 | 37 |
+| 16 | Charting | 18 | 37 |
+| 17 | Reporting | 17 | 37 |
+| 18 | Compliance ops | 14 | 36 |
+| 19 | Payments | 18 | 37 |
+| 20 | Payments | 15 | 36 |
+| 21 | Comms & growth | 18 | 37 |
+| 22 | Apps | 14 | 37 |
+| 23 | Apps | 17 | 36 |
 | 24 | Apps | 3 | 6 |
 
 
@@ -94,7 +94,7 @@
 | [Registration / PII / CPD expiry alerting (core: scheduled watch + auto-lapse)](stories/PRD-01__REG-WATCH.md) | PRD-01 | Story | P1 | 3 | PRD-01/CREDENTIALS |
 | [Rosters & engagement type (core: roster grid + availability)](stories/PRD-01__ROSTER.md) | PRD-01 | Story | P1 | 3 | PRD-01/CREDENTIALS |
 
-### Sprint 04 — Foundations  ·  11 items · 35 pts
+### Sprint 04 — Foundations  ·  14 items · 36 pts
 
 | Story | Epic | Type | Pri | Est | Depends on |
 |---|---|---|---|---|---|
@@ -106,87 +106,92 @@
 | [MFA & step-up authentication for sensitive actions](stories/PRD-01__MFA-STEPUP.md) | PRD-01 | Story | P1 | 3 | PRD-01/SIGNIN-UI |
 | [Multi-role staff & active-role context](stories/PRD-01__MULTI-ROLE.md) | PRD-01 | Story | P1 | 3 | PRD-01/RBAC |
 | [Authentication & authorisation audit events](stories/PRD-01__AUTH-AUDIT.md) | PRD-01 | Story | P1 | 3 | PRD-01/AUDIT, PRD-01/RBAC |
+| [Credentials: AHPRA PIE register auto-verification](stories/PRD-01__CREDENTIALS-PIE.md) | PRD-01 | Story | P2 | 2 | PRD-01/CREDENTIALS |
+| [Reg-watch: role-targeted routing to digest + Follow-ups](stories/PRD-01__REG-WATCH-ROUTING.md) | PRD-01 | Story | P2 | 2 | PRD-01/REG-WATCH |
+| [Reg-watch: 'who is cleared to inject today' compliance board](stories/PRD-01__REG-WATCH-BOARD.md) | PRD-01 | Story | P2 | 2 | PRD-01/REG-WATCH |
+| [Reg-watch: amber early-warning countdown chips](stories/PRD-01__REG-WATCH-CHIPS.md) | PRD-01 | Story | P2 | 2 | PRD-01/REG-WATCH |
+| [Roster: time-off / leave list with approval](stories/PRD-01__ROSTER-LEAVE.md) | PRD-01 | Story | P2 | 2 | PRD-01/ROSTER |
+| [Roster: engagement-type recording for attribution](stories/PRD-01__ROSTER-ENGAGEMENT.md) | PRD-01 | Story | P2 | 2 | PRD-01/ROSTER |
+
+### Sprint 05 — App shell  ·  14 items · 37 pts
+
+| Story | Epic | Type | Pri | Est | Depends on |
+|---|---|---|---|---|---|
+| [Client core: soft-delete with audit](stories/PRD-01__CLIENT-CORE-SOFTDELETE.md) | PRD-01 | Story | P2 | 2 | PRD-01/CLIENT-CORE |
+| [Client core: duplicate detection & reviewed merge](stories/PRD-01__CLIENT-CORE-DEDUPE.md) | PRD-01 | Story | P2 | 2 | PRD-01/CLIENT-CORE |
+| [Client core: patient-header age / under-18 chip](stories/PRD-01__CLIENT-CORE-AGECHIP.md) | PRD-01 | Story | P2 | 2 | PRD-01/CLIENT-CORE |
 | [Owner-only financial (.fin) capability gating](stories/PLATFORM__FIN-GATING.md) | PLATFORM | Story | P0 | 5 | PRD-01/RBAC |
 | [App shell & collapsible workspace navigation](stories/PLATFORM__APP-NAV.md) | PLATFORM | Story | P1 | 3 | SPRINT-0/WEB-SHELL, PRD-01/RBAC |
 | [Role-tailored Today dashboard (core: greeting + today's schedule)](stories/PLATFORM__TODAY.md) | PLATFORM | Story | P1 | 3 | PLATFORM/APP-NAV |
-
-### Sprint 05 — Reception  ·  11 items · 36 pts
-
-| Story | Epic | Type | Pri | Est | Depends on |
-|---|---|---|---|---|---|
 | [Active-role context, scope display & multi-role switching](stories/PLATFORM__ROLE-CONTEXT.md) | PLATFORM | Story | P1 | 3 | PRD-01/RBAC, PRD-01/MULTI-ROLE |
+| [Today: at-a-glance stat cards](stories/PLATFORM__TODAY-STATCARDS.md) | PLATFORM | Story | P2 | 2 | PLATFORM/TODAY |
+| [Today: lifecycle next-action pills + 'WITH YOU NOW' strip](stories/PLATFORM__TODAY-PILLS.md) | PLATFORM | Story | P2 | 2 | PLATFORM/TODAY |
+| [Today: Follow-ups preview + needs-attention digest](stories/PLATFORM__TODAY-DIGEST.md) | PLATFORM | Story | P2 | 2 | PLATFORM/TODAY |
 | [Global search (clients, appointments, invoices)](stories/PLATFORM__SEARCH.md) | PLATFORM | Story | P2 | 2 | PLATFORM/APP-NAV |
+| [In-app notification centre](stories/PLATFORM__NOTIFICATIONS.md) | PLATFORM | Story | P2 | 2 | PLATFORM/APP-NAV |
 | [Clinic / location switcher](stories/PLATFORM__CLINIC-SWITCH.md) | PLATFORM | Story | P2 | 2 | PRD-01/TENANT |
 | [Multi-resource calendar — basic grid & booking](stories/PRD-02__CALENDAR.md) | PRD-02 | Story | P0 | 5 | PRD-01/ROSTER |
-| [Online self-booking — basic scope-aware flow](stories/PRD-02__ONLINE-BOOK.md) | PRD-02 | Story | P0 | 5 | PRD-02/CALENDAR, PRD-01/CREDENTIALS |
-| [Consult gate on injectable appointments](stories/PRD-02__CONSULT-GATE.md) | PRD-02 | Story | P0 | 5 | PRD-02/ONLINE-BOOK |
-| [Visit lifecycle — basic status state-machine](stories/PRD-02__LIFECYCLE.md) | PRD-02 | Story | P1 | 3 | PRD-02/CALENDAR |
-| [Reminders — basic scheduling & dispatch](stories/PRD-02__REMINDERS.md) | PRD-02 | Story | P1 | 3 | PRD-02/LIFECYCLE |
-| [Waitlist — basic entries & management](stories/PRD-02__WAITLIST.md) | PRD-02 | Story | P1 | 3 | PRD-02/REMINDERS |
-| [Client 360° profile — basic aggregation & header](stories/PRD-02__CLIENT-360.md) | PRD-02 | Story | P1 | 3 | PRD-01/CLIENT-CORE |
-| [Walk-ins — basic gate-respecting booking](stories/PRD-02__WALKINS.md) | PRD-02 | Story | P2 | 2 | PRD-02/CALENDAR |
 
-### Sprint 06 — Consent  ·  8 items · 33 pts
+### Sprint 06 — Reception  ·  10 items · 34 pts
 
 | Story | Epic | Type | Pri | Est | Depends on |
 |---|---|---|---|---|---|
+| [Consult gate on injectable appointments](stories/PRD-02__CONSULT-GATE.md) | PRD-02 | Story | P0 | 5 | PRD-02/CALENDAR |
+| [Visit lifecycle — basic status state-machine](stories/PRD-02__LIFECYCLE.md) | PRD-02 | Story | P1 | 3 | PRD-02/CALENDAR |
+| [Waitlist — basic entries & management](stories/PRD-02__WAITLIST.md) | PRD-02 | Story | P1 | 3 | PRD-02/CALENDAR |
+| [Client 360° profile — basic aggregation & header](stories/PRD-02__CLIENT-360.md) | PRD-02 | Story | P1 | 3 | PRD-01/CLIENT-CORE |
+| [Walk-ins — basic gate-respecting booking](stories/PRD-02__WALKINS.md) | PRD-02 | Story | P2 | 2 | PRD-02/CALENDAR |
 | [Client directory — basic search & list](stories/PRD-02__CLIENT-DIR.md) | PRD-02 | Story | P2 | 2 | PRD-02/CLIENT-360 |
-| [Pre-visit intake — basic capture & chart-link](stories/PRD-03__INTAKE.md) | PRD-03 | Story | P0 | 5 | PRD-02/ONLINE-BOOK |
+| [Medicines & product catalogue — core typed catalogue + S4 classification (MVP)](stories/PRD-04__PRODUCT-CATALOGUE.md) | PRD-04 | Story | P0 | 5 | — |
+| [Services & treatment menu — basic catalogue & S4 flag](stories/PRD-02__SERVICE-CATALOGUE.md) | PRD-02 | Story | P1 | 3 | PRD-04/PRODUCT-CATALOGUE |
+| [Staff booking wizard — basic scope-aware flow](stories/PRD-02__BOOKING-WIZARD.md) | PRD-02 | Story | P1 | 3 | PRD-02/CALENDAR, PRD-02/SERVICE-CATALOGUE |
+| [Pre-visit intake — basic capture & chart-link](stories/PRD-03__INTAKE.md) | PRD-03 | Story | P0 | 5 | PRD-02/BOOKING-WIZARD |
+
+### Sprint 07 — Consent  ·  8 items · 36 pts
+
+| Story | Epic | Type | Pri | Est | Depends on |
+|---|---|---|---|---|---|
 | [BDD / psychological screening — basic instrument & scoring](stories/PRD-03__BDD.md) | PRD-03 | Story | P0 | 5 | PRD-03/INTAKE |
 | [Versioned e-signed consent — basic signature capture](stories/PRD-03__CONSENT.md) | PRD-03 | Story | P0 | 5 | PRD-03/INTAKE |
 | [Server-enforced treatment gating](stories/PRD-03__GATING.md) | PRD-03 | Story | P0 | 5 | PRD-03/CONSENT, PRD-03/BDD |
 | [Image-use consent — basic entity & grant/withdraw](stories/PRD-03__IMAGE-CONSENT.md) | PRD-03 | Story | P1 | 3 | PRD-03/CONSENT |
 | [Cooling-off — basic under-18 7-day enforcement](stories/PRD-03__COOLING-OFF.md) | PRD-03 | Story | P1 | 3 | PRD-01/CLIENT-CORE, PRD-03/CONSENT |
 | [Synchronous consult record](stories/PRD-04__CONSULT.md) | PRD-04 | Story | P0 | 5 | PRD-02/CONSULT-GATE, PRD-03/GATING |
+| [Individual prescription (no batch / no async)](stories/PRD-04__PRESCRIPTION.md) | PRD-04 | Story | P0 | 5 | PRD-04/CONSULT, PRD-01/CREDENTIALS |
+| [Stock receipt: ARTG & lawful-supply provenance per lot (MVP)](stories/PRD-04__STOCK-RECEIVE.md) | PRD-04 | Story | P0 | 5 | PRD-04/PRODUCT-CATALOGUE |
 
-### Sprint 07 — Injectables  ·  8 items · 36 pts
+### Sprint 08 — Injectables  ·  9 items · 37 pts
 
 | Story | Epic | Type | Pri | Est | Depends on |
 |---|---|---|---|---|---|
-| [Individual prescription (no batch / no async)](stories/PRD-04__PRESCRIPTION.md) | PRD-04 | Story | P0 | 5 | PRD-04/CONSULT, PRD-01/CREDENTIALS |
-| [Medicines & product catalogue — core typed catalogue + S4 classification (MVP)](stories/PRD-04__PRODUCT-CATALOGUE.md) | PRD-04 | Story | P0 | 5 | — |
-| [Services & treatment menu — basic catalogue & S4 flag](stories/PRD-02__SERVICE-CATALOGUE.md) | PRD-02 | Story | P1 | 3 | PRD-04/PRODUCT-CATALOGUE |
-| [Staff booking wizard — basic scope-aware flow](stories/PRD-02__BOOKING-WIZARD.md) | PRD-02 | Story | P1 | 3 | PRD-02/CALENDAR, PRD-02/SERVICE-CATALOGUE |
-| [Stock receipt: ARTG & lawful-supply provenance per lot (MVP)](stories/PRD-04__STOCK-RECEIVE.md) | PRD-04 | Story | P0 | 5 | PRD-04/PRODUCT-CATALOGUE |
 | [Administration gating & immutable record](stories/PRD-04__ADMIN-GATE.md) | PRD-04 | Story | P0 | 5 | PRD-04/PRESCRIPTION, PRD-04/STOCK-RECEIVE |
 | [Custody & secure storage: exclusive-custody binding (MVP)](stories/PRD-04__CUSTODY-STORAGE.md) | PRD-04 | Story | P0 | 5 | PRD-04/STOCK-RECEIVE |
 | [Lot → clients recall lookup & medicine register (MVP)](stories/PRD-04__RECALL-LOOKUP.md) | PRD-04 | Story | P0 | 5 | PRD-04/ADMIN-GATE |
-
-### Sprint 08 — Charting  ·  10 items · 36 pts
-
-| Story | Epic | Type | Pri | Est | Depends on |
-|---|---|---|---|---|---|
 | [Temperature logging & excursion alerts (manual + ESP32) (MVP)](stories/PRD-04__COLD-CHAIN.md) | PRD-04 | Story | P1 | 3 | PRD-04/CUSTODY-STORAGE |
 | [Vial / unit reconciliation](stories/PRD-04__VIAL-RECON.md) | PRD-04 | Story | P1 | 3 | PRD-04/ADMIN-GATE |
 | [Wastage recording (partial-vial) (MVP)](stories/PRD-04__WASTAGE-DESTRUCTION.md) | PRD-04 | Story | P1 | 3 | PRD-04/CUSTODY-STORAGE |
 | [Stocktake & discrepancy surfacing (MVP)](stories/PRD-04__STOCKTAKE.md) | PRD-04 | Story | P1 | 3 | PRD-04/CUSTODY-STORAGE |
 | [Guided toxin note: pre-treatment review & gate (MVP)](stories/PRD-05__NOTE-TEMPLATE.md) | PRD-05 | Story | P0 | 5 | PRD-04/ADMIN-GATE |
 | [Injection-mapping canvas: add/edit points + save draft (MVP)](stories/PRD-05__MAPPING.md) | PRD-05 | Story | P0 | 5 | SPRINT-0/SPIKE-CANVAS, PRD-04/RECALL-LOOKUP |
+
+### Sprint 09 — Reporting  ·  12 items · 36 pts
+
+| Story | Epic | Type | Pri | Est | Depends on |
+|---|---|---|---|---|---|
 | [Immutable finalisation & audited amendments](stories/PRD-05__IMMUTABILITY.md) | PRD-05 | Story | P0 | 5 | PRD-05/MAPPING |
 | [Clinical photo capture: signed-URL storage & consent gate (MVP)](stories/PRD-05__PHOTOS.md) | PRD-05 | Story | P1 | 3 | PRD-03/IMAGE-CONSENT |
 | [Offline queue & sync for room-side charting](stories/PRD-05__OFFLINE.md) | PRD-05 | Story | P1 | 3 | SPRINT-0/SPIKE-OFFLINE, PRD-05/IMMUTABILITY |
 | [Adverse-event capture & DAEN routing (MVP)](stories/PRD-05__ADVERSE-EVENT.md) | PRD-05 | Story | P1 | 3 | PRD-05/IMMUTABILITY |
-
-### Sprint 09 — Reporting  ·  14 items · 35 pts
-
-| Story | Epic | Type | Pri | Est | Depends on |
-|---|---|---|---|---|---|
 | [Complication protocol library & timestamped response (MVP)](stories/PRD-05__COMPLICATION-LIBRARY.md) | PRD-05 | Story | P1 | 3 | PRD-05/ADVERSE-EVENT |
-| [Treatment plans & protocol templates (MVP)](stories/PRD-05__TREATMENT-PLANS.md) | PRD-05 | Story | P2 | 2 | PRD-05/NOTE-TEMPLATE |
 | [Reporting read-models / materialized views](stories/PRD-08__READ-MODELS.md) | PRD-08 | Story | P1 | 3 | PRD-01/AUDIT |
-| [Business analytics dashboards (core: metrics read-model + headline tiles)](stories/PRD-08__BUSINESS-DASH.md) | PRD-08 | Story | P1 | 3 | PRD-08/READ-MODELS |
 | [Compliance dashboards (core: overview band + consent & consult adherence)](stories/PRD-08__COMPLIANCE-DASH.md) | PRD-08 | Story | P1 | 3 | PRD-08/READ-MODELS, PRD-04/RECALL-LOOKUP |
 | [Adverse-event / DAEN prefilled submission](stories/PRD-08__DAEN.md) | PRD-08 | Story | P1 | 3 | PRD-05/ADVERSE-EVENT |
 | [Data-quality checks](stories/PRD-08__DATA-QUALITY.md) | PRD-08 | Story | P2 | 2 | PRD-08/READ-MODELS |
-| [Owner 'needs attention' exceptions digest](stories/PRD-08__ATTENTION-DIGEST.md) | PRD-08 | Story | P2 | 2 | PRD-08/COMPLIANCE-DASH |
 | [Inspection-readiness pack & governance hub](stories/PRD-08__INSPECTION-PACK.md) | PRD-08 | Story | P2 | 2 | PRD-08/COMPLIANCE-DASH |
 | [Policies & procedures sign-off](stories/PRD-08__POLICIES.md) | PRD-08 | Story | P1 | 3 | PRD-08/INSPECTION-PACK |
-| [Practitioner scorecard](stories/PRD-08__SCORECARD.md) | PRD-08 | Story | P2 | 2 | PRD-08/BUSINESS-DASH |
-| [Capacity & utilisation report](stories/PRD-08__CAPACITY.md) | PRD-08 | Story | P2 | 2 | PRD-08/READ-MODELS |
-| [True-cost / margin (COGS) reporting](stories/PRD-08__TRUE-COST.md) | PRD-08 | Story | P2 | 2 | PRD-08/READ-MODELS, PRD-04/VIAL-RECON |
 | [Complaints register with AHPRA pathway (basic)](stories/PRD-11__COMPLAINTS.md) | PRD-11 | Story | P1 | 3 | — |
 
-### Sprint 10 — Compliance ops  ·  11 items · 36 pts
+### Sprint 10 — Compliance ops  ·  8 items · 25 pts
 
 | Story | Epic | Type | Pri | Est | Depends on |
 |---|---|---|---|---|---|
@@ -195,78 +200,22 @@
 | [Facility accreditation register (basic)](stories/PRD-11__FACILITY.md) | PRD-11 | Story | P2 | 2 | — |
 | [Infection-control & waste logs](stories/PRD-11__IPC-LOGS.md) | PRD-11 | Story | P2 | 2 | — |
 | [Emergency kit register (basic)](stories/PRD-11__EMERGENCY-KIT.md) | PRD-11 | Story | P2 | 2 | — |
-| [Rooms & devices register (basic)](stories/PRD-11__ROOMS-DEVICES.md) | PRD-11 | Story | P2 | 2 | PRD-02/CALENDAR |
-| [Equipment & maintenance register (basic)](stories/PRD-11__EQUIPMENT.md) | PRD-11 | Story | P2 | 2 | PRD-11/ROOMS-DEVICES |
 | [Payment provider abstraction + Square adapter](stories/PRD-06__PAYMENT-PROVIDER.md) | PRD-06 | Story | P0 | 5 | SPRINT-0/SPIKE-SQUARE |
 | [In-person POS checkout — basic cart + single tender (core)](stories/PRD-06__POS.md) | PRD-06 | Story | P0 | 5 | PRD-06/PAYMENT-PROVIDER |
-| [Membership join + card-on-file — basic enrolment (core)](stories/PRD-06__MEMBERSHIP.md) | PRD-06 | Story | P0 | 5 | PRD-06/PAYMENT-PROVIDER |
-| [Rewards engine — non-S4 points earn/redeem + S4 block (core)](stories/PRD-06__REWARDS-ENGINE.md) | PRD-06 | Story | P0 | 5 | PRD-04/PRODUCT-CATALOGUE |
-
-### Sprint 11 — Comms & growth  ·  13 items · 36 pts
-
-| Story | Epic | Type | Pri | Est | Depends on |
-|---|---|---|---|---|---|
-| [Packages/series: sell & redeem (visits remaining) — basic pre-paid value (core)](stories/PRD-06__PACKAGES-GIFT.md) | PRD-06 | Story | P1 | 3 | PRD-06/POS |
 | [Daily closeout — card + cash rollup, count & lock (core)](stories/PRD-06__CLOSEOUT.md) | PRD-06 | Story | P1 | 3 | PRD-06/POS |
-| [Margin-aware reward rules](stories/PRD-06__MARGIN-RULES.md) | PRD-06 | Story | P1 | 3 | PRD-06/REWARDS-ENGINE |
-| [Post-visit rebooking on the treatment interval (core)](stories/PRD-06__CHECKOUT-ASSIST.md) | PRD-06 | Story | P2 | 2 | PRD-06/POS |
-| [Pricing & what-if — editable plan prices + projected impact (core)](stories/PRD-06__PRICING-WHATIF.md) | PRD-06 | Story | P2 | 2 | PRD-06/POS |
-| [Notification channels (SMS / email / push)](stories/PRD-07__CHANNELS.md) | PRD-07 | Story | P0 | 5 | — |
-| [In-app notification centre](stories/PLATFORM__NOTIFICATIONS.md) | PLATFORM | Story | P2 | 2 | PLATFORM/APP-NAV, PRD-07/CHANNELS |
-| [Appointment reminders & confirmations — basic sequence (core)](stories/PRD-07__REMINDERS-CARE.md) | PRD-07 | Story | P1 | 3 | PRD-07/CHANNELS |
-| [Recall / recare worklist](stories/PRD-07__RECALL.md) | PRD-07 | Story | P1 | 3 | PRD-07/CHANNELS |
-| [Marketing consent & functional unsubscribe (Spam Act)](stories/PRD-07__MARKETING-CONSENT.md) | PRD-07 | Story | P1 | 3 | PRD-07/CHANNELS |
-| [Public booking page: schedule-driven generic names & withheld S4 prices (core)](stories/PRD-07__BOOKING-PAGE.md) | PRD-07 | Story | P1 | 3 | PRD-02/ONLINE-BOOK |
-| [Unified follow-up / job queue — projected signals + lifecycle (core)](stories/PRD-07__FOLLOWUPS.md) | PRD-07 | Story | P2 | 2 | PRD-07/CHANNELS |
-| [Call / phone log (basic)](stories/PRD-11__CALL-LOG.md) | PRD-11 | Story | P2 | 2 | PRD-07/FOLLOWUPS |
 
-### Sprint 12 — Apps  ·  15 items · 36 pts
+### Sprint 11 — Reception  ·  16 items · 37 pts
 
 | Story | Epic | Type | Pri | Est | Depends on |
 |---|---|---|---|---|---|
-| [Shift handover notes](stories/PRD-11__SHIFT-HANDOVER.md) | PRD-11 | Story | P2 | 2 | PRD-07/FOLLOWUPS |
-| [Automation builder — toggleable automations + consent split (core)](stories/PRD-07__AUTOMATIONS.md) | PRD-07 | Story | P2 | 2 | PRD-07/REMINDERS-CARE |
-| [Xero invoice/payment sync (basic)](stories/PRD-10__XERO.md) | PRD-10 | Story | P1 | 3 | PRD-06/POS |
-| [Calendar sync: outbound push (basic)](stories/PRD-10__CALENDAR-SYNC.md) | PRD-10 | Story | P2 | 2 | PRD-02/CALENDAR |
-| [Sub-processor residency posture (APP-8)](stories/PRD-10__SUBPROCESSOR-POSTURE.md) | PRD-10 | Story | P2 | 2 | PRD-01/RESIDENCY |
-| [Client app: shell, sign-in & home (basic)](stories/PRD-09__CLIENT-JOURNEY.md) | PRD-09 | Story | P1 | 3 | PRD-02/ONLINE-BOOK, PRD-03/CONSENT |
-| [Provider app: day schedule & open patient](stories/PRD-09__PROVIDER-DAY.md) | PRD-09 | Story | P1 | 3 | PRD-05/NOTE-TEMPLATE |
-| [Provider app: room-side injection mapping (basic)](stories/PRD-09__PROVIDER-ROOMSIDE.md) | PRD-09 | Story | P1 | 3 | PRD-09/PROVIDER-DAY, PRD-05/MAPPING |
-| [Provider app: offline-tolerant workflows + sync indicator](stories/PRD-09__PROVIDER-OFFLINE.md) | PRD-09 | Story | P1 | 3 | PRD-05/OFFLINE |
-| [Client 'report a concern' → follow-up bridge (basic)](stories/PRD-09__CLIENT-CONCERN.md) | PRD-09 | Story | P1 | 3 | PRD-07/FOLLOWUPS |
-| [Client app: my care health hub (basic)](stories/PRD-09__CLIENT-CARE.md) | PRD-09 | Story | P2 | 2 | PRD-09/CLIENT-JOURNEY, PRD-05/PHOTOS |
-| [Client app: account, privacy & access/correction](stories/PRD-09__CLIENT-PRIVACY.md) | PRD-09 | Story | P2 | 2 | PRD-01/PRIVACY-RIGHTS |
-| [App distribution & code-push posture](stories/PRD-09__APP-DISTRIBUTION.md) | PRD-09 | Story | P2 | 2 | SPRINT-0/FLUTTER |
-| [Reception self-check-in surface (basic)](stories/PRD-09__CHECKIN-KIOSK.md) | PRD-09 | Story | P2 | 2 | PRD-02/LIFECYCLE |
-| [Back-office / bench tablet surface (basic)](stories/PRD-09__BACKOFFICE-TABLET.md) | PRD-09 | Story | P2 | 2 | PRD-11/OPENCLOSE, PRD-07/FOLLOWUPS |
-
-### Sprint 13 — Foundations  ·  18 items · 37 pts
-
-| Story | Epic | Type | Pri | Est | Depends on |
-|---|---|---|---|---|---|
-| [Credentials: AHPRA PIE register auto-verification](stories/PRD-01__CREDENTIALS-PIE.md) | PRD-01 | Story | P2 | 2 | PRD-01/CREDENTIALS |
-| [Reg-watch: role-targeted routing to digest + Follow-ups](stories/PRD-01__REG-WATCH-ROUTING.md) | PRD-01 | Story | P2 | 2 | PRD-01/REG-WATCH |
-| [Reg-watch: 'who is cleared to inject today' compliance board](stories/PRD-01__REG-WATCH-BOARD.md) | PRD-01 | Story | P2 | 2 | PRD-01/REG-WATCH |
-| [Reg-watch: amber early-warning countdown chips](stories/PRD-01__REG-WATCH-CHIPS.md) | PRD-01 | Story | P2 | 2 | PRD-01/REG-WATCH |
-| [Roster: time-off / leave list with approval](stories/PRD-01__ROSTER-LEAVE.md) | PRD-01 | Story | P2 | 2 | PRD-01/ROSTER |
-| [Roster: engagement-type recording for attribution](stories/PRD-01__ROSTER-ENGAGEMENT.md) | PRD-01 | Story | P2 | 2 | PRD-01/ROSTER |
-| [Client core: soft-delete with audit](stories/PRD-01__CLIENT-CORE-SOFTDELETE.md) | PRD-01 | Story | P2 | 2 | PRD-01/CLIENT-CORE |
-| [Client core: duplicate detection & reviewed merge](stories/PRD-01__CLIENT-CORE-DEDUPE.md) | PRD-01 | Story | P2 | 2 | PRD-01/CLIENT-CORE |
-| [Client core: patient-header age / under-18 chip](stories/PRD-01__CLIENT-CORE-AGECHIP.md) | PRD-01 | Story | P2 | 2 | PRD-01/CLIENT-CORE |
-| [Today: at-a-glance stat cards](stories/PLATFORM__TODAY-STATCARDS.md) | PLATFORM | Story | P2 | 2 | PLATFORM/TODAY |
-| [Today: lifecycle next-action pills + 'WITH YOU NOW' strip](stories/PLATFORM__TODAY-PILLS.md) | PLATFORM | Story | P2 | 2 | PLATFORM/TODAY |
-| [Today: Follow-ups preview + needs-attention digest](stories/PLATFORM__TODAY-DIGEST.md) | PLATFORM | Story | P2 | 2 | PLATFORM/TODAY |
+| [Online self-booking — basic scope-aware flow](stories/PRD-02__ONLINE-BOOK.md) | PRD-02 | Story | P0 | 5 | PRD-02/CALENDAR, PRD-01/CREDENTIALS |
 | [Quiet windows — basic idle-slot detection & list](stories/PRD-02__QUIET-WINDOWS.md) | PRD-02 | Story | P1 | 3 | PRD-02/CALENDAR |
+| [Reminders — basic scheduling & dispatch](stories/PRD-02__REMINDERS.md) | PRD-02 | Story | P1 | 3 | PRD-02/LIFECYCLE |
 | [Calendar: header & date navigation](stories/PRD-02__CALENDAR-HEADER-NAV.md) | PRD-02 | Story | P2 | 2 | PRD-02/CALENDAR |
 | [Calendar: day / week view toggle & time-axis layout](stories/PRD-02__CALENDAR-DAYWEEK.md) | PRD-02 | Story | P2 | 2 | PRD-02/CALENDAR |
 | [Calendar: resource & practitioner filters](stories/PRD-02__CALENDAR-FILTERS.md) | PRD-02 | Story | P2 | 2 | PRD-02/CALENDAR |
 | [Calendar: drag-to-book, move & resize](stories/PRD-02__CALENDAR-DRAG.md) | PRD-02 | Story | P2 | 2 | PRD-02/CALENDAR |
 | [Calendar: appointment cards, status colours & summary strip](stories/PRD-02__CALENDAR-STATUS-CARDS.md) | PRD-02 | Story | P2 | 2 | PRD-02/CALENDAR |
-
-### Sprint 14 — Reception  ·  18 items · 36 pts
-
-| Story | Epic | Type | Pri | Est | Depends on |
-|---|---|---|---|---|---|
 | [Quiet windows: cost-per-treatment / savings framing](stories/PRD-02__QUIET-WINDOWS-COST.md) | PRD-02 | Story | P2 | 2 | PRD-02/QUIET-WINDOWS |
 | [Quiet windows: stock-expiry / FEFO tie-in](stories/PRD-02__QUIET-WINDOWS-FEFO.md) | PRD-02 | Story | P2 | 2 | PRD-02/QUIET-WINDOWS |
 | [Quiet windows: one-click fill (recall / waitlist / campaign)](stories/PRD-02__QUIET-WINDOWS-FILL.md) | PRD-02 | Story | P2 | 2 | PRD-02/QUIET-WINDOWS |
@@ -275,6 +224,11 @@
 | [Online self-booking: owner customise & embed panel](stories/PRD-02__ONLINE-BOOK-CUSTOMISE.md) | PRD-02 | Story | P2 | 2 | PRD-02/ONLINE-BOOK |
 | [Visit lifecycle: booking capture (new/returning, reason, roster)](stories/PRD-02__LIFECYCLE-BOOKING-CAPTURE.md) | PRD-02 | Story | P2 | 2 | PRD-02/LIFECYCLE |
 | [Visit lifecycle: no-show flag → auto follow-up job](stories/PRD-02__LIFECYCLE-NOSHOW-JOB.md) | PRD-02 | Story | P2 | 2 | PRD-02/LIFECYCLE |
+
+### Sprint 12 — Reception  ·  18 items · 36 pts
+
+| Story | Epic | Type | Pri | Est | Depends on |
+|---|---|---|---|---|---|
 | [Visit lifecycle: Today KPI tiles & in-room strip](stories/PRD-02__LIFECYCLE-TODAY-BOARD.md) | PRD-02 | Story | P2 | 2 | PRD-02/LIFECYCLE |
 | [Visit lifecycle: per-row role-appropriate next actions](stories/PRD-02__LIFECYCLE-ROW-ACTIONS.md) | PRD-02 | Story | P2 | 2 | PRD-02/LIFECYCLE |
 | [Reminders: confirm / decline handling](stories/PRD-02__REMINDERS-CONFIRM-DECLINE.md) | PRD-02 | Story | P2 | 2 | PRD-02/REMINDERS |
@@ -285,11 +239,6 @@
 | [Waitlist: cancel/no-show backfill prompt](stories/PRD-02__WAITLIST-BACKFILL-PROMPT.md) | PRD-02 | Story | P2 | 2 | PRD-02/WAITLIST, PRD-02/WAITLIST-MATCHING |
 | [Walk-ins: same-day add-on to an in-progress visit](stories/PRD-02__WALKINS-ADDON.md) | PRD-02 | Story | P2 | 2 | PRD-02/WALKINS |
 | [Walk-ins: resource conflict-flagging before confirm](stories/PRD-02__WALKINS-CONFLICT.md) | PRD-02 | Story | P2 | 2 | PRD-02/WALKINS |
-
-### Sprint 15 — Reception  ·  18 items · 36 pts
-
-| Story | Epic | Type | Pri | Est | Depends on |
-|---|---|---|---|---|---|
 | [Walk-ins: VIP / first-time tags & distinct rendering](stories/PRD-02__WALKINS-TAGS.md) | PRD-02 | Story | P2 | 2 | PRD-02/WALKINS |
 | [Client 360: Overview tab (recent activity & at-a-glance)](stories/PRD-02__CLIENT-360-OVERVIEW.md) | PRD-02 | Story | P2 | 2 | PRD-02/CLIENT-360 |
 | [Client 360: clinical & visit tabs (Visits / Treatment plan / Consents & forms)](stories/PRD-02__CLIENT-360-CLINICAL-TABS.md) | PRD-02 | Story | P2 | 2 | PRD-02/CLIENT-360 |
@@ -298,6 +247,11 @@
 | [Before/after photo gallery: compare & grouping UI](stories/PRD-02__PHOTOS-GALLERY-COMPARE.md) | PRD-02 | Story | P2 | 2 | PRD-02/PHOTOS-GALLERY |
 | [Before/after photo gallery: photo-view audit events](stories/PRD-02__PHOTOS-GALLERY-AUDIT.md) | PRD-02 | Story | P2 | 2 | PRD-02/PHOTOS-GALLERY |
 | [Client directory: segment filters (All / Members / At-risk / New)](stories/PRD-02__CLIENT-DIR-SEGMENTS.md) | PRD-02 | Story | P2 | 2 | PRD-02/CLIENT-DIR |
+
+### Sprint 13 — Reception  ·  17 items · 37 pts
+
+| Story | Epic | Type | Pri | Est | Depends on |
+|---|---|---|---|---|---|
 | [Client directory: audited soft-delete](stories/PRD-02__CLIENT-DIR-SOFT-DELETE.md) | PRD-02 | Story | P2 | 2 | PRD-02/CLIENT-DIR |
 | [Client directory: global header search wiring](stories/PRD-02__CLIENT-DIR-HEADER-SEARCH.md) | PRD-02 | Story | P2 | 2 | PRD-02/CLIENT-DIR |
 | [Client merge — basic duplicate detection & review](stories/PRD-02__CLIENT-MERGE.md) | PRD-02 | Story | P2 | 2 | PRD-02/CLIENT-DIR |
@@ -308,11 +262,6 @@
 | [Service catalogue: schedule flag wired to scope, rewards & public naming](stories/PRD-02__SERVICE-CATALOGUE-WIRING.md) | PRD-02 | Story | P2 | 2 | PRD-02/SERVICE-CATALOGUE |
 | [Service catalogue: capability-gated admin & audit](stories/PRD-02__SERVICE-CATALOGUE-ADMIN.md) | PRD-02 | Story | P2 | 2 | PRD-02/SERVICE-CATALOGUE |
 | [Service catalogue: treatment-menu card UI & status filter](stories/PRD-02__SERVICE-CATALOGUE-CARD-UI.md) | PRD-02 | Story | P2 | 2 | PRD-02/SERVICE-CATALOGUE |
-
-### Sprint 16 — Consent  ·  17 items · 37 pts
-
-| Story | Epic | Type | Pri | Est | Depends on |
-|---|---|---|---|---|---|
 | [Intake-form builder — basic versioned templates](stories/PRD-03__FORM-BUILDER.md) | PRD-03 | Story | P1 | 3 | PRD-03/INTAKE |
 | [Consent templates — basic versioned per-treatment templates](stories/PRD-03__CONSENT-TEMPLATE-ADMIN.md) | PRD-03 | Story | P1 | 3 | PRD-03/CONSENT |
 | [Under-18 guardian consent — basic guardian co-signature](stories/PRD-03__GUARDIAN-CONSENT.md) | PRD-03 | Story | P1 | 3 | PRD-03/COOLING-OFF, PRD-03/CONSENT |
@@ -320,6 +269,11 @@
 | [Pre-visit intake: medical-history step & quick safety check](stories/PRD-03__INTAKE-MEDICAL-HISTORY.md) | PRD-03 | Story | P2 | 2 | PRD-03/INTAKE |
 | [Pre-visit intake: staff status + send/chase](stories/PRD-03__INTAKE-STAFF-STATUS.md) | PRD-03 | Story | P2 | 2 | PRD-03/INTAKE |
 | [Intake-form builder: server-side answer validation](stories/PRD-03__FORM-BUILDER-VALIDATION.md) | PRD-03 | Story | P2 | 2 | PRD-03/FORM-BUILDER |
+
+### Sprint 14 — Consent  ·  18 items · 37 pts
+
+| Story | Epic | Type | Pri | Est | Depends on |
+|---|---|---|---|---|---|
 | [Intake-form builder: form-builder admin UI](stories/PRD-03__FORM-BUILDER-ADMIN-UI.md) | PRD-03 | Story | P2 | 2 | PRD-03/FORM-BUILDER |
 | [BDD screening: positive-flag surfacing & RN/NP review requirement](stories/PRD-03__BDD-REVIEW-GATE.md) | PRD-03 | Story | P2 | 2 | PRD-03/BDD |
 | [BDD screening: wellbeing questions in the intake wizard](stories/PRD-03__BDD-WELLBEING-UI.md) | PRD-03 | Story | P2 | 2 | PRD-03/BDD |
@@ -330,11 +284,6 @@
 | [Consent templates: authoring UI & audit](stories/PRD-03__CONSENT-TEMPLATE-AUTHORING-UI.md) | PRD-03 | Story | P2 | 2 | PRD-03/CONSENT-TEMPLATE-ADMIN |
 | [Image-use consent: downstream media-use enforcement on withdraw](stories/PRD-03__IMAGE-CONSENT-ENFORCEMENT.md) | PRD-03 | Story | P2 | 2 | PRD-03/IMAGE-CONSENT |
 | [Image-use consent: client self-manage toggle](stories/PRD-03__IMAGE-CONSENT-CLIENT-TOGGLE.md) | PRD-03 | Story | P2 | 2 | PRD-03/IMAGE-CONSENT |
-
-### Sprint 17 — Injectables  ·  17 items · 35 pts
-
-| Story | Epic | Type | Pri | Est | Depends on |
-|---|---|---|---|---|---|
 | [Image-use consent: staff header chip](stories/PRD-03__IMAGE-CONSENT-STAFF-CHIP.md) | PRD-03 | Story | P2 | 2 | PRD-03/IMAGE-CONSENT |
 | [Cooling-off: payment-block coordination & deposit suppression (F14)](stories/PRD-03__COOLING-OFF-PAYMENT-BLOCK.md) | PRD-03 | Story | P2 | 2 | PRD-03/COOLING-OFF |
 | [Cooling-off: optional adult cooling-off config (not a gate)](stories/PRD-03__COOLING-OFF-ADULT-CONFIG.md) | PRD-03 | Story | P2 | 2 | PRD-03/COOLING-OFF |
@@ -343,6 +292,11 @@
 | [Under-18 guardian consent: co-sign step in the consent flow](stories/PRD-03__GUARDIAN-CONSENT-COSIGN-UI.md) | PRD-03 | Story | P2 | 2 | PRD-03/GUARDIAN-CONSENT |
 | [Stock at-a-glance: KPI tiles (MVP)](stories/PRD-04__STOCK-OVERVIEW.md) | PRD-04 | Story | P1 | 3 | PRD-04/STOCK-RECEIVE |
 | [Product catalogue: per-product on-hand cards, usage history & below-par](stories/PRD-04__PRODUCT-CATALOGUE-CARDS.md) | PRD-04 | Story | P2 | 2 | PRD-04/PRODUCT-CATALOGUE |
+
+### Sprint 15 — Injectables  ·  17 items · 37 pts
+
+| Story | Epic | Type | Pri | Est | Depends on |
+|---|---|---|---|---|---|
 | [Product catalogue: schedule-change classification fan-out + audit](stories/PRD-04__PRODUCT-CATALOGUE-FANOUT.md) | PRD-04 | Story | P2 | 2 | PRD-04/PRODUCT-CATALOGUE |
 | [S4 purchase orders: prescriber-signer & approved-wholesaler gate](stories/PRD-04__STOCK-RECEIVE-PO-SIGNER.md) | PRD-04 | Story | P2 | 2 | PRD-04/STOCK-RECEIVE |
 | [Stock overview: usage-history chart](stories/PRD-04__STOCK-OVERVIEW-USAGE.md) | PRD-04 | Story | P2 | 2 | PRD-04/STOCK-OVERVIEW |
@@ -352,11 +306,6 @@
 | [Recall execution & acknowledgement tracking](stories/PRD-04__RECALL-EXECUTION.md) | PRD-04 | Story | P2 | 2 | PRD-04/RECALL-LOOKUP |
 | [Witnessed destruction & disposal records (licensed/RUM + certificate)](stories/PRD-04__DESTRUCTION-RECORDS.md) | PRD-04 | Story | P2 | 2 | PRD-04/WASTAGE-DESTRUCTION |
 | [Loss / theft reporting from a stock discrepancy](stories/PRD-04__STOCK-LOSS-THEFT.md) | PRD-04 | Story | P2 | 2 | PRD-04/STOCKTAKE |
-
-### Sprint 18 — Charting  ·  17 items · 37 pts
-
-| Story | Epic | Type | Pri | Est | Depends on |
-|---|---|---|---|---|---|
 | [Charting product & batch (lot) selector (MVP)](stories/PRD-05__PRODUCT-LOT-PICKER.md) | PRD-05 | Story | P0 | 5 | PRD-05/MAPPING |
 | [Charting: treatment-type toggle (toxin / non-S4 skin)](stories/PRD-05__NOTE-TEMPLATE-TYPE-TOGGLE.md) | PRD-05 | Story | P2 | 2 | PRD-05/NOTE-TEMPLATE |
 | [Charting: configurable, versioned note-template engine + snippet admin](stories/PRD-05__NOTE-TEMPLATE-ENGINE.md) | PRD-05 | Story | P2 | 2 | PRD-05/NOTE-TEMPLATE |
@@ -365,8 +314,14 @@
 | [Charting: non-S4 skin-note variant fields](stories/PRD-05__MAPPING-SKIN-NOTE.md) | PRD-05 | Story | P2 | 2 | PRD-05/MAPPING |
 | [Charting lot picker: lot-required-before-points gate](stories/PRD-05__PRODUCT-LOT-PICKER-GATE.md) | PRD-05 | Story | P2 | 2 | PRD-05/PRODUCT-LOT-PICKER |
 | [Clinical photos: before/after compare, per-pose gallery & annotation](stories/PRD-05__PHOTOS-COMPARE.md) | PRD-05 | Story | P2 | 2 | PRD-05/PHOTOS |
+
+### Sprint 16 — Charting  ·  18 items · 37 pts
+
+| Story | Epic | Type | Pri | Est | Depends on |
+|---|---|---|---|---|---|
 | [Clinical photos: on-device transient cache & post-sync purge](stories/PRD-05__PHOTOS-OFFLINE-CACHE.md) | PRD-05 | Story | P2 | 2 | PRD-05/PHOTOS |
 | [Adverse event: follow-up jobs & route to Governance](stories/PRD-05__ADVERSE-EVENT-JOBS.md) | PRD-05 | Story | P2 | 2 | PRD-05/ADVERSE-EVENT |
+| [Treatment plans & protocol templates (MVP)](stories/PRD-05__TREATMENT-PLANS.md) | PRD-05 | Story | P2 | 2 | PRD-05/NOTE-TEMPLATE |
 | [Treatment plans: project upcoming sessions as recall jobs](stories/PRD-05__TREATMENT-PLANS-RECALL.md) | PRD-05 | Story | P2 | 2 | PRD-05/TREATMENT-PLANS |
 | [Treatment plans: protocol builder, Client 360 progress & in-room list](stories/PRD-05__TREATMENT-PLANS-VIEWS.md) | PRD-05 | Story | P2 | 2 | PRD-05/TREATMENT-PLANS |
 | [Skin analysis: recommended-plan chips feeding treatment plans](stories/PRD-05__SKIN-ANALYSIS-RECOMMEND.md) | PRD-05 | Story | P2 | 2 | PRD-05/SKIN-ANALYSIS |
@@ -374,55 +329,63 @@
 | [Body contouring: consumable cost roll-up into true cost & margin](stories/PRD-05__BODY-CONTOURING-COST.md) | PRD-05 | Story | P2 | 2 | PRD-05/BODY-CONTOURING |
 | [Body contouring: standardised body photos & measurements over the course](stories/PRD-05__BODY-CONTOURING-PROGRESS.md) | PRD-05 | Story | P2 | 2 | PRD-05/BODY-CONTOURING |
 | [Complication protocols: emergency-kit register linkage & expiry surfacing](stories/PRD-05__COMPLICATION-KIT-LINK.md) | PRD-05 | Story | P2 | 2 | PRD-05/COMPLICATION-LIBRARY |
-
-### Sprint 19 — Reporting  ·  17 items · 35 pts
-
-| Story | Epic | Type | Pri | Est | Depends on |
-|---|---|---|---|---|---|
 | [Outcomes: per-treatment/practitioner aggregation & reporting feed](stories/PRD-05__OUTCOMES-REPORTING.md) | PRD-05 | Story | P2 | 2 | PRD-05/OUTCOMES |
+| [Business analytics dashboards (core: metrics read-model + headline tiles)](stories/PRD-08__BUSINESS-DASH.md) | PRD-08 | Story | P1 | 3 | PRD-08/READ-MODELS |
 | [Business dashboards: custom range & per-practitioner filter](stories/PRD-08__BUSINESS-DASH-FILTERS.md) | PRD-08 | Story | P2 | 2 | PRD-08/BUSINESS-DASH |
 | [Business dashboards: GROWTH band tiles](stories/PRD-08__BUSINESS-DASH-GROWTH.md) | PRD-08 | Story | P2 | 2 | PRD-08/BUSINESS-DASH |
 | [Business dashboards: PERFORMANCE band tiles](stories/PRD-08__BUSINESS-DASH-PERF.md) | PRD-08 | Story | P2 | 2 | PRD-08/BUSINESS-DASH |
 | [Business dashboards: FINANCE band tiles](stories/PRD-08__BUSINESS-DASH-FINANCE.md) | PRD-08 | Story | P2 | 2 | PRD-08/BUSINESS-DASH |
 | [Business dashboards: Insights strip + reward-cost-vs-retention](stories/PRD-08__BUSINESS-DASH-INSIGHTS.md) | PRD-08 | Story | P2 | 2 | PRD-08/BUSINESS-DASH |
 | [Business dashboards: owner Targets editor](stories/PRD-08__BUSINESS-DASH-TARGETS.md) | PRD-08 | Story | P2 | 2 | PRD-08/BUSINESS-DASH |
+
+### Sprint 17 — Reporting  ·  17 items · 37 pts
+
+| Story | Epic | Type | Pri | Est | Depends on |
+|---|---|---|---|---|---|
 | [Retention cohort analysis (core: cohort grid)](stories/PRD-08__RETENTION-COHORTS.md) | PRD-08 | Story | P2 | 2 | PRD-08/BUSINESS-DASH |
 | [Retention: at-risk / lapsed worklist + reactivation hand-off](stories/PRD-08__RETENTION-ATRISK.md) | PRD-08 | Story | P2 | 2 | PRD-08/RETENTION-COHORTS |
 | [Compliance: S4 register export](stories/PRD-08__COMPLIANCE-DASH-S4REGISTER.md) | PRD-08 | Story | P2 | 2 | PRD-08/COMPLIANCE-DASH |
 | [Compliance: lot → clients recall lookup](stories/PRD-08__COMPLIANCE-DASH-RECALL.md) | PRD-08 | Story | P2 | 2 | PRD-08/COMPLIANCE-DASH, PRD-04/RECALL-LOOKUP |
 | [Compliance: breach & complaints registers](stories/PRD-08__COMPLIANCE-DASH-REGISTERS.md) | PRD-08 | Story | P2 | 2 | PRD-08/COMPLIANCE-DASH |
 | [Compliance: registration-expiry watch & records-due lists](stories/PRD-08__COMPLIANCE-DASH-EXPIRY.md) | PRD-08 | Story | P2 | 2 | PRD-08/COMPLIANCE-DASH |
+| [Owner 'needs attention' exceptions digest](stories/PRD-08__ATTENTION-DIGEST.md) | PRD-08 | Story | P2 | 2 | PRD-08/COMPLIANCE-DASH |
+| [Practitioner scorecard](stories/PRD-08__SCORECARD.md) | PRD-08 | Story | P2 | 2 | PRD-08/BUSINESS-DASH |
+| [Capacity & utilisation report](stories/PRD-08__CAPACITY.md) | PRD-08 | Story | P2 | 2 | PRD-08/READ-MODELS |
+| [True-cost / margin (COGS) reporting](stories/PRD-08__TRUE-COST.md) | PRD-08 | Story | P2 | 2 | PRD-08/READ-MODELS, PRD-04/VIAL-RECON |
 | [Per-procedure cost catalogue (core: cost model + editor)](stories/PRD-08__COST-CATALOGUE.md) | PRD-08 | Story | P2 | 2 | PRD-08/TRUE-COST |
 | [Cost catalogue: single-source feed to margin report + pricing planner](stories/PRD-08__COST-CATALOGUE-FEED.md) | PRD-08 | Story | P2 | 2 | PRD-08/COST-CATALOGUE |
 | [Cost catalogue: consumable → Stock auto-decrement](stories/PRD-08__COST-CATALOGUE-STOCK.md) | PRD-08 | Story | P2 | 2 | PRD-08/COST-CATALOGUE |
 | [Complaint → indefinite retention flag](stories/PRD-11__COMPLAINT-RETENTION.md) | PRD-11 | Story | P1 | 3 | PRD-11/COMPLAINTS, PRD-01/PRIVACY-RIGHTS |
-
-### Sprint 20 — Compliance ops  ·  17 items · 37 pts
-
-| Story | Epic | Type | Pri | Est | Depends on |
-|---|---|---|---|---|---|
 | [Open/close: manual fridge-temp log + breach pathway](stories/PRD-11__OPENCLOSE-FRIDGE.md) | PRD-11 | Story | P1 | 3 | PRD-11/OPENCLOSE, PRD-04/COLD-CHAIN |
 | [Cold-chain: reconcile device + manual readings](stories/PRD-11__MONITOR-RECONCILE.md) | PRD-11 | Story | P1 | 3 | PRD-11/TEMP-MONITORS, PRD-11/OPENCLOSE-FRIDGE |
 | [Facility: accreditation expiry alerts](stories/PRD-11__FACILITY-ALERTS.md) | PRD-11 | Story | P2 | 2 | PRD-11/FACILITY |
+
+### Sprint 18 — Compliance ops  ·  14 items · 36 pts
+
+| Story | Epic | Type | Pri | Est | Depends on |
+|---|---|---|---|---|---|
 | [Facility: blocking-vs-advisory enforcement](stories/PRD-11__FACILITY-ENFORCE.md) | PRD-11 | Story | P2 | 2 | PRD-11/FACILITY |
 | [Emergency kit: expiry alerts](stories/PRD-11__KIT-ALERTS.md) | PRD-11 | Story | P2 | 2 | PRD-11/EMERGENCY-KIT |
 | [Emergency kit: complication protocols + 'Start response'](stories/PRD-11__KIT-PROTOCOLS.md) | PRD-11 | Story | P2 | 2 | PRD-11/EMERGENCY-KIT, PRD-05/ADVERSE-EVENT |
 | [Continuity-of-care contact](stories/PRD-11__CONTINUITY-CONTACT.md) | PRD-11 | Story | P2 | 2 | PRD-11/EMERGENCY-KIT |
-| [Complaints: reporting feed + raise-from-conversation](stories/PRD-11__COMPLAINT-REPORTING.md) | PRD-11 | Story | P2 | 2 | PRD-11/COMPLAINTS, PRD-07/FOLLOWUPS |
+| [Rooms & devices register (basic)](stories/PRD-11__ROOMS-DEVICES.md) | PRD-11 | Story | P2 | 2 | PRD-02/CALENDAR |
 | [Resources: calendar exposure + conflict-flagging](stories/PRD-11__RESOURCE-CALENDAR.md) | PRD-11 | Story | P2 | 2 | PRD-11/ROOMS-DEVICES, PRD-02/CALENDAR |
+| [Equipment & maintenance register (basic)](stories/PRD-11__EQUIPMENT.md) | PRD-11 | Story | P2 | 2 | PRD-11/ROOMS-DEVICES |
 | [Resources: out-of-service + equipment-maintenance link](stories/PRD-11__RESOURCE-SERVICE.md) | PRD-11 | Story | P2 | 2 | PRD-11/ROOMS-DEVICES, PRD-11/EQUIPMENT |
 | [Equipment: due/overdue maintenance alerts](stories/PRD-11__EQUIPMENT-ALERTS.md) | PRD-11 | Story | P2 | 2 | PRD-11/EQUIPMENT |
 | [Equipment: log service events with evidence](stories/PRD-11__EQUIPMENT-EVIDENCE.md) | PRD-11 | Story | P2 | 2 | PRD-11/EQUIPMENT |
-| [Call log: callback job + comms history](stories/PRD-11__CALL-FOLLOWUP.md) | PRD-11 | Story | P2 | 2 | PRD-11/CALL-LOG, PRD-07/FOLLOWUPS |
-| [Call log: shared follow-up queue (walk-ins / waitlist)](stories/PRD-11__CALL-QUEUE.md) | PRD-11 | Story | P2 | 2 | PRD-11/CALL-LOG, PRD-07/FOLLOWUPS |
+| [Membership join + card-on-file — basic enrolment (core)](stories/PRD-06__MEMBERSHIP.md) | PRD-06 | Story | P0 | 5 | PRD-06/PAYMENT-PROVIDER |
+| [Rewards engine — non-S4 points earn/redeem + S4 block (core)](stories/PRD-06__REWARDS-ENGINE.md) | PRD-06 | Story | P0 | 5 | PRD-04/PRODUCT-CATALOGUE |
+| [Packages/series: sell & redeem (visits remaining) — basic pre-paid value (core)](stories/PRD-06__PACKAGES-GIFT.md) | PRD-06 | Story | P1 | 3 | PRD-06/POS |
 | [Membership plans & tiers — define plans + non-S4 benefit constraint (core)](stories/PRD-06__MEMBERSHIP-PLANS.md) | PRD-06 | Story | P1 | 3 | PRD-06/MEMBERSHIP |
-| [Checkout: per-line GST (goods and services tax)](stories/PRD-06__POS-GST.md) | PRD-06 | Story | P2 | 2 | PRD-06/POS |
-| [Checkout: split / partial tenders, tips & card surcharge](stories/PRD-06__POS-SPLIT-TENDER.md) | PRD-06 | Story | P2 | 2 | PRD-06/POS |
 
-### Sprint 21 — Payments  ·  18 items · 36 pts
+### Sprint 19 — Payments  ·  18 items · 37 pts
 
 | Story | Epic | Type | Pri | Est | Depends on |
 |---|---|---|---|---|---|
+| [Margin-aware reward rules](stories/PRD-06__MARGIN-RULES.md) | PRD-06 | Story | P1 | 3 | PRD-06/REWARDS-ENGINE |
+| [Checkout: per-line GST (goods and services tax)](stories/PRD-06__POS-GST.md) | PRD-06 | Story | P2 | 2 | PRD-06/POS |
+| [Checkout: split / partial tenders, tips & card surcharge](stories/PRD-06__POS-SPLIT-TENDER.md) | PRD-06 | Story | P2 | 2 | PRD-06/POS |
 | [Checkout: member-reward & store-credit deduction lines (non-S4)](stories/PRD-06__POS-DEDUCTIONS.md) | PRD-06 | Story | P2 | 2 | PRD-06/POS |
 | [Checkout: Square-terminal modal (Processing → Approved) + decline path](stories/PRD-06__POS-TERMINAL-MODAL.md) | PRD-06 | Story | P2 | 2 | PRD-06/POS |
 | [Checkout: post completed sale to Xero (per-line tax mapping)](stories/PRD-06__POS-XERO-POST.md) | PRD-06 | Story | P2 | 2 | PRD-06/POS |
@@ -438,53 +401,90 @@
 | [Membership: members & billing list + overview KPIs](stories/PRD-06__MEMBERSHIP-MEMBERS.md) | PRD-06 | Story | P2 | 2 | PRD-06/MEMBERSHIP |
 | [Membership plans: capability-gated admin, audit & member-term preservation](stories/PRD-06__MEMBERSHIP-PLANS-ADMIN.md) | PRD-06 | Story | P2 | 2 | PRD-06/MEMBERSHIP-PLANS |
 | [Membership plans: Plans & packages tab UI (tier cards + per-tier MRR)](stories/PRD-06__MEMBERSHIP-PLANS-UI.md) | PRD-06 | Story | P2 | 2 | PRD-06/MEMBERSHIP-PLANS |
-| [Rewards: loyalty tiers (Silver / Gold / Platinum) + top balances](stories/PRD-06__REWARDS-TIERS.md) | PRD-06 | Story | P2 | 2 | PRD-06/REWARDS-ENGINE |
-| [Rewards: Loyalty screen UI](stories/PRD-06__REWARDS-LOYALTY-UI.md) | PRD-06 | Story | P2 | 2 | PRD-06/REWARDS-ENGINE |
-| [Checkout: 'Worth mentioning' upsell panel (membership / restock / rebook cue)](stories/PRD-06__CHECKOUT-UPSELL.md) | PRD-06 | Story | P2 | 2 | PRD-06/CHECKOUT-ASSIST |
 
-### Sprint 22 — Comms & growth  ·  18 items · 37 pts
+### Sprint 20 — Payments  ·  15 items · 36 pts
 
 | Story | Epic | Type | Pri | Est | Depends on |
 |---|---|---|---|---|---|
+| [Rewards: loyalty tiers (Silver / Gold / Platinum) + top balances](stories/PRD-06__REWARDS-TIERS.md) | PRD-06 | Story | P2 | 2 | PRD-06/REWARDS-ENGINE |
+| [Rewards: Loyalty screen UI](stories/PRD-06__REWARDS-LOYALTY-UI.md) | PRD-06 | Story | P2 | 2 | PRD-06/REWARDS-ENGINE |
+| [Post-visit rebooking on the treatment interval (core)](stories/PRD-06__CHECKOUT-ASSIST.md) | PRD-06 | Story | P2 | 2 | PRD-06/POS |
+| [Checkout: 'Worth mentioning' upsell panel (membership / restock / rebook cue)](stories/PRD-06__CHECKOUT-UPSELL.md) | PRD-06 | Story | P2 | 2 | PRD-06/CHECKOUT-ASSIST |
 | [Checkout: client-rapport panel (derived from history)](stories/PRD-06__CHECKOUT-RAPPORT.md) | PRD-06 | Story | P2 | 2 | PRD-06/CHECKOUT-ASSIST |
 | [Checkout: 'Pairs well with today's treatment' non-S4 cross-sell](stories/PRD-06__CHECKOUT-CROSSSELL.md) | PRD-06 | Story | P2 | 2 | PRD-06/CHECKOUT-ASSIST |
+| [Pricing & what-if — editable plan prices + projected impact (core)](stories/PRD-06__PRICING-WHATIF.md) | PRD-06 | Story | P2 | 2 | PRD-06/POS |
 | [Pricing & what-if: churn-sensitivity slider](stories/PRD-06__PRICING-CHURN-SLIDER.md) | PRD-06 | Story | P2 | 2 | PRD-06/PRICING-WHATIF |
 | [Pricing & what-if: editable service-pricing rows](stories/PRD-06__PRICING-SERVICE-ROWS.md) | PRD-06 | Story | P2 | 2 | PRD-06/PRICING-WHATIF |
 | [Pricing & what-if: save scenario + apply-via-admin handoff](stories/PRD-06__PRICING-SAVE-APPLY.md) | PRD-06 | Story | P2 | 2 | PRD-06/PRICING-WHATIF |
 | [Pricing & what-if: Finance hub framing (defers to Xero)](stories/PRD-06__PRICING-FINANCE-HUB.md) | PRD-06 | Story | P2 | 2 | PRD-06/PRICING-WHATIF |
+| [Notification channels (SMS / email / push)](stories/PRD-07__CHANNELS.md) | PRD-07 | Story | P0 | 5 | — |
+| [Appointment reminders & confirmations — basic sequence (core)](stories/PRD-07__REMINDERS-CARE.md) | PRD-07 | Story | P1 | 3 | PRD-07/CHANNELS |
+| [Recall / recare worklist](stories/PRD-07__RECALL.md) | PRD-07 | Story | P1 | 3 | PRD-07/CHANNELS |
+| [Marketing consent & functional unsubscribe (Spam Act)](stories/PRD-07__MARKETING-CONSENT.md) | PRD-07 | Story | P1 | 3 | PRD-07/CHANNELS |
+
+### Sprint 21 — Comms & growth  ·  18 items · 37 pts
+
+| Story | Epic | Type | Pri | Est | Depends on |
+|---|---|---|---|---|---|
+| [Public booking page: schedule-driven generic names & withheld S4 prices (core)](stories/PRD-07__BOOKING-PAGE.md) | PRD-07 | Story | P1 | 3 | PRD-02/ONLINE-BOOK |
 | [Pre-care instruction sequences (per treatment type)](stories/PRD-07__PRECARE.md) | PRD-07 | Story | P2 | 2 | PRD-07/REMINDERS-CARE |
 | [Aftercare instruction sequences (day-0 + day-3, per treatment type)](stories/PRD-07__AFTERCARE.md) | PRD-07 | Story | P2 | 2 | PRD-07/REMINDERS-CARE |
 | [Public booking page: Settings config screen + live preview](stories/PRD-07__BOOKING-PAGE-SETTINGS.md) | PRD-07 | Story | P2 | 2 | PRD-07/BOOKING-PAGE |
+| [Unified follow-up / job queue — projected signals + lifecycle (core)](stories/PRD-07__FOLLOWUPS.md) | PRD-07 | Story | P2 | 2 | PRD-07/CHANNELS |
+| [Complaints: reporting feed + raise-from-conversation](stories/PRD-11__COMPLAINT-REPORTING.md) | PRD-11 | Story | P2 | 2 | PRD-11/COMPLAINTS, PRD-07/FOLLOWUPS |
+| [Call / phone log (basic)](stories/PRD-11__CALL-LOG.md) | PRD-11 | Story | P2 | 2 | PRD-07/FOLLOWUPS |
+| [Call log: callback job + comms history](stories/PRD-11__CALL-FOLLOWUP.md) | PRD-11 | Story | P2 | 2 | PRD-11/CALL-LOG, PRD-07/FOLLOWUPS |
+| [Call log: shared follow-up queue (walk-ins / waitlist)](stories/PRD-11__CALL-QUEUE.md) | PRD-11 | Story | P2 | 2 | PRD-11/CALL-LOG, PRD-07/FOLLOWUPS |
+| [Shift handover notes](stories/PRD-11__SHIFT-HANDOVER.md) | PRD-11 | Story | P2 | 2 | PRD-07/FOLLOWUPS |
 | [Follow-ups: manual flag → Job](stories/PRD-07__FOLLOWUPS-FLAG.md) | PRD-07 | Story | P2 | 2 | PRD-07/FOLLOWUPS |
 | [Follow-ups: rules/keyword auto-categorisation (no AI)](stories/PRD-07__FOLLOWUPS-AUTOCAT.md) | PRD-07 | Story | P2 | 2 | PRD-07/FOLLOWUPS |
+| [Automation builder — toggleable automations + consent split (core)](stories/PRD-07__AUTOMATIONS.md) | PRD-07 | Story | P2 | 2 | PRD-07/REMINDERS-CARE |
 | [Automations: per-treatment-type editing](stories/PRD-07__AUTOMATIONS-PER-TREATMENT.md) | PRD-07 | Story | P2 | 2 | PRD-07/AUTOMATIONS |
 | [Automations: live stats (sent / booked / returned)](stories/PRD-07__AUTOMATIONS-STATS.md) | PRD-07 | Story | P2 | 2 | PRD-07/AUTOMATIONS |
 | [Reviews: auto-detect negative reviews / complaint keywords → Job](stories/PRD-07__REVIEWS-AUTODETECT.md) | PRD-07 | Story | P2 | 2 | PRD-07/REVIEWS |
 | [Reviews: screen UI + reputation KPIs](stories/PRD-07__REVIEWS-SCREEN-KPI.md) | PRD-07 | Story | P2 | 2 | PRD-07/REVIEWS |
 | [Leads: consent-gated outbound nudges (1:1 replies exempt, C23)](stories/PRD-07__LEADS-NUDGES.md) | PRD-07 | Story | P2 | 2 | PRD-07/LEADS-CRM |
-| [Leads: conversion KPIs + Follow-ups queue projection](stories/PRD-07__LEADS-KPI-FOLLOWUPS.md) | PRD-07 | Story | P2 | 2 | PRD-07/LEADS-CRM |
-| [Xero: resilient idempotent SyncJob + OAuth lifecycle](stories/PRD-10__XERO-SYNCJOB.md) | PRD-10 | Story | P1 | 3 | PRD-10/XERO |
 
-### Sprint 23 — Apps  ·  16 items · 36 pts
+### Sprint 22 — Apps  ·  14 items · 37 pts
 
 | Story | Epic | Type | Pri | Est | Depends on |
 |---|---|---|---|---|---|
+| [Leads: conversion KPIs + Follow-ups queue projection](stories/PRD-07__LEADS-KPI-FOLLOWUPS.md) | PRD-07 | Story | P2 | 2 | PRD-07/LEADS-CRM |
+| [Xero invoice/payment sync (basic)](stories/PRD-10__XERO.md) | PRD-10 | Story | P1 | 3 | PRD-06/POS |
+| [Xero: resilient idempotent SyncJob + OAuth lifecycle](stories/PRD-10__XERO-SYNCJOB.md) | PRD-10 | Story | P1 | 3 | PRD-10/XERO |
 | [Xero: Settings card + mapping editor + reconciliation list](stories/PRD-10__XERO-RECON-UI.md) | PRD-10 | Story | P2 | 2 | PRD-10/XERO, PRD-10/XERO-SYNCJOB |
+| [Calendar sync: outbound push (basic)](stories/PRD-10__CALENDAR-SYNC.md) | PRD-10 | Story | P2 | 2 | PRD-02/CALENDAR |
 | [Calendar sync: inbound busy-time → availability blocks](stories/PRD-10__CALENDAR-INBOUND.md) | PRD-10 | Story | P2 | 2 | PRD-10/CALENDAR-SYNC, PRD-02/CALENDAR |
+| [Sub-processor residency posture (APP-8)](stories/PRD-10__SUBPROCESSOR-POSTURE.md) | PRD-10 | Story | P2 | 2 | PRD-01/RESIDENCY |
+| [Client app: shell, sign-in & home (basic)](stories/PRD-09__CLIENT-JOURNEY.md) | PRD-09 | Story | P1 | 3 | PRD-02/ONLINE-BOOK, PRD-03/CONSENT |
+| [Provider app: day schedule & open patient](stories/PRD-09__PROVIDER-DAY.md) | PRD-09 | Story | P1 | 3 | PRD-05/NOTE-TEMPLATE |
+| [Provider app: room-side injection mapping (basic)](stories/PRD-09__PROVIDER-ROOMSIDE.md) | PRD-09 | Story | P1 | 3 | PRD-09/PROVIDER-DAY, PRD-05/MAPPING |
 | [Provider app: native-camera before/after capture](stories/PRD-09__PROVIDER-CAMERA.md) | PRD-09 | Story | P1 | 3 | PRD-09/PROVIDER-ROOMSIDE, PRD-05/PHOTOS |
 | [Provider app: server-side finalise → immutable record](stories/PRD-09__PROVIDER-FINALISE.md) | PRD-09 | Story | P1 | 3 | PRD-09/PROVIDER-ROOMSIDE, PRD-05/MAPPING |
+| [Provider app: offline-tolerant workflows + sync indicator](stories/PRD-09__PROVIDER-OFFLINE.md) | PRD-09 | Story | P1 | 3 | PRD-05/OFFLINE |
+| [Client 'report a concern' → follow-up bridge (basic)](stories/PRD-09__CLIENT-CONCERN.md) | PRD-09 | Story | P1 | 3 | PRD-07/FOLLOWUPS |
+
+### Sprint 23 — Apps  ·  17 items · 36 pts
+
+| Story | Epic | Type | Pri | Est | Depends on |
+|---|---|---|---|---|---|
 | [Staff Follow-ups: view / call back / resolve a concern](stories/PRD-09__CONCERN-TRIAGE.md) | PRD-09 | Story | P1 | 3 | PRD-09/CLIENT-CONCERN, PRD-07/FOLLOWUPS |
 | [Concern: escalate to adverse event / complaint](stories/PRD-09__CONCERN-ESCALATE.md) | PRD-09 | Story | P1 | 3 | PRD-09/CLIENT-CONCERN, PRD-05/ADVERSE-EVENT |
 | [Client app: in-app booking over PRD-02](stories/PRD-09__CLIENT-BOOK.md) | PRD-09 | Story | P2 | 2 | PRD-09/CLIENT-JOURNEY, PRD-02/ONLINE-BOOK |
 | [Client app: intake + consent, e-signed on device](stories/PRD-09__CLIENT-INTAKE.md) | PRD-09 | Story | P2 | 2 | PRD-09/CLIENT-JOURNEY, PRD-03/CONSENT |
 | [Client app: push token + notification inbox](stories/PRD-09__CLIENT-PUSH.md) | PRD-09 | Story | P2 | 2 | PRD-09/CLIENT-JOURNEY, PRD-07/FOLLOWUPS |
+| [Client app: my care health hub (basic)](stories/PRD-09__CLIENT-CARE.md) | PRD-09 | Story | P2 | 2 | PRD-09/CLIENT-JOURNEY, PRD-05/PHOTOS |
 | [Client app: rewards, perks & referrals](stories/PRD-09__CLIENT-REWARDS.md) | PRD-09 | Story | P2 | 2 | PRD-09/CLIENT-CARE, PRD-06/MEMBERSHIP |
 | [Client app: account, memberships & card-on-file](stories/PRD-09__CLIENT-ACCOUNT.md) | PRD-09 | Story | P2 | 2 | PRD-09/CLIENT-CARE, PRD-06/MEMBERSHIP |
 | [Client app: consent-gated before/after gallery with drag-to-compare](stories/PRD-09__PHOTO-COMPARE.md) | PRD-09 | Story | P2 | 2 | PRD-09/CLIENT-CARE, PRD-02/PHOTOS-GALLERY |
 | [Client app: day-by-day aftercare guidance + escalation](stories/PRD-09__AFTERCARE-GUIDE.md) | PRD-09 | Story | P2 | 2 | PRD-09/CLIENT-CARE, PRD-09/CLIENT-CONCERN |
+| [Client app: account, privacy & access/correction](stories/PRD-09__CLIENT-PRIVACY.md) | PRD-09 | Story | P2 | 2 | PRD-01/PRIVACY-RIGHTS |
+| [App distribution & code-push posture](stories/PRD-09__APP-DISTRIBUTION.md) | PRD-09 | Story | P2 | 2 | SPRINT-0/FLUTTER |
+| [Reception self-check-in surface (basic)](stories/PRD-09__CHECKIN-KIOSK.md) | PRD-09 | Story | P2 | 2 | PRD-02/LIFECYCLE |
 | [Kiosk: details review + today's health check](stories/PRD-09__CHECKIN-DETAILS.md) | PRD-09 | Story | P2 | 2 | PRD-09/CHECKIN-KIOSK, PRD-03/GATING |
 | [Kiosk: outstanding intake/consent at the desk](stories/PRD-09__CHECKIN-FORMS.md) | PRD-09 | Story | P2 | 2 | PRD-09/CHECKIN-KIOSK, PRD-03/GATING |
 | [Kiosk: reception arrivals board feed](stories/PRD-09__CHECKIN-ARRIVALS.md) | PRD-09 | Story | P2 | 2 | PRD-09/CHECKIN-KIOSK, PRD-02/LIFECYCLE |
+| [Back-office / bench tablet surface (basic)](stories/PRD-09__BACKOFFICE-TABLET.md) | PRD-09 | Story | P2 | 2 | PRD-11/OPENCLOSE, PRD-07/FOLLOWUPS |
 
 ### Sprint 24 — Apps  ·  3 items · 6 pts
 

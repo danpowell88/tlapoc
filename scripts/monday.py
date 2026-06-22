@@ -303,14 +303,21 @@ def plan_sprints(epics):
     total = sum(estimate(key_of[k][1]) for k in ordered)
     cap = max(14, math.ceil(total / TARGET_SPRINTS))
 
-    sprints, cur, load = [], [], 0
+    def _tier(k):
+        return 1 if "tier:followup" in key_of[k][1].get("labels", []) else 0
+
+    sprints, cur, load, cur_tier = [], [], 0, None
     for k in ordered:
         e = estimate(key_of[k][1])
-        if cur and load + e > cap:
+        t = _tier(k)
+        # break on capacity, OR at the MVP->follow-up tier boundary so the MVP
+        # finishes on a clean sprint edge (no sprint mixes MVP + enhancement work).
+        if cur and (load + e > cap or (cur_tier is not None and t != cur_tier)):
             sprints.append(cur)
             cur, load = [], 0
         cur.append(k)
         load += e
+        cur_tier = t
     if cur:
         sprints.append(cur)
 

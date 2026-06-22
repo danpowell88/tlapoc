@@ -885,7 +885,8 @@
         "type:story",
         "PRD-11",
         "phase:1",
-        "area:web"
+        "area:web",
+        "tier:followup"
       ],
       "priority": "P2",
       "depends_on": [
@@ -1035,7 +1036,8 @@
         "PRD-11",
         "phase:1",
         "area:web",
-        "compliance"
+        "compliance",
+        "tier:followup"
       ],
       "priority": "P2",
       "depends_on": [
@@ -1193,7 +1195,8 @@
         "type:story",
         "PRD-11",
         "phase:1",
-        "area:web"
+        "area:web",
+        "tier:followup"
       ],
       "priority": "P2",
       "depends_on": [
@@ -1335,7 +1338,8 @@
         "type:story",
         "PRD-11",
         "phase:1",
-        "area:web"
+        "area:web",
+        "tier:followup"
       ],
       "priority": "P2",
       "depends_on": [

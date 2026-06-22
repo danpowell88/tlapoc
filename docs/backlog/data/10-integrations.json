@@ -44,7 +44,8 @@
         "type:story",
         "PRD-10",
         "phase:1",
-        "area:integration"
+        "area:integration",
+        "tier:followup"
       ],
       "priority": "P1",
       "depends_on": [
@@ -208,7 +209,8 @@
         "type:story",
         "PRD-10",
         "phase:1",
-        "area:integration"
+        "area:integration",
+        "tier:followup"
       ],
       "priority": "P2",
       "depends_on": [
@@ -332,7 +334,8 @@
         "PRD-10",
         "phase:1",
         "area:integration",
-        "compliance"
+        "compliance",
+        "tier:followup"
       ],
       "priority": "P2",
       "depends_on": [

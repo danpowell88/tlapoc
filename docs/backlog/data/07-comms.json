@@ -44,7 +44,8 @@
         "PRD-07",
         "phase:1",
         "area:backend",
-        "area:integration"
+        "area:integration",
+        "tier:followup"
       ],
       "priority": "P0",
       "detail": [
@@ -111,7 +112,8 @@
         "type:story",
         "PRD-07",
         "phase:1",
-        "area:backend"
+        "area:backend",
+        "tier:followup"
       ],
       "priority": "P1",
       "depends_on": [
@@ -266,7 +268,8 @@
         "type:story",
         "PRD-07",
         "phase:1",
-        "area:backend"
+        "area:backend",
+        "tier:followup"
       ],
       "priority": "P1",
       "depends_on": [
@@ -331,7 +334,8 @@
         "PRD-07",
         "phase:1",
         "area:backend",
-        "compliance"
+        "compliance",
+        "tier:followup"
       ],
       "priority": "P1",
       "depends_on": [
@@ -408,7 +412,8 @@
         "PRD-07",
         "phase:1",
         "area:web",
-        "compliance"
+        "compliance",
+        "tier:followup"
       ],
       "priority": "P1",
       "depends_on": [
@@ -518,7 +523,8 @@
         "type:story",
         "PRD-07",
         "phase:1",
-        "area:web"
+        "area:web",
+        "tier:followup"
       ],
       "priority": "P2",
       "depends_on": [
@@ -732,7 +738,8 @@
         "type:story",
         "PRD-07",
         "phase:1",
-        "area:web"
+        "area:web",
+        "tier:followup"
       ],
       "priority": "P2",
       "depends_on": [

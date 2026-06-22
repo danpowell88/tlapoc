@@ -2,7 +2,7 @@
 
 > **Epic:** [PLATFORM — Platform shell, navigation & cross-cutting UX](../epics/PLATFORM.md)  ·  **Key:** `PLATFORM/NOTIFICATIONS`  ·  **Type:** Story  ·  **Stage:** M1  ·  **Priority:** P2  ·  **Estimate:** 2 pts  ·  **Area:** web
 >
-> **Depends on:** `PLATFORM/APP-NAV`, `PRD-07/CHANNELS`
+> **Depends on:** `PLATFORM/APP-NAV`
 
 ## Background
 
