@@ -7,7 +7,7 @@
 ## Background
 
 As a client, I want to give separate consent for photo use and withdraw it whenever I want, so that I control how my images are used.
-Photo use requires its own scoped consent, withdrawable at any time, which immediately stops downstream use (C14).
+Image-use consent is the separate, withdrawable photo permission inside Intake & Consent (PRD-03) — distinct from treatment consent because a client can agree to treatment but decline photos. It sits just after consent (PRD-03/CONSENT) in the flow. Crucially it is NOT part of the treatment gate: declining photos never blocks treatment. Instead it governs downstream media — the photos/charting in PRD-05 and media features in the apps (PRD-09) must check it before serving or capturing — so withdrawing it immediately stops further use.  Photo use requires its own scoped consent, withdrawable at any time, which immediately stops downstream use (C14).
 
 ## How it works
 

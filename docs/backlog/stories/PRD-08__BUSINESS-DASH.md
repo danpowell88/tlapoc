@@ -7,13 +7,13 @@
 ## Background
 
 As a owner, I want dashboards for revenue, retention, no-shows, conversion, at-risk, big spenders and membership MRR/churn, filterable by date and practitioner, so that I can run the business on real numbers.
-Revenue, retention/churn, no-shows, cancellations, conversion, at-risk, big spenders, membership MRR/churn and per-practitioner mix, date-filterable (REQ-RPT-1/2). Money figures owner-gated.
+This is the owner's business-intelligence screen: the revenue, retention and membership numbers needed to run the clinic, shown as live tiles with targets and variance. It sits in the Reporting layer (step 6 of the clinic-first build): it reads entirely from the reporting read-models (READ-MODELS), so it depends on those being in place, and the practitioner Scorecard (SCORECARD) is built on top of it. All money figures stay owner-only. Revenue, retention/churn, no-shows, cancellations, conversion, at-risk, big spenders, membership MRR (Monthly Recurring Revenue)/churn and per-practitioner mix, date-filterable (REQ-RPT-1/2). Money figures owner-gated.
 
 ## How it works
 
 The owner business-intelligence surface, rebuilt on live data from the reporting read-models (READ-MODELS) — the analytics the clinic relied on in Mindbody but never got cleanly. It carries the prototype's structure: an Insights strip of plain-language callouts (Opportunity / Watch / On-track), then three metric bands — GROWTH (MRR, active members, net member change, new members MTD), PERFORMANCE (conversion, retention, rebooking, no-show) and FINANCE (revenue last month + MoM, prepaid liability, to-reactivate value, autopay success) — each tile showing value, target and variance.
 Every figure is computed against a comparison window (prior period or an owner-set target) and is date-filterable via presets (7d / 30d / 90d) plus a custom range, with a per-practitioner breakdown. Owner-set Targets (MRR target, active-member target, conversion %, retention %, rebooking %, no-show ceiling) drive the variance colouring and the Insights callouts; targets are saved per clinic. Reward-cost vs retention surfaces from the rewards engine (PRD-06) so the owner can see whether loyalty spend is buying retention.
-All money figures — revenue, MRR, prepaid liability, ARPU, reward cost — are gated behind the owner financial capability (the .fin capability / applyFin() in the prototype). Non-owner roles such as Reception may see membership counts and operational metrics (no-show, rebooking) but never dollar figures.
+All money figures — revenue, MRR, prepaid liability, ARPU (average revenue per client), reward cost — are gated behind the owner financial capability (the .fin capability / applyFin() in the prototype). Non-owner roles such as Reception may see membership counts and operational metrics (no-show, rebooking) but never dollar figures.
 
 ## Requirements
 

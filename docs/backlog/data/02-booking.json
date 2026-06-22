@@ -18,7 +18,7 @@
     {
       "key": "CALENDAR",
       "title": "Multi-resource calendar (practitioner + room)",
-      "context": "Front desk needs a fast day/week/room calendar with service durations, buffers and rosters — the core of the diary.",
+      "context": "The multi-resource calendar is the first feature built in Reception (PRD-02), the front-of-house entry point to a visit, and sits directly on top of Foundations (PRD-01) — it consumes the practitioner roster and the canInject (the derived gate deciding whether a staff member may administer injectables right now) scope-of-practice gate. It is the diary that every other booking surface draws on. In the build timeline it comes after the platform and Foundations are in place and before everything else in Reception: the booking wizard, online self-booking, walk-ins and the visit lifecycle all reuse the availability engine this story creates, and it precedes the Intake/Consent gating (PRD-03) that runs between booking and treatment. As front desk, I want a day/week/room calendar showing practitioners and rooms with correct service durations and buffers, so that I can run the diary at a glance and book without clashes.  Front desk needs a fast day/week/room calendar with service durations, buffers and rosters — the core of the diary.",
       "as_a": "front desk",
       "i_want": "a day/week/room calendar showing practitioners and rooms with correct service durations and buffers",
       "so_that": "I can run the diary at a glance and book without clashes",
@@ -83,7 +83,7 @@
       "tasks": [
         {
           "title": "Availability engine: roster ∩ canInject ∩ free-resource",
-          "note": "Build the server-side availability function that, for a date range + service, returns bookable (practitioner, room, start) tuples. Inputs: RosterShift (PRD-01), TimeOff, existing Appointments, the practitioner canInject capability vs service.schedule, and Resource free/busy for the block length INCLUDING buffer/processing/turnaround. Returns scope-clean slots only — an uncredentialled or unrostered practitioner never appears for an injectable. Expose a read endpoint (GET availability?serviceId&from&to[&practitionerId]) consumed by the wizard, online booking and drag-drop validation. Pure, side-effect-free, tenant-scoped (RLS)."
+          "note": "Build the server-side availability function that, for a date range + service, returns bookable (practitioner, room, start) tuples. Inputs: RosterShift (PRD-01), TimeOff, existing Appointments, the practitioner canInject capability vs service.schedule, and Resource free/busy for the block length INCLUDING buffer/processing/turnaround. Returns scope-clean slots only — an uncredentialled or unrostered practitioner never appears for an injectable. Expose a read endpoint (GET availability?serviceId&from&to[&practitionerId]) consumed by the wizard, online booking and drag-drop validation. Pure, side-effect-free, tenant-scoped (RLS (row-level security))."
         },
         {
           "title": "Calendar API: appointment CRUD + move + conflict check",
@@ -98,7 +98,7 @@
     {
       "key": "ONLINE-BOOK",
       "title": "Online self-booking (scope-aware)",
-      "context": "Clients self-book service → practitioner → slot online; injectable services only offer cleared RN/NP and the public page uses generic names (C4/C9).",
+      "context": "Online self-booking is the public, client-facing front door to Reception (PRD-02): it lets a client book themselves onto the same diary the front desk runs, reusing the multi-resource calendar (PRD-02/CALENDAR) availability engine and the credentialing from Foundations (PRD-01/CREDENTIALS). It sits early in the clinic-first flow but faces outward, so it is deliberately constrained: an injectable can only ever offer a cleared injector, prices and brand names for prescription medicines are withheld, and a completed booking hands straight off to the Intake/Consent step (PRD-03) that must be satisfied before any treatment can proceed.  Clients self-book service → practitioner → slot online; injectable services only offer cleared RN/NP and the public page uses generic names (C4/C9).",
       "as_a": "client",
       "i_want": "to book a consult/treatment online by choosing service, practitioner and time",
       "so_that": "I can book without calling the clinic",
@@ -164,15 +164,15 @@
       "tasks": [
         {
           "title": "Public booking API: scope-aware availability + create (source=online)",
-          "note": "Public (unauthenticated for browse, authenticated to commit) endpoints that reuse the CALENDAR availability engine — service list filtered to bookable services, then practitioners filtered to canInject for S4, then slots. Create endpoint sets source=online, runs the same server-side conflict/scope checks as the desk, and rejects an ineligible practitioner for an S4 service. Rate-limit + bot-protect the public surface."
+          "note": "Public (unauthenticated for browse, authenticated to commit) endpoints that reuse the CALENDAR availability engine — service list filtered to bookable services, then practitioners filtered to canInject for S4 (Schedule 4 prescription-only medicine), then slots. Create endpoint sets source=online, runs the same server-side conflict/scope checks as the desk, and rejects an ineligible practitioner for an S4 service. Rate-limit + bot-protect the public surface."
         },
         {
           "title": "PublicBookingConfig: generic names + withheld S4 prices (C9)",
-          "note": "Per-tenant config (generic_names, withhold_s4_prices, display_name_overrides) that the public service list reads. S4 services render with the generic display name, no price, and a 'Consultation required' tag; non-S4 may show price. This is a configuration policy (shared with PRD-07 BOOKING-PAGE), NOT an advertising linter. Server returns already-sanitised data so the client never receives an S4 brand/price."
+          "note": "Per-tenant config (generic_names, withhold_s4_prices, display_name_overrides) that the public service list reads. S4 (Schedule 4 prescription-only medicine) services render with the generic display name, no price, and a 'Consultation required' tag; non-S4 may show price. This is a configuration policy (shared with PRD-07 BOOKING-PAGE), NOT an advertising linter. Server returns already-sanitised data so the client never receives an S4 brand/price."
         },
         {
           "title": "Public booking widget UI: stepped flow + account + intake/consent handoff",
-          "note": "Embeddable/standalone widget: progress-stepped service → practitioner → slot → details/account → confirm. Generic service cards, 'Consultation required' chips on S4, 'pricing confirmed privately' copy. Account create captures DOB; under-18 sets the flag on the resulting Appointment for PRD-03. On confirm, hand off to the intake + consent send and show the 'kept private' assurance. Customise panel (brand colour/name/services) backs the embed config."
+          "note": "Embeddable/standalone widget: progress-stepped service → practitioner → slot → details/account → confirm. Generic service cards, 'Consultation required' chips on S4 (Schedule 4 prescription-only medicine), 'pricing confirmed privately' copy. Account create captures DOB; under-18 sets the flag on the resulting Appointment for PRD-03. On confirm, hand off to the intake + consent send and show the 'kept private' assurance. Customise panel (brand colour/name/services) backs the embed config."
         },
         {
           "title": "Under-18 flag propagation from booking",
@@ -183,7 +183,7 @@
     {
       "key": "CONSULT-GATE",
       "title": "Consult gate on injectable appointments",
-      "context": "An injectable appointment cannot move to charting without a linked Consult — the booking-side half of the moat (REQ-BOOK-5).",
+      "context": "The consult gate is the booking-side half of the clinic's compliance moat. It sits in Reception (PRD-02) right after a client is booked and checked in, and it stands between the visit and the clinical record: a checked-in injectable visit cannot open charting (PRD-05) until a consult has been linked. It pairs with the consent gate from Intake/Consent (PRD-03/GATING) and is cleared downstream when the prescriber records the consult in Injectables (PRD-04/CONSULT) — together these enforce the consult → prescription → administration chain before any prescription-only treatment can proceed. As the system, I want to block a checked-in injectable appointment from opening charting unless a consult is linked, so that no S4 treatment can proceed without the required consult.  An injectable appointment cannot move to charting without a linked Consult — the booking-side half of the moat (REQ-BOOK-5).",
       "as_a": "system",
       "i_want": "to block a checked-in injectable appointment from opening charting unless a consult is linked",
       "so_that": "no S4 treatment can proceed without the required consult",
@@ -240,7 +240,7 @@
       "tasks": [
         {
           "title": "Server-side consult gate on charting-open (S4 only)",
-          "note": "When the charting context for an Appointment is requested, evaluate the gate: if service.schedule==S4 and Appointment.consult_id is null, refuse to return the editable charting context and return a structured 'missing: consult' reason instead. Enforce in the domain/API layer (ADR-0008), independent of the UI. Add Appointment.consult_id (FK Consult, nullable). Clearing happens when PRD-04 records the consult and sets consult_id."
+          "note": "When the charting context for an Appointment is requested, evaluate the gate: if service.schedule==S4 (Schedule 4 prescription-only medicine) and Appointment.consult_id is null, refuse to return the editable charting context and return a structured 'missing: consult' reason instead. Enforce in the domain/API layer (ADR-0008), independent of the UI. Add Appointment.consult_id (FK Consult, nullable). Clearing happens when PRD-04 records the consult and sets consult_id."
         },
         {
           "title": "Gate status on Today/Schedule board + blocked-action banner",
@@ -255,7 +255,7 @@
     {
       "key": "LIFECYCLE",
       "title": "Visit lifecycle & status state-machine",
-      "context": "Bookings move through booked → reminded → checked-in → in-room → checked-out, with late/no-show flags and role hand-offs (REQ-BOOK-7).",
+      "context": "The visit lifecycle is the status spine that carries a client through a visit in Reception (PRD-02): it turns a booking made on the calendar (PRD-02/CALENDAR) into a tracked journey from arrival to checkout, and is what the Today board, reminders and the consent/consult gates all read. It sits after the calendar and before reminders (PRD-02/REMINDERS) and waitlist backfill in the clinic-first flow; downstream it also feeds the check-in kiosk (PRD-09) and the no-show follow-up jobs in Comms (PRD-07). As front desk, I want a clear visit status flow with check-in, an in-room-now indicator and late/no-show flags, so that the team always knows where each client is in the visit.  Bookings move through booked → reminded → checked-in → in-room → checked-out, with late/no-show flags and role hand-offs (REQ-BOOK-7).",
       "as_a": "front desk",
       "i_want": "a clear visit status flow with check-in, an in-room-now indicator and late/no-show flags",
       "so_that": "the team always knows where each client is in the visit",
@@ -329,7 +329,7 @@
     {
       "key": "REMINDERS",
       "title": "Reminders & self-service reschedule/cancel",
-      "context": "Clients get reminders they can confirm/decline and can self-reschedule or cancel within policy without calling.",
+      "context": "Reminders and self-service reschedule/cancel keep the diary accurate without a phone call. The story sits in Reception (PRD-02) on top of the visit lifecycle (PRD-02/LIFECYCLE) — a confirm/decline or cancel moves the lifecycle status and frees the slot — and just before the waitlist (PRD-02/WAITLIST), which backfills the freed slot. It owns the booking-side scheduling, the self-service actions and the cancellation policy; the actual message delivery (SMS/app/email) is provided later by Comms (PRD-07), so this story schedules and reacts but does not itself send.  Clients get reminders they can confirm/decline and can self-reschedule or cancel within policy without calling.",
       "as_a": "client",
       "i_want": "appointment reminders I can confirm/decline and the ability to reschedule or cancel within policy myself",
       "so_that": "I don't need to call and the clinic's diary stays accurate",
@@ -399,7 +399,7 @@
     {
       "key": "WAITLIST",
       "title": "Waitlist & cancellation backfill",
-      "context": "Clients can join a waitlist; cancellations/no-shows auto-offer the freed slot to fill quiet windows.",
+      "context": "The waitlist keeps the diary full by auto-offering a freed slot when a booking cancels or no-shows. It sits late in Reception (PRD-02), built on top of reminders (PRD-02/REMINDERS, which emit the slot-freed event) and the calendar (PRD-02/CALENDAR, whose utilisation data surfaces the quiet windows to fill). It is the demand-side counterpart to the lifecycle and reminder flow: where those free a slot, the waitlist matches a waiting client to it — always re-running the same scope/resource availability checks so a backfilled booking still honours the rules. As front desk, I want a waitlist that auto-offers a freed slot when an appointment cancels or no-shows, so that we keep the diary full.  Clients can join a waitlist; cancellations/no-shows auto-offer the freed slot to fill quiet windows.",
       "as_a": "front desk",
       "i_want": "a waitlist that auto-offers a freed slot when an appointment cancels or no-shows",
       "so_that": "we keep the diary full",
@@ -464,7 +464,7 @@
     {
       "key": "WALKINS",
       "title": "Walk-ins, same-day add-ons & resources",
-      "context": "Walk-ins and same-day add-ons are supported but gate-respecting (an injectable walk-in still needs a consult first); room/chair/device resources are scheduled with conflict-flagging.",
+      "context": "Walk-ins and same-day add-ons let Reception (PRD-02) capture opportunistic demand at the desk. The story sits on top of the calendar (PRD-02/CALENDAR) — reusing its availability engine and room/chair/device resources — and the visit lifecycle, and is deliberately gate-respecting: nothing about a walk-in bypasses scope-of-practice or the compliance gates.  In the flow it complements scheduled and online bookings: an injectable walk-in still feeds the consult gate (PRD-02/CONSULT-GATE) and the Intake/Consent step (PRD-03) before any treatment, exactly as a planned injectable booking would.  As front desk, I want to add walk-ins and same-day add-ons against available rooms/chairs/devices, so that we capture opportunistic demand without breaking the rules or double-booking resources.  Walk-ins and same-day add-ons are supported but gate-respecting (an injectable walk-in still needs a consult first); room/chair/device resources are scheduled with conflict-flagging.",
       "as_a": "front desk",
       "i_want": "to add walk-ins and same-day add-ons against available rooms/chairs/devices",
       "so_that": "we capture opportunistic demand without breaking the rules or double-booking resources",
@@ -516,7 +516,7 @@
       "tasks": [
         {
           "title": "Walk-in / same-day add-on booking flow (gate-respecting)",
-          "note": "Quick-add flow from the Schedule that attaches an existing or new client, picks a free practitioner+resource via the availability engine, and books source=walkin. For S4 services, the resulting appointment still carries the consult gate (consult_id null ⇒ charting blocked) and requires consent — walk-ins never bypass C1/C5. Same-day add-on appends a service to an in-progress visit on a free resource."
+          "note": "Quick-add flow from the Schedule that attaches an existing or new client, picks a free practitioner+resource via the availability engine, and books source=walkin. For S4 (Schedule 4 prescription-only medicine) services, the resulting appointment still carries the consult gate (consult_id null ⇒ charting blocked) and requires consent — walk-ins never bypass C1/C5. Same-day add-on appends a service to an in-progress visit on a free resource."
         },
         {
           "title": "Resource conflict-flagging before confirm + tags",
@@ -531,7 +531,7 @@
     {
       "key": "CLIENT-360",
       "title": "Client 360° profile",
-      "context": "Any staff member can open a client's full profile: history, contacts, medical flags, consents, photos, memberships, balances, comms and complaints.",
+      "context": "The Client 360 profile is the single record everything in Reception (PRD-02) hangs off — the CRM (client relationship management) view any staff member opens to see one client whole. It builds on the core client record from Foundations (PRD-01/CLIENT-CORE) and aggregates data owned by the consent (PRD-03), clinical (PRD-04/05), payments (PRD-06) and compliance (PRD-11) modules. It is a read aggregation, not a source of truth: this story composes and presents the picture (with the at-a-glance gate chips a clinician reads before charting), while each underlying part stays owned by its module; the directory story (PRD-02/CLIENT-DIR) is how staff find their way into it.  Any staff member can open a client's full profile: history, contacts, medical flags, consents, photos, memberships, balances, comms and complaints.",
       "as_a": "staff member",
       "i_want": "a single 360° client profile pulling together history, medical flags, consents, photos, memberships, balances and comms",
       "so_that": "I have the full picture in one place",
@@ -600,7 +600,7 @@
     {
       "key": "CLIENT-DIR",
       "title": "Client directory: search, filter, merge, soft-delete",
-      "context": "A searchable client directory with duplicate merge and audited soft-delete keeps the record clean.",
+      "context": "The client directory is how the front desk finds anyone fast and keeps the client list clean. It sits in Reception (PRD-02) directly on top of the Client 360 profile (PRD-02/CLIENT-360) — a directory row opens that profile — and powers the global header search across the staff app shell. In the flow it is the entry point into a client record: search and filter find the person, duplicate-merge and audited soft-delete keep the record accurate, and true destruction is left to the retention policy in Foundations (PRD-01/RETENTION) rather than done here. As front desk, I want to search and filter clients, merge duplicates and soft-delete with audit, so that the client list stays accurate and findable.  A searchable client directory with duplicate merge and audited soft-delete keeps the record clean.",
       "as_a": "front desk",
       "i_want": "to search and filter clients, merge duplicates and soft-delete with audit",
       "so_that": "the client list stays accurate and findable",
@@ -653,7 +653,7 @@
       "tasks": [
         {
           "title": "Directory search/filter API + index",
-          "note": "Searchable, paginated directory endpoint over name/phone/email with segment filters (members/at-risk/new) and tenant RLS; back it with a search index for fast prefix/fuzzy match. Exclude soft-deleted clients from active results. Money columns (lifetime) flagged .fin so the UI can gate them. Also powers the global header search."
+          "note": "Searchable, paginated directory endpoint over name/phone/email with segment filters (members/at-risk/new) and tenant RLS (row-level security); back it with a search index for fast prefix/fuzzy match. Exclude soft-deleted clients from active results. Money columns (lifetime) flagged .fin so the UI can gate them. Also powers the global header search."
         },
         {
           "title": "Duplicate detection + merge with re-point + MergeLog",
@@ -668,7 +668,7 @@
     {
       "key": "DEPOSITS",
       "title": "Booking deposits / card-on-file hold (placeholder)",
-      "context": "An opt-in, ACL-fair booking deposit / card-on-file hold, suppressed during cooling-off (F14 invariant). Deferred to Phase 2 — placeholder.",
+      "context": "Booking deposits / card-on-file holds are a deferred Phase-2 placeholder, parked in Reception (PRD-02) so the no-show-cost lever is captured but explicitly NOT built in v1 — there are no deposits or holds in version 1.  Its one job today is to preserve a design constraint for whenever it is built: a hold must never be placed during an under-18 cooling-off period, coordinating with the cooling-off rule in Intake/Consent (PRD-03/COOLING-OFF).  As an owner, I want to optionally require a booking deposit or card-on-file hold, so that no-shows cost less.  Deferred to Phase 2 — placeholder. There are no deposits or holds in v1.",
       "as_a": "owner",
       "i_want": "to optionally require a booking deposit or card-on-file hold",
       "so_that": "no-shows cost less",
@@ -705,14 +705,14 @@
       "tasks": [
         {
           "title": "Design note: ACL-fair deposits + cooling-off suppression (F14) — Phase 2",
-          "note": "Placeholder design task (no v1 build). Document the opt-in deposit / card-on-file hold model behind IPaymentProvider (ADR-0036): disclosed at booking, refundable on notice, ACL-fair, never coercive. Capture the hard invariant F14 — a BookingHold must NOT be placed or held during an under-18 cooling-off period (coordinates with PRD-03 COOLING-OFF). S4 is never priced or sold online. Produce the design only; defer implementation to Phase 2."
+          "note": "Placeholder design task (no v1 build). Document the opt-in deposit / card-on-file hold model behind IPaymentProvider (ADR-0036): disclosed at booking, refundable on notice, ACL-fair, never coercive. Capture the hard invariant F14 — a BookingHold must NOT be placed or held during an under-18 cooling-off period (coordinates with PRD-03 COOLING-OFF). S4 (Schedule 4 prescription-only medicine) is never priced or sold online. Produce the design only; defer implementation to Phase 2."
         }
       ]
     },
     {
       "key": "BOOKING-WIZARD",
       "title": "Staff booking wizard (service → practitioner → time → client → confirm)",
-      "context": "The prototype's front-desk 'New booking' wizard (service select, slot pick, client attach, confirm) is the staff counterpart to client self-booking, and the entry point most bookings flow through.",
+      "context": "Built on the calendar (PRD-02/CALENDAR) availability engine and the service catalogue (PRD-02/SERVICE-CATALOGUE), the staff booking wizard is the desk and phone counterpart to online self-booking and the path most bookings in Reception (PRD-02) flow through, applying the same scope rules at the desk as online. In the flow it is front-of-house entry to a visit: a guided service → practitioner → time → client → confirm that creates the booking and kicks off the Intake/Consent send (PRD-03) which must be complete before treatment can start. As front desk, I want a guided booking wizard to create an appointment in a few steps, so that I can book clients quickly at the desk or over the phone.  The prototype's front-desk 'New booking' wizard (service select, slot pick, client attach, confirm) is the staff counterpart to client self-booking, and the entry point most bookings flow through.",
       "as_a": "front desk",
       "i_want": "a guided booking wizard to create an appointment in a few steps",
       "so_that": "I can book clients quickly at the desk or over the phone",
@@ -770,7 +770,7 @@
       "tasks": [
         {
           "title": "Wizard stepper UI (service→practitioner→time→client→confirm)",
-          "note": "Angular 5-step wizard with progress stepper. Step 1 service cards (duration/price/schedule, generic names). Step 2 practitioner cards filtered by scope for S4 (+ 'Next available' = soonest eligible). Step 3 slot grid from the availability engine with taken slots disabled/struck-through. Back/Continue nav; state held until confirm."
+          "note": "Angular 5-step wizard with progress stepper. Step 1 service cards (duration/price/schedule, generic names). Step 2 practitioner cards filtered by scope for S4 (Schedule 4 prescription-only medicine) (+ 'Next available' = soonest eligible). Step 3 slot grid from the availability engine with taken slots disabled/struck-through. Back/Continue nav; state held until confirm."
         },
         {
           "title": "Client step: attach existing or create inline + under-18 flag",
@@ -789,7 +789,7 @@
     {
       "key": "SERVICE-CATALOGUE",
       "title": "Services & treatment-menu admin (durations, eligible roles, S4 flag)",
-      "context": "The prototype's clinical Treatment menu + admin services list defines bookable services with durations, eligible roles, and the S4/non-S4 flag that drives scope-aware booking, rewards eligibility and public-page naming.",
+      "context": "The service catalogue is the treatment menu that defines every bookable service, and the single switch that makes booking behave correctly per service. It sits in Reception (PRD-02) and depends on the medicines/products catalogue in Injectables (PRD-04/PRODUCT-CATALOGUE) for the stock a service consumes. It is foundational to the booking surfaces: the S4/non-S4 schedule flag set here is what drives scope-aware booking (the booking wizard and online self-booking only offer cleared injectors), rewards eligibility (PRD-06), and the generic public-page naming (PRD-07) — so this catalogue is read everywhere a service is offered, priced or charted. As owner / manager, I want to manage the menu of services with durations, eligible roles and the S4 flag, so that booking, rewards and the public page all behave correctly per service.  The prototype's clinical Treatment menu + admin services list defines bookable services with durations, eligible roles, and the S4/non-S4 flag that drives scope-aware booking, rewards eligibility and public-page naming.",
       "as_a": "owner / manager",
       "i_want": "to manage the menu of services with durations, eligible roles and the S4 flag",
       "so_that": "booking, rewards and the public page all behave correctly per service",
@@ -847,19 +847,19 @@
       "tasks": [
         {
           "title": "Service entity + schedule(S4|non-S4) classification",
-          "note": "Model Service with id/name/public_name/category/duration/buffer/price/schedule/reg_class/unit/eligible_roles[]/requires[]/product_id?. The schedule flag (ADR-0014/0021) is the single source of truth. Persist with tenant RLS. Derive rewards_eligible = (schedule != S4)."
+          "note": "Model Service with id/name/public_name/category/duration/buffer/price/schedule/reg_class/unit/eligible_roles[]/requires[]/product_id?. The schedule flag (ADR-0014/0021) is the single source of truth. Persist with tenant RLS (row-level security). Derive rewards_eligible = (schedule != S4 (Schedule 4 prescription-only medicine))."
         },
         {
           "title": "Schedule flag wired to scope, rewards and public naming",
-          "note": "Make the schedule flag actually drive behaviour: the availability engine restricts S4 to canInject roles (C4); the rewards engine (PRD-06) is constrained to non-S4 by this flag (C9/REQ-MEMB-7); the public booking config (ONLINE-BOOK) uses generic name + withholds price for S4. Service also declares requires(consult/rx/s4_lot/standard_consent) that charting (PRD-05) and the gates read. Link product_id to PRODUCT-CATALOGUE for stock decrement."
+          "note": "Make the schedule flag actually drive behaviour: the availability engine restricts S4 (Schedule 4 prescription-only medicine) to canInject roles (C4); the rewards engine (PRD-06) is constrained to non-S4 by this flag (C9/REQ-MEMB-7); the public booking config (ONLINE-BOOK) uses generic name + withholds price for S4. Service also declares requires(consult/rx/s4_lot/standard_consent) that charting (PRD-05) and the gates read. Link product_id to PRODUCT-CATALOGUE for stock decrement."
         },
         {
           "title": "Capability-gated catalogue admin + audit",
-          "note": "Admin endpoints to add/edit/archive a service, gated to prescriber/owner capability; every change writes an AuditEvent. Validate that S4 services cannot have reward/discount controls enabled. Archive (not hard-delete) to preserve history on past bookings."
+          "note": "Admin endpoints to add/edit/archive a service, gated to prescriber/owner capability; every change writes an AuditEvent. Validate that S4 (Schedule 4 prescription-only medicine) services cannot have reward/discount controls enabled. Archive (not hard-delete) to preserve history on past bookings."
         },
         {
           "title": "Treatment menu admin UI",
-          "note": "Angular Treatment-menu screen: cards per service showing category, schedule + reg class, unit, performed-by roles, price, duration, linked stock, AE route and 'Charting & compliance this drives'. Active/Archived/All filter, '+ Add treatment', Edit/Archive. Visibly tag S4 and disable reward/discount controls on S4 cards. Capability-gate the admin actions."
+          "note": "Angular Treatment-menu screen: cards per service showing category, schedule + reg class, unit, performed-by roles, price, duration, linked stock, AE route and 'Charting & compliance this drives'. Active/Archived/All filter, '+ Add treatment', Edit/Archive. Visibly tag S4 (Schedule 4 prescription-only medicine) and disable reward/discount controls on S4 cards. Capability-gate the admin actions."
         }
       ]
     }

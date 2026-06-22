@@ -7,7 +7,7 @@
 ## Background
 
 As a staff member, I want one follow-up queue that merges recalls, needs-attention items and flagged messages, so that nothing falls through the cracks.
-Scattered recall / needs-attention / unanswered-comms items merge into one queue; staff can flag any message; inbound comms auto-categorise into jobs (rules/keyword, no AI) (REQ-NOTIF-7, ADR-0023).
+Follow-ups used to scatter: a recall worklist here, a dashboard 'needs attention' there, unanswered inbox messages somewhere else — and anything no one replied to could quietly fall through the cracks. This story makes one queue: recall, needs-attention and unanswered-comms items all merge into a single 'what needs doing' list, staff can flag any message so it isn't lost, and inbound comms auto-categorise into jobs by rules/keyword (no AI). It is the single cross-clinic to-do list (ADR-0023).  Scattered recall / needs-attention / unanswered-comms items merge into one queue; staff can flag any message; inbound comms auto-categorise into jobs (rules/keyword, no AI) (REQ-NOTIF-7, ADR-0023).
 
 ## How it works
 
@@ -49,7 +49,7 @@ _Prototype screen: prototype.html — Comms & growth (Inbox/Automations/Campaign
 ## Tasks (dev pickup)
 
 - [ ] **Job model + signal projections (migrations)**
-  Model Job (tenant_id + RLS) per ADR-0023: type, optional client/conversation/appointment links, assignee (role|person), status (open|snoozed|done), source (manual|auto|recall|system), due_at.
+  Model Job (tenant_id + RLS (row-level security)) per ADR-0023: type, optional client/conversation/appointment links, assignee (role|person), status (open|snoozed|done), source (manual|auto|recall|system), due_at.
   - Existing signals project INTO this queue (recall due, unanswered conversation, negative review, no-show, stock/expiry, client concern) rather than separate tables.
   - Role-scoping ('my queue') via the concerns model.
 - [ ] **Jobs API: lifecycle, flag, rules/keyword auto-categorise, projections**

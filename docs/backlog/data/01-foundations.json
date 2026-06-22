@@ -18,7 +18,7 @@
     {
       "key": "TENANT",
       "title": "Tenant provisioning & staff invitation",
-      "context": "An owner provisions their clinic (tenant) and invites staff to sign in with existing Microsoft 365 accounts.",
+      "context": "Plainly: this is where a clinic first exists in the system — one clinic becomes one isolated tenant (its own walled-off data), and its staff get accounts. It is the very first Foundations story, built right after the Sprint 0 platform plumbing. Everything else in the product hangs off it: there is no client, booking, chart or payment until a tenant and its staff exist, so this story unblocks the entire backlog. An owner provisions their clinic (tenant) and invites staff to sign in with existing Microsoft 365 accounts.",
       "as_a": "owner",
       "i_want": "to provision my clinic and invite staff who then sign in with our Microsoft 365 accounts",
       "so_that": "my team can access the platform under one isolated tenant",
@@ -89,14 +89,14 @@
         },
         {
           "title": "Staff invitation & lifecycle (invite -> Entra SSO bind -> activate/deactivate)",
-          "note": "Owner-facing invite flow: create a StaffInvite (email + role) and dispatch it; on the invitee's first successful Entra SSO, consume the invite and bind the Entra object id to a tenant-scoped StaffProfile (no local password). Support idempotent resend for pending invites, revoke (cancels a pending invite), and deactivate/reactivate of an active member (deactivate ends live sessions immediately and hides them from bookable/roster surfaces but preserves audited history). Every invite/bind/deactivate/reactivate writes an AuditEvent. Settings list UI: per-member row with status chip + resend/deactivate actions."
+          "note": "Owner-facing invite flow: create a StaffInvite (email + role) and dispatch it; on the invitee's first successful Entra SSO (single sign-on), consume the invite and bind the Entra object id to a tenant-scoped StaffProfile (no local password). Support idempotent resend for pending invites, revoke (cancels a pending invite), and deactivate/reactivate of an active member (deactivate ends live sessions immediately and hides them from bookable/roster surfaces but preserves audited history). Every invite/bind/deactivate/reactivate writes an AuditEvent. Settings list UI: per-member row with status chip + resend/deactivate actions."
         }
       ]
     },
     {
       "key": "RBAC",
       "title": "RBAC + scope-of-practice matrix enforcement",
-      "context": "Roles map to the §3 scope matrix; the auth pipeline blocks actions outside a user's scope. Capabilities gate API actions, concerns drive role-tailored dashboards (ADR-0017).",
+      "context": "Plainly: this decides what each person is allowed to do — a nurse can chart, reception can take payment, only a prescriber can prescribe. It is the permission layer that sits directly on top of tenancy, early in Foundations. It unblocks almost every feature: booking, charting, payments and the app shell all ask this layer 'is this person allowed?' before they act, so it must exist before those features are built. Roles map to the §3 scope matrix; the auth pipeline blocks actions outside a user's scope. Capabilities gate API actions, concerns drive role-tailored dashboards (ADR-0017).",
       "as_a": "owner",
       "i_want": "roles mapped to capabilities so the system blocks any action outside a user's scope of practice",
       "so_that": "people can only do what they're trained and legally allowed to do",
@@ -135,9 +135,9 @@
       ],
       "detail": [
         "Authorisation is modelled on two orthogonal axes (ADR-0017): capabilities — atomic permissions that gate API actions (chart, chartView, prescribe/inject, stock, receiveStock, finance.read, takePayment, team:manage, configure/integrations) — and concerns — relevance tags that drive what a role sees first (ops, clinical, stock, stockAlert, financial/biz, recall, consent, frontdesk, facility, compliance, hr). Capabilities decide what you may do; concerns decide what you see.",
-        "The prototype's persona set is the canonical preset map: NP (full clinical + prescribe + S4 custody, no financials), Lead Nurse/RN (administer on script, manage stock/team/roster, no prescribing/custody/financials), RN (administer on a valid script only), Dermal/laser (non-S4 only), Reception (scheduling/payment, no clinical/stock/financials), and Owner-business (full financials + read-only clinical/stock oversight, cannot prescribe/chart/hold S4). Solo-NP and Nurse-led-RN are combined presets.",
+        "The prototype's persona set is the canonical preset map: NP (full clinical + prescribe + S4 (Schedule 4 prescription-only medicine) custody, no financials), Lead Nurse/RN (administer on script, manage stock/team/roster, no prescribing/custody/financials), RN (administer on a valid script only), Dermal/laser (non-S4 only), Reception (scheduling/payment, no clinical/stock/financials), and Owner-business (full financials + read-only clinical/stock oversight, cannot prescribe/chart/hold S4). Solo-NP and Nurse-led-RN are combined presets.",
         "Enforcement is server-side by construction (ADR-0008): every API action declares the capability it needs and the pipeline checks it against the caller's active role before the handler runs. Screen-hiding is presentation only — it is never the control. A blocked action returns a structured reason (what is blocked / which rule / how to resolve / who can resolve) that the UI renders as the calm blocked-action banner, and writes a scope_block audit event (see AUTH-AUDIT). This is how AC1 (C4/C19) holds: an out-of-scope or lapsed-registration attempt is blocked with a reason and logged.",
-        "Owner-business is deliberately read-only for clinical/stock unless they personally hold the clinical capability — the owner is a business role, not an automatic clinical superuser. The credential gate (canInject) layers on top of capabilities: holding the inject capability is necessary but not sufficient; the practitioner must also be credential-current (CREDENTIALS)."
+        "Owner-business is deliberately read-only for clinical/stock unless they personally hold the clinical capability — the owner is a business role, not an automatic clinical superuser. The credential gate (canInject (the derived gate deciding whether a staff member may administer injectables right now)) layers on top of capabilities: holding the inject capability is necessary but not sufficient; the practitioner must also be credential-current (CREDENTIALS)."
       ],
       "ui_spec": [
         "Surfaces as the header user chip + scope-of-practice tooltip (hover the name/role 'info' icon) and as nav entries showing/hiding per role — driven by the persona's caps/concerns (prototype data-allow gating in setPersona).",
@@ -169,7 +169,7 @@
       "tasks": [
         {
           "title": "Capability/concern model, preset roles & seed",
-          "note": "Model Role, Capability, Concern and their joins (all tenant_id + RLS). Seed the canonical preset roles from the prototype persona map (NP, Lead RN, RN, dermal, reception, owner-business + Solo/Nurse-led presets) with their exact capability and concern sets. Capabilities are the atomic API gates; concerns are presentation tags. Keep presets editable-shaped so ROLE-BUILDER can compose custom roles without a schema change."
+          "note": "Model Role, Capability, Concern and their joins (all tenant_id + RLS). Seed the canonical preset roles from the prototype persona map (NP (nurse practitioner), Lead RN (registered nurse), RN, dermal, reception, owner-business + Solo/Nurse-led presets) with their exact capability and concern sets. Capabilities are the atomic API gates; concerns are presentation tags. Keep presets editable-shaped so ROLE-BUILDER can compose custom roles without a schema change."
         },
         {
           "title": "Server-side authorisation pipeline (capability checks + structured blocked reason)",
@@ -177,14 +177,14 @@
         },
         {
           "title": "Scope-block enforcement & audit on out-of-scope / lapsed actions",
-          "note": "Wire the blocked path so an out-of-scope action (C4) or a lapsed-registration action (C19, via canInject from CREDENTIALS) is rejected with the reason payload AND writes a scope_block audit event capturing actor, attempted capability, the rule that fired and the active role (peer of AUTH-AUDIT). Surface the reason to the UI for the blocked-action banner. This makes 'only allowed people can act' true by construction, satisfying AC1."
+          "note": "Wire the blocked path so an out-of-scope action (C4) or a lapsed-registration action (C19, via canInject (the derived gate deciding whether a staff member may administer injectables right now) from CREDENTIALS) is rejected with the reason payload AND writes a scope_block audit event capturing actor, attempted capability, the rule that fired and the active role (peer of AUTH-AUDIT). Surface the reason to the UI for the blocked-action banner. This makes 'only allowed people can act' true by construction, satisfying AC1."
         }
       ]
     },
     {
       "key": "CREDENTIALS",
       "title": "Staff credentials + canInject compliance gate",
-      "context": "Staff profiles hold AHPRA reg #, type, status/expiry, conditions, ≥1yr-experience flag, CPD and cosmetic-cover PII; these derive a single canInject gate. Must accept the new designated RN prescriber role.",
+      "context": "Plainly: this records each clinician's registration, training and insurance, and from them works out a single yes/no — is this person cleared to inject right now. It comes just after the permission layer in Foundations. That cleared-to-inject answer is consumed everywhere it matters downstream — booking only offers a cleared injector, and the treatment screens block an injection by anyone who is not cleared — so this story unblocks the clinical and reception epics. Staff profiles hold AHPRA (Australian Health Practitioner Regulation Agency) reg #, type, status/expiry, conditions, ≥1yr-experience flag, CPD (continuing professional development) and cosmetic-cover PII (professional-indemnity insurance); these derive a single canInject (the single derived gate deciding whether a clinician may inject right now) gate. Must accept the new designated RN (registered nurse) prescriber role.",
       "as_a": "owner",
       "i_want": "structured credential + CPD + cosmetic-cover-insurance records that derive whether each practitioner is cleared to treat/inject",
       "so_that": "only registered, insured, in-scope staff can be booked and can treat",
@@ -225,10 +225,10 @@
         "PRD-01/RBAC"
       ],
       "detail": [
-        "Each clinician profile holds the regulatory facts that decide whether they may lawfully treat (ADR-0028, C4/C19, s129 National Law + NMBA cosmetic guidelines): AHPRA registration number/type/status/expiry and any conditions, the >=1-year-cosmetic-experience flag, CPD hours done vs required (RN/EN 20h, NP 30h), and professional-indemnity insurance whose cover must explicitly include cosmetic procedures (standard nursing PII frequently excludes it).",
-        "These derive a single boolean canInject, computed exactly as the prototype does: scope is inject AND registration is current (not lapsed) AND insurance covers cosmetic AND insurance is in date. The prototype's staffStatus() shows the human-readable states this drives: 'Current' (emerald), 'Renews in Nd' (amber early warning), 'CPD behind X/Yh' (amber), 'PII excludes cosmetic — blocked' (rose), and 'Not compliant' (rose). Chloe Adams in the seed data is the worked example — registered, but insurance EXCLUDES cosmetic, so canInject is false and she is not bookable for S4.",
+        "Each clinician profile holds the regulatory facts that decide whether they may lawfully treat (ADR-0028, C4/C19, s129 National Law + NMBA cosmetic guidelines): AHPRA registration number/type/status/expiry and any conditions, the >=1-year-cosmetic-experience flag, CPD hours done vs required (RN/EN 20h, NP (nurse practitioner) 30h), and professional-indemnity insurance whose cover must explicitly include cosmetic procedures (standard nursing PII frequently excludes it).",
+        "These derive a single boolean canInject, computed exactly as the prototype does: scope is inject AND registration is current (not lapsed) AND insurance covers cosmetic AND insurance is in date. The prototype's staffStatus() shows the human-readable states this drives: 'Current' (emerald), 'Renews in Nd' (amber early warning), 'CPD behind X/Yh' (amber), 'PII excludes cosmetic — blocked' (rose), and 'Not compliant' (rose). Chloe Adams in the seed data is the worked example — registered, but insurance EXCLUDES cosmetic, so canInject is false and she is not bookable for S4 (Schedule 4 prescription-only medicine).",
         "canInject is the contract other modules consume: booking availability (PRD-02) removes a not-cleared practitioner from offered slots, the charting/administration gate blocks an S4 administration by an uncleared clinician (PRD-04/05), and the owner exceptions digest + Follow-ups queue raise expiry tasks. The signal is necessary on top of the RBAC inject capability — holding the capability is not enough without current credentials.",
-        "The designated RN prescriber arrangement (rev-2/rev-4 PRD note) is supported: an RN may administer under a recorded partnered/remote prescriber rather than holding the prescribe capability themselves; the profile records the endorsement and the partnered prescriber. AHPRA register auto-verification via the Practitioner Information Exchange (PIE) is supported where approved, degrading to a first-class manual-verify action that stores a 'verified-on' date (PIE is approval-gated SOAP — treat as best-effort with manual fallback always present)."
+        "The designated RN prescriber arrangement (rev-2/rev-4 PRD note) is supported: an RN may administer under a recorded partnered/remote prescriber rather than holding the prescribe capability themselves; the profile records the endorsement and the partnered prescriber. AHPRA register auto-verification via the Practitioner Information Exchange (PIE (the AHPRA Practitioner Information Exchange register lookup)) is supported where approved, degrading to a first-class manual-verify action that stores a 'verified-on' date (PIE is approval-gated SOAP — treat as best-effort with manual fallback always present)."
       ],
       "ui_spec": [
         "Prototype: Team -> People & credentials (team-people.png) — one card per staff member with avatar, name, role, engagement type (Contractor/Employee) and a derived status chip ('Current', 'Renews in 25d', 'PII excludes cosmetic — blocked').",
@@ -255,22 +255,22 @@
       "tasks": [
         {
           "title": "Credential data model & canInject derivation",
-          "note": "Extend StaffProfile with the AHPRA/experience/engagement/scope fields and model Credential (registration|insurance|cpd|training) with expiry, cosmetic_cover and verified-on. Compute canInject server-side exactly per the prototype rule (scope==inject AND registration current AND cosmetic_cover AND insurance in date) and expose it as a read-only derived signal; recompute on any credential change. Support the designated/partnered prescriber arrangement (prescriber_mode + partnered_prescriber_id). Store credential evidence behind signed URLs in AU-resident storage."
+          "note": "Extend StaffProfile with the AHPRA (Australian Health Practitioner Regulation Agency)/experience/engagement/scope fields and model Credential (registration|insurance|cpd|training) with expiry, cosmetic_cover and verified-on. Compute canInject (the single derived gate deciding whether a clinician may inject right now) server-side exactly per the prototype rule (scope==inject AND registration current AND cosmetic_cover AND insurance in date) and expose it as a read-only derived signal; recompute on any credential change. Support the designated/partnered prescriber arrangement (prescriber_mode + partnered_prescriber_id). Store credential evidence behind signed URLs in AU-resident storage."
         },
         {
           "title": "Credential management API + AHPRA PIE / manual verification",
-          "note": "CRUD for credentials gated to owner/lead (team:manage). Provide a verify action that attempts AHPRA PIE auto-verification where approved and always falls back to a first-class manual-verify that records verified_method + verified_on. Publish the derived canInject and the human-readable status (Current / Renews in Nd / CPD behind / PII excludes cosmetic / Not compliant) so booking, charting gates, the exceptions digest and Follow-ups consume one source of truth. Block S4-relevant booking/administration when canInject is false."
+          "note": "CRUD for credentials gated to owner/lead (team:manage). Provide a verify action that attempts AHPRA (Australian Health Practitioner Regulation Agency) PIE (the AHPRA Practitioner Information Exchange register lookup) auto-verification where approved and always falls back to a first-class manual-verify that records verified_method + verified_on. Publish the derived canInject (the single derived gate deciding whether a clinician may inject right now) and the human-readable status (Current / Renews in Nd / CPD (continuing professional development) behind / PII (professional-indemnity insurance) excludes cosmetic / Not compliant) so booking, charting gates, the exceptions digest and Follow-ups consume one source of truth. Block S4-relevant booking/administration when canInject is false."
         },
         {
           "title": "People & credentials UI (Team workspace)",
-          "note": "Build the Team -> People & credentials cards (team-people.png): staff card with avatar/name/role/engagement and the derived status chip, plus a per-person credential editor for AHPRA reg/type/status/expiry/conditions, experience flag, CPD done/required and PII insurer/expiry/cosmetic-cover, with the verify control. Show canInject read-only. Capability-gate the whole surface to team:manage; non-managers don't see it."
+          "note": "Build the Team -> People & credentials cards (team-people.png): staff card with avatar/name/role/engagement and the derived status chip, plus a per-person credential editor for AHPRA (Australian Health Practitioner Regulation Agency) reg/type/status/expiry/conditions, experience flag, CPD (continuing professional development) done/required and PII (professional-indemnity insurance) insurer/expiry/cosmetic-cover, with the verify control. Show canInject (the single derived gate deciding whether a clinician may inject right now) read-only. Capability-gate the whole surface to team:manage; non-managers don't see it."
         }
       ]
     },
     {
       "key": "REG-WATCH",
       "title": "Registration / PII / CPD expiry alerting",
-      "context": "Staff must be alerted before registration, insurance or CPD lapses so the clinic is never unknowingly non-compliant.",
+      "context": "Plainly: this watches every clinician's registration, insurance and training and warns before any of them lapses, so the clinic is never caught treating with an out-of-date practitioner. It builds straight on the credentials story. It feeds the owner's daily 'needs attention' list and the clinic's to-do queue, and on an actual lapse it automatically removes the practitioner from bookable slots — so it protects every booking and treatment that follows. Staff must be alerted before registration, insurance or CPD (continuing professional development) lapses so the clinic is never unknowingly non-compliant.",
       "as_a": "owner",
       "i_want": "to be alerted before a practitioner's registration, cosmetic insurance or CPD lapses",
       "so_that": "we never treat with an unregistered or uninsured practitioner",
@@ -307,9 +307,9 @@
       ],
       "detail": [
         "A scheduled watch (on the Sprint-0 job scheduler) scans every credential daily and raises an alert for anything within N days of expiry — registration, cosmetic insurance, or CPD shortfall — so the clinic is never unknowingly non-compliant. The prototype shows the thresholds in practice: amber 'Renews in Nd' when reg or insurance is <=40 days out, and 'CPD behind X/Yh' when CPD done is under 60% of required.",
-        "On actual lapse the derived canInject (CREDENTIALS) flips to not-cleared automatically — the practitioner stops appearing as bookable (PRD-02) and S4 administration by them is blocked (PRD-04/05). No human action is needed for the block; the alert exists to prompt renewal before that happens.",
-        "Alerts are role-targeted by concern: registration/insurance/CPD currency is a Lead/NP/owner concern (the 'stockAlert'/'compliance'/'hr' concerns in the persona model), not every RN's. They feed the owner 'needs attention' digest (PRD-08) and project as expiry tasks into the Follow-ups queue (ADR-0023). Acknowledge/dismiss is audited so there's a record of who saw and actioned each warning.",
-        "AHPRA PIE auto-verification re-checks status on a schedule where approved, with the manual-verify fallback always available; a status change pulled from PIE (e.g. suspended) is treated the same as a lapse for canInject."
+        "On actual lapse the derived canInject (CREDENTIALS) flips to not-cleared automatically — the practitioner stops appearing as bookable (PRD-02) and S4 (Schedule 4 prescription-only medicine) administration by them is blocked (PRD-04/05). No human action is needed for the block; the alert exists to prompt renewal before that happens.",
+        "Alerts are role-targeted by concern: registration/insurance/CPD currency is a Lead/NP (nurse practitioner)/owner concern (the 'stockAlert'/'compliance'/'hr' concerns in the persona model), not every RN (registered nurse)'s. They feed the owner 'needs attention' digest (PRD-08) and project as expiry tasks into the Follow-ups queue (ADR-0023). Acknowledge/dismiss is audited so there's a record of who saw and actioned each warning.",
+        "AHPRA PIE (the AHPRA Practitioner Information Exchange register lookup) auto-verification re-checks status on a schedule where approved, with the manual-verify fallback always available; a status change pulled from PIE (e.g. suspended) is treated the same as a lapse for canInject."
       ],
       "ui_spec": [
         "Prototype: Team -> Compliance board (team-compliance.png) — the 'who is cleared to inject today' board with an explainer ('an injector is bookable for S4 only when ALL of these hold: current registration, enough CPD, indemnity that covers cosmetic'), a red banner counting injectors flagged not-bookable, and a per-practitioner table: Registration (current·date / expired), CPD (X/Yh / behind), Indemnity (covers cosmetic / EXCLUDES cosmetic), Bookable-for-S4 (Yes / Blocked).",
@@ -326,22 +326,22 @@
       "tasks": [
         {
           "title": "Scheduled credential watch + alert generation",
-          "note": "Add a daily scheduled scan (Sprint-0 scheduler) over all credentials that raises a CredentialAlert for items within N days of expiry (registration/insurance), CPD under threshold (<60% of required), or a PIE-pulled status change. Set severity (amber early-warning vs red lapsed) using the prototype's 40-day window. On true lapse, ensure the derived canInject already reflects not-cleared (CREDENTIALS owns the derivation) so booking/administration block automatically — the alert is the prompt, not the gate."
+          "note": "Add a daily scheduled scan (Sprint-0 scheduler) over all credentials that raises a CredentialAlert for items within N days of expiry (registration/insurance), CPD (continuing professional development) under threshold (<60% of required), or a PIE-pulled status change. Set severity (amber early-warning vs red lapsed) using the prototype's 40-day window. On true lapse, ensure the derived canInject (the derived cleared-to-inject gate) already reflects not-cleared (CREDENTIALS owns the derivation) so booking/administration block automatically — the alert is the prompt, not the gate."
         },
         {
           "title": "Role-targeted routing to digest + Follow-ups, with audited acknowledge",
-          "note": "Route alerts by concern (compliance/hr/stockAlert) to Lead/NP/owner — not every RN. Project alerts into the owner needs-attention digest (PRD-08) and as expiry tasks into the Follow-ups queue (ADR-0023). Provide acknowledge/dismiss that writes an audit event (who/when). Idempotent: re-running the scan does not duplicate an open alert for the same credential."
+          "note": "Route alerts by concern (compliance/hr/stockAlert) to Lead/NP (nurse practitioner)/owner — not every RN (registered nurse). Project alerts into the owner needs-attention digest (PRD-08) and as expiry tasks into the Follow-ups queue (ADR-0023). Provide acknowledge/dismiss that writes an audit event (who/when). Idempotent: re-running the scan does not duplicate an open alert for the same credential."
         },
         {
           "title": "Compliance board UI",
-          "note": "Build Team -> Compliance board (team-compliance.png): the explainer note, the red 'N injector flagged not-bookable for S4' banner (or the green all-clear), and the per-practitioner table with Registration / CPD / Indemnity-cosmetic / Bookable-for-S4 columns using the emerald/amber/rose states. Show the amber 'Renews in Nd' countdowns. Capability-gate to team:manage / compliance concern."
+          "note": "Build Team -> Compliance board (team-compliance.png): the explainer note, the red 'N injector flagged not-bookable for S4 (Schedule 4 prescription-only medicine)' banner (or the green all-clear), and the per-practitioner table with Registration / CPD (continuing professional development) / Indemnity-cosmetic / Bookable-for-S4 columns using the emerald/amber/rose states. Show the amber 'Renews in Nd' countdowns. Capability-gate to team:manage / compliance concern."
         }
       ]
     },
     {
       "key": "ROSTER",
       "title": "Rosters & engagement type",
-      "context": "A roster (plus employee/contractor engagement type) drives booking availability and feeds commission/pay attribution downstream.",
+      "context": "Plainly: this records who is working when, and combines that with who is cleared to treat, to decide who can actually be booked. It sits in Foundations just after credentials. The diary (the Reception epic that comes next) reads directly from it, so it can only ever offer a slot backed by a rostered, cleared practitioner — this story unblocks booking availability. A roster (plus employee/contractor engagement type) drives booking availability and feeds commission/pay attribution downstream.",
       "as_a": "manager",
       "i_want": "to record staff rosters/time-off and each person's engagement type",
       "so_that": "booking availability reflects who is actually working and cleared",
@@ -372,7 +372,7 @@
         "PRD-01/CREDENTIALS"
       ],
       "detail": [
-        "The roster records who is working when, per staff member and location, plus time-off/leave. It is the source of truth for booking availability (ADR-0029): a practitioner is bookable for a service if and only if they are rostered at that location that day AND they are scope/credential-compliant for the service (canInject from CREDENTIALS for S4). The prototype encodes this as a weekly grid (rosterMap) plus a leave list, with the banner 'only practitioners rostered & compliant appear as bookable'.",
+        "The roster records who is working when, per staff member and location, plus time-off/leave. It is the source of truth for booking availability (ADR-0029): a practitioner is bookable for a service if and only if they are rostered at that location that day AND they are scope/credential-compliant for the service (canInject (the derived cleared-to-inject gate) from CREDENTIALS for S4 (Schedule 4 prescription-only medicine)). The prototype encodes this as a weekly grid (rosterMap) plus a leave list, with the banner 'only practitioners rostered & compliant appear as bookable'.",
         "Availability is therefore roster shifts, minus approved time-off, intersected with canInject — the diary (PRD-02) only ever offers slots backed by a rostered, cleared practitioner, so it can't double-book or schedule a non-compliant or off injector.",
         "Engagement type (employee/contractor) is recorded per staff member (it already lives on StaffProfile from CREDENTIALS) for downstream commission/pay attribution and the contractor compliance banner (ADR-0027) — the platform attributes revenue by engagement type but is explicitly not a payroll/super engine.",
         "Management is capability-gated: Owner/Lead manage the roster and approve leave; Reception is read-only (it needs to see who's in, not edit shifts). All roster and leave changes are audited."
@@ -397,7 +397,7 @@
       "tasks": [
         {
           "title": "Roster & leave model + availability derivation",
-          "note": "Model RosterShift (per staff + location) and TimeOff with an approval status, all tenant_id + RLS. Compute bookable availability as shifts minus approved leave, intersected with the canInject/scope check for the requested service — and expose it as the query PRD-02 booking consumes so it cannot offer a slot for an off or non-compliant practitioner. Record engagement type usage for downstream attribution (it lives on StaffProfile). Audit every roster/leave change and leave approval."
+          "note": "Model RosterShift (per staff + location) and TimeOff with an approval status, all tenant_id + RLS (row-level security). Compute bookable availability as shifts minus approved leave, intersected with the canInject (the derived cleared-to-inject gate)/scope check for the requested service — and expose it as the query PRD-02 booking consumes so it cannot offer a slot for an off or non-compliant practitioner. Record engagement type usage for downstream attribution (it lives on StaffProfile). Audit every roster/leave change and leave approval."
         },
         {
           "title": "Roster & leave UI (Team workspace)",
@@ -408,7 +408,7 @@
     {
       "key": "AUDIT",
       "title": "Exportable audit trail for clinical / medicines / PII",
-      "context": "Every read/write of clinical, medicines and PII data must produce an immutable AuditEvent that a compliance officer can export (C10/ADR-0010). Built on the Sprint 0 audit infra.",
+      "context": "Plainly: this keeps a permanent, unchangeable record of who looked at or changed any clinical, medicines or privacy-sensitive data, so the clinic can prove access in an inspection. It is a core Foundations story built on the Sprint 0 audit groundwork. It is the evidence spine the later governance work stands on — retention/destruction, the breach workflow and the privacy-rights queue all attach to it — so it is built early and depended on widely. Every read/write of clinical, medicines and PII (personally identifiable information) data must produce an immutable AuditEvent that a compliance officer can export (C10/ADR-0010). Built on the Sprint 0 audit infra.",
       "as_a": "compliance officer",
       "i_want": "to export an audit trail of who viewed or changed clinical, medicines and PII data",
       "so_that": "we can evidence access and changes in an inspection",
@@ -444,8 +444,8 @@
         "PRD-01/TENANT"
       ],
       "detail": [
-        "Every read AND write of clinical, medicines and PII data writes an immutable, append-only AuditEvent (who, what, when, tenant, entity, action) on the Sprint-0 audit infrastructure (ADR-0010, C10, REQ-SEC-3). Capturing reads — not just writes — is the point: an inspector asks 'who viewed this patient's record', and the answer must exist.",
-        "The log has no update or delete path at the data layer — corrections to clinical records are appended and linked, never edited (the same immutability ADR-0010 applies to finalised ChartEntry and medicine-register rows). This makes the trail tamper-evident and defensible in an AHPRA / QLD Health / Privacy audit.",
+        "Every read AND write of clinical, medicines and PII data writes an immutable, append-only (entries are only ever added, never edited or deleted) AuditEvent (who, what, when, tenant, entity, action) on the Sprint-0 audit infrastructure (ADR-0010, C10, REQ-SEC-3). Capturing reads — not just writes — is the point: an inspector asks 'who viewed this patient's record', and the answer must exist.",
+        "The log has no update or delete path at the data layer — corrections to clinical records are appended and linked, never edited (the same immutability ADR-0010 applies to finalised ChartEntry and medicine-register rows). This makes the trail tamper-evident and defensible in an AHPRA (Australian Health Practitioner Regulation Agency) / QLD Health / Privacy audit.",
         "Writing the event is part of the same logical operation as the access it records (so an access can't succeed unaudited), but the audit store is append-only and isolated so audit volume never blocks the transactional path. The capability/scope pipeline (RBAC) emits its own authorisation events (AUTH-AUDIT) as peers of these data-access events; together they are the evidentiary spine the breach workflow (BREACH) and retention/destruction register (RETENTION) build on.",
         "A compliance officer can filter the trail (by actor, entity type/id, date range, action) and export it. Edge cases: a denied read still records the attempt (via the scope_block path); bulk/report reads over the read-models record an aggregate access event rather than one per row, to stay meaningful."
       ],
@@ -457,17 +457,17 @@
         {
           "entity": "AuditEvent",
           "fields": "id, tenant_id, actor_id, action(read|create|update|delete|export), entity_type, entity_id, at, context(json)",
-          "notes": "Append-only; no update/delete path at the data layer (ADR-0010). tenant_id + RLS; indexed on (entity_type, entity_id), actor_id and at for the viewer filters."
+          "notes": "Append-only; no update/delete path at the data layer (ADR-0010). tenant_id + RLS (row-level security); indexed on (entity_type, entity_id), actor_id and at for the viewer filters."
         }
       ],
       "tasks": [
         {
           "title": "Append-only AuditEvent store (immutable, RLS, no update/delete path)",
-          "note": "Build the AuditEvent store on the Sprint-0 audit infra: append-only, with no update/delete code path or grant at the data layer (ADR-0010), tenant_id + RLS, and indexes on entity (type+id), actor and timestamp for the viewer. Define the context(json) shape so each event is self-describing. Ensure audit writes are part of the recorded operation (no unaudited access) but isolated so they never block or fail the transactional path."
+          "note": "Build the AuditEvent store on the Sprint-0 audit infra: append-only (entries are only ever added, never edited or deleted), with no update/delete code path or grant at the data layer (ADR-0010), tenant_id + RLS (row-level security), and indexes on entity (type+id), actor and timestamp for the viewer. Define the context(json) shape so each event is self-describing. Ensure audit writes are part of the recorded operation (no unaudited access) but isolated so they never block or fail the transactional path."
         },
         {
           "title": "Capture clinical/medicines/PII reads + writes across modules",
-          "note": "Provide the cross-cutting hook that every clinical/medicines/PII read and write goes through, capturing actor/action/entity/tenant/context — reads included (AC4 explicitly requires sensitive-data reads). Use an aggregate access event for bulk/report reads over the read-models so the log stays meaningful. This is the single mechanism other PRDs (clients, charting, Rx, stock) attach to rather than each rolling its own."
+          "note": "Provide the cross-cutting hook that every clinical/medicines/PII (personally identifiable information) read and write goes through, capturing actor/action/entity/tenant/context — reads included (AC4 explicitly requires sensitive-data reads). Use an aggregate access event for bulk/report reads over the read-models so the log stays meaningful. This is the single mechanism other PRDs (clients, charting, Rx, stock) attach to rather than each rolling its own."
         },
         {
           "title": "Audit viewer with filters + export",
@@ -478,7 +478,7 @@
     {
       "key": "RETENTION",
       "title": "Retention policy engine & destruction register",
-      "context": "Records must be retained per legal periods (adults ≥7y from last contact; minors to age 25; indefinite on complaint/litigation) and destroyed with a register + certificate (C18).",
+      "context": "Plainly: this keeps records exactly as long as the law requires and no longer, then surfaces them for a reviewed, logged destruction. It sits in the governance band of Foundations, built on the audit trail. It links to the privacy-rights story (a deletion request can't override a legal retention period) and is the answer to an inspector asking how the clinic disposes of records lawfully. Records must be retained per legal periods (adults ≥7y from last contact; minors to age 25; indefinite on complaint/litigation) and destroyed with a register + certificate (C18).",
       "as_a": "admin",
       "i_want": "retention timers and a destruction register that surfaces records due for destruction and logs their destruction",
       "so_that": "we keep records exactly as long as the law requires, no more, no less",
@@ -545,7 +545,7 @@
       "tasks": [
         {
           "title": "Retention policy engine, timers & holds",
-          "note": "Model RetentionPolicy (per record type, with basis + anchor) and RetentionHold. Compute each record's eligibility from its anchor: adults >=7y from last contact; minors until age 25 / 7y-from-last-entry whichever is later (uses CLIENT-CORE age derivation); indefinite while a complaint/adverse/litigation hold is set. A scheduled scan marks records past period as due-for-destruction with their retention basis; held records are never marked eligible until the hold clears."
+          "note": "Model RetentionPolicy (per record type, with basis + anchor) and RetentionHold. Compute each record's eligibility from its anchor: adults >=7y from last contact; minors until age 25 / 7y-from-last-entry whichever is later (uses CLIENT-CORE age derivation); indefinite while a complaint/adverse/litigation hold (a flag that freezes a record from destruction while a legal matter is open) is set. A scheduled scan marks records past period as due-for-destruction with their retention basis; held records are never marked eligible until the hold clears."
         },
         {
           "title": "Destruction register, certificates & transfer log",
@@ -560,7 +560,7 @@
     {
       "key": "BREACH",
       "title": "Data-breach assessment & notification workflow",
-      "context": "An eligible data breach (NDB scheme) must be assessed and, if eligible, notified to OAIC + individuals, with a breach register (C22).",
+      "context": "Plainly: when a data breach is suspected, this walks the clinic through the legal assessment and, if needed, produces the notifications and a permanent register entry. It is a governance story built on the audit trail. It is fed by the security signals and the authentication/authorisation audit, so a suspicious pattern raises a candidate case rather than going unnoticed — the clinic's safety net for its privacy obligations. An eligible data breach (NDB (Notifiable Data Breaches scheme) scheme) must be assessed and, if eligible, notified to OAIC (Office of the Australian Information Commissioner) + individuals, with a breach register (C22).",
       "as_a": "admin",
       "i_want": "a workflow that, when a breach is flagged, guides assessment and produces OAIC + individual notifications and a register entry",
       "so_that": "we meet Notifiable Data Breaches obligations",
@@ -595,7 +595,7 @@
       "detail": [
         "When a potential data breach is flagged, a guided workflow walks the admin/compliance officer through assessment under the Notifiable Data Breaches scheme (C22, REQ-SEC-7): is there unauthorised access/disclosure or loss of personal information, and is serious harm likely. There is a legal clock, so the case tracks detection, assessment and notification dates throughout.",
         "If assessed eligible, the workflow produces OAIC notification + affected-individual notification drafts and creates a breach-register entry that is retained (AC7). If not eligible, the assessment and its reasoning are still recorded — the register is the evidence the clinic assessed every flagged incident, eligible or not.",
-        "A case can be opened manually or seeded from security/observability signals (Sprint-0 OBS) and from the auth/authorisation audit (AUTH-AUDIT) — e.g. anomalous access patterns or a run of scope-blocks can raise a candidate breach case rather than sitting unnoticed in a log. The data-access and auth audit trails (AUDIT/AUTH-AUDIT) are the evidence the assessment draws on.",
+        "A case can be opened manually or seeded from security/observability signals (Sprint-0 OBS (the Sprint 0 observability / security-signals capability)) and from the auth/authorisation audit (AUTH-AUDIT) — e.g. anomalous access patterns or a run of scope-blocks can raise a candidate breach case rather than sitting unnoticed in a log. The data-access and auth audit trails (AUDIT/AUTH-AUDIT) are the evidence the assessment draws on.",
         "Workflow states: Detected -> Assessing -> (Eligible | Not eligible) -> Notifying (OAIC + individuals) -> Closed, each with timestamps against the 30-day assessment expectation. Surfaced in Governance (ADR-0030)."
       ],
       "ui_spec": [
@@ -617,22 +617,22 @@
       "tasks": [
         {
           "title": "Breach case model & assessment workflow (with the legal clock)",
-          "note": "Model DataBreach as a state machine (detected -> assessing -> eligible|not_eligible -> notifying -> closed) capturing detection/assessment/notification timestamps against the 30-day expectation. Build the guided NDB assessment (unauthorised access/disclosure or loss; serious-harm likelihood) that records the reasoning whether or not eligible. Append-only audited (ADR-0010); retained as register evidence."
+          "note": "Model DataBreach as a state machine (detected -> assessing -> eligible|not_eligible -> notifying -> closed) capturing detection/assessment/notification timestamps against the 30-day expectation. Build the guided NDB (Notifiable Data Breaches scheme) assessment (unauthorised access/disclosure or loss; serious-harm likelihood) that records the reasoning whether or not eligible. Append-only audited (ADR-0010); retained as register evidence."
         },
         {
           "title": "OAIC + individual notification generation & breach register",
-          "note": "On an eligible assessment, generate OAIC and affected-individual notification drafts (BreachNotification) from the case data and create the retained breach-register entry (AC7). Track sent dates against the clock. Provide the register list/query for the compliance officer."
+          "note": "On an eligible assessment, generate OAIC (Office of the Australian Information Commissioner) and affected-individual notification drafts (BreachNotification) from the case data and create the retained breach-register entry (AC7). Track sent dates against the clock. Provide the register list/query for the compliance officer."
         },
         {
           "title": "Seed cases from OBS / auth-audit signals + Governance UI",
-          "note": "Let security/observability signals (Sprint-0 OBS) and auth-audit anomalies (AUTH-AUDIT — e.g. a run of scope-blocks or anomalous access) raise candidate breach cases automatically, plus a manual 'flag a breach' entry. Build the Governance breach register + case workflow UI (assess -> notify -> close) showing the clock, assessment questions, generated drafts and close-out. Capability-gate to compliance/owner."
+          "note": "Let security/observability signals (Sprint-0 OBS (the Sprint 0 observability / security-signals capability)) and auth-audit anomalies (AUTH-AUDIT — e.g. a run of scope-blocks or anomalous access) raise candidate breach cases automatically, plus a manual 'flag a breach' entry. Build the Governance breach register + case workflow UI (assess -> notify -> close) showing the clock, assessment questions, generated drafts and close-out. Capability-gate to compliance/owner."
         }
       ]
     },
     {
       "key": "PRIVACY-RIGHTS",
       "title": "Client privacy: collection notice, access & correction (DSAR)",
-      "context": "Clients have APP 12/13 rights: a collection notice/consent at sign-up, and the ability to access and request correction of their own data (DSAR clock ≤30 days).",
+      "context": "Plainly: this gives clients their legal privacy rights — a clear notice at sign-up, a way to get a copy of their own data, and a way to request a correction or deletion. It is a Foundations governance story built on tenancy. Client-facing self-service lives in the client app and the staff side is a queue in Governance; it links to the retention story, since some records must be kept even after a deletion request. Clients have APP 12/13 (Australian Privacy Principles 12 and 13 — access and correction rights) rights: a collection notice/consent at sign-up, and the ability to access and request correction of their own data (DSAR (data subject access request — a person's legal request to access or correct their data) clock ≤30 days).",
       "as_a": "client",
       "i_want": "to see a clear collection notice, access a copy of my data and request a correction",
       "so_that": "my privacy rights under the Privacy Act are respected",
@@ -705,14 +705,14 @@
         },
         {
           "title": "Staff DSAR queue in Governance + correction handling",
-          "note": "Build the Governance DSAR queue: each request with type, opened/due dates, the 30-day clock and status to resolution, plus the fulfilment actions. A correction is applied as an appended, linked CorrectionEntry against the immutable record (never an overwrite). Surface overdue/at-risk requests; capability-gate to compliance/owner. All actions audited."
+          "note": "Build the Governance DSAR (data subject access request — a person's legal request to access or correct their data) queue: each request with type, opened/due dates, the 30-day clock and status to resolution, plus the fulfilment actions. A correction is applied as an appended, linked CorrectionEntry against the immutable record (never an overwrite). Surface overdue/at-risk requests; capability-gate to compliance/owner. All actions audited."
         }
       ]
     },
     {
       "key": "RESIDENCY",
       "title": "Data residency & sub-processor controls",
-      "context": "All PII/PHI storage + compute must resolve to Australia East; a sub-processor outside AU is blocked unless an APP-8 assessment + consent exists (C21/ADR-0016).",
+      "context": "Plainly: this guarantees the clinic's personal and health data stays in Australia and never flows to an overseas supplier without a proper cross-border assessment and consent. It is a Foundations story built on the Sprint 0 infrastructure policy. It is the check the later integrations epic calls before any data leaves to a third party, and the trust note clients see — the clinic's assurance that data stays in-country. All PII/PHI (personal and personal-health information) storage + compute must resolve to Australia East; a sub-processor outside AU is blocked unless an APP-8 (Australian Privacy Principle 8, governing cross-border disclosure) assessment + consent exists (C21/ADR-0016).",
       "as_a": "compliance officer",
       "i_want": "assurance and enforcement that PII/PHI stays in Australia and never flows to a non-AU sub-processor without an APP-8 assessment",
       "so_that": "we meet residency and cross-border obligations",
@@ -753,7 +753,7 @@
         "All PII/PHI storage and compute must resolve to Azure Australia East (ADR-0001/0016, C10/C21, REQ-SEC-1/2/6). This is enforced primarily at the infra level by the Sprint-0 IaC policy (region pinning + policy guardrails that fail a deploy outside AU East) — the application story is the runtime + integration controls that sit on top, plus the human-facing evidence.",
         "A sub-processor outside Australia (payment, SMS, accounting, any integration handling PII) is blocked unless an APP-8 cross-border assessment + client consent record exists (AC8). Integrations (PRD-10) check the sub-processor's region/assessment status before any PII leaves; an AU-resident processor passes, a non-AU one without an assessment+consent is refused with a clear reason. The sub-processor register documents every data flow (who, region, what data, assessment + consent references) so the clinic can evidence its cross-border posture.",
         "Signed-URL media access (clinical photos, credential evidence, data exports — ADR-0009) enforces the same residency: blobs live in AU-resident storage and are reached only via short-lived signed URLs, never copied to a non-AU location or retained on devices.",
-        "Surfaces to clients as the 'your data stays in Australia' trust note (client app privacy) and to staff as the sub-processor register in Settings. The register is the artefact an auditor asks for under APP 8."
+        "Surfaces to clients as the 'your data stays in Australia' trust note (client app privacy) and to staff as the sub-processor register in Settings. The register is the artefact an auditor asks for under APP 8 (Australian Privacy Principle 8, governing cross-border disclosure)."
       ],
       "ui_spec": [
         "Surfaces as a client-facing trust note ('Your data is stored securely in Australia') on the client app privacy screen, and an admin sub-processor register in Settings listing each integration with its region, data categories, APP-8 assessment reference and consent reference.",
@@ -769,7 +769,7 @@
       "tasks": [
         {
           "title": "Residency verification + APP-8 sub-processor gate",
-          "note": "Verify (and assert at runtime, tying to the Sprint-0 IaC region policy) that PII/PHI storage + compute resolve to Australia East. Model SubProcessor (region, purpose, data categories, app8_assessment_ref, consent_ref, status) and enforce the gate: any integration sending PII to a non-AU sub-processor is blocked unless an APP-8 assessment AND a consent record both exist, returning a clear reason. This is the check PRD-10 integrations call before any PII leaves."
+          "note": "Verify (and assert at runtime, tying to the Sprint-0 IaC region policy) that PII/PHI (personal and personal-health information) storage + compute resolve to Australia East. Model SubProcessor (region, purpose, data categories, app8_assessment_ref, consent_ref, status) and enforce the gate: any integration sending PII to a non-AU sub-processor is blocked unless an APP-8 (Australian Privacy Principle 8, governing cross-border disclosure) assessment AND a consent record both exist, returning a clear reason. This is the check PRD-10 integrations call before any PII leaves."
         },
         {
           "title": "Signed-URL media residency enforcement",
@@ -777,21 +777,21 @@
         },
         {
           "title": "Sub-processor register UI (Settings) + client trust note",
-          "note": "Build the admin sub-processor register in Settings: a row per integration with region, data categories, APP-8 assessment reference, consent reference and active/blocked status, with the block reason visible. Surface the client-facing 'your data stays in Australia' trust note on the client app privacy screen. Capability-gate the register to owner/configure."
+          "note": "Build the admin sub-processor register in Settings: a row per integration with region, data categories, APP-8 (Australian Privacy Principle 8, governing cross-border disclosure) assessment reference, consent reference and active/blocked status, with the block reason visible. Surface the client-facing 'your data stays in Australia' trust note on the client app privacy screen. Capability-gate the register to owner/configure."
         }
       ]
     },
     {
       "key": "CLIENT-CORE",
       "title": "Client core record: DOB & under-18 flag",
-      "context": "The client record captures DOB and derives an under-18 flag that feeds cooling-off (C6) and advertising/pricing (C9) elsewhere.",
+      "context": "Plainly: this is the bare-bones client record — enough to capture date of birth and work out whether the client is under 18, which several later rules depend on. It is a small Foundations story built on tenancy. The full client directory and profile come later in the Reception epic; this story exists early only so that age-based rules (cooling-off, advertising/pricing) have a single trustworthy source. The client record captures DOB (date of birth) and derives an under-18 flag that feeds cooling-off (C6) and advertising/pricing (C9) elsewhere.",
       "as_a": "system",
       "i_want": "to capture client DOB and derive an under-18 flag",
       "so_that": "downstream cooling-off and pricing rules can enforce age-based requirements",
       "acceptance": [
         "DOB captured; under-18 flag derived and exposed to PRD-03/PRD-06/PRD-07.",
         "The flag updates correctly across a birthday.",
-        "Soft-delete with audit and duplicate handling supported (full CRM in PRD-02).",
+        "Soft-delete with audit and duplicate handling supported (full CRM (the client relationship / directory management in PRD-02) in PRD-02).",
         "Under-18 status is visible on the patient header (consumed by UX age chip)."
       ],
       "refs": {
@@ -832,18 +832,18 @@
       "tasks": [
         {
           "title": "Client core record, DOB capture & age derivation",
-          "note": "Model the Client core (tenant_id + RLS) with DOB and derive under18 + current age server-side at read time so they stay correct across a birthday with no batch job. Expose the derived flag/age to PRD-03/06/07 (cooling-off, pricing) and to the patient-header age chip. Support soft-delete (deleted_at; excluded from active/bookable/search views; row + history retained for RETENTION/AUDIT — never hard-deleted here)."
+          "note": "Model the Client core (tenant_id + RLS (row-level security)) with DOB (date of birth) and derive under18 + current age server-side at read time so they stay correct across a birthday with no batch job. Expose the derived flag/age to PRD-03/06/07 (cooling-off, pricing) and to the patient-header age chip. Support soft-delete (deleted_at; excluded from active/bookable/search views; row + history retained for RETENTION/AUDIT — never hard-deleted here)."
         },
         {
           "title": "Duplicate detection & reviewed merge",
-          "note": "Surface duplicate/merge candidates (matching name + DOB + contact) as suggestions, never auto-merging two real people. Merge is a reviewed action that re-points history to the surviving record and writes an audit event. Soft-deleted and merged-away records stay out of active views."
+          "note": "Surface duplicate/merge candidates (matching name + DOB (date of birth) + contact) as suggestions, never auto-merging two real people. Merge is a reviewed action that re-points history to the surviving record and writes an audit event. Soft-deleted and merged-away records stay out of active views."
         }
       ]
     },
     {
       "key": "ROLE-BUILDER",
       "title": "Custom-role builder (placeholder)",
-      "context": "Beyond the preset personas, a future custom-role builder lets owners define bespoke capability sets. Deferred — placeholder.",
+      "context": "Plainly: a future tool letting an owner build their own custom roles beyond the ready-made ones. It is deferred to Phase 2+ — design-only, not built for launch. The ready-made preset roles already cover the clinic, and the permission model is shaped so this can be added later without a rewrite. Beyond the preset personas, a future custom-role builder lets owners define bespoke capability sets. Deferred — placeholder.",
       "as_a": "owner",
       "i_want": "to define custom roles from capabilities",
       "so_that": "I can model staff arrangements that don't fit the presets",
@@ -867,7 +867,7 @@
       ],
       "priority": "P2",
       "detail": [
-        "Beyond the preset personas (RBAC), a future custom-role builder lets owners compose bespoke capability sets — ticking capabilities + concern tiles to model unusual staffing that doesn't fit a preset (ADR-0017, REQ-TEN-5). Deferred (Phase 2+): the capability/concern model is already builder-ready (roles are lists of capability/concern keys), so this is design-only for v1 — the presets are sufficient for launch."
+        "Beyond the preset personas (RBAC (role-based access control)), a future custom-role builder lets owners compose bespoke capability sets — ticking capabilities + concern tiles to model unusual staffing that doesn't fit a preset (ADR-0017, REQ-TEN-5). Deferred (Phase 2+): the capability/concern model is already builder-ready (roles are lists of capability/concern keys), so this is design-only for v1 — the presets are sufficient for launch."
       ],
       "data_model": [
         {
@@ -889,7 +889,7 @@
     {
       "key": "SIGNIN-UI",
       "title": "Sign-in / sign-out screens & session management",
-      "context": "The prototype demos a login/persona screen; the real product needs proper sign-in/out UI for staff (Entra) and clients (External ID), plus session lifecycle — built on the Sprint 0 auth wiring.",
+      "context": "Plainly: the real sign-in and sign-out screens and the rules that keep a session safe — staff sign in with their work Microsoft account, clients with social/email/one-time-code. It is a Foundations story built on the Sprint 0 authentication wiring. It is where the clinic's login experience and session safety (timeouts, clean sign-out, not losing half-finished work) actually live, replacing the prototype's simple persona picker. The prototype demos a login/persona screen; the real product needs proper sign-in/out UI for staff (Entra ID (Microsoft's identity service)) and clients (External ID), plus session lifecycle — built on the Sprint 0 auth wiring.",
       "as_a": "user",
       "i_want": "clear sign-in and sign-out screens and a session that behaves safely",
       "so_that": "I can authenticate and trust my session",
@@ -926,7 +926,7 @@
         "SPRINT-0/AUTH-CLIENT"
       ],
       "detail": [
-        "The real sign-in sits on the Sprint-0 Entra wiring (ADR-0004, REQ-TEN-2, AC3). Staff sign in via Microsoft 365 / Entra ID SSO (no local password — they're bound to the tenant via TENANT's invite flow). Clients sign in/up via Entra External ID: Google/Apple social, email+password, or email/SMS OTP, with account recovery. The prototype's persona picker ('Switch user') stands in for this in the POC.",
+        "The real sign-in sits on the Sprint-0 Entra wiring (ADR-0004, REQ-TEN-2, AC3). Staff sign in via Microsoft 365 / Entra ID SSO (no local password — they're bound to the tenant via TENANT's invite flow). Clients sign in/up via Entra External ID: Google/Apple social, email+password, or email/SMS OTP (one-time passcode sent by email or SMS), with account recovery. The prototype's persona picker ('Switch user') stands in for this in the POC.",
         "Session lifecycle is the substance of this story: sign-out clears the session everywhere (revokes the server session + clears client tokens); token refresh is seamless so an active user isn't bounced mid-task; an idle-timeout and an absolute session limit both apply; and when a session expires the user is returned to sign-in without losing in-progress work (unsaved drafts preserved where possible — e.g. a half-written chart note or booking).",
         "Every sign-in, sign-out and failed attempt is recorded as an auth audit event (AUTH-AUDIT) — this is where C10 auth-trail capture begins. Failed attempts feed lockout (MFA-STEPUP / Entra policy).",
         "Edge cases: a session that expires during a long charting session restores the draft on re-auth; sign-out on one device doesn't silently keep another device signed in (sign-out is per-session, revocation is explicit); a client OTP that times out re-issues rather than failing hard."
@@ -946,11 +946,11 @@
       "tasks": [
         {
           "title": "Staff Entra SSO sign-in/out screens",
-          "note": "Build the staff sign-in (redirect to Microsoft Entra ID SSO, return to the tenant-scoped app on success — bound via TENANT) and a clear sign-out in the header user menu. No local staff password. Write a sign-in/sign-out/failed-attempt auth event for each (AUTH-AUDIT)."
+          "note": "Build the staff sign-in (redirect to Microsoft Entra ID (Microsoft's identity service) ID SSO (single sign-on), return to the tenant-scoped app on success — bound via TENANT) and a clear sign-out in the header user menu. No local staff password. Write a sign-in/sign-out/failed-attempt auth event for each (AUTH-AUDIT)."
         },
         {
           "title": "Client sign-in/up (social / email+password / OTP) + recovery",
-          "note": "Build client sign-in and sign-up via Entra External ID covering each of social (Google/Apple), email+password, and email/SMS OTP, plus account recovery (AC3 requires all three methods work). Handle OTP timeout by re-issuing rather than hard-failing. Auth events recorded."
+          "note": "Build client sign-in and sign-up via Entra ID (Microsoft's identity service) External ID covering each of social (Google/Apple), email+password, and email/SMS OTP (one-time passcode sent by email or SMS), plus account recovery (AC3 requires all three methods work). Handle OTP timeout by re-issuing rather than hard-failing. Auth events recorded."
         },
         {
           "title": "Session lifecycle: idle/absolute limits, seamless refresh, sign-out-everywhere",
@@ -965,7 +965,7 @@
     {
       "key": "MFA-STEPUP",
       "title": "MFA & step-up authentication for sensitive actions",
-      "context": "Staff MFA is required; sensitive clinical/medicines/financial actions (e.g. prescribing, S4 custody changes, destruction, data export) may require step-up re-auth. Client MFA policy is an open question.",
+      "context": "Plainly: staff must use two-step login, and the riskiest actions (prescribing, controlled-medicine changes, destroying records, exporting data) ask for a fresh re-confirmation so they can't happen on a walked-up-to or hijacked session. It builds on the sign-in story. It is a targeted extra lock on the small set of truly sensitive actions, while leaving everyday work uninterrupted. Staff MFA (multi-factor authentication) is required; sensitive clinical/medicines/financial actions (e.g. prescribing, S4 (Schedule 4 prescription-only medicine) custody changes, destruction, data export) may require step-up (re-prompting for a second factor before an especially sensitive action) re-auth. Client MFA policy is an open question.",
       "as_a": "security-conscious clinic",
       "i_want": "MFA for staff and step-up re-authentication on the most sensitive actions",
       "so_that": "high-risk operations can't be performed on a walk-up or hijacked session",
@@ -1023,22 +1023,22 @@
       "tasks": [
         {
           "title": "Enforce staff MFA + model auth assurance/recency",
-          "note": "Ensure staff sign-in enforces MFA via Entra and capture AuthAssurance per session (mfa_at, stepup_at, methods). Provide the recency check the sensitive-action gate uses, with a window so one fresh step-up covers subsequent in-window actions. Record MFA/step-up events (AUTH-AUDIT)."
+          "note": "Ensure staff sign-in enforces MFA (multi-factor authentication) via Entra ID (Microsoft's identity service) and capture AuthAssurance per session (mfa_at, stepup_at, methods). Provide the recency check the sensitive-action gate uses, with a window so one fresh step-up (re-prompting for a second factor before an especially sensitive action) covers subsequent in-window actions. Record MFA/step-up events (AUTH-AUDIT)."
         },
         {
           "title": "Step-up gate on sensitive actions (configurable, not hard-coded)",
-          "note": "Define StepUpPolicy (action_key + max_age) and gate the sensitive actions — prescribing, S4 custody changes, destruction, data export — so an attempt without recent strong auth triggers a step-up re-auth; if not completed, the action is blocked with a clear reason and the underlying record is untouched. The gated-action set is configuration so it extends without code change. Step-up events audited."
+          "note": "Define StepUpPolicy (action_key + max_age) and gate the sensitive actions — prescribing, S4 (Schedule 4 prescription-only medicine) custody changes, destruction, data export — so an attempt without recent strong auth triggers a step-up (re-prompting for a second factor before an especially sensitive action) re-auth; if not completed, the action is blocked with a clear reason and the underlying record is untouched. The gated-action set is configuration so it extends without code change. Step-up events audited."
         },
         {
           "title": "Configurable client MFA policy",
-          "note": "Model client MFA as a per-clinic configuration (optional by default; can be required for sensitive client actions) to resolve PRD §11's open question, rather than hard-coding it. Wire the client sensitive-action paths to honour the tenant's setting."
+          "note": "Model client MFA (multi-factor authentication) as a per-clinic configuration (optional by default; can be required for sensitive client actions) to resolve PRD §11's open question, rather than hard-coding it. Wire the client sensitive-action paths to honour the tenant's setting."
         }
       ]
     },
     {
       "key": "MULTI-ROLE",
       "title": "Multi-role staff & active-role context",
-      "context": "Some users legitimately hold several roles (e.g. an NP who is also the business owner, or a lead nurse covering reception). The model must allow multiple role assignments and an active-role context that the authorisation pipeline honours.",
+      "context": "Plainly: some people genuinely wear more than one hat — a nurse practitioner who is also the owner, or a lead nurse covering reception — so this lets a person hold several roles and act under a chosen one at a time. It builds on the permission layer. It feeds the header role display and switcher in the app shell, and keeps a firm rule that being a clinician never silently grants the owner's money access. Some users legitimately hold several roles (e.g. an NP (nurse practitioner) who is also the business owner, or a lead nurse covering reception). The model must allow multiple role assignments and an active-role context that the authorisation pipeline honours.",
       "as_a": "staff member with multiple roles",
       "i_want": "to be assigned more than one role and act under a chosen active role",
       "so_that": "my permissions reflect what I'm doing without separate logins",
@@ -1073,7 +1073,7 @@
       ],
       "detail": [
         "Some staff legitimately hold several roles — an NP who is also the business owner, or a Lead Nurse covering reception. The prototype models exactly these combinations (the Solo-NP and Nurse-led presets union multiple concern/capability sets). This story makes multiple role assignments first-class and defines an active-role context the authorisation pipeline honours.",
-        "The model: a StaffProfile has many roles (StaffRole join, one default); a session carries an active_role_id. The RBAC pipeline evaluates capabilities for the active role (not the union) so a clinician acting 'as reception' doesn't accidentally exercise clinical capability — and the active role is stamped on every action and audit event (consumed by PLATFORM/ROLE-CONTEXT). Switching active role is itself a recorded (role_switch) event.",
+        "The model: a StaffProfile has many roles (StaffRole join, one default); a session carries an active_role_id. The RBAC (role-based access control) pipeline evaluates capabilities for the active role (not the union) so a clinician acting 'as reception' doesn't accidentally exercise clinical capability — and the active role is stamped on every action and audit event (consumed by PLATFORM/ROLE-CONTEXT). Switching active role is itself a recorded (role_switch) event.",
         "A deliberate invariant: owner-only financial capability (finance.read / .fin) is independent of clinical roles — being an NP never automatically makes you the owner, and switching into a clinical role never reveals financials unless the person also holds the owner/finance capability. This keeps FIN-GATING structurally sound for multi-role people.",
         "Edge cases: a person whose only roles lack a capability simply can't do that action under any active role; the default role is what they land in at sign-in; deactivating one role doesn't sign them out if another remains."
       ],
@@ -1100,7 +1100,7 @@
         },
         {
           "title": "Active-role context in the authorisation pipeline",
-          "note": "Carry active_role_id on the session and make the RBAC pipeline evaluate capabilities for the ACTIVE role (not the union of all roles), so acting 'as reception' can't exercise clinical capability. Resolve the active role at sign-in to the default and on each switch. Expose active role + its capabilities/scope via the session context endpoint (consumed by ROLE-CONTEXT, APP-NAV)."
+          "note": "Carry active_role_id on the session and make the RBAC (role-based access control) pipeline evaluate capabilities for the ACTIVE role (not the union of all roles), so acting 'as reception' can't exercise clinical capability. Resolve the active role at sign-in to the default and on each switch. Expose active role + its capabilities/scope via the session context endpoint (consumed by ROLE-CONTEXT, APP-NAV)."
         },
         {
           "title": "Switch-active-role action + audit stamping",
@@ -1111,7 +1111,7 @@
     {
       "key": "AUTH-AUDIT",
       "title": "Authentication & authorisation audit events",
-      "context": "Beyond data-access audit, security needs a record of authentication and authorisation events: sign-in success/failure, lockouts, MFA/step-up, role switches and every scope-block (a blocked out-of-scope action).",
+      "context": "Plainly: alongside the record of who saw data, this keeps a record of the security events — sign-ins, lockouts, two-step prompts, role switches and every blocked out-of-scope attempt. It is built on the audit trail and the permission layer. Capturing every blocked attempt is what lets the clinic prove the safety gates actually fire, and a run of suspicious events can seed a breach case. Beyond data-access audit, security needs a record of authentication and authorisation events: sign-in success/failure, lockouts, MFA (multi-factor authentication)/step-up (a fresh re-authentication before a sensitive action), role switches and every scope-block (a blocked out-of-scope action).",
       "as_a": "compliance officer",
       "i_want": "an audit of authentication and authorisation events, including blocked out-of-scope attempts",
       "so_that": "we can investigate access and prove the gates work",
@@ -1151,8 +1151,8 @@
         "PRD-01/RBAC"
       ],
       "detail": [
-        "Beyond the data-access audit (AUDIT), security needs a record of authentication and authorisation events (REQ-SEC-3, C10/C4/C19): sign-in success/failure, account lockout, MFA and step-up, role switches, and — critically — every scope-block: a blocked out-of-scope action (C4) or a lapsed-registration/uncleared action (C19, via canInject), each with the reason that fired.",
-        "Capturing scope-blocks is what lets the clinic prove the gates work, not just claim they do: an inspector asks 'show me that an uncleared injector can't administer S4', and the answer is a queryable record of every such attempt and its block. AUTH-AUDIT is the peer of the data-access AuditEvent and shares the same append-only immutability (ADR-0010).",
+        "Beyond the data-access audit (AUDIT), security needs a record of authentication and authorisation events (REQ-SEC-3, C10/C4/C19): sign-in success/failure, account lockout, MFA and step-up, role switches, and — critically — every scope-block: a blocked out-of-scope action (C4) or a lapsed-registration/uncleared action (C19, via canInject (the derived cleared-to-inject gate)), each with the reason that fired.",
+        "Capturing scope-blocks is what lets the clinic prove the gates work, not just claim they do: an inspector asks 'show me that an uncleared injector can't administer S4', and the answer is a queryable record of every such attempt and its block. AUTH-AUDIT is the peer of the data-access AuditEvent and shares the same append-only (only ever added to, never edited or deleted) immutability (ADR-0010).",
         "These events are queryable and exportable alongside the data-access trail through the same Governance audit viewer (AUDIT), filtered to auth/authorisation kinds. Suspicious patterns — a burst of sign-in failures, anomalous access, a run of scope-blocks — can seed a breach case (BREACH).",
         "AC mapping: covers AC1 (the block is recorded with its reason) and AC4 (the events are immutable and exportable). It's wired from RBAC's scope-block path, SIGNIN-UI's session events and MFA-STEPUP's assurance events — this story is the unified event type + viewer/feed they all write to."
       ],
@@ -1169,11 +1169,11 @@
       "tasks": [
         {
           "title": "AuthEvent type (append-only, immutable) covering auth + authorisation",
-          "note": "Model AuthEvent as a peer of AuditEvent — append-only, tenant_id + RLS, no edit/delete path (ADR-0010) — covering signin_ok/fail, lockout, mfa, stepup, role_switch and scope_block, each with a reason and the active role. Index for the viewer filters."
+          "note": "Model AuthEvent as a peer of AuditEvent — append-only (only ever added to, never edited or deleted), tenant_id + RLS, no edit/delete path (ADR-0010) — covering signin_ok/fail, lockout, mfa, stepup, role_switch and scope_block, each with a reason and the active role. Index for the viewer filters."
         },
         {
           "title": "Wire emitters across RBAC / sign-in / MFA",
-          "note": "Emit AuthEvents from the RBAC scope-block path (every out-of-scope or lapsed-registration/uncleared attempt, with the rule that fired — AC1), SIGNIN-UI session events (sign-in ok/fail, lockout, sign-out), MFA-STEPUP (mfa/stepup) and MULTI-ROLE (role_switch). One unified stream so 'prove the gate fired' is a single query."
+          "note": "Emit AuthEvents from the RBAC scope-block (a blocked out-of-scope action) path (every out-of-scope or lapsed-registration/uncleared attempt, with the rule that fired — AC1), SIGNIN-UI session events (sign-in ok/fail, lockout, sign-out), MFA-STEPUP (mfa/stepup) and MULTI-ROLE (role_switch). One unified stream so 'prove the gate fired' is a single query."
         },
         {
           "title": "Surface in the audit viewer + breach seeding",

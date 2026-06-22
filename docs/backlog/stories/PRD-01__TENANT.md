@@ -5,7 +5,7 @@
 ## Background
 
 As a owner, I want to provision my clinic and invite staff who then sign in with our Microsoft 365 accounts, so that my team can access the platform under one isolated tenant.
-An owner provisions their clinic (tenant) and invites staff to sign in with existing Microsoft 365 accounts.
+Plainly: this is where a clinic first exists in the system — one clinic becomes one isolated tenant (its own walled-off data), and its staff get accounts. It is the very first Foundations story, built right after the Sprint 0 platform plumbing. Everything else in the product hangs off it: there is no client, booking, chart or payment until a tenant and its staff exist, so this story unblocks the entire backlog. An owner provisions their clinic (tenant) and invites staff to sign in with existing Microsoft 365 accounts.
 
 ## How it works
 
@@ -55,4 +55,4 @@ Edge cases: an invite to an email that is not a valid Entra account can never co
 - [ ] **Tenancy data model, RLS & tenant-context middleware**
   Model Tenant, Location, StaffProfile and StaffInvite with tenant_id on every table and an RLS policy that filters on the per-request session tenant (SET app.tenant_id). Provide request-scoped middleware that resolves the caller's tenant from the auth token, sets the DB session variable for the connection, and asserts it server-side as defence-in-depth so a missing/incorrect tenant context fails closed (never returns rows). Prove AC2: a cross-tenant id resolves to not-found, not a leak. Provisioning command creates Tenant + first Location + owner StaffProfile atomically; guard against deactivating the last active owner.
 - [ ] **Staff invitation & lifecycle (invite -> Entra SSO bind -> activate/deactivate)**
-  Owner-facing invite flow: create a StaffInvite (email + role) and dispatch it; on the invitee's first successful Entra SSO, consume the invite and bind the Entra object id to a tenant-scoped StaffProfile (no local password). Support idempotent resend for pending invites, revoke (cancels a pending invite), and deactivate/reactivate of an active member (deactivate ends live sessions immediately and hides them from bookable/roster surfaces but preserves audited history). Every invite/bind/deactivate/reactivate writes an AuditEvent. Settings list UI: per-member row with status chip + resend/deactivate actions.
+  Owner-facing invite flow: create a StaffInvite (email + role) and dispatch it; on the invitee's first successful Entra SSO (single sign-on), consume the invite and bind the Entra object id to a tenant-scoped StaffProfile (no local password). Support idempotent resend for pending invites, revoke (cancels a pending invite), and deactivate/reactivate of an active member (deactivate ends live sessions immediately and hides them from bookable/roster surfaces but preserves audited history). Every invite/bind/deactivate/reactivate writes an AuditEvent. Settings list UI: per-member row with status chip + resend/deactivate actions.

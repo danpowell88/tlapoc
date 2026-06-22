@@ -7,7 +7,7 @@
 ## Background
 
 As a owner, I want temperature logging for the medicine fridge with excursion alerts, so that we never use medicine that breached cold-chain.
-Toxin must stay 2–8°C; temperature logging raises excursion alerts and flags affected stock (C13). Integrates with the optional ESP32 cold-chain monitor.
+Plainly: this keeps the medicine cold enough to be safe. Botulinum toxin must stay between 2 and 8 degrees; this story logs the fridge temperature continuously and quarantines any stock that gets too warm. Where it fits: it sits on secure storage (PRD-04/CUSTODY-STORAGE) within the moat. A lot that breaches cold-chain is quarantined and becomes unselectable at the administration gate (PRD-04/ADMIN-GATE), and a breach raises a facility job in compliance ops (PRD-11).  Toxin must stay 2–8°C; temperature logging raises excursion alerts and flags affected stock (C13). Integrates with the optional ESP32 cold-chain monitor.
 
 ## How it works
 

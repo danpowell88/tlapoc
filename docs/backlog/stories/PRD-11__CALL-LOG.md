@@ -7,7 +7,7 @@
 ## Background
 
 As a front desk, I want to log phone calls against a client and raise a follow-up if needed, so that phone interactions aren't lost and callbacks happen.
-The prototype's Operations → Call log records inbound/outbound phone interactions against clients and raises follow-ups (the phone is still a primary clinic channel).
+Plainly: log inbound/outbound phone calls against a client and raise a callback when needed, so phone interactions are not lost. Where it fits: part of the operational backbone (Facility/Ops) around the clinical core; calls route into the shared follow-up queue (PRD-07). The prototype's Operations → Call log records inbound/outbound phone interactions against clients and raises follow-ups (the phone is still a primary clinic channel).
 
 ## How it works
 
@@ -47,7 +47,7 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 ## Tasks (dev pickup)
 
 - [ ] **CallLog entity + log a call**
-  Model CallLog (tenant_id, client_id?, direction[in|out], number, summary, outcome, at, actor_id) under RLS, audited. Call log UI (Time · Number · Who · Note) to log inbound/outbound calls against a client.
+  Model CallLog (tenant_id, client_id?, direction[in|out], number, summary, outcome, at, actor_id) under RLS (row-level security, the database-level tenant isolation), audited. Call log UI (Time · Number · Who · Note) to log inbound/outbound calls against a client.
 - [ ] **Call → follow-up job + comms history**
   A call can raise a follow-up Job (PRD-07); a linked call appears in the client's comms history. Missed calls auto-text-back and become callback jobs; track a missed-call/callback to resolution ('Log callback').
 - [ ] **Shared follow-up queue (walk-ins / waitlist offers)**

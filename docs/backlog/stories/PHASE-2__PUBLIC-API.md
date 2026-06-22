@@ -5,7 +5,7 @@
 ## Background
 
 As a integrator, I want a public API and webhooks, so that third-party tools can integrate.
-Outbound/inbound public API + webhooks for third parties (PRD-10 deferred; Phase 3).
+As an integrator, I want a public API and webhooks, so that third-party tools can integrate.  Outbound/inbound public API + webhooks for third parties (PRD-10 deferred; Phase 3).
 
 ## How it works
 

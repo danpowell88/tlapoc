@@ -7,7 +7,7 @@
 ## Background
 
 As a prescriber/owner, I want to receive S4 stock and record its ARTG status, brand, sponsor and lawful supply source, so that we only hold lawfully-supplied, approved medicine.
-S4 stock is received from a TGA-approved wholesaler with ARTG status, brand, sponsor and lawful supply source recorded; non-ARTG/unverified source is warned/blocked (C11). S4 POs require a prescriber signer.
+Plainly: this is how medicine comes in the door and gets logged. When an S4 (Schedule 4 prescription-only medicine) arrives, the clinic records exactly which approved product it is, who supplied it and that it was lawfully ordered — so the clinic can prove it only holds legitimate stock. Where it fits: this is where provenance enters the moat. It sits on the product catalogue (PRD-04/PRODUCT-CATALOGUE) and feeds the administration gate (PRD-04/ADMIN-GATE), which will only let a nurse draw from a lot whose lawful supply was recorded here.  S4 stock is received from a TGA-approved wholesaler with ARTG status, brand, sponsor and lawful supply source recorded; non-ARTG/unverified source is warned/blocked (C11). S4 POs require a prescriber signer.
 
 ## How it works
 

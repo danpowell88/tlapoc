@@ -7,7 +7,7 @@
 ## Background
 
 As a owner, I want data-quality checks that flag anomalies in my records, so that the data stays clean and trustworthy.
-Carry over anomaly checks: active-but-unseen, completed-not-checked-in, duplicates, missing contacts, implausible dates (REQ-RPT-4).
+This story keeps the records trustworthy: scheduled checks that flag anomalies — clients marked active but never seen, appointments completed without a check-in, likely duplicates, missing contact details, impossible dates — and offer a jump-to-fix. It sits in the Reporting layer (step 6 of the clinic-first build): it runs over the reporting read-models (READ-MODELS), so it depends on those, and its unresolved findings feed the owner needs-attention digest (ATTENTION-DIGEST). This is data hygiene, not compliance evidence and not financial — no money figures. Carry over anomaly checks: active-but-unseen, completed-not-checked-in, duplicates, missing contacts, implausible dates (REQ-RPT-4).
 
 ## How it works
 

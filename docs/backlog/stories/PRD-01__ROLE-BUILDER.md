@@ -5,11 +5,11 @@
 ## Background
 
 As a owner, I want to define custom roles from capabilities, so that I can model staff arrangements that don't fit the presets.
-Beyond the preset personas, a future custom-role builder lets owners define bespoke capability sets. Deferred — placeholder.
+Plainly: a future tool letting an owner build their own custom roles beyond the ready-made ones. It is deferred to Phase 2+ — design-only, not built for launch. The ready-made preset roles already cover the clinic, and the permission model is shaped so this can be added later without a rewrite. Beyond the preset personas, a future custom-role builder lets owners define bespoke capability sets. Deferred — placeholder.
 
 ## How it works
 
-Beyond the preset personas (RBAC), a future custom-role builder lets owners compose bespoke capability sets — ticking capabilities + concern tiles to model unusual staffing that doesn't fit a preset (ADR-0017, REQ-TEN-5). Deferred (Phase 2+): the capability/concern model is already builder-ready (roles are lists of capability/concern keys), so this is design-only for v1 — the presets are sufficient for launch.
+Beyond the preset personas (RBAC (role-based access control)), a future custom-role builder lets owners compose bespoke capability sets — ticking capabilities + concern tiles to model unusual staffing that doesn't fit a preset (ADR-0017, REQ-TEN-5). Deferred (Phase 2+): the capability/concern model is already builder-ready (roles are lists of capability/concern keys), so this is design-only for v1 — the presets are sufficient for launch.
 
 ## Requirements
 

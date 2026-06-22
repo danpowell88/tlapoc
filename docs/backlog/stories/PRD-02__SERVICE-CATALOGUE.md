@@ -7,7 +7,7 @@
 ## Background
 
 As a owner / manager, I want to manage the menu of services with durations, eligible roles and the S4 flag, so that booking, rewards and the public page all behave correctly per service.
-The prototype's clinical Treatment menu + admin services list defines bookable services with durations, eligible roles, and the S4/non-S4 flag that drives scope-aware booking, rewards eligibility and public-page naming.
+The service catalogue is the treatment menu that defines every bookable service, and the single switch that makes booking behave correctly per service. It sits in Reception (PRD-02) and depends on the medicines/products catalogue in Injectables (PRD-04/PRODUCT-CATALOGUE) for the stock a service consumes. It is foundational to the booking surfaces: the S4/non-S4 schedule flag set here is what drives scope-aware booking (the booking wizard and online self-booking only offer cleared injectors), rewards eligibility (PRD-06), and the generic public-page naming (PRD-07) — so this catalogue is read everywhere a service is offered, priced or charted. As owner / manager, I want to manage the menu of services with durations, eligible roles and the S4 flag, so that booking, rewards and the public page all behave correctly per service.  The prototype's clinical Treatment menu + admin services list defines bookable services with durations, eligible roles, and the S4/non-S4 flag that drives scope-aware booking, rewards eligibility and public-page naming.
 
 ## How it works
 
@@ -55,10 +55,10 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 ## Tasks (dev pickup)
 
 - [ ] **Service entity + schedule(S4|non-S4) classification**
-  Model Service with id/name/public_name/category/duration/buffer/price/schedule/reg_class/unit/eligible_roles[]/requires[]/product_id?. The schedule flag (ADR-0014/0021) is the single source of truth. Persist with tenant RLS. Derive rewards_eligible = (schedule != S4).
+  Model Service with id/name/public_name/category/duration/buffer/price/schedule/reg_class/unit/eligible_roles[]/requires[]/product_id?. The schedule flag (ADR-0014/0021) is the single source of truth. Persist with tenant RLS (row-level security). Derive rewards_eligible = (schedule != S4 (Schedule 4 prescription-only medicine)).
 - [ ] **Schedule flag wired to scope, rewards and public naming**
-  Make the schedule flag actually drive behaviour: the availability engine restricts S4 to canInject roles (C4); the rewards engine (PRD-06) is constrained to non-S4 by this flag (C9/REQ-MEMB-7); the public booking config (ONLINE-BOOK) uses generic name + withholds price for S4. Service also declares requires(consult/rx/s4_lot/standard_consent) that charting (PRD-05) and the gates read. Link product_id to PRODUCT-CATALOGUE for stock decrement.
+  Make the schedule flag actually drive behaviour: the availability engine restricts S4 (Schedule 4 prescription-only medicine) to canInject roles (C4); the rewards engine (PRD-06) is constrained to non-S4 by this flag (C9/REQ-MEMB-7); the public booking config (ONLINE-BOOK) uses generic name + withholds price for S4. Service also declares requires(consult/rx/s4_lot/standard_consent) that charting (PRD-05) and the gates read. Link product_id to PRODUCT-CATALOGUE for stock decrement.
 - [ ] **Capability-gated catalogue admin + audit**
-  Admin endpoints to add/edit/archive a service, gated to prescriber/owner capability; every change writes an AuditEvent. Validate that S4 services cannot have reward/discount controls enabled. Archive (not hard-delete) to preserve history on past bookings.
+  Admin endpoints to add/edit/archive a service, gated to prescriber/owner capability; every change writes an AuditEvent. Validate that S4 (Schedule 4 prescription-only medicine) services cannot have reward/discount controls enabled. Archive (not hard-delete) to preserve history on past bookings.
 - [ ] **Treatment menu admin UI**
-  Angular Treatment-menu screen: cards per service showing category, schedule + reg class, unit, performed-by roles, price, duration, linked stock, AE route and 'Charting & compliance this drives'. Active/Archived/All filter, '+ Add treatment', Edit/Archive. Visibly tag S4 and disable reward/discount controls on S4 cards. Capability-gate the admin actions.
+  Angular Treatment-menu screen: cards per service showing category, schedule + reg class, unit, performed-by roles, price, duration, linked stock, AE route and 'Charting & compliance this drives'. Active/Archived/All filter, '+ Add treatment', Edit/Archive. Visibly tag S4 (Schedule 4 prescription-only medicine) and disable reward/discount controls on S4 cards. Capability-gate the admin actions.

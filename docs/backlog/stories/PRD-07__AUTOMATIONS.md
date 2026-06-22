@@ -7,7 +7,7 @@
 ## Background
 
 As a owner / front desk, I want to configure automations that send the right message at the right time per trigger, so that reminders, aftercare and recall run hands-off.
-The prototype's Comms → Automations screen (toggleAuto) configures the reminder/aftercare/recall sequences as toggleable automations. This is the management UI over PRD-07's sequence engine.
+Reminders, aftercare and recall shouldn't need a human to remember them. The Automations screen is the management UI over the sequence engine: each automation maps a trigger (booking, visit, interval) to a timed sequence of messages, and can be switched on/off and tuned per treatment type — so the right message goes out at the right time, hands-off. It drives the same engine as REMINDERS-CARE and RECALL.  The prototype's Comms → Automations screen (toggleAuto) configures the reminder/aftercare/recall sequences as toggleable automations. This is the management UI over PRD-07's sequence engine.
 
 ## How it works
 
@@ -46,7 +46,7 @@ _Prototype screen: prototype.html — Comms & growth (Inbox/Automations/Campaign
 ## Tasks (dev pickup)
 
 - [ ] **Automation model over Sequence (migrations)**
-  Model Automation (tenant_id + RLS): trigger, treatment_type, sequence_id, kind (transactional|marketing), enabled.
+  Model Automation (tenant_id + RLS (row-level security)): trigger, treatment_type, sequence_id, kind (transactional|marketing), enabled.
   - A thin wrapper over Sequence (REMINDERS-CARE) — does not duplicate the engine.
   - kind carries through to the consent gate.
 - [ ] **Automation toggle/edit API + engine wiring**

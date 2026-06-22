@@ -7,7 +7,7 @@
 ## Background
 
 As a security-conscious clinic, I want MFA for staff and step-up re-authentication on the most sensitive actions, so that high-risk operations can't be performed on a walk-up or hijacked session.
-Staff MFA is required; sensitive clinical/medicines/financial actions (e.g. prescribing, S4 custody changes, destruction, data export) may require step-up re-auth. Client MFA policy is an open question.
+Plainly: staff must use two-step login, and the riskiest actions (prescribing, controlled-medicine changes, destroying records, exporting data) ask for a fresh re-confirmation so they can't happen on a walked-up-to or hijacked session. It builds on the sign-in story. It is a targeted extra lock on the small set of truly sensitive actions, while leaving everyday work uninterrupted. Staff MFA (multi-factor authentication) is required; sensitive clinical/medicines/financial actions (e.g. prescribing, S4 (Schedule 4 prescription-only medicine) custody changes, destruction, data export) may require step-up (re-prompting for a second factor before an especially sensitive action) re-auth. Client MFA policy is an open question.
 
 ## How it works
 
@@ -51,8 +51,8 @@ Edge cases: step-up failure leaves the underlying record untouched (the sensitiv
 ## Tasks (dev pickup)
 
 - [ ] **Enforce staff MFA + model auth assurance/recency**
-  Ensure staff sign-in enforces MFA via Entra and capture AuthAssurance per session (mfa_at, stepup_at, methods). Provide the recency check the sensitive-action gate uses, with a window so one fresh step-up covers subsequent in-window actions. Record MFA/step-up events (AUTH-AUDIT).
+  Ensure staff sign-in enforces MFA (multi-factor authentication) via Entra ID (Microsoft's identity service) and capture AuthAssurance per session (mfa_at, stepup_at, methods). Provide the recency check the sensitive-action gate uses, with a window so one fresh step-up (re-prompting for a second factor before an especially sensitive action) covers subsequent in-window actions. Record MFA/step-up events (AUTH-AUDIT).
 - [ ] **Step-up gate on sensitive actions (configurable, not hard-coded)**
-  Define StepUpPolicy (action_key + max_age) and gate the sensitive actions — prescribing, S4 custody changes, destruction, data export — so an attempt without recent strong auth triggers a step-up re-auth; if not completed, the action is blocked with a clear reason and the underlying record is untouched. The gated-action set is configuration so it extends without code change. Step-up events audited.
+  Define StepUpPolicy (action_key + max_age) and gate the sensitive actions — prescribing, S4 (Schedule 4 prescription-only medicine) custody changes, destruction, data export — so an attempt without recent strong auth triggers a step-up (re-prompting for a second factor before an especially sensitive action) re-auth; if not completed, the action is blocked with a clear reason and the underlying record is untouched. The gated-action set is configuration so it extends without code change. Step-up events audited.
 - [ ] **Configurable client MFA policy**
-  Model client MFA as a per-clinic configuration (optional by default; can be required for sensitive client actions) to resolve PRD §11's open question, rather than hard-coding it. Wire the client sensitive-action paths to honour the tenant's setting.
+  Model client MFA (multi-factor authentication) as a per-clinic configuration (optional by default; can be required for sensitive client actions) to resolve PRD §11's open question, rather than hard-coding it. Wire the client sensitive-action paths to honour the tenant's setting.

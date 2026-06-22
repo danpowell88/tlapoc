@@ -5,7 +5,7 @@
 ## Background
 
 As a owner, I want to build custom reports and benchmark against other clinics, so that I can answer bespoke questions.
-A custom report builder, external BI warehouse and cross-clinic benchmarking are Phase 2+. Placeholder.
+This is a deliberately deferred placeholder (Phase 2+): a future custom report builder and external business-intelligence/benchmarking layer. v1 ships fixed dashboards plus register exports instead. It is captured now only so the reporting read-models (READ-MODELS) stay export-friendly — a builder would sit on those projections — meaning no architectural rework is needed when it is pulled into a sprint. No build in v1. A custom report builder, external BI warehouse and cross-clinic benchmarking are Phase 2+. Placeholder.
 
 ## How it works
 

@@ -7,7 +7,7 @@
 ## Background
 
 As a client, I want to book a consult/treatment online by choosing service, practitioner and time, so that I can book without calling the clinic.
-Clients self-book service → practitioner → slot online; injectable services only offer cleared RN/NP and the public page uses generic names (C4/C9).
+Online self-booking is the public, client-facing front door to Reception (PRD-02): it lets a client book themselves onto the same diary the front desk runs, reusing the multi-resource calendar (PRD-02/CALENDAR) availability engine and the credentialing from Foundations (PRD-01/CREDENTIALS). It sits early in the clinic-first flow but faces outward, so it is deliberately constrained: an injectable can only ever offer a cleared injector, prices and brand names for prescription medicines are withheld, and a completed booking hands straight off to the Intake/Consent step (PRD-03) that must be satisfied before any treatment can proceed.  Clients self-book service → practitioner → slot online; injectable services only offer cleared RN/NP and the public page uses generic names (C4/C9).
 
 ## How it works
 
@@ -53,10 +53,10 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 ## Tasks (dev pickup)
 
 - [ ] **Public booking API: scope-aware availability + create (source=online)**
-  Public (unauthenticated for browse, authenticated to commit) endpoints that reuse the CALENDAR availability engine — service list filtered to bookable services, then practitioners filtered to canInject for S4, then slots. Create endpoint sets source=online, runs the same server-side conflict/scope checks as the desk, and rejects an ineligible practitioner for an S4 service. Rate-limit + bot-protect the public surface.
+  Public (unauthenticated for browse, authenticated to commit) endpoints that reuse the CALENDAR availability engine — service list filtered to bookable services, then practitioners filtered to canInject for S4 (Schedule 4 prescription-only medicine), then slots. Create endpoint sets source=online, runs the same server-side conflict/scope checks as the desk, and rejects an ineligible practitioner for an S4 service. Rate-limit + bot-protect the public surface.
 - [ ] **PublicBookingConfig: generic names + withheld S4 prices (C9)**
-  Per-tenant config (generic_names, withhold_s4_prices, display_name_overrides) that the public service list reads. S4 services render with the generic display name, no price, and a 'Consultation required' tag; non-S4 may show price. This is a configuration policy (shared with PRD-07 BOOKING-PAGE), NOT an advertising linter. Server returns already-sanitised data so the client never receives an S4 brand/price.
+  Per-tenant config (generic_names, withhold_s4_prices, display_name_overrides) that the public service list reads. S4 (Schedule 4 prescription-only medicine) services render with the generic display name, no price, and a 'Consultation required' tag; non-S4 may show price. This is a configuration policy (shared with PRD-07 BOOKING-PAGE), NOT an advertising linter. Server returns already-sanitised data so the client never receives an S4 brand/price.
 - [ ] **Public booking widget UI: stepped flow + account + intake/consent handoff**
-  Embeddable/standalone widget: progress-stepped service → practitioner → slot → details/account → confirm. Generic service cards, 'Consultation required' chips on S4, 'pricing confirmed privately' copy. Account create captures DOB; under-18 sets the flag on the resulting Appointment for PRD-03. On confirm, hand off to the intake + consent send and show the 'kept private' assurance. Customise panel (brand colour/name/services) backs the embed config.
+  Embeddable/standalone widget: progress-stepped service → practitioner → slot → details/account → confirm. Generic service cards, 'Consultation required' chips on S4 (Schedule 4 prescription-only medicine), 'pricing confirmed privately' copy. Account create captures DOB; under-18 sets the flag on the resulting Appointment for PRD-03. On confirm, hand off to the intake + consent send and show the 'kept private' assurance. Customise panel (brand colour/name/services) backs the embed config.
 - [ ] **Under-18 flag propagation from booking**
   On create, derive under_18 from DOB and stamp it on the Appointment so PRD-03 COOLING-OFF/GATING can enforce the 7-day cooling-off + payment block. No cooling-off logic here — only the durable flag + a domain event so downstream gates can react. Guardian/contact capture is deferred to PRD-03 consent.

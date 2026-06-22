@@ -7,11 +7,11 @@
 ## Background
 
 As a client, I want to view my photos, memberships, rewards and balance and add a card-on-file, so that I can self-serve my care and payments.
-Clients view consented before/after photos, memberships, rewards/perks and balances, and add a card-on-file for autopay (REQ-APP-1).
+Plainly: the parts of the client app where someone reviews their own care, memberships, rewards and balance, and saves a card for membership billing. Where it fits: a late, outward-facing surface that reuses the modules built earlier (PRD-05 photos, PRD-06 payments/memberships/rewards). Clients view consented before/after photos, memberships, rewards/perks and balances, and add a card-on-file for autopay (REQ-APP-1).
 
 ## How it works
 
-My care/Rewards/Account tabs: visit history + consent-gated before/after photos (served via short-lived signed URLs, ADR-0009, never on device); points/perks/gift cards over PRD-06; profile, memberships, the client's own balance, and add/replace a tokenised card-on-file (Square) that feeds PRD-06 autopay.
+My care/Rewards/Account tabs: visit history + consent-gated before/after photos (served via short-lived signed URLs (temporary, expiring links to stored photos), ADR-0009, never on device); points/perks/gift cards over PRD-06; profile, memberships, the client's own balance, and add/replace a tokenised card-on-file (Square) that feeds PRD-06 autopay (automatic recurring membership billing).
 No one-off online checkout (v1 payments are in-person). Self-service for care history and payments.
 
 ## Requirements
@@ -51,4 +51,4 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 ## Tasks (dev pickup)
 
 - [ ] **Client app: My care / Rewards / Account + card-on-file**
-  My care tab: visit history list and a before/after gallery whose tiles each fetch a per-view signed URL (ADR-0009) and cache transiently; gate the gallery on image-use consent re-checked server-side so a withdrawal hides it immediately. Rewards tab over PRD-06 (points balance, perks, gift-card redeem). Account tab: profile, memberships, the client's own balance, and 'Update card on file' using the Square SDK to tokenise — store no PAN; post the token to PRD-06 for membership autopay. Do not expose any one-off online checkout.
+  My care tab: visit history list and a before/after gallery whose tiles each fetch a per-view signed URL (ADR-0009) and cache transiently; gate the gallery on image-use consent re-checked server-side so a withdrawal hides it immediately. Rewards tab over PRD-06 (points balance, perks, gift-card redeem). Account tab: profile, memberships, the client's own balance, and 'Update card on file' using the Square SDK (software development kit) to tokenise — store no PAN (the raw card number, never stored); post the token to PRD-06 for membership autopay. Do not expose any one-off online checkout.

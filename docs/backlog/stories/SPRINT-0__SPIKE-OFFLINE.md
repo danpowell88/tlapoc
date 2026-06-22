@@ -5,7 +5,7 @@
 ## Background
 
 As a mobile engineer, I want a spike proving an encrypted local queue for drafts/photos that syncs with no data loss and last-write-wins drafts, so that the offline-tolerant charting design is viable.
-Treatment rooms drop Wi-Fi; the provider app must queue notes/photos encrypted and sync without loss, with server-side finalisation (ADR-0015/0010). De-risk before PRD-05/09.
+Treatment rooms drop Wi-Fi, and the provider app must queue notes and photos without losing data, with finalisation done server-side — an encrypted local queue that syncs cleanly on reconnect (ADR-0015/0010), and photos that never persist on device beyond a transient sync cache (C14/ADR-0009). The spike proves this before PRD-05/09 depend on it.  Output feeds PRD-05/OFFLINE and PRD-09 provider-offline: a proven offline queue + sync approach with last-write-wins drafts and verified no-loss behaviour.
 
 ## How it works
 

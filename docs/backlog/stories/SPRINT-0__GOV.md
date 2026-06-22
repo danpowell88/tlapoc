@@ -7,7 +7,7 @@
 ## Background
 
 As a maintainer, I want protected main with required status checks and reviews, PR/issue templates, and protected prod deployments, so that quality gates can't be bypassed and changes are traceable.
-Branch protection, required checks, PR templates and environment protection rules keep the main branch deployable and reviewable.
+Quality gates only matter if they can't be bypassed. Branch protection with required checks and reviews, PR/issue templates, environment protection on production deploys, and CODEOWNERS routing for sensitive areas keep main deployable and every change traceable. GOV builds on CICD (whose pipeline result becomes the required check and whose environments get approval gates) and complements SEC-BASE/TEST (whose scan and coverage gates it makes required).  Branch protection, required checks, PR templates and environment protection rules keep the main branch deployable and reviewable.
 
 ## How it works
 

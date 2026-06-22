@@ -5,7 +5,7 @@
 ## Background
 
 As a owner of multiple sites, I want to switch between locations in one place, so that I run several clinics from one login.
-Switching between locations/clinics in one tenant. The data model is location-aware; the switching UX is deferred.
+As an owner of multiple sites, I want to switch between locations in one place, so that I run several clinics from one login.  Switching between locations/clinics in one tenant. The data model is location-aware; the switching UX is deferred.
 
 ## How it works
 

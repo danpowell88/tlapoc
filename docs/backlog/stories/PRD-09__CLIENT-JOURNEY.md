@@ -7,11 +7,11 @@
 ## Background
 
 As a client, I want to book, complete intake and e-sign consent entirely in the app, so that I'm ready for my visit without paperwork.
-A client can complete the full pre-visit journey entirely in-app (REQ-APP-1).
+Plainly: this is the client's phone app for getting ready before a visit — sign in, book, fill in the medical-history form and sign consent, all in one place. Where it fits: the client-facing Flutter apps come last in the build, after the staff web app and clinical core, reusing the booking (PRD-02) and intake/consent (PRD-03) modules already built. A client can complete the full pre-visit journey entirely in-app (REQ-APP-1).
 
 ## How it works
 
-The client completes the full pre-visit journey entirely in-app: sign in (social/email/OTP, tenant-scoped via Entra External ID) → book over PRD-02 → complete PRD-03 intake (medical history/BDD) → e-sign per-treatment consent incl. separate image-use consent, ending on 'All set'. The app is a surface over those modules; the treatment gate is enforced server-side.
+The client completes the full pre-visit journey entirely in-app: sign in (social/email/OTP (one-time passcode), tenant-scoped via Entra External ID) → book over PRD-02 → complete PRD-03 intake (medical history/BDD (body dysmorphic disorder screen)) → e-sign per-treatment consent incl. separate image-use consent, ending on 'All set'. The app is a surface over those modules; the treatment gate is enforced server-side.
 Home surfaces the next appointment and an amber 'Finish your pre-visit forms' nudge; reminders/recall (PRD-07) arrive as push + in-app notifications. Removes paperwork and gets clients ready before they arrive.
 
 ## Requirements

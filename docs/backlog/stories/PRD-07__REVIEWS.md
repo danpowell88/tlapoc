@@ -7,7 +7,7 @@
 ## Background
 
 As a owner, I want to request reviews and manage replies, with negative ones auto-raising follow-ups, so that reputation is managed and problems are caught early.
-The prototype's Growth → Reviews screen (scanReviews/reviewReply/reviewFlag/reviewAck) requests reviews, replies/acknowledges, and auto-raises follow-up jobs for negative reviews (≤3★) — with a staff caution against resharing an S4-endorsing review as a prohibited testimonial.
+Reputation matters, but in Australia a review feature is a compliance trap: review gating (only asking happy clients) is misleading conduct under the ACL, and reposting a review that endorses an S4 result becomes a prohibited testimonial (National Law s133, TGA Code). So this feature is built request-all (no sentiment gating), reply-yes, repost-S4-no, and it closes the loop by auto-raising follow-up jobs for negative reviews. (Phase 2 in scope, but with real mechanics — request, acknowledge, reply, flag, auto-detect.)  The prototype's Growth → Reviews screen (scanReviews/reviewReply/reviewFlag/reviewAck) requests reviews, replies/acknowledges, and auto-raises follow-up jobs for negative reviews (≤3★) — with a staff caution against resharing an S4-endorsing review as a prohibited testimonial.
 
 ## How it works
 
@@ -51,7 +51,7 @@ _Prototype screen: prototype.html — Comms & growth (Inbox/Automations/Campaign
 ## Tasks (dev pickup)
 
 - [ ] **Review model + complaint-keyword auto-detect (migrations)**
-  Model Review (tenant_id + RLS): source, rating, body, names_s4, status.
+  Model Review (tenant_id + RLS (row-level security)): source, rating, body, names_s4, status.
   - Request-all: review requests gate only on consent (C23), never on sentiment (ACL).
   - Auto-detect: rating <=3 OR a complaint-keyword match flags needs-follow-up.
   - No repost-as-marketing field/feature exists (prevents prohibited testimonials).
@@ -59,4 +59,4 @@ _Prototype screen: prototype.html — Comms & growth (Inbox/Automations/Campaign
   Server-side.
   - Send review requests to all eligible consented clients (no gating); reply/acknowledge endpoints; flag -> create a review Job (Follow-ups) assigned Lead Nurse (clinical/unhappy) or Reception.
   - Auto-detect: scan reviews, raise review Jobs for ≤3★/complaint matches idempotently.
-  - When a review names an S4 result, surface the caution (don't reshare — prohibited testimonial, C9/ADR-0032); the platform offers no repost action. KPI read-model (avg, count, response rate, needs-follow-up).
+  - When a review names an S4 (Schedule 4 prescription-only medicine) result, surface the caution (don't reshare — prohibited testimonial, C9/ADR-0032); the platform offers no repost action. KPI read-model (avg, count, response rate, needs-follow-up).

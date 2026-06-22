@@ -7,7 +7,7 @@
 ## Background
 
 As a owner, I want a single 'needs attention' digest of exceptions across the clinic, so that I can act on what matters without hunting.
-An owner digest of exceptions across the platform (REQ-RPT-5).
+This story gives the owner one 'what needs me today' list: a single feed that gathers exceptions from across the whole platform — expiring credentials, cold-chain breaches, stock discrepancies, data-quality findings, failed payments, overdue recalls — each with a one-click jump to fix it. It sits in the Reporting layer (step 6 of the clinic-first build): it is a pure projection over signals the other modules already produce (it owns no data of its own), so it comes after the compliance dashboards (COMPLIANCE-DASH) and the data-quality checks it surfaces. Money-bearing items stay owner-only; operational items show to the role that can act on them. An owner digest of exceptions across the platform (REQ-RPT-5).
 
 ## How it works
 

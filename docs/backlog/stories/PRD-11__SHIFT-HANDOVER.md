@@ -7,7 +7,7 @@
 ## Background
 
 As a staff member, I want to record and read shift-handover notes, so that the next shift knows outstanding tasks and issues.
-The prototype's back-office tablet includes a shift-handover panel so the team passes on what the next shift needs to know.
+Plainly: record and read shift-handover notes so the next shift knows the outstanding tasks and issues. Where it fits: part of the operational backbone (Facility/Ops) around the clinical core; shown alongside outstanding follow-ups (PRD-07) and surfaced on the back-office tablet (PRD-09). The prototype's back-office tablet includes a shift-handover panel so the team passes on what the next shift needs to know.
 
 ## How it works
 
@@ -46,7 +46,7 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 ## Tasks (dev pickup)
 
 - [ ] **ShiftHandover entity + add/read notes**
-  Model ShiftHandover (tenant_id, location_id, note, created_by, at) as an append-style log under RLS. Add/read notes, timestamped and attributed, tenant/location-scoped.
+  Model ShiftHandover (tenant_id, location_id, note, created_by, at) as an append-style log under RLS (row-level security, the database-level tenant isolation). Add/read notes, timestamped and attributed, tenant/location-scoped.
 - [ ] **Shift-handover panel on the back-office tablet**
   Handover panel on the back-office tablet (BACKOFFICE-TABLET): list recent entries; show the last handover note on the hub alongside the morning's attention items.
 - [ ] **Surface outstanding jobs/follow-ups alongside**

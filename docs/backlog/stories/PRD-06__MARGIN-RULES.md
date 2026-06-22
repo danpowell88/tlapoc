@@ -7,7 +7,7 @@
 ## Background
 
 As a owner, I want to set margin-aware reward rules with caps and eligible items and see reward-cost vs retention, so that rewards drive retention without eroding margin.
-Owners set value caps and eligible items; reporting shows reward-cost vs retention (REQ-MEMB-6). Reward comms respect advertising rules (C9/C23).
+What this is, plainly: giving the owner the dials to keep loyalty profitable — a cap on what a reward is worth, a curated list of which items it applies to, and a read on cost-vs-retention. Where it sits: it extends the rewards engine and ties into the owner-only pricing surface; it sits in the Payments layer after the clinical core. Owners set value caps and eligible items; reporting shows reward-cost vs retention (REQ-MEMB-6). Reward comms respect advertising rules (C9/C23).
 
 ## How it works
 
@@ -46,15 +46,15 @@ Communications guardrail: reward/incentive comms ride the PRD-07 channels but ar
 ## Tasks (dev pickup)
 
 - [ ] **Reward-rule caps + eligible-item curation (migrations)**
-  Extend RewardRule with value_cap and a curated eligible_items set (non-S4 only; reuse the S4-block constraint).
+  Extend RewardRule with value_cap and a curated eligible_items set (non-S4 — non-Schedule 4 — only; reuse the S4-block constraint).
   - Add the reward-economics read-model inputs (cost per redemption, attributed retention) for PRD-08.
   - All owner-gated.
 - [ ] **Cap enforcement + reward-cost vs retention reporting API**
   Server-side.
   - Enforce value_cap at redemption (clamp/refuse beyond cap); rule config owner-only.
   - Expose reward-cost vs retention read queries to PRD-08 reporting.
-  - Reward-comms send path checks marketing consent (C23) + suppression before sending and never emits a public S4 price/incentive.
+  - Reward-comms send path checks marketing consent (C23) + suppression before sending and never emits a public S4 (Schedule 4 prescription-only medicine) price/incentive.
 - [ ] **Enforce comms-consent + no-public-S4 invariant + audit**
   C9/C23 server-side invariants.
-  - Block a reward-comms send to a non-consented/suppressed contact; block any attempt to surface an S4 price/incentive on a public channel — clear blocked-action reason for the UI.
+  - Block a reward-comms send to a non-consented/suppressed contact; block any attempt to surface an S4 (Schedule 4 prescription-only medicine) price/incentive on a public channel — clear blocked-action reason for the UI.
   - Audit blocked sends and cap clamps (ADR-0010).

@@ -5,7 +5,7 @@
 ## Background
 
 As a engineer, I want a spike proving EF Core reliably sets the Postgres session tenant for RLS under connection pooling and async, so that the RLS baseline is built on a verified pattern.
-Setting the per-request tenant for RLS through EF Core's connection/session lifecycle has known sharp edges (pooling, background jobs). Prove it before building on it.
+Setting the per-request tenant for Postgres RLS through EF Core's connection/session lifecycle has known sharp edges — connection pooling can leak a session setting between requests, and async/await can cross connection boundaries. Because RLS is the platform's most important safety property (ADR-0002/0003), the pattern is proven in a spike before RLS builds on it.  Output feeds SPRINT-0/RLS directly: the verified session-context pattern, the audited bypass path for jobs, and the measured performance impact.
 
 ## How it works
 
@@ -39,14 +39,14 @@ Go/no-go bar: isolation provably holds under pooling + async, the bypass path wo
   Frame the pooling/async risk precisely and what proving it requires.
   - Questions: does the per-request session tenant leak across pooled connections; does it follow the connection through async; can a job bypass safely + audited; what's the performance cost?
   - Go/no-go bar: isolation holds under pooling + async, the audited bypass works, overhead acceptable.
-  - Time-box and the hand-off target (SPRINT-0/RLS).
+  - Time-box and the hand-off target (SPRINT-0/RLS (row-level security)).
 - [ ] **Build the throwaway prototype and stress the failure modes**
   Prove the pattern under the conditions that actually break it.
   - Exercise concurrent requests over a shared connection pool and assert no cross-request session-tenant leak; assert the setting survives async boundaries.
   - Demonstrate a background-job bypass path that's unreachable from request code and emits an audit event.
   - Measure the overhead of the per-request SET. Disposable code — measuring, not productionising.
 - [ ] **Write up the verified pattern, bypass path and perf, with go/no-go**
-  Document exactly what RLS should implement.
+  Document exactly what RLS (row-level security) should implement.
   - Where in the EF Core connection lifecycle the SET happens, how it's cleared on return, and how the job bypass is gated + audited.
   - The measured performance impact and the go/no-go.
   - ADR only if a real alternative/decision surfaced (e.g. against a particular pooling config).

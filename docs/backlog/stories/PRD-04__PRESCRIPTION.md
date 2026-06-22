@@ -7,7 +7,7 @@
 ## Background
 
 As a prescriber, I want to write an individual prescription for this patient tied to their consult, so that prescribing is lawful and patient-specific.
-An individual prescription per client per consult — never batch/standing-order, never async (text/email/online-only) (C2). Supports the designated RN prescriber identity.
+Plainly: this is the script — the prescriber's written authority for one named patient to receive a specific S4 (Schedule 4 prescription-only medicine) dose. It is the document an administering nurse acts against. Where it fits: it is the second link of the S4 compliance chain, immediately after the Consult (PRD-04/CONSULT) and before the administration gate (PRD-04/ADMIN-GATE). No valid script, no lawful dose — every S4 administration downstream must point back to one of these.  An individual prescription per client per consult — never batch/standing-order, never async (text/email/online-only) (C2). Supports the designated RN prescriber identity.
 
 ## How it works
 

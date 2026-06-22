@@ -7,7 +7,7 @@
 ## Background
 
 As a front desk, I want a recall worklist of clients due to rebook and automatic recall nudges at the treatment interval, so that clients return on cadence and the book stays full.
-Recare at the treatment interval (toxin ~12 weeks) + unbooked-rebook prompts, with a recall worklist for front desk (REQ-NOTIF-3).
+Toxin wears off at a predictable cadence (~12 weeks), and treatment plans recommend follow-up sessions. If no one nudges the client and no one watches the gap, the booking quietly never happens. Recall closes that gap: at the configured interval a due client gets an automatic nudge, and front desk works a recall/rebook worklist of everyone owed a return. It keeps the book full and clients on cadence, tying treatment plans (PRD-05) to rebooking (PRD-06).  Recare at the treatment interval (toxin ~12 weeks) + unbooked-rebook prompts, with a recall worklist for front desk (REQ-NOTIF-3).
 
 ## How it works
 
@@ -44,7 +44,7 @@ Recall tasks merge into the unified Follow-ups queue as 'Recall' jobs (e.g. 'Reb
 ## Tasks (dev pickup)
 
 - [ ] **RecallTask model + interval/unbooked-plan generation (migrations)**
-  Model RecallTask (tenant_id + RLS): client_id, due_at, reason (interval|unbooked_plan), status, last_nudge_at.
+  Model RecallTask (tenant_id + RLS (row-level security)): client_id, due_at, reason (interval|unbooked_plan), status, last_nudge_at.
   - Configurable interval per treatment type (toxin ~12 wks default).
   - A RecallTask projects into the Job queue (FOLLOWUPS) as a 'recall' Job.
 - [ ] **Recall scheduler + nudge + worklist API**

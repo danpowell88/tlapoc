@@ -5,7 +5,7 @@
 ## Background
 
 As a front desk, I want native POS hardware and a kiosk check-in mode, so that the desk and waiting room are smoother.
-Native POS hardware integration and a tablet kiosk mode (PRD-06/09 non-goals).
+As front desk, I want native POS hardware and a kiosk check-in mode, so that the desk and waiting room are smoother.  Native POS hardware integration and a tablet kiosk mode (PRD-06/09 non-goals).
 
 ## How it works
 
@@ -37,4 +37,4 @@ Future â€” not built in the prototype (some shown as concept cards in Settings â
 ## Tasks (dev pickup)
 
 - [ ] **Placeholder: native POS hardware + native kiosk mode (Phase 2+)**
-  Deferred. Dedicated POS hardware integration + a hardened native kiosk mode beyond v1's Square card-present and the web self-check-in surface (CHECKIN-KIOSK). Not built in v1.
+  Deferred. Dedicated POS (point of sale) hardware integration + a hardened native kiosk mode beyond v1's Square card-present and the web self-check-in surface (CHECKIN-KIOSK). Not built in v1.

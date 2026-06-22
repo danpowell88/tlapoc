@@ -7,7 +7,7 @@
 ## Background
 
 As a backend developer, I want a media service for encrypted AU-resident blob storage with signed-URL upload/download, so that photos/documents are stored and served securely and consistently.
-Clinical photos and documents must be stored centrally in AU, served via short-lived signed URLs, and never persisted on personal devices (C14/ADR-0009). A shared media service underpins PRD-05 photos and PRD-09 capture.
+Clinical photos and documents must be stored centrally in Australia, served only via short-lived signed URLs, and never persisted on personal devices (C14, C21, ADR-0009/0016 — REQ-CLIN-3, REQ-SEC-2). A shared media service in Sprint 0 underpins PRD-05 photos and PRD-09 capture so each doesn't reinvent secure media handling.  MEDIA-STORAGE builds on IAC (the AU-resident, encrypted Blob storage) and API (auth/tenant context, consent/capability checks, audit). SPIKE-OFFLINE validated the device side (transient cache, purge-after-sync) that uploads through this service.
 
 ## How it works
 

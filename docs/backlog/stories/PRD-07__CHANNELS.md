@@ -5,7 +5,7 @@
 ## Background
 
 As a developer, I want a notification abstraction over SMS, email and push with per-tenant templates, so that all messaging is consistent and provider-swappable.
-An INotifier port over an AU SMS provider + email + app push, with per-tenant templates (REQ-NOTIF-1, ADR-0012).
+Every reminder, aftercare tip, recall nudge, dunning notice and marketing message leaves the platform through one delivery layer. Rather than scatter SMS/email/push SDK calls through the codebase, this story defines an INotifier port so the providers stay swappable (AU SMS, email, app push) and every send is rendered from a per-tenant template and logged to the client's comms history. It is the shared seam the whole comms epic — and PRD-06's reward/dunning comms — sends through.  An INotifier port over an AU SMS provider + email + app push, with per-tenant templates (REQ-NOTIF-1, ADR-0012).
 
 ## How it works
 
@@ -46,7 +46,7 @@ Every send writes a NotificationLog row (channel, template_key, status, sent_at)
 ## Tasks (dev pickup)
 
 - [ ] **INotifier port + MessageTemplate/NotificationLog model (migrations)**
-  Define the INotifier port and model MessageTemplate + NotificationLog (tenant_id + RLS).
+  Define the INotifier port and model MessageTemplate + NotificationLog (tenant_id + RLS (row-level security)).
   - Port: send(channel, recipient, templateKey, variables) returning a queued NotificationLog with a provider_ref.
   - MessageTemplate per tenant per channel with named variables; render step substitutes variables safely.
   - NotificationLog status lifecycle queued -> sent -> delivered|failed, updated by provider callbacks; joined to the client for the comms history.

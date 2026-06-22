@@ -7,7 +7,7 @@
 ## Background
 
 As a owner / compliance officer, I want to publish policies and track staff sign-off, so that I can evidence that the team has read current procedures.
-The prototype's Governance → Policies screen (signPolicy) tracks staff acknowledgement/sign-off of clinic policies and procedures, part of the Governance hub.
+This story tracks that every staff member has read and signed the current version of each clinic policy — infection control, consent, emergency/complication, privacy — so the clinic can prove the team is up to date. It sits in the Reporting/Governance layer (step 6 of the clinic-first build): the sign-off status is one of the categories in the inspection-readiness pack (INSPECTION-PACK), so it is built alongside it, and it feeds the 'Unsigned policies' count on the Governance Overview. Governance work, no money figures. The prototype's Governance → Policies screen (signPolicy) tracks staff acknowledgement/sign-off of clinic policies and procedures, part of the Governance hub.
 
 ## How it works
 
@@ -56,7 +56,7 @@ _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Po
 ## Tasks (dev pickup)
 
 - [ ] **Data model & migrations: Policy + PolicySignoff**
-  Add Policy (versioned, body, target roles, updated_at) and PolicySignoff (per policy_version + staff_id + signed_at). Migrations + RLS/tenancy. Publishing a new version is a new Policy version row that supersedes the prior and invalidates prior sign-offs for the unsigned-count computation.
+  Add Policy (versioned, body, target roles, updated_at) and PolicySignoff (per policy_version + staff_id + signed_at). Migrations + RLS (row-level security) (Row-Level Security)/tenancy. Publishing a new version is a new Policy version row that supersedes the prior and invalidates prior sign-offs for the unsigned-count computation.
 - [ ] **Backend: versioning, publish-resets-signoff, outstanding tracking**
   Implement publish (new version) → reset sign-off for that policy and raise a re-acknowledgement Job per relevant staff member (ADR-0023). Compute the signed-count (e.g. 5/6) and the unsigned-policies count for the Overview tile. signPolicy records the acting staff against the current version with a timestamp. Capability-gate to the compliance concern.
 - [ ] **Enforce audit on sign-off**

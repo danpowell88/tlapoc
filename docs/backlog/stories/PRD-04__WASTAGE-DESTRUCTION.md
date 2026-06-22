@@ -7,7 +7,7 @@
 ## Background
 
 As a owner, I want to record wastage, disposal and destruction (including partial vials) with certificates, so that we evidence lawful disposal of S4 medicine.
-Wastage and destruction (incl. partial vials) must be recorded via a licensed/RUM pathway with certificates (C16).
+Plainly: this records medicine that is thrown away or destroyed — a leftover part-vial after a treatment, or expired/spoiled stock — and proves it was disposed of lawfully with a certificate. Where it fits: it closes the medicines loop in the moat alongside reconciliation (PRD-04/VIAL-RECON): every unit received is accounted for as administered, wasted or destroyed. It sits on secure storage (PRD-04/CUSTODY-STORAGE) and feeds the compliance dashboard and audit pack (PRD-08).  Wastage and destruction (incl. partial vials) must be recorded via a licensed/RUM pathway with certificates (C16).
 
 ## How it works
 

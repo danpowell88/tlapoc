@@ -7,7 +7,7 @@
 ## Background
 
 As a front desk, I want a guided booking wizard to create an appointment in a few steps, so that I can book clients quickly at the desk or over the phone.
-The prototype's front-desk 'New booking' wizard (service select, slot pick, client attach, confirm) is the staff counterpart to client self-booking, and the entry point most bookings flow through.
+Built on the calendar (PRD-02/CALENDAR) availability engine and the service catalogue (PRD-02/SERVICE-CATALOGUE), the staff booking wizard is the desk and phone counterpart to online self-booking and the path most bookings in Reception (PRD-02) flow through, applying the same scope rules at the desk as online. In the flow it is front-of-house entry to a visit: a guided service → practitioner → time → client → confirm that creates the booking and kicks off the Intake/Consent send (PRD-03) which must be complete before treatment can start. As front desk, I want a guided booking wizard to create an appointment in a few steps, so that I can book clients quickly at the desk or over the phone.  The prototype's front-desk 'New booking' wizard (service select, slot pick, client attach, confirm) is the staff counterpart to client self-booking, and the entry point most bookings flow through.
 
 ## How it works
 
@@ -51,7 +51,7 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 ## Tasks (dev pickup)
 
 - [ ] **Wizard stepper UI (service→practitioner→time→client→confirm)**
-  Angular 5-step wizard with progress stepper. Step 1 service cards (duration/price/schedule, generic names). Step 2 practitioner cards filtered by scope for S4 (+ 'Next available' = soonest eligible). Step 3 slot grid from the availability engine with taken slots disabled/struck-through. Back/Continue nav; state held until confirm.
+  Angular 5-step wizard with progress stepper. Step 1 service cards (duration/price/schedule, generic names). Step 2 practitioner cards filtered by scope for S4 (Schedule 4 prescription-only medicine) (+ 'Next available' = soonest eligible). Step 3 slot grid from the availability engine with taken slots disabled/struck-through. Back/Continue nav; state held until confirm.
 - [ ] **Client step: attach existing or create inline + under-18 flag**
   Step 4: search/attach an existing (returning) client or create one inline (new) capturing DOB; toggle Returning/New changes the intake hint (returning=quick re-screen; new=full intake+history+BDD+consent). Derive + stamp under_18. Capture reason/notes. Checkbox 'Send intake + consent links now (treatment can't start until complete)' wires to the PRD-03 send.
 - [ ] **Confirm step: policy display + create (source=desk) + reminder schedule**

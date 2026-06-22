@@ -7,7 +7,7 @@
 ## Background
 
 As a client, I want timely reminders I can confirm/decline and pre-/after-care instructions for my treatment, so that I'm prepared and cared for around my visit.
-Appointment reminders/confirmations plus pre-care and aftercare sequences (multi-touch, timed per treatment type) (REQ-NOTIF-2). Transactional messages are exempt from opt-in.
+Two jobs that keep clients prepared and cared-for: appointment reminders/confirmations, and pre-care + aftercare instruction sequences timed to each treatment type. A reminder a client can confirm or decline keeps the book accurate; a day-0 and day-3 aftercare touch after a treatment reduces worry and complications. These are transactional messages — exempt from marketing opt-in, but they still avoid S4 references.  Appointment reminders/confirmations plus pre-care and aftercare sequences (multi-touch, timed per treatment type) (REQ-NOTIF-2). Transactional messages are exempt from opt-in.
 
 ## How it works
 
@@ -46,7 +46,7 @@ Pre-care (e.g. avoid blood thinners before toxin) and aftercare (day-0 + day-3 c
 ## Tasks (dev pickup)
 
 - [ ] **Sequence/SequenceRun model (migrations)**
-  Model Sequence + SequenceRun (tenant_id + RLS).
+  Model Sequence + SequenceRun (tenant_id + RLS (row-level security)).
   - Sequence: trigger (booking|visit), treatment_type, kind (transactional|marketing), ordered steps {offset, channel, template_key}.
   - SequenceRun: one per client+appointment with per-step status + sent_at.
   - kind distinguishes the opt-in-exempt transactional path from the consented marketing path.
@@ -54,5 +54,5 @@ Pre-care (e.g. avoid blood thinners before toxin) and aftercare (day-0 + day-3 c
   Server-side engine (shared with RECALL + AUTOMATIONS).
   - On a trigger (booking made / visit completed), start a SequenceRun and schedule steps at their offsets; dispatch each via INotifier at its time.
   - Reminder confirm/decline updates the Appointment (PRD-02); reschedule link routes to booking.
-  - Transactional sequences send regardless of marketing consent; marketing sequences gate on consent + suppression (MARKETING-CONSENT). Either way, content must not name/price S4 (C9).
+  - Transactional sequences send regardless of marketing consent; marketing sequences gate on consent + suppression (MARKETING-CONSENT). Either way, content must not name/price S4 (Schedule 4 prescription-only medicine) (C9).
   - Endpoints to define sequences + query runs; log every send.

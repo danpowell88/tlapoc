@@ -7,7 +7,7 @@
 ## Background
 
 As a client, I want to create an account and sign in with social login, email+password, or a one-time code, so that I can access booking, intake and my records easily and securely.
-Clients create accounts with Google/Apple, email+password, or email/SMS OTP via Entra External ID (CIAM).
+Sprint 0 (setup), client sign-in: this is the counterpart to staff sign-in for the people the clinic serves. Clients create accounts and log in with Google/Apple, an email and password, or a one-time code sent by email or text — whatever is easiest for them. Client logins are deliberately kept entirely separate from staff logins, so a client can never be mistaken for staff. It builds on the SPIKE-AUTH investigation and feeds the client records and sign-in UI built later.  Clients create accounts with Google/Apple, email+password, or email/SMS OTP via Entra External ID (CIAM).
 
 ## How it works
 
@@ -40,7 +40,7 @@ Because handles and contact details are personal data (C21), the identities crea
   Stand up CIAM sign-up/sign-in for clients across all three methods, tenant-scoped and distinct from staff.
   - External ID tenant with three user flows: social (Google/Apple), local (email+password), and email/SMS OTP, each with sign-up, sign-in and account recovery (reset / OTP resend).
   - Client Flutter app and public web complete each method.
-  - Client tokens carry tenant scope and a stable client identity in a namespace separate from staff; the API validates them and resolves tenant context for RLS.
+  - Client tokens carry tenant scope and a stable client identity in a namespace separate from staff; the API validates them and resolves tenant context for RLS (row-level security).
   - Social/OTP redirect + provider credentials sourced per environment from config/secrets (SECRETS).
 - [ ] **Document client auth flows, recovery and the client-vs-staff identity separation**
   Write the client-identity reference covering the separation that matters for safety and SaaS.

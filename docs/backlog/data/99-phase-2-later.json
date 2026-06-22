@@ -17,7 +17,7 @@
     {
       "key": "MULTI-LOCATION",
       "title": "Multi-location switching UI (placeholder)",
-      "context": "Switching between locations/clinics in one tenant. The data model is location-aware; the switching UX is deferred.",
+      "context": "As an owner of multiple sites, I want to switch between locations in one place, so that I run several clinics from one login.  Switching between locations/clinics in one tenant. The data model is location-aware; the switching UX is deferred.",
       "as_a": "owner of multiple sites",
       "i_want": "to switch between locations in one place",
       "so_that": "I run several clinics from one login",
@@ -57,7 +57,7 @@
     {
       "key": "SAAS-ONBOARDING",
       "title": "SaaS onboarding & billing UI (placeholder)",
-      "context": "Self-service tenant sign-up, subscription billing and per-tenant Entra federation for selling the platform as SaaS (PRD-01 non-goal; Phase 3).",
+      "context": "Plainly: this would let a brand-new clinic sign itself up and pay a subscription with no manual setup by our team. Where it fits: a deferred Phase 3 placeholder — the platform is multi-tenant (each clinic isolated in shared infrastructure) from day one, but v1 onboards this single clinic by hand, so self-service sign-up only matters once we sell the platform to other clinics.  Placeholder (Phase 3): self-service tenant sign-up, subscription billing and per-tenant Entra (Microsoft identity platform) federation to sell the platform as SaaS (software-as-a-service) (a PRD-01 non-goal).",
       "as_a": "prospective clinic",
       "i_want": "to sign up for the platform myself and pay a subscription",
       "so_that": "onboarding doesn't need manual provisioning",
@@ -98,7 +98,7 @@
     {
       "key": "WHITE-LABEL",
       "title": "Per-tenant white-label theming (placeholder)",
-      "context": "Per-tenant branding/theming of web and apps (PRD-01 non-goal).",
+      "context": "Plainly: this would let each clinic skin the web and mobile apps with its own logo, colours and name. Where it fits: a deferred Phase 2+ placeholder — v1 ships one clinic's brand, so per-tenant theming waits until there are multiple clinics to brand.  Placeholder (Phase 2+): per-tenant branding/theming of web and apps (a PRD-01 non-goal).",
       "as_a": "clinic owner",
       "i_want": "to brand the platform with my clinic's look",
       "so_that": "clients see my brand",
@@ -138,7 +138,7 @@
     {
       "key": "PUBLIC-API",
       "title": "Public API & webhooks (placeholder)",
-      "context": "Outbound/inbound public API + webhooks for third parties (PRD-10 deferred; Phase 3).",
+      "context": "As an integrator, I want a public API and webhooks, so that third-party tools can integrate.  Outbound/inbound public API + webhooks for third parties (PRD-10 deferred; Phase 3).",
       "as_a": "integrator",
       "i_want": "a public API and webhooks",
       "so_that": "third-party tools can integrate",
@@ -178,7 +178,7 @@
     {
       "key": "NATIVE-POS-KIOSK",
       "title": "Native POS hardware & tablet kiosk mode (placeholder)",
-      "context": "Native POS hardware integration and a tablet kiosk mode (PRD-06/09 non-goals).",
+      "context": "As front desk, I want native POS hardware and a kiosk check-in mode, so that the desk and waiting room are smoother.  Native POS hardware integration and a tablet kiosk mode (PRD-06/09 non-goals).",
       "as_a": "front desk",
       "i_want": "native POS hardware and a kiosk check-in mode",
       "so_that": "the desk and waiting room are smoother",
@@ -212,7 +212,7 @@
       "tasks": [
         {
           "title": "Placeholder: native POS hardware + native kiosk mode (Phase 2+)",
-          "note": "Deferred. Dedicated POS hardware integration + a hardened native kiosk mode beyond v1's Square card-present and the web self-check-in surface (CHECKIN-KIOSK). Not built in v1."
+          "note": "Deferred. Dedicated POS (point of sale) hardware integration + a hardened native kiosk mode beyond v1's Square card-present and the web self-check-in surface (CHECKIN-KIOSK). Not built in v1."
         }
       ]
     }

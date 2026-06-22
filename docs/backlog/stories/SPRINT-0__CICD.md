@@ -7,7 +7,7 @@
 ## Background
 
 As a developer, I want pipelines that build and test the API, web and apps on every PR and deploy to dev/staging on merge, so that broken code is caught early and releases are repeatable.
-Continuous build/test on every PR and automated deploys to environments prevent integration drift and make the compliance posture (tests, scans) enforceable.
+Sprint 0, the setup phase before any clinical feature: this story builds the automated pipelines that compile, test and deploy the code every time someone proposes a change — so problems are caught before they reach the shared codebase, and releases are repeatable rather than hand-cranked. It sits right after the repo scaffolding (REPO) and is the backbone almost everything else plugs into: the security scans, the test-coverage gate and the merge rules all attach here.  Continuous build/test on every PR and automated deploys to environments prevent integration drift and make the compliance posture (tests, scans) enforceable.
 
 ## How it works
 

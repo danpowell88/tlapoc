@@ -7,11 +7,11 @@
 ## Background
 
 As a injector, I want the app to keep working offline and clearly show my sync state, so that treatment-room Wi-Fi drops never cost me data.
-Charting/photos queue locally encrypted and sync on reconnect with no loss; a persistent sync/offline indicator shows queued count + last sync (REQ-APP-3, ADR-0015).
+Plainly: the app keeps working when the treatment room's Wi-Fi drops — charting and photos queue on the device and upload on reconnect, with a badge showing what's pending. Where it fits: a late provider-app capability built on the offline-charting module (PRD-05) and the Sprint 0 connectivity spike. Charting/photos queue locally encrypted and sync on reconnect with no loss; a persistent sync/offline indicator shows queued count + last sync (REQ-APP-3, ADR-0015).
 
 ## How it works
 
-The provider app keeps working offline: charting edits and captured photos queue to an encrypted on-device store and sync on reconnect with no loss (ADR-0015, built on SPIKE-OFFLINE + PRD-05/OFFLINE). Drafts reconcile last-write-wins; photos upload via signed URLs on reconnect (bytes held encrypted locally meanwhile, consistent with C14). A persistent indicator shows queued count + last-sync; finalise is disabled until everything has synced.
+The provider app keeps working offline: charting edits and captured photos queue to an encrypted on-device store and sync on reconnect with no loss (ADR-0015, built on SPIKE-OFFLINE + PRD-05/OFFLINE). Drafts reconcile last-write-wins (the most recent edit wins when a device reconnects); photos upload via signed URLs (temporary, expiring links to stored photos) on reconnect (bytes held encrypted locally meanwhile, consistent with C14). A persistent indicator shows queued count + last-sync; finalise is disabled until everything has synced.
 Treatment-room Wi-Fi drops never cost the clinician data.
 
 ## Requirements
@@ -52,6 +52,6 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 ## Tasks (dev pickup)
 
 - [ ] **Provider app: encrypted offline queue + sync engine**
-  Encrypted on-device store (encrypted box / SQLCipher, ADR-0015/SPIKE-OFFLINE) holding draft chart edits and pending photo bytes while offline. Sync engine drains the queue on reconnect with no data loss; drafts reconcile last-write-wins; pending photos upload via signed URLs once connectivity returns (bytes held encrypted locally meanwhile, consistent with C14 — never left as plain device media).
+  Encrypted on-device store (encrypted box / SQLCipher (encrypted SQLite), ADR-0015/SPIKE-OFFLINE) holding draft chart edits and pending photo bytes while offline. Sync engine drains the queue on reconnect with no data loss; drafts reconcile last-write-wins; pending photos upload via signed URLs once connectivity returns (bytes held encrypted locally meanwhile, consistent with C14 — never left as plain device media).
 - [ ] **Provider app: persistent sync/offline indicator + finalise gating**
   Always-visible indicator subscribing to queue depth and last-sync time (prototype's 'Connected to the treatment room' banner flips to an offline/queued state with counts). Disable finalise whenever the queue is non-empty so a chart can't be sealed with edits/photos still pending — protecting the server-side immutability guarantee.

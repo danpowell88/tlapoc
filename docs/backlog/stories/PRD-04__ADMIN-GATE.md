@@ -7,7 +7,7 @@
 ## Background
 
 As a RN, I want to administer S4 only against a valid unconsumed script for this client, recording product, units, depth, site and batch-lot/expiry, so that every dose is lawful, traceable and tamper-proof.
-An RN can only administer S4 against a valid, unconsumed prescription for that same client, with current consent and a selected in-date lot; the record is immutable once saved (C8).
+Plainly: this is the moment the dose is actually given, and the single rule that decides whether it is allowed to be given at all. A nurse may only administer an S4 (Schedule 4 prescription-only medicine) when every earlier safeguard is in place, and the record of the dose can never be edited afterwards. Where it fits: this is the keystone of the S4 compliance chain — it consumes the consult (PRD-04/CONSULT), the individual prescription (PRD-04/PRESCRIPTION), valid consent (PRD-03) and lawfully-held in-date stock (PRD-04/STOCK-RECEIVE), and produces the immutable register entry that powers recall (PRD-04/RECALL-LOOKUP) and reconciliation (PRD-04/VIAL-RECON). It is also the precondition for charting (PRD-05).  An RN can only administer S4 against a valid, unconsumed prescription for that same client, with current consent and a selected in-date lot; the record is immutable once saved (C8).
 
 ## How it works
 

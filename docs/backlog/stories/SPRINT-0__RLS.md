@@ -7,7 +7,7 @@
 ## Background
 
 As a platform engineer, I want Postgres RLS policies keyed on tenant_id, with EF Core setting the session tenant context on every request, so that a query can never return another tenant's rows, even on a developer mistake.
-Tenant isolation is enforced in the database via RLS, with the API setting tenant context per request (ADR-0003). This is the single most important safety property of the data layer.
+Sprint 0 (setup), and the most safety-critical data story: it makes the database itself refuse to return one clinic's records to another, so a coding mistake can never leak data across tenants. The clinic (tenant) for each request is set just before any query runs. It builds directly on the DB baseline (the tenant_id column) and on the SPIKE-RLS investigation that proved the technique is safe; in turn the API and the background-jobs framework rely on the per-request tenant context and the audited bypass path defined here.  Tenant isolation is enforced in the database via RLS, with the API setting tenant context per request (ADR-0003). This is the single most important safety property of the data layer.
 
 ## How it works
 

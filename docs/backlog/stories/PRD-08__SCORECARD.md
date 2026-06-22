@@ -7,7 +7,7 @@
 ## Background
 
 As a owner, I want a per-practitioner scorecard, so that I can coach the team and see who drives retention.
-The prototype's Reports → Scorecard view shows per-practitioner performance (revenue, retention, rebooking, utilisation, outcomes).
+This story is the per-practitioner view: revenue, retention, rebooking, utilisation and outcome signals for each clinician, so the owner can coach the team and see who actually drives retention — not just who bills the most. It sits in the Reporting layer (step 6 of the clinic-first build): it is the business dashboards (BUSINESS-DASH) sliced by practitioner, so it depends on that story. Revenue figures stay owner-only; the non-money signals stay visible to managers. The prototype's Reports → Scorecard view shows per-practitioner performance (revenue, retention, rebooking, utilisation, outcomes).
 
 ## How it works
 

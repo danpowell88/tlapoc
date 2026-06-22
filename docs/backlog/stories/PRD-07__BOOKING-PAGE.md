@@ -7,7 +7,7 @@
 ## Background
 
 As a owner, I want my public booking page to use generic service names and withhold S4 prices automatically, so that we don't reference S4 in public advertising.
-The public booking page uses generic service names and withholds S4 prices by configuration (catalog schedule flag), with no advertising linter (REQ-NOTIF-12, C9).
+The public booking page is the one outward-facing surface the platform owns, so it must not breach the advertising rules: it uses generic service names and withholds S4 prices automatically, driven by configuration off the catalog schedule flag — not by an automated advertising linter (which was withdrawn from scope, ADR-0034).  Everything else about advertising compliance is the clinic's responsibility in its external tools.
 
 ## How it works
 
@@ -55,14 +55,14 @@ _Prototype screen: prototype.html — Comms & growth (Inbox/Automations/Campaign
   - Shared with PRD-02 ONLINE-BOOK; the catalog Service.schedule flag (PRD-04/ADR-0014) is the source of truth for which services are affected.
 - [ ] **Public booking-page render: schedule-driven generic names + withheld prices**
   Server-side render of the public booking page/feed.
-  - For each service, if S4-flagged AND config on: emit a generic name, suppress price ('Pricing discussed at consult'), suppress S4 imagery; non-S4 services render name + price normally.
+  - For each service, if S4-flagged AND config on: emit a generic name, suppress price ('Pricing discussed at consult'), suppress S4 (Schedule 4 prescription-only medicine) imagery; non-S4 services render name + price normally.
   - Applies to the page and its SEO metadata. Configuration-driven, not a linter — driven entirely by the schedule flag + the toggles.
 - [ ] **Enforce no-public-S4 as a server-side invariant + audit**
   C9 invariant on the public surface the app owns.
-  - The public render must never expose an S4 service's brand/clinical name/price/imagery when the policy is on; assert this server-side so a UI/client change can't leak it.
+  - The public render must never expose an S4 (Schedule 4 prescription-only medicine) service's brand/clinical name/price/imagery when the policy is on; assert this server-side so a UI/client change can't leak it.
   - Audit config changes (ADR-0010). (No advertising linter — external advertising is clinic-owned, ADR-0034.)
 - [ ] **Settings -> Public booking page web UI + live preview**
   Angular per the screenshot.
-  - Public-booking-widget panel with the policy toggles (generic names / withhold S4 prices / no S4 imagery) and SEO metadata fields.
+  - Public-booking-widget panel with the policy toggles (generic names / withhold S4 (Schedule 4 prescription-only medicine) prices / no S4 imagery) and SEO metadata fields.
   - Live Preview showing how S4 vs non-S4 services render (price withheld for S4).
   - Owner/admin gated; loading/empty/error states.

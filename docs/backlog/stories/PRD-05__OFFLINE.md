@@ -7,7 +7,7 @@
 ## Background
 
 As a injector, I want my notes and photos to queue locally and sync when back online if the room loses Wi-Fi, so that I never lose work mid-treatment.
-If Wi-Fi drops mid-visit, notes/photos queue locally (encrypted) and sync on reconnect with no loss; finalisation is server-side (REQ-CLIN/APP, ADR-0015).
+Offline queue and sync for room-side charting: if a treatment room loses Wi-Fi, notes and photos queue locally (encrypted) and sync cleanly on reconnect with no loss. A reliability capability under PRD-05 charting on the clinic-first spine; the room-side surface ships later with the provider app (PRD-09). It depends on the offline spike (SPRINT-0/SPIKE-OFFLINE) and immutable finalisation (IMMUTABILITY) — finalisation is server-side, so a draft must sync before it can be finalised — and owns the sync/conflict contract. If Wi-Fi drops mid-visit, notes/photos queue locally (encrypted) and sync on reconnect with no loss; finalisation is server-side (REQ-CLIN/APP, ADR-0015).
 
 ## How it works
 

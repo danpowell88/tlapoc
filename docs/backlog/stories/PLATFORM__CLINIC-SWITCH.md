@@ -7,12 +7,12 @@
 ## Background
 
 As a owner / multi-site staff, I want to switch the active clinic/location, so that I work in the right location's data.
-The prototype's sidebar switches between clinics/locations (Brisbane, Gold Coast, a locum site). The in-product switcher is demonstrated; full multi-location data depth is PHASE-2/MULTI-LOCATION.
+Plainly: a switcher at the top of the menu that lets multi-site staff choose which clinic/location they are working in, so they see the right location's data. It is built on tenancy. This is the in-product switcher the prototype demonstrates; the deeper multi-site features come later in Phase 2+. The prototype's sidebar switches between clinics/locations (Brisbane, Gold Coast, a locum site). The in-product switcher is demonstrated; full multi-location data depth is PHASE-2/MULTI-LOCATION.
 
 ## How it works
 
 A switcher lets multi-site owners/staff choose the active clinic/location they're working in. The prototype puts it at the top of the sidebar (setClinic) listing The Lounge — Brisbane, The Lounge — Gold Coast and Skin & Co (locum); selecting one sets the active location (updating the clinic name/location/badge in the shell).
-It lists only the locations the user can access, and sets an active-location context on the session. Data shown is then scoped to the active location within the tenant (RLS tenant_id + location_id) — the diary, clients, stock and reports reflect that one location — and the active location is reflected in audit and reporting so 'where did this happen' is recorded.
+It lists only the locations the user can access, and sets an active-location context on the session. Data shown is then scoped to the active location within the tenant (RLS (row-level security) tenant_id + location_id) — the diary, clients, stock and reports reflect that one location — and the active location is reflected in audit and reporting so 'where did this happen' is recorded.
 This is the in-product switcher demonstrated by the prototype; deeper multi-site data depth (cross-location reporting, locum roster, per-location config) builds on PHASE-2/MULTI-LOCATION. v1 is: pick a location, work in its data, have audit/reporting know which one.
 Edge cases: a single-location user sees the location label but no real switching; switching location re-scopes the current views (and closes any location-specific in-progress context cleanly); a user without access to a location never sees it in the list.
 
@@ -48,4 +48,4 @@ _Prototype screen: prototype.html — sidebar clinic switcher._
 ## Tasks (dev pickup)
 
 - [ ] **Active-location context + scoped switcher**
-  Build the sidebar clinic/location switcher (dashboard.png) listing only the Locations the user can access (TENANT) and setting an active location_id on the session. Scope data to the active location within the tenant (RLS tenant + location) so diary/clients/stock/reports reflect it, and stamp the active location on audit + reporting. Switching re-scopes current views cleanly; single-location users see the label without a real switch. Deeper multi-site features build on PHASE-2/MULTI-LOCATION.
+  Build the sidebar clinic/location switcher (dashboard.png) listing only the Locations the user can access (TENANT) and setting an active location_id on the session. Scope data to the active location within the tenant (RLS (row-level security) tenant + location) so diary/clients/stock/reports reflect it, and stamp the active location on audit + reporting. Switching re-scopes current views cleanly; single-location users see the label without a real switch. Deeper multi-site features build on PHASE-2/MULTI-LOCATION.

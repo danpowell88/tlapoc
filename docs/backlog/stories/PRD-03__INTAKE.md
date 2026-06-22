@@ -7,7 +7,7 @@
 ## Background
 
 As a client, I want to complete my medical history, medications, allergies and contraindications before my visit on my phone, so that my practitioner has what they need and my treatment is safe.
-Clients complete medical history, meds, allergies and contraindications on their phone before the visit; responses auto-link to the chart.
+Pre-visit intake is the first step of Intake & Consent (PRD-03), which sits between booking (PRD-02) and treatment and enforces what must be true before a clinician can proceed. Intake collects the medical history a practitioner must see, and it is triggered by a booking (PRD-02/ONLINE-BOOK or the booking wizard). In the flow it precedes and feeds the rest of PRD-03 — the BDD screen (PRD-03/BDD), the e-signed consent (PRD-03/CONSENT) and the treatment gate (PRD-03/GATING) — and its responses auto-link to the chart so the consult (PRD-04) and charting (PRD-05) downstream see them. Incomplete required intake is one of the inputs that blocks treatment.  Clients complete medical history, meds, allergies and contraindications on their phone before the visit; responses auto-link to the chart.
 
 ## How it works
 
@@ -50,7 +50,7 @@ _Prototype screen: prototype.html — Forms & consent; client-app.html intake/co
 ## Tasks (dev pickup)
 
 - [ ] **Configurable, versioned IntakeForm + JSON field schema**
-  Model IntakeForm (name, version, fields as a JSON schema, required flag) so admins can define fields without code; bump version on change. Validate submitted answers against the schema server-side. Tenant-scoped (RLS). Seed the v1 medical-history & screening template (history checkboxes, contraindication items).
+  Model IntakeForm (name, version, fields as a JSON schema, required flag) so admins can define fields without code; bump version on change. Validate submitted answers against the schema server-side. Tenant-scoped (RLS (row-level security)). Seed the v1 medical-history & screening template (history checkboxes, contraindication items).
 - [ ] **IntakeResponse capture + auto-link to chart/appointment**
   Endpoint to submit an IntakeResponse from the client app/web/kiosk: stamp form_version, store answers(json), derive contraindication_flags, set submitted_at, and auto-link to client_id + appointment_id so it appears on the chart. Required-and-current responses feed the GATING evaluation. Re-screen vs full form chosen by new/returning. Audited.
 - [ ] **Staff Forms & consent intake status + send/chase UI**

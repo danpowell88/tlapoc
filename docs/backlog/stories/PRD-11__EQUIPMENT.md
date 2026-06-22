@@ -7,7 +7,7 @@
 ## Background
 
 As a owner, I want to track equipment servicing, validation and calibration with reminders, so that devices stay safe, validated and within service.
-The prototype's Operations → Equipment & maintenance tracks sterilisation/equipment servicing (autoclave validation, spore testing, laser service/calibration) with due dates — promoted from the FAC-WORKFLOWS placeholder.
+Plainly: track servicing, validation and calibration of equipment (autoclave validation, spore testing, laser service) with due-date reminders so devices stay safe and in-service. Where it fits: part of the operational backbone (Facility/Ops) around the clinical core; promoted from the FAC-WORKFLOWS placeholder, it feeds the inspection pack (PRD-08). The prototype's Operations → Equipment & maintenance tracks sterilisation/equipment servicing (autoclave validation, spore testing, laser service/calibration) with due dates — promoted from the FAC-WORKFLOWS placeholder.
 
 ## How it works
 

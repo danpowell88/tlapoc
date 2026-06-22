@@ -5,7 +5,7 @@
 ## Background
 
 As a owner, I want a pharmacy-dispensing mode for clinics without on-site custody, so that the platform fits a pharmacy-partner arrangement.
-An alternative dispensing model where a pharmacy partner holds/dispenses stock. No pharmacy partner yet — deferred, placeholder. (DispensedItem entity reserved.)
+Plainly: this is a placeholder for a different way of holding medicine — where a partner pharmacy dispenses each patient's dose instead of the clinic keeping its own bulk stock. There is no pharmacy partner yet, so nothing is built; the story just keeps the design ready. Where it fits: it is a deferred (Phase 2+) variant of the custody model in the moat. Today the platform runs Mode A only (on-site prescriber custody, PRD-04/CUSTODY-STORAGE); this story reserves the switch and entities so a pharmacy-dispensing model can be added later without reworking the schema.  An alternative dispensing model where a pharmacy partner holds/dispenses stock. No pharmacy partner yet — deferred, placeholder. (DispensedItem entity reserved.)
 
 ## How it works
 

@@ -7,7 +7,7 @@
 ## Background
 
 As a front desk, I want a clear visit status flow with check-in, an in-room-now indicator and late/no-show flags, so that the team always knows where each client is in the visit.
-Bookings move through booked → reminded → checked-in → in-room → checked-out, with late/no-show flags and role hand-offs (REQ-BOOK-7).
+The visit lifecycle is the status spine that carries a client through a visit in Reception (PRD-02): it turns a booking made on the calendar (PRD-02/CALENDAR) into a tracked journey from arrival to checkout, and is what the Today board, reminders and the consent/consult gates all read. It sits after the calendar and before reminders (PRD-02/REMINDERS) and waitlist backfill in the clinic-first flow; downstream it also feeds the check-in kiosk (PRD-09) and the no-show follow-up jobs in Comms (PRD-07). As front desk, I want a clear visit status flow with check-in, an in-room-now indicator and late/no-show flags, so that the team always knows where each client is in the visit.  Bookings move through booked → reminded → checked-in → in-room → checked-out, with late/no-show flags and role hand-offs (REQ-BOOK-7).
 
 ## How it works
 

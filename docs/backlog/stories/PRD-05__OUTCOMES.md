@@ -7,7 +7,7 @@
 ## Background
 
 As a injector / owner, I want to track treatment outcomes and any revisions/touch-ups, so that we can measure quality and feed it to reporting.
-The prototype's Photography & outcomes view tracks before/after outcomes and a revision/touch-up signal that feeds reporting (REQ-CLIN-13).
+Outcomes and revision tracking: capturing how treatments turned out (a result rating, the before/after linkage) and recording any revision/touch-up against the original treatment, so quality can be measured per treatment type and practitioner. The quality-measurement capability under PRD-05 charting on the clinic-first spine; it depends on standardised photos (PHOTOS) for evidence and consent rules, and its aggregates feed reporting (PRD-08); complications tie back to adverse-event records (ADVERSE-EVENT). The prototype's Photography & outcomes view tracks before/after outcomes and a revision/touch-up signal that feeds reporting (REQ-CLIN-13).
 
 ## How it works
 
@@ -54,4 +54,4 @@ _Prototype screen: prototype.html — Clinical → Photography & outcomes._
 ## Tasks (dev pickup)
 
 - [ ] **Outcome + revision capture, aggregation & UI**
-  EF Core: Outcome linked to a finalised ChartEntry (rating, optional satisfaction, before/after photo links, revision_of pointing at the original treatment), tenant_id + RLS, indexed by treatment type + practitioner. API to capture outcomes/revisions and a read-model aggregating touch-up rate, % satisfied, n and complications (from AdverseEvent) per treatment type/practitioner, feeding PRD-08 reporting. UI: per-treatment outcome capture + the 'Outcomes & revisions - per treatment type' table; any photo-based outcome respects image-use consent (PHOTOS / C14). Keep money/quality figures owner-gated per the financial-gating rules.
+  EF Core: Outcome linked to a finalised ChartEntry (rating, optional satisfaction, before/after photo links, revision_of pointing at the original treatment), tenant_id + Row-Level Security (RLS, the per-tenant database isolation), indexed by treatment type + practitioner. API to capture outcomes/revisions and a read-model aggregating touch-up rate, % satisfied, n and complications (from AdverseEvent) per treatment type/practitioner, feeding PRD-08 reporting. UI: per-treatment outcome capture + the 'Outcomes & revisions - per treatment type' table; any photo-based outcome respects image-use consent (PHOTOS / C14). Keep money/quality figures owner-gated per the financial-gating rules.

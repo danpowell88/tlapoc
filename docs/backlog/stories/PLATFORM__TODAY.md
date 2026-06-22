@@ -7,12 +7,12 @@
 ## Background
 
 As a staff member, I want a Today landing page showing the live state of the clinic and what needs my attention, tailored to my role, so that I start the day knowing exactly what to do.
-The prototype opens on a Today board: waiting / in-room / checked-out columns, the day's appointments, the jobs/needs-attention digest and alerts — tailored to the signed-in role's 'concerns' (ADR-0017).
+Plainly: the landing page staff open onto — the live state of the clinic today and what needs their attention, tailored to their role. It is built on the app shell. Reception sees front-desk tasks, a clinician sees clinical ones, the owner sees the business digest — one screen, role-aware, with one click through to the next action. The prototype opens on a Today board: waiting / in-room / checked-out columns, the day's appointments, the jobs/needs-attention digest and alerts — tailored to the signed-in role's 'concerns' (ADR-0017).
 
 ## How it works
 
 Today is the landing page — the live state of the clinic at a glance, tailored to the signed-in role's concerns (ADR-0017). The prototype shows it as a greeting ('Good morning, Lena'), a date/at-a-glance line ('14 appointments · 3 checked in'), a row of stat cards (Appointments 14 / Checked in 3 · 1 waiting / Awaiting consent 2 'treatment gated until done' / Stock on hand), Today's schedule (each appointment with its lifecycle state pills — Late, Start, No-show, Confirmed, In treatment, Resume — per ADR-0024 visit lifecycle), and a Follow-ups panel previewing the queue.
-Role-tailoring is by concern, not by separate dashboards: each widget is tagged with a concern (the prototype's data-concern) and shown only if the active role carries it. Reception sees front-desk widgets (waiting/checked-in, recall), an NP sees clinical (awaiting-consent, in-room, stock alerts), the owner sees the business digest. Money cards are additionally .fin-gated (FIN-GATING) so non-owner roles never see revenue on Today.
+Role-tailoring is by concern, not by separate dashboards: each widget is tagged with a concern (the prototype's data-concern) and shown only if the active role carries it. Reception sees front-desk widgets (waiting/checked-in, recall), an NP (nurse practitioner) sees clinical (awaiting-consent, in-room, stock alerts), the owner sees the business digest. Money cards are additionally .fin-gated (FIN-GATING) so non-owner roles never see revenue on Today.
 The 'waiting / in-room / checked-out' live state and the day's schedule come from the appointment/visit state machine (ADR-0024); the needs-attention digest aggregates exceptions (overdue recalls, unbilled visits, expiries from REG-WATCH, failed payments) and the Follow-ups preview reads the Jobs queue (ADR-0023). Quick links jump straight into the in-flight visit: Open chart, Profile, Resume, Checkout.
 It's a read aggregation (no new write model) — so each role starts the day knowing exactly what to do, with one click to the next action.
 
@@ -39,7 +39,7 @@ _Prototype screen: prototype.html — Today (waiting / in-room / checked-out)._
 
 ## Suggested data model
 
-- **(read) TodayBoard** — from Appointment/Visit.status (waiting|in-room|checked-out) + Job queue + AttentionDigest, filtered by the active role's concerns and .fin gating
+- **(read) TodayBoard** — from Appointment/Visit.status (waiting|in-room|checked-out) + Job queue + AttentionDigest, filtered by the active role's concerns and .fin (the owner-only financial gate — money figures are stripped for non-owner roles) gating
   - _Role-tailored read aggregation; no separate persistence. Money figures stripped server-side for non-owner roles._
 
 ## Technical notes (high level)

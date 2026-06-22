@@ -7,7 +7,7 @@
 ## Background
 
 As a platform engineer, I want feature flags and a typed per-tenant configuration store, so that we can ship features progressively and tailor behaviour per clinic.
-The build is staged and many capabilities are configurable per tenant (cooling-off policy, S4 naming, telehealth path risk, modality availability, deferred features). A flag + config mechanism lets features ship dark and toggle per tenant.
+The build is staged and many capabilities are configurable per tenant — cooling-off policy (N days), S4 naming, telehealth path risk, modality availability and deferred features. A feature-flag plus typed per-tenant configuration mechanism lets features ship dark and behaviour be tailored per clinic.  FEATURE-FLAGS builds on API and provides the toggles/config later stories read — COOLING-OFF reads cooling_off_days, the public booking page reads S4 naming, MODALITY reads modality availability, and phased features hide behind flags until ready. Changes are audited via AUDIT-INFRA.
 
 ## How it works
 
@@ -47,4 +47,4 @@ The two records are a FeatureFlag (key, scope global|tenant, enabled, optional t
 - [ ] **Audit flag/config changes and document the model**
   Make compliance-relevant settings traceable and the mechanism reusable.
   - Every flag/config change emits an AuditEvent (who/which tenant/which key/old->new) via AUDIT-INFRA — these settings drive compliance behaviour (e.g. cooling-off duration), so changes must be on the trail.
-  - Document how a feature ships dark, how to add a typed tenant-config key, and which later stories read which keys (COOLING-OFF, booking page S4 naming, MODALITY availability).
+  - Document how a feature ships dark, how to add a typed tenant-config key, and which later stories read which keys (COOLING-OFF, booking page S4 (Schedule 4 prescription-only medicine) naming, MODALITY availability).

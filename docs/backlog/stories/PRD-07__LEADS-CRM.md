@@ -7,7 +7,7 @@
 ## Background
 
 As a front desk / owner, I want to track leads/prospects through to booking, so that enquiries don't get lost and convert better.
-The prototype's Growth → Leads (CRM) screen tracks enquiries who haven't booked yet, over the inbox (ADR-0033).
+Most enquiries arrive asking the one thing a clinic can't answer publicly ('how much is Botox?'), via IG/FB DM, the website widget or phone. A 1:1 reply isn't public advertising, so a lead pipeline lets reception convert privately and stops enquiries getting lost. This is a thin CRM over the inbox: track prospects who haven't booked, move them to consult/won/lost, and convert to a client/booking preserving history. Phase 2 in scope, with real pipeline mechanics.  The prototype's Growth → Leads (CRM) screen tracks enquiries who haven't booked yet, over the inbox (ADR-0033).
 
 ## How it works
 
@@ -51,7 +51,7 @@ _Prototype screen: prototype.html — Comms & growth (Inbox/Automations/Campaign
 ## Tasks (dev pickup)
 
 - [ ] **Lead model as a projection over conversations (migrations)**
-  Model Lead (tenant_id + RLS) per ADR-0033: name, contact, source, interest, stage, next_action, optional conversation_id + converted_client_id, consent.
+  Model Lead (tenant_id + RLS (row-level security)) per ADR-0033: name, contact, source, interest, stage, next_action, optional conversation_id + converted_client_id, consent.
   - A thin pipeline layer over the inbox; stage transitions feed conversion read-models.
 - [ ] **Leads API: pipeline stages, convert-to-client, consent-gated nudges, Follow-ups**
   Server-side.

@@ -5,7 +5,7 @@
 ## Background
 
 As a owner, I want future integrations: online checkout/deposits, e-prescribing and a public API, so that the platform extends as we scale.
-Online checkout & deposits (S4 never priced/sold online), e-prescribing (eRx/ETP, 🔬), public API/webhooks (Phase 3) and Medicare/HICAPS (non-applicable to cosmetic). Placeholder (REQ-INT-2a/4/5/6/7, ADR-0035/0036).
+This is a deliberately deferred placeholder (Phase 2/3) for the later integration roadmap: online checkout and deposits, e-prescribing for private scripts, a public API/webhooks, and Medicare/HICAPS (recorded as non-applicable to cosmetic). It sits past the v1 Integrations work (step 10 of the clinic-first build): each future item is captured so it can sit behind an existing swappable port with no rework. No build in v1; the carried-forward invariants still hold. Online checkout & deposits (S4 (Schedule 4 prescription-only medicine) never priced/sold online), e-prescribing (eRx/ETP, 🔬), public API/webhooks (Phase 3) and Medicare/HICAPS (non-applicable to cosmetic). Placeholder (REQ-INT-2a/4/5/6/7, ADR-0035/0036).
 
 ## How it works
 
@@ -47,4 +47,4 @@ Each future integration sits behind an existing port so the architecture stays e
 ## Tasks (dev pickup)
 
 - [ ] **Scope & design when pulled into a sprint**
-  Deferred placeholder — no build in v1. When scheduled, confirm each still fits scope and the carried-forward invariants (S4 never priced/sold online; e-prescribing bound to the synchronous consult + S4 register + prescriber identity; Medicare/HICAPS out as non-applicable), then break down behind the existing port (IPaymentProvider / IPrescribingProvider / IAccountingExport / ICalendarProvider). E-prescribing and any inbound webhooks/public API need a feasibility spike (ADR-0035/0036) before commit.
+  Deferred placeholder — no build in v1. When scheduled, confirm each still fits scope and the carried-forward invariants (S4 (Schedule 4 prescription-only medicine) never priced/sold online; e-prescribing bound to the synchronous consult + S4 register + prescriber identity; Medicare/HICAPS out as non-applicable), then break down behind the existing port (IPaymentProvider / IPrescribingProvider / IAccountingExport / ICalendarProvider). E-prescribing and any inbound webhooks/public API need a feasibility spike (ADR-0035/0036) before commit.

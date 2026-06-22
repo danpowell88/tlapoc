@@ -7,7 +7,7 @@
 ## Background
 
 As a backend developer, I want a Postgres database with EF Core, a migration pipeline and base entity/columns conventions, so that every module adds schema consistently and migrations run automatically per environment.
-A migrations-first data layer with a base entity convention (tenant_id, audit columns) underpins every module.
+Sprint 0 (setup), data layer: this story stands up the PostgreSQL database and the standard way every part of the system reads and writes it — including a shared set of columns (a tenant marker plus who-changed-what-and-when stamps) that every table inherits. Almost the entire data layer is built on this: tenant isolation (RLS), the audit trail, the event outbox and the synthetic seed all extend the conventions defined here.  A migrations-first data layer with a base entity convention (tenant_id, audit columns) underpins every module.
 
 ## How it works
 
@@ -44,7 +44,7 @@ A sample entity round-trips through a repository + migration in an integration t
 - [ ] **Stand up EF Core + the base-entity convention and migration pipeline**
   Establish the DbContext, the base-entity convention and the migrations-first workflow against the IAC-provisioned Postgres.
   - A BaseEntity (id, tenant_id, created/updated audit columns) applied via model-building conventions so every tenant-scoped entity inherits it.
-  - A SaveChanges interceptor that stamps audit columns (and tenant_id from the request context once RLS lands) so modules never hand-set them.
+  - A SaveChanges interceptor that stamps audit columns (and tenant_id from the request context once RLS (row-level security) lands) so modules never hand-set them.
   - Migration generation in the codebase as the only way schema changes; naming/folder convention for module migrations.
   - Connection comes from per-environment config/secret (SECRETS), never hard-coded.
 - [ ] **Automate migrations on deploy and a containerised local Postgres**
@@ -54,6 +54,6 @@ A sample entity round-trips through a repository + migration in an integration t
   - A sample entity that round-trips through a repository + migration in an integration test against a real Postgres, proving connectivity + convention before modules depend on it.
 - [ ] **Document the data conventions and how modules add schema**
   Write the data-layer guide so every module adds tables consistently.
-  - The base-entity convention, what the audit interceptor sets, and the rule that all tenant-scoped tables carry tenant_id (the RLS hook).
+  - The base-entity convention, what the audit interceptor sets, and the rule that all tenant-scoped tables carry tenant_id (the RLS (row-level security) hook).
   - How to author + review a migration, and how it gets applied per environment.
   - How local containerised Postgres + SEED fit together for development and tests.

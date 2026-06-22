@@ -7,7 +7,7 @@
 ## Background
 
 As a prescriber, I want to record a synchronous consult (in person or from our external telehealth app) before writing any script, so that every prescription is backed by a real assessment.
-A Consult (in-person or external-telehealth) records modality, prescriber, timestamp, external reference and notes — required before any script (C1).
+Plainly: this is the assessment appointment, recorded. Before anyone can be prescribed a cosmetic injectable, a qualified prescriber must actually assess them; this story captures that assessment as a Consult record so the rest of the chain can prove it happened. Where it fits: this is the first link of the S4 (Schedule 4 prescription-only medicine) compliance chain and the clinical heart of the platform. It sits straight after booking (PRD-02) and the consent/pre-treatment gate (PRD-03), and it is the precondition for the prescription (PRD-04/PRESCRIPTION) that in turn gates every administration (PRD-04/ADMIN-GATE) and the charting that records it (PRD-05).  A Consult (in-person or external-telehealth) records modality, prescriber, timestamp, external reference and notes — required before any script (C1).
 
 ## How it works
 

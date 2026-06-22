@@ -7,14 +7,14 @@
 ## Background
 
 As a clinician, I want a library of complication protocols with guided response steps and kit links, so that in an emergency I follow the correct, documented steps.
-The prototype's Clinical → Complication protocols (openComplication/completeComplication) provides step-by-step VO/anaphylaxis protocols and links the emergency kit — the reference side of the adverse-event response.
+A library of complication protocols (e.g. vascular occlusion, anaphylaxis) with guided, editable response steps and emergency-kit links, launched as a timestamped checklist so the clinician follows the correct documented steps in an emergency. The reference-and-response side of safety within PRD-05 charting on the clinic-first spine; it depends on adverse-event capture (ADVERSE-EVENT) — a completed response raises a pre-filled, routed adverse event — and links to the emergency-kit register (PRD-11/EMERGENCY-KIT). The prototype's Clinical → Complication protocols (openComplication/completeComplication) provides step-by-step vascular occlusion (VO)/anaphylaxis protocols and links the emergency kit — the reference side of the adverse-event response.
 
 ## How it works
 
 As a clinician, I want a library of complication protocols with guided response steps and kit links, so that in an emergency I follow the correct, documented steps.
 When a complication happens - a vascular occlusion mid-filler, an anaphylactic reaction - there is no time to look things up. The complication library is the reference + response side of safety: clinic-curated, editable protocols (VO, anaphylaxis, ...) with ordered steps and the emergency-kit items they draw on, launched as a timestamped checklist that logs what was done and opens a routed adverse-event case.
 Each ComplicationProtocol is an editable template: a name, a sub-line, ordered response steps, and the required kit items (e.g. VO -> high-dose hyaluronidase; anaphylaxis -> adrenaline 1:1000). 'Edit steps' lets the clinic tailor protocols to its own policy. The protocols read against the emergency-kit register (PRD-11/EMERGENCY-KIT) so the items they need are known to be on hand with in-date expiry.
-'Start response' launches the protocol as a live, timestamped checklist (openComplication): the clinician ticks steps as they go and records the drug/kit used. On 'Complete & open AE case' (completeComplication) the response records its timing + outcome and raises a pre-filled, routed AdverseEvent (ADVERSE-EVENT) - seriousness pre-set, DAEN route derived from the modality (device for VO/filler, medicine for anaphylaxis) - plus a complication follow-up Job.
+'Start response' launches the protocol as a live, timestamped checklist (openComplication): the clinician ticks steps as they go and records the drug/kit used. On 'Complete & open adverse event (AE) case' (completeComplication) the response records its timing + outcome and raises a pre-filled, routed AdverseEvent (ADVERSE-EVENT) - seriousness pre-set, Database of Adverse Event Notifications (DAEN) route derived from the modality (device for VO/filler, medicine for anaphylaxis) - plus a complication follow-up Job.
 This is the reference + response library; the AE record + DAEN routing live in ADVERSE-EVENT, and the kit register lives in PRD-11. Completion is part of the immutable clinical record.
 
 ## Requirements
@@ -56,7 +56,7 @@ _Prototype screen: prototype.html — Clinical → Complication protocols._
 ## Tasks (dev pickup)
 
 - [ ] **Data model & migrations: ComplicationProtocol + ComplicationResponse**
-  EF Core: ComplicationProtocol (name, ordered steps, required_kit refs, route, drug, editable) + ComplicationResponse (protocol_id, client/chart links, started_at/completed_at, steps_done, kit_used, outcome). tenant_id + RLS; a response is immutable once completed. Reference the emergency-kit register (PRD-11).
+  EF Core: ComplicationProtocol (name, ordered steps, required_kit refs, route, drug, editable) + ComplicationResponse (protocol_id, client/chart links, started_at/completed_at, steps_done, kit_used, outcome). tenant_id + Row-Level Security (RLS, the per-tenant database isolation); a response is immutable once completed. Reference the emergency-kit register (PRD-11).
 - [ ] **Protocol library + response API**
   CRUD for clinic-editable protocols; a start-response command that creates a timestamped ComplicationResponse and a complete command that records timing/outcome + kit used, raises a pre-filled routed AdverseEvent (ADVERSE-EVENT) and a complication follow-up Job. Surface required-kit availability/expiry from the kit register. Audit completions (ADR-0010); publish OpenAPI.
 - [ ] **Protocol cards + timestamped response checklist UI**

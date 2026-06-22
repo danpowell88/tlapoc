@@ -7,7 +7,7 @@
 ## Background
 
 As a RN/NP, I want a BDD/psychological screen completed and surfaced before I proceed, so that I can avoid harm for at-risk patients per the guidelines.
-Cosmetic guidelines require BDD screening; a positive result must be surfaced to the prescriber before treatment (C3).
+The BDD/psychological screen is the patient-safety check inside Intake & Consent (PRD-03): cosmetic guidelines require screening for psychological suitability before non-surgical cosmetic procedures, and this story embeds that instrument in the intake wizard. It sits directly after intake (PRD-03/INTAKE, which carries it) and feeds the treatment gate (PRD-03/GATING): a positive flag is surfaced to the prescriber and an RN/NP-reviewed result must exist before an S4 treatment can proceed in the consult (PRD-04) and charting (PRD-05). As an RN/NP, I want a BDD/psychological screen completed and surfaced before I proceed, so that I can avoid harm for at-risk patients per the guidelines.  Cosmetic guidelines require BDD screening; a positive result must be surfaced to the prescriber before treatment (C3).
 
 ## How it works
 
@@ -49,6 +49,6 @@ Which validated instrument to embed is an open clinical question (the prototype 
 - [ ] **Configurable BDD/psychological instrument + scoring**
   Embed a validated screening instrument in intake as a configurable, versioned question set with a scoring rule that produces a score + boolean flag. Make the instrument swappable (instrument + instrument_version) so the clinically-chosen tool slots in without rework — v1 uses the prototype's placeholder wellbeing questions. Store the answers + score as a ScreeningResult linked to client + appointment.
 - [ ] **Positive-flag surfacing + RN/NP review requirement**
-  On a positive score, raise the flag and surface it to the prescriber (chip on the charting pre-treatment review + a follow-up signal). Record reviewed_by/reviewed_at when an RN/NP reviews the result; the GATING evaluation requires an RN/NP-reviewed ScreeningResult to exist before an S4 treatment (C3). Audited.
+  On a positive score, raise the flag and surface it to the prescriber (chip on the charting pre-treatment review + a follow-up signal). Record reviewed_by/reviewed_at when an RN/NP reviews the result; the GATING evaluation requires an RN/NP-reviewed ScreeningResult to exist before an S4 (Schedule 4 prescription-only medicine) treatment (C3). Audited.
 - [ ] **BDD screen in the intake wizard + prescriber chip UI**
   Render the wellbeing questions inside the client-app/kiosk intake wizard step. On the staff side, render the 'BDD screen: clear' / flagged chip on the Charting pre-treatment review and the screening status within the Forms & consent 'Medical history & screening' template.

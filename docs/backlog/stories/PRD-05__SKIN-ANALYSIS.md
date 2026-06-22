@@ -7,7 +7,7 @@
 ## Background
 
 As a dermal therapist / injector, I want to record a structured skin assessment (and optionally an AI-assisted scan) and share results with the client, so that skin treatment is planned and tracked, and clients see their progress.
-The prototype's Clinical → Skin analysis screen captures a structured skin assessment with zone scoring, an AI scan (simulateScan) and a push-to-client summary (pushSkinToClient). Per the no-AI-in-v1 stance, AI scoring is advisory/Phase 2; the manual assessment record can be v1.
+A structured skin assessment: concerns scored by zone and tracked over time, driving a recommended treatment plan and giving the client visible progress (manual record in v1; AI-assisted scan advisory and Phase 2+). The front door to non-injectable care under PRD-05 charting on the clinic-first spine; it depends on the guided note (NOTE-TEMPLATE) and feeds plans (TREATMENT-PLANS) and outcomes (OUTCOMES). Skin images are Personal Health Information (PHI), so image-use consent and Australian storage apply. The prototype's Clinical → Skin analysis screen captures a structured skin assessment with zone scoring, an AI scan (simulateScan) and a push-to-client summary (pushSkinToClient). Per the no-AI-in-v1 stance, AI scoring is advisory/Phase 2; the manual assessment record can be v1.
 
 ## How it works
 
@@ -59,4 +59,4 @@ _Prototype screen: prototype.html — Clinical → Skin analysis (scan + push-to
 ## Tasks (dev pickup)
 
 - [ ] **Skin assessment record + scoring UI (manual v1; AI advisory Phase 2)**
-  EF Core: SkinAssessment + SkinZoneScore (per-concern percentile-vs-cohort score, recommended service), tenant_id + RLS, indexed by client for trend. API to record/retrieve assessments and trend them across visits; below-threshold concerns surface recommended-plan chips that feed TREATMENT-PLANS; a consent-respecting push-to-client summary (C14 image-use + AU storage for image-backed assessments). UI: the concern-score bars, skin-age vs actual, trend sparkline and recommended-plan chips per the prototype. Keep AI auto-scoring advisory + human-confirmed and gated to Phase 2 (ADR-0020) - v1 records manually; mark source manual vs ai_advisory.
+  EF Core: SkinAssessment + SkinZoneScore (per-concern percentile-vs-cohort score, recommended service), tenant_id + Row-Level Security (RLS, the per-tenant database isolation), indexed by client for trend. API to record/retrieve assessments and trend them across visits; below-threshold concerns surface recommended-plan chips that feed TREATMENT-PLANS; a consent-respecting push-to-client summary (C14 image-use + AU storage for image-backed assessments). UI: the concern-score bars, skin-age vs actual, trend sparkline and recommended-plan chips per the prototype. Keep AI auto-scoring advisory + human-confirmed and gated to Phase 2 (ADR-0020) - v1 records manually; mark source manual vs ai_advisory.

@@ -18,7 +18,7 @@
     {
       "key": "NOTE-TEMPLATE",
       "title": "Guided toxin treatment note & pre-treatment review",
-      "context": "Charting is a guided, treatment-type-aware flow: a pre-treatment review (safety + last-treatment + consult/Rx surfaced) then a configurable toxin note (structured + free text + snippets) (REQ-CLIN-1/9).",
+      "context": "The guided clinical note an injector fills in during a toxin treatment: it surfaces safety and prescription context first, then a templated note. Charting (the clinical record of what was actually done) is the clinical heart of the platform and sits straight after the S4 (Schedule 4 'Prescription Only Medicine') consult/prescribing moat (PRD-04) on the clinic-first build spine; this story is the entry point to the whole PRD-05 charting flow (depends on PRD-04/ADMIN-GATE; depended on by MAPPING, TREATMENT-PLANS, SKIN-ANALYSIS). Charting is a guided, treatment-type-aware flow: a pre-treatment review (safety + last-treatment + consult/prescription (Rx) surfaced) then a configurable toxin note (structured + free text + snippets) (REQ-CLIN-1/9).",
       "as_a": "injector",
       "i_want": "a guided note that first surfaces safety, last treatment and the consult/Rx, then a toxin template",
       "so_that": "I chart quickly and safely with the right context in front of me",
@@ -50,7 +50,7 @@
       ],
       "detail": [
         "As an injector, I want a guided note that first surfaces safety, last treatment and the consult/Rx, then a toxin template, so that I chart quickly and safely with the right context in front of me.",
-        "Charting at The Lounge is not a blank text box — it is a guided, treatment-type-aware flow that puts the safety- and compliance-critical context in front of the clinician before they touch a single field. The note itself is templated (structured fields + free text + reusable phrases) so a routine anti-wrinkle treatment can be charted in under a minute without losing the medico-legal detail an AHPRA inspection expects.",
+        "Charting at The Lounge is not a blank text box — it is a guided, treatment-type-aware flow that puts the safety- and compliance-critical context in front of the clinician before they touch a single field. The note itself is templated (structured fields + free text + reusable phrases) so a routine anti-wrinkle treatment can be charted in under a minute without losing the medico-legal detail an Australian Health Practitioner Regulation Agency (AHPRA) inspection expects.",
         "Step 1 is a Pre-treatment review card the injector reads before anything is editable: safety flags (allergies, contraindications, BDD-screen result), the linked consult/prescription status, and a one-line Last treatment summary (e.g. '24u · 12 Mar · forehead + glabella · Bella RN') with a 'Copy last map' shortcut. These are read-only chips pulled from PRD-03 (intake/consent/screening) and PRD-04 (consult/Rx) — the injector confirms them, the system does not let them be edited here.",
         "A treatment-type toggle (Anti-wrinkle (toxin) / Skin treatment) selects which template renders. The toxin template is a configurable NoteTemplate: structured fields (indication, areas, technique notes, aftercare) plus a free-text area and a library of reusable phrases/snippets the clinic curates. Selecting 'Skin treatment' swaps in a non-S4 skin-note variant (areas / device / settings / consumables) with no prescription or lot — built in PRD-05/MAPPING's skin-note story.",
         "Charting cannot open at all unless the consult + consent gate (PRD-03/PRD-04) is satisfied — the safe path is the only path. The gate state is shown as header chips ('Consult ✓ · Consent ✓ · screening clear'); when it is not satisfied the entry point is blocked with a reason rather than opening a half-usable note.",
@@ -83,7 +83,7 @@
       "tasks": [
         {
           "title": "Data model & migrations: ChartEntry + NoteTemplate",
-          "note": "EF Core entities + migrations (every table tenant_id + RLS). ChartEntry carries treatment_type, status, consult_id/appointment_id links and the locked flag (immutability lands in IMMUTABILITY). NoteTemplate is versioned and tenant-scoped, holding a JSON field-schema + a snippet library; NoteValue binds captured content to the template version so a finalised note always renders against the schema it was authored with. Index ChartEntry by client and appointment."
+          "note": "EF Core entities + migrations (every table tenant_id + Row-Level Security (RLS, the per-tenant database isolation)). ChartEntry carries treatment_type, status, consult_id/appointment_id links and the locked flag (immutability lands in IMMUTABILITY). NoteTemplate is versioned and tenant-scoped, holding a JSON field-schema + a snippet library; NoteValue binds captured content to the template version so a finalised note always renders against the schema it was authored with. Index ChartEntry by client and appointment."
         },
         {
           "title": "Charting API: gated draft open + guided note capture",
@@ -98,7 +98,7 @@
     {
       "key": "MAPPING",
       "title": "Injection-mapping canvas (per-point lot)",
-      "context": "On a facial diagram and/or patient photo, tap-to-add and drag injection points, each capturing product, units, depth, technique and batch-lot/expiry; charted units deduct from the selected lot on finalise (REQ-CLIN-2, C8).",
+      "context": "The injection-mapping canvas: on a facial diagram or photo the injector taps to drop and drags each injection point, recording product, dose in units, depth, technique and the batch-lot drawn from. It is the clinical hero screen of PRD-05, sitting right after the S4 (Schedule 4 'Prescription Only Medicine') consult/prescribing moat (PRD-04) on the clinic-first spine, opening after the pre-treatment review (NOTE-TEMPLATE) and feeding immutable finalisation (IMMUTABILITY), which deducts charted units from stock on finalise. On a facial diagram and/or patient photo, tap-to-add and drag injection points, each capturing product, units, depth, technique and batch-lot/expiry; charted units deduct from the selected lot on finalise (REQ-CLIN-2, C8).",
       "as_a": "injector",
       "i_want": "to drop and drag injection points on a facial diagram or photo, each recording product, units, depth, technique and lot",
       "so_that": "the treatment is precisely charted and traceable to a batch",
@@ -136,7 +136,7 @@
       "detail": [
         "As an injector, I want to drop and drag injection points on a facial diagram or photo, each recording product, units, depth, technique and lot, so that the treatment is precisely charted and traceable to a batch.",
         "The injection map is the clinical hero screen and the evidentiary heart of the S4 medicine register: it records exactly what was injected, where on the face, how much, and from which vial — the data that later proves the consult→prescription→administration chain and powers the lot→client recall and vial reconciliation.",
-        "It sits inside the guided charting flow as step 3 and only opens once the consult + consent gate is satisfied (PRD-03/PRD-04). Step 1 surfaces the pre-treatment review (NOTE-TEMPLATE); step 2 forces the injector to choose the exact product and the in-date, in-custody, ARTG-checked lot they are drawing from before any point is placed; step 3 is the map itself.",
+        "It sits inside the guided charting flow as step 3 and only opens once the consult + consent gate is satisfied (PRD-03/PRD-04). Step 1 surfaces the pre-treatment review (NOTE-TEMPLATE); step 2 forces the injector to choose the exact product and the in-date, in-custody, Australian Register of Therapeutic Goods (ARTG)-checked lot they are drawing from before any point is placed; step 3 is the map itself.",
         "Each point is tap-to-add on a facial diagram (or the patient photo) and drag-to-fine-tune; coordinates are stored as a percentage of the image so they survive different render sizes and the room-side provider app. A point carries units, plus depth and technique in the real build (the prototype captures name + units only). A running Total units sums the points live, and the active 'Product · lot' label is shown so the injector always knows which vial they are charting against.",
         "On Finalise, the charted Σunits are decremented from the selected lot inside one transaction (a StockLedger administration movement, PRD-04), the note is locked (immutable — later edits become appended amendments per ADR-0010, built in IMMUTABILITY), and every point becomes part of the medicine register with its lot→client link for recall and vial reconciliation. Finalise is rejected if the units exceed on-hand, and is idempotent so a retried request never double-deducts.",
         "It is modality-aware: anti-wrinkle (toxin) shows the map + lot step, while a non-S4 skin treatment shows a note variant (areas, device/modality, settings, consumables) with no prescription or lot. Built web-first; the provider app (PRD-09, later) re-surfaces the same canvas room-side and offline (OFFLINE). 'Auto-detect' landmark suggestions are advisory + human-confirmed and deferred to Phase 2 (no AI in v1, ADR-0020) — v1 is manual tap-to-add + drag only."
@@ -179,7 +179,7 @@
       "tasks": [
         {
           "title": "Data model & migrations: ChartEntry + InjectionPoint",
-          "note": "EF Core: ChartEntry (treatment_type, status, consult/consent links, locked) + InjectionPoint (product_id, lot_id, units, depth, technique, coord_x/y as image-relative percent, region/label, sequence). Every table tenant_id + RLS. Index by client (clinical record retrieval) and by lot_id (the lot→client recall lookup, C8). FK InjectionPoint.lot_id → StockItem so finalise can write the administration movement."
+          "note": "EF Core: ChartEntry (treatment_type, status, consult/consent links, locked) + InjectionPoint (product_id, lot_id, units, depth, technique, coord_x/y as image-relative percent, region/label, sequence). Every table tenant_id + Row-Level Security (RLS, the per-tenant database isolation). Index by client (clinical record retrieval) and by lot_id (the lot→client recall lookup, C8). FK InjectionPoint.lot_id → StockItem so finalise can write the administration movement."
         },
         {
           "title": "Charting API: open draft, add/move/delete points, live total",
@@ -199,14 +199,14 @@
         },
         {
           "title": "Skin-note (non-S4) variant + treatment-type toggle",
-          "note": "Render the non-S4 skin note when treatment_type=skin: 'Areas treated' multi-select chips (Full face / Cheeks / Under-eye / Neck / Décolletage), Device/modality select (needling / Hydrafacial / Laser-IPL / peel), Settings/depth input, Consumables (non-S4) input — no lot/Rx, no deduction on finalise. The treatment-type toggle hides the map+lot step and shows the skin note (applyChartType). Persist to SkinNote bound to the ChartEntry."
+          "note": "Render the non-S4 skin note when treatment_type=skin: 'Areas treated' multi-select chips (Full face / Cheeks / Under-eye / Neck / Décolletage), Device/modality select (needling / Hydrafacial / Laser-IPL / peel), Settings/depth input, Consumables (non-S4) input — no lot/prescription (Rx), no deduction on finalise. The treatment-type toggle hides the map+lot step and shows the skin note (applyChartType). Persist to SkinNote bound to the ChartEntry."
         }
       ]
     },
     {
       "key": "PHOTOS",
       "title": "Standardised before/after photos + compare",
-      "context": "Capture standardised before/after photos room-side (framing/ghosting guide), compare side-by-side across visits; media stored centrally via signed URLs, never on personal devices, gated by image-use consent (REQ-CLIN-3, C14/ADR-0009).",
+      "context": "Standardised before/after clinical photos captured room-side with a framing/ghosting guide, then compared across visits. A supporting capability within PRD-05 charting on the clinic-first spine after the S4 (Schedule 4 'Prescription Only Medicine') moat (PRD-04); it depends on image-use consent (PRD-03/IMAGE-CONSENT) and is depended on by outcomes tracking (OUTCOMES). Every image is Personal Health Information (PHI), stored centrally via signed URLs and never left on the device. Capture standardised before/after photos room-side (framing/ghosting guide), compare side-by-side across visits; media stored centrally via signed URLs, never on personal devices, gated by image-use consent (REQ-CLIN-3, C14/ADR-0009).",
       "as_a": "injector",
       "i_want": "to capture standardised before/after photos and compare them against prior visits",
       "so_that": "I can track outcomes consistently",
@@ -276,7 +276,7 @@
       "tasks": [
         {
           "title": "Data model & migrations: Photo + PosePreset",
-          "note": "EF Core: Photo (client_id, chart_entry_id, blob_ref to private storage, pose_preset, framing_meta json, taken_at, captured_by, image_consent_id FK, annotated_copy_ref) + PosePreset (tenant-scoped pose list). Every table tenant_id + RLS. The clinical record stores only the blob reference + metadata — never image bytes. Index Photo by client and by pose for the compare gallery."
+          "note": "EF Core: Photo (client_id, chart_entry_id, blob_ref to private storage, pose_preset, framing_meta json, taken_at, captured_by, image_consent_id FK, annotated_copy_ref) + PosePreset (tenant-scoped pose list). Every table tenant_id + Row-Level Security (RLS, the per-tenant database isolation). The clinical record stores only the blob reference + metadata — never image bytes. Index Photo by client and by pose for the compare gallery."
         },
         {
           "title": "Media pipeline: signed-URL upload/serve + consent gate",
@@ -295,7 +295,7 @@
     {
       "key": "IMMUTABILITY",
       "title": "Immutable finalisation & audited amendments",
-      "context": "A finalised note is locked; any later change is an appended, audited amendment preserving the original (REQ-CLIN-4, ADR-0010).",
+      "context": "Finalisation and amendments: once a treatment note is finalised it is locked, and any later correction is an attributed, audited amendment that preserves the original. The trust backbone of PRD-05 charting on the clinic-first spine after the S4 (Schedule 4 'Prescription Only Medicine') moat (PRD-04); it depends on the injection map (MAPPING) — finalising locks the note and deducts stock — and is depended on by the offline queue (OFFLINE) and adverse-event capture (ADVERSE-EVENT). A finalised note is locked; any later change is an appended, audited amendment preserving the original (REQ-CLIN-4, ADR-0010).",
       "as_a": "injector",
       "i_want": "my finalised note to be locked, with later changes added as visible audited amendments",
       "so_that": "the clinical record is trustworthy and tamper-evident",
@@ -330,7 +330,7 @@
       ],
       "detail": [
         "As an injector, I want my finalised note to be locked, with later changes added as visible audited amendments, so that the clinical record is trustworthy and tamper-evident.",
-        "Immutability is what makes the clinical record stand up in an AHPRA or TGA inspection: once a treatment is finalised, the note can never be silently edited. Any later correction is an appended, audited amendment that preserves the original, so the record shows exactly what was charted at the time and what was changed afterwards, by whom and why.",
+        "Immutability is what makes the clinical record stand up in an Australian Health Practitioner Regulation Agency (AHPRA) or Therapeutic Goods Administration (TGA) inspection: once a treatment is finalised, the note can never be silently edited. Any later correction is an appended, audited amendment that preserves the original, so the record shows exactly what was charted at the time and what was changed afterwards, by whom and why.",
         "Finalisation happens server-side, not in the UI. The finalise command runs the close-out (aftercare · recall · 2-day wellbeing call · adverse-event prompt), locks the ChartEntry (status=final, locked=true, finalised_at, author), and — for toxin — triggers the lot deduction + register link from MAPPING in the same transaction. After that, every field of the original note is read-only.",
         "A post-finalise change creates an Amendment: a new linked, append-only entry capturing the author, timestamp, a required reason, and the delta/payload. The original ChartEntry is never mutated; the amendment trail is rendered beneath the locked note so a reader sees the full history. Amendments themselves are immutable and audited (ADR-0010).",
         "Because finalisation is server-side, an offline draft (OFFLINE) can only be finalised once it has synced — the UI keeps 'Finalise' disabled until the draft is on the server, so two devices can never both finalise the same entry. The whole chain (draft edits, finalise, amendments) emits AuditEvents into the append-only audit stream.",
@@ -362,11 +362,11 @@
       "tasks": [
         {
           "title": "Immutability model + finalise/amendment migrations",
-          "note": "EF Core: extend ChartEntry with status/locked/finalised_at/finalised_by; add Amendment (chart_entry_id FK, author, created_at, required reason, payload delta) as an append-only table. Enforce immutability at the data layer where possible (no UPDATE on a locked row) and back it with an AuditEvent stream. tenant_id + RLS throughout."
+          "note": "EF Core: extend ChartEntry with status/locked/finalised_at/finalised_by; add Amendment (chart_entry_id FK, author, created_at, required reason, payload delta) as an append-only table. Enforce immutability at the data layer where possible (no UPDATE on a locked row) and back it with an AuditEvent stream. tenant_id + Row-Level Security (RLS, the per-tenant database isolation) throughout."
         },
         {
           "title": "Server-side finalise + amendment API",
-          "note": "Finalise command (server-side, idempotent): run the close-out (aftercare/recall/wellbeing-call/AE prompt), lock the entry, and for toxin trigger MAPPING's transactional lot deduction + register link. Reject finalising an unsynced draft. Amendment command requires a reason, creates a linked append-only entry, never mutates the original, and rejects any direct edit of a locked entry. Emit finalise + amend AuditEvents (ADR-0010); publish OpenAPI."
+          "note": "Finalise command (server-side, idempotent): run the close-out (aftercare/recall/wellbeing-call/adverse event (AE) prompt), lock the entry, and for toxin trigger MAPPING's transactional lot deduction + register link. Reject finalising an unsynced draft. Amendment command requires a reason, creates a linked append-only entry, never mutates the original, and rejects any direct edit of a locked entry. Emit finalise + amend AuditEvents (ADR-0010); publish OpenAPI."
         },
         {
           "title": "Finalise close-out + read-only/amendment UI",
@@ -377,7 +377,7 @@
     {
       "key": "OFFLINE",
       "title": "Offline queue & sync for room-side charting",
-      "context": "If Wi-Fi drops mid-visit, notes/photos queue locally (encrypted) and sync on reconnect with no loss; finalisation is server-side (REQ-CLIN/APP, ADR-0015).",
+      "context": "Offline queue and sync for room-side charting: if a treatment room loses Wi-Fi, notes and photos queue locally (encrypted) and sync cleanly on reconnect with no loss. A reliability capability under PRD-05 charting on the clinic-first spine; the room-side surface ships later with the provider app (PRD-09). It depends on the offline spike (SPRINT-0/SPIKE-OFFLINE) and immutable finalisation (IMMUTABILITY) — finalisation is server-side, so a draft must sync before it can be finalised — and owns the sync/conflict contract. If Wi-Fi drops mid-visit, notes/photos queue locally (encrypted) and sync on reconnect with no loss; finalisation is server-side (REQ-CLIN/APP, ADR-0015).",
       "as_a": "injector",
       "i_want": "my notes and photos to queue locally and sync when back online if the room loses Wi-Fi",
       "so_that": "I never lose work mid-treatment",
@@ -463,7 +463,7 @@
     {
       "key": "ADVERSE-EVENT",
       "title": "Adverse-event capture → DAEN pathway",
-      "context": "Log an adverse event/complication linked to the treatment, product and lot, classify seriousness and target the correct DAEN database (REQ-CLIN-5, C12). Includes the VO/anaphylaxis complication-response flow.",
+      "context": "Adverse-event capture: when a treatment causes an unwanted medical occurrence, the clinician logs it against the treatment, product and batch-lot, classifies seriousness, and the system routes it to the correct Database of Adverse Event Notifications (DAEN), the Therapeutic Goods Administration's (TGA) reporting system. The safety-reporting source record within PRD-05 charting on the clinic-first spine after the S4 (Schedule 4 'Prescription Only Medicine') moat (PRD-04); it depends on immutable finalisation (IMMUTABILITY), can be raised from COMPLICATION-LIBRARY, and routes to the Governance hub (PRD-08/DAEN). Log an adverse event/complication linked to the treatment, product and lot, classify seriousness and target the correct DAEN database (REQ-CLIN-5, C12). Includes the vascular occlusion (VO)/anaphylaxis complication-response flow.",
       "as_a": "injector",
       "i_want": "to log an adverse event linked to the treatment, product and lot",
       "so_that": "it feeds the TGA report and the right follow-ups happen",
@@ -498,7 +498,7 @@
       ],
       "detail": [
         "As an injector, I want to log an adverse event linked to the treatment, product and lot, so that it feeds the TGA report and the right follow-ups happen.",
-        "When something goes wrong — a vascular occlusion, an anaphylactic reaction, an unexpected reaction to a toxin — the clinician needs to act immediately and capture, in the moment, exactly what a TGA report will later need. This story is the AE capture itself: linked to the treatment, product and lot, classified by seriousness, and routed to the correct DAEN database.",
+        "When something goes wrong — a vascular occlusion, an anaphylactic reaction, an unexpected reaction to a toxin — the clinician needs to act immediately and capture, in the moment, exactly what a TGA report will later need. This story is the adverse event (AE) capture itself: linked to the treatment, product and lot, classified by seriousness, and routed to the correct DAEN database.",
         "An adverse event is logged against the ChartEntry (so it inherits the client, treatment, product and lot context automatically) and captures the fields a TGA DAEN report needs: description, onset, seriousness classification, the product + batch-lot involved, and the outcome/treatment given. The DAEN target is derived from the modality (C12): a toxin or filler-as-medicine routes to DAEN-medicines; a device-class filler/PDO/RF routes to DAEN-medical devices. The system flags the cases where reporting is mandatory rather than voluntary.",
         "Capture can be reached two ways: directly from the finalise close-out ('any adverse event?'), or as the outcome of a complication-response flow (COMPLICATION-LIBRARY) — e.g. a vascular-occlusion or anaphylaxis protocol completes and logs the hyaluronidase/adrenaline given, then raises the AE pre-filled. Either way, logging an AE raises follow-up Jobs (review, mandatory-report check, client follow-up) so nothing is dropped.",
         "Because the AE links to the lot, it ties straight into the lot→client recall lookup (PRD-04) — if a batch is implicated, the affected clients are already known. The AE is part of the immutable clinical record (amendments only, ADR-0010).",
@@ -530,7 +530,7 @@
       "tasks": [
         {
           "title": "Data model & migrations: AdverseEvent",
-          "note": "EF Core: AdverseEvent linked to ChartEntry (so it inherits client/treatment/product/lot), with onset, seriousness, daen_target, mandatory_report flag, description, treatment_given, status. tenant_id + RLS; index by lot_id (recall) and by status (governance worklist). Append-only/immutable like the rest of the clinical record."
+          "note": "EF Core: AdverseEvent linked to ChartEntry (so it inherits client/treatment/product/lot), with onset, seriousness, daen_target, mandatory_report flag, description, treatment_given, status. tenant_id + Row-Level Security (RLS, the per-tenant database isolation); index by lot_id (recall) and by status (governance worklist). Append-only/immutable like the rest of the clinical record."
         },
         {
           "title": "AE capture + modality-derived DAEN routing API",
@@ -549,7 +549,7 @@
     {
       "key": "TREATMENT-PLANS",
       "title": "Treatment plans & protocol templates",
-      "context": "Multi-session treatment plans + applyable protocol templates feed recall and structure ongoing care (REQ-CLIN-7).",
+      "context": "Treatment plans: multi-session courses of care built from clinic-curated protocol templates, scheduling and tracking ongoing treatment and driving the recall worklist. A care-structuring capability under PRD-05 charting on the clinic-first spine; it depends on the guided note (NOTE-TEMPLATE), feeds the recall worklist in comms (PRD-07), and reads from skin analysis (SKIN-ANALYSIS) and outcomes (OUTCOMES). Multi-session treatment plans + applyable protocol templates feed recall and structure ongoing care (REQ-CLIN-7).",
       "as_a": "injector",
       "i_want": "to build multi-session treatment plans from protocol templates",
       "so_that": "ongoing care is structured and drives recall",
@@ -610,7 +610,7 @@
       "tasks": [
         {
           "title": "Data model & migrations: Protocol + TreatmentPlan + PlanSession",
-          "note": "EF Core: Protocol (named template with ordered steps = service + recommended interval), TreatmentPlan (client_id, optional protocol_id, status), PlanSession (due_date, status, optional chart_entry_id link). tenant_id + RLS; index plans by client and sessions by due_date for the recall projection."
+          "note": "EF Core: Protocol (named template with ordered steps = service + recommended interval), TreatmentPlan (client_id, optional protocol_id, status), PlanSession (due_date, status, optional chart_entry_id link). tenant_id + Row-Level Security (RLS, the per-tenant database isolation); index plans by client and sessions by due_date for the recall projection."
         },
         {
           "title": "Plan API: apply protocol, schedule sessions, track progress",
@@ -625,7 +625,7 @@
     {
       "key": "MODALITY",
       "title": "Other-modality charting: filler / energy / weight-loss (placeholder)",
-      "context": "Phase 2 adds dermal filler (multi-area, per-area lot, VO/blindness consent gate), energy-device charting (per-pass settings, laser-licence gated), weight-loss titration and ghost-overlay photo alignment (REQ-CLIN-10..13). Placeholder.",
+      "context": "A Phase-2 placeholder for charting other modalities (categories of treatment beyond toxin injectables) — dermal filler, energy/laser devices and weight-loss. v1 ships only the toxin chart and a non-S4 skin note, but the charting engine is built modality-aware now so these slot in later. A deferred design-only card under PRD-05 charting (depended on by BODY-CONTOURING); nothing builds in v1 beyond the modality model already in MAPPING and NOTE-TEMPLATE. Phase 2 adds dermal filler (multi-area, per-area lot, vascular occlusion (VO)/blindness consent gate), energy-device charting (per-pass settings, laser-licence gated), weight-loss titration and ghost-overlay photo alignment (REQ-CLIN-10..13). Placeholder.",
       "as_a": "injector",
       "i_want": "modality-aware charting for filler, energy devices and weight-loss",
       "so_that": "the platform covers the full treatment menu",
@@ -655,12 +655,12 @@
       "detail": [
         "As an injector, I want modality-aware charting for filler, energy devices and weight-loss, so that the platform covers the full treatment menu.",
         "Placeholder / Phase 2. v1 ships toxin + a non-S4 skin note, but the charting engine is built modality-aware from day one (ADR-0025) so these extensions slot in without re-architecting the clinical record. This story captures each modality's specific gates and capture surface so the later build is a known quantity.",
-        "Treatment is modelled as a typed modality carrying {schedule, regClass, daenRoute, unit, advertisable, requires:[consult|rx|s4Lot|laserLicence|patchTest]} (ADR-0025). The modality drives the capture surface and the compliance behaviour: dermal filler is multi-area / multi-syringe with per-area lot and a mandatory vascular-occlusion / blindness consent gate; energy-device charting is a per-pass settings/fluence logbook with skin-typing + patch-test + safety checks, blocked without a state laser licence (no S4); weight-loss is a titration protocol with ARTG-brand enforcement (compounded GLP-1 refused); standardised photography gains ghost-overlay alignment.",
-        "Adverse-event routing is modality-derived: toxin & filler-as-medicine route to DAEN-medicines; device-class filler/PDO/RF route to DAEN-devices (extends ADVERSE-EVENT / C12). The catalogue's existing s4 flag is extended (not replaced) with regClass/artg/compounded/daenRoute, and a new laserLicence credential (per state/class) gates energy-device booking and charting.",
+        "Treatment is modelled as a typed modality carrying {schedule, regClass, daenRoute, unit, advertisable, requires:[consult|rx|s4Lot|laserLicence|patchTest]} (ADR-0025). The modality drives the capture surface and the compliance behaviour: dermal filler is multi-area / multi-syringe with per-area lot and a mandatory vascular-occlusion / blindness consent gate; energy-device charting is a per-pass settings/fluence logbook with skin-typing + patch-test + safety checks, blocked without a state laser licence (no Schedule 4 'Prescription Only Medicine' (S4)); weight-loss is a titration protocol with Australian Register of Therapeutic Goods (ARTG)-brand enforcement (compounded GLP-1 refused); standardised photography gains ghost-overlay alignment.",
+        "Adverse-event routing is modality-derived: toxin & filler-as-medicine route to Database of Adverse Event Notifications (DAEN)-medicines; device-class filler/PDO/RF route to DAEN-devices (extends ADVERSE-EVENT / C12). The catalogue's existing s4 flag is extended (not replaced) with regClass/artg/compounded/daenRoute, and a new laserLicence credential (per state/class) gates energy-device booking and charting.",
         "No build in v1 beyond the modality model already present in MAPPING / NOTE-TEMPLATE; this card holds the design and the gates so the Phase-2 stories (e.g. BODY-CONTOURING) extend it cleanly."
       ],
       "ui_spec": [
-        "Clinical -> Treatment menu: each treatment's category sets its compliance behaviour (schedule, custody, consent, AE routing, rewards/ads) - the modality model in action (ADR-0025).",
+        "Clinical -> Treatment menu: each treatment's category sets its compliance behaviour (schedule, custody, consent, adverse event (AE) routing, rewards/ads) - the modality model in action (ADR-0025).",
         "Body contouring + the skin note show non-toxin capture surfaces; filler/energy/weight-loss are concept cards for v1.",
         "Deferred - no v1 build; the model already carries the requires:[] gates so Phase-2 stories extend it."
       ],
@@ -691,7 +691,7 @@
     {
       "key": "AI-SCRIBE",
       "title": "AI note dictation / auto-detect injection points (placeholder)",
-      "context": "AI scribe and advisory auto-detection of injection points are explicitly out for v1 (no AI; everything manual + human-confirmed). Placeholder (REQ-CLIN-6, ADR-0020).",
+      "context": "A Phase-2 placeholder for optional AI assistance — note dictation and advisory auto-detection of injection points — explicitly out for v1, where every note and injection point is entered and confirmed by a human. A deferred design-only card under PRD-05 charting that keeps the data model and stance ready; any future feature is advisory and human-confirmed only and never sets units, auto-finalises or auto-administers. AI scribe and advisory auto-detection of injection points are explicitly out for v1 (no AI; everything manual + human-confirmed). Placeholder (REQ-CLIN-6, ADR-0020).",
       "as_a": "injector",
       "i_want": "optional AI assistance for notes and injection-point suggestions",
       "so_that": "charting is faster (with human confirmation)",
@@ -743,7 +743,7 @@
     {
       "key": "SKIN-ANALYSIS",
       "title": "Skin analysis & assessment (with AI scan, advisory)",
-      "context": "The prototype's Clinical → Skin analysis screen captures a structured skin assessment with zone scoring, an AI scan (simulateScan) and a push-to-client summary (pushSkinToClient). Per the no-AI-in-v1 stance, AI scoring is advisory/Phase 2; the manual assessment record can be v1.",
+      "context": "A structured skin assessment: concerns scored by zone and tracked over time, driving a recommended treatment plan and giving the client visible progress (manual record in v1; AI-assisted scan advisory and Phase 2+). The front door to non-injectable care under PRD-05 charting on the clinic-first spine; it depends on the guided note (NOTE-TEMPLATE) and feeds plans (TREATMENT-PLANS) and outcomes (OUTCOMES). Skin images are Personal Health Information (PHI), so image-use consent and Australian storage apply. The prototype's Clinical → Skin analysis screen captures a structured skin assessment with zone scoring, an AI scan (simulateScan) and a push-to-client summary (pushSkinToClient). Per the no-AI-in-v1 stance, AI scoring is advisory/Phase 2; the manual assessment record can be v1.",
       "as_a": "dermal therapist / injector",
       "i_want": "to record a structured skin assessment (and optionally an AI-assisted scan) and share results with the client",
       "so_that": "skin treatment is planned and tracked, and clients see their progress",
@@ -802,14 +802,14 @@
       "tasks": [
         {
           "title": "Skin assessment record + scoring UI (manual v1; AI advisory Phase 2)",
-          "note": "EF Core: SkinAssessment + SkinZoneScore (per-concern percentile-vs-cohort score, recommended service), tenant_id + RLS, indexed by client for trend. API to record/retrieve assessments and trend them across visits; below-threshold concerns surface recommended-plan chips that feed TREATMENT-PLANS; a consent-respecting push-to-client summary (C14 image-use + AU storage for image-backed assessments). UI: the concern-score bars, skin-age vs actual, trend sparkline and recommended-plan chips per the prototype. Keep AI auto-scoring advisory + human-confirmed and gated to Phase 2 (ADR-0020) - v1 records manually; mark source manual vs ai_advisory."
+          "note": "EF Core: SkinAssessment + SkinZoneScore (per-concern percentile-vs-cohort score, recommended service), tenant_id + Row-Level Security (RLS, the per-tenant database isolation), indexed by client for trend. API to record/retrieve assessments and trend them across visits; below-threshold concerns surface recommended-plan chips that feed TREATMENT-PLANS; a consent-respecting push-to-client summary (C14 image-use + AU storage for image-backed assessments). UI: the concern-score bars, skin-age vs actual, trend sparkline and recommended-plan chips per the prototype. Keep AI auto-scoring advisory + human-confirmed and gated to Phase 2 (ADR-0020) - v1 records manually; mark source manual vs ai_advisory."
         }
       ]
     },
     {
       "key": "BODY-CONTOURING",
       "title": "Body contouring charting (e.g. CoolSculpting)",
-      "context": "The prototype's Clinical → Body contouring screen charts body treatments on a body map (bodyAdd/bodyDel/bodyCyc) with applicator/cycle settings — a distinct modality beyond the face.",
+      "context": "Charting body-contouring treatments (e.g. CoolSculpting) on a body map — placing applicators on regions with per-area cycle settings, tallying cycles, chair time and the consumable cost that drives true margin. A Phase-2 modality under PRD-05 charting on the clinic-first spine; it depends on the modality placeholder (MODALITY) it extends, feeds plans (TREATMENT-PLANS) and outcomes (OUTCOMES), rides the photo rules (PHOTOS) and finalises like any record (IMMUTABILITY). It is non-S4 device-class, so there is no lot, prescription or stock deduction. The prototype's Clinical → Body contouring screen charts body treatments on a body map (bodyAdd/bodyDel/bodyCyc) with applicator/cycle settings — a distinct modality beyond the face.",
       "as_a": "therapist",
       "i_want": "to chart body-contouring treatments on a body map with per-area applicator/cycle settings",
       "so_that": "non-facial treatments are recorded with the same rigour",
@@ -842,7 +842,7 @@
         "As a therapist, I want to chart body-contouring treatments on a body map with per-area applicator/cycle settings, so that non-facial treatments are recorded with the same rigour.",
         "Body contouring (e.g. CoolSculpting / cryolipolysis) is a non-S4 Class IIb device treatment whose true cost driver is the single-use applicator. Charting it well means a body-map analogue of the injection map: placing applicators on regions, recording cycles per area, chair time and the per-cycle consumable cost, plus standardised photos and circumference measurements over the course.",
         "The clinician taps regions on a body map to place applicators (the prototype's bodyAdd over bodyZones), each mapped to its applicator type and per-cycle cost/time (APPL), and adjusts cycles per area (bodyCyc). The chart tallies applicators - cycles - chair time and the applicator (consumable) cost, which flows into True cost & margin reporting (PRD-08) so body-contouring profit is real, not a guess.",
-        "It is a distinct modality (extends MODALITY / ADR-0025): non-S4, device-class, so no lot/Rx and no S4 deduction - but device-gated where a licence/patch-test applies per the modality rules. Sessions feed multi-session plans (TREATMENT-PLANS) and outcomes (OUTCOMES), and standardised before/after body photos + objective measurements (e.g. waist circumference over the course) ride the PHOTOS storage rules.",
+        "It is a distinct modality (extends MODALITY / ADR-0025): non-S4, device-class, so no lot/prescription (Rx) and no S4 deduction - but device-gated where a licence/patch-test applies per the modality rules. Sessions feed multi-session plans (TREATMENT-PLANS) and outcomes (OUTCOMES), and standardised before/after body photos + objective measurements (e.g. waist circumference over the course) ride the PHOTOS storage rules.",
         "Finalising the body chart locks it like any clinical record (IMMUTABILITY); progress photos + measurements can be pushed to the client app (consent-respecting)."
       ],
       "ui_spec": [
@@ -872,14 +872,14 @@
       "tasks": [
         {
           "title": "Body-contouring charting: body map, applicator/cycle capture + cost roll-up",
-          "note": "EF Core: BodyChart (areas[]{region, applicator, cycles, params}, totals, consumable_cost, chair_minutes) + BodyMeasurement, linked to a ChartEntry (treatment_type=body-contouring, non-S4 device-class - no lot/Rx). tenant_id + RLS. Build the body-map UI (tap regions to place applicators, -/+ cycles per area, per-area applicator/cost/time table, summary tiles) plus standardised body photos (PHOTOS rules) and circumference measurements over the course. Roll per-cycle applicator cost into True cost & margin (PRD-08); feed sessions into plans (TREATMENT-PLANS) + outcomes (OUTCOMES); finalise locks the chart (IMMUTABILITY); device-gate where a licence/patch-test applies. Extends the MODALITY model (ADR-0025)."
+          "note": "EF Core: BodyChart (areas[]{region, applicator, cycles, params}, totals, consumable_cost, chair_minutes) + BodyMeasurement, linked to a ChartEntry (treatment_type=body-contouring, non-S4 device-class - no lot/Rx). tenant_id + Row-Level Security (RLS, the per-tenant database isolation). Build the body-map UI (tap regions to place applicators, -/+ cycles per area, per-area applicator/cost/time table, summary tiles) plus standardised body photos (PHOTOS rules) and circumference measurements over the course. Roll per-cycle applicator cost into True cost & margin (PRD-08); feed sessions into plans (TREATMENT-PLANS) + outcomes (OUTCOMES); finalise locks the chart (IMMUTABILITY); device-gate where a licence/patch-test applies. Extends the MODALITY model (ADR-0025)."
         }
       ]
     },
     {
       "key": "COMPLICATION-LIBRARY",
       "title": "Complication protocol library & response kits",
-      "context": "The prototype's Clinical → Complication protocols (openComplication/completeComplication) provides step-by-step VO/anaphylaxis protocols and links the emergency kit — the reference side of the adverse-event response.",
+      "context": "A library of complication protocols (e.g. vascular occlusion, anaphylaxis) with guided, editable response steps and emergency-kit links, launched as a timestamped checklist so the clinician follows the correct documented steps in an emergency. The reference-and-response side of safety within PRD-05 charting on the clinic-first spine; it depends on adverse-event capture (ADVERSE-EVENT) — a completed response raises a pre-filled, routed adverse event — and links to the emergency-kit register (PRD-11/EMERGENCY-KIT). The prototype's Clinical → Complication protocols (openComplication/completeComplication) provides step-by-step vascular occlusion (VO)/anaphylaxis protocols and links the emergency kit — the reference side of the adverse-event response.",
       "as_a": "clinician",
       "i_want": "a library of complication protocols with guided response steps and kit links",
       "so_that": "in an emergency I follow the correct, documented steps",
@@ -914,7 +914,7 @@
         "As a clinician, I want a library of complication protocols with guided response steps and kit links, so that in an emergency I follow the correct, documented steps.",
         "When a complication happens - a vascular occlusion mid-filler, an anaphylactic reaction - there is no time to look things up. The complication library is the reference + response side of safety: clinic-curated, editable protocols (VO, anaphylaxis, ...) with ordered steps and the emergency-kit items they draw on, launched as a timestamped checklist that logs what was done and opens a routed adverse-event case.",
         "Each ComplicationProtocol is an editable template: a name, a sub-line, ordered response steps, and the required kit items (e.g. VO -> high-dose hyaluronidase; anaphylaxis -> adrenaline 1:1000). 'Edit steps' lets the clinic tailor protocols to its own policy. The protocols read against the emergency-kit register (PRD-11/EMERGENCY-KIT) so the items they need are known to be on hand with in-date expiry.",
-        "'Start response' launches the protocol as a live, timestamped checklist (openComplication): the clinician ticks steps as they go and records the drug/kit used. On 'Complete & open AE case' (completeComplication) the response records its timing + outcome and raises a pre-filled, routed AdverseEvent (ADVERSE-EVENT) - seriousness pre-set, DAEN route derived from the modality (device for VO/filler, medicine for anaphylaxis) - plus a complication follow-up Job.",
+        "'Start response' launches the protocol as a live, timestamped checklist (openComplication): the clinician ticks steps as they go and records the drug/kit used. On 'Complete & open adverse event (AE) case' (completeComplication) the response records its timing + outcome and raises a pre-filled, routed AdverseEvent (ADVERSE-EVENT) - seriousness pre-set, Database of Adverse Event Notifications (DAEN) route derived from the modality (device for VO/filler, medicine for anaphylaxis) - plus a complication follow-up Job.",
         "This is the reference + response library; the AE record + DAEN routing live in ADVERSE-EVENT, and the kit register lives in PRD-11. Completion is part of the immutable clinical record."
       ],
       "ui_spec": [
@@ -943,7 +943,7 @@
       "tasks": [
         {
           "title": "Data model & migrations: ComplicationProtocol + ComplicationResponse",
-          "note": "EF Core: ComplicationProtocol (name, ordered steps, required_kit refs, route, drug, editable) + ComplicationResponse (protocol_id, client/chart links, started_at/completed_at, steps_done, kit_used, outcome). tenant_id + RLS; a response is immutable once completed. Reference the emergency-kit register (PRD-11)."
+          "note": "EF Core: ComplicationProtocol (name, ordered steps, required_kit refs, route, drug, editable) + ComplicationResponse (protocol_id, client/chart links, started_at/completed_at, steps_done, kit_used, outcome). tenant_id + Row-Level Security (RLS, the per-tenant database isolation); a response is immutable once completed. Reference the emergency-kit register (PRD-11)."
         },
         {
           "title": "Protocol library + response API",
@@ -962,7 +962,7 @@
     {
       "key": "OUTCOMES",
       "title": "Outcomes & revision tracking",
-      "context": "The prototype's Photography & outcomes view tracks before/after outcomes and a revision/touch-up signal that feeds reporting (REQ-CLIN-13).",
+      "context": "Outcomes and revision tracking: capturing how treatments turned out (a result rating, the before/after linkage) and recording any revision/touch-up against the original treatment, so quality can be measured per treatment type and practitioner. The quality-measurement capability under PRD-05 charting on the clinic-first spine; it depends on standardised photos (PHOTOS) for evidence and consent rules, and its aggregates feed reporting (PRD-08); complications tie back to adverse-event records (ADVERSE-EVENT). The prototype's Photography & outcomes view tracks before/after outcomes and a revision/touch-up signal that feeds reporting (REQ-CLIN-13).",
       "as_a": "injector / owner",
       "i_want": "to track treatment outcomes and any revisions/touch-ups",
       "so_that": "we can measure quality and feed it to reporting",
@@ -1017,7 +1017,7 @@
       "tasks": [
         {
           "title": "Outcome + revision capture, aggregation & UI",
-          "note": "EF Core: Outcome linked to a finalised ChartEntry (rating, optional satisfaction, before/after photo links, revision_of pointing at the original treatment), tenant_id + RLS, indexed by treatment type + practitioner. API to capture outcomes/revisions and a read-model aggregating touch-up rate, % satisfied, n and complications (from AdverseEvent) per treatment type/practitioner, feeding PRD-08 reporting. UI: per-treatment outcome capture + the 'Outcomes & revisions - per treatment type' table; any photo-based outcome respects image-use consent (PHOTOS / C14). Keep money/quality figures owner-gated per the financial-gating rules."
+          "note": "EF Core: Outcome linked to a finalised ChartEntry (rating, optional satisfaction, before/after photo links, revision_of pointing at the original treatment), tenant_id + Row-Level Security (RLS, the per-tenant database isolation), indexed by treatment type + practitioner. API to capture outcomes/revisions and a read-model aggregating touch-up rate, % satisfied, n and complications (from AdverseEvent) per treatment type/practitioner, feeding PRD-08 reporting. UI: per-treatment outcome capture + the 'Outcomes & revisions - per treatment type' table; any photo-based outcome respects image-use consent (PHOTOS / C14). Keep money/quality figures owner-gated per the financial-gating rules."
         }
       ]
     }

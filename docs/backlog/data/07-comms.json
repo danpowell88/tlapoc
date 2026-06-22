@@ -18,7 +18,7 @@
     {
       "key": "CHANNELS",
       "title": "Notification channels (SMS / email / push)",
-      "context": "An INotifier port over an AU SMS provider + email + app push, with per-tenant templates (REQ-NOTIF-1, ADR-0012).",
+      "context": "Every reminder, aftercare tip, recall nudge, dunning notice and marketing message leaves the platform through one delivery layer. Rather than scatter SMS/email/push SDK calls through the codebase, this story defines an INotifier port so the providers stay swappable (AU SMS, email, app push) and every send is rendered from a per-tenant template and logged to the client's comms history. It is the shared seam the whole comms epic — and PRD-06's reward/dunning comms — sends through.  An INotifier port over an AU SMS provider + email + app push, with per-tenant templates (REQ-NOTIF-1, ADR-0012).",
       "as_a": "developer",
       "i_want": "a notification abstraction over SMS, email and push with per-tenant templates",
       "so_that": "all messaging is consistent and provider-swappable",
@@ -74,7 +74,7 @@
       "tasks": [
         {
           "title": "INotifier port + MessageTemplate/NotificationLog model (migrations)",
-          "note": "Define the INotifier port and model MessageTemplate + NotificationLog (tenant_id + RLS).\n- Port: send(channel, recipient, templateKey, variables) returning a queued NotificationLog with a provider_ref.\n- MessageTemplate per tenant per channel with named variables; render step substitutes variables safely.\n- NotificationLog status lifecycle queued -> sent -> delivered|failed, updated by provider callbacks; joined to the client for the comms history.\n- The port is consent-agnostic; callers apply the consent/suppression gate (MARKETING-CONSENT)."
+          "note": "Define the INotifier port and model MessageTemplate + NotificationLog (tenant_id + RLS (row-level security)).\n- Port: send(channel, recipient, templateKey, variables) returning a queued NotificationLog with a provider_ref.\n- MessageTemplate per tenant per channel with named variables; render step substitutes variables safely.\n- NotificationLog status lifecycle queued -> sent -> delivered|failed, updated by provider callbacks; joined to the client for the comms history.\n- The port is consent-agnostic; callers apply the consent/suppression gate (MARKETING-CONSENT)."
         },
         {
           "title": "Notification API: render, send, comms-history query",
@@ -89,7 +89,7 @@
     {
       "key": "REMINDERS-CARE",
       "title": "Reminders, confirmations & care sequences",
-      "context": "Appointment reminders/confirmations plus pre-care and aftercare sequences (multi-touch, timed per treatment type) (REQ-NOTIF-2). Transactional messages are exempt from opt-in.",
+      "context": "Two jobs that keep clients prepared and cared-for: appointment reminders/confirmations, and pre-care + aftercare instruction sequences timed to each treatment type. A reminder a client can confirm or decline keeps the book accurate; a day-0 and day-3 aftercare touch after a treatment reduces worry and complications. These are transactional messages — exempt from marketing opt-in, but they still avoid S4 references.  Appointment reminders/confirmations plus pre-care and aftercare sequences (multi-touch, timed per treatment type) (REQ-NOTIF-2). Transactional messages are exempt from opt-in.",
       "as_a": "client",
       "i_want": "timely reminders I can confirm/decline and pre-/after-care instructions for my treatment",
       "so_that": "I'm prepared and cared for around my visit",
@@ -144,18 +144,18 @@
       "tasks": [
         {
           "title": "Sequence/SequenceRun model (migrations)",
-          "note": "Model Sequence + SequenceRun (tenant_id + RLS).\n- Sequence: trigger (booking|visit), treatment_type, kind (transactional|marketing), ordered steps {offset, channel, template_key}.\n- SequenceRun: one per client+appointment with per-step status + sent_at.\n- kind distinguishes the opt-in-exempt transactional path from the consented marketing path."
+          "note": "Model Sequence + SequenceRun (tenant_id + RLS (row-level security)).\n- Sequence: trigger (booking|visit), treatment_type, kind (transactional|marketing), ordered steps {offset, channel, template_key}.\n- SequenceRun: one per client+appointment with per-step status + sent_at.\n- kind distinguishes the opt-in-exempt transactional path from the consented marketing path."
         },
         {
           "title": "Sequence engine: trigger -> timed steps, confirm/decline, transactional/consent split",
-          "note": "Server-side engine (shared with RECALL + AUTOMATIONS).\n- On a trigger (booking made / visit completed), start a SequenceRun and schedule steps at their offsets; dispatch each via INotifier at its time.\n- Reminder confirm/decline updates the Appointment (PRD-02); reschedule link routes to booking.\n- Transactional sequences send regardless of marketing consent; marketing sequences gate on consent + suppression (MARKETING-CONSENT). Either way, content must not name/price S4 (C9).\n- Endpoints to define sequences + query runs; log every send."
+          "note": "Server-side engine (shared with RECALL + AUTOMATIONS).\n- On a trigger (booking made / visit completed), start a SequenceRun and schedule steps at their offsets; dispatch each via INotifier at its time.\n- Reminder confirm/decline updates the Appointment (PRD-02); reschedule link routes to booking.\n- Transactional sequences send regardless of marketing consent; marketing sequences gate on consent + suppression (MARKETING-CONSENT). Either way, content must not name/price S4 (Schedule 4 prescription-only medicine) (C9).\n- Endpoints to define sequences + query runs; log every send."
         }
       ]
     },
     {
       "key": "RECALL",
       "title": "Recall / recare worklist",
-      "context": "Recare at the treatment interval (toxin ~12 weeks) + unbooked-rebook prompts, with a recall worklist for front desk (REQ-NOTIF-3).",
+      "context": "Toxin wears off at a predictable cadence (~12 weeks), and treatment plans recommend follow-up sessions. If no one nudges the client and no one watches the gap, the booking quietly never happens. Recall closes that gap: at the configured interval a due client gets an automatic nudge, and front desk works a recall/rebook worklist of everyone owed a return. It keeps the book full and clients on cadence, tying treatment plans (PRD-05) to rebooking (PRD-06).  Recare at the treatment interval (toxin ~12 weeks) + unbooked-rebook prompts, with a recall worklist for front desk (REQ-NOTIF-3).",
       "as_a": "front desk",
       "i_want": "a recall worklist of clients due to rebook and automatic recall nudges at the treatment interval",
       "so_that": "clients return on cadence and the book stays full",
@@ -205,7 +205,7 @@
       "tasks": [
         {
           "title": "RecallTask model + interval/unbooked-plan generation (migrations)",
-          "note": "Model RecallTask (tenant_id + RLS): client_id, due_at, reason (interval|unbooked_plan), status, last_nudge_at.\n- Configurable interval per treatment type (toxin ~12 wks default).\n- A RecallTask projects into the Job queue (FOLLOWUPS) as a 'recall' Job."
+          "note": "Model RecallTask (tenant_id + RLS (row-level security)): client_id, due_at, reason (interval|unbooked_plan), status, last_nudge_at.\n- Configurable interval per treatment type (toxin ~12 wks default).\n- A RecallTask projects into the Job queue (FOLLOWUPS) as a 'recall' Job."
         },
         {
           "title": "Recall scheduler + nudge + worklist API",
@@ -216,7 +216,7 @@
     {
       "key": "MARKETING-CONSENT",
       "title": "Marketing consent & functional unsubscribe (Spam Act)",
-      "context": "Opt-in for commercial electronic messages, sender identification and a functional unsubscribe that suppresses immediately on withdrawal (REQ-NOTIF-5, C23).",
+      "context": "Under the Spam Act, a commercial electronic message needs the recipient's consent, must identify the sender, and must carry a functional unsubscribe that takes effect promptly. This story is the consent + suppression spine for all marketing: opt-in per channel, an unsubscribe in every marketing message, and immediate suppression on withdrawal — honoured across SMS/email/push and by PRD-06's reward comms. Transactional reminders/aftercare are exempt and always send.  Opt-in for commercial electronic messages, sender identification and a functional unsubscribe that suppresses immediately on withdrawal (REQ-NOTIF-5, C23).",
       "as_a": "client",
       "i_want": "to only receive marketing I opted into, with a working unsubscribe on every message",
       "so_that": "my consent is respected per the Spam Act",
@@ -275,7 +275,7 @@
       "tasks": [
         {
           "title": "MarketingConsent + SuppressionList model (migrations)",
-          "note": "Model MarketingConsent (per client per channel) + SuppressionList (tenant-wide contacts) — tenant_id + RLS.\n- Consent carries opted_in + updated_at; suppression carries contact + reason + at.\n- These are the shared gate every marketing caller (incl. PRD-06 reward comms) consults."
+          "note": "Model MarketingConsent (per client per channel) + SuppressionList (tenant-wide contacts) — tenant_id + RLS (row-level security).\n- Consent carries opted_in + updated_at; suppression carries contact + reason + at.\n- These are the shared gate every marketing caller (incl. PRD-06 reward comms) consults."
         },
         {
           "title": "Consent gate + functional unsubscribe + sender-ID",
@@ -290,7 +290,7 @@
     {
       "key": "BOOKING-PAGE",
       "title": "Public booking page: generic names, S4 prices withheld",
-      "context": "The public booking page uses generic service names and withholds S4 prices by configuration (catalog schedule flag), with no advertising linter (REQ-NOTIF-12, C9).",
+      "context": "The public booking page is the one outward-facing surface the platform owns, so it must not breach the advertising rules: it uses generic service names and withholds S4 prices automatically, driven by configuration off the catalog schedule flag — not by an automated advertising linter (which was withdrawn from scope, ADR-0034).  Everything else about advertising compliance is the clinic's responsibility in its external tools.",
       "as_a": "owner",
       "i_want": "my public booking page to use generic service names and withhold S4 prices automatically",
       "so_that": "we don't reference S4 in public advertising",
@@ -351,22 +351,22 @@
         },
         {
           "title": "Public booking-page render: schedule-driven generic names + withheld prices",
-          "note": "Server-side render of the public booking page/feed.\n- For each service, if S4-flagged AND config on: emit a generic name, suppress price ('Pricing discussed at consult'), suppress S4 imagery; non-S4 services render name + price normally.\n- Applies to the page and its SEO metadata. Configuration-driven, not a linter — driven entirely by the schedule flag + the toggles."
+          "note": "Server-side render of the public booking page/feed.\n- For each service, if S4-flagged AND config on: emit a generic name, suppress price ('Pricing discussed at consult'), suppress S4 (Schedule 4 prescription-only medicine) imagery; non-S4 services render name + price normally.\n- Applies to the page and its SEO metadata. Configuration-driven, not a linter — driven entirely by the schedule flag + the toggles."
         },
         {
           "title": "Enforce no-public-S4 as a server-side invariant + audit",
-          "note": "C9 invariant on the public surface the app owns.\n- The public render must never expose an S4 service's brand/clinical name/price/imagery when the policy is on; assert this server-side so a UI/client change can't leak it.\n- Audit config changes (ADR-0010). (No advertising linter — external advertising is clinic-owned, ADR-0034.)"
+          "note": "C9 invariant on the public surface the app owns.\n- The public render must never expose an S4 (Schedule 4 prescription-only medicine) service's brand/clinical name/price/imagery when the policy is on; assert this server-side so a UI/client change can't leak it.\n- Audit config changes (ADR-0010). (No advertising linter — external advertising is clinic-owned, ADR-0034.)"
         },
         {
           "title": "Settings -> Public booking page web UI + live preview",
-          "note": "Angular per the screenshot.\n- Public-booking-widget panel with the policy toggles (generic names / withhold S4 prices / no S4 imagery) and SEO metadata fields.\n- Live Preview showing how S4 vs non-S4 services render (price withheld for S4).\n- Owner/admin gated; loading/empty/error states."
+          "note": "Angular per the screenshot.\n- Public-booking-widget panel with the policy toggles (generic names / withhold S4 (Schedule 4 prescription-only medicine) prices / no S4 imagery) and SEO metadata fields.\n- Live Preview showing how S4 vs non-S4 services render (price withheld for S4).\n- Owner/admin gated; loading/empty/error states."
         }
       ]
     },
     {
       "key": "FOLLOWUPS",
       "title": "Unified follow-up / job queue",
-      "context": "Scattered recall / needs-attention / unanswered-comms items merge into one queue; staff can flag any message; inbound comms auto-categorise into jobs (rules/keyword, no AI) (REQ-NOTIF-7, ADR-0023).",
+      "context": "Follow-ups used to scatter: a recall worklist here, a dashboard 'needs attention' there, unanswered inbox messages somewhere else — and anything no one replied to could quietly fall through the cracks. This story makes one queue: recall, needs-attention and unanswered-comms items all merge into a single 'what needs doing' list, staff can flag any message so it isn't lost, and inbound comms auto-categorise into jobs by rules/keyword (no AI). It is the single cross-clinic to-do list (ADR-0023).  Scattered recall / needs-attention / unanswered-comms items merge into one queue; staff can flag any message; inbound comms auto-categorise into jobs (rules/keyword, no AI) (REQ-NOTIF-7, ADR-0023).",
       "as_a": "staff member",
       "i_want": "one follow-up queue that merges recalls, needs-attention items and flagged messages",
       "so_that": "nothing falls through the cracks",
@@ -415,7 +415,7 @@
       "tasks": [
         {
           "title": "Job model + signal projections (migrations)",
-          "note": "Model Job (tenant_id + RLS) per ADR-0023: type, optional client/conversation/appointment links, assignee (role|person), status (open|snoozed|done), source (manual|auto|recall|system), due_at.\n- Existing signals project INTO this queue (recall due, unanswered conversation, negative review, no-show, stock/expiry, client concern) rather than separate tables.\n- Role-scoping ('my queue') via the concerns model."
+          "note": "Model Job (tenant_id + RLS (row-level security)) per ADR-0023: type, optional client/conversation/appointment links, assignee (role|person), status (open|snoozed|done), source (manual|auto|recall|system), due_at.\n- Existing signals project INTO this queue (recall due, unanswered conversation, negative review, no-show, stock/expiry, client concern) rather than separate tables.\n- Role-scoping ('my queue') via the concerns model."
         },
         {
           "title": "Jobs API: lifecycle, flag, rules/keyword auto-categorise, projections",
@@ -430,7 +430,7 @@
     {
       "key": "INBOX",
       "title": "Omnichannel inbox + lead/reviews (placeholder)",
-      "context": "The omnichannel inbox (IG/FB/SMS/email), lead/prospect CRM and reviews/reputation are scoped to Phase 2; marketing DMs are out (Meta 24-h window). Placeholder (REQ-NOTIF-6/8/9, ADR-0018/0019/0032/0033).",
+      "context": "Most enquiries arrive as IG/FB DMs, SMS and email — and the prototype shows an omnichannel inbox with categorisation, client linking and templated/keyword suggested replies. Per scope this is Phase 2, captured as a placeholder. Crucially, Meta's constraints (App Review, Business Verification, the 24-hour messaging window, no cold-DM) mean marketing DMs are out: IG/FB/WhatsApp are reactive/service channels only, while proactive marketing stays on SMS/email.  The omnichannel inbox (IG/FB/SMS/email), lead/prospect CRM and reviews/reputation are scoped to Phase 2; marketing DMs are out (Meta 24-h window). Placeholder (REQ-NOTIF-6/8/9, ADR-0018/0019/0032/0033).",
       "as_a": "staff member",
       "i_want": "a unified inbox with lead tracking and review management",
       "so_that": "all client conversations live in one place",
@@ -491,7 +491,7 @@
     {
       "key": "AUTOMATIONS",
       "title": "Automation builder (triggers → timed messages)",
-      "context": "The prototype's Comms → Automations screen (toggleAuto) configures the reminder/aftercare/recall sequences as toggleable automations. This is the management UI over PRD-07's sequence engine.",
+      "context": "Reminders, aftercare and recall shouldn't need a human to remember them. The Automations screen is the management UI over the sequence engine: each automation maps a trigger (booking, visit, interval) to a timed sequence of messages, and can be switched on/off and tuned per treatment type — so the right message goes out at the right time, hands-off. It drives the same engine as REMINDERS-CARE and RECALL.  The prototype's Comms → Automations screen (toggleAuto) configures the reminder/aftercare/recall sequences as toggleable automations. This is the management UI over PRD-07's sequence engine.",
       "as_a": "owner / front desk",
       "i_want": "to configure automations that send the right message at the right time per trigger",
       "so_that": "reminders, aftercare and recall run hands-off",
@@ -541,7 +541,7 @@
       "tasks": [
         {
           "title": "Automation model over Sequence (migrations)",
-          "note": "Model Automation (tenant_id + RLS): trigger, treatment_type, sequence_id, kind (transactional|marketing), enabled.\n- A thin wrapper over Sequence (REMINDERS-CARE) — does not duplicate the engine.\n- kind carries through to the consent gate."
+          "note": "Model Automation (tenant_id + RLS (row-level security)): trigger, treatment_type, sequence_id, kind (transactional|marketing), enabled.\n- A thin wrapper over Sequence (REMINDERS-CARE) — does not duplicate the engine.\n- kind carries through to the consent gate."
         },
         {
           "title": "Automation toggle/edit API + engine wiring",
@@ -556,7 +556,7 @@
     {
       "key": "REVIEWS",
       "title": "Reviews & reputation (request, acknowledge, flag, auto-follow-up)",
-      "context": "The prototype's Growth → Reviews screen (scanReviews/reviewReply/reviewFlag/reviewAck) requests reviews, replies/acknowledges, and auto-raises follow-up jobs for negative reviews (≤3★) — with a staff caution against resharing an S4-endorsing review as a prohibited testimonial.",
+      "context": "Reputation matters, but in Australia a review feature is a compliance trap: review gating (only asking happy clients) is misleading conduct under the ACL, and reposting a review that endorses an S4 result becomes a prohibited testimonial (National Law s133, TGA Code). So this feature is built request-all (no sentiment gating), reply-yes, repost-S4-no, and it closes the loop by auto-raising follow-up jobs for negative reviews. (Phase 2 in scope, but with real mechanics — request, acknowledge, reply, flag, auto-detect.)  The prototype's Growth → Reviews screen (scanReviews/reviewReply/reviewFlag/reviewAck) requests reviews, replies/acknowledges, and auto-raises follow-up jobs for negative reviews (≤3★) — with a staff caution against resharing an S4-endorsing review as a prohibited testimonial.",
       "as_a": "owner",
       "i_want": "to request reviews and manage replies, with negative ones auto-raising follow-ups",
       "so_that": "reputation is managed and problems are caught early",
@@ -610,18 +610,18 @@
       "tasks": [
         {
           "title": "Review model + complaint-keyword auto-detect (migrations)",
-          "note": "Model Review (tenant_id + RLS): source, rating, body, names_s4, status.\n- Request-all: review requests gate only on consent (C23), never on sentiment (ACL).\n- Auto-detect: rating <=3 OR a complaint-keyword match flags needs-follow-up.\n- No repost-as-marketing field/feature exists (prevents prohibited testimonials)."
+          "note": "Model Review (tenant_id + RLS (row-level security)): source, rating, body, names_s4, status.\n- Request-all: review requests gate only on consent (C23), never on sentiment (ACL).\n- Auto-detect: rating <=3 OR a complaint-keyword match flags needs-follow-up.\n- No repost-as-marketing field/feature exists (prevents prohibited testimonials)."
         },
         {
           "title": "Reviews API: request, reply, acknowledge, flag -> Job; testimonial caution",
-          "note": "Server-side.\n- Send review requests to all eligible consented clients (no gating); reply/acknowledge endpoints; flag -> create a review Job (Follow-ups) assigned Lead Nurse (clinical/unhappy) or Reception.\n- Auto-detect: scan reviews, raise review Jobs for ≤3★/complaint matches idempotently.\n- When a review names an S4 result, surface the caution (don't reshare — prohibited testimonial, C9/ADR-0032); the platform offers no repost action. KPI read-model (avg, count, response rate, needs-follow-up)."
+          "note": "Server-side.\n- Send review requests to all eligible consented clients (no gating); reply/acknowledge endpoints; flag -> create a review Job (Follow-ups) assigned Lead Nurse (clinical/unhappy) or Reception.\n- Auto-detect: scan reviews, raise review Jobs for ≤3★/complaint matches idempotently.\n- When a review names an S4 (Schedule 4 prescription-only medicine) result, surface the caution (don't reshare — prohibited testimonial, C9/ADR-0032); the platform offers no repost action. KPI read-model (avg, count, response rate, needs-follow-up)."
         }
       ]
     },
     {
       "key": "LEADS-CRM",
       "title": "Lead / prospect CRM",
-      "context": "The prototype's Growth → Leads (CRM) screen tracks enquiries who haven't booked yet, over the inbox (ADR-0033).",
+      "context": "Most enquiries arrive asking the one thing a clinic can't answer publicly ('how much is Botox?'), via IG/FB DM, the website widget or phone. A 1:1 reply isn't public advertising, so a lead pipeline lets reception convert privately and stops enquiries getting lost. This is a thin CRM over the inbox: track prospects who haven't booked, move them to consult/won/lost, and convert to a client/booking preserving history. Phase 2 in scope, with real pipeline mechanics.  The prototype's Growth → Leads (CRM) screen tracks enquiries who haven't booked yet, over the inbox (ADR-0033).",
       "as_a": "front desk / owner",
       "i_want": "to track leads/prospects through to booking",
       "so_that": "enquiries don't get lost and convert better",
@@ -674,7 +674,7 @@
       "tasks": [
         {
           "title": "Lead model as a projection over conversations (migrations)",
-          "note": "Model Lead (tenant_id + RLS) per ADR-0033: name, contact, source, interest, stage, next_action, optional conversation_id + converted_client_id, consent.\n- A thin pipeline layer over the inbox; stage transitions feed conversion read-models."
+          "note": "Model Lead (tenant_id + RLS (row-level security)) per ADR-0033: name, contact, source, interest, stage, next_action, optional conversation_id + converted_client_id, consent.\n- A thin pipeline layer over the inbox; stage transitions feed conversion read-models."
         },
         {
           "title": "Leads API: pipeline stages, convert-to-client, consent-gated nudges, Follow-ups",
@@ -689,7 +689,7 @@
     {
       "key": "CAMPAIGNS",
       "title": "Campaigns (external-tool handoff) (placeholder)",
-      "context": "The prototype shows a Comms → Campaigns screen, but advertising/campaign tooling was withdrawn from scope (ADR-0034 withdrawn) — email campaigns and social belong in the clinic's external tools (Mailchimp, Meta Business Suite). Tracked as a placeholder to reconcile prototype vs scope.",
+      "context": "The prototype shows a Comms -> Campaigns screen, but advertising/campaign tooling was withdrawn from scope (ADR-0034 withdrawn). Email campaigns and social belong in the clinic's external tools (Mailchimp, Meta Business Suite).  Tracked as a placeholder to reconcile the prototype against the scope cut.",
       "as_a": "owner",
       "i_want": "campaign capability",
       "so_that": "I can run promotions",
@@ -735,7 +735,7 @@
       "tasks": [
         {
           "title": "Scope & design when pulled into a sprint",
-          "note": "Deferred placeholder — no build in v1; advertising tooling is withdrawn (ADR-0034). If revisited: the only in-scope capability is a consented audience-segment export (consent + suppression honoured, C23) to the clinic's external tools (Mailchimp, Meta Business Suite). Any in-app campaign would have to honour TGA/AHPRA advertising rules and the no-public-S4-pricing rule (C9). Confirm scope/regulatory stance before any breakdown."
+          "note": "Deferred placeholder — no build in v1; advertising tooling is withdrawn (ADR-0034). If revisited: the only in-scope capability is a consented audience-segment export (consent + suppression honoured, C23) to the clinic's external tools (Mailchimp, Meta Business Suite). Any in-app campaign would have to honour TGA (Therapeutic Goods Administration)/AHPRA (Australian Health Practitioner Regulation Agency) advertising rules and the no-public-S4-pricing rule (C9). Confirm scope/regulatory stance before any breakdown."
         }
       ]
     }

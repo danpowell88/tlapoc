@@ -7,7 +7,7 @@
 ## Background
 
 As a prescriber, I want to generate a prefilled DAEN adverse-event report targeting the correct database, so that reporting an adverse event is fast and correct.
-Classify seriousness, route medicine vs device, produce a prefilled DAEN export/submission and flag mandatory cases (C12, ADR-0031).
+This story makes adverse-event reporting fast and correct: it takes a complication recorded in the clinical record and produces a prefilled report for the right TGA (Therapeutic Goods Administration) database, plus runs product recalls with an acknowledgement trail. It sits in the Reporting/Governance layer (step 6 of the clinic-first build): it consumes the adverse-event record from Charting (PRD-05 ADVERSE-EVENT), so it depends on that, and feeds the open-adverse-event count on the Governance Overview. This is clinical-governance work, not financial — no money figures appear. Classify seriousness, route medicine vs device, produce a prefilled DAEN (Database of Adverse Event Notifications) export/submission and flag mandatory cases (C12, ADR-0031).
 
 ## How it works
 
@@ -60,10 +60,10 @@ _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Po
 ## Tasks (dev pickup)
 
 - [ ] **Backend: AE → DAEN classification, routing & prefill**
-  From an AdverseEvent (PRD-05), build a DaenReport: set seriousness, route to medicine vs device by the product's modality/regClass (ADR-0025), and prefill the report fields from AE + administration + product/lot data. Flag mandatory cases by rule (unapproved-goods-under-authority; serious device event at a hospital/day-hospital facility from 21 Mar 2026 — ASDER) with the basis recorded, defaulting to voluntary otherwise. Status machine: submit_due/open → submitted. No direct TGA API (ADR-0031).
+  From an AdverseEvent (PRD-05), build a DaenReport: set seriousness, route to medicine vs device by the product's modality/regClass (ADR-0025), and prefill the report fields from AE + administration + product/lot data. Flag mandatory cases by rule (unapproved-goods-under-authority; serious device event at a hospital/day-hospital facility from 21 Mar 2026 — ASDER) with the basis recorded, defaulting to voluntary otherwise. Status machine: submit_due/open → submitted. No direct TGA (Therapeutic Goods Administration) API (ADR-0031).
 - [ ] **Recall execution + acknowledgement tracking**
   Turn a lot safety notice into a RecallCampaign over the affected-clients set (lot→clients lookup), dispatch SMS+call via the notifier (PRD-07), and track per-client RecallAcknowledgement to produce the acknowledgement trail (e.g. 9 of 14 acknowledged) shown as an inspector-ready evidence artefact. Recall messaging is a safety message and overrides marketing opt-out.
 - [ ] **Enforce compliance gate + audit events**
-  All DAEN and recall actions are append-only audited (ADR-0010): generating the prefill, marking submitted (with portal reference + reported date), launching a recall, and each acknowledgement. Capability-gate to the compliance concern. The audit entries are what surface in the inspection pack and the Overview counts.
+  All DAEN (Database of Adverse Event Notifications) and recall actions are append-only audited (ADR-0010): generating the prefill, marking submitted (with portal reference + reported date), launching a recall, and each acknowledgement. Capability-gate to the compliance concern. The audit entries are what surface in the inspection pack and the Overview counts.
 - [ ] **Web UI: AE list, DAEN modal, recalls**
-  Build gov-ae (AE table with Case/Product-lot/Route/Severity/Status/Report and the colour-coded route chips) and the prefilled DAEN modal (route/product/lot/severity summary, voluntary-encouraged note, Submit/export → status Submitted + reported date + toast). Build gov-recalls (recall cards with lot, sponsor notice, acknowledgement progress bar, Run recall). Update the Overview AE/recall counts on action.
+  Build gov-ae (AE table with Case/Product-lot/Route/Severity/Status/Report and the colour-coded route chips) and the prefilled DAEN (Database of Adverse Event Notifications) modal (route/product/lot/severity summary, voluntary-encouraged note, Submit/export → status Submitted + reported date + toast). Build gov-recalls (recall cards with lot, sponsor notice, acknowledgement progress bar, Run recall). Update the Overview AE/recall counts on action.

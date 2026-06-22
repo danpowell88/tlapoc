@@ -5,11 +5,11 @@
 ## Background
 
 As a owner, I want to record facility accreditation and be alerted before it expires, so that we never lapse on accreditation.
-Per-location accreditation status + expiry alerts before lapse (REQ-FAC-1, C20).
+Plainly: record each location's accreditation and get warned before it lapses, so the clinic never operates out of accreditation. Where it fits: Facility/Ops is the operational backbone around the clinical core, built after the clinical and reporting layers; accreditation status feeds the inspection pack (PRD-08) and Governance. Per-location accreditation status + expiry alerts before lapse (REQ-FAC-1, C20).
 
 ## How it works
 
-Per-location facility accreditation recorded with scheme (ACSQHC/NSQHS where applicable, or a state licence), status, expiry and evidence reference; expiry alerts fire ahead of lapse. Per RECON-2 (non-surgical injectables), accreditation is treated as optional/conditional, so blocking-vs-advisory is configurable per clinic (the open question), defaulting advisory.
+Per-location facility accreditation recorded with scheme (ACSQHC (Australian Commission on Safety and Quality in Health Care)/NSQHS (National Safety and Quality Health Service standards) where applicable, or a state licence), status, expiry and evidence reference; expiry alerts fire ahead of lapse. Per RECON-2 (non-surgical injectables), accreditation is treated as optional/conditional, so blocking-vs-advisory is configurable per clinic (the open question), defaulting advisory.
 Records are audited and current status feeds the inspection pack (PRD-08) and Governance ('Registrations & indemnity: current'). Evidences the clinic's facility obligations (C20).
 
 ## Requirements
@@ -44,7 +44,7 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 ## Tasks (dev pickup)
 
 - [ ] **FacilityAccreditation entity + per-location record**
-  Model FacilityAccreditation (tenant_id, location_id, scheme, status, expiry, evidence_ref), tenant-scoped under RLS. CRUD for the per-location accreditation record; attach the certificate as evidence_ref (media).
+  Model FacilityAccreditation (tenant_id, location_id, scheme, status, expiry, evidence_ref), tenant-scoped under RLS (row-level security, the database-level tenant isolation). CRUD for the per-location accreditation record; attach the certificate as evidence_ref (media).
 - [ ] **Facility profile: per-location accreditation UI**
   Facility-profile view listing each location's accreditation (scheme, status, expiry, evidence link). Edit/renew action. Surfaces on the operations view and feeds Governance's 'Registrations & indemnity' status.
 - [ ] **Accreditation expiry alerts (scheduled)**

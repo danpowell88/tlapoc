@@ -7,7 +7,7 @@
 ## Background
 
 As a staff member, I want to sign in to the web and provider app with my Microsoft 365 account and MFA, so that I use one secure corporate identity and no extra password.
-Staff sign in with the clinic's existing Microsoft 365 accounts via Entra ID with MFA (ADR-0004). This is the plumbing; the RBAC/scope rules are PRD-01.
+Sprint 0 (setup), staff sign-in: staff log in to the web app and the provider mobile app using the clinic's existing Microsoft 365 accounts, with a second-factor check — so there is one secure work identity and no extra password to manage. This is only the sign-in plumbing; who-can-do-what (roles and clinical scope) is added later in Foundations. It builds on the SPIKE-AUTH investigation and produces the tokens the API and tenant isolation rely on; the web shell and the Flutter apps consume this flow.  Staff sign in with the clinic's existing Microsoft 365 accounts via Entra ID with MFA (ADR-0004). This is the plumbing; the RBAC/scope rules are PRD-01.
 
 ## How it works
 
@@ -38,9 +38,9 @@ For the SaaS path, ADR-0004 anticipates each clinic federating its own Entra ten
 
 - [ ] **Configure Entra ID app registration and complete staff SSO + MFA on web and provider app**
   Stand up workforce sign-in for staff on both staff-facing surfaces, yielding API-usable tokens.
-  - App registration(s) for the Angular web app and the Flutter provider app: auth-code + PKCE, redirect URIs, required scopes/audience, MFA enforced.
+  - App registration(s) for the Angular web app and the Flutter provider app: auth-code + PKCE, redirect URIs, required scopes/audience, MFA (multi-factor authentication) enforced.
   - Both surfaces complete interactive SSO + MFA against the clinic's Entra tenant.
-  - Tokens carry the tenant and a stable user id (Entra object id) the API validates and RLS reads for tenant context; sessions are scoped to one tenant.
+  - Tokens carry the tenant and a stable user id (Entra object id) the API validates and RLS (row-level security) reads for tenant context; sessions are scoped to one tenant.
   - Token refresh and sign-out work across web (silent refresh) and app (secure refresh); keep tenant resolution claim-driven so per-tenant Entra federation is additive later.
 - [ ] **Document the staff auth setup, claims contract & SaaS-federation path**
   Write the staff-identity reference so API, RBAC and the SaaS roadmap can rely on it.

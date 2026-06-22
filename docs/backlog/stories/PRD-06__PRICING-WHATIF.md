@@ -7,12 +7,12 @@
 ## Background
 
 As a owner, I want to model pricing and run what-if scenarios, so that I can set prices and plan membership economics.
-An owner pricing + what-if planner over the reporting read-models (REQ-MEMB-9, ADR-0022). The Finance screen is a light pricing + reporting hub; the ledger defers to Xero.
+What this is, plainly: an owner's pricing sandbox — change prices, drag a churn assumption, and watch projected revenue move, without touching live prices until you choose to. Where it sits: it reads the same reporting read-models (PRD-08) and sits in the Payments layer after the clinical core; the real ledger lives in Xero (PRD-10). An owner pricing + what-if planner over the reporting read-models (REQ-MEMB-9, ADR-0022). The Finance screen is a light pricing + reporting hub; the ledger defers to Xero.
 
 ## How it works
 
-The planner reads the same read-models as Reports (PRD-08): current plan member counts and MRR, service volumes and revenue. The owner edits plan/service prices inline and moves a churn-sensitivity slider (e.g. '6% leave / +$10'); a Projected impact panel computes Membership MRR, Service rev/mo, Net/month and projected annual impact under that elasticity assumption (ADR-0022). It proposes and projects — it does not mutate live pricing; applying a change goes through the normal catalogue/membership admin (capability-gated, audited).
-Scope is deliberately narrow: the Finance screen is pricing + reporting only. In-app ledger, commission pay-run, supplier POs/AP, refund/dispute management and BAS/GST tooling are out (ADR-0027 revised) — those defer to Xero; invoices/payments still sync from checkout. A PricingScenario can be saved (inputs/outputs JSON) for comparison.
+The planner reads the same read-models as Reports (PRD-08): current plan member counts and MRR (monthly recurring revenue), service volumes and revenue. The owner edits plan/service prices inline and moves a churn-sensitivity slider (e.g. '6% leave / +$10'); a Projected impact panel computes Membership MRR, Service rev/mo, Net/month and projected annual impact under that elasticity assumption (ADR-0022). It proposes and projects — it does not mutate live pricing; applying a change goes through the normal catalogue/membership admin (capability-gated, audited).
+Scope is deliberately narrow: the Finance screen is pricing + reporting only. In-app ledger, commission pay-run, supplier POs/AP, refund/dispute management and BAS (business activity statement)/GST (goods and services tax) tooling are out (ADR-0027 revised) — those defer to Xero; invoices/payments still sync from checkout. A PricingScenario can be saved (inputs/outputs JSON) for comparison.
 
 ## Requirements
 
@@ -20,10 +20,10 @@ Scope is deliberately narrow: the Finance screen is pricing + reporting only. In
 
 ## Acceptance Criteria
 
-- [ ] The pricing/what-if planner reads the same read-models as reporting (PRD-08) and projects MRR/revenue/net under a churn-sensitivity assumption.
+- [ ] The pricing/what-if planner reads the same read-models as reporting (PRD-08) and projects MRR (monthly recurring revenue)/revenue/net under a churn-sensitivity assumption.
 - [ ] It proposes/projects only — it does not mutate live pricing; applying a change goes through normal admin (audited).
 - [ ] Scenario outputs are owner-gated.
-- [ ] In-app ledger/payroll/AP/BAS tooling is out of scope (Xero); invoices/payments still sync from checkout.
+- [ ] In-app ledger/payroll/AP (accounts payable)/BAS (business activity statement) tooling is out of scope (Xero); invoices/payments still sync from checkout.
 
 ## UI designs / screenshots
 
@@ -49,15 +49,15 @@ _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rew
 ## Tasks (dev pickup)
 
 - [ ] **PricingScenario model over PRD-08 read-models (migrations)**
-  Model PricingScenario (tenant_id + RLS): inputs JSON (plan/service prices + churn assumption) and computed outputs JSON (MRR/rev/net).
+  Model PricingScenario (tenant_id + RLS (row-level security)): inputs JSON (plan/service prices + churn assumption) and computed outputs JSON (MRR (monthly recurring revenue) — monthly recurring revenue/rev/net).
   - No live-pricing mutation here; read current state from PRD-08 read-models.
   - Owner-gated.
 - [ ] **What-if compute API (read-only) + apply-via-admin handoff**
   Server-side.
-  - Compute projected Membership MRR, Service rev/mo, Net/month and annual impact from edited prices + the churn-sensitivity assumption (elasticity) over PRD-08 read-models.
+  - Compute projected Membership MRR (monthly recurring revenue), Service rev/mo, Net/month and annual impact from edited prices + the churn-sensitivity assumption (elasticity) over PRD-08 read-models.
   - Save/load scenarios; owner-only.
   - 'Apply' does NOT write here — it hands the proposed prices to the normal catalogue/membership admin (capability-gated, audited).
 - [ ] **Pricing & what-if web UI (owner-only)**
   Angular per the screenshot.
-  - Editable plan prices with member counts + per-tier MRR; churn-sensitivity slider; live Projected-impact panel; editable service pricing rows.
+  - Editable plan prices with member counts + per-tier MRR (monthly recurring revenue); churn-sensitivity slider; live Projected-impact panel; editable service pricing rows.
   - Read-only planner styling (proposes, doesn't apply); owner-only .fin capability gate; loading/empty/error states.

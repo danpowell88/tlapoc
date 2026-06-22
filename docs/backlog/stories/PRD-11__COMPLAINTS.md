@@ -5,7 +5,7 @@
 ## Background
 
 As a manager, I want to log a complaint against a client/treatment and have the system surface the AHPRA pathway, so that complaints are handled correctly and retained.
-A complaints/adverse-outcome register linked to client/treatment that surfaces complaint mechanisms incl. AHPRA (NDA doesn't remove the right), feeds retention (complaint → indefinite) and reporting (REQ-CLI-4, C24).
+Plainly: a register for logging complaints against a client/treatment that always shows the AHPRA (Australian Health Practitioner Regulation Agency) pathway and keeps the related record indefinitely. Where it fits: part of the operational backbone (Facility/Ops) around the clinical core; complaints feed reporting (PRD-08) and a complaint flag drives indefinite retention via the foundations retention engine (PRD-01). A complaints/adverse-outcome register linked to client/treatment that surfaces complaint mechanisms incl. AHPRA (NDA (non-disclosure agreement) doesn't remove the right), feeds retention (complaint → indefinite) and reporting (REQ-CLI-4, C24).
 
 ## How it works
 
@@ -45,9 +45,9 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 ## Tasks (dev pickup)
 
 - [ ] **Complaint entity + complaints register**
-  Model Complaint (tenant_id, client_id, treatment_ref, status, pathway[ahpra|internal], opened_at, resolution) under RLS. Complaints register in Governance: log, view, update status/resolution, link to client + treatment.
+  Model Complaint (tenant_id, client_id, treatment_ref, status, pathway[ahpra|internal], opened_at, resolution) under RLS (row-level security, the database-level tenant isolation). Complaints register in Governance: log, view, update status/resolution, link to client + treatment.
 - [ ] **Surface AHPRA pathway at log time**
-  When a complaint is logged, surface the complaint mechanisms including the right to complain to AHPRA notwithstanding any NDA (C24) as guidance copy on the form.
+  When a complaint is logged, surface the complaint mechanisms including the right to complain to AHPRA (Australian Health Practitioner Regulation Agency) notwithstanding any NDA (C24) as guidance copy on the form.
 - [ ] **Complaint → indefinite retention flag**
   Logging a complaint sets an indefinite-retention flag on the related record; the PRD-01 retention engine reads it and exempts that record from the normal destruction schedule while the complaint exists (C18).
 - [ ] **Feed reporting + raise-from-conversation**

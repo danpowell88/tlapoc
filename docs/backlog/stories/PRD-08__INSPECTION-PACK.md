@@ -7,7 +7,7 @@
 ## Background
 
 As a owner, I want a one-click pack that assembles the evidence an inspector would ask for, so that we're always inspection-ready.
-A one-click inspection-readiness pack and the cross-case Governance hub (policies sign-off, waste manifests/IPC, DSAR + breach drill) (REQ-RPT-7, ADR-0030, REQ-SEC-8/9).
+This story is the 'one-click, we're ready for the inspector' feature: it assembles, into a single dated bundle, the evidence an AHPRA (Australian Health Practitioner Regulation Agency), TGA (Therapeutic Goods Administration) or state-Health inspector asks for — pulled live from across the app rather than re-typed. It sits in the Reporting/Governance layer (step 6 of the clinic-first build): it draws on the compliance dashboards and register exports (COMPLIANCE-DASH), so it depends on those, and the policies sign-off story (POLICIES) hangs off it. The hub is also where the privacy actions (DSAR (Data Subject Access Request), breach drill) are launched. No money figures appear in the pack. A one-click inspection-readiness pack and the cross-case Governance hub (policies sign-off, waste manifests/IPC, DSAR + breach drill) (REQ-RPT-7, ADR-0030, REQ-SEC-8/9).
 
 ## How it works
 
@@ -57,10 +57,10 @@ _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Po
 ## Tasks (dev pickup)
 
 - [ ] **Backend: inspection-pack assembly + readiness state**
-  Build the pack assembler: for each ticked category, pull the current evidence from its source (registrations from PRD-01, consent coverage + S4 register + breach/complaints from COMPLIANCE-DASH RegisterExport, retention/destruction + cold-chain from PRD-04/PRD-11, policy sign-off from POLICIES) into one dated artefact, persist an InspectionPack row referencing the included exports. Compute InspectionReadiness (ready/review) from category completeness (unsigned policies / lapsed registration → review) for the Overview tile.
+  Build the pack assembler: for each ticked category, pull the current evidence from its source (registrations from PRD-01, consent coverage + S4 (Schedule 4 prescription-only medicine) register + breach/complaints from COMPLIANCE-DASH RegisterExport, retention/destruction + cold-chain from PRD-04/PRD-11, policy sign-off from POLICIES) into one dated artefact, persist an InspectionPack row referencing the included exports. Compute InspectionReadiness (ready/review) from category completeness (unsigned policies / lapsed registration → review) for the Overview tile.
 - [ ] **Enforce audit on pack generation**
   Pack generation is append-only audited (ADR-0010): an AuditEvent capturing actor, timestamp, ticked categories and the referenced exports — the pack is itself a piece of governance evidence. Capability-gate to the compliance concern.
 - [ ] **Hub: DSAR (APP 12/13) + breach-drill launchers**
-  Wire the cross-case governance launchers into the hub: a DSAR / access-and-correction action (APP 12/13, REQ-SEC-8, ties to PRD-01 PRIVACY-RIGHTS) and a notifiable-data-breach drill (REQ-SEC-9, ties to PRD-01 BREACH). The hub launches the existing flows and projects their state — it does not relocate the guardrails (ADR-0030).
+  Wire the cross-case governance launchers into the hub: a DSAR (data subject access request) (Data Subject Access Request) / access-and-correction action (APP 12/13, REQ-SEC-8, ties to PRD-01 PRIVACY-RIGHTS) and a notifiable-data-breach drill (REQ-SEC-9, ties to PRD-01 BREACH). The hub launches the existing flows and projects their state — it does not relocate the guardrails (ADR-0030).
 - [ ] **Web UI: Audit pack builder**
-  Build gov-audit: the category checklist (seven categories, pre-ticked), 'Build pack' producing the dated result line ('inspection-pack-YYYY-MM-DD.pdf · N evidence categories bundled') + toast, and the Overview Inspection-ready tile reflecting readiness. Link Policies, DSAR and breach-drill from the hub. No money figures.
+  Build gov-audit: the category checklist (seven categories, pre-ticked), 'Build pack' producing the dated result line ('inspection-pack-YYYY-MM-DD.pdf · N evidence categories bundled') + toast, and the Overview Inspection-ready tile reflecting readiness. Link Policies, DSAR (data subject access request) and breach-drill from the hub. No money figures.

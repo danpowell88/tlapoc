@@ -5,7 +5,7 @@
 ## Background
 
 As a injector, I want optional AI assistance for notes and injection-point suggestions, so that charting is faster (with human confirmation).
-AI scribe and advisory auto-detection of injection points are explicitly out for v1 (no AI; everything manual + human-confirmed). Placeholder (REQ-CLIN-6, ADR-0020).
+A Phase-2 placeholder for optional AI assistance — note dictation and advisory auto-detection of injection points — explicitly out for v1, where every note and injection point is entered and confirmed by a human. A deferred design-only card under PRD-05 charting that keeps the data model and stance ready; any future feature is advisory and human-confirmed only and never sets units, auto-finalises or auto-administers. AI scribe and advisory auto-detection of injection points are explicitly out for v1 (no AI; everything manual + human-confirmed). Placeholder (REQ-CLIN-6, ADR-0020).
 
 ## How it works
 

@@ -7,7 +7,7 @@
 ## Background
 
 As a owner, I want to run a stocktake and have discrepancies surfaced with a loss/theft reporting path, so that stock integrity is provable and losses are reported.
-Stocktakes and discrepancy handling, with loss/theft reporting, close the medicines-governance loop (C17).
+Plainly: this is the periodic count. Staff physically count the stock of S4 (Schedule 4 prescription-only medicine), the system compares it against what the records say should be there, and any difference is flagged — with a path to report a loss or theft. Where it fits: it closes the medicines-governance loop in the moat. It sits on secure storage (PRD-04/CUSTODY-STORAGE), cross-references cabinet access anomalies, and feeds discrepancies and loss/theft reports to the compliance dashboard (PRD-08).  Stocktakes and discrepancy handling, with loss/theft reporting, close the medicines-governance loop (C17).
 
 ## How it works
 

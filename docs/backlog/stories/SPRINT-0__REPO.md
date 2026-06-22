@@ -5,7 +5,7 @@
 ## Background
 
 As a developer, I want a scaffolded repo with the API, web, app and shared-package folders, a clean .NET solution, an Angular workspace and a Flutter workspace wired together, so that everyone builds against one consistent structure and shared code has an obvious home.
-A single, well-structured repo (or workspace) for the .NET API, Angular web, two Flutter apps and shared packages keeps versioning, CI and code-sharing sane from day one.
+New here? This is the very first piece of Sprint 0 (the setup phase that comes before any clinical feature): it creates the one repository and folder layout that the .NET API, the Angular web app, the two Flutter mobile apps and the shared code all live in. Nothing depends on a specific feature here, but almost everything depends on this: CI/CD (continuous integration / continuous delivery), the design system and the generated API client all need these folders to exist before they can land.  A single, well-structured repo (or workspace) for the .NET API, Angular web, two Flutter apps and shared packages keeps versioning, CI and code-sharing sane from day one.
 
 ## How it works
 

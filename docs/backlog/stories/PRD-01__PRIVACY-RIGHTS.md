@@ -7,7 +7,7 @@
 ## Background
 
 As a client, I want to see a clear collection notice, access a copy of my data and request a correction, so that my privacy rights under the Privacy Act are respected.
-Clients have APP 12/13 rights: a collection notice/consent at sign-up, and the ability to access and request correction of their own data (DSAR clock ≤30 days).
+Plainly: this gives clients their legal privacy rights — a clear notice at sign-up, a way to get a copy of their own data, and a way to request a correction or deletion. It is a Foundations governance story built on tenancy. Client-facing self-service lives in the client app and the staff side is a queue in Governance; it links to the retention story, since some records must be kept even after a deletion request. Clients have APP 12/13 (Australian Privacy Principles 12 and 13 — access and correction rights) rights: a collection notice/consent at sign-up, and the ability to access and request correction of their own data (DSAR (data subject access request — a person's legal request to access or correct their data) clock ≤30 days).
 
 ## How it works
 
@@ -56,4 +56,4 @@ Edge cases: a deletion request on a record under legal retention or hold is ackn
 - [ ] **Self-service privacy in the client app**
   Build client-app Account -> Privacy & consents (client-app.png): the AU-residency trust card, the current-consents list, 'Download a copy of my data' (opens an access request; export delivered via a short-lived signed URL to AU-resident storage), 'Request account deletion' (opens a deletion request with the retention caveat shown), and the legal-retention note. Wire each action to create the corresponding PrivacyRequest.
 - [ ] **Staff DSAR queue in Governance + correction handling**
-  Build the Governance DSAR queue: each request with type, opened/due dates, the 30-day clock and status to resolution, plus the fulfilment actions. A correction is applied as an appended, linked CorrectionEntry against the immutable record (never an overwrite). Surface overdue/at-risk requests; capability-gate to compliance/owner. All actions audited.
+  Build the Governance DSAR (data subject access request — a person's legal request to access or correct their data) queue: each request with type, opened/due dates, the 30-day clock and status to resolution, plus the fulfilment actions. A correction is applied as an appended, linked CorrectionEntry against the immutable record (never an overwrite). Surface overdue/at-risk requests; capability-gate to compliance/owner. All actions audited.

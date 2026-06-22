@@ -7,7 +7,7 @@
 ## Background
 
 As a client, I want to read plain-language consent covering the procedure, risks, alternatives, the practitioner's qualifications and costs, and e-sign it, so that I give genuinely informed consent.
-Consent must be versioned, e-signed, plain-language and contain mandated content (nature, risks/benefits/alternatives, practitioner qualifications, costs, realistic-outcome language, complaint mechanisms incl. AHPRA-despite-NDA) (C5).
+Versioned e-signed consent is the heart of Intake & Consent (PRD-03): the legally informed agreement a client must give before treatment. It sits after intake (PRD-03/INTAKE) and feeds the treatment gate (PRD-03/GATING), which blocks treatment until a current, version-matched consent is signed. In the flow it is what stands between booking (PRD-02) and the clinical work in the consult (PRD-04) and charting (PRD-05); it also seeds the separate image-use consent (PRD-03/IMAGE-CONSENT) and the under-18 cooling-off timer (PRD-03/COOLING-OFF), whose clock starts from the consent timestamp.  Consent must be versioned, e-signed, plain-language and contain mandated content (nature, risks/benefits/alternatives, practitioner qualifications, costs, realistic-outcome language, complaint mechanisms incl. AHPRA-despite-NDA) (C5).
 
 ## How it works
 

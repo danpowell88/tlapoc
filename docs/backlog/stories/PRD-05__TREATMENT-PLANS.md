@@ -7,7 +7,7 @@
 ## Background
 
 As a injector, I want to build multi-session treatment plans from protocol templates, so that ongoing care is structured and drives recall.
-Multi-session treatment plans + applyable protocol templates feed recall and structure ongoing care (REQ-CLIN-7).
+Treatment plans: multi-session courses of care built from clinic-curated protocol templates, scheduling and tracking ongoing treatment and driving the recall worklist. A care-structuring capability under PRD-05 charting on the clinic-first spine; it depends on the guided note (NOTE-TEMPLATE), feeds the recall worklist in comms (PRD-07), and reads from skin analysis (SKIN-ANALYSIS) and outcomes (OUTCOMES). Multi-session treatment plans + applyable protocol templates feed recall and structure ongoing care (REQ-CLIN-7).
 
 ## How it works
 
@@ -59,7 +59,7 @@ _Prototype screen: prototype.html — Charting + Clinical (Skin analysis, Body c
 ## Tasks (dev pickup)
 
 - [ ] **Data model & migrations: Protocol + TreatmentPlan + PlanSession**
-  EF Core: Protocol (named template with ordered steps = service + recommended interval), TreatmentPlan (client_id, optional protocol_id, status), PlanSession (due_date, status, optional chart_entry_id link). tenant_id + RLS; index plans by client and sessions by due_date for the recall projection.
+  EF Core: Protocol (named template with ordered steps = service + recommended interval), TreatmentPlan (client_id, optional protocol_id, status), PlanSession (due_date, status, optional chart_entry_id link). tenant_id + Row-Level Security (RLS, the per-tenant database isolation); index plans by client and sessions by due_date for the recall projection.
 - [ ] **Plan API: apply protocol, schedule sessions, track progress**
   Apply-protocol command instantiates a plan with sessions dated off the step intervals; support ad hoc plans. Finalising a charted ChartEntry against a session marks it done and advances the next active session. Project upcoming sessions as recall Jobs (ADR-0023) into the PRD-07 worklist. Expose plan-progress queries for the Client 360. Emit domain events; publish OpenAPI.
 - [ ] **Plan UI: protocol builder, apply + progress + in-room list**

@@ -7,7 +7,7 @@
 ## Background
 
 As a system, I want to enforce a 7-day cooling-off and payment block for under-18s and record a second consultation, so that minors are protected per the rules.
-Under-18s require ≥7 days between consent and procedure plus a payment block (except the consult) and a recorded second consultation; an optional adult cooling-off is configurable (C6).
+Cooling-off and the under-18 payment block is the minor-protection rule inside Intake & Consent (PRD-03): for patients under 18 it enforces a mandatory 7-day wait between consent and procedure and blocks payment until it elapses. It builds on the core client record (PRD-01/CLIENT-CORE) for the age flag and on consent (PRD-03/CONSENT), whose timestamp starts the clock. In the flow it coordinates outward with Payments (PRD-06), where the payment block is actually enforced at checkout, and with the deferred booking-deposit placeholder (PRD-02/DEPOSITS), whose holds must be suppressed during the cooling-off window. For adults there is no mandated cooling-off — only an optional clinic-policy setting. As the system, I want to enforce a 7-day cooling-off and payment block for under-18s and record a second consultation, so that minors are protected per the rules.  Under-18s require ≥7 days between consent and procedure plus a payment block (except the consult) and a recorded second consultation; an optional adult cooling-off is configurable (C6).
 
 ## How it works
 

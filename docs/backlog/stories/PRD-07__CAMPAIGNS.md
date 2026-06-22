@@ -5,7 +5,7 @@
 ## Background
 
 As a owner, I want campaign capability, so that I can run promotions.
-The prototype shows a Comms → Campaigns screen, but advertising/campaign tooling was withdrawn from scope (ADR-0034 withdrawn) — email campaigns and social belong in the clinic's external tools (Mailchimp, Meta Business Suite). Tracked as a placeholder to reconcile prototype vs scope.
+The prototype shows a Comms -> Campaigns screen, but advertising/campaign tooling was withdrawn from scope (ADR-0034 withdrawn). Email campaigns and social belong in the clinic's external tools (Mailchimp, Meta Business Suite).  Tracked as a placeholder to reconcile the prototype against the scope cut.
 
 ## How it works
 
@@ -45,4 +45,4 @@ Placeholder. The advertising linter, newsletter builder and social scheduler are
 ## Tasks (dev pickup)
 
 - [ ] **Scope & design when pulled into a sprint**
-  Deferred placeholder — no build in v1; advertising tooling is withdrawn (ADR-0034). If revisited: the only in-scope capability is a consented audience-segment export (consent + suppression honoured, C23) to the clinic's external tools (Mailchimp, Meta Business Suite). Any in-app campaign would have to honour TGA/AHPRA advertising rules and the no-public-S4-pricing rule (C9). Confirm scope/regulatory stance before any breakdown.
+  Deferred placeholder — no build in v1; advertising tooling is withdrawn (ADR-0034). If revisited: the only in-scope capability is a consented audience-segment export (consent + suppression honoured, C23) to the clinic's external tools (Mailchimp, Meta Business Suite). Any in-app campaign would have to honour TGA (Therapeutic Goods Administration)/AHPRA (Australian Health Practitioner Regulation Agency) advertising rules and the no-public-S4-pricing rule (C9). Confirm scope/regulatory stance before any breakdown.

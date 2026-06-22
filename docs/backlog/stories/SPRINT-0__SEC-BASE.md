@@ -7,12 +7,12 @@
 ## Background
 
 As a security-minded engineer, I want TLS everywhere, encryption at rest, hardened HTTP headers, least-privilege identities and dependency/secret/code scanning in CI, so that the platform meets its baseline security obligations from day one.
-Encryption in transit + at rest, least-privilege, secure headers and automated scanning establish the security posture the compliance docs assume (C10/C21).
+Sprint 0 (setup), security baseline: this asserts the platform-wide security defaults — encryption everywhere, hardened web headers, least-privilege identities — and adds automated code/dependency/secret scans to the build, so security is inherited by every later feature rather than bolted on afterwards. It plugs its scan stages into the build pipeline and gates merges, working alongside the secrets vault and the cloud-environment config that pins encryption-at-rest and data residency. Encryption in transit + at rest, least-privilege, secure headers and automated scanning establish the security posture the compliance docs assume (C10/C21).
 
 ## How it works
 
-All traffic is TLS end to end and data stores are encrypted at rest (Postgres, Blob, Key Vault — much of this is platform-default but is asserted and verified here). The web app sends hardened HTTP security headers (CSP, HSTS, X-Content-Type-Options, frame-ancestors), and CORS is locked down to known origins rather than wildcarded.
-CI runs three scan classes and gates merges on high-severity findings: dependency scanning (vulnerable packages), secret scanning (coordinated with SECRETS — no committed secrets), and SAST (static analysis of the code). High-severity findings block the PR, making the security gate enforceable through CICD/GOV rather than advisory.
+All traffic is TLS (Transport Layer Security — encryption in transit) end to end and data stores are encrypted at rest (Postgres, Blob, Key Vault — much of this is platform-default but is asserted and verified here). The web app sends hardened HTTP security headers (CSP — Content Security Policy, HSTS — HTTP Strict Transport Security, X-Content-Type-Options, frame-ancestors), and CORS (Cross-Origin Resource Sharing) is locked down to known origins rather than wildcarded.
+CI (continuous integration) runs three scan classes and gates merges on high-severity findings: dependency scanning (vulnerable packages), secret scanning (coordinated with SECRETS — no committed secrets), and SAST (static application security testing — static analysis of the code). High-severity findings block the PR (pull request), making the security gate enforceable through CICD/GOV rather than advisory.
 Service identities follow least-privilege — each service/pipeline uses a scoped managed identity, with no shared admin credentials — so a compromised component has minimal blast radius. The posture (what's encrypted, which headers, which scans, the identity model) is documented as the security baseline the platform builds on.
 
 ## Requirements
@@ -39,13 +39,13 @@ Service identities follow least-privilege — each service/pipeline uses a scope
 
 - [ ] **Enforce TLS + encryption at rest, harden HTTP headers and lock down CORS**
   Assert and verify the transport/storage/edge security baseline.
-  - TLS on all traffic; encryption at rest verified on Postgres, Blob and Key Vault (coordinate with IAC defaults).
-  - Security headers on web: CSP, HSTS, X-Content-Type-Options, frame-ancestors, referrer policy.
-  - CORS restricted to known origins (no wildcard); document the allowed-origin list per environment.
+  - TLS (Transport Layer Security — encryption in transit) on all traffic; encryption at rest verified on Postgres, Blob and Key Vault (coordinate with IAC defaults).
+  - Security headers on web: CSP (Content Security Policy), HSTS (HTTP Strict Transport Security), X-Content-Type-Options, frame-ancestors, referrer policy.
+  - CORS (Cross-Origin Resource Sharing) restricted to known origins (no wildcard); document the allowed-origin list per environment.
 - [ ] **Add dependency, secret and SAST scanning to CI and gate merges on high-severity findings**
-  Make the security scans blocking through the pipeline.
+  Make the security scans blocking through the pipeline (add dependency, secret and SAST — static application security testing — scanning to CI — continuous integration).
   - Dependency scanning (vulnerable packages), secret scanning (coordinated with SECRETS), and SAST stages in CI.
-  - High-severity findings fail the PR (GOV marks these required); documented triage/suppression process for false positives.
+  - High-severity findings fail the PR (pull request) (GOV marks these required); documented triage/suppression process for false positives.
   - Runs across all surfaces (.NET, Angular, Flutter).
 - [ ] **Apply least-privilege service identities and document the security baseline**
   Minimise blast radius and write down the posture.

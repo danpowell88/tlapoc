@@ -7,7 +7,7 @@
 ## Background
 
 As a front desk, I want to search and filter clients, merge duplicates and soft-delete with audit, so that the client list stays accurate and findable.
-A searchable client directory with duplicate merge and audited soft-delete keeps the record clean.
+The client directory is how the front desk finds anyone fast and keeps the client list clean. It sits in Reception (PRD-02) directly on top of the Client 360 profile (PRD-02/CLIENT-360) — a directory row opens that profile — and powers the global header search across the staff app shell. In the flow it is the entry point into a client record: search and filter find the person, duplicate-merge and audited soft-delete keep the record accurate, and true destruction is left to the retention policy in Foundations (PRD-01/RETENTION) rather than done here. As front desk, I want to search and filter clients, merge duplicates and soft-delete with audit, so that the client list stays accurate and findable.  A searchable client directory with duplicate merge and audited soft-delete keeps the record clean.
 
 ## How it works
 
@@ -50,7 +50,7 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 ## Tasks (dev pickup)
 
 - [ ] **Directory search/filter API + index**
-  Searchable, paginated directory endpoint over name/phone/email with segment filters (members/at-risk/new) and tenant RLS; back it with a search index for fast prefix/fuzzy match. Exclude soft-deleted clients from active results. Money columns (lifetime) flagged .fin so the UI can gate them. Also powers the global header search.
+  Searchable, paginated directory endpoint over name/phone/email with segment filters (members/at-risk/new) and tenant RLS (row-level security); back it with a search index for fast prefix/fuzzy match. Exclude soft-deleted clients from active results. Money columns (lifetime) flagged .fin so the UI can gate them. Also powers the global header search.
 - [ ] **Duplicate detection + merge with re-point + MergeLog**
   Detect candidate duplicates (name/dob/phone/email heuristics). Merge transaction re-points ALL child records (appointments, consents, image-consent, photos, invoices, memberships, rewards, jobs) from the merged client to the surviving primary, preserving history, and writes a MergeLog (primary/merged/actor/at/repointed counts) for audit + reversible reference. Server-enforced; capability-gated.
 - [ ] **Soft-delete (audited) + directory/search UI**

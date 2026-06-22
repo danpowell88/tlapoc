@@ -18,7 +18,7 @@
     {
       "key": "INTAKE",
       "title": "Pre-visit intake forms",
-      "context": "Clients complete medical history, meds, allergies and contraindications on their phone before the visit; responses auto-link to the chart.",
+      "context": "Pre-visit intake is the first step of Intake & Consent (PRD-03), which sits between booking (PRD-02) and treatment and enforces what must be true before a clinician can proceed. Intake collects the medical history a practitioner must see, and it is triggered by a booking (PRD-02/ONLINE-BOOK or the booking wizard). In the flow it precedes and feeds the rest of PRD-03 — the BDD screen (PRD-03/BDD), the e-signed consent (PRD-03/CONSENT) and the treatment gate (PRD-03/GATING) — and its responses auto-link to the chart so the consult (PRD-04) and charting (PRD-05) downstream see them. Incomplete required intake is one of the inputs that blocks treatment.  Clients complete medical history, meds, allergies and contraindications on their phone before the visit; responses auto-link to the chart.",
       "as_a": "client",
       "i_want": "to complete my medical history, medications, allergies and contraindications before my visit on my phone",
       "so_that": "my practitioner has what they need and my treatment is safe",
@@ -70,7 +70,7 @@
       "tasks": [
         {
           "title": "Configurable, versioned IntakeForm + JSON field schema",
-          "note": "Model IntakeForm (name, version, fields as a JSON schema, required flag) so admins can define fields without code; bump version on change. Validate submitted answers against the schema server-side. Tenant-scoped (RLS). Seed the v1 medical-history & screening template (history checkboxes, contraindication items)."
+          "note": "Model IntakeForm (name, version, fields as a JSON schema, required flag) so admins can define fields without code; bump version on change. Validate submitted answers against the schema server-side. Tenant-scoped (RLS (row-level security)). Seed the v1 medical-history & screening template (history checkboxes, contraindication items)."
         },
         {
           "title": "IntakeResponse capture + auto-link to chart/appointment",
@@ -85,7 +85,7 @@
     {
       "key": "BDD",
       "title": "BDD / psychological screening instrument",
-      "context": "Cosmetic guidelines require BDD screening; a positive result must be surfaced to the prescriber before treatment (C3).",
+      "context": "The BDD/psychological screen is the patient-safety check inside Intake & Consent (PRD-03): cosmetic guidelines require screening for psychological suitability before non-surgical cosmetic procedures, and this story embeds that instrument in the intake wizard. It sits directly after intake (PRD-03/INTAKE, which carries it) and feeds the treatment gate (PRD-03/GATING): a positive flag is surfaced to the prescriber and an RN/NP-reviewed result must exist before an S4 treatment can proceed in the consult (PRD-04) and charting (PRD-05). As an RN/NP, I want a BDD/psychological screen completed and surfaced before I proceed, so that I can avoid harm for at-risk patients per the guidelines.  Cosmetic guidelines require BDD screening; a positive result must be surfaced to the prescriber before treatment (C3).",
       "as_a": "RN/NP",
       "i_want": "a BDD/psychological screen completed and surfaced before I proceed",
       "so_that": "I can avoid harm for at-risk patients per the guidelines",
@@ -141,7 +141,7 @@
         },
         {
           "title": "Positive-flag surfacing + RN/NP review requirement",
-          "note": "On a positive score, raise the flag and surface it to the prescriber (chip on the charting pre-treatment review + a follow-up signal). Record reviewed_by/reviewed_at when an RN/NP reviews the result; the GATING evaluation requires an RN/NP-reviewed ScreeningResult to exist before an S4 treatment (C3). Audited."
+          "note": "On a positive score, raise the flag and surface it to the prescriber (chip on the charting pre-treatment review + a follow-up signal). Record reviewed_by/reviewed_at when an RN/NP reviews the result; the GATING evaluation requires an RN/NP-reviewed ScreeningResult to exist before an S4 (Schedule 4 prescription-only medicine) treatment (C3). Audited."
         },
         {
           "title": "BDD screen in the intake wizard + prescriber chip UI",
@@ -152,7 +152,7 @@
     {
       "key": "CONSENT",
       "title": "Versioned e-signed consent with mandated content",
-      "context": "Consent must be versioned, e-signed, plain-language and contain mandated content (nature, risks/benefits/alternatives, practitioner qualifications, costs, realistic-outcome language, complaint mechanisms incl. AHPRA-despite-NDA) (C5).",
+      "context": "Versioned e-signed consent is the heart of Intake & Consent (PRD-03): the legally informed agreement a client must give before treatment. It sits after intake (PRD-03/INTAKE) and feeds the treatment gate (PRD-03/GATING), which blocks treatment until a current, version-matched consent is signed. In the flow it is what stands between booking (PRD-02) and the clinical work in the consult (PRD-04) and charting (PRD-05); it also seeds the separate image-use consent (PRD-03/IMAGE-CONSENT) and the under-18 cooling-off timer (PRD-03/COOLING-OFF), whose clock starts from the consent timestamp.  Consent must be versioned, e-signed, plain-language and contain mandated content (nature, risks/benefits/alternatives, practitioner qualifications, costs, realistic-outcome language, complaint mechanisms incl. AHPRA-despite-NDA) (C5).",
       "as_a": "client",
       "i_want": "to read plain-language consent covering the procedure, risks, alternatives, the practitioner's qualifications and costs, and e-sign it",
       "so_that": "I give genuinely informed consent",
@@ -226,7 +226,7 @@
     {
       "key": "IMAGE-CONSENT",
       "title": "Separate, withdrawable image-use consent",
-      "context": "Photo use requires its own scoped consent, withdrawable at any time, which immediately stops downstream use (C14).",
+      "context": "Image-use consent is the separate, withdrawable photo permission inside Intake & Consent (PRD-03) — distinct from treatment consent because a client can agree to treatment but decline photos. It sits just after consent (PRD-03/CONSENT) in the flow. Crucially it is NOT part of the treatment gate: declining photos never blocks treatment. Instead it governs downstream media — the photos/charting in PRD-05 and media features in the apps (PRD-09) must check it before serving or capturing — so withdrawing it immediately stops further use.  Photo use requires its own scoped consent, withdrawable at any time, which immediately stops downstream use (C14).",
       "as_a": "client",
       "i_want": "to give separate consent for photo use and withdraw it whenever I want",
       "so_that": "I control how my images are used",
@@ -292,7 +292,7 @@
     {
       "key": "COOLING-OFF",
       "title": "Cooling-off & under-18 payment block",
-      "context": "Under-18s require ≥7 days between consent and procedure plus a payment block (except the consult) and a recorded second consultation; an optional adult cooling-off is configurable (C6).",
+      "context": "Cooling-off and the under-18 payment block is the minor-protection rule inside Intake & Consent (PRD-03): for patients under 18 it enforces a mandatory 7-day wait between consent and procedure and blocks payment until it elapses. It builds on the core client record (PRD-01/CLIENT-CORE) for the age flag and on consent (PRD-03/CONSENT), whose timestamp starts the clock. In the flow it coordinates outward with Payments (PRD-06), where the payment block is actually enforced at checkout, and with the deferred booking-deposit placeholder (PRD-02/DEPOSITS), whose holds must be suppressed during the cooling-off window. For adults there is no mandated cooling-off — only an optional clinic-policy setting. As the system, I want to enforce a 7-day cooling-off and payment block for under-18s and record a second consultation, so that minors are protected per the rules.  Under-18s require ≥7 days between consent and procedure plus a payment block (except the consult) and a recorded second consultation; an optional adult cooling-off is configurable (C6).",
       "as_a": "system",
       "i_want": "to enforce a 7-day cooling-off and payment block for under-18s and record a second consultation",
       "so_that": "minors are protected per the rules",
@@ -360,7 +360,7 @@
     {
       "key": "GATING",
       "title": "Server-enforced treatment gating",
-      "context": "Treatment cannot start unless required intake + consent are complete and current — enforced server-side, surfaced via the blocked-action banner (ADR-0008).",
+      "context": "Server-enforced treatment gating is the keystone of Intake & Consent (PRD-03): the single, shared mechanism that blocks treatment until the required intake and consent are complete and current. It sits at the end of PRD-03, consuming intake (PRD-03/INTAKE), the BDD screen (PRD-03/BDD) and consent (PRD-03/CONSENT). It is the one gate that the consult/prescription (PRD-04) and charting (PRD-05) downstream all reuse rather than re-implementing — making the compliant path the only path between booking (PRD-02) and the clinical record, and feeding its audited decisions to compliance reporting (PRD-08). As an RN/NP, I want the system to block treatment until required intake and consent are complete and current, telling me exactly what's missing, so that the compliant path is the only path.  Treatment cannot start unless required intake + consent are complete and current — enforced server-side, surfaced via the blocked-action banner (ADR-0008).",
       "as_a": "RN/NP",
       "i_want": "the system to block treatment until required intake and consent are complete and current, telling me exactly what's missing",
       "so_that": "the compliant path is the only path",
@@ -418,7 +418,7 @@
       "tasks": [
         {
           "title": "Shared server-side TreatmentGate evaluation (ADR-0008)",
-          "note": "A single, reusable gate evaluator invoked before charting/treatment opens: checks required IntakeResponse present, RN/NP-reviewed ScreeningResult, current version-matched ConsentSignature, and (for S4) consult_id + valid Rx + elapsed under-18 cooling-off. Returns allowed + a structured missing[] (item, fix, who-resolves). Enforced as a domain invariant so a direct API call is blocked too. This is the one mechanism PRD-04/05 consume. Every decision writes a GateDecision to the append-only audit stream (ADR-0010) for PRD-08 consent-coverage reporting."
+          "note": "A single, reusable gate evaluator invoked before charting/treatment opens: checks required IntakeResponse present, RN/NP-reviewed ScreeningResult, current version-matched ConsentSignature, and (for S4 (Schedule 4 prescription-only medicine)) consult_id + valid Rx + elapsed under-18 cooling-off. Returns allowed + a structured missing[] (item, fix, who-resolves). Enforced as a domain invariant so a direct API call is blocked too. This is the one mechanism PRD-04/05 consume. Every decision writes a GateDecision to the append-only audit stream (ADR-0010) for PRD-08 consent-coverage reporting."
         },
         {
           "title": "Blocked-action banner (what/how/who) + chips, reused on web + provider app",

@@ -7,7 +7,7 @@
 ## Background
 
 As a staff member, I want a daily open/close checklist and a twice-daily fridge-temperature log, so that the clinic opens/closes safely and cold-chain is evidenced.
-The prototype's Operations → Open/close & fridge log (openFridge/saveFridge) is a twice-daily routine: an open/close checklist plus a manual fridge-temperature log with a breach pathway.
+Plainly: the twice-daily safe-open/safe-close routine — a checklist plus a manual fridge-temperature log, where an out-of-range reading quarantines the affected stock and raises a job. Where it fits: part of the operational backbone (Facility/Ops) around the clinical core; the manual log is the fallback alongside automated monitors and reconciles into one cold-chain (the unbroken temperature-controlled storage required for medicines) record with the medicines module (PRD-04). The prototype's Operations → Open/close & fridge log (openFridge/saveFridge) is a twice-daily routine: an open/close checklist plus a manual fridge-temperature log with a breach pathway.
 
 ## How it works
 
@@ -22,7 +22,7 @@ Logs are audited and feed the inspection pack (PRD-08); the manual log is the fa
 ## Acceptance Criteria
 
 - [ ] Configurable open and close checklists are completed and recorded with who/when.
-- [ ] A twice-daily fridge log captures temperature; an out-of-range reading triggers the breach pathway (quarantine lot + job).
+- [ ] A twice-daily fridge log captures temperature; an out-of-range reading triggers the breach pathway (quarantine lot (the manufacturer's batch of a medicine vial) + job).
 - [ ] Logs are audited and feed the inspection pack (PRD-08).
 - [ ] Ties into automated temperature monitors (PRD-11/TEMP-MONITORS, PRD-04/COLD-CHAIN).
 

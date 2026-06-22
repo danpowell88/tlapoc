@@ -7,7 +7,7 @@
 ## Background
 
 As a owner, I want capacity and utilisation reporting, so that I can fill quiet windows and right-size rosters.
-The prototype's Reports → Capacity view reports chair/room/practitioner utilisation and quiet windows (overview/trends).
+This story reports how full the clinic actually runs: utilisation by practitioner, room/chair and device over a date range, with the quiet windows highlighted so they can be filled from the waitlist or a recall. It sits in the Reporting layer (step 6 of the clinic-first build): it reads from the reporting read-models (READ-MODELS) over appointment, roster and resource data, so it depends on those. Utilisation is an operational metric, not financial — no money figures here. The prototype's Reports → Capacity view reports chair/room/practitioner utilisation and quiet windows (overview/trends).
 
 ## How it works
 

@@ -5,7 +5,7 @@
 ## Background
 
 As a owner, I want to optionally require a booking deposit or card-on-file hold, so that no-shows cost less.
-An opt-in, ACL-fair booking deposit / card-on-file hold, suppressed during cooling-off (F14 invariant). Deferred to Phase 2 — placeholder.
+Booking deposits / card-on-file holds are a deferred Phase-2 placeholder, parked in Reception (PRD-02) so the no-show-cost lever is captured but explicitly NOT built in v1 — there are no deposits or holds in version 1.  Its one job today is to preserve a design constraint for whenever it is built: a hold must never be placed during an under-18 cooling-off period, coordinating with the cooling-off rule in Intake/Consent (PRD-03/COOLING-OFF).  As an owner, I want to optionally require a booking deposit or card-on-file hold, so that no-shows cost less.  Deferred to Phase 2 — placeholder. There are no deposits or holds in v1.
 
 ## How it works
 
@@ -38,4 +38,4 @@ Design constraint that must survive into Phase 2: the cooling-off suppression in
 ## Tasks (dev pickup)
 
 - [ ] **Design note: ACL-fair deposits + cooling-off suppression (F14) — Phase 2**
-  Placeholder design task (no v1 build). Document the opt-in deposit / card-on-file hold model behind IPaymentProvider (ADR-0036): disclosed at booking, refundable on notice, ACL-fair, never coercive. Capture the hard invariant F14 — a BookingHold must NOT be placed or held during an under-18 cooling-off period (coordinates with PRD-03 COOLING-OFF). S4 is never priced or sold online. Produce the design only; defer implementation to Phase 2.
+  Placeholder design task (no v1 build). Document the opt-in deposit / card-on-file hold model behind IPaymentProvider (ADR-0036): disclosed at booking, refundable on notice, ACL-fair, never coercive. Capture the hard invariant F14 — a BookingHold must NOT be placed or held during an under-18 cooling-off period (coordinates with PRD-03 COOLING-OFF). S4 (Schedule 4 prescription-only medicine) is never priced or sold online. Produce the design only; defer implementation to Phase 2.

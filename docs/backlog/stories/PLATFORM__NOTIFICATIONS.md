@@ -7,12 +7,12 @@
 ## Background
 
 As a staff member, I want an in-app notification centre for events relevant to my role, so that I don't miss time-sensitive things.
-The header bell + badges imply an in-app notification surface for alerts (new bookings, failed payments, expiries, AE/recall, jobs assigned).
+Plainly: the header bell and the in-app list of alerts relevant to a person's role — new bookings, failed payments, expiries, safety actions and assigned jobs. It is built on the app shell and the comms channels. In-app is just one delivery target of the same notifier that sends SMS and email, so the channels stay consistent rather than being a separate pipe. The header bell + badges imply an in-app notification surface for alerts (new bookings, failed payments, expiries, AE (adverse event — an unwanted medical occurrence after treatment)/recall, jobs assigned).
 
 ## How it works
 
 The header bell + badge implies an in-app notification centre (prototype header notifications icon with the rose dot). It surfaces role-relevant events so time-sensitive things aren't missed: new bookings, failed payments, credential/stock expiries (REG-WATCH), adverse-event/recall actions, and job assignments (ADR-0023).
-In-app is one delivery target of the INotifier port (ADR-0012, PRD-07) — the same event that goes out as SMS/email can also drop an in-app notification; channels stay consistent rather than this being a separate bespoke pipe. Each notification carries read/unread state and a per-user badge count, and deep-links to its source (the booking, the failed invoice, the credential, the assigned job).
+In-app is one delivery target of the INotifier (the shared notification port that fans out SMS, email and in-app) port (ADR-0012, PRD-07) — the same event that goes out as SMS/email can also drop an in-app notification; channels stay consistent rather than this being a separate bespoke pipe. Each notification carries read/unread state and a per-user badge count, and deep-links to its source (the booking, the failed invoice, the credential, the assigned job).
 Targeting is per-user and role-relevant (concern-driven, ADR-0017) — a payment-failure notification goes to roles that handle money/front-desk, a credential expiry to Lead/owner, not to everyone. Read state is per-user (two people seeing the same clinic event each track their own read/unread).
 Edge cases: clearing/marking-read updates the badge immediately; a notification whose source the role can no longer access (e.g. after a role switch) degrades gracefully; high-volume events are coalesced rather than flooding the bell.
 
@@ -48,7 +48,7 @@ _Prototype screen: prototype.html — sidebar/app shell, Today dashboard, header
 ## Tasks (dev pickup)
 
 - [ ] **Notification model + in-app channel of INotifier**
-  Model Notification (per-user, tenant_id + RLS) with kind, source_ref, read state and timestamp. Implement the in-app delivery target of the INotifier port (ADR-0012/PRD-07) so domain events (new booking, failed payment, expiry from REG-WATCH, AE/recall, job assignment from ADR-0023) fan out to in-app consistently with SMS/email. Target per-user by role relevance (concern-driven); coalesce high-volume events.
+  Model Notification (per-user, tenant_id + RLS) with kind, source_ref, read state and timestamp. Implement the in-app delivery target of the INotifier (the shared notification port that fans out SMS, email and in-app) port (ADR-0012/PRD-07) so domain events (new booking, failed payment, expiry from REG-WATCH, AE (adverse event — an unwanted medical occurrence after treatment)/recall, job assignment from ADR-0023) fan out to in-app consistently with SMS/email. Target per-user by role relevance (concern-driven); coalesce high-volume events.
 - [ ] **Read/unread + badge count API**
   Maintain per-user read/unread state and an unread badge count, with mark-read / mark-all-read that updates the count immediately. Two users seeing the same clinic event each track their own state.
 - [ ] **Notification centre UI (header bell + list, deep-linking)**

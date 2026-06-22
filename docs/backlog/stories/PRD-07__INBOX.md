@@ -5,7 +5,7 @@
 ## Background
 
 As a staff member, I want a unified inbox with lead tracking and review management, so that all client conversations live in one place.
-The omnichannel inbox (IG/FB/SMS/email), lead/prospect CRM and reviews/reputation are scoped to Phase 2; marketing DMs are out (Meta 24-h window). Placeholder (REQ-NOTIF-6/8/9, ADR-0018/0019/0032/0033).
+Most enquiries arrive as IG/FB DMs, SMS and email — and the prototype shows an omnichannel inbox with categorisation, client linking and templated/keyword suggested replies. Per scope this is Phase 2, captured as a placeholder. Crucially, Meta's constraints (App Review, Business Verification, the 24-hour messaging window, no cold-DM) mean marketing DMs are out: IG/FB/WhatsApp are reactive/service channels only, while proactive marketing stays on SMS/email.  The omnichannel inbox (IG/FB/SMS/email), lead/prospect CRM and reviews/reputation are scoped to Phase 2; marketing DMs are out (Meta 24-h window). Placeholder (REQ-NOTIF-6/8/9, ADR-0018/0019/0032/0033).
 
 ## How it works
 

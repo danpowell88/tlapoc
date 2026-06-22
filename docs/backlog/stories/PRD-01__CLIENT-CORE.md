@@ -7,7 +7,7 @@
 ## Background
 
 As a system, I want to capture client DOB and derive an under-18 flag, so that downstream cooling-off and pricing rules can enforce age-based requirements.
-The client record captures DOB and derives an under-18 flag that feeds cooling-off (C6) and advertising/pricing (C9) elsewhere.
+Plainly: this is the bare-bones client record — enough to capture date of birth and work out whether the client is under 18, which several later rules depend on. It is a small Foundations story built on tenancy. The full client directory and profile come later in the Reception epic; this story exists early only so that age-based rules (cooling-off, advertising/pricing) have a single trustworthy source. The client record captures DOB (date of birth) and derives an under-18 flag that feeds cooling-off (C6) and advertising/pricing (C9) elsewhere.
 
 ## How it works
 
@@ -25,7 +25,7 @@ Edge cases: an unknown/estimated DOB still derives a defensible age band; a soft
 
 - [ ] DOB captured; under-18 flag derived and exposed to PRD-03/PRD-06/PRD-07.
 - [ ] The flag updates correctly across a birthday.
-- [ ] Soft-delete with audit and duplicate handling supported (full CRM in PRD-02).
+- [ ] Soft-delete with audit and duplicate handling supported (full CRM (the client relationship / directory management in PRD-02) in PRD-02).
 - [ ] Under-18 status is visible on the patient header (consumed by UX age chip).
 
 ## UI designs / screenshots
@@ -47,6 +47,6 @@ Edge cases: an unknown/estimated DOB still derives a defensible age band; a soft
 ## Tasks (dev pickup)
 
 - [ ] **Client core record, DOB capture & age derivation**
-  Model the Client core (tenant_id + RLS) with DOB and derive under18 + current age server-side at read time so they stay correct across a birthday with no batch job. Expose the derived flag/age to PRD-03/06/07 (cooling-off, pricing) and to the patient-header age chip. Support soft-delete (deleted_at; excluded from active/bookable/search views; row + history retained for RETENTION/AUDIT — never hard-deleted here).
+  Model the Client core (tenant_id + RLS (row-level security)) with DOB (date of birth) and derive under18 + current age server-side at read time so they stay correct across a birthday with no batch job. Expose the derived flag/age to PRD-03/06/07 (cooling-off, pricing) and to the patient-header age chip. Support soft-delete (deleted_at; excluded from active/bookable/search views; row + history retained for RETENTION/AUDIT — never hard-deleted here).
 - [ ] **Duplicate detection & reviewed merge**
-  Surface duplicate/merge candidates (matching name + DOB + contact) as suggestions, never auto-merging two real people. Merge is a reviewed action that re-points history to the surviving record and writes an audit event. Soft-deleted and merged-away records stay out of active views.
+  Surface duplicate/merge candidates (matching name + DOB (date of birth) + contact) as suggestions, never auto-merging two real people. Merge is a reviewed action that re-points history to the surviving record and writes an audit event. Soft-deleted and merged-away records stay out of active views.

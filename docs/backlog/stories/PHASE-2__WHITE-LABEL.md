@@ -5,7 +5,7 @@
 ## Background
 
 As a clinic owner, I want to brand the platform with my clinic's look, so that clients see my brand.
-Per-tenant branding/theming of web and apps (PRD-01 non-goal).
+Plainly: this would let each clinic skin the web and mobile apps with its own logo, colours and name. Where it fits: a deferred Phase 2+ placeholder — v1 ships one clinic's brand, so per-tenant theming waits until there are multiple clinics to brand.  Placeholder (Phase 2+): per-tenant branding/theming of web and apps (a PRD-01 non-goal).
 
 ## How it works
 

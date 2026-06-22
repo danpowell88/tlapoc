@@ -7,7 +7,7 @@
 ## Background
 
 As a client, I want to only receive marketing I opted into, with a working unsubscribe on every message, so that my consent is respected per the Spam Act.
-Opt-in for commercial electronic messages, sender identification and a functional unsubscribe that suppresses immediately on withdrawal (REQ-NOTIF-5, C23).
+Under the Spam Act, a commercial electronic message needs the recipient's consent, must identify the sender, and must carry a functional unsubscribe that takes effect promptly. This story is the consent + suppression spine for all marketing: opt-in per channel, an unsubscribe in every marketing message, and immediate suppression on withdrawal — honoured across SMS/email/push and by PRD-06's reward comms. Transactional reminders/aftercare are exempt and always send.  Opt-in for commercial electronic messages, sender identification and a functional unsubscribe that suppresses immediately on withdrawal (REQ-NOTIF-5, C23).
 
 ## How it works
 
@@ -47,7 +47,7 @@ The line between transactional and marketing is enforced here: reminders, confir
 ## Tasks (dev pickup)
 
 - [ ] **MarketingConsent + SuppressionList model (migrations)**
-  Model MarketingConsent (per client per channel) + SuppressionList (tenant-wide contacts) — tenant_id + RLS.
+  Model MarketingConsent (per client per channel) + SuppressionList (tenant-wide contacts) — tenant_id + RLS (row-level security).
   - Consent carries opted_in + updated_at; suppression carries contact + reason + at.
   - These are the shared gate every marketing caller (incl. PRD-06 reward comms) consults.
 - [ ] **Consent gate + functional unsubscribe + sender-ID**

@@ -18,7 +18,7 @@
     {
       "key": "CONSULT",
       "title": "Synchronous consult record",
-      "context": "A Consult (in-person or external-telehealth) records modality, prescriber, timestamp, external reference and notes — required before any script (C1).",
+      "context": "Plainly: this is the assessment appointment, recorded. Before anyone can be prescribed a cosmetic injectable, a qualified prescriber must actually assess them; this story captures that assessment as a Consult record so the rest of the chain can prove it happened. Where it fits: this is the first link of the S4 (Schedule 4 prescription-only medicine) compliance chain and the clinical heart of the platform. It sits straight after booking (PRD-02) and the consent/pre-treatment gate (PRD-03), and it is the precondition for the prescription (PRD-04/PRESCRIPTION) that in turn gates every administration (PRD-04/ADMIN-GATE) and the charting that records it (PRD-05).  A Consult (in-person or external-telehealth) records modality, prescriber, timestamp, external reference and notes — required before any script (C1).",
       "as_a": "prescriber",
       "i_want": "to record a synchronous consult (in person or from our external telehealth app) before writing any script",
       "so_that": "every prescription is backed by a real assessment",
@@ -100,7 +100,7 @@
     {
       "key": "PRESCRIPTION",
       "title": "Individual prescription (no batch / no async)",
-      "context": "An individual prescription per client per consult — never batch/standing-order, never async (text/email/online-only) (C2). Supports the designated RN prescriber identity.",
+      "context": "Plainly: this is the script — the prescriber's written authority for one named patient to receive a specific S4 (Schedule 4 prescription-only medicine) dose. It is the document an administering nurse acts against. Where it fits: it is the second link of the S4 compliance chain, immediately after the Consult (PRD-04/CONSULT) and before the administration gate (PRD-04/ADMIN-GATE). No valid script, no lawful dose — every S4 administration downstream must point back to one of these.  An individual prescription per client per consult — never batch/standing-order, never async (text/email/online-only) (C2). Supports the designated RN prescriber identity.",
       "as_a": "prescriber",
       "i_want": "to write an individual prescription for this patient tied to their consult",
       "so_that": "prescribing is lawful and patient-specific",
@@ -181,7 +181,7 @@
     {
       "key": "PRODUCT-CATALOGUE",
       "title": "Medicines & product catalogue (S4 classification)",
-      "context": "A typed, multi-unit catalogue (toxin/filler/skin/retail) with the S4 flag — the single classification driving rewards eligibility and public-page naming — plus regClass/ARTG/compounded for GLP-1 handling (ADR-0014/0021).",
+      "context": "Plainly: this is the list of everything the clinic stocks and sells — each toxin, filler, skin product and retail item — tagged with what it is and how it is regulated. The single most important tag is whether a product is an S4 (Schedule 4 prescription-only medicine). Where it fits: it underpins the whole moat. The S4 flag set here is read everywhere — it decides which lots flow through the prescribe→administer chain (PRD-04), what the rewards engine may never discount (PRD-06) and how a product is named on the public booking page (PRD-07). Stock receipt (PRD-04/STOCK-RECEIVE) and lots hang off these products.  A typed, multi-unit catalogue (toxin/filler/skin/retail) with the S4 flag — the single classification driving rewards eligibility and public-page naming — plus regClass/ARTG/compounded for GLP-1 handling (ADR-0014/0021).",
       "as_a": "owner",
       "i_want": "a product catalogue where each product has a type, unit, S4 flag and regulatory metadata",
       "so_that": "the right rules apply to each product across the platform",
@@ -256,7 +256,7 @@
     {
       "key": "ADMIN-GATE",
       "title": "Administration gating & immutable record",
-      "context": "An RN can only administer S4 against a valid, unconsumed prescription for that same client, with current consent and a selected in-date lot; the record is immutable once saved (C8).",
+      "context": "Plainly: this is the moment the dose is actually given, and the single rule that decides whether it is allowed to be given at all. A nurse may only administer an S4 (Schedule 4 prescription-only medicine) when every earlier safeguard is in place, and the record of the dose can never be edited afterwards. Where it fits: this is the keystone of the S4 compliance chain — it consumes the consult (PRD-04/CONSULT), the individual prescription (PRD-04/PRESCRIPTION), valid consent (PRD-03) and lawfully-held in-date stock (PRD-04/STOCK-RECEIVE), and produces the immutable register entry that powers recall (PRD-04/RECALL-LOOKUP) and reconciliation (PRD-04/VIAL-RECON). It is also the precondition for charting (PRD-05).  An RN can only administer S4 against a valid, unconsumed prescription for that same client, with current consent and a selected in-date lot; the record is immutable once saved (C8).",
       "as_a": "RN",
       "i_want": "to administer S4 only against a valid unconsumed script for this client, recording product, units, depth, site and batch-lot/expiry",
       "so_that": "every dose is lawful, traceable and tamper-proof",
@@ -338,7 +338,7 @@
     {
       "key": "STOCK-RECEIVE",
       "title": "Stock receipt, ARTG & lawful-supply provenance",
-      "context": "S4 stock is received from a TGA-approved wholesaler with ARTG status, brand, sponsor and lawful supply source recorded; non-ARTG/unverified source is warned/blocked (C11). S4 POs require a prescriber signer.",
+      "context": "Plainly: this is how medicine comes in the door and gets logged. When an S4 (Schedule 4 prescription-only medicine) arrives, the clinic records exactly which approved product it is, who supplied it and that it was lawfully ordered — so the clinic can prove it only holds legitimate stock. Where it fits: this is where provenance enters the moat. It sits on the product catalogue (PRD-04/PRODUCT-CATALOGUE) and feeds the administration gate (PRD-04/ADMIN-GATE), which will only let a nurse draw from a lot whose lawful supply was recorded here.  S4 stock is received from a TGA-approved wholesaler with ARTG status, brand, sponsor and lawful supply source recorded; non-ARTG/unverified source is warned/blocked (C11). S4 POs require a prescriber signer.",
       "as_a": "prescriber/owner",
       "i_want": "to receive S4 stock and record its ARTG status, brand, sponsor and lawful supply source",
       "so_that": "we only hold lawfully-supplied, approved medicine",
@@ -415,7 +415,7 @@
     {
       "key": "CUSTODY-STORAGE",
       "title": "Custody & secure storage",
-      "context": "Only NP/prescriber roles may take custody; stock is bound to a secure, access-logged location. Mode-A custodian must physically work at the clinic with exclusive custody (C7/C15).",
+      "context": "Plainly: this is the rule about who is allowed to hold the stock of S4 (Schedule 4 prescription-only medicine) and where it must be kept. Only an on-site prescriber may have custody, and the medicine must live in a locked, access-logged cabinet or fridge. Where it fits: it sits on stock receipt (PRD-04/STOCK-RECEIVE) within the moat — received stock is bound to a secure location and a named custodian here, and that custody is one of the preconditions the administration gate (PRD-04/ADMIN-GATE) re-checks before any dose.  Only NP/prescriber roles may take custody; stock is bound to a secure, access-logged location. Mode-A custodian must physically work at the clinic with exclusive custody (C7/C15).",
       "as_a": "owner",
       "i_want": "stock custody limited to an on-site prescriber and bound to a secure, access-logged location",
       "so_that": "S4 custody meets the exclusive-custody rule",
@@ -494,7 +494,7 @@
     {
       "key": "COLD-CHAIN",
       "title": "Temperature logging & excursion alerts",
-      "context": "Toxin must stay 2–8°C; temperature logging raises excursion alerts and flags affected stock (C13). Integrates with the optional ESP32 cold-chain monitor.",
+      "context": "Plainly: this keeps the medicine cold enough to be safe. Botulinum toxin must stay between 2 and 8 degrees; this story logs the fridge temperature continuously and quarantines any stock that gets too warm. Where it fits: it sits on secure storage (PRD-04/CUSTODY-STORAGE) within the moat. A lot that breaches cold-chain is quarantined and becomes unselectable at the administration gate (PRD-04/ADMIN-GATE), and a breach raises a facility job in compliance ops (PRD-11).  Toxin must stay 2–8°C; temperature logging raises excursion alerts and flags affected stock (C13). Integrates with the optional ESP32 cold-chain monitor.",
       "as_a": "owner",
       "i_want": "temperature logging for the medicine fridge with excursion alerts",
       "so_that": "we never use medicine that breached cold-chain",
@@ -581,7 +581,7 @@
     {
       "key": "VIAL-RECON",
       "title": "Vial / unit reconciliation",
-      "context": "Units drawn vs vial size + wastage must reconcile so stock, billing and the register agree (C8).",
+      "context": "Plainly: this makes the sums add up. One toxin vial treats several patients, so the units drawn for each patient plus any wastage must reconcile against the vial — proving no medicine is unaccounted for. Where it fits: it sits on the administration gate (PRD-04/ADMIN-GATE) within the moat — every dose given there decrements a lot, and the reconciliation here keeps stock, billing and the medicine register in agreement and feeds reporting (PRD-08).  Units drawn vs vial size + wastage must reconcile so stock, billing and the register agree (C8).",
       "as_a": "owner",
       "i_want": "vial/unit reconciliation across draws and wastage",
       "so_that": "stock, billing and the medicine register always agree",
@@ -654,7 +654,7 @@
     {
       "key": "RECALL-LOOKUP",
       "title": "Lot → clients recall lookup & medicine register",
-      "context": "Given a lot, the system must instantly list every client/administration for that lot, and export an audit-ready medicine register (C8).",
+      "context": "Plainly: this is the payoff of recording the batch on every dose. Type in a lot number and instantly see every client who received that batch — and export the official medicine register for inspection. Where it fits: it sits on the immutable administration records (PRD-04/ADMIN-GATE) within the moat. When a manufacturer or the TGA (Therapeutic Goods Administration) issues a safety notice for a batch, this turns the lot number into the exact client list in minutes; full recall execution lives in the governance hub (PRD-08/PRD-11).  Given a lot, the system must instantly list every client/administration for that lot, and export an audit-ready medicine register (C8).",
       "as_a": "prescriber/owner",
       "i_want": "to enter a lot number and instantly see every client who received it, plus export the medicine register",
       "so_that": "we can run a recall in minutes and evidence the register",
@@ -735,7 +735,7 @@
     {
       "key": "WASTAGE-DESTRUCTION",
       "title": "Wastage, disposal & destruction records",
-      "context": "Wastage and destruction (incl. partial vials) must be recorded via a licensed/RUM pathway with certificates (C16).",
+      "context": "Plainly: this records medicine that is thrown away or destroyed — a leftover part-vial after a treatment, or expired/spoiled stock — and proves it was disposed of lawfully with a certificate. Where it fits: it closes the medicines loop in the moat alongside reconciliation (PRD-04/VIAL-RECON): every unit received is accounted for as administered, wasted or destroyed. It sits on secure storage (PRD-04/CUSTODY-STORAGE) and feeds the compliance dashboard and audit pack (PRD-08).  Wastage and destruction (incl. partial vials) must be recorded via a licensed/RUM pathway with certificates (C16).",
       "as_a": "owner",
       "i_want": "to record wastage, disposal and destruction (including partial vials) with certificates",
       "so_that": "we evidence lawful disposal of S4 medicine",
@@ -805,7 +805,7 @@
     {
       "key": "STOCKTAKE",
       "title": "Stocktake, discrepancy & loss/theft reporting",
-      "context": "Stocktakes and discrepancy handling, with loss/theft reporting, close the medicines-governance loop (C17).",
+      "context": "Plainly: this is the periodic count. Staff physically count the stock of S4 (Schedule 4 prescription-only medicine), the system compares it against what the records say should be there, and any difference is flagged — with a path to report a loss or theft. Where it fits: it closes the medicines-governance loop in the moat. It sits on secure storage (PRD-04/CUSTODY-STORAGE), cross-references cabinet access anomalies, and feeds discrepancies and loss/theft reports to the compliance dashboard (PRD-08).  Stocktakes and discrepancy handling, with loss/theft reporting, close the medicines-governance loop (C17).",
       "as_a": "owner",
       "i_want": "to run a stocktake and have discrepancies surfaced with a loss/theft reporting path",
       "so_that": "stock integrity is provable and losses are reported",
@@ -880,7 +880,7 @@
     {
       "key": "MODE-B",
       "title": "Mode B pharmacy-dispensing model (placeholder)",
-      "context": "An alternative dispensing model where a pharmacy partner holds/dispenses stock. No pharmacy partner yet — deferred, placeholder. (DispensedItem entity reserved.)",
+      "context": "Plainly: this is a placeholder for a different way of holding medicine — where a partner pharmacy dispenses each patient's dose instead of the clinic keeping its own bulk stock. There is no pharmacy partner yet, so nothing is built; the story just keeps the design ready. Where it fits: it is a deferred (Phase 2+) variant of the custody model in the moat. Today the platform runs Mode A only (on-site prescriber custody, PRD-04/CUSTODY-STORAGE); this story reserves the switch and entities so a pharmacy-dispensing model can be added later without reworking the schema.  An alternative dispensing model where a pharmacy partner holds/dispenses stock. No pharmacy partner yet — deferred, placeholder. (DispensedItem entity reserved.)",
       "as_a": "owner",
       "i_want": "a pharmacy-dispensing mode for clinics without on-site custody",
       "so_that": "the platform fits a pharmacy-partner arrangement",

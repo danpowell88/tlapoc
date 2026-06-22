@@ -7,13 +7,13 @@
 ## Background
 
 As a developer, I want read-models/materialized views fed by domain events and the audit stream, so that dashboards are fast and don't hammer the transactional DB.
-Dashboards read from dedicated read-models/materialized views fed by domain events + the audit stream; eventual consistency acceptable (ADR-0013). Build incrementally as modules land.
+This is the data plumbing under all of Reporting (PRD-08): a separate, query-optimised copy of the data that every dashboard and register reads from, kept up to date by listening to events from the rest of the app. It sits at step 6 of the clinic-first build — after the clinical and operations core (Reception, Consent, Injectables, Charting) has started emitting events, and before the dashboards (BUSINESS-DASH, COMPLIANCE-DASH) that depend on it. Its only upstream dependency is the audit stream (PRD-01 AUDIT); almost everything else in Reporting depends on it. Dashboards read from dedicated read-models/materialized views fed by domain events + the audit stream; eventual consistency acceptable (ADR-0013). Build incrementally as modules land.
 
 ## How it works
 
 Every dashboard and register in the platform reads from a dedicated read schema — a set of materialised views and projection tables — never from the transactional (OLTP) tables directly (ADR-0013). Projections are fed two ways: from domain events emitted on the write side (Sprint-0 DOMAIN-EVENTS) as modules finalise appointments, administrations, payments, memberships and credentials; and from the append-only AuditEvent stream (ADR-0010), which carries the read/write trail the compliance metrics are computed over.
 Eventual consistency is the explicit trade: a projection may lag the write by seconds, which is acceptable for reporting and removes read load and lock contention from the booking/charting/checkout paths. Each view is owned by the module that produces its source events and is built incrementally as that module lands — there is no big-bang reporting layer.
-Every projection is rebuildable: a backfill replays the source events/audit rows from a checkpoint to reconstruct a view from cold, so a new metric, a bug fix, or a schema change never requires touching live OLTP data. Projections record their last-processed event offset so an incremental catch-up and a full rebuild use the same code path. Money-bearing views (revenue, MRR, margin) carry the owner-financial capability tag so the gating layer can suppress them for non-owner roles.
+Every projection is rebuildable: a backfill replays the source events/audit rows from a checkpoint to reconstruct a view from cold, so a new metric, a bug fix, or a schema change never requires touching live OLTP data. Projections record their last-processed event offset so an incremental catch-up and a full rebuild use the same code path. Money-bearing views (revenue, MRR (Monthly Recurring Revenue), margin) carry the owner-financial capability tag so the gating layer can suppress them for non-owner roles.
 
 ## Requirements
 

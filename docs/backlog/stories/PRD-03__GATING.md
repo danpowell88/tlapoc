@@ -7,7 +7,7 @@
 ## Background
 
 As a RN/NP, I want the system to block treatment until required intake and consent are complete and current, telling me exactly what's missing, so that the compliant path is the only path.
-Treatment cannot start unless required intake + consent are complete and current — enforced server-side, surfaced via the blocked-action banner (ADR-0008).
+Server-enforced treatment gating is the keystone of Intake & Consent (PRD-03): the single, shared mechanism that blocks treatment until the required intake and consent are complete and current. It sits at the end of PRD-03, consuming intake (PRD-03/INTAKE), the BDD screen (PRD-03/BDD) and consent (PRD-03/CONSENT). It is the one gate that the consult/prescription (PRD-04) and charting (PRD-05) downstream all reuse rather than re-implementing — making the compliant path the only path between booking (PRD-02) and the clinical record, and feeding its audited decisions to compliance reporting (PRD-08). As an RN/NP, I want the system to block treatment until required intake and consent are complete and current, telling me exactly what's missing, so that the compliant path is the only path.  Treatment cannot start unless required intake + consent are complete and current — enforced server-side, surfaced via the blocked-action banner (ADR-0008).
 
 ## How it works
 
@@ -53,6 +53,6 @@ This is the single mechanism PRD-04 (consult/Rx) and PRD-05 (charting) consume r
 ## Tasks (dev pickup)
 
 - [ ] **Shared server-side TreatmentGate evaluation (ADR-0008)**
-  A single, reusable gate evaluator invoked before charting/treatment opens: checks required IntakeResponse present, RN/NP-reviewed ScreeningResult, current version-matched ConsentSignature, and (for S4) consult_id + valid Rx + elapsed under-18 cooling-off. Returns allowed + a structured missing[] (item, fix, who-resolves). Enforced as a domain invariant so a direct API call is blocked too. This is the one mechanism PRD-04/05 consume. Every decision writes a GateDecision to the append-only audit stream (ADR-0010) for PRD-08 consent-coverage reporting.
+  A single, reusable gate evaluator invoked before charting/treatment opens: checks required IntakeResponse present, RN/NP-reviewed ScreeningResult, current version-matched ConsentSignature, and (for S4 (Schedule 4 prescription-only medicine)) consult_id + valid Rx + elapsed under-18 cooling-off. Returns allowed + a structured missing[] (item, fix, who-resolves). Enforced as a domain invariant so a direct API call is blocked too. This is the one mechanism PRD-04/05 consume. Every decision writes a GateDecision to the append-only audit stream (ADR-0010) for PRD-08 consent-coverage reporting.
 - [ ] **Blocked-action banner (what/how/who) + chips, reused on web + provider app**
   Render the calm blocked-action banner from the gate's missing[]: what is missing, how to fix, who can resolve, with a deep link to the fix (send consent/intake link, record consult). Render the pre-treatment review chips from the same evaluation; reuse the identical component/contract on the Angular charting screen and the Flutter provider app (treatment-room) and the Today 'treatment gated' tile — never a dead-end.

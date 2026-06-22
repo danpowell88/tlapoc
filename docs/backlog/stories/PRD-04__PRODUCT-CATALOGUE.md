@@ -5,7 +5,7 @@
 ## Background
 
 As a owner, I want a product catalogue where each product has a type, unit, S4 flag and regulatory metadata, so that the right rules apply to each product across the platform.
-A typed, multi-unit catalogue (toxin/filler/skin/retail) with the S4 flag — the single classification driving rewards eligibility and public-page naming — plus regClass/ARTG/compounded for GLP-1 handling (ADR-0014/0021).
+Plainly: this is the list of everything the clinic stocks and sells — each toxin, filler, skin product and retail item — tagged with what it is and how it is regulated. The single most important tag is whether a product is an S4 (Schedule 4 prescription-only medicine). Where it fits: it underpins the whole moat. The S4 flag set here is read everywhere — it decides which lots flow through the prescribe→administer chain (PRD-04), what the rewards engine may never discount (PRD-06) and how a product is named on the public booking page (PRD-07). Stock receipt (PRD-04/STOCK-RECEIVE) and lots hang off these products.  A typed, multi-unit catalogue (toxin/filler/skin/retail) with the S4 flag — the single classification driving rewards eligibility and public-page naming — plus regClass/ARTG/compounded for GLP-1 handling (ADR-0014/0021).
 
 ## How it works
 

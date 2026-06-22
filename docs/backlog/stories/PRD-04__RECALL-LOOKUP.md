@@ -7,7 +7,7 @@
 ## Background
 
 As a prescriber/owner, I want to enter a lot number and instantly see every client who received it, plus export the medicine register, so that we can run a recall in minutes and evidence the register.
-Given a lot, the system must instantly list every client/administration for that lot, and export an audit-ready medicine register (C8).
+Plainly: this is the payoff of recording the batch on every dose. Type in a lot number and instantly see every client who received that batch — and export the official medicine register for inspection. Where it fits: it sits on the immutable administration records (PRD-04/ADMIN-GATE) within the moat. When a manufacturer or the TGA (Therapeutic Goods Administration) issues a safety notice for a batch, this turns the lot number into the exact client list in minutes; full recall execution lives in the governance hub (PRD-08/PRD-11).  Given a lot, the system must instantly list every client/administration for that lot, and export an audit-ready medicine register (C8).
 
 ## How it works
 

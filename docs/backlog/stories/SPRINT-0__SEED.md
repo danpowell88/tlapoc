@@ -7,7 +7,7 @@
 ## Background
 
 As a developer, I want a one-command local environment seeded with synthetic tenant, staff, clients, catalogue and stock, so that I can run and demo any module locally without touching real data.
-Realistic synthetic data (clinic, staff with credentials, clients, services incl. S4/non-S4, stock) lets every module be developed and demoed without real PII. All data must stay synthetic (project rule).
+Every module needs realistic-but-synthetic data to be developed and demoed without touching real PII — a clinic, staff with credentials, clients (including an under-18 for cooling-off paths), services flagged S4/non-S4, and stock lots. The project rule is absolute: all seed data is synthetic; no real client, staff or business information ever. SEED depends on DB (the schema it populates and the containerised local Postgres) and is reused by the integration/e2e tests (TEST). It's what makes a one-command local environment possible for every later feature.  Realistic synthetic data (clinic, staff with credentials, clients, services incl. S4/non-S4, stock) lets every module be developed and demoed without real PII. All data must stay synthetic (project rule).
 
 ## How it works
 
@@ -40,7 +40,7 @@ Because the seed reflects the compliance-relevant edge cases (under-18, S4 vs no
 - [ ] **Seed the compliance-relevant edge cases (roles/credentials, under-18, S4/non-S4, lots)**
   Make the seed exercise the guardrails, not just happy paths.
   - Staff with roles + credentials so RBAC/scope has data; clients including an under-18 so cooling-off + payment-block (C6) are testable.
-  - Services/products flagged S4 and non-S4 so rewards/public-naming classification (ADR-0014) has data; stock lots for custody/expiry/recall flows.
+  - Services/products flagged S4 (Schedule 4 prescription-only medicine) and non-S4 so rewards/public-naming classification (ADR-0014) has data; stock lots for custody/expiry/recall flows.
   - Coverage chosen so demos and dev can hit the real compliance blocks (ADR-0008).
 - [ ] **Make the seed reusable by tests and document it**
   Share the fixture with the test suites and write the how-to.

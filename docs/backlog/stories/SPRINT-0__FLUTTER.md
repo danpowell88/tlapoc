@@ -7,13 +7,13 @@
 ## Background
 
 As a mobile developer, I want client and provider app shells with bottom-tab navigation, shared auth/API/design packages and secure token storage, so that the two apps are built from one codebase with consistent plumbing.
-One Flutter codebase, two flavours (client, provider), sharing auth, the API client and the design system (ADR-0006).
+Sprint 0 (setup), mobile foundation: this builds the empty shells of both mobile apps — the client app and the staff (provider) app — from a single shared codebase, with their tab bars, shared sign-in/API/design packages and secure storage for login tokens in place. It builds on staff and client sign-in, the design system and the generated API client; the real screens, the offline charting and the injection-mapping canvas all build on this base later in the Apps phase. One Flutter codebase, two flavours (client, provider), sharing auth, the API client and the design system (ADR-0006).
 
 ## How it works
 
 One Flutter codebase produces two flavours. The client app shell has bottom-tab navigation Home / Book / My care / Membership / Account (matching client-app.png), and the provider app shell has Schedule / Patient / Medicines / Tasks (the room-side flow in treatment-room.png) — empty screens at this stage, just the navigable frame and theme.
 Both apps authenticate through the shared auth package: the provider flavour signs in with Entra ID (staff) and the client flavour with External ID, and both call the sample API endpoint via the OPENAPI-generated client to prove the round-trip. Auth tokens are kept in platform secure storage (keychain/keystore), never plain storage, and the design-system theme/tokens are applied so both apps look like the product from day one.
-CI builds installable artifacts for internal distribution for both flavours (signing/store channels are APP-DISTRIBUTION's job). This shell is the base the offline-tolerant charting (PRD-05/09) and the injection-mapping canvas build on — de-risked separately by SPIKE-OFFLINE and SPIKE-CANVAS.
+CI (continuous integration) builds installable artifacts for internal distribution for both flavours (signing/store channels are APP-DISTRIBUTION's job). This shell is the base the offline-tolerant charting (PRD-05/09) and the injection-mapping canvas build on — de-risked separately by SPIKE-OFFLINE and SPIKE-CANVAS.
 
 ## Requirements
 
@@ -47,9 +47,9 @@ _Prototype screen: Non-UI / platform scaffolding — no prototype screen._
   - Client shell tabs Home/Book/My care/Membership/Account; provider shell tabs Schedule/Patient/Medicines/Tasks (empty screens, navigable frame).
   - Shared auth package: provider signs in with Entra (AUTH-STAFF), client with External ID (AUTH-CLIENT); both call the sample endpoint via the OPENAPI-generated client.
   - Tokens stored in platform secure storage (keychain/keystore); design-system theme/tokens (DESIGN) applied.
-  - CI builds installable artifacts per flavour for internal distribution (channels deferred to APP-DISTRIBUTION).
+  - CI (continuous integration) builds installable artifacts per flavour for internal distribution (channels deferred to APP-DISTRIBUTION).
 - [ ] **Document the Flutter flavour/package structure and build/run/distribution basics**
   Write the mobile-base guide so SPIKE-CANVAS/SPIKE-OFFLINE and PRD-09 build consistently.
   - Flavour configuration (client vs provider) and the shared packages (auth, api-client, design-system) layout.
   - How each flavour authenticates (different audiences) and where secure token storage lives.
-  - How CI produces artifacts and the hand-off to APP-DISTRIBUTION for real distribution.
+  - How CI (continuous integration) produces artifacts and the hand-off to APP-DISTRIBUTION for real distribution.

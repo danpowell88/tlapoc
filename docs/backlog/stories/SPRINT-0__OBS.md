@@ -7,7 +7,7 @@
 ## Background
 
 As a platform engineer, I want structured logging, distributed tracing, key metrics dashboards and alerting wired across API and apps, so that we can diagnose issues and detect incidents (feeding the breach workflow) quickly.
-You cannot run a compliance-critical platform blind. Centralised logs, distributed traces, metrics and alerting are needed from the first deploy.
+Sprint 0 (setup), keeping the lights on: this wires up centralised logging, request tracing, dashboards and alerts from the very first deploy, so the team can see what the platform is doing, diagnose problems and catch incidents early. It builds on the API skeleton (whose request logs and tracing id it threads together) and the monitoring workspace provisioned with the cloud environments; the security-signal stream it produces is what the data-breach workflow later builds on. You cannot run a compliance-critical platform blind. Centralised logs, distributed traces, metrics and alerting are needed from the first deploy.
 
 ## How it works
 

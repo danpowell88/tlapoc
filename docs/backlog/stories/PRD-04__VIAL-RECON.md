@@ -7,7 +7,7 @@
 ## Background
 
 As a owner, I want vial/unit reconciliation across draws and wastage, so that stock, billing and the medicine register always agree.
-Units drawn vs vial size + wastage must reconcile so stock, billing and the register agree (C8).
+Plainly: this makes the sums add up. One toxin vial treats several patients, so the units drawn for each patient plus any wastage must reconcile against the vial — proving no medicine is unaccounted for. Where it fits: it sits on the administration gate (PRD-04/ADMIN-GATE) within the moat — every dose given there decrements a lot, and the reconciliation here keeps stock, billing and the medicine register in agreement and feeds reporting (PRD-08).  Units drawn vs vial size + wastage must reconcile so stock, billing and the register agree (C8).
 
 ## How it works
 

@@ -7,7 +7,7 @@
 ## Background
 
 As a front desk, I want a day/week/room calendar showing practitioners and rooms with correct service durations and buffers, so that I can run the diary at a glance and book without clashes.
-Front desk needs a fast day/week/room calendar with service durations, buffers and rosters — the core of the diary.
+The multi-resource calendar is the first feature built in Reception (PRD-02), the front-of-house entry point to a visit, and sits directly on top of Foundations (PRD-01) — it consumes the practitioner roster and the canInject (the derived gate deciding whether a staff member may administer injectables right now) scope-of-practice gate. It is the diary that every other booking surface draws on. In the build timeline it comes after the platform and Foundations are in place and before everything else in Reception: the booking wizard, online self-booking, walk-ins and the visit lifecycle all reuse the availability engine this story creates, and it precedes the Intake/Consent gating (PRD-03) that runs between booking and treatment. As front desk, I want a day/week/room calendar showing practitioners and rooms with correct service durations and buffers, so that I can run the diary at a glance and book without clashes.  Front desk needs a fast day/week/room calendar with service durations, buffers and rosters — the core of the diary.
 
 ## How it works
 
@@ -59,7 +59,7 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 ## Tasks (dev pickup)
 
 - [ ] **Availability engine: roster ∩ canInject ∩ free-resource**
-  Build the server-side availability function that, for a date range + service, returns bookable (practitioner, room, start) tuples. Inputs: RosterShift (PRD-01), TimeOff, existing Appointments, the practitioner canInject capability vs service.schedule, and Resource free/busy for the block length INCLUDING buffer/processing/turnaround. Returns scope-clean slots only — an uncredentialled or unrostered practitioner never appears for an injectable. Expose a read endpoint (GET availability?serviceId&from&to[&practitionerId]) consumed by the wizard, online booking and drag-drop validation. Pure, side-effect-free, tenant-scoped (RLS).
+  Build the server-side availability function that, for a date range + service, returns bookable (practitioner, room, start) tuples. Inputs: RosterShift (PRD-01), TimeOff, existing Appointments, the practitioner canInject capability vs service.schedule, and Resource free/busy for the block length INCLUDING buffer/processing/turnaround. Returns scope-clean slots only — an uncredentialled or unrostered practitioner never appears for an injectable. Expose a read endpoint (GET availability?serviceId&from&to[&practitionerId]) consumed by the wizard, online booking and drag-drop validation. Pure, side-effect-free, tenant-scoped (RLS (row-level security)).
 - [ ] **Calendar API: appointment CRUD + move + conflict check**
   Endpoints to create/read/update/cancel an Appointment and to move it (PUT new practitioner/room/start). On create and on move, re-run the availability engine server-side and REJECT with a structured conflict (room/chair/device busy, outside roster, scope mismatch) — never trust the client. Emit appointment.created / appointment.moved domain events for reminders + read models. Persist source(online|desk|walkin) and reason. Buffers reserve the resource for the full block.
 - [ ] **Week/day calendar UI: columns, colour-coded blocks, drag-to-move, utilisation strip**

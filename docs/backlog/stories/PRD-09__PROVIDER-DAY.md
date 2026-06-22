@@ -7,11 +7,11 @@
 ## Background
 
 As a injector/prescriber, I want to see my day and open a patient with consult/consent status shown before I chart, so that I work room-side with the right context and gates.
-The provider sees their day and opens a patient with consult+consent status verified before charting (REQ-APP-2).
+Plainly: the practitioner's app showing their day's patients, with each patient's consult and consent status checked before charting starts. Where it fits: a late, room-side surface on the shared Flutter codebase that reuses the charting (PRD-05) and gating (PRD-03/04) modules built earlier; the apps come last because they face outward. The provider sees their day and opens a patient with consult+consent status verified before charting (REQ-APP-2).
 
 ## How it works
 
-The provider app shows the practitioner's day ('Today · Room 2') and opens a patient with consult+consent status shown before charting. Provider signs in via Entra ID SSO, tenant-scoped; a self-checked-in client is highlighted as ready ('Start visit'). The consult+consent gate (PRD-03/04) is enforced server-side before charting opens — if unmet, the app shows what's outstanding and blocks charting.
+The provider app shows the practitioner's day ('Today · Room 2') and opens a patient with consult+consent status shown before charting. Provider signs in via Entra ID SSO (single sign-on), tenant-scoped; a self-checked-in client is highlighted as ready ('Start visit'). The consult+consent gate (PRD-03/04) is enforced server-side before charting opens — if unmet, the app shows what's outstanding and blocks charting.
 Room-side starting point with the right context and gates.
 
 ## Requirements

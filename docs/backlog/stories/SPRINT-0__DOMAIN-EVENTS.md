@@ -7,7 +7,7 @@
 ## Background
 
 As a backend developer, I want a domain-event mechanism (transactional outbox + dispatch) modules can publish to and subscribe from, so that read-models, jobs and notifications react to changes without tight coupling.
-Reporting read-models, the follow-up job queue, notifications and cross-module reactions all consume domain events. A lightweight event backbone (outbox + dispatch) decouples modules.
+Reporting read-models (PRD-08), the follow-up/Jobs queue (PRD-07/ADR-0023), notifications and cross-module reactions all need to react to changes without tightly coupling modules. A lightweight domain-event backbone — a transactional outbox plus at-least-once dispatch — decouples producers from consumers (ADR-0013/0010).  DOMAIN-EVENTS builds on AUDIT-INFRA (the same append-only discipline) and DB (the outbox table + transaction), and runs dispatch on JOBS-SCHEDULER; READ-MODELS, FOLLOWUPS and notifications consume from it.
 
 ## How it works
 

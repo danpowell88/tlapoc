@@ -7,7 +7,7 @@
 ## Background
 
 As a admin, I want retention timers and a destruction register that surfaces records due for destruction and logs their destruction, so that we keep records exactly as long as the law requires, no more, no less.
-Records must be retained per legal periods (adults ≥7y from last contact; minors to age 25; indefinite on complaint/litigation) and destroyed with a register + certificate (C18).
+Plainly: this keeps records exactly as long as the law requires and no longer, then surfaces them for a reviewed, logged destruction. It sits in the governance band of Foundations, built on the audit trail. It links to the privacy-rights story (a deletion request can't override a legal retention period) and is the answer to an inspector asking how the clinic disposes of records lawfully. Records must be retained per legal periods (adults ≥7y from last contact; minors to age 25; indefinite on complaint/litigation) and destroyed with a register + certificate (C18).
 
 ## How it works
 
@@ -51,7 +51,7 @@ Built on the audit spine (AUDIT) and surfaced in Governance (ADR-0030); it does 
 ## Tasks (dev pickup)
 
 - [ ] **Retention policy engine, timers & holds**
-  Model RetentionPolicy (per record type, with basis + anchor) and RetentionHold. Compute each record's eligibility from its anchor: adults >=7y from last contact; minors until age 25 / 7y-from-last-entry whichever is later (uses CLIENT-CORE age derivation); indefinite while a complaint/adverse/litigation hold is set. A scheduled scan marks records past period as due-for-destruction with their retention basis; held records are never marked eligible until the hold clears.
+  Model RetentionPolicy (per record type, with basis + anchor) and RetentionHold. Compute each record's eligibility from its anchor: adults >=7y from last contact; minors until age 25 / 7y-from-last-entry whichever is later (uses CLIENT-CORE age derivation); indefinite while a complaint/adverse/litigation hold (a flag that freezes a record from destruction while a legal matter is open) is set. A scheduled scan marks records past period as due-for-destruction with their retention basis; held records are never marked eligible until the hold clears.
 - [ ] **Destruction register, certificates & transfer log**
   Implement the explicit, reviewed destruction action that removes the live record and writes an immutable, audited DestructionRecord (patient, period covered, disposal date) + certificate reference (AC5). Model the TransferLog for records handed to another provider. Both append-only (ADR-0010); destruction can never be invoked on a held record. Every destruction/transfer writes an AuditEvent.
 - [ ] **Governance UI: due-for-destruction, register & transfer log**

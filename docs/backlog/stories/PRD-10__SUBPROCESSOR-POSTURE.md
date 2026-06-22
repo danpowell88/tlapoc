@@ -7,7 +7,7 @@
 ## Background
 
 As a owner, I want assurance that any data leaving the platform goes only to AU-resident or APP-8-assessed sub-processors, so that integrations don't breach cross-border rules.
-No integration sends PII to a non-AU sub-processor unless an APP-8 assessment + consent record exists (REQ-INT-3, C21/ADR-0016).
+This story is the cross-border privacy gate over every integration: it ensures no client data leaves Australia to an outside service unless a documented cross-border assessment and consent exist, blocking the flow otherwise. It sits in the Integrations layer (step 10 of the clinic-first build) and extends the in-country data-residency guarantee from Foundations (PRD-01 RESIDENCY) to the outbound edge where data leaves the platform (Xero, calendar, SMS), so it depends on that. This is a compliance control, not a financial feature. No integration sends PII (personal information) to a non-AU sub-processor unless an APP-8 (Australian Privacy Principle 8, cross-border disclosure) assessment + consent record exists (REQ-INT-3, C21/ADR-0016).
 
 ## How it works
 
@@ -54,8 +54,8 @@ Surfaced on the Integrations screen: each integration card shows its data-reside
 ## Tasks (dev pickup)
 
 - [ ] **Sub-processor register + residency check (fail-closed)**
-  Model the SubProcessor register (shared with PRD-01: provider, region, APP-8 assessment ref, consent ref, linked flows). Implement the pre-dispatch residency check used by every integration adapter (Xero, calendar, SMS): AU region → allow; non-AU → allow only if APP-8 assessment + consent present; else block (fail-closed) and flag. Ties into PRD-01 RESIDENCY (all PII/PHI AU-pinned).
+  Model the SubProcessor register (shared with PRD-01: provider, region, APP-8 (Australian Privacy Principle 8, cross-border disclosure) assessment ref, consent ref, linked flows). Implement the pre-dispatch residency check used by every integration adapter (Xero, calendar, SMS): AU region → allow; non-AU → allow only if APP-8 assessment + consent present; else block (fail-closed) and flag. Ties into PRD-01 RESIDENCY (all PII/PHI AU-pinned).
 - [ ] **Enforce posture across the integration ports + audit**
   Wire the residency check into the IAccountingExport / ICalendarProvider / INotifier dispatch paths so no adapter can send PII without passing the gate. Audit registration changes and any blocked flow (ADR-0010). All integrations stay outbound + swappable (ADR-0012). Compliance concern, capability-gated.
 - [ ] **Web UI: residency posture on cards + admin register**
-  Show each integration card's data-residency posture on Settings → Integrations, and build the admin sub-processor register (provider, region, APP-8 status, consent ref, linked flows) with non-compliant flows visibly flagged/blocked. Admin/compliance-gated; no money figures.
+  Show each integration card's data-residency posture on Settings → Integrations, and build the admin sub-processor register (provider, region, APP-8 (Australian Privacy Principle 8, cross-border disclosure) status, consent ref, linked flows) with non-compliant flows visibly flagged/blocked. Admin/compliance-gated; no money figures.

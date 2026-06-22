@@ -7,7 +7,7 @@
 ## Background
 
 As a owner, I want a daily closeout that balances card and cash, so that the till reconciles every day.
-End-of-day closeout balances card + cash (REQ-PAY-4).
+What this is, plainly: the end-of-day till balance — count the cash, check the card total against Square, explain any difference, lock it. Where it sits: it reads the day's POS payments and is the bridge to Xero accounting (PRD-10); it follows the till in the Payments layer, on top of the booked/charted visit. End-of-day closeout (reconciliation of takings against recorded payments) balances card + cash (REQ-PAY-4).
 
 ## How it works
 
@@ -46,12 +46,12 @@ _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rew
 ## Tasks (dev pickup)
 
 - [ ] **Closeout model + day-rollup (migrations)**
-  Model Closeout (tenant_id + RLS). One row per location per trading day.
+  Model Closeout — the day's end-of-day reconciliation of takings against recorded payments — (tenant_id + RLS (row-level security)). One row per location per trading day.
   - card_total / cash_total aggregated from the day's Payments; counted_cash entered by the operator; variance = counted - recorded (and card vs Square batch).
   - Capture note + closed_by/closed_at; immutable once locked.
 - [ ] **Closeout API: rollup, variance, reconcile-to-Xero**
   Server-side.
-  - Endpoint to open/compute the day's rollup, accept the counted-cash figure, compute + persist variance, and lock the closeout.
+  - Endpoint to open/compute the day's rollup, accept the counted-cash figure, compute + persist variance, and lock the closeout (end-of-day reconciliation of takings against recorded payments).
   - Reconcile against the Xero post (PRD-10): the day's posted invoices/payments should foot to closeout totals; flag a mismatch.
   - Entire surface owner-only (financial capability).
 - [ ] **Closeout web UI (desk + back-office tablet)**

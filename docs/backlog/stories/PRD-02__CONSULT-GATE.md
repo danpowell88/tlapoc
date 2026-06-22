@@ -7,7 +7,7 @@
 ## Background
 
 As a system, I want to block a checked-in injectable appointment from opening charting unless a consult is linked, so that no S4 treatment can proceed without the required consult.
-An injectable appointment cannot move to charting without a linked Consult — the booking-side half of the moat (REQ-BOOK-5).
+The consult gate is the booking-side half of the clinic's compliance moat. It sits in Reception (PRD-02) right after a client is booked and checked in, and it stands between the visit and the clinical record: a checked-in injectable visit cannot open charting (PRD-05) until a consult has been linked. It pairs with the consent gate from Intake/Consent (PRD-03/GATING) and is cleared downstream when the prescriber records the consult in Injectables (PRD-04/CONSULT) — together these enforce the consult → prescription → administration chain before any prescription-only treatment can proceed. As the system, I want to block a checked-in injectable appointment from opening charting unless a consult is linked, so that no S4 treatment can proceed without the required consult.  An injectable appointment cannot move to charting without a linked Consult — the booking-side half of the moat (REQ-BOOK-5).
 
 ## How it works
 
@@ -49,7 +49,7 @@ This complements, and is distinct from, the consent gate (PRD-03 GATING) and the
 ## Tasks (dev pickup)
 
 - [ ] **Server-side consult gate on charting-open (S4 only)**
-  When the charting context for an Appointment is requested, evaluate the gate: if service.schedule==S4 and Appointment.consult_id is null, refuse to return the editable charting context and return a structured 'missing: consult' reason instead. Enforce in the domain/API layer (ADR-0008), independent of the UI. Add Appointment.consult_id (FK Consult, nullable). Clearing happens when PRD-04 records the consult and sets consult_id.
+  When the charting context for an Appointment is requested, evaluate the gate: if service.schedule==S4 (Schedule 4 prescription-only medicine) and Appointment.consult_id is null, refuse to return the editable charting context and return a structured 'missing: consult' reason instead. Enforce in the domain/API layer (ADR-0008), independent of the UI. Add Appointment.consult_id (FK Consult, nullable). Clearing happens when PRD-04 records the consult and sets consult_id.
 - [ ] **Gate status on Today/Schedule board + blocked-action banner**
   Surface the per-visit gate state on the Today board and Schedule (chip: consult/consent/screening status). On the Charting screen render the calm blocked-action banner from the structured reason: what's missing, the fix link (record consult), and who can resolve it (NP/prescriber). Reuse the same banner component PRD-03 GATING uses.
 - [ ] **Gate-decision audit events**

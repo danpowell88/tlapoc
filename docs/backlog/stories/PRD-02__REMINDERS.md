@@ -7,7 +7,7 @@
 ## Background
 
 As a client, I want appointment reminders I can confirm/decline and the ability to reschedule or cancel within policy myself, so that I don't need to call and the clinic's diary stays accurate.
-Clients get reminders they can confirm/decline and can self-reschedule or cancel within policy without calling.
+Reminders and self-service reschedule/cancel keep the diary accurate without a phone call. The story sits in Reception (PRD-02) on top of the visit lifecycle (PRD-02/LIFECYCLE) — a confirm/decline or cancel moves the lifecycle status and frees the slot — and just before the waitlist (PRD-02/WAITLIST), which backfills the freed slot. It owns the booking-side scheduling, the self-service actions and the cancellation policy; the actual message delivery (SMS/app/email) is provided later by Comms (PRD-07), so this story schedules and reacts but does not itself send.  Clients get reminders they can confirm/decline and can self-reschedule or cancel within policy without calling.
 
 ## How it works
 

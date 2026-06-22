@@ -7,11 +7,11 @@
 ## Background
 
 As a developer, I want the API to publish an OpenAPI document and CI to generate typed clients for web and Flutter, so that front-ends always match the API contract.
-Generating typed clients for Angular and Flutter from the API's OpenAPI spec keeps the three surfaces in lock-step and removes hand-written DTO drift (ADR-0006).
+Sprint 0 (setup): so the web app and the two mobile apps never drift out of sync with the back-end, the API describes its own shape in a standard document, and the build automatically generates matching client code for each front-end from it. It builds on the API skeleton (which exposes that description) and fills the shared client package created during repo scaffolding; from then on every feature gets a ready-made, type-checked client for free.  Generating typed clients for Angular and Flutter from the API's OpenAPI spec keeps the three surfaces in lock-step and removes hand-written DTO drift (ADR-0006).
 
 ## How it works
 
-The API publishes a versioned OpenAPI document generated from its endpoints and models, with the version bumped deliberately on contract changes. CI runs the client generators (one for Angular/TypeScript, one for Flutter/Dart) and publishes the results into the shared packages from REPO, so front-ends import a typed client rather than writing DTOs.
+The API publishes a versioned OpenAPI (a standard machine-readable description of an API) document generated from its endpoints and models, with the version bumped deliberately on contract changes. CI (continuous integration) runs the client generators (one for Angular/TypeScript, one for Flutter/Dart) and publishes the results into the shared packages from REPO, so front-ends import a typed client rather than writing DTOs (data transfer objects).
 Client generation runs in the pipeline (CICD) and is a gate: a breaking contract change without a version bump fails the build, which is what keeps web and Flutter from silently diverging from the API. The generated artefacts are reproducible from the spec, so a regenerate is deterministic.
 The vertical-slice sample endpoint from API is consumed via the generated client in both web and Flutter, proving the round-trip (spec -> generated client -> real call) before feature work depends on it. Versioning strategy and the breaking-change definition are documented so module authors know when a bump is required.
 
@@ -38,12 +38,12 @@ The vertical-slice sample endpoint from API is consumed via the generated client
 
 - [ ] **Publish a versioned OpenAPI doc and generate typed clients into the shared packages**
   Make the API contract the single source and generate clients from it for both front-ends.
-  - API serves a versioned OpenAPI document generated from its endpoints/models.
+  - API serves a versioned OpenAPI (a standard machine-readable description of an API) document generated from its endpoints/models.
   - Generators produce an Angular/TypeScript client and a Flutter/Dart client, published into the shared API-client package(s) from REPO.
-  - Generation runs in CI and fails the build on a breaking contract change without a version bump (the lock-step guarantee).
+  - Generation runs in CI (continuous integration) and fails the build on a breaking contract change without a version bump (the lock-step guarantee).
   - The API sample endpoint is consumed via the generated client in both web and Flutter to prove the round-trip.
 - [ ] **Document the contract/versioning workflow**
   Write the contract guide so module authors keep the surfaces in sync.
-  - How to regenerate clients locally and how CI enforces it.
+  - How to regenerate clients locally and how CI (continuous integration) enforces it.
   - The versioning scheme and the definition of a breaking change that requires a bump.
   - Where generated clients live and how web/Flutter import them.

@@ -5,11 +5,11 @@
 ## Background
 
 As a designer/developer, I want a shared set of design tokens and core components (buttons, inputs, banners, the blocked-action banner, chips, tables), so that all surfaces look consistent and the compliance UX patterns are reusable.
-One design system (tokens, components) shared across web and the two Flutter apps delivers the 'fast and modern, thumb-first' UX the docs demand and avoids re-styling per surface.
+Sprint 0 (setup), shared look-and-feel: this defines one set of design building blocks — colours, type, spacing and core components like buttons, banners and the compliance warnings — used by the web app and both mobile apps, so everything looks consistent and the safety patterns are built once. It fills the design-system package from repo scaffolding and is consumed by the web shell, the Flutter apps and every later screen; its warning components are the visual vocabulary the compliance guardrails rely on. One design system (tokens, components) shared across web and the two Flutter apps delivers the 'fast and modern, thumb-first' UX (user experience) the docs demand and avoids re-styling per surface.
 
 ## How it works
 
-Design tokens — colour, typography, spacing, radius, elevation — are defined once in the shared package and consumed by both web (Angular) and Flutter, so a brand change is one edit, not three. Core components cover the everyday set (buttons, inputs, banners, chips, tables) plus the cross-cutting UX patterns the platform leans on: the blocked-action banner (the visible face of a server-side block, ADR-0008), consent/age chips, the S4 guardrail tag, and the offline indicator (for the provider app, ADR-0015).
+Design tokens — colour, typography, spacing, radius, elevation — are defined once in the shared package and consumed by both web (Angular) and Flutter, so a brand change is one edit, not three. Core components cover the everyday set (buttons, inputs, banners, chips, tables) plus the cross-cutting UX (user experience) patterns the platform leans on: the blocked-action banner (the visible face of a server-side block, ADR-0008), consent/age chips, the S4 (Schedule 4 — prescription-only medicine) guardrail tag, and the offline indicator (for the provider app, ADR-0015).
 Components are documented in a simple gallery/storybook so designers and developers see the catalogue and use the canonical version rather than re-implementing. The cross-surface reality (web tokens + Flutter widgets from one token source) is the point — the gallery shows the same component on both.
 Accessibility basics are verified for the core components: colour contrast, visible focus, and minimum hit-target size, so the thumb-first promise is real on small screens. These patterns then appear across the prototype screens (chips on charting.png, banners, the S4 guardrail), but DESIGN ships the reusable primitives, not the screens.
 
@@ -43,10 +43,10 @@ _Prototype screen: Non-UI / platform scaffolding — no prototype screen._
 - [ ] **Define tokens + core components (incl. the cross-cutting compliance patterns) and verify accessibility**
   Build the shared visual foundation consumed by web and both Flutter apps.
   - Tokens (colour, type, spacing, radius, elevation) defined once and consumed by Angular and Flutter from one source.
-  - Core components: buttons, inputs, banners, chips, tables, PLUS the cross-cutting patterns — blocked-action banner (the UI face of ADR-0008 server-side blocks), consent/age chips, S4 guardrail tag, offline indicator (ADR-0015).
+  - Core components: buttons, inputs, banners, chips, tables, PLUS the cross-cutting patterns — blocked-action banner (the UI — user-interface — face of ADR-0008 server-side blocks), consent/age chips, S4 (Schedule 4 — prescription-only medicine) guardrail tag, offline indicator (ADR-0015).
   - Accessibility basics verified for core components: contrast, visible focus, minimum hit-target size (thumb-first).
 - [ ] **Publish the component gallery/storybook and usage docs**
   Make the system discoverable so surfaces use canonical components, not re-implementations.
   - A simple gallery/storybook showing each token and component, ideally the same component on web and Flutter.
-  - Usage guidance for the compliance patterns (when to show the blocked-action banner, S4 tag, consent/age chips, offline indicator).
+  - Usage guidance for the compliance patterns (when to show the blocked-action banner, S4 (Schedule 4 — prescription-only medicine) tag, consent/age chips, offline indicator).
   - How web and Flutter import the package (ties to REPO's shared-package layout).

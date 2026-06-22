@@ -5,11 +5,11 @@
 ## Background
 
 As a staff member, I want to keep infection-control logs for sterilisation/single-use and sharps/clinical-waste disposal, so that we evidence safe practice.
-Sterilisation/single-use, sharps & clinical-waste disposal logs, all audited (REQ-FAC-2, C20). Fuller v2 adds manifests + sterilisation register.
+Plainly: the day-to-day hygiene logs — sterilisation/single-use and sharps/clinical-waste disposal — that prove the clinic practises safely. Where it fits: part of the operational backbone (Facility/Ops) around the clinical core; logs are retrievable as an inspection trail and feed the inspection pack (PRD-08). Sterilisation/single-use, sharps & clinical-waste disposal logs, all audited (REQ-FAC-2, C20). Fuller v2 adds manifests + sterilisation register.
 
 ## How it works
 
-Infection-control logs: sterilisation/single-use and sharps/clinical-waste disposals, each with detail, timestamp and actor, tenant/location-scoped and audited, retrievable as an inspection trail (feeds the PRD-08 pack). The cold-chain dimension (twice-daily fridge log + breach pathway, links PRD-04) lives in the OPENCLOSE/TEMP-MONITORS stories and reconciles into one cold-chain record.
+Infection-control logs: sterilisation/single-use and sharps/clinical-waste disposals, each with detail, timestamp and actor, tenant/location-scoped and audited, retrievable as an inspection trail (feeds the PRD-08 pack). The cold-chain (the unbroken temperature-controlled storage required for medicines) dimension (twice-daily fridge log + breach pathway, links PRD-04) lives in the OPENCLOSE/TEMP-MONITORS stories and reconciles into one cold-chain record.
 Waste manifests (NSW CA+TC / QLD WTC) and a sterilisation register are captured at the model level for v2 expansion. Day-to-day evidence of safe practice (C20).
 
 ## Requirements
@@ -47,10 +47,10 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 ## Tasks (dev pickup)
 
 - [ ] **InfectionControlLog entity (append-only, audited)**
-  Model InfectionControlLog (tenant_id, location_id, kind[sterilisation|single_use|sharps|clinical_waste], detail, at, actor_id) as an append-only, audited log under RLS.
+  Model InfectionControlLog (tenant_id, location_id, kind[sterilisation|single_use|sharps|clinical_waste], detail, at, actor_id) as an append-only, audited log under RLS (row-level security, the database-level tenant isolation).
 - [ ] **IPC log entry UI (sterilisation/single-use + sharps/clinical-waste)**
   Quick-entry surface on Operations / back-office waste log to record sterilisation/single-use cycles and sharps/clinical-waste disposals (detail, auto time + actor).
 - [ ] **IPC log retrieval / inspection trail**
-  Retrieve and filter IPC logs (by kind, date, location) as an inspection trail; expose them to the PRD-08 inspection-readiness pack.
+  Retrieve and filter IPC (infection prevention and control) logs (by kind, date, location) as an inspection trail; expose them to the PRD-08 inspection-readiness pack.
 - [ ] **WasteManifest model stub for v2**
   Define WasteManifest (stream[clinical|sharps], carrier, certificate_ref, at) at the model level so the data model anticipates the v2 manifest workflow (NSW CA+TC / QLD WTC); v1 surface only captures disposals, no full carrier/certificate workflow.

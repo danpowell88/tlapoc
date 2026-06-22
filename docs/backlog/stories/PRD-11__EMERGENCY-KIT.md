@@ -5,7 +5,7 @@
 ## Background
 
 As a owner, I want to track the emergency kit with expiry alerts and record a continuity-of-care contact, so that we're prepared for complications and cover when a prescriber is unavailable.
-Track the emergency kit (hyaluronidase, anaphylaxis) with expiry alerts and record a continuity-of-care contact (REQ-FAC-3, C20).
+Plainly: track the emergency drugs and kit (for filler vascular occlusion and anaphylaxis) with expiry alerts, and record a backup contact for when the prescriber is unavailable. Where it fits: part of the operational backbone (Facility/Ops) around the clinical core; it sits beside the complication-response flow (PRD-05). Track the emergency kit (hyaluronidase, anaphylaxis) with expiry alerts and record a continuity-of-care contact (REQ-FAC-3, C20).
 
 ## How it works
 
@@ -51,6 +51,6 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 - [ ] **Emergency-kit expiry alerts (scheduled)**
   Schedule expiry alerts (lead-time before expiry) via the jobs scheduler so a lapsing item (e.g. adrenaline) is flagged before it expires.
 - [ ] **Surface kit from complication protocols + 'Start response' link**
-  Surface the kit register on Clinical → Complication protocols beside the Vascular-occlusion / Anaphylaxis protocol cards. 'Start response' opens a timestamped checklist (PRD-05 complication response) that records the kit item used and routes an adverse event.
+  Surface the kit register on Clinical → Complication protocols beside the Vascular-occlusion / Anaphylaxis protocol cards. 'Start response' opens a timestamped checklist (PRD-05 complication response) that records the kit item used and routes an adverse event (an unwanted medical occurrence after a treatment).
 - [ ] **ContinuityContact record + visibility**
-  Model and record a continuity-of-care contact (name, role, phone) and surface it when the treating practitioner/prescriber is unavailable (AHPRA continuity-of-care obligation, C20).
+  Model and record a continuity-of-care contact (name, role, phone) and surface it when the treating practitioner/prescriber is unavailable (AHPRA (Australian Health Practitioner Regulation Agency) continuity-of-care obligation, C20).

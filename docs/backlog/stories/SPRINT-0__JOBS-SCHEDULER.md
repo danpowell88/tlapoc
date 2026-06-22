@@ -7,7 +7,7 @@
 ## Background
 
 As a platform engineer, I want a background-job framework with scheduling, retries, idempotency and dead-lettering, so that time-driven and async work runs reliably and observably.
-Many features are time-driven, not user-driven: reminders/recall sends, membership autopay + dunning retries, retention timers, temperature polling, expiry alerts, read-model projections. A reliable background worker + scheduler is needed before those features land.
+Many features are time-driven, not user-driven — reminder/recall sends, membership autopay + dunning retries, retention timers, temperature polling, expiry alerts and read-model projections. A reliable background worker + scheduler with retries, idempotency and dead-lettering is needed before any of those land.  JOBS-SCHEDULER builds on API and RLS (it runs jobs under the audited elevated/bypass path RLS defines) and is the engine REMINDERS, MEMBERSHIP autopay, RETENTION, TEMP-MONITORS, the recall/expiry scans and DOMAIN-EVENTS projections all run on; its runs are observable via OBS.
 
 ## How it works
 
@@ -44,7 +44,7 @@ A sample recurring job (e.g. an expiry scan) and a sample queued job are demonst
   - JobRun record (type, payload, schedule, attempts, status) tracking lifecycle.
 - [ ] **Make jobs tenant-aware under the audited elevated context**
   Ensure jobs touch the right tenant and every cross-tenant run is recorded.
-  - Jobs carry tenant_id and run under the RLS audited elevated/bypass path (the only sanctioned cross-tenant route) so isolation holds and elevations are audited (AUDIT-INFRA).
+  - Jobs carry tenant_id and run under the RLS (row-level security) audited elevated/bypass path (the only sanctioned cross-tenant route) so isolation holds and elevations are audited (AUDIT-INFRA).
   - A sample recurring job (e.g. expiry scan) and a sample queued job demonstrated end to end (schedule, retry, idempotency, tenancy).
 - [ ] **Wire job observability and document the framework**
   Make runs visible and document how features add jobs.

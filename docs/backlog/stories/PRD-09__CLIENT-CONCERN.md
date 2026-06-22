@@ -7,12 +7,12 @@
 ## Background
 
 As a client, I want to report a concern after my treatment from the app, so that the clinic responds quickly if something's wrong.
-The prototype's client app lets a client report a post-treatment concern, which bridges into staff follow-ups (and can escalate to an adverse event/complaint). A safety-critical client→clinic channel.
+Plainly: a safety channel in the client app — after a treatment the client reports a problem, which raises a staff follow-up and can escalate to a clinical adverse event (an unwanted medical occurrence after a treatment) or a formal complaint. Where it fits: a late, client-facing surface that reuses the follow-ups/job-queue (PRD-07) and adverse-event (PRD-05) modules, closing the loop back to the clinical core. The prototype's client app lets a client report a post-treatment concern, which bridges into staff follow-ups (and can escalate to an adverse event/complaint). A safety-critical client→clinic channel.
 
 ## How it works
 
-A safety-critical client→clinic channel: the client reports a post-treatment concern from the app (description, urgency, optional photo handled like clinical media — signed URLs, no plain device retention, consent-respecting) and immediately sees an acknowledgement. Submitting raises a follow-up Job (PRD-07) with the client and treatment linked; in staff Follow-ups it appears as a job (prototype openConcern / concernCall) where staff view it, call back, resolve, or escalate to an adverse event (PRD-05) / complaint (PRD-11).
-The exchange is recorded and audited; a complaint escalation pulls in the C24 AHPRA pathway + indefinite retention. Bridges the client app to staff follow-ups (the concern bridge — tla_client_reports localStorage in the proto).
+A safety-critical client→clinic channel: the client reports a post-treatment concern from the app (description, urgency, optional photo handled like clinical media — signed URLs (temporary, expiring links to stored photos), no plain device retention, consent-respecting) and immediately sees an acknowledgement. Submitting raises a follow-up Job (PRD-07) with the client and treatment linked; in staff Follow-ups it appears as a job (prototype openConcern / concernCall) where staff view it, call back, resolve, or escalate to an adverse event (PRD-05) / complaint (PRD-11).
+The exchange is recorded and audited; a complaint escalation pulls in the C24 AHPRA (Australian Health Practitioner Regulation Agency) pathway + indefinite retention. Bridges the client app to staff follow-ups (the concern bridge — tla_client_reports localStorage in the proto).
 
 ## Requirements
 
@@ -55,4 +55,4 @@ _Prototype screen: client-app.html — Report a concern; prototype Follow-ups._
 - [ ] **Staff Follow-ups: view / call back / resolve a concern**
   In staff Follow-ups, render the concern job (prototype openConcern 'View report'); let staff call the client back and resolve it (concernCall → 'Marked as actioned — client called back', job → done). Surface urgency.
 - [ ] **Escalate a concern to adverse event / complaint**
-  From the concern, allow escalation to an adverse event (PRD-05) or a complaint (PRD-11). A complaint escalation pulls in the C24 AHPRA pathway and indefinite retention (C18). Record + audit the whole exchange end-to-end.
+  From the concern, allow escalation to an adverse event (PRD-05) or a complaint (PRD-11). A complaint escalation pulls in the C24 AHPRA (Australian Health Practitioner Regulation Agency) pathway and indefinite retention (C18). Record + audit the whole exchange end-to-end.

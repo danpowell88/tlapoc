@@ -7,7 +7,7 @@
 ## Background
 
 As a backend developer, I want an API skeleton with auth middleware, tenant-context resolution, a standard error/response model and health checks, so that feature modules are added consistently and cross-cutting concerns are solved once.
-A consistent API skeleton (clean/layered architecture, request pipeline, problem-details errors, pagination) means every feature module plugs in the same way.
+Sprint 0 (setup), the API foundation: this builds the shared skeleton of the back-end service — how every request is authenticated, scoped to the right clinic, error-handled, paged and logged — so each later feature just adds its own logic and inherits all of that for free. It sits on top of tenant isolation (RLS) and staff sign-in, and is the base that the generated API contract, observability, background jobs, media storage and feature flags all build on.  A consistent API skeleton (clean/layered architecture, request pipeline, problem-details errors, pagination) means every feature module plugs in the same way.
 
 ## How it works
 
@@ -39,7 +39,7 @@ A vertical-slice sample endpoint demonstrates the full pattern end to end — au
 - [ ] **Build the request pipeline: auth, tenant context, problem-details, pagination, health & logging**
   Implement the modular-monolith host and the cross-cutting pipeline every module reuses.
   - Host wires the bounded-module libraries from REPO; each module contributes endpoints/domain.
-  - Auth middleware validates staff (Entra ID) + client (External ID) tokens, resolves the tenant claim into per-request tenant context for RLS, and surfaces the actor for audit.
+  - Auth middleware validates staff (Entra ID) + client (External ID) tokens, resolves the tenant claim into per-request tenant context for RLS (row-level security), and surfaces the actor for audit.
   - RFC 7807 problem-details error model with consistent codes; one shared pagination/filtering/sorting convention for list endpoints.
   - Health + readiness endpoints; structured request logging emitting the correlation id OBS will use.
 - [ ] **Ship the vertical-slice sample endpoint and document the module pattern**

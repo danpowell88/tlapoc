@@ -7,7 +7,7 @@
 ## Background
 
 As a injector, I want to capture standardised before/after photos and compare them against prior visits, so that I can track outcomes consistently.
-Capture standardised before/after photos room-side (framing/ghosting guide), compare side-by-side across visits; media stored centrally via signed URLs, never on personal devices, gated by image-use consent (REQ-CLIN-3, C14/ADR-0009).
+Standardised before/after clinical photos captured room-side with a framing/ghosting guide, then compared across visits. A supporting capability within PRD-05 charting on the clinic-first spine after the S4 (Schedule 4 'Prescription Only Medicine') moat (PRD-04); it depends on image-use consent (PRD-03/IMAGE-CONSENT) and is depended on by outcomes tracking (OUTCOMES). Every image is Personal Health Information (PHI), stored centrally via signed URLs and never left on the device. Capture standardised before/after photos room-side (framing/ghosting guide), compare side-by-side across visits; media stored centrally via signed URLs, never on personal devices, gated by image-use consent (REQ-CLIN-3, C14/ADR-0009).
 
 ## How it works
 
@@ -61,7 +61,7 @@ _Prototype screen: prototype.html — Charting + Clinical (Skin analysis, Body c
 ## Tasks (dev pickup)
 
 - [ ] **Data model & migrations: Photo + PosePreset**
-  EF Core: Photo (client_id, chart_entry_id, blob_ref to private storage, pose_preset, framing_meta json, taken_at, captured_by, image_consent_id FK, annotated_copy_ref) + PosePreset (tenant-scoped pose list). Every table tenant_id + RLS. The clinical record stores only the blob reference + metadata — never image bytes. Index Photo by client and by pose for the compare gallery.
+  EF Core: Photo (client_id, chart_entry_id, blob_ref to private storage, pose_preset, framing_meta json, taken_at, captured_by, image_consent_id FK, annotated_copy_ref) + PosePreset (tenant-scoped pose list). Every table tenant_id + Row-Level Security (RLS, the per-tenant database isolation). The clinical record stores only the blob reference + metadata — never image bytes. Index Photo by client and by pose for the compare gallery.
 - [ ] **Media pipeline: signed-URL upload/serve + consent gate**
   Server-issued short-lived signed URLs for both upload (write to private AU-resident Blob, ADR-0009) and read; no public URLs, no bytes through the API. The capture/serve endpoints check current image-use consent (PRD-03) and refuse when missing/withdrawn; a consent-withdrawal event revokes downstream access. Write an AuditEvent for capture, view and annotation. Enforce these as server-side invariants (C14) — never trust the client.
 - [ ] **Capture + before/after compare UI**

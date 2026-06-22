@@ -5,14 +5,14 @@
 ## Background
 
 As a injector, I want modality-aware charting for filler, energy devices and weight-loss, so that the platform covers the full treatment menu.
-Phase 2 adds dermal filler (multi-area, per-area lot, VO/blindness consent gate), energy-device charting (per-pass settings, laser-licence gated), weight-loss titration and ghost-overlay photo alignment (REQ-CLIN-10..13). Placeholder.
+A Phase-2 placeholder for charting other modalities (categories of treatment beyond toxin injectables) — dermal filler, energy/laser devices and weight-loss. v1 ships only the toxin chart and a non-S4 skin note, but the charting engine is built modality-aware now so these slot in later. A deferred design-only card under PRD-05 charting (depended on by BODY-CONTOURING); nothing builds in v1 beyond the modality model already in MAPPING and NOTE-TEMPLATE. Phase 2 adds dermal filler (multi-area, per-area lot, vascular occlusion (VO)/blindness consent gate), energy-device charting (per-pass settings, laser-licence gated), weight-loss titration and ghost-overlay photo alignment (REQ-CLIN-10..13). Placeholder.
 
 ## How it works
 
 As an injector, I want modality-aware charting for filler, energy devices and weight-loss, so that the platform covers the full treatment menu.
 Placeholder / Phase 2. v1 ships toxin + a non-S4 skin note, but the charting engine is built modality-aware from day one (ADR-0025) so these extensions slot in without re-architecting the clinical record. This story captures each modality's specific gates and capture surface so the later build is a known quantity.
-Treatment is modelled as a typed modality carrying {schedule, regClass, daenRoute, unit, advertisable, requires:[consult|rx|s4Lot|laserLicence|patchTest]} (ADR-0025). The modality drives the capture surface and the compliance behaviour: dermal filler is multi-area / multi-syringe with per-area lot and a mandatory vascular-occlusion / blindness consent gate; energy-device charting is a per-pass settings/fluence logbook with skin-typing + patch-test + safety checks, blocked without a state laser licence (no S4); weight-loss is a titration protocol with ARTG-brand enforcement (compounded GLP-1 refused); standardised photography gains ghost-overlay alignment.
-Adverse-event routing is modality-derived: toxin & filler-as-medicine route to DAEN-medicines; device-class filler/PDO/RF route to DAEN-devices (extends ADVERSE-EVENT / C12). The catalogue's existing s4 flag is extended (not replaced) with regClass/artg/compounded/daenRoute, and a new laserLicence credential (per state/class) gates energy-device booking and charting.
+Treatment is modelled as a typed modality carrying {schedule, regClass, daenRoute, unit, advertisable, requires:[consult|rx|s4Lot|laserLicence|patchTest]} (ADR-0025). The modality drives the capture surface and the compliance behaviour: dermal filler is multi-area / multi-syringe with per-area lot and a mandatory vascular-occlusion / blindness consent gate; energy-device charting is a per-pass settings/fluence logbook with skin-typing + patch-test + safety checks, blocked without a state laser licence (no Schedule 4 'Prescription Only Medicine' (S4)); weight-loss is a titration protocol with Australian Register of Therapeutic Goods (ARTG)-brand enforcement (compounded GLP-1 refused); standardised photography gains ghost-overlay alignment.
+Adverse-event routing is modality-derived: toxin & filler-as-medicine route to Database of Adverse Event Notifications (DAEN)-medicines; device-class filler/PDO/RF route to DAEN-devices (extends ADVERSE-EVENT / C12). The catalogue's existing s4 flag is extended (not replaced) with regClass/artg/compounded/daenRoute, and a new laserLicence credential (per state/class) gates energy-device booking and charting.
 No build in v1 beyond the modality model already present in MAPPING / NOTE-TEMPLATE; this card holds the design and the gates so the Phase-2 stories (e.g. BODY-CONTOURING) extend it cleanly.
 
 ## Requirements
@@ -30,7 +30,7 @@ No build in v1 beyond the modality model already present in MAPPING / NOTE-TEMPL
 
 _Prototype screen: prototype.html — Charting + Clinical (Skin analysis, Body contouring, Complication protocols, Photography & outcomes); treatment-room.html._
 
-- Clinical -> Treatment menu: each treatment's category sets its compliance behaviour (schedule, custody, consent, AE routing, rewards/ads) - the modality model in action (ADR-0025).
+- Clinical -> Treatment menu: each treatment's category sets its compliance behaviour (schedule, custody, consent, adverse event (AE) routing, rewards/ads) - the modality model in action (ADR-0025).
 - Body contouring + the skin note show non-toxin capture surfaces; filler/energy/weight-loss are concept cards for v1.
 - Deferred - no v1 build; the model already carries the requires:[] gates so Phase-2 stories extend it.
 

@@ -7,7 +7,7 @@
 ## Background
 
 As a client arriving for a visit, I want to check myself in on the reception tablet, so that the team knows I've arrived and I complete anything outstanding.
-The prototype's checkin surface is a reception-desk tablet where clients check themselves in (confirm details, complete any outstanding intake/consent), updating the Today board.
+Plainly: the locked-down reception tablet where an arriving client checks themselves in, confirms details and finishes outstanding forms or consent. Where it fits: a late, client-facing surface that reuses the booking-lifecycle (PRD-02) and gating (PRD-03) modules; one of the kiosk (the in-clinic self-service check-in surface)/back-office surfaces that come last. The prototype's checkin surface is a reception-desk tablet where clients check themselves in (confirm details, complete any outstanding intake/consent), updating the Today board.
 
 ## How it works
 
@@ -49,4 +49,4 @@ _Prototype screen: checkin.html._
 ## Tasks (dev pickup)
 
 - [ ] **Reception self-check-in tablet surface**
-  Locked-down web/PWA kiosk surface re-using the PRD-02/03 modules. Idle 'Welcome in' attract screen → 'Tap to check in' → booking lookup + light detail confirmation (not a staff login) → prompt/complete outstanding intake (medical history/health check) and consent (PRD-03) → advance Appointment to checked_in (PRD-02), updating the arrivals board and the provider day list. Single-client session with no cross-client data access; auto-timeout back to the attract screen between clients (C10).
+  Locked-down web/PWA (progressive web app) kiosk surface re-using the PRD-02/03 modules. Idle 'Welcome in' attract screen → 'Tap to check in' → booking lookup + light detail confirmation (not a staff login) → prompt/complete outstanding intake (medical history/health check) and consent (PRD-03) → advance Appointment to checked_in (PRD-02), updating the arrivals board and the provider day list. Single-client session with no cross-client data access; auto-timeout back to the attract screen between clients (C10).

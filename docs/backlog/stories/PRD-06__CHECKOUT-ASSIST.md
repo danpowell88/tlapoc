@@ -7,7 +7,7 @@
 ## Background
 
 As a front desk, I want checkout to suggest relevant non-S4 upsells and prompt rebooking at the right interval, so that I help clients and keep them on cadence.
-Subtle membership/restock upsell + client rapport panel + post-checkout rebooking on the treatment interval (REQ-PAY-6, ADR-0022).
+What this is, plainly: gentle, rules-safe prompts at the till — a quiet membership or restock nudge, a one-line rapport cue, and an offer to rebook the next visit at the right interval. Where it sits: it layers onto the POS checkout and ties out to the calendar (PRD-02) and recall (PRD-07); it sits in the Payments layer after the clinical core. Subtle membership/restock upsell + client rapport panel + post-checkout rebooking on the treatment interval (REQ-PAY-6, ADR-0022).
 
 ## How it works
 
@@ -51,6 +51,6 @@ _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rew
 - [ ] **Checkout-assist web UI: upsell, rapport, cross-sell, post-pay rebook**
   Angular, layered onto the checkout (no new core entity).
   - 'Worth mentioning' panel: membership offer (if non-member), retail restock (stock-ageing derived) with Add action, rebook cue.
-  - 'Pairs well with today's treatment' cross-sell: match non-S4 aftercare/retail to cart signals (toxin/filler/skin/energy/contour); show price + margin + Add; suppress S4 entirely.
+  - 'Pairs well with today's treatment' cross-sell: match non-S4 (non-Schedule 4) aftercare/retail to cart signals (toxin/filler/skin/energy/contour); show price + margin + Add; suppress S4 (Schedule 4 prescription-only medicine) entirely.
   - Post-payment rebook view: slot grid on the treatment interval, 'Text her the options' (PRD-07), restock-reminder toggle; confirm -> create Appointment (PRD-02).
   - Suggestions read rewards eligibility + stock ageing + interval server-side; loading/empty/error states; no S4 discount/promotion anywhere.

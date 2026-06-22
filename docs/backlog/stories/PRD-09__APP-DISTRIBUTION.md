@@ -7,7 +7,7 @@
 ## Background
 
 As a mobile developer, I want a store-distribution and (where viable) code-push pipeline for both apps, so that we can ship and patch the apps responsibly.
-Store distribution + code-push (e.g. Shorebird) where the compliance posture allows (open question) (ADR-0006).
+Plainly: the release pipeline that builds, signs and ships both apps to the stores, manages versions, and decides whether over-the-air patching is allowed. Where it fits: enabling work for the two Flutter apps, which come last on the clinic-first timeline — no clinical feature of its own. Store distribution + code-push (e.g. Shorebird) where the compliance posture allows (open question) (ADR-0006).
 
 ## How it works
 
@@ -51,6 +51,6 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 - [ ] **Versioning + minimum-supported-version + 'update required' gate**
   Stamp each release with a version and a minimum-supported-version. In-app 'update required' gate blocks unsupported builds; enforce the floor server-side too (API rejects unsupported clients) so the gate can't be skipped.
 - [ ] **Assess + document code-push (Shorebird) compliance viability**
-  Assess Shorebird/code-push against the compliance posture and document the decision per flavour: likely acceptable for the client app, constrained for the clinical provider app (OTA Dart changes to a clinical record surface). Record the outcome (open question in the PRD), don't assume it.
+  Assess Shorebird/code-push against the compliance posture and document the decision per flavour: likely acceptable for the client app, constrained for the clinical provider app (OTA (over-the-air, patching without a full store release) Dart changes to a clinical record surface). Record the outcome (open question in the PRD), don't assume it.
 - [ ] **Crash + usage telemetry into observability**
-  Wire crash and usage telemetry from both apps into the platform observability stack so regressions and adoption are visible. Respect the privacy posture (no PHI in telemetry).
+  Wire crash and usage telemetry from both apps into the platform observability stack so regressions and adoption are visible. Respect the privacy posture (no PHI (personal health information) in telemetry).

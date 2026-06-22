@@ -7,7 +7,7 @@
 ## Background
 
 As a front desk, I want to add walk-ins and same-day add-ons against available rooms/chairs/devices, so that we capture opportunistic demand without breaking the rules or double-booking resources.
-Walk-ins and same-day add-ons are supported but gate-respecting (an injectable walk-in still needs a consult first); room/chair/device resources are scheduled with conflict-flagging.
+Walk-ins and same-day add-ons let Reception (PRD-02) capture opportunistic demand at the desk. The story sits on top of the calendar (PRD-02/CALENDAR) — reusing its availability engine and room/chair/device resources — and the visit lifecycle, and is deliberately gate-respecting: nothing about a walk-in bypasses scope-of-practice or the compliance gates.  In the flow it complements scheduled and online bookings: an injectable walk-in still feeds the consult gate (PRD-02/CONSULT-GATE) and the Intake/Consent step (PRD-03) before any treatment, exactly as a planned injectable booking would.  As front desk, I want to add walk-ins and same-day add-ons against available rooms/chairs/devices, so that we capture opportunistic demand without breaking the rules or double-booking resources.  Walk-ins and same-day add-ons are supported but gate-respecting (an injectable walk-in still needs a consult first); room/chair/device resources are scheduled with conflict-flagging.
 
 ## How it works
 
@@ -52,7 +52,7 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 ## Tasks (dev pickup)
 
 - [ ] **Walk-in / same-day add-on booking flow (gate-respecting)**
-  Quick-add flow from the Schedule that attaches an existing or new client, picks a free practitioner+resource via the availability engine, and books source=walkin. For S4 services, the resulting appointment still carries the consult gate (consult_id null ⇒ charting blocked) and requires consent — walk-ins never bypass C1/C5. Same-day add-on appends a service to an in-progress visit on a free resource.
+  Quick-add flow from the Schedule that attaches an existing or new client, picks a free practitioner+resource via the availability engine, and books source=walkin. For S4 (Schedule 4 prescription-only medicine) services, the resulting appointment still carries the consult gate (consult_id null ⇒ charting blocked) and requires consent — walk-ins never bypass C1/C5. Same-day add-on appends a service to an in-progress visit on a free resource.
 - [ ] **Resource conflict-flagging before confirm + tags**
   Before a walk-in/add-on confirms, check the chosen room/chair/device is free for the whole block incl. buffers and surface any conflict inline (block confirm until resolved). Support appointment tags[] (vip, first_time) set at booking and rendered on the calendar block. Feed resource utilisation.
 - [ ] **Walk-in UI on the Schedule grid**

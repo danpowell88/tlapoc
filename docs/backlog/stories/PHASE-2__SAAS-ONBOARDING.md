@@ -5,7 +5,7 @@
 ## Background
 
 As a prospective clinic, I want to sign up for the platform myself and pay a subscription, so that onboarding doesn't need manual provisioning.
-Self-service tenant sign-up, subscription billing and per-tenant Entra federation for selling the platform as SaaS (PRD-01 non-goal; Phase 3).
+Plainly: this would let a brand-new clinic sign itself up and pay a subscription with no manual setup by our team. Where it fits: a deferred Phase 3 placeholder — the platform is multi-tenant (each clinic isolated in shared infrastructure) from day one, but v1 onboards this single clinic by hand, so self-service sign-up only matters once we sell the platform to other clinics.  Placeholder (Phase 3): self-service tenant sign-up, subscription billing and per-tenant Entra (Microsoft identity platform) federation to sell the platform as SaaS (software-as-a-service) (a PRD-01 non-goal).
 
 ## How it works
 

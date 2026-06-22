@@ -5,7 +5,7 @@
 ## Background
 
 As a platform engineer, I want dev, staging and prod environments provisioned via IaC, all pinned to Australia East, so that data residency is guaranteed and environments are reproducible.
-All PII/PHI must resolve to Australia East (C21/ADR-0016). Defining dev/staging/prod as code makes residency, isolation and reproducibility provable.
+Still in Sprint 0 (setup): this story defines the cloud environments — dev, staging and production — as code, so they are built the same way every time and provably keep all personal and health data inside Australia. It is the ground the platform stands on: the database, the secret vault, media storage and the deploy pipeline are all provisioned into the environments described here, and a later compliance story (RESIDENCY) audits what this pins.  All PII/PHI must resolve to Australia East (C21/ADR-0016). Defining dev/staging/prod as code makes residency, isolation and reproducibility provable.
 
 ## How it works
 

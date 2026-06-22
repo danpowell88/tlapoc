@@ -7,7 +7,7 @@
 ## Background
 
 As a client, I want to earn and redeem rewards on non-S4 items only, so that I'm rewarded without breaching S4 advertising rules.
-Visit-based + membership rewards that the engine blocks from ever applying to S4 items; configuring an S4 reward is blocked (REQ-MEMB-4/5/7, C9/ADR-0014).
+What this is, plainly: the loyalty rules — points and perks earned and spent — built so they can never touch a prescription injectable. Where it sits: it depends on the PRD-04 product catalogue's schedule flag and underpins later loyalty work; it lives in the Payments/commerce layer after the clinical core. Visit-based + membership rewards that the engine blocks from ever applying to S4 (Schedule 4 prescription-only medicine) items; configuring an S4 reward is blocked (REQ-MEMB-4/5/7, C9/ADR-0014).
 
 ## How it works
 
@@ -52,16 +52,16 @@ Defaults match the prototype: earn 1 pt / $1 on non-S4; redeem 200 pts = $20 off
 ## Tasks (dev pickup)
 
 - [ ] **RewardRule/RewardLedger model + non-S4 eligibility constraint (migrations)**
-  Model RewardRule and RewardLedger (tenant_id + RLS).
-  - RewardRule.eligible_items reference catalog items; a DB/domain constraint forbids any S4-scheduled item being added to a rule's eligible set.
+  Model RewardRule and RewardLedger (tenant_id + RLS (row-level security)).
+  - RewardRule.eligible_items reference catalog items; a DB/domain constraint forbids any S4-scheduled (Schedule 4 prescription-only medicine) item being added to a rule's eligible set.
   - RewardLedger records earned/redeemed/balance per client with a ref to the originating invoice/visit.
 - [ ] **Rewards engine: earn/redeem with live schedule re-check**
   Server-side earn/redeem logic.
-  - Earn on completed non-S4 spend (1 pt/$1 default) and visit milestones; redeem (200 pts = $20 off non-S4) only against non-S4 lines.
-  - At checkout, recompute eligibility against the live line's schedule flag — never trust a cached/UI value; an S4 line is inert.
+  - Earn on completed non-S4 (non-Schedule 4) spend (1 pt/$1 default) and visit milestones; redeem (200 pts = $20 off non-S4) only against non-S4 lines.
+  - At checkout, recompute eligibility against the live line's schedule flag — never trust a cached/UI value; an S4 (Schedule 4 prescription-only medicine) line is inert.
   - Endpoints to define/list reward rules and query a client's ledger/balance.
 - [ ] **Enforce the S4 reward block as a server-side invariant + audit**
   C9 invariant that cannot be bypassed via the API.
-  - Reject any rule-config call whose eligible_items include an S4 item — return a clear blocked-action reason (what's blocked / which item / why) for the UI banner and disabled controls.
+  - Reject any rule-config call whose eligible_items include an S4 (Schedule 4 prescription-only medicine) item — return a clear blocked-action reason (what's blocked / which item / why) for the UI banner and disabled controls.
   - Reject any earn/redeem/discount targeting an S4 line at checkout.
   - Audit both the block events and successful non-S4 redemptions (ADR-0010 audit trail).

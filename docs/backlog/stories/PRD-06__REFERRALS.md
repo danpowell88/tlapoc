@@ -5,11 +5,11 @@
 ## Background
 
 As a client / owner, I want to refer friends and earn non-S4 credit, so that word-of-mouth growth is rewarded compliantly.
-The prototype's Memberships → Referrals screen shows referral/affiliate credit. Per scope, advanced loyalty/referrals are Phase 2 and referral/affiliate credit is non-S4 only (REQ-MEMB-10).
+What this is, plainly: a placeholder for refer-a-friend credit — captured now so the rewards model stays referral-ready, built later. Where it sits: Phase 2, after the core membership/rewards mechanics ship; it reuses the rewards engine's non-S4 guardrail. The prototype's Memberships → Referrals screen shows referral/affiliate credit. Per scope, advanced loyalty/referrals are Phase 2 and referral/affiliate credit is non-S4 only (REQ-MEMB-10).
 
 ## How it works
 
-Placeholder (Phase 2). Referral/affiliate credit reuses the rewards-engine guardrail: credit is non-S4 only — no S4 incentive (C9). Core membership/rewards mechanics ship first; this is captured so the data model and the non-S4 invariant already accommodate referrals when it's built.
+Placeholder (Phase 2). Referral/affiliate credit reuses the rewards-engine guardrail: credit is non-S4 (non-Schedule 4) only — no S4 (Schedule 4 prescription-only medicine) incentive (C9). Core membership/rewards mechanics ship first; this is captured so the data model and the non-S4 invariant already accommodate referrals when it's built.
 
 ## Requirements
 
@@ -47,4 +47,4 @@ _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rew
 ## Tasks (dev pickup)
 
 - [ ] **Scope & design when pulled into a sprint**
-  Deferred placeholder — no build in v1. When pulled in: confirm it still fits scope and the non-S4 regulatory stance (referral/affiliate credit must be non-S4 only, reusing the rewards-engine guardrail, C9), then break down. Referral credit posts to the same RewardLedger; no S4 incentive ever.
+  Deferred placeholder — no build in v1. When pulled in: confirm it still fits scope and the non-S4 (non-Schedule 4) regulatory stance (referral/affiliate credit must be non-S4 only, reusing the rewards-engine guardrail, C9), then break down. Referral credit posts to the same RewardLedger; no S4 (Schedule 4 prescription-only medicine) incentive ever.

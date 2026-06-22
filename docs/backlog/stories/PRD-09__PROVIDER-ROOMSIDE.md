@@ -7,7 +7,7 @@
 ## Background
 
 As a injector, I want to map injections, capture photos and finalise the chart room-side, so that the full clinical record is captured at the chair.
-Map injections, capture photos via signed URLs (never on device), record consult/link script and finalise — all surfacing PRD-04/05 (REQ-APP-2, C14/ADR-0009).
+Plainly: the chairside app where the injector maps each injection, photographs before/after, links the script and seals the record. Where it fits: the hero clinical workflow on the provider app, a late surface that reuses the mapping/photos (PRD-05) and prescribing (PRD-04) modules built earlier. Map injections, capture photos via signed URLs (never on device), record consult/link script and finalise — all surfacing PRD-04/05 (REQ-APP-2, C14/ADR-0009).
 
 ## How it works
 
@@ -22,7 +22,7 @@ Finalisation is server-side and the entry becomes read-only once sealed (AC6). T
 ## Acceptance Criteria
 
 - [ ] Provider app surfaces PRD-05 mapping/photos and PRD-04 consult/Rx/administration.
-- [ ] Photos capture to central storage via signed URLs; none persist on device after sync (C14).
+- [ ] Photos capture to central storage via signed URLs (temporary, expiring links to stored photos); none persist on device after sync (C14).
 - [ ] Finalisation is server-side; once finalised the entry is read-only.
 - [ ] Thumb-first, gloves-on usability (UX §1).
 

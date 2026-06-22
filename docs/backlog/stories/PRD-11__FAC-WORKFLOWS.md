@@ -5,11 +5,11 @@
 ## Background
 
 As a owner, I want fuller facility workflows: checklists, maintenance registers and incident case management, so that operations and safety are fully systematised.
-Open/close checklist, sterilisation & equipment maintenance register (autoclave validation, spore testing, laser service), deep incident & mandatory-reporting case management — Phase 2 (REQ-FAC-4..10). Placeholder.
+Plainly: a placeholder for the heavier facility workflows left to Phase 2 — deep incident and mandatory-reporting case management beyond the v1 registers. Where it fits: part of the operational backbone (Facility/Ops); most original scope has been promoted to its own v1 stories, leaving the deferred case-management piece here. Open/close checklist, sterilisation & equipment maintenance register (autoclave validation, spore testing, laser service), deep incident & mandatory-reporting case management — Phase 2 (REQ-FAC-4..10). Placeholder.
 
 ## How it works
 
-Placeholder (Phase 2): deep incident & mandatory-reporting case management beyond the registers (the open/close, equipment, IPC and complication-response pieces are now their own v1 stories — OPENCLOSE, EQUIPMENT, IPC-LOGS, EMERGENCY-KIT). The facility model already anticipates an IncidentCase workflow (ADR-0026/0030).
+Placeholder (Phase 2): deep incident & mandatory-reporting case management beyond the registers (the open/close, equipment, IPC (infection prevention and control) and complication-response pieces are now their own v1 stories — OPENCLOSE, EQUIPMENT, IPC-LOGS, EMERGENCY-KIT). The facility model already anticipates an IncidentCase workflow (ADR-0026/0030).
 Captured so operations can be fully systematised later.
 
 ## Requirements

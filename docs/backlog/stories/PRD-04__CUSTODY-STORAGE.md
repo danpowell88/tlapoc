@@ -7,7 +7,7 @@
 ## Background
 
 As a owner, I want stock custody limited to an on-site prescriber and bound to a secure, access-logged location, so that S4 custody meets the exclusive-custody rule.
-Only NP/prescriber roles may take custody; stock is bound to a secure, access-logged location. Mode-A custodian must physically work at the clinic with exclusive custody (C7/C15).
+Plainly: this is the rule about who is allowed to hold the stock of S4 (Schedule 4 prescription-only medicine) and where it must be kept. Only an on-site prescriber may have custody, and the medicine must live in a locked, access-logged cabinet or fridge. Where it fits: it sits on stock receipt (PRD-04/STOCK-RECEIVE) within the moat — received stock is bound to a secure location and a named custodian here, and that custody is one of the preconditions the administration gate (PRD-04/ADMIN-GATE) re-checks before any dose.  Only NP/prescriber roles may take custody; stock is bound to a secure, access-logged location. Mode-A custodian must physically work at the clinic with exclusive custody (C7/C15).
 
 ## How it works
 
