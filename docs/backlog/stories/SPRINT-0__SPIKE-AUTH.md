@@ -38,15 +38,15 @@ This is a spike: produce findings and a recommendation, not production code. The
 - [ ] **Define the spike scope, questions and go/no-go criteria**
   Frame exactly what must be proven and what 'pass' means before building.
   - Questions: can Flutter + web complete Entra (staff) AND External ID (client) sign-in; does an authorised .NET call receive usable tenant + role claims; do refresh/sign-out work; which auth libraries are viable?
-  - Go/no-go bar: both audiences sign in from both surfaces and the .NET endpoint reads a tenant id + role claim usable for RLS (row-level security)/RBAC, with working refresh/sign-out.
+  - Go/no-go bar: both audiences sign in from both surfaces and the .NET endpoint reads a tenant id + role claim usable for RLS (row-level security)/RBAC (role-based access control), with working refresh/sign-out.
   - Time-box and the explicit hand-off targets (AUTH-STAFF, AUTH-CLIENT).
 - [ ] **Build the throwaway end-to-end prototype**
   Prove the full path with disposable code.
   - Staff (Entra) + client (External ID) sign-in from Flutter and web.
-  - An authorised call into a minimal .NET endpoint that surfaces tenant + role claims for RLS (row-level security)/RBAC.
-  - Exercise the sharp edges: device redirect/PKCE, token refresh, claim mapping, sign-out. This is throwaway — measure feasibility, don't productionise.
+  - An authorised call into a minimal .NET endpoint that surfaces tenant + role claims for RLS (row-level security)/RBAC (role-based access control).
+  - Exercise the sharp edges: device redirect/PKCE (proof key for code exchange), token refresh, claim mapping, sign-out. This is throwaway — measure feasibility, don't productionise.
 - [ ] **Write up findings, library choices and a go/no-go (ADR if warranted)**
   Capture the decision so the wiring stories proceed on a proven approach.
-  - Findings, chosen libraries, the documented claim contract (what tokens must carry for RLS (row-level security)/RBAC), and gotchas.
+  - Findings, chosen libraries, the documented claim contract (what tokens must carry for RLS (row-level security)/RBAC (role-based access control)), and gotchas.
   - A clear go/no-go; raise an ADR if a real decision/alternative emerged.
   - Explicitly state how AUTH-STAFF and AUTH-CLIENT should build on the result.

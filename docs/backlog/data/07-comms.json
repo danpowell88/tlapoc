@@ -82,7 +82,7 @@
         },
         {
           "title": "Channel adapters (AU SMS / email / push) + delivery callbacks",
-          "note": "Adapters behind the port (ADR-0012).\n- AU SMS adapter (provider chosen in spike) with sender-ID; email adapter; app-push adapter (Flutter tokens).\n- Provider credentials stored encrypted in Settings -> Integrations config.\n- Handle inbound delivery/failure webhooks/callbacks and update NotificationLog idempotently; retries with back-off on transient failures."
+          "note": "Adapters behind the port (ADR-0012).\n- AU SMS (text message) adapter (provider chosen in spike) with sender-ID; email adapter; app-push adapter (Flutter tokens).\n- Provider credentials stored encrypted in Settings -> Integrations config.\n- Handle inbound delivery/failure webhooks (inbound provider callbacks)/callbacks and update NotificationLog idempotently (safe to process the same callback twice); retries with back-off on transient failures."
         }
       ]
     },
@@ -279,7 +279,7 @@
         },
         {
           "title": "Consent gate + functional unsubscribe + sender-ID",
-          "note": "Server-side.\n- A send-gate helper: marketing send proceeds only if opted_in AND contact not suppressed; transactional sends bypass the gate.\n- Inject sender identification + unsubscribe (STOP keyword handler for SMS; unsubscribe link/endpoint for email) into every marketing message.\n- Acting on unsubscribe writes to SuppressionList immediately; subsequent marketing sends are suppressed. Endpoints: get/set consent, list/append suppression."
+          "note": "Server-side.\n- A send-gate helper: marketing send proceeds only if opted_in AND contact not suppressed; transactional sends bypass the gate.\n- Inject sender identification + unsubscribe (STOP keyword handler for SMS (text message); unsubscribe link/endpoint for email) into every marketing message.\n- Acting on unsubscribe writes to SuppressionList immediately; subsequent marketing sends are suppressed. Endpoints: get/set consent, list/append suppression."
         },
         {
           "title": "Enforce consent/suppression as a server-side invariant + audit",
@@ -351,7 +351,7 @@
         },
         {
           "title": "Public booking-page render: schedule-driven generic names + withheld prices",
-          "note": "Server-side render of the public booking page/feed.\n- For each service, if S4-flagged AND config on: emit a generic name, suppress price ('Pricing discussed at consult'), suppress S4 (Schedule 4 prescription-only medicine) imagery; non-S4 services render name + price normally.\n- Applies to the page and its SEO metadata. Configuration-driven, not a linter — driven entirely by the schedule flag + the toggles."
+          "note": "Server-side render of the public booking page/feed.\n- For each service, if S4-flagged AND config on: emit a generic name, suppress price ('Pricing discussed at consult'), suppress S4 (Schedule 4 prescription-only medicine) imagery; non-S4 services render name + price normally.\n- Applies to the page and its SEO (search engine optimisation) metadata. Configuration-driven, not a linter — driven entirely by the schedule flag + the toggles."
         },
         {
           "title": "Enforce no-public-S4 as a server-side invariant + audit",
@@ -359,7 +359,7 @@
         },
         {
           "title": "Settings -> Public booking page web UI + live preview",
-          "note": "Angular per the screenshot.\n- Public-booking-widget panel with the policy toggles (generic names / withhold S4 (Schedule 4 prescription-only medicine) prices / no S4 imagery) and SEO metadata fields.\n- Live Preview showing how S4 vs non-S4 services render (price withheld for S4).\n- Owner/admin gated; loading/empty/error states."
+          "note": "Angular per the screenshot.\n- Public-booking-widget panel with the policy toggles (generic names / withhold S4 (Schedule 4 prescription-only medicine) prices / no S4 imagery) and SEO (search engine optimisation) metadata fields.\n- Live Preview showing how S4 vs non-S4 services render (price withheld for S4).\n- Owner/admin gated; loading/empty/error states."
         }
       ]
     },
@@ -610,11 +610,11 @@
       "tasks": [
         {
           "title": "Review model + complaint-keyword auto-detect (migrations)",
-          "note": "Model Review (tenant_id + RLS (row-level security)): source, rating, body, names_s4, status.\n- Request-all: review requests gate only on consent (C23), never on sentiment (ACL).\n- Auto-detect: rating <=3 OR a complaint-keyword match flags needs-follow-up.\n- No repost-as-marketing field/feature exists (prevents prohibited testimonials)."
+          "note": "Model Review (tenant_id + RLS (row-level security)): source, rating, body, names_s4, status.\n- Request-all: review requests gate only on consent (C23), never on sentiment (ACL — Australian Consumer Law).\n- Auto-detect: rating <=3 OR a complaint-keyword match flags needs-follow-up.\n- No repost-as-marketing field/feature exists (prevents prohibited testimonials)."
         },
         {
           "title": "Reviews API: request, reply, acknowledge, flag -> Job; testimonial caution",
-          "note": "Server-side.\n- Send review requests to all eligible consented clients (no gating); reply/acknowledge endpoints; flag -> create a review Job (Follow-ups) assigned Lead Nurse (clinical/unhappy) or Reception.\n- Auto-detect: scan reviews, raise review Jobs for ≤3★/complaint matches idempotently.\n- When a review names an S4 (Schedule 4 prescription-only medicine) result, surface the caution (don't reshare — prohibited testimonial, C9/ADR-0032); the platform offers no repost action. KPI read-model (avg, count, response rate, needs-follow-up)."
+          "note": "Server-side.\n- Send review requests to all eligible consented clients (no gating); reply/acknowledge endpoints; flag -> create a review Job (Follow-ups) assigned Lead Nurse (clinical/unhappy) or Reception.\n- Auto-detect: scan reviews, raise review Jobs for ≤3★/complaint matches idempotently.\n- When a review names an S4 (Schedule 4 prescription-only medicine) result, surface the caution (don't reshare — prohibited testimonial, C9/ADR-0032); the platform offers no repost action. KPI (key performance indicator) read-model (avg, count, response rate, needs-follow-up)."
         }
       ]
     },
@@ -678,11 +678,11 @@
         },
         {
           "title": "Leads API: pipeline stages, convert-to-client, consent-gated nudges, Follow-ups",
-          "note": "Server-side.\n- CRUD leads; move stage (new/consult/won/lost); convert -> create/link a client + (optional) booking, preserving enquiry history.\n- Outbound nudges gate on marketing consent (C23); 1:1 service replies exempt.\n- Lead follow-ups raise Jobs into Follow-ups; conversion KPI read-model (open, consults, conversion %, avg days)."
+          "note": "Server-side.\n- CRUD leads; move stage (new/consult/won/lost); convert -> create/link a client + (optional) booking, preserving enquiry history.\n- Outbound nudges gate on marketing consent (C23); 1:1 service replies exempt.\n- Lead follow-ups raise Jobs into Follow-ups; conversion KPI (key performance indicator) read-model (open, consults, conversion %, avg days)."
         },
         {
           "title": "Leads (CRM) web UI: kanban + KPIs + convert",
-          "note": "Angular per the screenshot.\n- Kanban columns (New enquiry / Consult booked / Converted / Lost) with lead cards (source + consent dot); KPI cards; convert-to-client/booking action; the 1:1-vs-public-advertising note.\n- Front-desk/owner gated; loading/empty/error states."
+          "note": "Angular per the screenshot.\n- Kanban columns (New enquiry / Consult booked / Converted / Lost) with lead cards (source + consent dot); KPI (key performance indicator) cards; convert-to-client/booking action; the 1:1-vs-public-advertising note.\n- Front-desk/owner gated; loading/empty/error states."
         }
       ]
     },

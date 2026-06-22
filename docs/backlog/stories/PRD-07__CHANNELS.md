@@ -58,6 +58,6 @@ Every send writes a NotificationLog row (channel, template_key, status, sent_at)
   - Email/SMS/push share the same send contract.
 - [ ] **Channel adapters (AU SMS / email / push) + delivery callbacks**
   Adapters behind the port (ADR-0012).
-  - AU SMS adapter (provider chosen in spike) with sender-ID; email adapter; app-push adapter (Flutter tokens).
+  - AU SMS (text message) adapter (provider chosen in spike) with sender-ID; email adapter; app-push adapter (Flutter tokens).
   - Provider credentials stored encrypted in Settings -> Integrations config.
-  - Handle inbound delivery/failure webhooks/callbacks and update NotificationLog idempotently; retries with back-off on transient failures.
+  - Handle inbound delivery/failure webhooks (inbound provider callbacks)/callbacks and update NotificationLog idempotently (safe to process the same callback twice); retries with back-off on transient failures.

@@ -57,8 +57,8 @@ _Prototype screen: prototype.html — Comms & growth (Inbox/Automations/Campaign
   Server-side.
   - CRUD leads; move stage (new/consult/won/lost); convert -> create/link a client + (optional) booking, preserving enquiry history.
   - Outbound nudges gate on marketing consent (C23); 1:1 service replies exempt.
-  - Lead follow-ups raise Jobs into Follow-ups; conversion KPI read-model (open, consults, conversion %, avg days).
+  - Lead follow-ups raise Jobs into Follow-ups; conversion KPI (key performance indicator) read-model (open, consults, conversion %, avg days).
 - [ ] **Leads (CRM) web UI: kanban + KPIs + convert**
   Angular per the screenshot.
-  - Kanban columns (New enquiry / Consult booked / Converted / Lost) with lead cards (source + consent dot); KPI cards; convert-to-client/booking action; the 1:1-vs-public-advertising note.
+  - Kanban columns (New enquiry / Consult booked / Converted / Lost) with lead cards (source + consent dot); KPI (key performance indicator) cards; convert-to-client/booking action; the 1:1-vs-public-advertising note.
   - Front-desk/owner gated; loading/empty/error states.

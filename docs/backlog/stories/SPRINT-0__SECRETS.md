@@ -46,4 +46,4 @@ Rotation requires no code change: rotating a secret in the vault is picked up by
   Write the config/secrets guide so the pattern is followed consistently.
   - The split: typed config for shape, vault for secret values, scanning to keep them out of git.
   - How to add a new secret (vault key naming, typed-option binding, required-value validation) and how rotation works without code change.
-  - The list of secret categories (DB connection, Entra/External ID provider creds, Square/SMS/Xero keys, signing secrets) and where each lives.
+  - The list of secret categories (DB connection, Entra/External ID provider creds, Square (the payment provider)/SMS (short message service)/Xero (the accounting system) keys, signing secrets) and where each lives.

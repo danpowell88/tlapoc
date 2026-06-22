@@ -87,7 +87,7 @@
         },
         {
           "title": "Calendar API: appointment CRUD + move + conflict check",
-          "note": "Endpoints to create/read/update/cancel an Appointment and to move it (PUT new practitioner/room/start). On create and on move, re-run the availability engine server-side and REJECT with a structured conflict (room/chair/device busy, outside roster, scope mismatch) — never trust the client. Emit appointment.created / appointment.moved domain events for reminders + read models. Persist source(online|desk|walkin) and reason. Buffers reserve the resource for the full block."
+          "note": "Endpoints to create/read/update/cancel an Appointment and to move it (PUT new practitioner/room/start). On create and on move, re-run the availability engine server-side and REJECT with a structured conflict (room/chair/device busy, outside roster, scope mismatch) — never trust the client. Emit appointment.created / appointment.moved domain events (a fact emitted when something happens in the system) for reminders + read models (a query-optimised view built from domain events). Persist source(online|desk|walkin) and reason. Buffers reserve the resource for the full block."
         },
         {
           "title": "Week/day calendar UI: columns, colour-coded blocks, drag-to-move, utilisation strip",
@@ -176,7 +176,7 @@
         },
         {
           "title": "Under-18 flag propagation from booking",
-          "note": "On create, derive under_18 from DOB and stamp it on the Appointment so PRD-03 COOLING-OFF/GATING can enforce the 7-day cooling-off + payment block. No cooling-off logic here — only the durable flag + a domain event so downstream gates can react. Guardian/contact capture is deferred to PRD-03 consent."
+          "note": "On create, derive under_18 from DOB and stamp it on the Appointment so PRD-03 COOLING-OFF/GATING can enforce the 7-day cooling-off (the mandatory wait before a cosmetic procedure can proceed) + payment block. No cooling-off logic here — only the durable flag + a domain event (a fact emitted when something happens in the system) so downstream gates can react. Guardian/contact capture is deferred to PRD-03 consent."
         }
       ]
     },
@@ -240,15 +240,15 @@
       "tasks": [
         {
           "title": "Server-side consult gate on charting-open (S4 only)",
-          "note": "When the charting context for an Appointment is requested, evaluate the gate: if service.schedule==S4 (Schedule 4 prescription-only medicine) and Appointment.consult_id is null, refuse to return the editable charting context and return a structured 'missing: consult' reason instead. Enforce in the domain/API layer (ADR-0008), independent of the UI. Add Appointment.consult_id (FK Consult, nullable). Clearing happens when PRD-04 records the consult and sets consult_id."
+          "note": "When the charting context for an Appointment is requested, evaluate the gate: if service.schedule==S4 (Schedule 4 prescription-only medicine) and Appointment.consult_id is null, refuse to return the editable charting context and return a structured 'missing: consult (the assessment appointment where suitability is established and an S4 prescription can be written)' reason instead. Enforce in the domain/API layer (ADR-0008 (an architecture decision record)), independent of the UI. Add Appointment.consult_id (FK Consult, nullable). Clearing happens when PRD-04 records the consult and sets consult_id."
         },
         {
           "title": "Gate status on Today/Schedule board + blocked-action banner",
-          "note": "Surface the per-visit gate state on the Today board and Schedule (chip: consult/consent/screening status). On the Charting screen render the calm blocked-action banner from the structured reason: what's missing, the fix link (record consult), and who can resolve it (NP/prescriber). Reuse the same banner component PRD-03 GATING uses."
+          "note": "Surface the per-visit gate state on the Today board and Schedule (chip: consult/consent/screening status). On the Charting screen render the calm blocked-action banner from the structured reason: what's missing, the fix link (record consult (the assessment appointment where suitability is established and an S4 prescription can be written)), and who can resolve it (NP/prescriber (a practitioner authorised to write a prescription)). Reuse the same banner component PRD-03 GATING uses."
         },
         {
           "title": "Gate-decision audit events",
-          "note": "Every gate evaluation that BLOCKS (and the later clear) writes an AuditEvent (actor, appointment, reason, timestamp) to the append-only stream (ADR-0010) so the moat is demonstrable to a regulator. Emit a domain event when consult_id is set so the board/banner update live."
+          "note": "Every gate evaluation that BLOCKS (and the later clear) writes an AuditEvent (actor, appointment, reason, timestamp) to the append-only stream (ADR-0010) so the moat is demonstrable to a regulator. Emit a domain event (a fact emitted when something happens in the system) when consult_id is set so the board/banner update live."
         }
       ]
     },
@@ -314,11 +314,11 @@
       "tasks": [
         {
           "title": "Visit state-machine + transition API (server-validated)",
-          "note": "Model Appointment.status as a state machine (booked→reminded→checked_in→in_room→for_checkout→checked_out, plus late/no_show/cancelled). Transition endpoints validate legal transitions server-side and reject illegal ones; each write appends a VisitEvent (from/to/actor/at) to the audit stream. Emit domain events per transition for the Today board, reminders and read models. Capture new_or_returning/reason/practitioner at booking."
+          "note": "Model Appointment.status as a state machine (booked→reminded→checked_in→in_room→for_checkout→checked_out, plus late/no_show/cancelled). Transition endpoints validate legal transitions server-side and reject illegal ones; each write appends a VisitEvent (from/to/actor/at) to the audit stream. Emit domain events (a fact emitted when something happens in the system) per transition for the Today board, reminders and read models (a query-optimised view built from domain events). Capture new_or_returning/reason/practitioner at booking."
         },
         {
           "title": "No-show → auto follow-up call job",
-          "note": "When status transitions to no_show, automatically create a Follow-up CALL job in the PRD-07 jobs queue (assignee=reception, source=system, due=today) so the no-show is recovered. Late is a flag only (no job). Idempotent — re-flagging doesn't duplicate the job."
+          "note": "When status transitions to no_show, automatically create a Follow-up CALL job in the PRD-07 jobs queue (assignee=reception, source=system, due=today) so the no-show (a client who misses an appointment without notice) is recovered. Late is a flag only (no job). Idempotent — re-flagging doesn't duplicate the job."
         },
         {
           "title": "Today board: in-room-now strip + per-row status actions",
@@ -457,7 +457,7 @@
         },
         {
           "title": "Waitlist management UI + backfill prompt",
-          "note": "UI to add/view/remove waitlist entries for a service/window and see offered/accepted/expired status. When an appointment is cancelled/no-showed, show the backfill prompt ('offer this slot to the waitlist'). Wire the Schedule quiet-window panel actions to the matching engine."
+          "note": "UI to add/view/remove waitlist (clients waiting for an earlier slot) entries for a service/window and see offered/accepted/expired status. When an appointment is cancelled/no-showed, show the backfill prompt ('offer this slot to the waitlist'). Wire the Schedule quiet-window panel actions to the matching engine."
         }
       ]
     },
@@ -516,7 +516,7 @@
       "tasks": [
         {
           "title": "Walk-in / same-day add-on booking flow (gate-respecting)",
-          "note": "Quick-add flow from the Schedule that attaches an existing or new client, picks a free practitioner+resource via the availability engine, and books source=walkin. For S4 (Schedule 4 prescription-only medicine) services, the resulting appointment still carries the consult gate (consult_id null ⇒ charting blocked) and requires consent — walk-ins never bypass C1/C5. Same-day add-on appends a service to an in-progress visit on a free resource."
+          "note": "Quick-add flow from the Schedule that attaches an existing or new client, picks a free practitioner+resource via the availability engine, and books source=walkin. For S4 (Schedule 4 prescription-only medicine) services, the resulting appointment still carries the consult (the assessment appointment where suitability is established and an S4 prescription can be written) gate (consult_id null ⇒ charting blocked) and requires consent — walk-ins never bypass C1/C5. Same-day add-on appends a service to an in-progress visit on a free resource."
         },
         {
           "title": "Resource conflict-flagging before confirm + tags",
@@ -585,7 +585,7 @@
       "tasks": [
         {
           "title": "Client 360 read-aggregation API (RBAC + .fin + audit)",
-          "note": "A read endpoint that composes the profile from each owning module (intake, consent, image-consent, photos, visits, plan, membership, balance, rewards, complaints). Apply RBAC field filtering server-side (reception gets limited clinical info; money fields require the .fin capability — owner-only), and write an AuditEvent for every clinical/PII read (C10, ADR-0010). Returns the header chip state (consent current, image-use, under-18 cooling-off) computed from the gates."
+          "note": "A read endpoint that composes the profile from each owning module (intake, consent, image-consent, photos, visits, plan, membership, balance, rewards, complaints). Apply RBAC field filtering server-side (reception gets limited clinical info; money fields require the .fin capability — owner-only), and write an AuditEvent for every clinical/PII read (C10, ADR-0010). Returns the header chip state (consent current, image-use, under-18 cooling-off (the mandatory wait before a cosmetic procedure can proceed)) computed from the gates."
         },
         {
           "title": "Profile header with compliance/age chips + quick actions",
@@ -705,7 +705,7 @@
       "tasks": [
         {
           "title": "Design note: ACL-fair deposits + cooling-off suppression (F14) — Phase 2",
-          "note": "Placeholder design task (no v1 build). Document the opt-in deposit / card-on-file hold model behind IPaymentProvider (ADR-0036): disclosed at booking, refundable on notice, ACL-fair, never coercive. Capture the hard invariant F14 — a BookingHold must NOT be placed or held during an under-18 cooling-off period (coordinates with PRD-03 COOLING-OFF). S4 (Schedule 4 prescription-only medicine) is never priced or sold online. Produce the design only; defer implementation to Phase 2."
+          "note": "Placeholder design task (no v1 build). Document the opt-in deposit / card-on-file hold model behind IPaymentProvider (ADR-0036): disclosed at booking, refundable on notice, ACL-fair, never coercive. Capture the hard invariant F14 — a BookingHold must NOT be placed or held during an under-18 cooling-off (the mandatory wait before a cosmetic procedure can proceed) period (coordinates with PRD-03 COOLING-OFF). S4 (Schedule 4 prescription-only medicine) is never priced or sold online. Produce the design only; defer implementation to Phase 2."
         }
       ]
     },
@@ -855,7 +855,7 @@
         },
         {
           "title": "Capability-gated catalogue admin + audit",
-          "note": "Admin endpoints to add/edit/archive a service, gated to prescriber/owner capability; every change writes an AuditEvent. Validate that S4 (Schedule 4 prescription-only medicine) services cannot have reward/discount controls enabled. Archive (not hard-delete) to preserve history on past bookings."
+          "note": "Admin endpoints to add/edit/archive a service, gated to prescriber (a practitioner authorised to write a prescription)/owner capability; every change writes an AuditEvent. Validate that S4 (Schedule 4 prescription-only medicine) services cannot have reward/discount controls enabled. Archive (not hard-delete) to preserve history on past bookings."
         },
         {
           "title": "Treatment menu admin UI",

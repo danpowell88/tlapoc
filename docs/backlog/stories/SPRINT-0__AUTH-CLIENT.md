@@ -38,7 +38,7 @@ Because handles and contact details are personal data (C21), the identities crea
 
 - [ ] **Configure Entra External ID user flows (social / email+password / OTP) and complete them on client app + public web**
   Stand up CIAM sign-up/sign-in for clients across all three methods, tenant-scoped and distinct from staff.
-  - External ID tenant with three user flows: social (Google/Apple), local (email+password), and email/SMS OTP, each with sign-up, sign-in and account recovery (reset / OTP resend).
+  - External ID tenant with three user flows: social (Google/Apple), local (email+password), and email/SMS (short message service) OTP (one-time passcode), each with sign-up, sign-in and account recovery (reset / OTP resend).
   - Client Flutter app and public web complete each method.
   - Client tokens carry tenant scope and a stable client identity in a namespace separate from staff; the API validates them and resolves tenant context for RLS (row-level security).
   - Social/OTP redirect + provider credentials sourced per environment from config/secrets (SECRETS).

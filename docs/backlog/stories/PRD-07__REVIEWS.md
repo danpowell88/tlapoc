@@ -52,11 +52,11 @@ _Prototype screen: prototype.html — Comms & growth (Inbox/Automations/Campaign
 
 - [ ] **Review model + complaint-keyword auto-detect (migrations)**
   Model Review (tenant_id + RLS (row-level security)): source, rating, body, names_s4, status.
-  - Request-all: review requests gate only on consent (C23), never on sentiment (ACL).
+  - Request-all: review requests gate only on consent (C23), never on sentiment (ACL — Australian Consumer Law).
   - Auto-detect: rating <=3 OR a complaint-keyword match flags needs-follow-up.
   - No repost-as-marketing field/feature exists (prevents prohibited testimonials).
 - [ ] **Reviews API: request, reply, acknowledge, flag -> Job; testimonial caution**
   Server-side.
   - Send review requests to all eligible consented clients (no gating); reply/acknowledge endpoints; flag -> create a review Job (Follow-ups) assigned Lead Nurse (clinical/unhappy) or Reception.
   - Auto-detect: scan reviews, raise review Jobs for ≤3★/complaint matches idempotently.
-  - When a review names an S4 (Schedule 4 prescription-only medicine) result, surface the caution (don't reshare — prohibited testimonial, C9/ADR-0032); the platform offers no repost action. KPI read-model (avg, count, response rate, needs-follow-up).
+  - When a review names an S4 (Schedule 4 prescription-only medicine) result, surface the caution (don't reshare — prohibited testimonial, C9/ADR-0032); the platform offers no repost action. KPI (key performance indicator) read-model (avg, count, response rate, needs-follow-up).

@@ -54,11 +54,11 @@ _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rew
   - Package: total_visits/remaining decremented on redemption.
   - GiftCard: code, initial, running balance, status, optional assigned client; partial redemption supported.
   - AccountBalance: client store-credit + AR (accounts receivable) ageing buckets.
-  - Deferred-revenue treatment is recognised in Xero (PRD-10), not re-implemented here.
+  - Deferred-revenue treatment is recognised in Xero (the clinic's cloud accounting system) (PRD-10), not re-implemented here.
 - [ ] **Sell/redeem API: package decrement, gift balance draw-down, credit/AR**
   Server-side commands/queries.
   - Sell package / issue gift card / apply store credit; redeem a package visit (decrement remaining, guard against 0) and draw down a gift-card balance at checkout (partial allowed).
-  - Redemptions write to the Closeout (the daily reconciliation of takings) and the Xero post.
+  - Redemptions write to the Closeout (the daily reconciliation of takings) and the Xero (the clinic's cloud accounting system) post.
   - Expose client credit + AR (accounts receivable)-ageing read queries (owner/manager gated). Gift cards stay schedule-neutral; the rewards engine still blocks S4 (Schedule 4 prescription-only medicine) earn/redeem at checkout.
 - [ ] **Gift-cards web UI + Client-360 'visits remaining'**
   Angular per the screenshot.

@@ -53,7 +53,7 @@ The line between transactional and marketing is enforced here: reminders, confir
 - [ ] **Consent gate + functional unsubscribe + sender-ID**
   Server-side.
   - A send-gate helper: marketing send proceeds only if opted_in AND contact not suppressed; transactional sends bypass the gate.
-  - Inject sender identification + unsubscribe (STOP keyword handler for SMS; unsubscribe link/endpoint for email) into every marketing message.
+  - Inject sender identification + unsubscribe (STOP keyword handler for SMS (text message); unsubscribe link/endpoint for email) into every marketing message.
   - Acting on unsubscribe writes to SuppressionList immediately; subsequent marketing sends are suppressed. Endpoints: get/set consent, list/append suppression.
 - [ ] **Enforce consent/suppression as a server-side invariant + audit**
   C23 invariant that cannot be bypassed via the API.

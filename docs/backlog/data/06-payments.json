@@ -82,11 +82,11 @@
         },
         {
           "title": "SquareAdapter: card-present, card-on-file tokenise, recurring charge",
-          "note": "Implement the Square adapter behind the port, built on SPIKE-SQUARE.\n- Map domain calls to Square Payments/Cards/Refunds APIs; card-present via terminal, card-on-file via Cards API.\n- recurringCharge does an off-session charge of a stored card token (the autopay (automatic recurring billing) path the membership story consumes).\n- Idempotency keys on every charge; map Square error/decline codes to a normalised result the dunning (the retry-and-chase on a failed recurring charge) logic can branch on.\n- OAuth/app credentials stored encrypted in config; tenant -> Square location mapping."
+          "note": "Implement the Square adapter behind the port, built on SPIKE-SQUARE.\n- Map domain calls to Square (the card-payment provider) Payments/Cards/Refunds APIs; card-present via terminal, card-on-file via Cards API.\n- recurringCharge does an off-session charge of a stored card token (the autopay (automatic recurring billing) path the membership story consumes).\n- Idempotency keys (so a retried charge never double-bills) on every charge; map Square error/decline codes to a normalised result the dunning (the retry-and-chase on a failed recurring charge) logic can branch on.\n- OAuth/app credentials stored encrypted in config; tenant -> Square location mapping."
         },
         {
           "title": "Webhook intake + ProviderTxn reconciliation; tokens-only enforcement",
-          "note": "Close the loop between async processor events and our ledger.\n- Subscribe to Square webhooks (payment updated, refund updated, dispute created); verify signatures; update the matching ProviderTxn idempotently.\n- A dispute event raises a Job (PRD-07 Follow-ups) and is surfaced to the owner-only finance view.\n- Enforce the tokens-only invariant at the persistence boundary: reject/strip any PAN (primary account number)/CVV; assert only token_ref + brand/last4/exp are stored (PCI-DSS card-security standard, ADR-0007)."
+          "note": "Close the loop between async processor events and our ledger.\n- Subscribe to Square (the card-payment provider) webhooks (inbound provider callbacks) (payment updated, refund updated, dispute created); verify signatures; update the matching ProviderTxn idempotently (safe to process the same event twice).\n- A dispute event raises a Job (PRD-07 Follow-ups) and is surfaced to the owner-only finance view.\n- Enforce the tokens-only invariant at the persistence boundary: reject/strip any PAN (primary account number)/CVV; assert only token_ref + brand/last4/exp are stored (PCI-DSS card-security standard, ADR-0007)."
         }
       ]
     },
@@ -156,11 +156,11 @@
         },
         {
           "title": "Checkout API: sale, tenders, split/partial, receipt, Closeout+Xero post",
-          "note": "Server-authoritative checkout commands/queries.\n- Endpoints: create/append invoice line, apply member reward/credit (non-S4 only — reject if a line is S4 (Schedule 4 prescription-only medicine) — Schedule 4 prescription-only medicine), take payment (card via IPaymentProvider authorize+capture; cash recorded; gift-card redeem), split/partial across tenders, void/refund.\n- On completion: write to the day's Closeout (the daily reconciliation of takings) and enqueue the Xero post (PRD-10) with per-line account/GST (goods and services tax) mapping.\n- Owner-only gate on takings/margin read-models; Reception can complete a sale and see its total only. Never trust the client for schedule/eligibility — re-check server-side."
+          "note": "Server-authoritative checkout commands/queries.\n- Endpoints: create/append invoice line, apply member reward/credit (non-S4 only — reject if a line is S4 (Schedule 4 prescription-only medicine) — Schedule 4 prescription-only medicine), take payment (card via IPaymentProvider authorize+capture; cash recorded; gift-card redeem), split/partial across tenders, void/refund.\n- On completion: write to the day's Closeout (the daily reconciliation of takings) and enqueue the Xero (the clinic's cloud accounting system) post (PRD-10) with per-line account/GST (goods and services tax) mapping.\n- Owner-only gate on takings/margin read-models; Reception can complete a sale and see its total only. Never trust the client for schedule/eligibility — re-check server-side."
         },
         {
           "title": "Checkout web UI: lines, tenders, S4-inert controls, terminal modal",
-          "note": "Angular checkout per the screenshot.\n- Line list with per-line schedule tag; S4 (Schedule 4 prescription-only medicine) lines render reward/discount/points controls disabled with a tooltip (engine refuses them).\n- Tender panel (Square card / Record cash / Gift card), split/partial entry, tip + surcharge; Subtotal / GST (goods and services tax) incl. / Total with member-reward + store-credit deduction lines.\n- Square-terminal modal: Processing -> Approved; loading/empty/error states; capability-gate owner-only money figures."
+          "note": "Angular checkout per the screenshot.\n- Line list with per-line schedule tag; S4 (Schedule 4 prescription-only medicine) lines render reward/discount/points controls disabled with a tooltip (engine refuses them).\n- Tender panel (Square (the card-payment provider) card / Record cash / Gift card), split/partial entry, tip + surcharge; Subtotal / GST (goods and services tax) incl. / Total with member-reward + store-credit deduction lines.\n- Square-terminal modal: Processing -> Approved; loading/empty/error states; capability-gate owner-only money figures."
         }
       ]
     },
@@ -228,11 +228,11 @@
       "tasks": [
         {
           "title": "Package/GiftCard/AccountBalance model (migrations)",
-          "note": "Model Package, GiftCard and AccountBalance (tenant_id + RLS (row-level security)).\n- Package: total_visits/remaining decremented on redemption.\n- GiftCard: code, initial, running balance, status, optional assigned client; partial redemption supported.\n- AccountBalance: client store-credit + AR (accounts receivable) ageing buckets.\n- Deferred-revenue treatment is recognised in Xero (PRD-10), not re-implemented here."
+          "note": "Model Package, GiftCard and AccountBalance (tenant_id + RLS (row-level security)).\n- Package: total_visits/remaining decremented on redemption.\n- GiftCard: code, initial, running balance, status, optional assigned client; partial redemption supported.\n- AccountBalance: client store-credit + AR (accounts receivable) ageing buckets.\n- Deferred-revenue treatment is recognised in Xero (the clinic's cloud accounting system) (PRD-10), not re-implemented here."
         },
         {
           "title": "Sell/redeem API: package decrement, gift balance draw-down, credit/AR",
-          "note": "Server-side commands/queries.\n- Sell package / issue gift card / apply store credit; redeem a package visit (decrement remaining, guard against 0) and draw down a gift-card balance at checkout (partial allowed).\n- Redemptions write to the Closeout (the daily reconciliation of takings) and the Xero post.\n- Expose client credit + AR (accounts receivable)-ageing read queries (owner/manager gated). Gift cards stay schedule-neutral; the rewards engine still blocks S4 (Schedule 4 prescription-only medicine) earn/redeem at checkout."
+          "note": "Server-side commands/queries.\n- Sell package / issue gift card / apply store credit; redeem a package visit (decrement remaining, guard against 0) and draw down a gift-card balance at checkout (partial allowed).\n- Redemptions write to the Closeout (the daily reconciliation of takings) and the Xero (the clinic's cloud accounting system) post.\n- Expose client credit + AR (accounts receivable)-ageing read queries (owner/manager gated). Gift cards stay schedule-neutral; the rewards engine still blocks S4 (Schedule 4 prescription-only medicine) earn/redeem at checkout."
         },
         {
           "title": "Gift-cards web UI + Client-360 'visits remaining'",
@@ -293,11 +293,11 @@
       "tasks": [
         {
           "title": "Closeout model + day-rollup (migrations)",
-          "note": "Model Closeout — the day's end-of-day reconciliation of takings against recorded payments — (tenant_id + RLS (row-level security)). One row per location per trading day.\n- card_total / cash_total aggregated from the day's Payments; counted_cash entered by the operator; variance = counted - recorded (and card vs Square batch).\n- Capture note + closed_by/closed_at; immutable once locked."
+          "note": "Model Closeout — the day's end-of-day reconciliation of takings against recorded payments — (tenant_id + RLS (row-level security)). One row per location per trading day.\n- card_total / cash_total aggregated from the day's Payments; counted_cash entered by the operator; variance = counted - recorded (and card vs Square (the card-payment provider) batch).\n- Capture note + closed_by/closed_at; immutable once locked."
         },
         {
           "title": "Closeout API: rollup, variance, reconcile-to-Xero",
-          "note": "Server-side.\n- Endpoint to open/compute the day's rollup, accept the counted-cash figure, compute + persist variance, and lock the closeout (end-of-day reconciliation of takings against recorded payments).\n- Reconcile against the Xero post (PRD-10): the day's posted invoices/payments should foot to closeout totals; flag a mismatch.\n- Entire surface owner-only (financial capability)."
+          "note": "Server-side.\n- Endpoint to open/compute the day's rollup, accept the counted-cash figure, compute + persist variance, and lock the closeout (end-of-day reconciliation of takings against recorded payments).\n- Reconcile against the Xero (the clinic's cloud accounting system) post (PRD-10): the day's posted invoices/payments should foot to closeout totals; flag a mismatch.\n- Entire surface owner-only (financial capability)."
         },
         {
           "title": "Closeout web UI (desk + back-office tablet)",
@@ -375,7 +375,7 @@
         },
         {
           "title": "Autopay scheduler + dunning state machine + benefit auto-apply",
-          "note": "The recurring-billing engine.\n- A scheduled job picks up memberships where next_charge_at <= now and charges off-session via IPaymentProvider.recurringCharge (idempotent per period).\n- On failure: open a DunningAttempt sequence — back-off retries, notify the client to update the card (INotifier/PRD-07), raise a 'Payment failed' Job (Follow-ups), and only lapse after the sequence exhausts; expose a manual Retry.\n- Benefits/credits auto-apply at checkout (member pricing, 10% non-S4 (non-Schedule 4), complimentary add-on) — non-S4 only; money figures owner-gated.\n- Endpoints for join (token from online/in-app/desk), pause, cancel, win-back."
+          "note": "The recurring-billing engine.\n- A scheduled job picks up memberships where next_charge_at <= now and charges off-session via IPaymentProvider.recurringCharge (idempotent (safe to repeat without double-charging) per period).\n- On failure: open a DunningAttempt sequence — back-off retries, notify the client to update the card (INotifier/PRD-07), raise a 'Payment failed' Job (Follow-ups), and only lapse after the sequence exhausts; expose a manual Retry.\n- Benefits/credits auto-apply at checkout (member pricing, 10% non-S4 (non-Schedule 4), complimentary add-on) — non-S4 only; money figures owner-gated.\n- Endpoints for join (token from online/in-app/desk), pause, cancel, win-back."
         }
       ]
     },

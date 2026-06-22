@@ -46,7 +46,7 @@ Because it is separate, the treatment gate (GATING) does NOT require image-use c
 ## Tasks (dev pickup)
 
 - [ ] **ImageConsent entity (separate, scoped) + grant/withdraw**
-  Model ImageConsent (scope, granted_at, withdrawn_at, status) separate from ConsentSignature. Grant/withdraw endpoints; withdraw sets withdrawn_at + status and emits a domain event. Audited (C14). It is NOT an input to the treatment gate — declining/withdrawing never blocks treatment, only media features.
+  Model ImageConsent (scope, granted_at, withdrawn_at, status) separate from ConsentSignature. Grant/withdraw endpoints; withdraw sets withdrawn_at + status and emits a domain event (a fact emitted when something happens in the system). Audited (C14). It is NOT an input to the treatment gate — declining/withdrawing never blocks treatment, only media features.
 - [ ] **Downstream media-use enforcement on withdraw**
   PRD-05/09 media operations (serve signed URL, capture, share) must check current ImageConsent.status server-side before proceeding, so withdrawal IMMEDIATELY stops further use (ADR-0009: media never on personal devices, always via consent-gated signed URLs). On the withdraw event, ensure no new signed URLs are issued. Audited.
 - [ ] **Client self-manage toggle + staff header chip UI**

@@ -51,7 +51,7 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 ## Tasks (dev pickup)
 
 - [ ] **Client 360 read-aggregation API (RBAC + .fin + audit)**
-  A read endpoint that composes the profile from each owning module (intake, consent, image-consent, photos, visits, plan, membership, balance, rewards, complaints). Apply RBAC field filtering server-side (reception gets limited clinical info; money fields require the .fin capability — owner-only), and write an AuditEvent for every clinical/PII read (C10, ADR-0010). Returns the header chip state (consent current, image-use, under-18 cooling-off) computed from the gates.
+  A read endpoint that composes the profile from each owning module (intake, consent, image-consent, photos, visits, plan, membership, balance, rewards, complaints). Apply RBAC field filtering server-side (reception gets limited clinical info; money fields require the .fin capability — owner-only), and write an AuditEvent for every clinical/PII read (C10, ADR-0010). Returns the header chip state (consent current, image-use, under-18 cooling-off (the mandatory wait before a cosmetic procedure can proceed)) computed from the gates.
 - [ ] **Profile header with compliance/age chips + quick actions**
   Angular profile header: avatar, name, member/VIP tag, demographics; chips for Consent current / Image use / Balance / Allergy / under-18 cooling-off (driven by the gate state). Quick actions Open chart (hidden unless the role has chart capability) and Checkout. Chips are the at-a-glance gate read before charting.
 - [ ] **Tabbed profile sections (Overview/Visits/Plan/Photos/Consents/Membership/Billing/Notes)**

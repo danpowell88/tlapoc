@@ -56,13 +56,13 @@ _Prototype screen: prototype.html — Comms & growth (Inbox/Automations/Campaign
 - [ ] **Public booking-page render: schedule-driven generic names + withheld prices**
   Server-side render of the public booking page/feed.
   - For each service, if S4-flagged AND config on: emit a generic name, suppress price ('Pricing discussed at consult'), suppress S4 (Schedule 4 prescription-only medicine) imagery; non-S4 services render name + price normally.
-  - Applies to the page and its SEO metadata. Configuration-driven, not a linter — driven entirely by the schedule flag + the toggles.
+  - Applies to the page and its SEO (search engine optimisation) metadata. Configuration-driven, not a linter — driven entirely by the schedule flag + the toggles.
 - [ ] **Enforce no-public-S4 as a server-side invariant + audit**
   C9 invariant on the public surface the app owns.
   - The public render must never expose an S4 (Schedule 4 prescription-only medicine) service's brand/clinical name/price/imagery when the policy is on; assert this server-side so a UI/client change can't leak it.
   - Audit config changes (ADR-0010). (No advertising linter — external advertising is clinic-owned, ADR-0034.)
 - [ ] **Settings -> Public booking page web UI + live preview**
   Angular per the screenshot.
-  - Public-booking-widget panel with the policy toggles (generic names / withhold S4 (Schedule 4 prescription-only medicine) prices / no S4 imagery) and SEO metadata fields.
+  - Public-booking-widget panel with the policy toggles (generic names / withhold S4 (Schedule 4 prescription-only medicine) prices / no S4 imagery) and SEO (search engine optimisation) metadata fields.
   - Live Preview showing how S4 vs non-S4 services render (price withheld for S4).
   - Owner/admin gated; loading/empty/error states.

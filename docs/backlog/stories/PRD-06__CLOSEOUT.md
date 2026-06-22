@@ -47,12 +47,12 @@ _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rew
 
 - [ ] **Closeout model + day-rollup (migrations)**
   Model Closeout — the day's end-of-day reconciliation of takings against recorded payments — (tenant_id + RLS (row-level security)). One row per location per trading day.
-  - card_total / cash_total aggregated from the day's Payments; counted_cash entered by the operator; variance = counted - recorded (and card vs Square batch).
+  - card_total / cash_total aggregated from the day's Payments; counted_cash entered by the operator; variance = counted - recorded (and card vs Square (the card-payment provider) batch).
   - Capture note + closed_by/closed_at; immutable once locked.
 - [ ] **Closeout API: rollup, variance, reconcile-to-Xero**
   Server-side.
   - Endpoint to open/compute the day's rollup, accept the counted-cash figure, compute + persist variance, and lock the closeout (end-of-day reconciliation of takings against recorded payments).
-  - Reconcile against the Xero post (PRD-10): the day's posted invoices/payments should foot to closeout totals; flag a mismatch.
+  - Reconcile against the Xero (the clinic's cloud accounting system) post (PRD-10): the day's posted invoices/payments should foot to closeout totals; flag a mismatch.
   - Entire surface owner-only (financial capability).
 - [ ] **Closeout web UI (desk + back-office tablet)**
   Angular per the screenshot.

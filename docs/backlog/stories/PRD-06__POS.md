@@ -59,10 +59,10 @@ _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rew
 - [ ] **Checkout API: sale, tenders, split/partial, receipt, Closeout+Xero post**
   Server-authoritative checkout commands/queries.
   - Endpoints: create/append invoice line, apply member reward/credit (non-S4 only — reject if a line is S4 (Schedule 4 prescription-only medicine) — Schedule 4 prescription-only medicine), take payment (card via IPaymentProvider authorize+capture; cash recorded; gift-card redeem), split/partial across tenders, void/refund.
-  - On completion: write to the day's Closeout (the daily reconciliation of takings) and enqueue the Xero post (PRD-10) with per-line account/GST (goods and services tax) mapping.
+  - On completion: write to the day's Closeout (the daily reconciliation of takings) and enqueue the Xero (the clinic's cloud accounting system) post (PRD-10) with per-line account/GST (goods and services tax) mapping.
   - Owner-only gate on takings/margin read-models; Reception can complete a sale and see its total only. Never trust the client for schedule/eligibility — re-check server-side.
 - [ ] **Checkout web UI: lines, tenders, S4-inert controls, terminal modal**
   Angular checkout per the screenshot.
   - Line list with per-line schedule tag; S4 (Schedule 4 prescription-only medicine) lines render reward/discount/points controls disabled with a tooltip (engine refuses them).
-  - Tender panel (Square card / Record cash / Gift card), split/partial entry, tip + surcharge; Subtotal / GST (goods and services tax) incl. / Total with member-reward + store-credit deduction lines.
+  - Tender panel (Square (the card-payment provider) card / Record cash / Gift card), split/partial entry, tip + surcharge; Subtotal / GST (goods and services tax) incl. / Total with member-reward + store-credit deduction lines.
   - Square-terminal modal: Processing -> Approved; loading/empty/error states; capability-gate owner-only money figures.

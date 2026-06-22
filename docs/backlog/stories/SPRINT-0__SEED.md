@@ -39,7 +39,7 @@ Because the seed reflects the compliance-relevant edge cases (under-18, S4 vs no
   - All data clearly synthetic — invented names/contacts/business details — honouring the no-real-data rule absolutely.
 - [ ] **Seed the compliance-relevant edge cases (roles/credentials, under-18, S4/non-S4, lots)**
   Make the seed exercise the guardrails, not just happy paths.
-  - Staff with roles + credentials so RBAC/scope has data; clients including an under-18 so cooling-off + payment-block (C6) are testable.
+  - Staff with roles + credentials so RBAC (role-based access control)/scope has data; clients including an under-18 so cooling-off + payment-block (C6) are testable.
   - Services/products flagged S4 (Schedule 4 prescription-only medicine) and non-S4 so rewards/public-naming classification (ADR-0014) has data; stock lots for custody/expiry/recall flows.
   - Coverage chosen so demos and dev can hit the real compliance blocks (ADR-0008).
 - [ ] **Make the seed reusable by tests and document it**

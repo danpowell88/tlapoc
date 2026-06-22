@@ -44,7 +44,7 @@ Service identities follow least-privilege — each service/pipeline uses a scope
   - CORS (Cross-Origin Resource Sharing) restricted to known origins (no wildcard); document the allowed-origin list per environment.
 - [ ] **Add dependency, secret and SAST scanning to CI and gate merges on high-severity findings**
   Make the security scans blocking through the pipeline (add dependency, secret and SAST — static application security testing — scanning to CI — continuous integration).
-  - Dependency scanning (vulnerable packages), secret scanning (coordinated with SECRETS), and SAST stages in CI.
+  - Dependency scanning (vulnerable packages), secret scanning (coordinated with SECRETS), and SAST (static application security testing) stages in CI.
   - High-severity findings fail the PR (pull request) (GOV marks these required); documented triage/suppression process for false positives.
   - Runs across all surfaces (.NET, Angular, Flutter).
 - [ ] **Apply least-privilege service identities and document the security baseline**

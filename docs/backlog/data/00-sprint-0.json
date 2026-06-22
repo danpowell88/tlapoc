@@ -314,11 +314,11 @@
       "tasks": [
         {
           "title": "Configure Entra ID app registration and complete staff SSO + MFA on web and provider app",
-          "note": "Stand up workforce sign-in for staff on both staff-facing surfaces, yielding API-usable tokens.\n- App registration(s) for the Angular web app and the Flutter provider app: auth-code + PKCE, redirect URIs, required scopes/audience, MFA (multi-factor authentication) enforced.\n- Both surfaces complete interactive SSO + MFA against the clinic's Entra tenant.\n- Tokens carry the tenant and a stable user id (Entra object id) the API validates and RLS (row-level security) reads for tenant context; sessions are scoped to one tenant.\n- Token refresh and sign-out work across web (silent refresh) and app (secure refresh); keep tenant resolution claim-driven so per-tenant Entra federation is additive later."
+          "note": "Stand up workforce sign-in for staff on both staff-facing surfaces, yielding API-usable tokens.\n- App registration(s) for the Angular web app and the Flutter provider app: auth-code + PKCE, redirect URIs, required scopes/audience, MFA (multi-factor authentication) enforced.\n- Both surfaces complete interactive SSO (single sign-on) + MFA against the clinic's Entra tenant.\n- Tokens carry the tenant and a stable user id (Entra object id) the API validates and RLS (row-level security) reads for tenant context; sessions are scoped to one tenant.\n- Token refresh and sign-out work across web (silent refresh) and app (secure refresh); keep tenant resolution claim-driven so per-tenant Entra federation is additive later."
         },
         {
           "title": "Document the staff auth setup, claims contract & SaaS-federation path",
-          "note": "Write the staff-identity reference so API, RBAC and the SaaS roadmap can rely on it.\n- The exact claims the token carries (tenant, stable user id, anything RBAC/credentials will need) and how the API consumes them.\n- App-registration configuration and redirect/scope setup per environment.\n- How per-tenant Entra federation slots in for SaaS, and the explicit note that scope/registration gating (C4/C19) is CREDENTIALS' job, not this story's."
+          "note": "Write the staff-identity reference so API, RBAC (role-based access control) and the SaaS (software-as-a-service) roadmap can rely on it.\n- The exact claims the token carries (tenant, stable user id, anything RBAC/credentials will need) and how the API consumes them.\n- App-registration configuration and redirect/scope setup per environment.\n- How per-tenant Entra federation slots in for SaaS, and the explicit note that scope/registration gating (C4/C19) is CREDENTIALS' job, not this story's."
         }
       ]
     },
@@ -361,7 +361,7 @@
       "tasks": [
         {
           "title": "Configure Entra External ID user flows (social / email+password / OTP) and complete them on client app + public web",
-          "note": "Stand up CIAM sign-up/sign-in for clients across all three methods, tenant-scoped and distinct from staff.\n- External ID tenant with three user flows: social (Google/Apple), local (email+password), and email/SMS OTP, each with sign-up, sign-in and account recovery (reset / OTP resend).\n- Client Flutter app and public web complete each method.\n- Client tokens carry tenant scope and a stable client identity in a namespace separate from staff; the API validates them and resolves tenant context for RLS (row-level security).\n- Social/OTP redirect + provider credentials sourced per environment from config/secrets (SECRETS)."
+          "note": "Stand up CIAM sign-up/sign-in for clients across all three methods, tenant-scoped and distinct from staff.\n- External ID tenant with three user flows: social (Google/Apple), local (email+password), and email/SMS (short message service) OTP (one-time passcode), each with sign-up, sign-in and account recovery (reset / OTP resend).\n- Client Flutter app and public web complete each method.\n- Client tokens carry tenant scope and a stable client identity in a namespace separate from staff; the API validates them and resolves tenant context for RLS (row-level security).\n- Social/OTP redirect + provider credentials sourced per environment from config/secrets (SECRETS)."
         },
         {
           "title": "Document client auth flows, recovery and the client-vs-staff identity separation",
@@ -699,7 +699,7 @@
         },
         {
           "title": "Document the secrets & configuration model and how to add a new secret",
-          "note": "Write the config/secrets guide so the pattern is followed consistently.\n- The split: typed config for shape, vault for secret values, scanning to keep them out of git.\n- How to add a new secret (vault key naming, typed-option binding, required-value validation) and how rotation works without code change.\n- The list of secret categories (DB connection, Entra/External ID provider creds, Square/SMS/Xero keys, signing secrets) and where each lives."
+          "note": "Write the config/secrets guide so the pattern is followed consistently.\n- The split: typed config for shape, vault for secret values, scanning to keep them out of git.\n- How to add a new secret (vault key naming, typed-option binding, required-value validation) and how rotation works without code change.\n- The list of secret categories (DB connection, Entra/External ID provider creds, Square (the payment provider)/SMS (short message service)/Xero (the accounting system) keys, signing secrets) and where each lives."
         }
       ]
     },
@@ -791,7 +791,7 @@
         },
         {
           "title": "Add dependency, secret and SAST scanning to CI and gate merges on high-severity findings",
-          "note": "Make the security scans blocking through the pipeline (add dependency, secret and SAST — static application security testing — scanning to CI — continuous integration).\n- Dependency scanning (vulnerable packages), secret scanning (coordinated with SECRETS), and SAST stages in CI.\n- High-severity findings fail the PR (pull request) (GOV marks these required); documented triage/suppression process for false positives.\n- Runs across all surfaces (.NET, Angular, Flutter)."
+          "note": "Make the security scans blocking through the pipeline (add dependency, secret and SAST — static application security testing — scanning to CI — continuous integration).\n- Dependency scanning (vulnerable packages), secret scanning (coordinated with SECRETS), and SAST (static application security testing) stages in CI.\n- High-severity findings fail the PR (pull request) (GOV marks these required); documented triage/suppression process for false positives.\n- Runs across all surfaces (.NET, Angular, Flutter)."
         },
         {
           "title": "Apply least-privilege service identities and document the security baseline",
@@ -874,7 +874,7 @@
         },
         {
           "title": "Seed the compliance-relevant edge cases (roles/credentials, under-18, S4/non-S4, lots)",
-          "note": "Make the seed exercise the guardrails, not just happy paths.\n- Staff with roles + credentials so RBAC/scope has data; clients including an under-18 so cooling-off + payment-block (C6) are testable.\n- Services/products flagged S4 (Schedule 4 prescription-only medicine) and non-S4 so rewards/public-naming classification (ADR-0014) has data; stock lots for custody/expiry/recall flows.\n- Coverage chosen so demos and dev can hit the real compliance blocks (ADR-0008)."
+          "note": "Make the seed exercise the guardrails, not just happy paths.\n- Staff with roles + credentials so RBAC (role-based access control)/scope has data; clients including an under-18 so cooling-off + payment-block (C6) are testable.\n- Services/products flagged S4 (Schedule 4 prescription-only medicine) and non-S4 so rewards/public-naming classification (ADR-0014) has data; stock lots for custody/expiry/recall flows.\n- Coverage chosen so demos and dev can hit the real compliance blocks (ADR-0008)."
         },
         {
           "title": "Make the seed reusable by tests and document it",
@@ -959,15 +959,15 @@
       "tasks": [
         {
           "title": "Define the spike scope, questions and go/no-go criteria",
-          "note": "Frame exactly what must be proven and what 'pass' means before building.\n- Questions: can Flutter + web complete Entra (staff) AND External ID (client) sign-in; does an authorised .NET call receive usable tenant + role claims; do refresh/sign-out work; which auth libraries are viable?\n- Go/no-go bar: both audiences sign in from both surfaces and the .NET endpoint reads a tenant id + role claim usable for RLS (row-level security)/RBAC, with working refresh/sign-out.\n- Time-box and the explicit hand-off targets (AUTH-STAFF, AUTH-CLIENT)."
+          "note": "Frame exactly what must be proven and what 'pass' means before building.\n- Questions: can Flutter + web complete Entra (staff) AND External ID (client) sign-in; does an authorised .NET call receive usable tenant + role claims; do refresh/sign-out work; which auth libraries are viable?\n- Go/no-go bar: both audiences sign in from both surfaces and the .NET endpoint reads a tenant id + role claim usable for RLS (row-level security)/RBAC (role-based access control), with working refresh/sign-out.\n- Time-box and the explicit hand-off targets (AUTH-STAFF, AUTH-CLIENT)."
         },
         {
           "title": "Build the throwaway end-to-end prototype",
-          "note": "Prove the full path with disposable code.\n- Staff (Entra) + client (External ID) sign-in from Flutter and web.\n- An authorised call into a minimal .NET endpoint that surfaces tenant + role claims for RLS (row-level security)/RBAC.\n- Exercise the sharp edges: device redirect/PKCE, token refresh, claim mapping, sign-out. This is throwaway — measure feasibility, don't productionise."
+          "note": "Prove the full path with disposable code.\n- Staff (Entra) + client (External ID) sign-in from Flutter and web.\n- An authorised call into a minimal .NET endpoint that surfaces tenant + role claims for RLS (row-level security)/RBAC (role-based access control).\n- Exercise the sharp edges: device redirect/PKCE (proof key for code exchange), token refresh, claim mapping, sign-out. This is throwaway — measure feasibility, don't productionise."
         },
         {
           "title": "Write up findings, library choices and a go/no-go (ADR if warranted)",
-          "note": "Capture the decision so the wiring stories proceed on a proven approach.\n- Findings, chosen libraries, the documented claim contract (what tokens must carry for RLS (row-level security)/RBAC), and gotchas.\n- A clear go/no-go; raise an ADR if a real decision/alternative emerged.\n- Explicitly state how AUTH-STAFF and AUTH-CLIENT should build on the result."
+          "note": "Capture the decision so the wiring stories proceed on a proven approach.\n- Findings, chosen libraries, the documented claim contract (what tokens must carry for RLS (row-level security)/RBAC (role-based access control)), and gotchas.\n- A clear go/no-go; raise an ADR if a real decision/alternative emerged.\n- Explicitly state how AUTH-STAFF and AUTH-CLIENT should build on the result."
         }
       ]
     },
@@ -1052,15 +1052,15 @@
       "tasks": [
         {
           "title": "Define the spike scope, questions and go/no-go criteria",
-          "note": "Frame the autopay-feasibility question and the bar for proceeding with Square.\n- Questions: can Square AU sandbox tokenise a card and run a scheduled recurring charge; what is the failed-charge/retry behaviour; is the no-PAN/tokens-only PCI posture (ADR-0007) achievable?\n- Go/no-go bar: recurring card-on-file works in sandbox, failure/retry observable + a dunning approach outlined, PCI posture confirmed.\n- Time-box and the hand-off (PRD-06 PAYMENT-PROVIDER / MEMBERSHIP)."
+          "note": "Frame the autopay-feasibility question and the bar for proceeding with Square (the payment provider).\n- Questions: can Square AU sandbox tokenise a card and run a scheduled recurring charge; what is the failed-charge/retry behaviour; is the no-PAN (the raw card number)/tokens-only PCI (the card-security standard) posture (ADR-0007) achievable?\n- Go/no-go bar: recurring card-on-file works in sandbox, failure/retry observable + a dunning approach outlined, PCI posture confirmed.\n- Time-box and the hand-off (PRD-06 PAYMENT-PROVIDER / MEMBERSHIP)."
         },
         {
           "title": "Build the throwaway sandbox prototype",
-          "note": "Prove (or disprove) recurring autopay against the Square AU sandbox.\n- Tokenise a test card; schedule and run a recurring charge.\n- Trigger and observe a failed charge + retry behaviour; sketch dunning (retry cadence, notify, suspend).\n- Confirm no PAN is stored anywhere — only Square tokens. Disposable code against sandbox only."
+          "note": "Prove (or disprove) recurring autopay against the Square (the payment provider) AU sandbox.\n- Tokenise a test card; schedule and run a recurring charge.\n- Trigger and observe a failed charge + retry behaviour; sketch dunning (retry cadence, notify, suspend).\n- Confirm no PAN (the raw card number) is stored anywhere — only Square tokens. Disposable code against sandbox only."
         },
         {
           "title": "Record go/no-go and findings (incl. PCI posture and the dunning outline)",
-          "note": "Capture the decision and what MEMBERSHIP should build on.\n- Go/no-go on Square AU recurring autopay; if no-go, point at the IPaymentProvider adapter alternative.\n- The dunning approach outline and the confirmed PCI posture.\n- ADR only if a real provider/architecture decision results."
+          "note": "Capture the decision and what MEMBERSHIP should build on.\n- Go/no-go on Square (the payment provider) AU recurring autopay; if no-go, point at the IPaymentProvider adapter alternative.\n- The dunning approach outline and the confirmed PCI (the card-security standard) posture.\n- ADR only if a real provider/architecture decision results."
         }
       ]
     },

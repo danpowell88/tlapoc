@@ -55,7 +55,7 @@ Lifecycle — join / pause / cancel / win-back — is tracked and feeds MRR (mon
   - Lifecycle transitions (join/pause/cancel/win-back) emit events for MRR (monthly recurring revenue)/churn read-models (PRD-08).
 - [ ] **Autopay scheduler + dunning state machine + benefit auto-apply**
   The recurring-billing engine.
-  - A scheduled job picks up memberships where next_charge_at <= now and charges off-session via IPaymentProvider.recurringCharge (idempotent per period).
+  - A scheduled job picks up memberships where next_charge_at <= now and charges off-session via IPaymentProvider.recurringCharge (idempotent (safe to repeat without double-charging) per period).
   - On failure: open a DunningAttempt sequence — back-off retries, notify the client to update the card (INotifier/PRD-07), raise a 'Payment failed' Job (Follow-ups), and only lapse after the sequence exhausts; expose a manual Retry.
   - Benefits/credits auto-apply at checkout (member pricing, 10% non-S4 (non-Schedule 4), complimentary add-on) — non-S4 only; money figures owner-gated.
   - Endpoints for join (token from online/in-app/desk), pause, cancel, win-back.

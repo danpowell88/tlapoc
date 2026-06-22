@@ -36,17 +36,17 @@ It's a spike against a sandbox — findings and a recommendation, not production
 ## Tasks (dev pickup)
 
 - [ ] **Define the spike scope, questions and go/no-go criteria**
-  Frame the autopay-feasibility question and the bar for proceeding with Square.
-  - Questions: can Square AU sandbox tokenise a card and run a scheduled recurring charge; what is the failed-charge/retry behaviour; is the no-PAN/tokens-only PCI posture (ADR-0007) achievable?
+  Frame the autopay-feasibility question and the bar for proceeding with Square (the payment provider).
+  - Questions: can Square AU sandbox tokenise a card and run a scheduled recurring charge; what is the failed-charge/retry behaviour; is the no-PAN (the raw card number)/tokens-only PCI (the card-security standard) posture (ADR-0007) achievable?
   - Go/no-go bar: recurring card-on-file works in sandbox, failure/retry observable + a dunning approach outlined, PCI posture confirmed.
   - Time-box and the hand-off (PRD-06 PAYMENT-PROVIDER / MEMBERSHIP).
 - [ ] **Build the throwaway sandbox prototype**
-  Prove (or disprove) recurring autopay against the Square AU sandbox.
+  Prove (or disprove) recurring autopay against the Square (the payment provider) AU sandbox.
   - Tokenise a test card; schedule and run a recurring charge.
   - Trigger and observe a failed charge + retry behaviour; sketch dunning (retry cadence, notify, suspend).
-  - Confirm no PAN is stored anywhere — only Square tokens. Disposable code against sandbox only.
+  - Confirm no PAN (the raw card number) is stored anywhere — only Square tokens. Disposable code against sandbox only.
 - [ ] **Record go/no-go and findings (incl. PCI posture and the dunning outline)**
   Capture the decision and what MEMBERSHIP should build on.
-  - Go/no-go on Square AU recurring autopay; if no-go, point at the IPaymentProvider adapter alternative.
-  - The dunning approach outline and the confirmed PCI posture.
+  - Go/no-go on Square (the payment provider) AU recurring autopay; if no-go, point at the IPaymentProvider adapter alternative.
+  - The dunning approach outline and the confirmed PCI (the card-security standard) posture.
   - ADR only if a real provider/architecture decision results.

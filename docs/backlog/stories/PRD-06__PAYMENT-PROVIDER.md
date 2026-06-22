@@ -58,12 +58,12 @@ Built on the SPIKE-SQUARE findings (the card-on-file recurring de-risk). The ada
   - Tokens-only invariant lives here: the port signature accepts/returns token refs, brand/last4/exp — never PAN (primary account number)/CVV/track data.
 - [ ] **SquareAdapter: card-present, card-on-file tokenise, recurring charge**
   Implement the Square adapter behind the port, built on SPIKE-SQUARE.
-  - Map domain calls to Square Payments/Cards/Refunds APIs; card-present via terminal, card-on-file via Cards API.
+  - Map domain calls to Square (the card-payment provider) Payments/Cards/Refunds APIs; card-present via terminal, card-on-file via Cards API.
   - recurringCharge does an off-session charge of a stored card token (the autopay (automatic recurring billing) path the membership story consumes).
-  - Idempotency keys on every charge; map Square error/decline codes to a normalised result the dunning (the retry-and-chase on a failed recurring charge) logic can branch on.
+  - Idempotency keys (so a retried charge never double-bills) on every charge; map Square error/decline codes to a normalised result the dunning (the retry-and-chase on a failed recurring charge) logic can branch on.
   - OAuth/app credentials stored encrypted in config; tenant -> Square location mapping.
 - [ ] **Webhook intake + ProviderTxn reconciliation; tokens-only enforcement**
   Close the loop between async processor events and our ledger.
-  - Subscribe to Square webhooks (payment updated, refund updated, dispute created); verify signatures; update the matching ProviderTxn idempotently.
+  - Subscribe to Square (the card-payment provider) webhooks (inbound provider callbacks) (payment updated, refund updated, dispute created); verify signatures; update the matching ProviderTxn idempotently (safe to process the same event twice).
   - A dispute event raises a Job (PRD-07 Follow-ups) and is surfaced to the owner-only finance view.
   - Enforce the tokens-only invariant at the persistence boundary: reject/strip any PAN (primary account number)/CVV; assert only token_ref + brand/last4/exp are stored (PCI-DSS card-security standard, ADR-0007).

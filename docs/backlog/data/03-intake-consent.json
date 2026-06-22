@@ -277,7 +277,7 @@
       "tasks": [
         {
           "title": "ImageConsent entity (separate, scoped) + grant/withdraw",
-          "note": "Model ImageConsent (scope, granted_at, withdrawn_at, status) separate from ConsentSignature. Grant/withdraw endpoints; withdraw sets withdrawn_at + status and emits a domain event. Audited (C14). It is NOT an input to the treatment gate — declining/withdrawing never blocks treatment, only media features."
+          "note": "Model ImageConsent (scope, granted_at, withdrawn_at, status) separate from ConsentSignature. Grant/withdraw endpoints; withdraw sets withdrawn_at + status and emits a domain event (a fact emitted when something happens in the system). Audited (C14). It is NOT an input to the treatment gate — declining/withdrawing never blocks treatment, only media features."
         },
         {
           "title": "Downstream media-use enforcement on withdraw",
@@ -345,7 +345,7 @@
       "tasks": [
         {
           "title": "CoolingOffTimer: under-18 7-day enforcement",
-          "note": "On consent for an under-18 (under_18 flag from booking + ConsentSignature.signed_at), create a CoolingOffTimer with eligible_at = consent_at + 7 days and payment_blocked = true. Server-side, the procedure cannot be charted/finalised and checkout (except the consult line) cannot complete until eligible_at passes. Enforce as a domain invariant (ADR-0008), not UI. Audited."
+          "note": "On consent for an under-18 (under_18 flag from booking + ConsentSignature.signed_at), create a CoolingOffTimer with eligible_at = consent_at + 7 days and payment_blocked = true. Server-side, the procedure cannot be charted/finalised and checkout (except the consult (the assessment appointment where suitability is established and an S4 prescription can be written) line) cannot complete until eligible_at passes. Enforce as a domain invariant (ADR-0008), not UI. Audited."
         },
         {
           "title": "Payment-block coordination (PRD-06) + deposit suppression (F14)",
@@ -353,7 +353,7 @@
         },
         {
           "title": "Adult cooling-off config + header chip UI",
-          "note": "Configurable adult cool-off / second-consult clinic-policy setting (default off per legal read) producing an optional adult CoolingOffTimer (basis=adult_policy) — NOT a compliance gate. UI: 'under-18 cooling-off' chip with elapse date on the patient/charting header; checkout-blocked indicator (except consult); second-consult offer on the timeline; the client done-screen note."
+          "note": "Configurable adult cool-off / second-consult clinic-policy setting (default off per legal read) producing an optional adult CoolingOffTimer (basis=adult_policy) — NOT a compliance gate. UI: 'under-18 cooling-off (the mandatory wait before a cosmetic procedure can proceed)' chip with elapse date on the patient/charting header; checkout-blocked indicator (except consult (the assessment appointment where suitability is established and an S4 prescription can be written)); second-consult offer on the timeline; the client done-screen note."
         }
       ]
     },
@@ -418,11 +418,11 @@
       "tasks": [
         {
           "title": "Shared server-side TreatmentGate evaluation (ADR-0008)",
-          "note": "A single, reusable gate evaluator invoked before charting/treatment opens: checks required IntakeResponse present, RN/NP-reviewed ScreeningResult, current version-matched ConsentSignature, and (for S4 (Schedule 4 prescription-only medicine)) consult_id + valid Rx + elapsed under-18 cooling-off. Returns allowed + a structured missing[] (item, fix, who-resolves). Enforced as a domain invariant so a direct API call is blocked too. This is the one mechanism PRD-04/05 consume. Every decision writes a GateDecision to the append-only audit stream (ADR-0010) for PRD-08 consent-coverage reporting."
+          "note": "A single, reusable gate evaluator invoked before charting/treatment opens: checks required IntakeResponse present, RN/NP-reviewed ScreeningResult, current version-matched ConsentSignature, and (for S4 (Schedule 4 prescription-only medicine)) consult_id + valid Rx + elapsed under-18 cooling-off (the mandatory wait before a cosmetic procedure can proceed). Returns allowed + a structured missing[] (item, fix, who-resolves). Enforced as a domain invariant so a direct API call is blocked too. This is the one mechanism PRD-04/05 consume. Every decision writes a GateDecision to the append-only audit stream (ADR-0010) for PRD-08 consent-coverage reporting."
         },
         {
           "title": "Blocked-action banner (what/how/who) + chips, reused on web + provider app",
-          "note": "Render the calm blocked-action banner from the gate's missing[]: what is missing, how to fix, who can resolve, with a deep link to the fix (send consent/intake link, record consult). Render the pre-treatment review chips from the same evaluation; reuse the identical component/contract on the Angular charting screen and the Flutter provider app (treatment-room) and the Today 'treatment gated' tile — never a dead-end."
+          "note": "Render the calm blocked-action banner from the gate's missing[]: what is missing, how to fix, who can resolve, with a deep link to the fix (send consent/intake link, record consult (the assessment appointment where suitability is established and an S4 prescription can be written)). Render the pre-treatment review chips from the same evaluation; reuse the identical component/contract on the Angular charting screen and the Flutter provider app (treatment-room) and the Today 'treatment gated' tile — never a dead-end."
         }
       ]
     }

@@ -55,4 +55,4 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 - [ ] **Quiet-window fill suggestions from utilisation**
   Derive open/quiet chair windows from the calendar (roster − bookings, idle resource blocks) and expose them as fill suggestions. Drive the Schedule 'Quiet windows to fill' panel (open chairs per day, ideal-for-recall hints e.g. lot expiry) with 'Offer recall' (push to waitlist/recall) and 'Fill' actions.
 - [ ] **Waitlist management UI + backfill prompt**
-  UI to add/view/remove waitlist entries for a service/window and see offered/accepted/expired status. When an appointment is cancelled/no-showed, show the backfill prompt ('offer this slot to the waitlist'). Wire the Schedule quiet-window panel actions to the matching engine.
+  UI to add/view/remove waitlist (clients waiting for an earlier slot) entries for a service/window and see offered/accepted/expired status. When an appointment is cancelled/no-showed, show the backfill prompt ('offer this slot to the waitlist'). Wire the Schedule quiet-window panel actions to the matching engine.
