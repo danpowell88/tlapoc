@@ -32,6 +32,10 @@ jobs:
           # Turn Pages on (in "GitHub Actions" mode) if it isn't already
           enablement: true
 
+      - name: Rebuild backlog manifest
+        # Re-index the hand-authored Backlog.md task files so backlog.html stays current.
+        run: python scripts/backlog_manifest.py
+
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v3
         with:

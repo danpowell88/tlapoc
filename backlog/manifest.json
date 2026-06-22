@@ -1,0 +1,2647 @@
+{
+ "project": "The Lounge Aesthetics Platform",
+ "generated": "by scripts/backlog_manifest.py",
+ "epics": [
+  {
+   "id": "TLA-001",
+   "title": "EPIC: Platform foundations & setup",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "",
+   "labels": [
+    "type:epic",
+    "area:infra",
+    "mvp",
+    "milestone:M0"
+   ],
+   "stage": "M0",
+   "isEpic": true,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-001 - EPIC-Platform-foundations-setup.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-002",
+   "title": "EPIC: Platform shell & cross-cutting UX",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "",
+   "labels": [
+    "type:epic",
+    "area:web",
+    "mvp",
+    "milestone:M1"
+   ],
+   "stage": "M1",
+   "isEpic": true,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-002 - EPIC-Platform-shell-cross-cutting-UX.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-003",
+   "title": "EPIC: Identity, access & tenancy",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "",
+   "labels": [
+    "type:epic",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M1"
+   ],
+   "stage": "M1",
+   "isEpic": true,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-003 - EPIC-Identity-access-tenancy.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-004",
+   "title": "EPIC: Booking & scheduling + clients",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "",
+   "labels": [
+    "type:epic",
+    "area:web",
+    "area:api",
+    "mvp",
+    "milestone:M2"
+   ],
+   "stage": "M2",
+   "isEpic": true,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-004 - EPIC-Booking-scheduling-clients.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-005",
+   "title": "EPIC: Intake, consent & compliance gating",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "",
+   "labels": [
+    "type:epic",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M2"
+   ],
+   "stage": "M2",
+   "isEpic": true,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-005 - EPIC-Intake-consent-compliance-gating.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-006",
+   "title": "EPIC: Consult, prescribing & S4 medicines",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "",
+   "labels": [
+    "type:epic",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M3"
+   ],
+   "stage": "M3",
+   "isEpic": true,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-006 - EPIC-Consult-prescribing-S4-medicines.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-007",
+   "title": "EPIC: Clinical charting",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "",
+   "labels": [
+    "type:epic",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M3"
+   ],
+   "stage": "M3",
+   "isEpic": true,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-007 - EPIC-Clinical-charting.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-008",
+   "title": "EPIC: Checkout & payments (POS basics)",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "",
+   "labels": [
+    "type:epic",
+    "area:web",
+    "area:api",
+    "mvp",
+    "milestone:M4"
+   ],
+   "stage": "M4",
+   "isEpic": true,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-008 - EPIC-Checkout-payments-POS-basics.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-009",
+   "title": "EPIC: Memberships, autopay & rewards",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "",
+   "labels": [
+    "type:epic",
+    "area:web",
+    "area:api",
+    "later",
+    "milestone:M5"
+   ],
+   "stage": "M5",
+   "isEpic": true,
+   "tier": "later",
+   "file": "backlog/tasks/tla-009 - EPIC-Memberships-autopay-rewards.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-010",
+   "title": "EPIC: Comms, reminders & recall",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "",
+   "labels": [
+    "type:epic",
+    "area:web",
+    "area:api",
+    "later",
+    "milestone:M5"
+   ],
+   "stage": "M5",
+   "isEpic": true,
+   "tier": "later",
+   "file": "backlog/tasks/tla-010 - EPIC-Comms-reminders-recall.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-011",
+   "title": "EPIC: Reporting & compliance dashboards",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "",
+   "labels": [
+    "type:epic",
+    "area:web",
+    "area:api",
+    "later",
+    "compliance",
+    "milestone:M6"
+   ],
+   "stage": "M6",
+   "isEpic": true,
+   "tier": "later",
+   "file": "backlog/tasks/tla-011 - EPIC-Reporting-compliance-dashboards.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-012",
+   "title": "EPIC: Client & provider apps (mobile/tablet)",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "",
+   "labels": [
+    "type:epic",
+    "area:flutter",
+    "later",
+    "milestone:M6"
+   ],
+   "stage": "M6",
+   "isEpic": true,
+   "tier": "later",
+   "file": "backlog/tasks/tla-012 - EPIC-Client-provider-apps-mobile-tablet.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-013",
+   "title": "EPIC: Integrations (Xero & calendar)",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "",
+   "labels": [
+    "type:epic",
+    "area:api",
+    "later",
+    "milestone:M6"
+   ],
+   "stage": "M6",
+   "isEpic": true,
+   "tier": "later",
+   "file": "backlog/tasks/tla-013 - EPIC-Integrations-Xero-calendar.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-014",
+   "title": "EPIC: Facility, infection control & complaints",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "",
+   "labels": [
+    "type:epic",
+    "area:web",
+    "area:api",
+    "later",
+    "compliance",
+    "milestone:M7"
+   ],
+   "stage": "M7",
+   "isEpic": true,
+   "tier": "later",
+   "file": "backlog/tasks/tla-014 - EPIC-Facility-infection-control-complaints.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-015",
+   "title": "EPIC: Scale — multi-location & platform",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "",
+   "labels": [
+    "type:epic",
+    "later",
+    "phase-2",
+    "milestone:M8"
+   ],
+   "stage": "M8",
+   "isEpic": true,
+   "tier": "later",
+   "file": "backlog/tasks/tla-015 - EPIC-Scale-—-multi-location-platform.md",
+   "summary": "## Description"
+  }
+ ],
+ "stories": [
+  {
+   "id": "TLA-001.01",
+   "title": "Project scaffolding & CI/CD pipeline",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-001",
+   "labels": [
+    "type:chore",
+    "area:infra",
+    "mvp",
+    "milestone:M0"
+   ],
+   "stage": "M0",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-001.01 - Project-scaffolding-CI-CD-pipeline.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-001.02",
+   "title": "AU-hosted cloud environment & infrastructure-as-code",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-001",
+   "labels": [
+    "type:chore",
+    "area:infra",
+    "mvp",
+    "compliance",
+    "milestone:M0"
+   ],
+   "stage": "M0",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-001.02 - AU-hosted-cloud-environment-infrastructure-as-code.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-001.03",
+   "title": "Multi-tenant data baseline with row-level isolation",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-001",
+   "labels": [
+    "type:chore",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M0"
+   ],
+   "stage": "M0",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-001.03 - Multi-tenant-data-baseline-with-row-level-isolation.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-001.04",
+   "title": "Append-only audit infrastructure",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-001",
+   "labels": [
+    "type:chore",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M0"
+   ],
+   "stage": "M0",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-001.04 - Append-only-audit-infrastructure.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-001.05",
+   "title": "Staff identity: Entra SSO + MFA",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-001",
+   "labels": [
+    "type:chore",
+    "area:web",
+    "area:api",
+    "mvp",
+    "milestone:M0"
+   ],
+   "stage": "M0",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-001.05 - Staff-identity-Entra-SSO-MFA.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-001.06",
+   "title": "Client identity: Entra External ID (social / email / OTP)",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-001",
+   "labels": [
+    "type:chore",
+    "area:api",
+    "mvp",
+    "milestone:M0"
+   ],
+   "stage": "M0",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-001.06 - Client-identity-Entra-External-ID-social-email-OTP.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-001.07",
+   "title": "Staff web app shell (routing, auth guard, layout)",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-001",
+   "labels": [
+    "type:chore",
+    "area:web",
+    "mvp",
+    "milestone:M0"
+   ],
+   "stage": "M0",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-001.07 - Staff-web-app-shell-routing-auth-guard-layout.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-001.08",
+   "title": "Provider & client app shells (Flutter) + shared packages",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-001",
+   "labels": [
+    "type:chore",
+    "area:flutter",
+    "later",
+    "milestone:M0"
+   ],
+   "stage": "M0",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-001.08 - Provider-client-app-shells-Flutter-shared-packages.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-001.09",
+   "title": "Shared design system & tokens",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-001",
+   "labels": [
+    "type:chore",
+    "area:design",
+    "area:web",
+    "mvp",
+    "milestone:M0"
+   ],
+   "stage": "M0",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-001.09 - Shared-design-system-tokens.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-001.10",
+   "title": "Observability & security baseline",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-001",
+   "labels": [
+    "type:chore",
+    "area:infra",
+    "mvp",
+    "compliance",
+    "milestone:M0"
+   ],
+   "stage": "M0",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-001.10 - Observability-security-baseline.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-001.11",
+   "title": "Platform services: background jobs, scheduler & media storage",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-001",
+   "labels": [
+    "type:chore",
+    "area:api",
+    "area:infra",
+    "mvp",
+    "milestone:M0"
+   ],
+   "stage": "M0",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-001.11 - Platform-services-background-jobs-scheduler-media-storage.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-001.12",
+   "title": "De-risk spikes (auth, RLS, autopay, mapping canvas, offline sync)",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-001",
+   "labels": [
+    "type:spike",
+    "area:infra",
+    "mvp",
+    "milestone:M0"
+   ],
+   "stage": "M0",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-001.12 - De-risk-spikes-auth-RLS-autopay-mapping-canvas-offline-sync.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-002.01",
+   "title": "Global navigation & app frame",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-002",
+   "labels": [
+    "type:story",
+    "area:web",
+    "mvp",
+    "milestone:M1"
+   ],
+   "stage": "M1",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-002.01 - Global-navigation-app-frame.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-002.02",
+   "title": "Role-aware 'Today' dashboard",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-002",
+   "labels": [
+    "type:story",
+    "area:web",
+    "mvp",
+    "milestone:M1"
+   ],
+   "stage": "M1",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-002.02 - Role-aware-Today-dashboard.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-002.03",
+   "title": "Current-clinic context & switcher",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-002",
+   "labels": [
+    "type:story",
+    "area:web",
+    "mvp",
+    "milestone:M1"
+   ],
+   "stage": "M1",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-002.03 - Current-clinic-context-switcher.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-002.04",
+   "title": "Financial gating (owner-only money figures)",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-002",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M1"
+   ],
+   "stage": "M1",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-002.04 - Financial-gating-owner-only-money-figures.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-002.05",
+   "title": "Global search (clients, bookings, products)",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-002",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "milestone:M1"
+   ],
+   "stage": "M1",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-002.05 - Global-search-clients-bookings-products.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-002.06",
+   "title": "In-app notifications",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-002",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "milestone:M1"
+   ],
+   "stage": "M1",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-002.06 - In-app-notifications.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-003.01",
+   "title": "Roles & capabilities (RBAC scope matrix)",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-003",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M1"
+   ],
+   "stage": "M1",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-003.01 - Roles-capabilities-RBAC-scope-matrix.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-003.02",
+   "title": "Scope-of-practice gate (canInject)",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-003",
+   "labels": [
+    "type:story",
+    "area:api",
+    "area:web",
+    "mvp",
+    "compliance",
+    "milestone:M1"
+   ],
+   "stage": "M1",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-003.02 - Scope-of-practice-gate-canInject.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-003.03",
+   "title": "Staff credential & CPD records + expiry alerts",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-003",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M1"
+   ],
+   "stage": "M1",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-003.03 - Staff-credential-CPD-records-expiry-alerts.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-003.04",
+   "title": "Practitioner roster (shifts & leave)",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-003",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "milestone:M1"
+   ],
+   "stage": "M1",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-003.04 - Practitioner-roster-shifts-leave.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-003.05",
+   "title": "Multi-role & role context switch",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-003",
+   "labels": [
+    "type:story",
+    "area:web",
+    "mvp",
+    "milestone:M1"
+   ],
+   "stage": "M1",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-003.05 - Multi-role-role-context-switch.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-003.06",
+   "title": "Step-up authentication for sensitive actions",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-003",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M1"
+   ],
+   "stage": "M1",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-003.06 - Step-up-authentication-for-sensitive-actions.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-003.07",
+   "title": "Core client record (DOB, age, contact)",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-003",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "milestone:M1"
+   ],
+   "stage": "M1",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-003.07 - Core-client-record-DOB-age-contact.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-003.08",
+   "title": "Client de-duplication & merge",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-003",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "milestone:M1"
+   ],
+   "stage": "M1",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-003.08 - Client-de-duplication-merge.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-003.09",
+   "title": "Audit log viewer & export",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-003",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M1"
+   ],
+   "stage": "M1",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-003.09 - Audit-log-viewer-export.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-003.10",
+   "title": "Client privacy rights (access & correction)",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "TLA-003",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "later",
+    "compliance",
+    "milestone:M5"
+   ],
+   "stage": "M5",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-003.10 - Client-privacy-rights-access-correction.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-003.11",
+   "title": "Retention & destruction register",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "TLA-003",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "later",
+    "compliance",
+    "milestone:M7"
+   ],
+   "stage": "M7",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-003.11 - Retention-destruction-register.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-003.12",
+   "title": "Data-breach workflow & register",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "TLA-003",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "later",
+    "compliance",
+    "milestone:M7"
+   ],
+   "stage": "M7",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-003.12 - Data-breach-workflow-register.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-003.13",
+   "title": "Custom role builder",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "TLA-003",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "later",
+    "milestone:M7"
+   ],
+   "stage": "M7",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-003.13 - Custom-role-builder.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-004.01",
+   "title": "Multi-resource calendar (day/week/room)",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-004",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "milestone:M2"
+   ],
+   "stage": "M2",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-004.01 - Multi-resource-calendar-day-week-room.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-004.02",
+   "title": "Service catalogue (treatment types & scope)",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-004",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M2"
+   ],
+   "stage": "M2",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-004.02 - Service-catalogue-treatment-types-scope.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-004.03",
+   "title": "Staff booking wizard (scope-aware)",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-004",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M2"
+   ],
+   "stage": "M2",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-004.03 - Staff-booking-wizard-scope-aware.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-004.04",
+   "title": "Online self-booking (public)",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-004",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M2"
+   ],
+   "stage": "M2",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-004.04 - Online-self-booking-public.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-004.05",
+   "title": "Client directory (search, filter, soft-delete)",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-004",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "milestone:M2"
+   ],
+   "stage": "M2",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-004.05 - Client-directory-search-filter-soft-delete.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-004.06",
+   "title": "Client 360 profile",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-004",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "milestone:M2"
+   ],
+   "stage": "M2",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-004.06 - Client-360-profile.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-004.07",
+   "title": "Visit lifecycle & status board",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-004",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "milestone:M2"
+   ],
+   "stage": "M2",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-004.07 - Visit-lifecycle-status-board.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-004.08",
+   "title": "Consult gate (no charting without a consult)",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-004",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M2"
+   ],
+   "stage": "M2",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-004.08 - Consult-gate-no-charting-without-a-consult.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-004.09",
+   "title": "Reschedule, cancel & cancellation policy",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-004",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "milestone:M2"
+   ],
+   "stage": "M2",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-004.09 - Reschedule-cancel-cancellation-policy.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-004.10",
+   "title": "Waitlist & cancellation backfill",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-004",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "milestone:M2"
+   ],
+   "stage": "M2",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-004.10 - Waitlist-cancellation-backfill.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-004.11",
+   "title": "Walk-ins & same-day add-ons",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-004",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M2"
+   ],
+   "stage": "M2",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-004.11 - Walk-ins-same-day-add-ons.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-004.12",
+   "title": "Basic appointment reminders (schedule + confirm/decline)",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-004",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "milestone:M2"
+   ],
+   "stage": "M2",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-004.12 - Basic-appointment-reminders-schedule-confirm-decline.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-004.13",
+   "title": "Booking deposit / card-on-file hold (opt-in)",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "TLA-004",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "later",
+    "compliance",
+    "milestone:M5"
+   ],
+   "stage": "M5",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-004.13 - Booking-deposit-card-on-file-hold-opt-in.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-005.01",
+   "title": "Pre-visit intake & medical history",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-005",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M2"
+   ],
+   "stage": "M2",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-005.01 - Pre-visit-intake-medical-history.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-005.02",
+   "title": "BDD / psychological screening",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-005",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M2"
+   ],
+   "stage": "M2",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-005.02 - BDD-psychological-screening.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-005.03",
+   "title": "Consent capture & e-signature",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-005",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M2"
+   ],
+   "stage": "M2",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-005.03 - Consent-capture-e-signature.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-005.04",
+   "title": "Consent templates: authoring & versioning",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-005",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M2"
+   ],
+   "stage": "M2",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-005.04 - Consent-templates-authoring-versioning.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-005.05",
+   "title": "Image-use consent (separate, withdrawable)",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-005",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M2"
+   ],
+   "stage": "M2",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-005.05 - Image-use-consent-separate-withdrawable.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-005.06",
+   "title": "Cooling-off & under-18 payment block",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-005",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M2"
+   ],
+   "stage": "M2",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-005.06 - Cooling-off-under-18-payment-block.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-005.07",
+   "title": "Guardian co-consent for minors",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-005",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M2"
+   ],
+   "stage": "M2",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-005.07 - Guardian-co-consent-for-minors.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-005.08",
+   "title": "Treatment compliance gate (server-enforced)",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-005",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M2"
+   ],
+   "stage": "M2",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-005.08 - Treatment-compliance-gate-server-enforced.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-005.09",
+   "title": "Intake form builder (configurable forms)",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "TLA-005",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "later",
+    "milestone:M5"
+   ],
+   "stage": "M5",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-005.09 - Intake-form-builder-configurable-forms.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-006.01",
+   "title": "Consult record (synchronous, prescriber-authored)",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-006",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M3"
+   ],
+   "stage": "M3",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-006.01 - Consult-record-synchronous-prescriber-authored.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-006.02",
+   "title": "Individual prescription (no batch/standing-order)",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-006",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M3"
+   ],
+   "stage": "M3",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-006.02 - Individual-prescription-no-batch-standing-order.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-006.03",
+   "title": "Administration gate & immutable record",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-006",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M3"
+   ],
+   "stage": "M3",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-006.03 - Administration-gate-immutable-record.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-006.04",
+   "title": "Designated RN prescriber (partnered) support",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-006",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M3"
+   ],
+   "stage": "M3",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-006.04 - Designated-RN-prescriber-partnered-support.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-006.05",
+   "title": "Product catalogue (medicines & retail SKUs)",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-006",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M3"
+   ],
+   "stage": "M3",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-006.05 - Product-catalogue-medicines-retail-SKUs.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-006.06",
+   "title": "S4 stock ledger & custody",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-006",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M3"
+   ],
+   "stage": "M3",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-006.06 - S4-stock-ledger-custody.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-006.07",
+   "title": "Cold-chain temperature logging & excursion alerts",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-006",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M3"
+   ],
+   "stage": "M3",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-006.07 - Cold-chain-temperature-logging-excursion-alerts.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-006.08",
+   "title": "Vial / unit reconciliation",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-006",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M3"
+   ],
+   "stage": "M3",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-006.08 - Vial-unit-reconciliation.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-006.09",
+   "title": "Recall lookup (lot to clients)",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-006",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M3"
+   ],
+   "stage": "M3",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-006.09 - Recall-lookup-lot-to-clients.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-006.10",
+   "title": "Supplier purchase orders & receiving (ARTG-verified)",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-006",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M3"
+   ],
+   "stage": "M3",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-006.10 - Supplier-purchase-orders-receiving-ARTG-verified.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-006.11",
+   "title": "Stocktake, discrepancy & loss/theft reporting",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-006",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M3"
+   ],
+   "stage": "M3",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-006.11 - Stocktake-discrepancy-loss-theft-reporting.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-006.12",
+   "title": "Disposal, destruction & wastage records",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-006",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M3"
+   ],
+   "stage": "M3",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-006.12 - Disposal-destruction-wastage-records.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-007.01",
+   "title": "Pre-treatment review (guided entry)",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-007",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M3"
+   ],
+   "stage": "M3",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-007.01 - Pre-treatment-review-guided-entry.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-007.02",
+   "title": "Treatment note (toxin template)",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-007",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "milestone:M3"
+   ],
+   "stage": "M3",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-007.02 - Treatment-note-toxin-template.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-007.03",
+   "title": "Injection mapping (lot-first, per-point detail)",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-007",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M3"
+   ],
+   "stage": "M3",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-007.03 - Injection-mapping-lot-first-per-point-detail.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-007.04",
+   "title": "Before/after photo capture & compare",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-007",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:flutter",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M3"
+   ],
+   "stage": "M3",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-007.04 - Before-after-photo-capture-compare.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-007.05",
+   "title": "Finalise, close-out & immutable amendments",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-007",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M3"
+   ],
+   "stage": "M3",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-007.05 - Finalise-close-out-immutable-amendments.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-007.06",
+   "title": "Offline capture & sync (provider app)",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-007",
+   "labels": [
+    "type:story",
+    "area:flutter",
+    "area:api",
+    "later",
+    "milestone:M6"
+   ],
+   "stage": "M6",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-007.06 - Offline-capture-sync-provider-app.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-007.07",
+   "title": "Adverse-event & complication logging",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-007",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M3"
+   ],
+   "stage": "M3",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-007.07 - Adverse-event-complication-logging.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-007.08",
+   "title": "Non-S4 skin note (dermal therapist)",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-007",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "milestone:M3"
+   ],
+   "stage": "M3",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-007.08 - Non-S4-skin-note-dermal-therapist.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-007.09",
+   "title": "Treatment plans & protocols",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-007",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "milestone:M3"
+   ],
+   "stage": "M3",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-007.09 - Treatment-plans-protocols.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-007.10",
+   "title": "Modality expansion: filler, energy-device, weight-loss",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "TLA-007",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "later",
+    "compliance",
+    "milestone:M6"
+   ],
+   "stage": "M6",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-007.10 - Modality-expansion-filler-energy-device-weight-loss.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-008.01",
+   "title": "Checkout & itemised invoice",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-008",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "milestone:M4"
+   ],
+   "stage": "M4",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-008.01 - Checkout-itemised-invoice.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-008.02",
+   "title": "Payment provider abstraction (Square adapter, tokens only)",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-008",
+   "labels": [
+    "type:story",
+    "area:api",
+    "mvp",
+    "compliance",
+    "milestone:M4"
+   ],
+   "stage": "M4",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-008.02 - Payment-provider-abstraction-Square-adapter-tokens-only.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-008.03",
+   "title": "In-person tender (card, cash, receipts)",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-008",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "milestone:M4"
+   ],
+   "stage": "M4",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-008.03 - In-person-tender-card-cash-receipts.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-008.04",
+   "title": "Refunds & voids",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-008",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "milestone:M4"
+   ],
+   "stage": "M4",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-008.04 - Refunds-voids.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-008.05",
+   "title": "Daily closeout & reconciliation",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-008",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "milestone:M4"
+   ],
+   "stage": "M4",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-008.05 - Daily-closeout-reconciliation.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-008.06",
+   "title": "Checkout assist (upsell, rapport, rebooking)",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "TLA-008",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "mvp",
+    "milestone:M4"
+   ],
+   "stage": "M4",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-008.06 - Checkout-assist-upsell-rapport-rebooking.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-009.01",
+   "title": "Membership plans & tiers",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-009",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "later",
+    "milestone:M5"
+   ],
+   "stage": "M5",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-009.01 - Membership-plans-tiers.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-009.02",
+   "title": "Card-on-file & recurring autopay (+ dunning)",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-009",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "later",
+    "compliance",
+    "milestone:M5"
+   ],
+   "stage": "M5",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-009.02 - Card-on-file-recurring-autopay-dunning.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-009.03",
+   "title": "Membership lifecycle (join/pause/cancel/win-back)",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-009",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "later",
+    "milestone:M5"
+   ],
+   "stage": "M5",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-009.03 - Membership-lifecycle-join-pause-cancel-win-back.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-009.04",
+   "title": "Packages/series & client balances",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-009",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "later",
+    "milestone:M5"
+   ],
+   "stage": "M5",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-009.04 - Packages-series-client-balances.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-009.05",
+   "title": "Gift cards",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "TLA-009",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "later",
+    "milestone:M5"
+   ],
+   "stage": "M5",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-009.05 - Gift-cards.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-009.06",
+   "title": "Rewards engine (non-S4 only, margin-aware)",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-009",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "later",
+    "compliance",
+    "milestone:M5"
+   ],
+   "stage": "M5",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-009.06 - Rewards-engine-non-S4-only-margin-aware.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-009.07",
+   "title": "Pricing & what-if planning (owner)",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "TLA-009",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "later",
+    "milestone:M6"
+   ],
+   "stage": "M6",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-009.07 - Pricing-what-if-planning-owner.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-010.01",
+   "title": "Notification channels & templates",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-010",
+   "labels": [
+    "type:story",
+    "area:api",
+    "area:web",
+    "later",
+    "milestone:M5"
+   ],
+   "stage": "M5",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-010.01 - Notification-channels-templates.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-010.02",
+   "title": "Appointment reminders & confirmations (full)",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-010",
+   "labels": [
+    "type:story",
+    "area:api",
+    "later",
+    "milestone:M5"
+   ],
+   "stage": "M5",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-010.02 - Appointment-reminders-confirmations-full.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-010.03",
+   "title": "Pre-care & aftercare sequences",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "TLA-010",
+   "labels": [
+    "type:story",
+    "area:api",
+    "later",
+    "milestone:M5"
+   ],
+   "stage": "M5",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-010.03 - Pre-care-aftercare-sequences.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-010.04",
+   "title": "Recall / recare worklist",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-010",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "later",
+    "milestone:M5"
+   ],
+   "stage": "M5",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-010.04 - Recall-recare-worklist.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-010.05",
+   "title": "Marketing consent & unsubscribe (Spam Act)",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-010",
+   "labels": [
+    "type:story",
+    "area:api",
+    "area:web",
+    "later",
+    "compliance",
+    "milestone:M5"
+   ],
+   "stage": "M5",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-010.05 - Marketing-consent-unsubscribe-Spam-Act.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-010.06",
+   "title": "Public booking-page S4 naming (config)",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-010",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "later",
+    "compliance",
+    "milestone:M5"
+   ],
+   "stage": "M5",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-010.06 - Public-booking-page-S4-naming-config.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-010.07",
+   "title": "Unified follow-up / job queue",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-010",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "later",
+    "milestone:M5"
+   ],
+   "stage": "M5",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-010.07 - Unified-follow-up-job-queue.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-010.08",
+   "title": "Growth surfaces: inbox, reviews, leads (Phase 2)",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "TLA-010",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "later",
+    "phase-2",
+    "milestone:M7"
+   ],
+   "stage": "M7",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-010.08 - Growth-surfaces-inbox-reviews-leads-Phase-2.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-011.01",
+   "title": "Business analytics dashboards (owner)",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-011",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "later",
+    "milestone:M6"
+   ],
+   "stage": "M6",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-011.01 - Business-analytics-dashboards-owner.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-011.02",
+   "title": "Compliance dashboards",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-011",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "later",
+    "compliance",
+    "milestone:M6"
+   ],
+   "stage": "M6",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-011.02 - Compliance-dashboards.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-011.03",
+   "title": "S4 register export & recall execution",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-011",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "later",
+    "compliance",
+    "milestone:M6"
+   ],
+   "stage": "M6",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-011.03 - S4-register-export-recall-execution.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-011.04",
+   "title": "Adverse-event / DAEN prefilled submission",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-011",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "later",
+    "compliance",
+    "milestone:M6"
+   ],
+   "stage": "M6",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-011.04 - Adverse-event-DAEN-prefilled-submission.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-011.05",
+   "title": "Policies & procedures sign-off",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "TLA-011",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "later",
+    "compliance",
+    "milestone:M6"
+   ],
+   "stage": "M6",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-011.05 - Policies-procedures-sign-off.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-011.06",
+   "title": "Inspection-readiness pack & data-quality checks",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "TLA-011",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "later",
+    "compliance",
+    "milestone:M6"
+   ],
+   "stage": "M6",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-011.06 - Inspection-readiness-pack-data-quality-checks.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-012.01",
+   "title": "Client app: book + intake/consent journey",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-012",
+   "labels": [
+    "type:story",
+    "area:flutter",
+    "later",
+    "milestone:M6"
+   ],
+   "stage": "M6",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-012.01 - Client-app-book-intake-consent-journey.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-012.02",
+   "title": "Client app: memberships, rewards, balances, card-on-file",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "TLA-012",
+   "labels": [
+    "type:story",
+    "area:flutter",
+    "later",
+    "milestone:M6"
+   ],
+   "stage": "M6",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-012.02 - Client-app-memberships-rewards-balances-card-on-file.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-012.03",
+   "title": "Client app: reminders, recall & report a concern",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "TLA-012",
+   "labels": [
+    "type:story",
+    "area:flutter",
+    "later",
+    "milestone:M6"
+   ],
+   "stage": "M6",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-012.03 - Client-app-reminders-recall-report-a-concern.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-012.04",
+   "title": "Provider app: day schedule & open patient",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-012",
+   "labels": [
+    "type:story",
+    "area:flutter",
+    "later",
+    "milestone:M6"
+   ],
+   "stage": "M6",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-012.04 - Provider-app-day-schedule-open-patient.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-012.05",
+   "title": "Provider app: room-side charting, mapping & camera",
+   "status": "To Do",
+   "priority": "medium",
+   "parent": "TLA-012",
+   "labels": [
+    "type:story",
+    "area:flutter",
+    "later",
+    "compliance",
+    "milestone:M6"
+   ],
+   "stage": "M6",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-012.05 - Provider-app-room-side-charting-mapping-camera.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-012.06",
+   "title": "Provider app: consult, Rx & administration room-side",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "TLA-012",
+   "labels": [
+    "type:story",
+    "area:flutter",
+    "later",
+    "compliance",
+    "milestone:M6"
+   ],
+   "stage": "M6",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-012.06 - Provider-app-consult-Rx-administration-room-side.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-013.01",
+   "title": "Xero invoice & payment sync",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "TLA-013",
+   "labels": [
+    "type:story",
+    "area:api",
+    "later",
+    "milestone:M6"
+   ],
+   "stage": "M6",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-013.01 - Xero-invoice-payment-sync.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-013.02",
+   "title": "Two-way calendar sync",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "TLA-013",
+   "labels": [
+    "type:story",
+    "area:api",
+    "later",
+    "milestone:M6"
+   ],
+   "stage": "M6",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-013.02 - Two-way-calendar-sync.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-013.03",
+   "title": "Adapter pattern & sub-processor residency posture",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "TLA-013",
+   "labels": [
+    "type:story",
+    "area:api",
+    "later",
+    "compliance",
+    "milestone:M6"
+   ],
+   "stage": "M6",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-013.03 - Adapter-pattern-sub-processor-residency-posture.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-014.01",
+   "title": "Facility accreditation register & expiry alerts",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "TLA-014",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "later",
+    "compliance",
+    "milestone:M7"
+   ],
+   "stage": "M7",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-014.01 - Facility-accreditation-register-expiry-alerts.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-014.02",
+   "title": "Infection control, sterilisation & waste logs",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "TLA-014",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "later",
+    "compliance",
+    "milestone:M7"
+   ],
+   "stage": "M7",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-014.02 - Infection-control-sterilisation-waste-logs.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-014.03",
+   "title": "Emergency kit register & continuity-of-care contact",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "TLA-014",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "later",
+    "compliance",
+    "milestone:M7"
+   ],
+   "stage": "M7",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-014.03 - Emergency-kit-register-continuity-of-care-contact.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-014.04",
+   "title": "Complaints register (AHPRA pathway)",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "TLA-014",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "later",
+    "compliance",
+    "milestone:M7"
+   ],
+   "stage": "M7",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-014.04 - Complaints-register-AHPRA-pathway.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-015.01",
+   "title": "Multi-location under one tenant",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "TLA-015",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "later",
+    "phase-2",
+    "milestone:M8"
+   ],
+   "stage": "M8",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-015.01 - Multi-location-under-one-tenant.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-015.02",
+   "title": "Public API & webhooks",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "TLA-015",
+   "labels": [
+    "type:story",
+    "area:api",
+    "later",
+    "phase-2",
+    "milestone:M8"
+   ],
+   "stage": "M8",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-015.02 - Public-API-webhooks.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-015.03",
+   "title": "White-label & per-tenant theming",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "TLA-015",
+   "labels": [
+    "type:story",
+    "area:web",
+    "later",
+    "phase-2",
+    "milestone:M8"
+   ],
+   "stage": "M8",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-015.03 - White-label-per-tenant-theming.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-015.04",
+   "title": "Self-serve SaaS onboarding & billing",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "TLA-015",
+   "labels": [
+    "type:story",
+    "area:web",
+    "area:api",
+    "later",
+    "phase-2",
+    "milestone:M8"
+   ],
+   "stage": "M8",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-015.04 - Self-serve-SaaS-onboarding-billing.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-015.05",
+   "title": "Native POS / kiosk hardware",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "TLA-015",
+   "labels": [
+    "type:story",
+    "area:flutter",
+    "later",
+    "phase-2",
+    "milestone:M8"
+   ],
+   "stage": "M8",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-015.05 - Native-POS-kiosk-hardware.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-015.06",
+   "title": "Deferred integration roadmap (online checkout, e-prescribing)",
+   "status": "To Do",
+   "priority": "low",
+   "parent": "TLA-015",
+   "labels": [
+    "type:story",
+    "area:api",
+    "later",
+    "phase-2",
+    "milestone:M8"
+   ],
+   "stage": "M8",
+   "isEpic": false,
+   "tier": "later",
+   "file": "backlog/tasks/tla-015.06 - Deferred-integration-roadmap-online-checkout-e-prescribing.md",
+   "summary": "## Description"
+  }
+ ],
+ "docs": [
+  {
+   "id": "doc-001",
+   "title": "Sprint plan (MVP-first)",
+   "file": "backlog/docs/doc-001 - Sprint-plan-MVP-first.md"
+  }
+ ],
+ "counts": {
+  "epics": 15,
+  "stories": 121,
+  "mvp": 72,
+  "later": 49
+ }
+}

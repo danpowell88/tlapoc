@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Backlog — The Lounge Aesthetics POC</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/marked@15.0.12/marked.min.js"></script>
+<style>
+  :root{--brand:#0d9488;--ink:#0f172a;--mute:#64748b;--line:#e2e8f0;--bg:#f8fafc}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,sans-serif;color:var(--ink);background:var(--bg)}
+  .top{height:56px;display:flex;align-items:center;gap:16px;padding:0 18px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+  .top .brand{font-weight:700}.top a{color:var(--mute);text-decoration:none;font-size:14px;font-weight:500}.top a:hover{color:var(--brand)}
+  .wrap{display:flex;max-width:1240px;margin:0 auto;min-height:calc(100vh - 56px)}
+  .side{width:312px;flex:none;border-right:1px solid var(--line);background:#fff;padding:14px 12px;overflow:auto;max-height:calc(100vh - 56px);position:sticky;top:56px}
+  .side .grp{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);margin:14px 10px 6px}
+  .side a{display:block;padding:6px 10px;border-radius:8px;color:#334155;text-decoration:none;font-size:13.5px;line-height:1.3;cursor:pointer}
+  .side a:hover{background:var(--bg)}.side a.on{background:#f0fdfa;color:var(--brand);font-weight:600}
+  .side .epic{font-weight:600;color:#1e293b;display:flex;align-items:center;gap:6px;justify-content:space-between}
+  .side .epic .cnt{font-size:11px;color:var(--mute);font-weight:500;background:var(--bg);border-radius:20px;padding:1px 7px}
+  .side .kids{margin:2px 0 6px 6px;border-left:1px solid var(--line);padding-left:6px;display:none}
+  .side .kids.open{display:block}
+  .side .kids a{font-size:13px;color:#475569;padding:5px 8px}
+  .side .filters{display:flex;gap:6px;margin:4px 8px 8px}
+  .side .filters button{flex:1;font-family:inherit;font-size:12px;font-weight:600;color:#475569;background:#fff;border:1px solid var(--line);border-radius:8px;padding:5px 0;cursor:pointer}
+  .side .filters button.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .content{flex:1;min-width:0;padding:30px 44px 80px;max-width:860px}
+  .content h1{font-size:28px;margin:.1em 0 .4em;line-height:1.22}
+  .content h2{font-size:20px;margin:1.5em 0 .5em;padding-bottom:.2em;border-bottom:1px solid var(--line)}
+  .content h3{font-size:16px;margin:1.2em 0 .4em}
+  .content p,.content li{line-height:1.65;color:#1e293b}
+  .content code{font-family:'JetBrains Mono',monospace;font-size:.86em;background:#eef2f6;padding:.12em .4em;border-radius:5px}
+  .content pre{background:#0f172a;color:#e2e8f0;padding:14px 16px;border-radius:10px;overflow:auto}
+  .content pre code{background:none;color:inherit;padding:0}
+  .content table{border-collapse:collapse;width:100%;margin:1em 0;font-size:13.5px}
+  .content th,.content td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+  .content th{background:var(--bg)}
+  .content blockquote{margin:1em 0;padding:.4em 1em;border-left:3px solid var(--brand);background:#f0fdfa;color:#334155;border-radius:0 8px 8px 0}
+  .content a{color:var(--brand)}
+  .content ul li input[type=checkbox]{margin-right:.5em}
+  .content img{max-width:100%;border:1px solid var(--line);border-radius:10px}
+  /* meta header */
+  .meta{display:flex;flex-wrap:wrap;gap:6px;margin:.2em 0 1.2em}
+  .chip{font-size:12px;font-weight:600;border-radius:20px;padding:3px 10px;background:var(--bg);color:#475569;border:1px solid var(--line)}
+  .chip.id{font-family:'JetBrains Mono',monospace;background:#0f172a;color:#fff;border-color:#0f172a}
+  .chip.mvp{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
+  .chip.later{background:#f1f5f9;color:#64748b}
+  .chip.high{background:#fef2f2;color:#b91c1c;border-color:#fecaca}
+  .chip.medium{background:#fffbeb;color:#b45309;border-color:#fde68a}
+  .chip.low{background:#f8fafc;color:#64748b}
+  .chip.comp{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}
+  /* overview board */
+  .lede{color:#475569;font-size:15px;line-height:1.6;margin:.2em 0 1.4em}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:880px){.cols{grid-template-columns:1fr}}
+  .col h2{margin-top:.3em}
+  .ecard{display:block;text-decoration:none;color:inherit;border:1px solid var(--line);background:#fff;border-radius:12px;padding:13px 15px;margin:0 0 10px;transition:box-shadow .15s,border-color .15s}
+  .ecard:hover{box-shadow:0 4px 14px rgba(15,23,42,.07);border-color:#cbd5e1}
+  .ecard .et{font-weight:700;font-size:14.5px;display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+  .ecard .et .n{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mute);font-weight:600}
+  .ecard .es{color:#475569;font-size:13px;line-height:1.5;margin:5px 0 0}
+  .ecard .ebar{margin-top:9px;display:flex;gap:6px;flex-wrap:wrap}
+  .statline{display:flex;gap:18px;flex-wrap:wrap;margin:0 0 18px;padding:14px 16px;background:#fff;border:1px solid var(--line);border-radius:12px}
+  .statline .s{display:flex;flex-direction:column}
+  .statline .s b{font-size:22px;line-height:1}.statline .s span{font-size:12px;color:var(--mute);margin-top:3px}
+  /* story list inside an epic */
+  .stories{list-style:none;padding:0;margin:1em 0}
+  .stories li{border:1px solid var(--line);border-radius:10px;padding:10px 13px;margin:0 0 8px;background:#fff}
+  .stories li a{font-weight:600;text-decoration:none;color:#0f172a}
+  .stories li a:hover{color:var(--brand)}
+  .stories li .sm{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+  .stories li .ss{color:#475569;font-size:13px;margin:5px 0 0;line-height:1.45}
+  @media(max-width:760px){.side{display:none}.content{padding:22px 18px 60px}}
+</style>
+</head>
+<body>
+<div class="top">
+  <span class="brand">Lounge Aesthetics POC</span>
+  <span style="color:var(--mute)">· Backlog</span>
+  <span style="flex:1"></span>
+  <a href="index.html">Home</a>
+  <a href="docs.html">Docs</a>
+  <a href="prototype.html">Open prototype →</a>
+</div>
+<div class="wrap">
+  <nav class="side" id="side"></nav>
+  <article class="content" id="content">Loading…</article>
+</div>
+<script>
+marked.setOptions({gfm:true,breaks:false});
+const side=document.getElementById("side"),content=document.getElementById("content");
+let M=null, FILTER="all";
+const byId={};
+
+const STAGE={M0:"S1 · Foundations",M1:"S2 · Shell & access",M2:"S3–4 · Booking · Intake/consent",
+  M3:"S5–6 · S4 medicines · Charting",M4:"S7 · Checkout",M5:"S8–9 · Memberships · Comms",
+  M6:"S10–12 · Reporting · Apps · Integrations",M7:"S13 · Facility / hardening",M8:"S14 · Scale / Phase 2"};
+
+function area(labels){return labels.filter(l=>l.startsWith("area:")).map(l=>l.split(":")[1]);}
+function chips(t){
+  let h=`<span class="chip id">${t.id}</span>`;
+  if(t.tier)h+=`<span class="chip ${t.tier}">${t.tier.toUpperCase()}</span>`;
+  if(t.priority)h+=`<span class="chip ${t.priority}">${t.priority}</span>`;
+  if(t.stage)h+=`<span class="chip">${t.stage}</span>`;
+  area(t.labels).forEach(a=>h+=`<span class="chip">${a}</span>`);
+  if(t.labels.includes("compliance"))h+=`<span class="chip comp">compliance</span>`;
+  if(t.status)h+=`<span class="chip">${t.status}</span>`;
+  return h;
+}
+function visible(t){return FILTER==="all"||t.tier===FILTER;}
+
+function buildSide(){
+  side.innerHTML="";
+  const v=document.createElement("div");v.className="grp";v.textContent="Views";side.appendChild(v);
+  [["overview","Overview & board"],["doc:"+(M.docs[0]?M.docs[0].file:""),"Sprint plan"]].forEach(([h,t])=>{
+    const a=document.createElement("a");a.textContent=t;a.onclick=()=>location.hash=h;side.appendChild(a);
+  });
+  const f=document.createElement("div");f.className="filters";
+  [["all","All"],["mvp","MVP"],["later","Later"]].forEach(([k,lab])=>{
+    const b=document.createElement("button");b.textContent=lab;b.className=k===FILTER?"on":"";
+    b.onclick=()=>{FILTER=k;buildSide();route();};f.appendChild(b);
+  });
+  side.appendChild(f);
+  const g=document.createElement("div");g.className="grp";g.textContent="Epics";side.appendChild(g);
+  M.epics.forEach(ep=>{
+    const kids=M.stories.filter(s=>s.parent===ep.id&&visible(s));
+    if(FILTER!=="all"&&kids.length===0&&ep.tier!==FILTER)return;
+    const a=document.createElement("a");a.className="epic";a.dataset.id=ep.id;
+    a.innerHTML=`<span>${ep.title.replace(/^EPIC:\s*/,"")}</span><span class="cnt">${kids.length}</span>`;
+    const box=document.createElement("div");box.className="kids";box.dataset.for=ep.id;
+    kids.forEach(s=>{const k=document.createElement("a");k.textContent=s.id.split(".")[1]+" · "+s.title;k.dataset.id=s.id;k.onclick=(e)=>{e.stopPropagation();location.hash=s.id;};box.appendChild(k);});
+    a.onclick=()=>location.hash=ep.id;
+    side.appendChild(a);side.appendChild(box);
+  });
+}
+function markActive(id){
+  side.querySelectorAll("a[data-id]").forEach(a=>a.classList.toggle("on",a.dataset.id===id));
+  side.querySelectorAll(".kids").forEach(b=>b.classList.toggle("open", b.dataset.for===id || b.dataset.for===(id||"").split(".")[0]));
+}
+function stripFm(md){if(md.slice(0,3)==="---"){const e=md.indexOf("\n---",3);if(e>-1)return md.slice(e+4).replace(/^\n+/,"");}return md;}
+async function fetchMd(file){const r=await fetch(file);if(!r.ok)throw r.status;return stripFm(await r.text());}
+
+function overview(){
+  markActive("overview");
+  const c=M.counts;
+  let h=`<h1>Platform backlog</h1>
+   <p class="lede">${c.epics} epics, ${c.stories} stories — hand-authored from the PRDs and prototype.
+   The first seven sprints deliver the <b>MVP clinical loop</b> (book → consent → consult/prescribe → chart → check out);
+   later epics are spec'd but flagged <span class="chip later">LATER</span>.
+   See the <a onclick="location.hash='doc:${M.docs[0]?M.docs[0].file:''}'" style="cursor:pointer">sprint plan</a> for sequencing.</p>
+   <div class="statline">
+     <div class="s"><b>${c.epics}</b><span>epics</span></div>
+     <div class="s"><b>${c.stories}</b><span>stories</span></div>
+     <div class="s"><b>${c.mvp}</b><span>MVP stories</span></div>
+     <div class="s"><b>${c.later}</b><span>later stories</span></div>
+   </div>`;
+  const render=list=>list.filter(visible).map(ep=>{
+    const kids=M.stories.filter(s=>s.parent===ep.id);
+    return `<a class="ecard" onclick="location.hash='${ep.id}'">
+      <div class="et"><span>${ep.title.replace(/^EPIC:\s*/,"")}</span><span class="n">${ep.id} · ${kids.length}</span></div>
+      <p class="es">${ep.summary||""}</p>
+      <div class="ebar">${ep.tier?`<span class="chip ${ep.tier}">${ep.tier.toUpperCase()}</span>`:""}${ep.stage?`<span class="chip">${STAGE[ep.stage]||ep.stage}</span>`:""}${ep.labels.includes("compliance")?'<span class="chip comp">compliance</span>':""}</div>
+    </a>`;}).join("");
+  const mvp=M.epics.filter(e=>e.tier==="mvp"), later=M.epics.filter(e=>e.tier!=="mvp");
+  h+=`<div class="cols">
+    <div class="col"><h2>MVP — the clinic loop</h2>${render(mvp)}</div>
+    <div class="col"><h2>Later — spec'd, deferred</h2>${render(later)}</div>
+  </div>`;
+  content.innerHTML=h;window.scrollTo(0,0);
+}
+
+async function showEpic(ep){
+  markActive(ep.id);
+  const kids=M.stories.filter(s=>s.parent===ep.id);
+  try{
+    const md=await fetchMd(ep.file);
+    let h=`<h1>${ep.title.replace(/^EPIC:\s*/,"")}</h1><div class="meta">${chips(ep)}</div>`+marked.parse(md);
+    h+=`<h2>Stories (${kids.length})</h2><ul class="stories">`;
+    kids.forEach(s=>{h+=`<li><a onclick="location.hash='${s.id}'">${s.title}</a><p class="ss">${s.summary||""}</p><div class="sm">${chips(s)}</div></li>`;});
+    h+="</ul>";
+    content.innerHTML=h;window.scrollTo(0,0);
+  }catch(e){content.innerHTML=`<h1>Couldn't load ${ep.id}</h1><p>${e}</p>`;}
+}
+async function showTask(t){
+  markActive(t.id);
+  try{
+    const md=await fetchMd(t.file);
+    const parent=byId[t.parent];
+    const crumb=parent?`<p class="lede" style="margin-bottom:.6em"><a onclick="location.hash='${parent.id}'" style="cursor:pointer">↩ ${parent.title.replace(/^EPIC:\s*/,'')}</a></p>`:"";
+    content.innerHTML=crumb+`<h1>${t.title}</h1><div class="meta">${chips(t)}</div>`+marked.parse(md);
+    window.scrollTo(0,0);
+  }catch(e){content.innerHTML=`<h1>Couldn't load ${t.id}</h1><p>${e}</p>`;}
+}
+async function showDoc(file){
+  markActive("doc");side.querySelectorAll(".side>a").forEach(a=>{});
+  try{content.innerHTML=marked.parse(await fetchMd(file));window.scrollTo(0,0);}
+  catch(e){content.innerHTML=`<h1>Couldn't load document</h1><p>${file} (${e})</p>`;}
+}
+
+function route(){
+  const h=decodeURIComponent(location.hash.slice(1));
+  if(!h||h==="overview")return overview();
+  if(h.startsWith("doc:"))return showDoc(h.slice(4));
+  const t=byId[h];
+  if(!t)return overview();
+  return t.isEpic?showEpic(t):showTask(t);
+}
+// intercept .md / TLA-id links inside rendered content
+content.addEventListener("click",e=>{const a=e.target.closest("a");if(!a)return;const href=a.getAttribute("href")||"";
+  if(/^https?:/.test(href))return;                       // external -> normal
+  const m=href.match(/TLA-\d{3}(\.\d{2})?/);
+  if(m&&byId[m[0]]){e.preventDefault();location.hash=m[0];return;}
+  if(/docs\/.*\.md/.test(href)){e.preventDefault();const fn=href.split("/").pop();location.href="docs.html#docs/"+ (href.split("docs/").pop());}
+});
+window.addEventListener("hashchange",route);
+fetch("backlog/manifest.json").then(r=>r.json()).then(m=>{
+  M=m;[...m.epics,...m.stories].forEach(t=>byId[t.id]=t);
+  buildSide();route();
+}).catch(e=>{content.innerHTML="<h1>Couldn't load the backlog</h1><p>backlog/manifest.json missing — run <code>python scripts/backlog_manifest.py</code>. ("+e+")</p>";});
+</script>
+</body>
+</html>
