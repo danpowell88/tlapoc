@@ -48,5 +48,13 @@ _Prototype screen: checkin.html._
 
 ## Tasks (dev pickup)
 
-- [ ] **Reception self-check-in tablet surface**
-  Locked-down web/PWA (progressive web app) kiosk surface re-using the PRD-02/03 modules. Idle 'Welcome in' attract screen → 'Tap to check in' → booking lookup + light detail confirmation (not a staff login) → prompt/complete outstanding intake (medical history/health check) and consent (PRD-03) → advance Appointment to checked_in (PRD-02), updating the arrivals board and the provider day list. Single-client session with no cross-client data access; auto-timeout back to the attract screen between clients (C10).
+- [ ] **Locked-down kiosk shell + attract screen + session timeout**
+  Behaviour: a locked-down web/PWA (progressive web app) kiosk surface that idles on a 'Welcome in' attract screen ('Tap to check in') and steps through Find booking · Confirm · Check details · Health check · Sign consent · Checked in. Requirements: a single-client session with NO access to other clients' data and no staff login; auto-timeout back to the attract screen between clients, clearing all state (C10); the device is kiosk-pinned (no browser chrome / navigation away).
+- [ ] **Booking lookup + confirm-it's-me (no password)**
+  Behaviour: 'Find your booking' matches the visit by mobile number (no app or password), then 'Confirm appointment' shows the found booking and the client confirms it's them before anything else happens. Requirements: lookup returns only the matching client's own booking; a light verification (not a staff login); reception can also look it up; rate-limit/guard the public lookup.
+- [ ] **Details review + today's health check ('anything changed?')**
+  Behaviour: 'Check your details' is a 10-second contact-details review to keep records current, then 'Today's health check' asks the safety 'anything changed?' question captured before the chair. Requirements: writes back to the PRD-02 client record / PRD-03 intake; the health-check response is the per-visit re-screen feeding the clinician; no clinical record is exposed at the kiosk.
+- [ ] **Outstanding intake/consent completion at the desk (PRD-03)**
+  Behaviour: 'Outstanding before your visit' prompts and completes anything unsigned — outstanding intake (medical history) and consent — finished here rather than in the room. Requirements: reuses the SAME PRD-03 intake/consent modules as the client app (no parallel store); the on-device signature posts to the API; the compliance gate stays server-enforced — the kiosk only completes what's outstanding.
+- [ ] **Advance to checked_in + reception arrivals board feed**
+  Behaviour: completing check-in advances the Appointment to checked_in and shows 'You're checked in' + what happens next; the staff-facing 'Reception arrivals board' shows who's here, where, and how long they've waited. Requirements: the transition drives the PRD-02 visit lifecycle, updating the arrivals board and the provider's day list instantly; reception and the treatment room are notified; the board is the staff companion the kiosk feeds.

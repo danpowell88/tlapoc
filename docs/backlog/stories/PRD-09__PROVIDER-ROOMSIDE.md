@@ -55,7 +55,11 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 
 ## Tasks (dev pickup)
 
-- [ ] **Provider app: injection-mapping canvas + product/units + script link**
-  Build the tap-to-place injection-mapping canvas on a face/body image (drag to adjust, accurate hit-testing — highest app risk, SPIKE-CANVAS). Per point capture product/units; link the individual script and surface PRD-04 consult/Rx/administration. Thumb-first targets sized for gloved hands (UX §1). Writes to the PRD-05 ChartEntry/InjectionPoint entities via the API.
-- [ ] **Provider app: camera capture (signed-URL upload) + server-side finalise**
-  Native-camera before/after capture gated on image-use consent: request a per-image signed upload URL (ADR-0009), stream the image to central storage and discard the local file once sync confirms — no photo persists on device after sync (C14), only a transient capture cache. Finalise calls the server seal; re-fetch the sealed, read-only entry so the app shows it immutable (AC6).
+- [ ] **Pre-flight + consent/script verification step**
+  Behaviour: a room-side pre-flight read (alerts, allergies, history, goals) and a 'Consent & script' step showing signed consent + the prescriber's authorised dose, both verified before mapping. Requirements: surfaces the PRD-03/04 gate state and the linked script; the injection-map / photos / complete steps stay locked until pre-flight + consent + script pass; thumb-first, gloves-on layout (UX §1).
+- [ ] **Tap-to-place injection-mapping canvas (product/units, script-linked)**
+  Behaviour: a tap-to-place injection-mapping canvas on a face/body image — drag to adjust each point, capture product + units per point, with a live units total checked against the script. Requirements: accurate hit-testing on a touch canvas (highest app risk — SPIKE-CANVAS); writes to the PRD-05 ChartEntry/InjectionPoint entities via the API; surfaces PRD-04 consult/Rx/administration; gloved-hand target sizes.
+- [ ] **Native-camera before/after capture via signed-URL upload (no device retention)**
+  Behaviour: native-camera before/after capture gated on image-use consent. Requirements: request a per-image signed upload URL (a temporary, expiring link, ADR-0009), stream the image straight to central storage, and discard the local file once sync confirms — no photo persists on device after sync (C14), only a transient capture cache; capture is blocked when image-use consent is absent.
+- [ ] **Server-side finalise → immutable record + stock decrement**
+  Behaviour: 'Complete' seals the record. Requirements: finalisation is server-side — it decrements the exact batch/lot (the manufacturer's batch of a medicine vial) from inventory and pushes aftercare to the client app; the app re-fetches the sealed, read-only entry so it shows immutable (AC6); corrections are appended amendments, never edits; finalise is disabled until everything has synced (ties to PROVIDER-OFFLINE).

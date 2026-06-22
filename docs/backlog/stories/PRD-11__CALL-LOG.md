@@ -47,8 +47,8 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 ## Tasks (dev pickup)
 
 - [ ] **CallLog entity + log a call**
-  Model CallLog (tenant_id, client_id?, direction[in|out], number, summary, outcome, at, actor_id) under RLS (row-level security, the database-level tenant isolation), audited. Call log UI (Time · Number · Who · Note) to log inbound/outbound calls against a client.
+  Behaviour: log inbound/outbound phone calls against a client. Requirements: model CallLog (tenant_id, client_id?, direction[in|out], number, summary, outcome, at, actor_id) under RLS (row-level security, the database-level tenant isolation), audited; call-log UI (Time · Number · Who · Note) to record a call against a client.
 - [ ] **Call → follow-up job + comms history**
-  A call can raise a follow-up Job (PRD-07); a linked call appears in the client's comms history. Missed calls auto-text-back and become callback jobs; track a missed-call/callback to resolution ('Log callback').
+  Behaviour: a call can spawn a callback and is visible in the client's history. Requirements: a call can raise a follow-up Job (PRD-07); a linked call appears in the client's comms history; missed calls auto-text-back and become callback jobs; a missed-call/callback is tracked to resolution ('Log callback').
 - [ ] **Shared follow-up queue (walk-ins / waitlist offers)**
-  Route walk-ins and waitlist offers through the same follow-up queue as call callbacks, so the front desk works one queue.
+  Behaviour: the front desk works one queue, not several. Requirements: route walk-ins and waitlist offers through the SAME follow-up queue as call callbacks so call, walk-in and waitlist actions all land in one worklist.

@@ -50,9 +50,11 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 
 ## Tasks (dev pickup)
 
-- [ ] **Waitlist entry + matching/backfill engine**
-  WaitlistEntry CRUD (client, service, desired window, priority). Subscribe to the slot-freed event (cancel/no-show from REMINDERS/LIFECYCLE); match freed slots to waiting entries (service + window + scope/resource feasible per the availability engine), create an offer with expires_at, and dispatch it (PRD-07). On accept → book via the create endpoint (full scope/conflict checks) and mark accepted; on expiry → mark expired and roll to the next entry. Idempotent, tenant-scoped.
-- [ ] **Quiet-window fill suggestions from utilisation**
-  Derive open/quiet chair windows from the calendar (roster − bookings, idle resource blocks) and expose them as fill suggestions. Drive the Schedule 'Quiet windows to fill' panel (open chairs per day, ideal-for-recall hints e.g. lot expiry) with 'Offer recall' (push to waitlist/recall) and 'Fill' actions.
-- [ ] **Waitlist management UI + backfill prompt**
-  UI to add/view/remove waitlist (clients waiting for an earlier slot) entries for a service/window and see offered/accepted/expired status. When an appointment is cancelled/no-showed, show the backfill prompt ('offer this slot to the waitlist'). Wire the Schedule quiet-window panel actions to the matching engine.
+- [ ] **Waitlist entry CRUD (client + service + window + priority)**
+  Behaviour: add/view/remove a WaitlistEntry capturing client, service, desired date/time window and priority. Requirements: tenant-scoped; an entry is the demand record matched against freed slots; priority + FIFO ordering decides who is offered first; status defaults to waiting.
+- [ ] **Matching / backfill engine on slot-freed**
+  Behaviour: when a booking cancels or no-shows the freed slot is auto-offered to the best matching waiting entry. Requirements: subscribe to the slot-freed event (from REMINDERS/LIFECYCLE); match by service + window + scope/resource feasibility via the SAME availability engine; create an offer with expires_at and dispatch it (PRD-07); idempotent and tenant-scoped.
+- [ ] **Offer lifecycle: offered → accepted / expired**
+  Behaviour: an offer holds the slot for a short window, then accepts or rolls on. Requirements: on accept, book via the create endpoint with full scope/conflict checks and mark accepted; on expiry, mark expired and roll the offer to the next matching entry; every state (offered/accepted/expired, with timestamps) is tracked per entry so the desk can see who was offered what and when.
+- [ ] **Waitlist management UI + cancel/no-show backfill prompt**
+  Behaviour: a screen to add/view waiting clients for a service/window and see offered/accepted/expired status, plus a prompt when an appointment is cancelled/no-showed ('offer this slot to the waitlist'). Requirements: the backfill prompt triggers the matching engine; the management list reflects live offer states; reachable from the Schedule.

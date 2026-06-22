@@ -53,10 +53,10 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 ## Tasks (dev pickup)
 
 - [ ] **Equipment entity + link to bookable Resource**
-  Model Equipment (tenant_id, location_id, name, type, linked_resource_id?). Link a device Equipment record to its bookable Resource (ROOMS-DEVICES) so the same physical device has one identity. Optional per clinic (not every clinic runs an autoclave/laser).
-- [ ] **MaintenanceRecord: schedules (service/validation/calibration/spore)**
-  Model MaintenanceRecord (equipment_id, kind[service|validation|calibration|spore_test], standard, due_at, done_at, evidence_ref, status). Hold cadence/standard (e.g. AS 5369:2023 spore weekly) and compute due/overdue against done_at.
-- [ ] **Equipment & maintenance register UI + due/overdue alerts**
-  Register table (Equipment · Standard/cadence · Last · Next due · Status OK/Due soon). Due/overdue items raise alerts (facility jobs via the scheduler) and surface on the operations view.
+  Behaviour: model the clinic's serviceable equipment and tie each device to its bookable identity. Requirements: model Equipment (tenant_id, location_id, name, type, linked_resource_id?); link a device Equipment record to its bookable Resource (ROOMS-DEVICES) so the same physical device has one identity across booking and servicing; optional per clinic (not every clinic runs an autoclave/laser).
+- [ ] **MaintenanceRecord: service/validation/calibration/spore schedules**
+  Behaviour: hold each item's servicing/validation/calibration cadence and compute when it's due. Requirements: model MaintenanceRecord (equipment_id, kind[service|validation|calibration|spore_test], standard, due_at, done_at, evidence_ref, status) holding the standard/cadence (e.g. AS 5369:2023 spore weekly) and deriving due/overdue against done_at; supports autoclave validation + spore testing and laser service/calibration.
+- [ ] **Register UI + due/overdue alerts**
+  Behaviour: the Equipment & maintenance register table (Equipment · Standard/cadence · Last · Next due · Status OK / Due soon) on Operations. Requirements: due/overdue items raise alerts (facility jobs via the scheduler) and surface on the operations view; 'Optional per clinic' is shown; renew/log actions are reachable from the row.
 - [ ] **Log service events with evidence + inspection feed**
-  Log a service event (sets done_at, attaches evidence_ref — service report / spore-test result), audited. Feed equipment status + evidence into the PRD-08 inspection-readiness pack.
+  Behaviour: log a completed service event with proof. Requirements: setting done_at attaches evidence_ref (service report / spore-test result) and is audited; equipment status + evidence feed the PRD-08 inspection-readiness pack so a regulator can see devices are validated and in-service.

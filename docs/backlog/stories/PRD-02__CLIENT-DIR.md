@@ -50,8 +50,10 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 ## Tasks (dev pickup)
 
 - [ ] **Directory search/filter API + index**
-  Searchable, paginated directory endpoint over name/phone/email with segment filters (members/at-risk/new) and tenant RLS (row-level security); back it with a search index for fast prefix/fuzzy match. Exclude soft-deleted clients from active results. Money columns (lifetime) flagged .fin so the UI can gate them. Also powers the global header search.
-- [ ] **Duplicate detection + merge with re-point + MergeLog**
-  Detect candidate duplicates (name/dob/phone/email heuristics). Merge transaction re-points ALL child records (appointments, consents, image-consent, photos, invoices, memberships, rewards, jobs) from the merged client to the surviving primary, preserving history, and writes a MergeLog (primary/merged/actor/at/repointed counts) for audit + reversible reference. Server-enforced; capability-gated.
-- [ ] **Soft-delete (audited) + directory/search UI**
-  Soft-delete sets deleted_at + audits; client drops from active views but history is retained (true destruction is PRD-01 RETENTION only). Build the Clients UI: search box, segment filter chips, table (Client/Status/Last visit/Lifetime[.fin]/Membership/Next), row→Client 360, and the merge/soft-delete actions. Wire the global header search to jump to a client.
+  Behaviour: a searchable, paginated directory over name/phone/email. Requirements: back it with a search index for fast prefix/fuzzy match; tenant RLS (row-level security); exclude soft-deleted clients from active results; money columns (lifetime) flagged .fin so the UI can gate them (owner-only); the same endpoint powers the global header search.
+- [ ] **Segment filters (All / Members / At-risk / New)**
+  Behaviour: filter chips that narrow the directory to All / Members / At-risk / New. Requirements: segments derive from membership state, recency/recall risk and join date; compose with the search query; the active segment persists so a refresh keeps it.
+- [ ] **Soft-delete (audited) + active-view exclusion**
+  Behaviour: soft-deleting a client removes them from active views without destroying history. Requirements: set deleted_at and write an audit entry; deleted clients are excluded from search/active lists but retained (true destruction is governed by PRD-01 RETENTION only, never here); capability-gated.
+- [ ] **Clients table + global header search wiring**
+  Behaviour: the Clients screen — search box, segment chips and a table (Client / Status / Last visit / Lifetime[.fin] / Membership / Next) where a row opens Client 360 — plus the global header search that jumps straight to a client from anywhere in the shell. Requirements: the Lifetime column is .fin-gated (owner-only); the header search reads the same directory API and deep-links to the matched Client 360.

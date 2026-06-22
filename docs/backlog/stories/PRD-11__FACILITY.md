@@ -44,10 +44,10 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 ## Tasks (dev pickup)
 
 - [ ] **FacilityAccreditation entity + per-location record**
-  Model FacilityAccreditation (tenant_id, location_id, scheme, status, expiry, evidence_ref), tenant-scoped under RLS (row-level security, the database-level tenant isolation). CRUD for the per-location accreditation record; attach the certificate as evidence_ref (media).
+  Behaviour: record each location's accreditation with its scheme, status, expiry and evidence. Requirements: model FacilityAccreditation (tenant_id, location_id, scheme, status, expiry, evidence_ref) tenant-scoped under RLS (row-level security, the database-level tenant isolation); CRUD the per-location record and attach the certificate as evidence_ref (media).
 - [ ] **Facility profile: per-location accreditation UI**
-  Facility-profile view listing each location's accreditation (scheme, status, expiry, evidence link). Edit/renew action. Surfaces on the operations view and feeds Governance's 'Registrations & indemnity' status.
+  Behaviour: a facility-profile view listing each location's accreditation (scheme, status, expiry, evidence link) with an edit/renew action. Requirements: surfaces on the operations view; feeds Governance's 'Registrations & indemnity: current' status; current status flows into the PRD-08 inspection pack.
 - [ ] **Accreditation expiry alerts (scheduled)**
-  Schedule expiry alerts (lead-time before expiry) via the jobs scheduler, raising a job/notification so renewal happens in time.
+  Behaviour: warn ahead of an accreditation lapsing. Requirements: schedule expiry alerts (configurable lead-time before expiry) via the jobs scheduler, raising a job/notification so renewal happens in time; never operate silently out of accreditation.
 - [ ] **Blocking-vs-advisory config flag**
-  Per-clinic config flag (blocking | advisory) read at the relevant guard points; default advisory per RECON-2 (accreditation optional/conditional for non-surgical injectables). Audit accreditation changes; feed status into the PRD-08 inspection pack.
+  Behaviour: let each clinic choose whether a lapsed accreditation blocks or merely warns. Requirements: a per-clinic config flag (blocking | advisory) read at the relevant guard points, defaulting advisory per RECON-2 (accreditation optional/conditional for non-surgical injectables — the open question); audit accreditation changes.

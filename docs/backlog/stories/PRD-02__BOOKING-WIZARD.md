@@ -50,11 +50,13 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 
 ## Tasks (dev pickup)
 
-- [ ] **Wizard stepper UI (service→practitioner→time→client→confirm)**
-  Angular 5-step wizard with progress stepper. Step 1 service cards (duration/price/schedule, generic names). Step 2 practitioner cards filtered by scope for S4 (Schedule 4 prescription-only medicine) (+ 'Next available' = soonest eligible). Step 3 slot grid from the availability engine with taken slots disabled/struck-through. Back/Continue nav; state held until confirm.
-- [ ] **Client step: attach existing or create inline + under-18 flag**
-  Step 4: search/attach an existing (returning) client or create one inline (new) capturing DOB; toggle Returning/New changes the intake hint (returning=quick re-screen; new=full intake+history+BDD+consent). Derive + stamp under_18. Capture reason/notes. Checkbox 'Send intake + consent links now (treatment can't start until complete)' wires to the PRD-03 send.
-- [ ] **Confirm step: policy display + create (source=desk) + reminder schedule**
-  Step 5: show the booking summary + the cancellation policy; on confirm, call the create endpoint (source=desk, full server-side scope/conflict checks), schedule the reminder (PRD-07, e.g. 24h prior) and trigger the intake/consent send if selected. Show 'Intake + consent sent · Reminder scheduled'.
-- [ ] **Scope-aware practitioner/slot filtering (shared engine)**
-  Ensure steps 2–3 call the SAME server-side availability engine as CALENDAR/online so an injectable never offers an ineligible practitioner and slots honour roster ∩ canInject ∩ free-resource. No client-side scope logic — the server returns only eligible practitioners/slots.
+- [ ] **Step 1 — service selection (generic names, schedule shown)**
+  Behaviour: service cards showing duration / price / schedule (e.g. 'Anti-wrinkle · 45 min · from $11/unit · S4') with a header note that public names stay generic and injectables offer RN/NP only. Requirements: only bookable services appear; the schedule flag on each card drives the downstream scope filtering; selecting a service advances the stepper.
+- [ ] **Step 2 — practitioner selection (scope-filtered + Next available)**
+  Behaviour: practitioner cards for the chosen service, with a 'Next available' shortcut. Requirements: for an S4 (Schedule 4 prescription-only medicine) service only cleared RN/NP are offered (the canInject gate, C4); the eligible list comes from the SAME server-side availability engine as CALENDAR/online — no client-side scope logic; 'Next available' resolves to the soonest eligible injector.
+- [ ] **Step 3 — time-slot grid (roster ∩ availability)**
+  Behaviour: a slot grid for the chosen service + practitioner with taken slots struck through. Requirements: slots = roster ∩ canInject ∩ free room/chair/device for the whole block incl. buffers, from the shared engine; over-capacity/taken slots are disabled; the server returns only genuinely bookable slots.
+- [ ] **Step 4 — client step (attach existing / create inline + under-18)**
+  Behaviour: search/attach a returning client or create a new one inline capturing DOB, plus a reason/notes field and a 'Send intake + consent links now (treatment can't start until complete)' checkbox. Requirements: the Returning/New toggle changes the intake hint (returning = quick re-screen; new = full intake + history + BDD + consent); derive and stamp under_18 from DOB; the checkbox wires to the PRD-03 intake + consent send.
+- [ ] **Step 5 — confirm (policy + create source=desk + reminder)**
+  Behaviour: a summary that shows the cancellation policy and commits the booking. Requirements: on confirm, call the create endpoint (source=desk) with full server-side scope/conflict checks, schedule the reminder (PRD-07, e.g. 24h prior), and trigger the intake/consent send if the checkbox was set; show 'Intake + consent sent · Reminder scheduled'; the created Appointment is identical to online/walk-in.

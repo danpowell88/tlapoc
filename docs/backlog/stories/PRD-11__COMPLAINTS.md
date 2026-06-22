@@ -45,10 +45,10 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 ## Tasks (dev pickup)
 
 - [ ] **Complaint entity + complaints register**
-  Model Complaint (tenant_id, client_id, treatment_ref, status, pathway[ahpra|internal], opened_at, resolution) under RLS (row-level security, the database-level tenant isolation). Complaints register in Governance: log, view, update status/resolution, link to client + treatment.
+  Behaviour: a register to log a complaint/adverse-outcome against a client/treatment and work it to resolution. Requirements: model Complaint (tenant_id, client_id, treatment_ref, status, pathway[ahpra|internal], opened_at, resolution) under RLS (row-level security, the database-level tenant isolation); the Governance register lets staff log, view, update status/resolution and link to client + treatment.
 - [ ] **Surface AHPRA pathway at log time**
-  When a complaint is logged, surface the complaint mechanisms including the right to complain to AHPRA (Australian Health Practitioner Regulation Agency) notwithstanding any NDA (C24) as guidance copy on the form.
+  Behaviour: always show the external complaint pathway when a complaint is logged. Requirements: surface the complaint mechanisms including the right to complain to AHPRA (Australian Health Practitioner Regulation Agency) — explicitly noting an NDA (non-disclosure agreement) doesn't remove that right — as guidance copy on the form (C24).
 - [ ] **Complaint → indefinite retention flag**
-  Logging a complaint sets an indefinite-retention flag on the related record; the PRD-01 retention engine reads it and exempts that record from the normal destruction schedule while the complaint exists (C18).
+  Behaviour: a complaint must keep the related record from being destroyed. Requirements: logging a complaint sets an indefinite-retention flag on the related record; the PRD-01 retention engine reads it and exempts that record from the normal destruction schedule for as long as the complaint exists (C18).
 - [ ] **Feed reporting + raise-from-conversation**
-  Feed complaints into the register/reporting (PRD-08) and the Governance command centre. Allow a complaint to be raised directly from a PRD-07 inbox conversation, linking the thread to the new complaint.
+  Behaviour: complaints feed the wider picture and can start from an inbox thread. Requirements: feed complaints into the register/reporting (PRD-08) and the Governance command centre ('Open AE cases', 'Needs attention'); allow a complaint to be raised directly from a PRD-07 inbox conversation, linking the thread to the new complaint.

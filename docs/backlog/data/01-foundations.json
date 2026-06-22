@@ -254,16 +254,20 @@
       ],
       "tasks": [
         {
-          "title": "Credential data model & canInject derivation",
-          "note": "Extend StaffProfile with the AHPRA (Australian Health Practitioner Regulation Agency)/experience/engagement/scope fields and model Credential (registration|insurance|cpd|training) with expiry, cosmetic_cover and verified-on. Compute canInject (the single derived gate deciding whether a clinician may inject right now) server-side exactly per the prototype rule (scope==inject AND registration current AND cosmetic_cover AND insurance in date) and expose it as a read-only derived signal; recompute on any credential change. Support the designated/partnered prescriber arrangement (prescriber_mode + partnered_prescriber_id). Store credential evidence behind signed URLs in AU-resident storage."
+          "title": "Staff cards grid with derived status chip",
+          "note": "Behaviour: the People & credentials grid (team-people.png) — one card per staff member with avatar, name, role, engagement type (Contractor/Employee) and a derived status chip ('Current', 'Renews in 25d', 'PII excludes cosmetic — blocked'). Requirements: the status chip is computed (staffStatus), never set by hand — it surfaces the human-readable states the canInject derivation drives (Current / Renews in Nd / CPD behind X/Yh / PII excludes cosmetic / Not compliant) with emerald/amber/rose colouring; capability-gate the whole surface to team:manage so non-managers don't see it."
         },
         {
-          "title": "Credential management API + AHPRA PIE / manual verification",
-          "note": "CRUD for credentials gated to owner/lead (team:manage). Provide a verify action that attempts AHPRA (Australian Health Practitioner Regulation Agency) PIE (the AHPRA Practitioner Information Exchange register lookup) auto-verification where approved and always falls back to a first-class manual-verify that records verified_method + verified_on. Publish the derived canInject (the single derived gate deciding whether a clinician may inject right now) and the human-readable status (Current / Renews in Nd / CPD (continuing professional development) behind / PII (professional-indemnity insurance) excludes cosmetic / Not compliant) so booking, charting gates, the exceptions digest and Follow-ups consume one source of truth. Block S4-relevant booking/administration when canInject is false."
+          "title": "Per-person credential editor (AHPRA / experience / CPD / PII)",
+          "note": "Behaviour: a per-person credential detail/edit view capturing AHPRA (Australian Health Practitioner Regulation Agency) reg #/type/status/expiry/conditions, the ≥1-year-cosmetic-experience flag, CPD (continuing professional development) done vs required (RN/EN 20h, NP 30h) and PII (professional-indemnity insurance) insurer/expiry and the cosmetic-cover boolean. Requirements: insurance must flag cosmetic_cover explicitly (standard nursing PII frequently excludes cosmetic — Chloe Adams is the worked example); credential evidence is stored behind signed URLs in AU-resident storage; edits are gated to owner/lead (team:manage) and audited."
         },
         {
-          "title": "People & credentials UI (Team workspace)",
-          "note": "Build the Team -> People & credentials cards (team-people.png): staff card with avatar/name/role/engagement and the derived status chip, plus a per-person credential editor for AHPRA (Australian Health Practitioner Regulation Agency) reg/type/status/expiry/conditions, experience flag, CPD (continuing professional development) done/required and PII (professional-indemnity insurance) insurer/expiry/cosmetic-cover, with the verify control. Show canInject (the single derived gate deciding whether a clinician may inject right now) read-only. Capability-gate the whole surface to team:manage; non-managers don't see it."
+          "title": "canInject derivation (read-only) + designated/partnered prescriber",
+          "note": "Behaviour: compute canInject (the single derived gate deciding whether a clinician may inject right now) server-side exactly per the prototype rule — scope==inject AND registration current AND cosmetic_cover AND insurance in date — and show it read-only ('cleared to treat' / 'Blocked'); it is computed, never set by hand. Requirements: recompute on any credential change; publish it as the single signal booking (PRD-02), the charting/administration gates (PRD-04/05), the exceptions digest and Follow-ups all consume; support the designated/partnered RN prescriber arrangement (prescriber_mode self|partnered + partnered_prescriber_id) so an RN may administer under a recorded prescriber without holding the prescribe capability."
+        },
+        {
+          "title": "AHPRA PIE auto-verify with first-class manual-verify fallback",
+          "note": "Behaviour: a verify action on each credential that attempts AHPRA (Australian Health Practitioner Regulation Agency) PIE (the AHPRA Practitioner Information Exchange register lookup) auto-verification where approved and always falls back to a first-class manual-verify storing verified_method + verified_on. Requirements: PIE is approval-gated SOAP — treat as best-effort with the manual fallback always present; a verified-on date is recorded either way; CRUD + verify are gated to owner/lead (team:manage)."
         }
       ]
     },
@@ -326,15 +330,23 @@
       "tasks": [
         {
           "title": "Scheduled credential watch + alert generation",
-          "note": "Add a daily scheduled scan (Sprint-0 scheduler) over all credentials that raises a CredentialAlert for items within N days of expiry (registration/insurance), CPD (continuing professional development) under threshold (<60% of required), or a PIE-pulled status change. Set severity (amber early-warning vs red lapsed) using the prototype's 40-day window. On true lapse, ensure the derived canInject (the derived cleared-to-inject gate) already reflects not-cleared (CREDENTIALS owns the derivation) so booking/administration block automatically — the alert is the prompt, not the gate."
+          "note": "Behaviour: a daily scheduled scan (Sprint-0 scheduler) over all credentials raising a CredentialAlert for items within N days of expiry (registration/insurance), CPD (continuing professional development) under threshold (<60% of required), or a PIE-pulled status change. Requirements: set severity (amber early-warning vs red lapsed) using the prototype's 40-day window; idempotent — re-running the scan never duplicates an open alert for the same credential."
+        },
+        {
+          "title": "Auto-lapse → canInject flips not-cleared (the block is automatic)",
+          "note": "Behaviour: on an actual lapse (or a PIE status change like suspended), the practitioner stops being bookable and S4 administration by them is blocked — with no human action. Requirements: CREDENTIALS owns the canInject (the derived cleared-to-inject gate) derivation; this story ensures the watch's lapse outcome is reflected so booking (PRD-02) and administration (PRD-04/05) block automatically; the alert is the PROMPT to renew before that happens, not the gate itself."
         },
         {
           "title": "Role-targeted routing to digest + Follow-ups, with audited acknowledge",
-          "note": "Route alerts by concern (compliance/hr/stockAlert) to Lead/NP (nurse practitioner)/owner — not every RN (registered nurse). Project alerts into the owner needs-attention digest (PRD-08) and as expiry tasks into the Follow-ups queue (ADR-0023). Provide acknowledge/dismiss that writes an audit event (who/when). Idempotent: re-running the scan does not duplicate an open alert for the same credential."
+          "note": "Behaviour: route alerts by concern (compliance/hr/stockAlert) to Lead/NP (nurse practitioner)/owner — not every RN (registered nurse) — projecting them into the owner needs-attention digest (PRD-08) and as expiry tasks into the Follow-ups queue (ADR-0023). Requirements: acknowledge/dismiss writes an audit event (who/when); idempotent so a re-scan does not duplicate an open alert."
         },
         {
-          "title": "Compliance board UI",
-          "note": "Build Team -> Compliance board (team-compliance.png): the explainer note, the red 'N injector flagged not-bookable for S4 (Schedule 4 prescription-only medicine)' banner (or the green all-clear), and the per-practitioner table with Registration / CPD (continuing professional development) / Indemnity-cosmetic / Bookable-for-S4 columns using the emerald/amber/rose states. Show the amber 'Renews in Nd' countdowns. Capability-gate to team:manage / compliance concern."
+          "title": "Compliance board UI ('who is cleared to inject today')",
+          "note": "Behaviour: build Team → Compliance board (team-compliance.png) — the explainer note ('an injector is bookable for S4 only when ALL of these hold: current registration, enough CPD, indemnity that covers cosmetic'), a red 'N injector flagged not-bookable for S4 (Schedule 4 prescription-only medicine)' banner (or the green all-clear), and the per-practitioner table with Registration / CPD (continuing professional development) / Indemnity-cosmetic / Bookable-for-S4 columns. Requirements: cells use emerald/amber/rose states; non-AHPRA practitioners render n/a; capability-gate to team:manage / the compliance concern."
+        },
+        {
+          "title": "Amber early-warning countdown chips ('Renews in Nd')",
+          "note": "Behaviour: surface the amber early-warning chips ('Renews in Nd' for reg/insurance ≤40 days out, 'CPD behind X/Yh' when CPD is under threshold) on the People & Compliance views. Requirements: the countdown is derived from the credential expiry/CPD figures; the same items also surface in the owner needs-attention digest and Follow-ups; the chip is read-only signal, not an editable field."
         }
       ]
     },
@@ -396,12 +408,20 @@
       ],
       "tasks": [
         {
-          "title": "Roster & leave model + availability derivation",
-          "note": "Model RosterShift (per staff + location) and TimeOff with an approval status, all tenant_id + RLS (row-level security). Compute bookable availability as shifts minus approved leave, intersected with the canInject (the derived cleared-to-inject gate)/scope check for the requested service — and expose it as the query PRD-02 booking consumes so it cannot offer a slot for an off or non-compliant practitioner. Record engagement type usage for downstream attribution (it lives on StaffProfile). Audit every roster/leave change and leave approval."
+          "title": "Weekly roster grid (editable shifts, per staff + location)",
+          "note": "Behaviour: the weekly roster grid (team-roster.png) — day columns × practitioner rows with shaded rostered cells, editable by Owner/Lead. Requirements: model RosterShift per staff + location (tenant_id + RLS); Reception sees the grid read-only (it needs to see who's in, not edit shifts); the ADR-0029 banner states the roster is the source of truth for booking availability; every shift change is audited."
         },
         {
-          "title": "Roster & leave UI (Team workspace)",
-          "note": "Build Team -> Roster & leave (team-roster.png): the weekly grid (day columns x practitioner rows) with editable rostered cells and the Leave list with pending/approved status chips and approve/decline actions. Show the ADR-0029 availability banner. Owner/Lead edit; Reception read-only (capability-gate to team:manage for edits, read for frontdesk). No payroll/commission UI here — attribution is downstream (ADR-0027)."
+          "title": "Leave list with pending/approved status + approve/decline",
+          "note": "Behaviour: the Leave list below the grid — entries with kind (annual/personal/other), dates and a status chip (Pending/Approved/Declined), with approve/decline actions for Owner/Lead. Requirements: approved leave blocks availability, pending does not yet block but is visible; approve/decline is gated to team:manage and audited; model TimeOff with the approval status."
+        },
+        {
+          "title": "Bookable-availability derivation (the query PRD-02 consumes)",
+          "note": "Behaviour: compute bookable availability = roster shifts − approved leave, intersected with the canInject (the derived cleared-to-inject gate)/scope check for the requested service. Requirements: expose this as the exact query PRD-02 booking consumes so the diary can never offer a slot for an off or non-compliant practitioner; a practitioner is bookable for an S4 (Schedule 4 prescription-only medicine) service only when rostered AND canInject is true (ADR-0029)."
+        },
+        {
+          "title": "Engagement-type recording for downstream attribution",
+          "note": "Behaviour: record each staff member's engagement type (employee/contractor) — it already lives on StaffProfile from CREDENTIALS — for downstream commission/pay attribution and the contractor compliance banner. Requirements: the platform attributes revenue by engagement type but is explicitly NOT a payroll/super engine (ADR-0027); no payroll/commission UI here — attribution is downstream."
         }
       ]
     },
@@ -831,12 +851,20 @@
       ],
       "tasks": [
         {
-          "title": "Client core record, DOB capture & age derivation",
-          "note": "Model the Client core (tenant_id + RLS (row-level security)) with DOB (date of birth) and derive under18 + current age server-side at read time so they stay correct across a birthday with no batch job. Expose the derived flag/age to PRD-03/06/07 (cooling-off, pricing) and to the patient-header age chip. Support soft-delete (deleted_at; excluded from active/bookable/search views; row + history retained for RETENTION/AUDIT — never hard-deleted here)."
+          "title": "Client core record + server-side age / under-18 derivation",
+          "note": "Behaviour: model the Client core (tenant_id + RLS (row-level security)) with DOB (date of birth) and derive under18 + current age server-side AT READ TIME so they stay correct across a birthday with no batch job (a client who is 17 today is 18 on their birthday automatically). Requirements: expose the derived flag/age to PRD-03/06/07 (the under-18 cooling-off C6 and the S4 advertising/pricing C9 rules) so every consumer reads one answer instead of re-implementing date maths; an unknown/estimated DOB still derives a defensible age band."
+        },
+        {
+          "title": "Soft-delete with audit (retention/destruction stays RETENTION's job)",
+          "note": "Behaviour: support soft-delete (deleted_at) so a deleted client is excluded from active/bookable/search views but the row and its history remain. Requirements: never hard-delete here — destruction is RETENTION's job; a soft-deleted client cannot be booked or appear in active search; the delete writes an audit event."
         },
         {
           "title": "Duplicate detection & reviewed merge",
-          "note": "Surface duplicate/merge candidates (matching name + DOB (date of birth) + contact) as suggestions, never auto-merging two real people. Merge is a reviewed action that re-points history to the surviving record and writes an audit event. Soft-deleted and merged-away records stay out of active views."
+          "note": "Behaviour: surface duplicate/merge candidates (matching name + DOB (date of birth) + contact) as suggestions, never auto-merging two real people. Requirements: merge is a reviewed action that re-points history to the surviving record and writes an audit event; soft-deleted and merged-away records stay out of active views (full client directory + 360 profile are PRD-02)."
+        },
+        {
+          "title": "Patient-header age / under-18 chip surface",
+          "note": "Behaviour: expose the derived age + under-18 status as the patient-header age chip (the visible signal staff always see, e.g. '34 · Brisbane'), consumed by the Client 360 header (PRD-02/CLIENT-360). Requirements: the chip reads the server-derived age/flag (never a hand-set field); the under-18 state is the at-a-glance gate signal a clinician sees before charting; the directory + full profile that host it are PRD-02."
         }
       ]
     },

@@ -240,16 +240,20 @@
       ],
       "tasks": [
         {
-          "title": "Product catalogue model: type, unit, schedule, ARTG/reg metadata (model & migration)",
-          "note": "Add Product: id, tenant_id, name, type(toxin|filler|skin|retail), unit, schedule(S4|non-S4), reg_class, artg_no, sponsor, compounded(bool), par_level, color; RLS by tenant. StockItem.product_id FK. Per-product+unit aggregation only — no cross-unit roll-up. Build the ProductAggregate read model (on_hand, used_90d, wasted_90d, below_par) over StockLedger (ADR-0013). schedule is the single column the rewards engine (PRD-06) and public-naming policy (PRD-07) read."
+          "title": "Products catalogue table (typed rows + S4 toggle pill)",
+          "note": "Behaviour: the 'Products' modal lists every product as a row — name, type(toxin|filler|skin|retail), unit, par level, an S4 toggle pill ('S4 ✓' / 'non-S4'), per-product on-hand in that product's unit, and a Remove action (prototype renderCatalog/toggleS4/removeProduct). Requirements: the schedule(S4|non-S4) flag is the master classification — toggling it re-renders the stock view and the lot-detail S4 badge live, in one place; on-hand shown per product is its own-unit aggregate only (never summed across a toxin's units and a filler's syringes, ADR-0021). The toggle and Remove are capability-gated to prescriber/owner; non-owner stock roles see the table read-only."
         },
         {
-          "title": "Catalogue admin API + S4/GLP-1 rules",
-          "note": "Endpoints (capability-gated to prescriber/owner): POST/PATCH/DELETE /products, PATCH /products/{id}/schedule (the S4 toggle). Setting schedule re-classifies everywhere — rewards eligibility and public naming key off it (ADR-0014). On create/receive, if compounded=true AND reg_class indicates GLP-1, block (prohibited compounded GLP-1, 1 Oct 2024). Persist reg_class so adverse-event DAEN routing (PRD-08) can pick medicine vs device."
+          "title": "Add-product form (type, unit, par, S4)",
+          "note": "Behaviour: an add-product form captures name, type, unit (units vs syringes vs each), par level and an S4 checkbox, appending a new typed product to the catalogue (prototype addProduct). Requirements: unit is chosen at creation and governs every lot quantity under the product; reg_class/ARTG/sponsor/compounded metadata are captured here too so adverse-event DAEN routing (medicine vs device) and the GLP-1 block can key off them; on create, a compounded GLP-1 (Glucagon-Like Peptide-1) product is refused (prohibited compounded GLP-1, banned 1 Oct 2024). Capability-gated to prescriber/owner."
         },
         {
-          "title": "Capability gate + audit on classification changes",
-          "note": "Gate catalogue admin on the catalogue-admin capability (PRD-01/ADR-0017); non-owner stock roles may view but not change the S4 flag. Audit every product add/remove and every schedule toggle to the append-only stream — the S4 classification is compliance-load-bearing (rewards exclusion C9, public naming), so changes must be explainable. Any margin/cost fields stay .fin-gated (owner-only)."
+          "title": "Per-product cards: on-hand, usage, below-par & sparkline",
+          "note": "Behaviour: the main stock screen renders a card per product showing on-hand, used/wasted over 90 days, a usage sparkline and an S4 badge, with a 'below par' state when on-hand drops under the par level (prototype prodCards/prodAgg/spark). Requirements: each figure is computed per product+unit from the ProductAggregate read model over the StockLedger (ADR-0013) — never a cross-unit roll-up; below-par drives the reorder count on the KPI strip. Cost/margin fields, if shown, stay owner-only behind the .fin capability."
+        },
+        {
+          "title": "Schedule-change classification fan-out + audit",
+          "note": "Behaviour: setting the S4 flag re-classifies the product everywhere at once — the rewards engine (PRD-06) immediately excludes it (rewards may never apply to an S4 prescription-only medicine, C9) and the public booking page (PRD-07) applies the generic-naming / withheld-price policy. Requirements: the schedule(S4|non-S4) column is the single source those modules read; every product add/remove and every schedule toggle writes an AuditEvent to the append-only stream so a compliance-load-bearing classification change is explainable to a regulator."
         }
       ]
     },
@@ -399,16 +403,82 @@
       ],
       "tasks": [
         {
-          "title": "StockItem (lot) + PurchaseOrder model with provenance (model & migration)",
-          "note": "Add StockItem: id, tenant_id, product_id(FK), lot, expiry, received_units, on_hand, wasted, supplier, artg_verified(bool), supply_source, location_id(FK StockLocation), custodian_id, status; RLS by tenant. Add PurchaseOrder: id, tenant_id, supplier, wholesaler_approved, lines[], prescriber_signer_id, status. Index (product_id, expiry) for expiry alerts and (lot) for recall. on_hand is maintained only via StockLedger movements, never edited directly."
+          "title": "Receive-stock modal (lot, expiry, units, supplier, ARTG, destination)",
+          "note": "Behaviour: 'Receive stock' opens a modal capturing the lot number, expiry, units received (in the product's unit), supplier, ARTG (Australian Register of Therapeutic Goods) status and the destination location ('Receive into Fridge 1'); on save the lot appears at the top of the 'Stock by lot' table and is auto-selected for its detail (prototype openReceive/doReceive). Requirements: received_units seeds on_hand via a StockLedger receive movement (on_hand is never typed directly); receiving into a location binds the lot to that secure StockLocation and its custodian (PRD-04/CUSTODY-STORAGE)."
         },
         {
-          "title": "Receive-stock API + ARTG/lawful-supply validation",
-          "note": "Endpoint POST /stock/receive: lot, expiry, received_units (product unit), supplier, artg status, supply_source, location_id, custodian_id. Writes a StockLedger receive movement and creates the StockItem. Validate lawful supply: warn or block non-ARTG / unverified-source per tenant config (C11). ARTG = manual entry in v1 with a hook for a future ARTG dataset lookup. Receiving into a location binds custody (PRD-04/CUSTODY-STORAGE)."
+          "title": "ARTG status + lawful-supply provenance per lot",
+          "note": "Behaviour: every received S4 (Schedule 4 prescription-only medicine) lot records its ARTG registration status, brand, sponsor and lawful supply source; the lot detail shows the ARTG badge ('ARTG ✓' vs 'unapproved') alongside supplier and custody. Requirements: a non-ARTG or unverified-source lot is warned or blocked per tenant config (C11) — lawful supply is a top TGA (Therapeutic Goods Administration) enforcement target; ARTG is manual entry in v1 with a hook for a future ARTG-dataset lookup. The provenance recorded here is exactly what makes a lot selectable at the administration gate (PRD-04/ADMIN-GATE)."
         },
         {
-          "title": "Prescriber-signer gate on S4 POs + audit",
-          "note": "Enforce that an S4 PurchaseOrder requires prescriber_signer_id (a prescribe-S4-capable staffer) and wholesaler_approved=true before it can be raised/received (GAP-3, ADR-0008); RN/EN/admin attempts are rejected. Audit every receive with full provenance (lot, ARTG, supplier, source, signer) - this is the lawful-supply evidence an inspector asks for (C11)."
+          "title": "Prescriber-signer gate on S4 purchase orders",
+          "note": "Behaviour: an S4 purchase order can only be raised/received by a prescriber signer from a TGA-approved wholesaler. Requirements: enforce in domain + DB (ADR-0008) that an S4 PurchaseOrder carries prescriber_signer_id (a prescribe-S4-capable staffer) AND wholesaler_approved=true before it commits (GAP-3); RN/EN/admin attempts are rejected with an explainable reason. RNs/ENs/admin cannot buy S4."
+        },
+        {
+          "title": "Receive-provenance audit trail",
+          "note": "Behaviour: each receive writes an immutable audit record of the full provenance — lot, ARTG status, supplier, supply source, destination, custodian and the prescriber signer. Requirements: append-only AuditEvent stream (ADR-0010); a blocked receive (non-ARTG / unverified source / non-prescriber signer) is itself audited so the refusal is explainable. This is the lawful-supply evidence an inspector asks for (C11)."
+        }
+      ]
+    },
+    {
+      "key": "STOCK-OVERVIEW",
+      "title": "Stock at-a-glance: KPIs, product cards & waste-reduction nudges",
+      "as_a": "stock-capable clinician / owner",
+      "i_want": "an at-a-glance medicines dashboard with on-hand, expiry and below-par signals plus FEFO waste-reduction nudges",
+      "so_that": "I can see stock health in seconds and act before a lot expires or runs out",
+      "context": "Plainly: this is the top of the Medicines & stock screen — the read-only picture of stock health (what's on hand, what's expiring, what's below par) plus the lawful nudges to use near-expiry stock before it is written off. Where it fits: it is the at-a-glance surface of the medicines moat, a sibling of the receive/provenance story (PRD-04/STOCK-RECEIVE) and a read aggregation over the same lots. It reads on-hand and usage from the StockLedger (PRD-04/VIAL-RECON), expiry from the lots, and its 'reduce waste & lift margin' panel coordinates with the schedule's quiet-window fill (PRD-02/QUIET-WINDOWS) so a near-expiry S4 (Schedule 4 prescription-only medicine) lot can be consumed first-expiry-first-out (FEFO) — using only non-S4 incentives, because S4 medicines may never be discounted or advertised (TGA, the Therapeutic Goods Administration).",
+      "notes": "",
+      "acceptance": [
+        "KPI tiles surface products tracked, active lots, expiring-soon lots (with the lot detail) and below-par reorder count, computed per product+unit.",
+        "Per-product cards show on-hand, used/wasted (90d), a usage sparkline and a below-par state; a usage-history chart trends units used per week.",
+        "A 'reduce waste & lift margin' panel nudges FEFO use of near-expiry lots and slow-moving retail using only non-S4 incentives, with any dollar/margin figure gated owner-only (.fin).",
+        "The panel cross-links to the schedule's quiet windows (PRD-02/QUIET-WINDOWS) so a near-expiry lot can be absorbed before it must be written off."
+      ],
+      "detail": [
+        "The screen already holds the lots; this story is the read-only health summary on top of them. KPI tiles report products tracked, active lots (on-hand > 0), expiring-soon lots with their detail (e.g. 'Botox B2188 · 40U'), and the below-par reorder count — every figure computed per product+unit, never rolled up across a toxin's units and a filler's syringes (ADR-0021).",
+        "Per-product cards (prototype prodCards/prodAgg) show on-hand, used/wasted over 90 days, a usage sparkline and a 'below par' state; a usage-history chart trends units used per week per product. These are projections over the StockLedger (PRD-04/VIAL-RECON), not hand-maintained counters.",
+        "The 'Reduce waste & lift margin' panel turns the data into action: a near-expiry lot is framed as a write-off to avoid ('Lot B2188 expiring ~6 wks · 40u — avoid a ~$440 write-off'), nudged FEFO (first-expiry-first-out), with a tie-in to the schedule's quiet windows that could absorb it (PRD-02/QUIET-WINDOWS). It also nudges clearing slow-moving retail.",
+        "Two hard constraints frame the panel: S4 medicines can never be discounted or advertised, so every lever uses non-S4 incentives sent privately to consented clients (TGA); and every dollar/margin figure is owner-only and stripped for non-owner roles (the .fin capability) — a non-owner sees the lot-health prompt to act, but no money."
+      ],
+      "ui_spec": [
+        "Prototype screen: Stock & medicines top section (stock.png).",
+        "KPI tiles: 'Products tracked', 'Active lots', 'Expiring soon' (count + the lot detail line, amber) and 'Below par' (reorder count, amber).",
+        "Per-product cards (on-hand, used/wasted 90d, sparkline, S4 badge, below-par state) and a 'Usage history · units used / week' chart with a per-product toggle.",
+        "'Reduce waste & lift margin' panel: a near-expiry-lot card ('Lot B2188 expiring (~6 wks · 40u) · avoid a ~$440 write-off · FEFO · 3 quiet windows could absorb it · See quiet windows →'), a 'pull bookings into the window' non-S4 member-offer card and a slow-moving-retail bundle card, with the footnote that S4 medicines can't be discounted/advertised (TGA).",
+        "Owner-only ($) figures rendered only when the .fin capability is present."
+      ],
+      "data_model": [
+        {
+          "entity": "ProductAggregate (read model)",
+          "fields": "product_id, unit, on_hand, used_90d, wasted_90d, below_par(bool); projected from StockLedger",
+          "notes": "Per product+unit only (ADR-0021); drives the cards + KPI tiles. Mapping: prodAgg() in the prototype."
+        },
+        {
+          "entity": "ExpiryAlert (derived)",
+          "fields": "lot_id, product_id, expiry, on_hand, weeks_to_expiry, est_writeoff_value(.fin)",
+          "notes": "Surfaces near-expiry lots for the FEFO nudge; the dollar value is owner-only (.fin). Ties to PRD-02/QUIET-WINDOWS for absorption."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-04/STOCK-RECEIVE"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P1",
+      "tasks": [
+        {
+          "title": "Stock KPI tiles (products, active lots, expiring soon, below par)",
+          "note": "Behaviour: a KPI strip over the lots — products tracked, active lots (on-hand > 0), expiring-soon lots with the lot detail line, and the below-par reorder count (prototype kProducts/kLots/kExpLots/kReorder). Requirements: every figure is a per-product+unit projection over the StockLedger (PRD-04/VIAL-RECON), never a cross-unit roll-up (ADR-0021); below-par is on-hand < par level; expiring-soon reads the expiry alert query."
+        },
+        {
+          "title": "Per-product cards + usage-history chart",
+          "note": "Behaviour: a card per product (on-hand, used/wasted 90d, usage sparkline, S4 badge, below-par state) plus a 'units used / week' usage-history chart with a per-product toggle (prototype prodCards/spark/usagechart). Requirements: figures come from the ProductAggregate read model; the chart trends StockLedger administer/waste movements per product. Any cost/margin overlay stays owner-only (.fin)."
+        },
+        {
+          "title": "Reduce-waste & lift-margin nudges (FEFO, non-S4, .fin)",
+          "note": "Behaviour: a panel that frames a near-expiry lot as a write-off to avoid, nudges first-expiry-first-out (FEFO) use, and links to the schedule's quiet windows that could absorb it (PRD-02/QUIET-WINDOWS); plus a non-S4 member-offer nudge and a slow-moving-retail bundle nudge. Requirements: levers use ONLY non-S4 incentives sent privately to consented clients — S4 (Schedule 4 prescription-only medicine) may never be discounted or advertised (TGA, the Therapeutic Goods Administration); every dollar/margin/write-off figure is owner-only and stripped for non-owner roles (the .fin capability)."
         }
       ]
     },

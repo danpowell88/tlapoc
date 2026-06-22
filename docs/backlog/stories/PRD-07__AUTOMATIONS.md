@@ -45,16 +45,13 @@ _Prototype screen: prototype.html — Comms & growth (Inbox/Automations/Campaign
 
 ## Tasks (dev pickup)
 
-- [ ] **Automation model over Sequence (migrations)**
-  Model Automation (tenant_id + RLS (row-level security)): trigger, treatment_type, sequence_id, kind (transactional|marketing), enabled.
-  - A thin wrapper over Sequence (REMINDERS-CARE) — does not duplicate the engine.
-  - kind carries through to the consent gate.
-- [ ] **Automation toggle/edit API + engine wiring**
-  Server-side.
-  - Endpoints to list/enable/disable/edit automations per treatment type; toggling enabled gates whether the linked Sequence triggers.
-  - Marketing-kind automations gate on consent + suppression (C23); transactional always send.
-  - Stats (sent/booked/returned) read from NotificationLog + outcomes.
+- [ ] **Automation model over Sequence + on/off toggle**
+  Behaviour: an Automation is a thin, toggleable wrapper over a Sequence — trigger (booking|visit|interval) + treatment_type + sequence_id + kind (transactional|marketing) + enabled. Toggling an automation off stops the underlying Sequence from triggering; toggling on resumes it. Requirements: tenant-scoped with RLS (row-level security); does NOT duplicate the sequence engine (REMINDERS-CARE/RECALL) — it configures it; kind carries through to the consent gate.
+- [ ] **Per-treatment-type editing of automations**
+  Behaviour: each automation can be edited per treatment type so a filler client and a skin client get the right cadence/content (e.g. Recall — anti-wrinkle ~12 wks vs a different interval for filler). Requirements: editing changes the linked Sequence's steps/offsets/templates; changes are owner/front-desk gated; the default set matches the prototype cards (Recall, Aftercare, Win-back, Birthday, No-show follow-up, Review request).
+- [ ] **Transactional vs marketing consent split (C23)**
+  Behaviour: the screen states 'Flows run automatically on the right trigger. All respect opt-in & unsubscribe (Spam Act).' Marketing automations (recall nudge, win-back, birthday, review request) gate on marketing consent + suppression; transactional ones (reminders, aftercare) always send. Requirements: the kind flag drives the gate via MARKETING-CONSENT; a marketing automation never sends to a non-consented/suppressed contact; content never names/prices S4 (Schedule 4 prescription-only medicine) (C9). Review request is off by default.
+- [ ] **Automation live stats (sent / booked / returned)**
+  Behaviour: each automation card shows live stats — e.g. 'Recall 42 sent · 18 booked', 'Aftercare 96 sent (30d)', 'Win-back 128 sent · 11 returned', 'No-show 9 sent · 5 rebooked'. Requirements: stats read from NotificationLog (sends) joined to outcomes (bookings/returns) over a rolling window; computed server-side, not hand-entered.
 - [ ] **Automations web UI (cards + toggles)**
-  Angular per the screenshot.
-  - Automation cards with channel + audience + live stats and an on/off toggle (toggleAuto); per-treatment editing; the 'all respect opt-in & unsubscribe' note.
-  - Owner/front-desk gated; loading/empty/error states.
+  Behaviour: the Automations screen renders automation cards with channel + audience + live stats and an on/off toggle (toggleAuto), plus per-treatment editing and the 'all respect opt-in & unsubscribe (Spam Act)' note. Requirements: owner/front-desk gated; Review request shown off by default; loading/empty/error states.

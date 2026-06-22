@@ -50,15 +50,13 @@ _Prototype screen: prototype.html — Comms & growth (Inbox/Automations/Campaign
 
 ## Tasks (dev pickup)
 
-- [ ] **Lead model as a projection over conversations (migrations)**
-  Model Lead (tenant_id + RLS (row-level security)) per ADR-0033: name, contact, source, interest, stage, next_action, optional conversation_id + converted_client_id, consent.
-  - A thin pipeline layer over the inbox; stage transitions feed conversion read-models.
-- [ ] **Leads API: pipeline stages, convert-to-client, consent-gated nudges, Follow-ups**
-  Server-side.
-  - CRUD leads; move stage (new/consult/won/lost); convert -> create/link a client + (optional) booking, preserving enquiry history.
-  - Outbound nudges gate on marketing consent (C23); 1:1 service replies exempt.
-  - Lead follow-ups raise Jobs into Follow-ups; conversion KPI (key performance indicator) read-model (open, consults, conversion %, avg days).
-- [ ] **Leads (CRM) web UI: kanban + KPIs + convert**
-  Angular per the screenshot.
-  - Kanban columns (New enquiry / Consult booked / Converted / Lost) with lead cards (source + consent dot); KPI (key performance indicator) cards; convert-to-client/booking action; the 1:1-vs-public-advertising note.
-  - Front-desk/owner gated; loading/empty/error states.
+- [ ] **Lead pipeline model + stages (projection over conversations)**
+  Behaviour: a Lead is a thin pipeline layer over the inbox (ADR-0033) — name, contact, source (Instagram DM / Website widget / Facebook / Referral / Google), interest, stage (new / consult / won / lost), next_action, optional linked conversation, plus consent state. Staff move a lead between stages as it progresses. Requirements: tenant-scoped with RLS (row-level security); stage transitions feed the conversion read-models; an enquiry from the inbox becomes a pipeline card.
+- [ ] **Convert lead -> client / booking (preserve history)**
+  Behaviour: converting a lead creates or links a client and (optionally) a booking, preserving the original enquiry history. Requirements: the linked conversation/history is retained on the resulting client; converted_client_id is stamped; conversion moves the lead to 'won'.
+- [ ] **Consent-gated outbound nudges (1:1 replies exempt, C23)**
+  Behaviour: a 1:1 service reply to a lead is fine (not public advertising), but any proactive outbound nudge to a lead gates on marketing consent — the board shows a consent dot per lead. Requirements: outbound nudges route through MARKETING-CONSENT (consent + suppression, C23); 1:1 replies are exempt; advertising compliance (C9) for campaigns/social stays clinic-owned in external tools.
+- [ ] **Lead follow-ups -> Follow-ups queue + conversion KPIs**
+  Behaviour: lead follow-ups surface in the unified Follow-ups queue (e.g. 'Reply & book — Friday consult'); a conversion KPI read-model powers the cards (Open leads, Consults booked, Conversion %, Avg days). Requirements: lead Jobs project into PRD-07/FOLLOWUPS; KPI (key performance indicator) figures computed server-side from stage transitions.
+- [ ] **Leads (CRM) web UI (kanban + KPIs + convert)**
+  Behaviour: the Growth -> Leads screen shows KPI cards and kanban columns (New enquiry / Consult booked / Converted / Lost) with lead cards (source + consent dot), a convert-to-client/booking action, and the '1:1 replies aren't public advertising; outbound nudges need opt-in consent' note. Requirements: front-desk/owner gated; loading/empty/error states; cards reflect stage moves live.

@@ -47,10 +47,10 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 ## Tasks (dev pickup)
 
 - [ ] **EmergencyKitItem register + add/remove**
-  Model EmergencyKitItem (tenant_id, location_id, name, for, expiry, quantity). Register UI (Item · For · Qty · Expiry) with add/remove (prototype saveKit/newKit/removeKit). Source of truth for what's available during a complication response.
+  Behaviour: track the emergency drugs/kit (hyaluronidase for filler vascular occlusion, adrenaline 1:1000 for anaphylaxis, hydrocortisone, etc.) with what each is for, quantity and expiry. Requirements: model EmergencyKitItem (tenant_id, location_id, name, for, expiry, quantity); register UI (Item · For · Qty · Expiry) with add/remove (prototype saveKit/newKit/removeKit); this is the source of truth for what's available during a complication response.
 - [ ] **Emergency-kit expiry alerts (scheduled)**
-  Schedule expiry alerts (lead-time before expiry) via the jobs scheduler so a lapsing item (e.g. adrenaline) is flagged before it expires.
+  Behaviour: flag a lapsing kit item before it expires. Requirements: schedule expiry alerts (configurable lead-time) via the jobs scheduler so a time-critical item (e.g. adrenaline) is never found expired during an emergency.
 - [ ] **Surface kit from complication protocols + 'Start response' link**
-  Surface the kit register on Clinical → Complication protocols beside the Vascular-occlusion / Anaphylaxis protocol cards. 'Start response' opens a timestamped checklist (PRD-05 complication response) that records the kit item used and routes an adverse event (an unwanted medical occurrence after a treatment).
+  Behaviour: show the kit register beside the time-critical protocol cards and let staff launch a response. Requirements: surface the kit on Clinical → Complication protocols next to the Vascular-occlusion / Anaphylaxis cards; 'Start response' opens a timestamped checklist (PRD-05 complication response) that records the kit item used and routes an adverse event (an unwanted medical occurrence after a treatment) — the breach/complication pathway stays intact.
 - [ ] **ContinuityContact record + visibility**
-  Model and record a continuity-of-care contact (name, role, phone) and surface it when the treating practitioner/prescriber is unavailable (AHPRA (Australian Health Practitioner Regulation Agency) continuity-of-care obligation, C20).
+  Behaviour: record a backup contact for when the prescriber is unavailable. Requirements: model ContinuityContact (name, role, phone) and surface it when the treating practitioner/prescriber is unavailable, satisfying the AHPRA (Australian Health Practitioner Regulation Agency) continuity-of-care obligation (C20).

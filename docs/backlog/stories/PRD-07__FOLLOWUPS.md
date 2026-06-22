@@ -48,17 +48,13 @@ _Prototype screen: prototype.html — Comms & growth (Inbox/Automations/Campaign
 
 ## Tasks (dev pickup)
 
-- [ ] **Job model + signal projections (migrations)**
-  Model Job (tenant_id + RLS (row-level security)) per ADR-0023: type, optional client/conversation/appointment links, assignee (role|person), status (open|snoozed|done), source (manual|auto|recall|system), due_at.
-  - Existing signals project INTO this queue (recall due, unanswered conversation, negative review, no-show, stock/expiry, client concern) rather than separate tables.
-  - Role-scoping ('my queue') via the concerns model.
-- [ ] **Jobs API: lifecycle, flag, rules/keyword auto-categorise, projections**
-  Server-side.
-  - Lifecycle endpoints: create/open/done/snooze/reopen/reassign; flag a message/client -> Job.
-  - Auto-categorise inbound conversations by rules/keyword (no AI): map category (Complaint -> Lead-Nurse callback; Booking -> Reception reply-&-book; Pricing -> Reception reply) to a Job; idempotent (don't double-create for an already-open conversation job).
-  - Project recall (RECALL), reviews (REVIEWS), no-shows (PRD-02), stock/expiry and concerns (PRD-09) into the queue; audit all status changes (ADR-0010).
-- [ ] **Follow-ups web UI: filters, job rows, actions, nav badge**
-  Angular per the screenshot.
-  - Filter pills (Open / Mine / Snoozed / Done) with counts; 'Auto-detect from inbox' action.
-  - Job rows: type badge, assignee, source tag, due + client; primary link (open chat / open client / view report) + done checkbox + Snooze / Reassign.
-  - Nav count badge + dashboard 'follow-ups' list; role-scoped 'Mine'; loading/empty ('queue clear')/error states.
+- [ ] **Unified Job model + signal projections**
+  Behaviour: one Job entity backs the whole queue — type (recall|callback|reply|review|concern|consent|stock|restock|admin), optional client/conversation/appointment links, assignee (role|person), status (open|snoozed|done), source (manual|auto|recall|system), due_at. Existing signals project INTO this one queue rather than living in separate UIs: recall due (RECALL), unanswered conversations (INBOX), negative reviews (REVIEWS), no-shows (PRD-02), stock/expiry alerts, client concern reports (PRD-09). Requirements: tenant-scoped with RLS (row-level security); projections don't create duplicate tables — they surface as Jobs; per ADR-0023.
+- [ ] **Job lifecycle actions (open / done / snooze / reopen / reassign / callback)**
+  Behaviour: each job supports open (jumps to the chat/client/report), mark done, snooze, reopen, reassign (cycles the role) and callback; every status change is audited. Requirements: actions are server-authoritative; reassign cycles through the role set; snooze hides until a due time; all transitions write an AuditEvent (ADR-0010); the queue is role-scoped so 'Mine' shows only the current user's/role's jobs.
+- [ ] **Manual flag -> Job**
+  Behaviour: staff can flag any message or client and it becomes a Job so it can't get lost ('Flag a message and it can't get lost'). Requirements: a manual flag sets source=manual and an appropriate type/assignee; flagging is available from the inbox and the client record; idempotent (re-flagging an already-open item doesn't duplicate).
+- [ ] **Rules/keyword auto-categorisation (no AI)**
+  Behaviour: inbound comms auto-categorise into jobs by rules/keyword (NO AI) — e.g. a 'Complaint' conversation → a Lead-Nurse callback job; a 'Booking' enquiry → a Reception reply-&-book job; a 'Pricing' enquiry → a Reception reply job; an 'Auto-detect from inbox' action triggers a sweep. Requirements: rules/keyword only (auto-categorisation is a UX aid, not a safety control — jobs are advisory and human-actioned); idempotent (don't double-create for an already-open conversation job); the assigned role follows the category.
+- [ ] **Follow-ups web UI (filters, job rows, actions, nav badge)**
+  Behaviour: the Follow-ups screen shows filter pills (Open / Mine / Snoozed / Done) with counts and an 'Auto-detect from inbox' action; each job row has a type badge, assignee, source tag (auto-detected / flagged / recall / system), due + client link, a primary action (open chat / open client / view report), a done checkbox and Snooze / Reassign. A count badge in the nav and a dashboard 'follow-ups' list keep it visible. Requirements: role-scoped 'Mine'; loading/empty ('queue clear')/error states; the nav badge reflects the open count live.

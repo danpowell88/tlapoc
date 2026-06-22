@@ -69,16 +69,75 @@
       ],
       "tasks": [
         {
-          "title": "Configurable, versioned IntakeForm + JSON field schema",
-          "note": "Model IntakeForm (name, version, fields as a JSON schema, required flag) so admins can define fields without code; bump version on change. Validate submitted answers against the schema server-side. Tenant-scoped (RLS (row-level security)). Seed the v1 medical-history & screening template (history checkboxes, contraindication items)."
-        },
-        {
           "title": "IntakeResponse capture + auto-link to chart/appointment",
-          "note": "Endpoint to submit an IntakeResponse from the client app/web/kiosk: stamp form_version, store answers(json), derive contraindication_flags, set submitted_at, and auto-link to client_id + appointment_id so it appears on the chart. Required-and-current responses feed the GATING evaluation. Re-screen vs full form chosen by new/returning. Audited."
+          "note": "Behaviour: an endpoint that submits an IntakeResponse from the client app / web / kiosk. Requirements: stamp form_version, store answers(json), derive contraindication_flags, set submitted_at, and auto-link to client_id + appointment_id so it appears on the chart; the response is validated server-side against the form's JSON schema; required-and-current responses feed the GATING evaluation; audited."
         },
         {
-          "title": "Staff Forms & consent intake status + send/chase UI",
-          "note": "Forms & consent screen: templates table (form/type/version/status) and recent submissions with per-client intake status (complete / pending — link sent). Actions to send or chase an intake link (via PRD-07). The client-app/kiosk intake wizard (history → safety check → wellbeing → consent → image use → done) renders the configured form."
+          "title": "Re-screen vs full form (new/returning)",
+          "note": "Behaviour: a returning client gets a quick medical re-screen; a new client gets the full intake form. Requirements: the form variant is chosen from the booking's new_or_returning flag (PRD-02); both stamp the form_version they were answered against; the quick re-screen still captures any changed contraindications."
+        },
+        {
+          "title": "Medical-history step + quick safety check",
+          "note": "Behaviour: the intake wizard's medical-history step (checkboxes incl. pregnancy/breastfeeding, blood thinners, cold-sore history, latex/lidocaine allergies, and 'None of the above') followed by a 'quick safety check' summary. Requirements: selections derive contraindication_flags; the safety check summarises whether any contraindication was flagged for the nurse; rendered identically in the client app and at the reception check-in tablet."
+        },
+        {
+          "title": "Staff Forms & consent: intake status + send/chase",
+          "note": "Behaviour: the staff Forms & consent screen showing recent submissions with per-client intake status (complete / pending — link sent) and actions to send or chase an intake link. Requirements: send/chase goes via PRD-07; status reflects whether a required, current IntakeResponse exists; rows deep-link to the client."
+        }
+      ]
+    },
+    {
+      "key": "FORM-BUILDER",
+      "title": "Configurable intake-form builder (versioned templates)",
+      "as_a": "owner / manager",
+      "i_want": "to define and version the pre-visit intake forms without code",
+      "so_that": "we can adjust the medical-history and screening questions as guidance changes while keeping every past answer tied to the form it was answered against",
+      "context": "Plainly: the admin tool that lets the clinic define what questions appear on the pre-visit intake form — and version those forms so a change never rewrites answers already given. Where it fits: a sibling of pre-visit intake (PRD-03/INTAKE) inside Intake & Consent (PRD-03), which sits between booking (PRD-02) and treatment. INTAKE collects and acts on a client's answers; this story owns the configurable, versioned TEMPLATE those answers are captured against. It is the structural backbone the intake wizard renders and the GATING evaluation relies on (a response is only valid against a known form version), and it mirrors the versioning discipline used for consent (PRD-03/CONSENT).",
+      "notes": "",
+      "acceptance": [
+        "Admins can define intake fields (a JSON field schema) without code, including required flags and contraindication items.",
+        "Editing a form creates a NEW version; previously submitted responses stay bound to the version they were answered against.",
+        "Submitted answers are validated server-side against the form's schema.",
+        "Templates are tenant-scoped and the v1 medical-history & screening template is seeded."
+      ],
+      "detail": [
+        "Intake forms are admin-configurable so the clinic can change the medical-history and screening questions as clinical guidance evolves, without a code change. An IntakeForm carries a versioned JSON field schema (field types, labels, options, required flags, contraindication items) and a required flag.",
+        "Versioning is the core discipline: editing a form publishes a NEW version and supersedes the old; a submitted IntakeResponse references the form_version it was answered against, so a later edit never rewrites or invalidates an answer already given (mirrors CONSENT's versioning). The GATING evaluation can therefore reason about whether a response is current.",
+        "Submitted answers are validated server-side against the active schema; templates are tenant-scoped (RLS). The v1 medical-history & screening template (history checkboxes, contraindication items, the embedded BDD/wellbeing block from PRD-03/BDD) is seeded."
+      ],
+      "ui_spec": [
+        "Prototype: Forms & consent (forms-consent.png) — the Templates table lists 'Medical history & screening · Intake · v4.0 · Current'; a '+ New template' affordance creates/edits a versioned form.",
+        "Form editor: add/reorder fields (checkbox/radio/text), mark required, tag contraindication items; medical-history step uses checkboxes incl. 'None of the above'.",
+        "Editing a current form warns it will publish a new version; superseded versions remain viewable for responses bound to them."
+      ],
+      "data_model": [
+        {
+          "entity": "IntakeForm",
+          "fields": "id, tenant_id, name, version, fields(json schema), required(bool), status(current|superseded)",
+          "notes": "Configurable; versioned; editing publishes a new version; old versions immutable so bound responses stay valid."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-03/INTAKE"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P1",
+      "tasks": [
+        {
+          "title": "Versioned IntakeForm + JSON field schema",
+          "note": "Behaviour: model IntakeForm (name, version, fields as a JSON schema, required flag) so admins define fields without code. Requirements: tenant-scoped (RLS (row-level security)); editing publishes a NEW version and supersedes the old; old versions are immutable so a bound IntakeResponse stays valid; seed the v1 medical-history & screening template (history checkboxes, contraindication items, the embedded BDD/wellbeing block)."
+        },
+        {
+          "title": "Server-side answer validation against the active schema",
+          "note": "Behaviour: validate every submitted set of answers against the form's field schema. Requirements: enforced server-side (a malformed/out-of-schema submission is rejected); required fields must be present for the response to count toward the GATING evaluation; the response is stamped with the exact form_version validated against."
+        },
+        {
+          "title": "Form-builder admin UI (add/reorder/require fields)",
+          "note": "Behaviour: a Forms & consent editor to add/reorder fields (checkbox/radio/text), mark required, and tag contraindication items, reached via '+ New template'. Requirements: editing a current form warns it will publish a new version; superseded versions remain viewable for responses bound to them; capability-gated admin."
         }
       ]
     },
@@ -137,15 +196,19 @@
       "tasks": [
         {
           "title": "Configurable BDD/psychological instrument + scoring",
-          "note": "Embed a validated screening instrument in intake as a configurable, versioned question set with a scoring rule that produces a score + boolean flag. Make the instrument swappable (instrument + instrument_version) so the clinically-chosen tool slots in without rework — v1 uses the prototype's placeholder wellbeing questions. Store the answers + score as a ScreeningResult linked to client + appointment."
+          "note": "Behaviour: embed a validated screening instrument in intake as a versioned question set that produces a score + boolean flag. Requirements: the instrument is swappable (instrument + instrument_version) so the clinically-chosen tool slots in without rework — v1 uses the prototype's placeholder wellbeing questions; store the answers + score as a ScreeningResult linked to client + appointment; audited."
         },
         {
           "title": "Positive-flag surfacing + RN/NP review requirement",
-          "note": "On a positive score, raise the flag and surface it to the prescriber (chip on the charting pre-treatment review + a follow-up signal). Record reviewed_by/reviewed_at when an RN/NP reviews the result; the GATING evaluation requires an RN/NP-reviewed ScreeningResult to exist before an S4 (Schedule 4 prescription-only medicine) treatment (C3). Audited."
+          "note": "Behaviour: a positive score raises a flag the prescriber sees, and an RN/NP must review the result before treatment. Requirements: surface the flag to the prescriber (chip on the charting pre-treatment review + a follow-up signal); record reviewed_by/reviewed_at on review; the GATING evaluation requires an RN/NP-reviewed ScreeningResult before an S4 (Schedule 4 prescription-only medicine) treatment (C3); audited."
         },
         {
-          "title": "BDD screen in the intake wizard + prescriber chip UI",
-          "note": "Render the wellbeing questions inside the client-app/kiosk intake wizard step. On the staff side, render the 'BDD screen: clear' / flagged chip on the Charting pre-treatment review and the screening status within the Forms & consent 'Medical history & screening' template."
+          "title": "Wellbeing questions in the intake wizard (client/kiosk)",
+          "note": "Behaviour: render the 'A few wellbeing questions' step inside the client-app/kiosk intake wizard (e.g. how often the concern is thought about, daily-life impact, realistic expectations) with radio options. Requirements: the same step renders in the client app and at the reception check-in tablet; answers feed the scoring rule; framed as routine for all cosmetic treatments."
+        },
+        {
+          "title": "Prescriber/staff screening chip UI",
+          "note": "Behaviour: show the screening outcome to staff. Requirements: render a 'BDD screen: clear' or flagged chip on the Charting pre-treatment review, and the screening status within the Forms & consent 'Medical history & screening' template; the flagged state is unmistakable to the prescriber."
         }
       ]
     },
@@ -210,16 +273,71 @@
       ],
       "tasks": [
         {
-          "title": "Versioned ConsentTemplate with mandated-content sections",
-          "note": "Model ConsentTemplate per treatment_type with an immutable, versioned content (sections) and a mandated_fields[] checklist (nature, risks/benefits/alternatives, practitioner qualifications, costs, realistic-outcome language, complaint mechanisms incl. AHPRA-despite-NDA). Editing creates a NEW version and supersedes the old; old versions are never mutated. Validate that a publishable version covers all mandated sections. Seed anti-wrinkle (and the under-18 + image-use templates)."
-        },
-        {
           "title": "E-signature capture bound to template_version (+ verbal)",
-          "note": "Endpoint to e-sign: create a ConsentSignature referencing the EXACT template_version read, with signature_ref (typed full name / signature), signed_at, and a verbal_confirmed flag (practitioner confirmation). A later template change does NOT invalidate or rebind an existing signature. Retain per C18 (PRD-01 RETENTION). Audited; feeds the GATING evaluation (current, version-matched)."
+          "note": "Behaviour: an endpoint that records a client's e-signature against the exact consent version they read. Requirements: create a ConsentSignature referencing the EXACT template_version, with signature_ref (typed full name / signature), signed_at and a verbal_confirmed flag (practitioner confirmation); a later template change does NOT invalidate or rebind an existing signature; retained per C18 (PRD-01 RETENTION); audited; feeds the GATING evaluation (current, version-matched)."
         },
         {
-          "title": "Consent reader/e-sign UI + staff status",
-          "note": "Client-app/kiosk plain-language consent reader (scrollable mandated content) + 'I've read & understood' + type-to-sign. Staff Forms & consent: templates with version/status and a '+ New template' (creates a new version). Render the 'Consent ✓' / version-mismatch chip on the patient/charting header; the blocked-action banner names the missing/expired consent."
+          "title": "Plain-language consent reader + type-to-sign (client/kiosk)",
+          "note": "Behaviour: the client-app/kiosk consent step — a scrollable plain-language reader of the mandated content (nature, risks/benefits/alternatives, practitioner qualifications, costs, realistic-outcome language, AHPRA-despite-NDA complaint line), an 'I've read and understood' acknowledgement, and a type-your-full-name-to-sign field. Requirements: renders the exact template_version being signed; the same flow runs in the client app and at the reception check-in tablet; submitting calls the e-signature endpoint."
+        },
+        {
+          "title": "Consent status chip + blocked-action banner",
+          "note": "Behaviour: surface consent state to staff. Requirements: render a 'Consent ✓' or version-mismatch chip on the patient / charting header driven by the gate; when consent is missing or superseded the blocked-action banner names exactly what is missing and links the fix (send consent link); reuses the shared GATING banner."
+        }
+      ]
+    },
+    {
+      "key": "CONSENT-TEMPLATE-ADMIN",
+      "title": "Consent template authoring & versioning (mandated-content)",
+      "as_a": "owner / manager",
+      "i_want": "to author and version per-treatment consent templates with all mandated content",
+      "so_that": "every consent a client signs is legally complete and changes never rewrite consents already given",
+      "context": "Plainly: the staff tool for writing and versioning the consent templates clients sign — and the check that each template actually contains everything AHPRA requires before it can be published. Where it fits: a sibling of versioned e-signed consent (PRD-03/CONSENT) inside Intake & Consent (PRD-03). CONSENT owns the client-facing reader and the binding signature; this story owns the authoring side — the per-treatment-type templates, their version history, and the mandated-content validation gate that must pass before a version goes live. It is the consent counterpart to the intake form builder (PRD-03/FORM-BUILDER) and the source of the versions a ConsentSignature binds to.",
+      "notes": "",
+      "acceptance": [
+        "Templates are per-treatment-type and versioned; editing creates a NEW version and supersedes the old, never mutating it.",
+        "A version cannot be published unless it covers every mandated-content section (nature, risks/benefits/alternatives, practitioner qualifications, costs, realistic-outcome language, complaint mechanisms incl. AHPRA-despite-NDA).",
+        "Previously signed consents stay bound to the version they were signed against.",
+        "Templates and versions are retained per the retention policy (C18) and admin changes are audited."
+      ],
+      "detail": [
+        "Consent templates are authored per treatment type (anti-wrinkle, dermal filler, under-18 + guardian, image-use) and versioned. Editing a current template publishes a NEW version and supersedes the old; the old version is never mutated, so a ConsentSignature that referenced it stays valid and readable exactly as signed.",
+        "Each publishable version must satisfy a mandated_fields[] checklist — nature of the procedure, risks/benefits/alternatives, practitioner qualifications, costs, realistic-outcome language (no minimising/overstating), and complaint mechanisms including the explicit right to complain to AHPRA despite any NDA (C5). The publish action is blocked until every mandated section is present.",
+        "Templates and all versions are retained per the retention policy (C18, PRD-01/RETENTION); every authoring change is audited and capability-gated. This is the authoring backbone the client reader (CONSENT) renders and a signature binds to."
+      ],
+      "ui_spec": [
+        "Prototype: Forms & consent (forms-consent.png) — Templates table with version + status (e.g. 'Anti-wrinkle consent v3.2 · Current'; 'Dermal filler consent v2.1 · Current'; 'Under-18 consent (+ guardian) v1.0 · 7-day cool-off'); '+ New template'.",
+        "Template editor with the mandated-content sections as named, required blocks; a publish action disabled until all mandated sections are filled.",
+        "Editing a current template warns it will publish a new version; superseded versions remain viewable for signatures bound to them."
+      ],
+      "data_model": [
+        {
+          "entity": "ConsentTemplate",
+          "fields": "id, tenant_id, treatment_type, version, content(sections), mandated_fields[], status(current|superseded)",
+          "notes": "New version on change; old versions immutable + retained (C18); the mandated_fields[] checklist gates publish; bound by ConsentSignature.template_version."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-03/CONSENT"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P1",
+      "tasks": [
+        {
+          "title": "Versioned ConsentTemplate per treatment-type",
+          "note": "Behaviour: model ConsentTemplate per treatment_type with immutable, versioned content(sections). Requirements: editing creates a NEW version and supersedes the old; old versions are never mutated so bound signatures stay valid; retained per C18 (PRD-01/RETENTION); seed anti-wrinkle, dermal filler, under-18 (+ guardian) and image-use templates; tenant-scoped."
+        },
+        {
+          "title": "Mandated-content validation gate on publish",
+          "note": "Behaviour: a version can only go live once it covers every required section. Requirements: validate the mandated_fields[] checklist (nature, risks/benefits/alternatives, practitioner qualifications, costs, realistic-outcome language, complaint mechanisms incl. AHPRA-despite-NDA) server-side; block publish until all are present (C5); the rule is enforced regardless of the UI."
+        },
+        {
+          "title": "Template authoring UI + audit",
+          "note": "Behaviour: the Forms & consent template editor — the mandated sections as named required blocks, a '+ New template' affordance, and a publish action disabled until complete. Requirements: editing a current template warns it will publish a new version; superseded versions remain viewable for signatures bound to them; capability-gated; every change audited."
         }
       ]
     },
@@ -277,15 +395,19 @@
       "tasks": [
         {
           "title": "ImageConsent entity (separate, scoped) + grant/withdraw",
-          "note": "Model ImageConsent (scope, granted_at, withdrawn_at, status) separate from ConsentSignature. Grant/withdraw endpoints; withdraw sets withdrawn_at + status and emits a domain event (a fact emitted when something happens in the system). Audited (C14). It is NOT an input to the treatment gate — declining/withdrawing never blocks treatment, only media features."
+          "note": "Behaviour: model ImageConsent (scope, granted_at, withdrawn_at, status) separate from ConsentSignature, with grant/withdraw endpoints. Requirements: withdraw sets withdrawn_at + status and emits a domain event (a fact emitted when something happens in the system); audited (C14); it is NOT an input to the treatment gate — declining or withdrawing never blocks treatment, only media features."
         },
         {
           "title": "Downstream media-use enforcement on withdraw",
-          "note": "PRD-05/09 media operations (serve signed URL, capture, share) must check current ImageConsent.status server-side before proceeding, so withdrawal IMMEDIATELY stops further use (ADR-0009: media never on personal devices, always via consent-gated signed URLs). On the withdraw event, ensure no new signed URLs are issued. Audited."
+          "note": "Behaviour: media operations check current image-use consent before proceeding so a withdrawal immediately stops further use. Requirements: PRD-05/09 media ops (serve signed URL, capture, share) check current ImageConsent.status server-side first; on the withdraw event no new signed URLs are issued (ADR-0009: media never on personal devices, always via consent-gated signed URLs (a temporary, expiring link)); audited."
         },
         {
-          "title": "Client self-manage toggle + staff header chip UI",
-          "note": "Client app: image-use toggle with scope in the intake 'Photos (optional)' step and in Privacy & consents (withdraw with confirmation/toast). Staff: 'Image use ✓ / withdrawn' chip on the Client 360 + charting header; photo galleries show 'image-use consent on file' and hide when withdrawn."
+          "title": "Client self-manage toggle (intake + Privacy & consents)",
+          "note": "Behaviour: the client controls image-use consent — a scoped toggle in the intake 'Photos (optional)' step and in the client-app Privacy & consents screen, where it can be withdrawn any time. Requirements: withdrawing prompts a confirmation and shows a 'Consent withdrawn' toast; the toggle is clearly framed as separate from treatment consent; state persists immediately."
+        },
+        {
+          "title": "Staff image-use header chip",
+          "note": "Behaviour: show the granted/withdrawn state to staff. Requirements: render an 'Image use ✓ / withdrawn' chip on the Client 360 + charting header; photo galleries note 'image-use consent on file' and hide when withdrawn (ties to PRD-02/PHOTOS-GALLERY)."
         }
       ]
     },
@@ -345,15 +467,80 @@
       "tasks": [
         {
           "title": "CoolingOffTimer: under-18 7-day enforcement",
-          "note": "On consent for an under-18 (under_18 flag from booking + ConsentSignature.signed_at), create a CoolingOffTimer with eligible_at = consent_at + 7 days and payment_blocked = true. Server-side, the procedure cannot be charted/finalised and checkout (except the consult (the assessment appointment where suitability is established and an S4 prescription can be written) line) cannot complete until eligible_at passes. Enforce as a domain invariant (ADR-0008), not UI. Audited."
+          "note": "Behaviour: for an under-18, enforce a mandatory 7-day wait between consent and procedure. Requirements: on consent for an under-18 (under_18 flag from booking + ConsentSignature.signed_at) create a CoolingOffTimer with eligible_at = consent_at + 7 days and payment_blocked = true; server-side the procedure cannot be charted/finalised and checkout (except the consult line) cannot complete until eligible_at passes; enforced as a domain invariant (ADR-0008), not UI; audited; clears automatically when eligible_at passes."
         },
         {
           "title": "Payment-block coordination (PRD-06) + deposit suppression (F14)",
-          "note": "Expose the cooling-off/payment-blocked state so PRD-06 checkout blocks all non-consult charges until eligible_at, and so the (Phase-2) DEPOSITS hold is suppressed during the window (F14 invariant). Record the second_consultation offer (second_consult_offered_at) on the client timeline. Clears automatically when eligible_at passes."
+          "note": "Behaviour: expose the cooling-off/payment-blocked state so money is held back during the window. Requirements: PRD-06 checkout blocks all non-consult charges until eligible_at; the (Phase-2) DEPOSITS hold is suppressed during the window (F14 invariant); the consult (the assessment appointment where suitability is established and an S4 prescription can be written) line is the one exception that may be charged."
         },
         {
-          "title": "Adult cooling-off config + header chip UI",
-          "note": "Configurable adult cool-off / second-consult clinic-policy setting (default off per legal read) producing an optional adult CoolingOffTimer (basis=adult_policy) — NOT a compliance gate. UI: 'under-18 cooling-off (the mandatory wait before a cosmetic procedure can proceed)' chip with elapse date on the patient/charting header; checkout-blocked indicator (except consult (the assessment appointment where suitability is established and an S4 prescription can be written)); second-consult offer on the timeline; the client done-screen note."
+          "title": "Adult cooling-off config (optional, not a gate)",
+          "note": "Behaviour: an optional adult cool-off / second-consult is a clinic-policy setting, not a compliance gate. Requirements: configurable, default off per legal read (there is NO mandated adult cooling-off); when on it produces an optional adult CoolingOffTimer (basis=adult_policy) that is advisory only and never blocks treatment/payment."
+        },
+        {
+          "title": "Cooling-off header chip + done-screen note UI",
+          "note": "Behaviour: surface the cooling-off state. Requirements: an 'under-18 cooling-off (the mandatory wait before a cosmetic procedure can proceed)' chip with the elapse date on the patient/charting header; a checkout-blocked indicator (except the consult); the second-consult offer on the client timeline; the client done-screen note 'If under 18, a mandatory 7-day cooling-off applies before any treatment'."
+        }
+      ]
+    },
+    {
+      "key": "GUARDIAN-CONSENT",
+      "title": "Under-18 guardian consent & recorded second consultation",
+      "as_a": "RN/NP",
+      "i_want": "a guardian to co-sign consent for an under-18 and a second consultation to be recorded",
+      "so_that": "a minor's treatment meets the additional consent and review requirements before it can proceed",
+      "context": "Plainly: the extra consent steps required when the patient is under 18 — a parent or guardian must co-sign, and a second consultation must be recorded — on top of the standard consent. Where it fits: a sibling of cooling-off (PRD-03/COOLING-OFF) inside Intake & Consent (PRD-03). COOLING-OFF owns the 7-day timer and the payment block; this story owns the additional consent artefacts for minors: the guardian co-signature against the dedicated 'Under-18 consent (+ guardian)' template and the recorded second consultation. It uses the same versioned-consent mechanism as PRD-03/CONSENT and the under-18 flag set at booking (PRD-02), and it feeds the treatment gate (PRD-03/GATING) so a minor cannot be treated until these exist.",
+      "notes": "",
+      "acceptance": [
+        "An under-18 booking requires consent against the dedicated under-18 (+ guardian) template, co-signed by a parent/guardian.",
+        "The guardian's identity/relationship is captured and the co-signature is bound to the template version (like any consent).",
+        "A second consultation is recorded for the minor before treatment, with date and reviewing practitioner.",
+        "The under-18 consent + recorded second consultation are inputs the treatment gate checks for a minor (with cooling-off from PRD-03/COOLING-OFF)."
+      ],
+      "detail": [
+        "When the patient is under 18 (flag set at booking, PRD-02), standard consent is not enough: consent must be taken against the dedicated 'Under-18 consent (+ guardian)' template and co-signed by a parent or guardian. The guardian's name and relationship to the patient are captured and the co-signature binds to the exact template version, exactly like an adult signature (reuses PRD-03/CONSENT).",
+        "A second consultation must be recorded for the minor before treatment — its date and the reviewing practitioner are stored on the client timeline (this is the recorded review that pairs with the 7-day cooling-off enforced in PRD-03/COOLING-OFF).",
+        "The presence of a valid guardian-co-signed under-18 consent AND a recorded second consultation are inputs the treatment gate (PRD-03/GATING) checks for an under-18 patient, alongside the elapsed cooling-off. Adults are unaffected."
+      ],
+      "ui_spec": [
+        "Prototype: Forms & consent (forms-consent.png) — 'Under-18 consent (+ guardian) v1.0 · 7-day cool-off' template; the under-18 flow adds a guardian co-sign step to the consent reader.",
+        "Guardian step: capture guardian full name + relationship to patient + their type-to-sign signature, after the patient's acknowledgement.",
+        "A recorded second-consultation entry (date + reviewing practitioner) appears on the client timeline; the patient header shows the under-18 status."
+      ],
+      "data_model": [
+        {
+          "entity": "GuardianConsent",
+          "fields": "id, tenant_id, client_id, appointment_id, template_id, template_version, guardian_name, guardian_relationship, signed_at, signature_ref",
+          "notes": "Co-signature on the under-18 (+ guardian) template; binds to template_version like any consent; required for an under-18 treatment (feeds GATING)."
+        },
+        {
+          "entity": "SecondConsultation",
+          "fields": "id, tenant_id, client_id, appointment_id, occurred_at, reviewed_by",
+          "notes": "Recorded review for a minor before treatment; shown on the client timeline; paired with the cooling-off (PRD-03/COOLING-OFF)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-03/COOLING-OFF",
+        "PRD-03/CONSENT"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P1",
+      "tasks": [
+        {
+          "title": "Guardian co-signature bound to the under-18 template version",
+          "note": "Behaviour: capture a parent/guardian co-signature for an under-18, against the dedicated under-18 (+ guardian) consent template. Requirements: capture guardian_name + guardian_relationship + signature_ref, signed_at; bind to the EXACT template_version (reuses PRD-03/CONSENT versioning); required for an under-18 patient and fed to GATING; retained (C18) and audited."
+        },
+        {
+          "title": "Recorded second consultation for minors",
+          "note": "Behaviour: record a second consultation for an under-18 before treatment. Requirements: store occurred_at + reviewed_by on a SecondConsultation linked to client + appointment; surface it on the client timeline; it pairs with the 7-day cooling-off (PRD-03/COOLING-OFF) and is one of the inputs the treatment gate checks for a minor; audited."
+        },
+        {
+          "title": "Guardian co-sign step UI in the consent flow",
+          "note": "Behaviour: add a guardian co-sign step to the consent reader when the patient is under 18. Requirements: after the patient acknowledgement, capture guardian full name, relationship to patient and a type-to-sign signature; the step appears only for the under-18 flow; show the under-18 status on the patient header and the recorded second-consultation on the timeline."
         }
       ]
     },

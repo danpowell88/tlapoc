@@ -82,16 +82,24 @@
       ],
       "tasks": [
         {
-          "title": "Data model & migrations: ChartEntry + NoteTemplate",
-          "note": "EF Core entities + migrations (every table tenant_id + Row-Level Security (RLS, the per-tenant database isolation)). ChartEntry carries treatment_type, status, consult_id/appointment_id links and the locked flag (immutability lands in IMMUTABILITY). NoteTemplate is versioned and tenant-scoped, holding a JSON field-schema + a snippet library; NoteValue binds captured content to the template version so a finalised note always renders against the schema it was authored with. Index ChartEntry by client and appointment."
+          "title": "Gate chips header + blocked entry point",
+          "note": "Behaviour: the charting header reads 'Charting — {client}' with a live gate chip ('Consult ✓ · Consent ✓ · screening clear') and a 'Read-only view' chip for oversight roles; the charting screen will not open at all unless the consult+consent gate is satisfied. Requirements: the gate is re-checked server-side on open-draft (reject unless PRD-03 consent + PRD-04 consult/Rx are satisfied — never trust the UI, ADR-0008); an unmet gate shows a calm blocked-action banner stating what's missing and who can resolve it rather than a half-usable note. The safe path is the only path."
         },
         {
-          "title": "Charting API: gated draft open + guided note capture",
-          "note": "Open-draft command is gate-checked server-side (reject unless PRD-03 consent + PRD-04 consult/Rx are satisfied — never trust the UI) and returns the pre-treatment review payload (safety flags, last-treatment summary, consult/Rx status) read-only. CRUD for note structured fields/free text against the active template version; a 'copy last' query that pre-fills from the client's previous matching ChartEntry. Emit domain events for the visit lifecycle (ADR-0024) and publish the OpenAPI contract."
+          "title": "Pre-treatment review card (safety flags + last-treatment + copy-last)",
+          "note": "Behaviour: Step 1 is a read-only review the injector confirms before anything becomes editable — safety chips (Allergies / Contraindications / BDD (Body Dysmorphic Disorder) screen result / Consent / Consult), and a 'Last treatment' summary row (e.g. '24u · 12 Mar · forehead + glabella · Bella RN') with a 'Copy last map' / copy-last-note shortcut (prototype renderChartReview/copyLast). Requirements: these chips are pulled from PRD-03 (intake/consent/screening) and PRD-04 (consult/Rx) and are not editable here; 'copy last' pre-fills from the client's previous matching ChartEntry for editing and is never auto-finalised."
         },
         {
-          "title": "Provider/web UI: pre-treatment review + template + type toggle",
-          "note": "Build the Charting screen per the spec: header gate chips, the read-only Step-1 pre-treatment review card, the toxin note template (structured fields + free text + snippet picker) and the treatment-type toggle that swaps to the non-S4 skin-note variant. Wire to the API with loading/empty/error states; show the blocked-action banner when the gate is unmet; capability-gate to clinical roles and render the read-only oversight view for non-editors. Include the clinic-side template/snippet admin."
+          "title": "Consult & prescription card (role-aware)",
+          "note": "Behaviour: the pre-treatment card surfaces the synchronous-consult + individual-prescription (Rx) chain inline. For a prescriber (NP/solo) it shows 'Record consult ✓' then 'Write prescription'; for an administering RN it instead shows 'Administering on a valid script · Dr Lena Park (NP) · today · 30u authorised · individual (this client)' with a verify-before-administer checkbox (prototype renderChartReview rx branch). Requirements: this card is the visible surface of the S4 (Schedule 4 prescription-only medicine) gate — the consult tick must be satisfied before 'Write prescription' is usable; the actual consult/Rx records and invariants live in PRD-04 (CONSULT/PRESCRIPTION)."
+        },
+        {
+          "title": "Treatment-type toggle (toxin / non-S4 skin)",
+          "note": "Behaviour: a toggle (Anti-wrinkle (toxin) / Skin treatment) selects which template renders and shows/hides the toxin-only map+lot steps vs the non-S4 skin note (prototype setChartType/applyChartType). Requirements: switching swaps the rendered fields and the pre-treatment chips (skin has no consult requirement); the toxin path requires product/lot and prescription, the non-S4 skin path has neither. The skin-note fields themselves are built in PRD-05/MAPPING's skin-note task."
+        },
+        {
+          "title": "Configurable, versioned NoteTemplate engine + snippet admin",
+          "note": "Behaviour: the toxin note is a per-tenant NoteTemplate — structured fields (indication, areas, technique notes, aftercare), a free-text area and a curated library of reusable phrases/snippets — with a clinic-side builder/admin and template versioning. Requirements: NoteValue binds captured content to the template version used so a finalised note always renders against the schema it was authored with; the same generic engine is what later modalities (filler, energy, weight-loss) extend, even though v1 ships only the toxin template + the non-S4 skin variant. tenant_id + Row-Level Security (RLS, the per-tenant database isolation) throughout."
         }
       ]
     },
@@ -178,28 +186,86 @@
       ],
       "tasks": [
         {
-          "title": "Data model & migrations: ChartEntry + InjectionPoint",
-          "note": "EF Core: ChartEntry (treatment_type, status, consult/consent links, locked) + InjectionPoint (product_id, lot_id, units, depth, technique, coord_x/y as image-relative percent, region/label, sequence). Every table tenant_id + Row-Level Security (RLS, the per-tenant database isolation). Index by client (clinical record retrieval) and by lot_id (the lot→client recall lookup, C8). FK InjectionPoint.lot_id → StockItem so finalise can write the administration movement."
+          "title": "Injection-map canvas: tap-to-add + drag pins (image-relative)",
+          "note": "Behaviour: the LEFT pane is a facial diagram/photo in a crosshair-cursor wrapper; tapping adds a numbered pin and dragging repositions it (prototype faceClick/startDrag/renderInj). Requirements: build on the SPIKE-CANVAS approach; coordinates are stored as a percentage of the image (coord_x/coord_y 0–100) so they reproduce at any render size and room-side on the provider app; drag clamps pins to 2–98% so they stay on-image; the canvas must stay smooth with many points. A 'Clear' button removes all pins; honour a read-only mode (oversight roles see pins/detail, no edit controls)."
         },
         {
-          "title": "Charting API: open draft, add/move/delete points, live total",
-          "note": "Gate-checked draft open (reject unless consult+consent satisfied). CRUD for points; server recomputes the live Σunits rather than trusting a client total. Validate on every write that the selected lot is in-date, in-custody and ARTG-checked and that the product matches the lot. Coordinates accepted as 0–100 percentages. Emit draft-changed events for offline sync + read models; publish OpenAPI."
+          "title": "Per-point editor + point list + live total",
+          "note": "Behaviour: the RIGHT pane is the selected-point editor — label, units (depth and technique/needle in the real build), with the active 'Lot · exp' shown — plus the point list and a running 'Total units' that sums all points live (prototype editor/ptlist/totalu/updPt). Requirements: selecting a pin opens its editor; the live Σunits is recomputed by the server on every write rather than trusting a client total; the real build adds per-point depth + technique and optional per-point product/lot for multi-product sessions (the prototype captures name + units only). Read-only roles see point detail without editors."
         },
         {
-          "title": "Finalise endpoint (transactional, immutable, idempotent)",
-          "note": "Single DB transaction: re-validate the gate, lock the note, deduct Σunits from the selected lot via a StockLedger administration movement, and write the lot→client register link (PRD-04) for recall + vial reconciliation. Reject if Σunits > on-hand. Idempotency key so a retried/queued finalise never double-deducts. Write an immutable AuditEvent (ADR-0010). Post-finalise edits route to Amendment (IMMUTABILITY)."
+          "title": "Charting API: open draft, add/move/delete points, draft sync",
+          "note": "Behaviour: gate-checked draft open (reject unless consult+consent satisfied), then CRUD for points. Requirements: validate on every write that the selected lot is in-date, in-custody and ARTG (Australian Register of Therapeutic Goods)-checked and that the product matches the lot; coordinates accepted as 0–100 percentages; the server recomputes the live Σunits. Emit draft-changed domain events for offline sync (OFFLINE) + read models; publish the OpenAPI contract. tenant_id + Row-Level Security (RLS, the per-tenant database isolation); index InjectionPoint by lot_id for the lot→client recall lookup (C8)."
         },
         {
-          "title": "Injection-map canvas (web/provider)",
-          "note": "Build the canvas on the SPIKE-CANVAS approach: facial diagram/photo in a crosshair wrapper, tap-to-add numbered pins, pointer-drag to reposition (clamp to 2–98% so pins stay on-image), selected-point editor (units/depth/technique + lot·exp), point list, live total and the active product·lot label. Must stay smooth with many points and reproduce coordinates at any render size. Honour a read-only mode (oversight roles see detail, no edit controls)."
+          "title": "Finalise → transactional stock deduction + register link",
+          "note": "Behaviour: 'Finalise & checkout' commits the administration — it locks the note and deducts the charted Σunits from the selected lot in Stock (prototype finaliseChart). Requirements: a single DB transaction re-validates the gate, locks the ChartEntry, deducts Σunits via a StockLedger administration movement, and writes the lot→client register link (PRD-04) for recall + vial reconciliation; reject if Σunits > on-hand (over-draw); an idempotency key so a retried/offline-queued finalise never double-deducts. Post-finalise edits route to Amendment (IMMUTABILITY); the immutability/close-out UI itself lives in IMMUTABILITY."
         },
         {
-          "title": "Product & batch (lot) selector (step 2)",
-          "note": "Step-2 dropdowns: Product (toxins) → Batch/lot filtered to onhand>0 and not Depleted/Expired, with a lot-info line (on hand · location · in-date|expiring · S4 vs non-S4) and the 'no in-date stock — receive or pick another product' empty state. The chosen lot is the default lot wired into point deductions; selecting it updates the 'Product · lot' label on the map. Block placing points until a valid lot is selected."
+          "title": "Skin-note (non-S4) variant fields",
+          "note": "Behaviour: when treatment_type=skin the toxin map+lot steps are hidden and a non-S4 skin note renders — 'Areas treated' multi-select chips (Full face / Cheeks / Under-eye / Neck / Décolletage), Device/modality select (needling / Hydrafacial / Laser-IPL / peel), a Settings/depth input and a Consumables (non-S4) input (prototype skin-only block + applyChartType). Requirements: no lot, no prescription (Rx) and no stock deduction on finalise; persist to a SkinNote bound to the ChartEntry. The treatment-type toggle that shows/hides this lives in NOTE-TEMPLATE."
+        }
+      ]
+    },
+    {
+      "key": "PRODUCT-LOT-PICKER",
+      "title": "Charting product & batch (lot) selector",
+      "as_a": "injector",
+      "i_want": "to choose the exact product and the in-date, in-custody, ARTG-verified lot I am drawing from before I place any injection point",
+      "so_that": "every charted point is traceable to a lawfully-held vial and the units deduct from the right lot on finalise",
+      "context": "Plainly: this is Step 2 of charting — the dropdown pair where the injector picks the product and the precise batch (lot) of medicine they are about to use, before they can map a single point. Where it fits: it is a substantial, self-contained feature of the injection-map screen (PRD-05/MAPPING) and the bridge between the medicines moat and the clinical record. It reads only lawfully-held, in-date, ARTG (Australian Register of Therapeutic Goods)-checked, in-custody lots from inventory (PRD-04/STOCK-RECEIVE, PRD-04/CUSTODY-STORAGE, PRD-04/COLD-CHAIN), and the lot it selects is the one the finalise deduction draws against (PRD-04/ADMIN-GATE, PRD-04/VIAL-RECON). Without a valid lot selected here, no point can be placed and no S4 (Schedule 4 prescription-only medicine) dose is possible.",
+      "notes": "",
+      "acceptance": [
+        "A Product dropdown lists chartable products; choosing one filters the Batch/lot dropdown to that product's lots with on-hand > 0, excluding Depleted/Expired/quarantined lots.",
+        "Only in-date, in-custody, ARTG-verified, non-quarantined lots are selectable; a lot-info line shows on-hand · location · in-date/expiring · S4 vs non-S4.",
+        "No injection point can be placed until a valid lot is selected; the chosen lot becomes the default lot wired into every point's deduction and updates the 'Product · lot' label on the map.",
+        "A 'no in-date stock — receive or pick another product' empty state appears when a product has no usable lot."
+      ],
+      "detail": [
+        "Step 2 sits between the pre-treatment review and the injection map, and it is deliberately a hard gate: the injector must commit to the exact vial before charting any point, so the medicine register can prove which lot every unit came from. The Product dropdown lists chartable products (toxins for the toxin path); selecting a product filters the Batch/lot dropdown to that product's lots (prototype setChartProd/setChartLot/renderChartProduct).",
+        "The lot list is filtered to lawfully-usable stock only: on-hand > 0 and not Depleted/Expired, in-date, in the correct custody location, ARTG-verified and not quarantined by a cold-chain breach (PRD-04/COLD-CHAIN). A lot-info line summarises the chosen lot — on-hand · location · in-date or expiring · S4 vs non-S4 — and the helper notes that 'units charted below deduct from this lot on finalise · only in-date, in-custody stock is selectable (ARTG-checked).'",
+        "The selected lot is load-bearing: it is the default lot wired into every injection point's deduction and shown as the active 'Product · lot' label on the map (e.g. 'Botox · B2245 · exp Sep 2026'). Placing a point is blocked until a valid lot is selected.",
+        "When a product has no usable lot, the picker shows a 'no in-date stock — receive or pick another product' empty state rather than offering an unusable vial — the selectable set is exactly the lots the administration gate (PRD-04/ADMIN-GATE) would accept, so the injector never charts against stock that finalise will reject."
+      ],
+      "ui_spec": [
+        "Prototype screen: Charting — Step 2 'Product & batch' card (charting.png).",
+        "Product dropdown + Batch/lot dropdown (chartProdSel / chartLotSel), a lot-info line (on hand · location · in-date|expiring · S4), and the helper 'Units charted below deduct from this lot on finalise · only in-date, in-custody stock is selectable (ARTG-checked).'",
+        "The lot dropdown shows 'B2245 · exp Sep 2026' style options with an ⚠ on expiring lots; an empty state 'no in-date stock' when none qualify.",
+        "Selecting a lot updates the 'Product · lot' label on the injection map; in read-only mode the chosen product/lot renders statically with no edit controls."
+      ],
+      "data_model": [
+        {
+          "entity": "ChartEntry (referenced)",
+          "fields": "selected_product_id, selected_lot_id (the default lot for this chart's points)",
+          "notes": "The picked lot is wired into InjectionPoint deductions; finalise draws against it (PRD-04/ADMIN-GATE / VIAL-RECON)."
         },
         {
-          "title": "Skin-note (non-S4) variant + treatment-type toggle",
-          "note": "Render the non-S4 skin note when treatment_type=skin: 'Areas treated' multi-select chips (Full face / Cheeks / Under-eye / Neck / Décolletage), Device/modality select (needling / Hydrafacial / Laser-IPL / peel), Settings/depth input, Consumables (non-S4) input — no lot/prescription (Rx), no deduction on finalise. The treatment-type toggle hides the map+lot step and shows the skin note (applyChartType). Persist to SkinNote bound to the ChartEntry."
+          "entity": "SelectableLot (derived view over StockItem)",
+          "fields": "lot_id, product_id, lot, expiry, on_hand, location, schedule(S4|non-S4), in_date(bool), in_custody(bool), artg_verified(bool), quarantined(bool)",
+          "notes": "Filtered to the exact set the administration gate would accept: on-hand>0, in-date, in-custody, ARTG-verified, not quarantined. Mapping: stock.filter(onhand>0) + renderChartProduct() in the prototype."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-05/MAPPING"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P0",
+      "tasks": [
+        {
+          "title": "Selectable-lot query (in-date · in-custody · ARTG · not quarantined)",
+          "note": "Behaviour: given a product, return only its lawfully-usable lots — on-hand > 0, not Depleted/Expired, in-date, in the correct custody location, ARTG (Australian Register of Therapeutic Goods)-verified and not quarantined by a cold-chain breach (PRD-04/COLD-CHAIN). Requirements: the selectable set must be exactly the set the administration gate (PRD-04/ADMIN-GATE) would accept, so a chartable lot can never be one finalise will reject; reads inventory (PRD-04/STOCK-RECEIVE, CUSTODY-STORAGE) server-side; tenant-scoped (RLS, the per-tenant database isolation)."
+        },
+        {
+          "title": "Product → lot dropdowns + lot-info line + empty state",
+          "note": "Behaviour: a Product dropdown filters the Batch/lot dropdown to the selected product's selectable lots, each labelled 'lot · exp …' with an expiring warning; a lot-info line summarises on-hand · location · in-date/expiring · S4 vs non-S4; a 'no in-date stock — receive or pick another product' empty state shows when none qualify (prototype setChartProd/renderChartProduct). Requirements: the helper copy states units deduct from this lot on finalise and only in-date/in-custody/ARTG stock is selectable; read-only roles see the chosen product/lot statically."
+        },
+        {
+          "title": "Lot-selection gate on point placement + default-lot wiring",
+          "note": "Behaviour: no injection point can be placed until a valid lot is selected; once chosen, the lot becomes the default wired into every point's deduction and updates the active 'Product · lot' label on the map. Requirements: enforce the 'lot required before points' rule on the server too (not just the UI) so a draft can't carry points without a lot; the selected_lot_id is what the finalise deduction and the lot→client register link draw against (PRD-04/ADMIN-GATE, VIAL-RECON)."
         }
       ]
     },

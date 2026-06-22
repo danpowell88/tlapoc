@@ -46,8 +46,8 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 ## Tasks (dev pickup)
 
 - [ ] **ShiftHandover entity + add/read notes**
-  Model ShiftHandover (tenant_id, location_id, note, created_by, at) as an append-style log under RLS (row-level security, the database-level tenant isolation). Add/read notes, timestamped and attributed, tenant/location-scoped.
+  Behaviour: record and read shift-handover notes so the next shift knows what's outstanding. Requirements: model ShiftHandover (tenant_id, location_id, note, created_by, at) as an append-style log under RLS (row-level security, the database-level tenant isolation); add/read notes, timestamped and attributed, tenant/location-scoped.
 - [ ] **Shift-handover panel on the back-office tablet**
-  Handover panel on the back-office tablet (BACKOFFICE-TABLET): list recent entries; show the last handover note on the hub alongside the morning's attention items.
+  Behaviour: surface handover on the back room's tablet. Requirements: a handover panel on the back-office tablet (PRD-09/BACKOFFICE-TABLET) lists recent entries; the last handover note also shows on the hub alongside the morning's attention items.
 - [ ] **Surface outstanding jobs/follow-ups alongside**
-  Show outstanding follow-ups/jobs (PRD-07) next to the handover so the incoming shift sees notes and open work together.
+  Behaviour: the incoming shift sees notes and open work together. Requirements: show outstanding follow-ups/jobs (PRD-07) next to the handover so notes and the open worklist are read as one.

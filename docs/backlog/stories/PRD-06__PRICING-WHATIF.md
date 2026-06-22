@@ -48,16 +48,13 @@ _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rew
 
 ## Tasks (dev pickup)
 
-- [ ] **PricingScenario model over PRD-08 read-models (migrations)**
-  Model PricingScenario (tenant_id + RLS (row-level security)): inputs JSON (plan/service prices + churn assumption) and computed outputs JSON (MRR (monthly recurring revenue) — monthly recurring revenue/rev/net).
-  - No live-pricing mutation here; read current state from PRD-08 read-models.
-  - Owner-gated.
-- [ ] **What-if compute API (read-only) + apply-via-admin handoff**
-  Server-side.
-  - Compute projected Membership MRR (monthly recurring revenue), Service rev/mo, Net/month and annual impact from edited prices + the churn-sensitivity assumption (elasticity) over PRD-08 read-models.
-  - Save/load scenarios; owner-only.
-  - 'Apply' does NOT write here — it hands the proposed prices to the normal catalogue/membership admin (capability-gated, audited).
-- [ ] **Pricing & what-if web UI (owner-only)**
-  Angular per the screenshot.
-  - Editable plan prices with member counts + per-tier MRR (monthly recurring revenue); churn-sensitivity slider; live Projected-impact panel; editable service pricing rows.
-  - Read-only planner styling (proposes, doesn't apply); owner-only .fin capability gate; loading/empty/error states.
+- [ ] **Editable membership plan prices + per-tier MRR (read-models)**
+  Behaviour: the planner lists each plan with its member count and per-tier MRR (monthly recurring revenue), and lets the owner edit the monthly price inline; the figures read the same PRD-08 read-models as Reports. Requirements: editing here is a what-if input only — it does NOT mutate live plan pricing (that's PRD-06/MEMBERSHIP-PLANS); owner-only (.fin); reads current member counts/MRR from the read-models, not from a separate copy.
+- [ ] **Churn-sensitivity slider + Projected-impact panel**
+  Behaviour: a churn-sensitivity slider (e.g. '6% leave / +$10') drives a live Projected-impact panel computing Membership MRR, Service rev/mo, Net/month and projected annual impact under that elasticity assumption (ADR-0022). Requirements: the projection is a model, clearly labelled as an assumption, not a guarantee; recomputes live as prices/slider change; a Reset returns to current actuals; owner-only.
+- [ ] **Editable service pricing rows + projection**
+  Behaviour: editable service-pricing rows (Anti-wrinkle, Dermal filler, Skin treatment, Consultation) with per-service volume and projected monthly revenue, feeding the same Projected-impact panel. Requirements: 'per-treatment price · assumes volume holds' is stated; editing is a what-if input only; volumes read from PRD-08 read-models; owner-only.
+- [ ] **Save scenario + apply-via-admin handoff**
+  Behaviour: a PricingScenario (inputs/outputs JSON) can be saved for comparison; an 'Apply' action does NOT write live prices — it hands the proposed prices to the normal catalogue/membership admin (capability-gated, audited). Requirements: the planner proposes and projects only (read-only over the ledger, which lives in Xero); in-app ledger/payroll/AP (accounts payable)/BAS (business activity statement) tooling is explicitly out of scope; owner-only (.fin).
+- [ ] **Pricing & what-if web UI + Finance hub framing (owner-only)**
+  Behaviour: the Angular Pricing & what-if screen wires the plan-price editor, churn slider, Projected-impact panel and service-pricing rows together; the surrounding Finance screen frames it as a light pricing + reporting hub ('the books live in Xero'). Requirements: read-only planner styling (proposes, doesn't apply); owner-only .fin capability gate; the Finance hub links to Pricing and Reports and states what's handled in Xero (payroll, AP, GST/BAS, reconciliation); loading/empty/error states.

@@ -52,11 +52,11 @@ _Prototype screen: prototype.html — Operations → Temperature monitors._
 
 ## Tasks (dev pickup)
 
-- [ ] **Monitor entity + per-fridge provisioning + device auth**
-  Model Monitor (tenant_id, location_id, fridge_id, label, api_key_ref, last_heartbeat, signal, firmware, power, status). Register/provision one monitor per fridge; issue a per-device API key (api_key_ref) so the ESP32 sensor authenticates to this clinic's private endpoint. See the hardware design doc for the ESP32 build.
-- [ ] **Ingest readings + chart over time**
-  Ingest streamed readings into PRD-04 COLD-CHAIN TempLog; chart per-monitor temperature over time. Monitors view with summary tiles (Monitors / Online / Last sync / Needs attention) and per-monitor cards (online/offline, charted temp, last-seen/signal/firmware/power).
+- [ ] **Monitor entity + per-fridge provisioning + per-device auth**
+  Behaviour: register/provision one wireless monitor per fridge/location and issue it credentials so it can stream readings. Requirements: model Monitor (tenant_id, location_id, fridge_id, label, api_key_ref, last_heartbeat, signal, firmware, power, status); issue a per-device API key (api_key_ref) so each ESP32 (a low-cost Wi-Fi microcontroller) sensor authenticates to THIS clinic's private endpoint only; tenant-scoped; see the hardware design doc for the ESP32 build.
+- [ ] **Ingest readings + chart over time + monitors view**
+  Behaviour: ingest streamed readings and chart per-monitor temperature, with a monitors view (summary tiles Monitors / Online / Last sync / Needs attention; per-monitor cards showing online/offline, charted temp, last-seen / signal / firmware / power). Requirements: readings land in the PRD-04 COLD-CHAIN TempLog (not a separate store); the chart is continuous and tamper-evident; cards link to 'Details →' (openMonitor).
 - [ ] **Excursion + dead-monitor (heartbeat) detection → breach job**
-  Heartbeat watchdog flags monitors with no recent data as offline ('no recent data', '3h 12m ago') under Needs attention. An excursion (or offline/battery-low/firmware condition) raises a job (monitorJob → Lead Nurse with the reason) and flags the affected stock; 'Raise job' / 'Details →' (openMonitor).
+  Behaviour: a heartbeat watchdog flags monitors with no recent data as offline ('no recent data', '3h 12m ago') under Needs attention; an excursion (or offline / battery-low / firmware condition) raises a breach job. Requirements: monitorJob creates a job to the Lead Nurse carrying the reason and flags the affected stock; 'Raise job' surfaces on the card; the excursion path mirrors the manual breach pathway (OPENCLOSE).
 - [ ] **Reconcile device + manual readings into one cold-chain record**
-  Merge device readings with the manual FridgeLog entries (OPENCLOSE) into a single evidenced cold-chain record per fridge (C13), so there's one history regardless of source.
+  Behaviour: merge device readings with the manual FridgeLog entries (OPENCLOSE) into a single evidenced cold-chain (the unbroken temperature-controlled storage required for medicines) record per fridge. Requirements: one history regardless of source (C13); the reconciled record is what feeds the inspection pack and demonstrates an unbroken chain to a regulator.

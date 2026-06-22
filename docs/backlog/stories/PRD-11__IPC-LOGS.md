@@ -47,10 +47,10 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 ## Tasks (dev pickup)
 
 - [ ] **InfectionControlLog entity (append-only, audited)**
-  Model InfectionControlLog (tenant_id, location_id, kind[sterilisation|single_use|sharps|clinical_waste], detail, at, actor_id) as an append-only, audited log under RLS (row-level security, the database-level tenant isolation).
+  Behaviour: a tamper-evident hygiene log for sterilisation/single-use cycles and sharps/clinical-waste disposals. Requirements: model InfectionControlLog (tenant_id, location_id, kind[sterilisation|single_use|sharps|clinical_waste], detail, at, actor_id) as an append-only, audited log under RLS (row-level security, the database-level tenant isolation).
 - [ ] **IPC log entry UI (sterilisation/single-use + sharps/clinical-waste)**
-  Quick-entry surface on Operations / back-office waste log to record sterilisation/single-use cycles and sharps/clinical-waste disposals (detail, auto time + actor).
+  Behaviour: a quick-entry surface on Operations / the back-office waste log to record an IPC (infection prevention and control) event. Requirements: capture detail with auto-stamped time + actor; both kinds (sterilisation/single-use and sharps/clinical-waste) are loggable; entries are immediately part of the inspection trail.
 - [ ] **IPC log retrieval / inspection trail**
-  Retrieve and filter IPC (infection prevention and control) logs (by kind, date, location) as an inspection trail; expose them to the PRD-08 inspection-readiness pack.
+  Behaviour: retrieve and filter IPC logs as an inspection trail. Requirements: filter by kind, date and location; expose the results to the PRD-08 inspection-readiness pack so logs are retrievable on demand for an inspector.
 - [ ] **WasteManifest model stub for v2**
-  Define WasteManifest (stream[clinical|sharps], carrier, certificate_ref, at) at the model level so the data model anticipates the v2 manifest workflow (NSW CA+TC / QLD WTC); v1 surface only captures disposals, no full carrier/certificate workflow.
+  Behaviour: anticipate the heavier v2 waste-manifest workflow at the model level without building it. Requirements: define WasteManifest (stream[clinical|sharps], carrier, certificate_ref, at) so the data model is ready (NSW CA+TC / QLD WTC); the v1 surface only captures disposals — no full carrier/certificate workflow yet.

@@ -48,9 +48,11 @@ _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rew
 
 ## Tasks (dev pickup)
 
-- [ ] **Checkout-assist web UI: upsell, rapport, cross-sell, post-pay rebook**
-  Angular, layered onto the checkout (no new core entity).
-  - 'Worth mentioning' panel: membership offer (if non-member), retail restock (stock-ageing derived) with Add action, rebook cue.
-  - 'Pairs well with today's treatment' cross-sell: match non-S4 (non-Schedule 4) aftercare/retail to cart signals (toxin/filler/skin/energy/contour); show price + margin + Add; suppress S4 (Schedule 4 prescription-only medicine) entirely.
-  - Post-payment rebook view: slot grid on the treatment interval, 'Text her the options' (PRD-07), restock-reminder toggle; confirm -> create Appointment (PRD-02).
-  - Suggestions read rewards eligibility + stock ageing + interval server-side; loading/empty/error states; no S4 discount/promotion anywhere.
+- [ ] **'Worth mentioning' upsell panel (membership / restock / rebook cue)**
+  Behaviour: a subtle 'Worth mentioning' panel surfaces derived prompts at the till — a membership offer if the client isn't a member ('Not a member — offer Glow Club · $89/mo') with an 'Add to sale' action, a likely retail restock ('Likely low on retinol serum — bought 10 wks ago, lasts ~8') with an 'Add restock' action, and a 'Toxin due ~now' rebook cue. Requirements: suggestions are derived (membership status + stock ageing + treatment interval), computed server-side; the copy is a quiet staff nudge ('suggest, don't push'); none of these ever discount or promote an S4 (Schedule 4 prescription-only medicine) item.
+- [ ] **Client-rapport panel (derived from history)**
+  Behaviour: a one-line rapport panel derived from the client record — preferences ('Natural finish · a chamomile tea on arrival'), recent treatments, and a connection cue ('Birthday in 12 days · referred by Hannah L.') — to help the desk personalise. Requirements: read-only, derived from the Client 360; no money figures; respects RBAC (no clinical detail beyond what reception may see).
+- [ ] **'Pairs well with today's treatment' non-S4 cross-sell**
+  Behaviour: a cross-sell row matches non-S4 aftercare/retail to what was treated (toxin → arnica/recovery serum; filler → lip balm; skin → SPF/HA serum; etc.), each card showing price, margin (e.g. '+$21 margin') and an 'Add' action that appends the line to the cart. Requirements: matched from cart signals server-side; S4 (Schedule 4 prescription-only medicine) items are suppressed entirely; margin figures are owner-relevant but shown to the desk as a selling aid (no daily-takings exposure); empty state when the cart already covers aftercare.
+- [ ] **Post-payment rebooking on the treatment interval**
+  Behaviour: after payment, a rebook view offers the next visit on the treatment interval (toxin ~12 weeks) — a slot grid to pick a time or 'Text her the options', plus a non-S4 restock-reminder toggle. Booking a slot creates the appointment (PRD-02); the text/recall nudge ties to PRD-07. Requirements: slots come from the calendar availability engine (scope-aware); 'Text her the options' sends via INotifier (PRD-07) honouring consent; confirming sets confirmation + reminders. No S4 discount/promotion anywhere.

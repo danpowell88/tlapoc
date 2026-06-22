@@ -79,8 +79,24 @@
       ],
       "tasks": [
         {
-          "title": "Client app: sign-in + book→intake→consent journey",
-          "note": "Client Flutter flavour: Entra External ID sign-in (social/email/OTP) writing a tenant-pinned session into secure storage. Home screen with the NEXT APPOINTMENT card and the 'Finish your pre-visit forms' nudge. Wire Book to the PRD-02 booking endpoints and the intake/consent screens to PRD-03 (medical history/BDD, per-treatment consent + separate image-use consent, on-device e-signature posted to the API). End-states 'You're booked!' / 'All set'. Register a push token and render reminders/recall (PRD-07) in an in-app inbox. No app-local clinical store; the treatment gate stays server-side."
+          "title": "Client Flutter flavour: shell, sign-in & tenant-pinned session",
+          "note": "Behaviour: stand up the client flavour of the shared Flutter codebase — bottom tabs (Home / Book / My care / Rewards / Account), the design system and the API client. Sign-in via Entra External ID (social / email / OTP one-time passcode). Requirements: the chosen tenant is pinned into a session held in platform secure storage (Keychain / Keystore); every API call carries the tenant + token; sign-out clears it; no clinical data is stored app-local. This shell is shared with CLIENT-CARE / CLIENT-PRIVACY (same flavour, other tabs)."
+        },
+        {
+          "title": "Home / 'For you' landing (next appointment + pre-visit nudge)",
+          "note": "Behaviour: the Home tab greets the client and shows a NEXT APPOINTMENT card (treatment, time, injector, room, 'View details') plus an amber 'Finish your pre-visit forms' nudge when intake/consent is outstanding. Requirements: the nudge is driven by the server-side gate state (PRD-03) and deep-links into the forms; quick actions (Book / Messages / Photos / Rewards) route to the relevant screens; nothing here is the source of truth — it reflects the booking + gate read."
+        },
+        {
+          "title": "In-app booking flow over PRD-02 (service → practitioner → slot → confirm)",
+          "note": "Behaviour: the Book tab walks service → practitioner → day/time → review → 'You're booked!', surfacing the SAME scope-aware availability as the desk. Requirements: injectable (S4 — Schedule 4 prescription-only medicine) services show generic names, no price and 'pricing confirmed privately' and only offer cleared RN/NP; slots and the create call go through the PRD-02/ONLINE-BOOK endpoints; the resulting Appointment is identical to a desk booking (source=online) and triggers the intake/consent send."
+        },
+        {
+          "title": "Intake + per-treatment consent + image-use consent (PRD-03), e-signed on device",
+          "note": "Behaviour: the pre-visit forms screen completes the PRD-03 medical-history / BDD (body dysmorphic disorder) intake and e-signs per-treatment consent plus a SEPARATE, withdrawable image-use consent, ending on 'All set'. Requirements: the on-device signature is captured and posted to the API (records live server-side, no parallel app store); the treatment gate stays server-enforced — the app only reflects outstanding items; image-use consent is its own toggle the client can later withdraw."
+        },
+        {
+          "title": "Push token registration + in-app notification inbox (PRD-07)",
+          "note": "Behaviour: register a push token at sign-in and render reminders / recall as push plus an in-app inbox. Requirements: notifications are delivered by PRD-07 (this surface only receives and displays them); transactional care/appointment messages are always shown; the inbox drives the Home pre-visit nudge; tapping a notification deep-links to the relevant screen."
         }
       ]
     },
@@ -146,8 +162,147 @@
       ],
       "tasks": [
         {
-          "title": "Client app: My care / Rewards / Account + card-on-file",
-          "note": "My care tab: visit history list and a before/after gallery whose tiles each fetch a per-view signed URL (ADR-0009) and cache transiently; gate the gallery on image-use consent re-checked server-side so a withdrawal hides it immediately. Rewards tab over PRD-06 (points balance, perks, gift-card redeem). Account tab: profile, memberships, the client's own balance, and 'Update card on file' using the Square SDK (software development kit) to tokenise — store no PAN (the raw card number, never stored); post the token to PRD-06 for membership autopay. Do not expose any one-off online checkout."
+          "title": "My care tab: visit history + treatment plan + medicines + documents",
+          "note": "Behaviour: the My care health hub lists past visits, the ongoing treatment plan (what's due / course progress), the client's own medicines (S4 — Schedule 4 prescription-only medicine — record) and downloadable documents (signed consents, treatment records, receipts, aftercare PDFs). Requirements: all read-only over the owning modules (PRD-05 clinical, PRD-06 commerce) via the API; the medicines view is shown privately and never priced or advertised (AU advertising rules); documents download through the secure channel. The before/after gallery and the day-by-day aftercare are their own siblings (PHOTO-COMPARE, AFTERCARE-GUIDE)."
+        },
+        {
+          "title": "Rewards tab over PRD-06 (points, perks, gift cards, referrals)",
+          "note": "Behaviour: the Rewards tab shows the membership card, points balance / ledger, member perks, milestones, a give-$25/get-$25 referral with tracking, and gift-card redeem. Requirements: reads PRD-06 reward/membership data, the client's OWN figures only; rewards are never applied to S4 medicines (you can't discount or incentivise a prescription medicine); redemptions post back to PRD-06."
+        },
+        {
+          "title": "Account tab: profile, memberships, own balance + card-on-file (Square tokenise)",
+          "note": "Behaviour: the Account tab surfaces profile, memberships, the client's own balance and 'Update card on file'. Requirements: card capture uses the Square SDK (software development kit) to tokenise on-device — no PAN (the raw card number) is ever stored or sent; the token posts to PRD-06 to feed membership autopay (automatic recurring billing); the client sees only their own balances, never clinic revenue; NO one-off online checkout is exposed (v1 payments are in-person). The 'Your data & privacy' entry point (CLIENT-PRIVACY) lives beneath these actions."
+        }
+      ]
+    },
+    {
+      "key": "PHOTO-COMPARE",
+      "title": "Client app: consent-gated before/after gallery with drag-to-compare",
+      "context": "Plainly: the before/after photo section inside the client app's My care tab, where someone reviews their own progress photos with a drag-to-compare slider — shown only while their image-use consent is current. Where it fits: a client-facing surface that comes late in the build, a sibling of the My care story (PRD-09/CLIENT-CARE); it is the client-side display of photos captured and owned during charting (PRD-05) and must honour the separate, withdrawable image-use consent from Intake & Consent (PRD-03/IMAGE-CONSENT). It mirrors the staff-side gallery (PRD-02/PHOTOS-GALLERY) on the client's own phone, so the same consent + signed-URL (a temporary, expiring link to a stored photo) rules apply.",
+      "as_a": "client",
+      "i_want": "to view my before/after photos with a drag-to-compare slider, only while my image-use consent is on",
+      "so_that": "I can see my own progress without my photos ever being exposed without consent",
+      "acceptance": [
+        "The gallery renders only when current image-use consent is granted; when withdrawn it is hidden/empty with a clear note.",
+        "Each image is fetched through a short-lived signed URL and never written to device storage or the photo library.",
+        "Before/after pairs compare side-by-side via a drag-to-compare slider, grouped by treatment/date.",
+        "The client sees only their own photos; every view is audited."
+      ],
+      "notes": "",
+      "detail": [
+        "The before/after gallery is the client-facing display of their own clinical photos inside My care. It is strictly downstream of consent: it re-checks the client's current image-use consent server-side and only renders when consent is granted — when consent is withdrawn the gallery hides (or shows an empty 'image-use consent withdrawn' state) and the server issues no new signed URLs, so a withdrawal immediately stops further display (C14, ADR-0009).",
+        "Images are never on the device: each thumbnail/full view is fetched through a short-lived signed URL (a temporary, expiring link to a stored photo) and held only in a transient cache — nothing is downloaded to the device photo library. A drag-to-compare slider overlays a before and after image so the client reads progress at a glance; pairs are grouped by treatment/date.",
+        "Photos are captured and owned by charting (PRD-05); this surface composes and displays them on the client's phone and enforces the consent + audit rules. The client sees only their own photos and every view writes an AuditEvent."
+      ],
+      "ui_spec": [
+        "Prototype: client-app My care → 'Before & after' (cphotos) — consent-gated progress photos with a drag-to-compare slider.",
+        "When image-use consent is off, the section is hidden / shows an empty 'image-use consent withdrawn' state rather than any image.",
+        "Pairs grouped by treatment/date; full view served via a signed URL, no save-to-device."
+      ],
+      "data_model": [
+        {
+          "entity": "(reuses) Photo",
+          "fields": "PRD-05 — before/after; viewed via short-lived signed URL (ADR-0009); image-use-consent-gated",
+          "notes": "Client sees own photos only; never persisted/cached to the device photo library."
+        },
+        {
+          "entity": "(reuses) ImageConsent",
+          "fields": "PRD-03/IMAGE-CONSENT — status(granted|withdrawn), re-checked server-side per view",
+          "notes": "Withdrawal hides the gallery and stops new signed URLs (C14)."
+        },
+        {
+          "entity": "(reuses) AuditEvent",
+          "fields": "actor(client), photo, at",
+          "notes": "Every view audited (C10/C14)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-09/CLIENT-CARE",
+        "PRD-02/PHOTOS-GALLERY"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Consent-gated gallery with server-side image-use re-check",
+          "note": "Behaviour: render the before/after gallery in My care only when the client's current image-use consent is granted; when withdrawn, hide it or show an empty 'image-use consent withdrawn' state. Requirements: re-check ImageConsent.status server-side (PRD-03/IMAGE-CONSENT) on entry and per view; on withdrawal the server issues NO new signed URLs so display stops immediately (C14, ADR-0009); the client sees only their own photos."
+        },
+        {
+          "title": "Signed-URL fetch with no device retention",
+          "note": "Behaviour: each thumbnail and full view streams from a short-lived signed URL (a temporary, expiring link to a stored photo). Requirements: nothing is written to the device photo library or persisted between sessions — only a transient in-memory cache; save/share-to-device is disabled; URLs expire quickly and are re-requested per view."
+        },
+        {
+          "title": "Drag-to-compare slider + treatment/date grouping + audit",
+          "note": "Behaviour: a drag-to-compare slider overlays a before and after image; pairs are grouped by treatment/date. Requirements: smooth gloved/touch dragging; the pairing reads PRD-05 photo metadata; every view writes an AuditEvent (actor=client, photo, at) for compliance (C10/C14)."
+        }
+      ]
+    },
+    {
+      "key": "AFTERCARE-GUIDE",
+      "title": "Client app: day-by-day aftercare guidance + escalation",
+      "context": "Plainly: the in-app aftercare guide that walks a client through recovery day by day after a treatment, suggests matched skincare, and gives a clear 'something's wrong' escalation. Where it fits: a client-facing surface that comes late in the build, a sibling of the My care story (PRD-09/CLIENT-CARE); it reads the visit/treatment so the right protocol shows, and its escalation hands off to the safety channel (PRD-09/CLIENT-CONCERN → PRD-07 follow-ups / PRD-05 adverse event). Aftercare is care content (transactional), not marketing, so it is always delivered.",
+      "as_a": "client",
+      "i_want": "day-by-day aftercare guidance for my treatment with a clear way to escalate if something's wrong",
+      "so_that": "I recover well and know exactly what to do if there's a problem",
+      "acceptance": [
+        "The right aftercare protocol shows for the client's recent treatment, with day-by-day recovery guidance.",
+        "Matched product picks are suggested as care content (not S4, never priced as advertising).",
+        "A prominent 'something's wrong' action escalates into Report-a-concern (PRD-09/CLIENT-CONCERN).",
+        "Aftercare is treated as transactional care content and always delivered (not gated by marketing opt-out)."
+      ],
+      "notes": "",
+      "detail": [
+        "After a treatment the app surfaces the matching aftercare protocol and steps the client through recovery day by day (e.g. skin-needling day-1 / day-4 guidance), with reminders/check-ins arriving as care notifications. The content is keyed to the client's recent visit/treatment so the right guidance shows automatically.",
+        "Matched product picks (e.g. recovery serums) are presented as care recommendations — never S4 (Schedule 4 prescription-only medicine) and not priced/advertised in a way that breaches the AU advertising rules. A prominent 'something's wrong' affordance escalates into the Report-a-concern flow (PRD-09/CLIENT-CONCERN), which raises a staff follow-up and can escalate to an adverse event (an unwanted medical occurrence after a treatment) / complaint.",
+        "Because aftercare is transactional care content, it is always delivered regardless of the client's marketing opt-out (only offers/news are opt-out). This closes the loop from the treatment back to the client's recovery."
+      ],
+      "ui_spec": [
+        "Prototype: client-app My care → Aftercare (caftercare) — day-by-day recovery guidance, matched product picks (aftercareRecs), and a 'something's wrong' escalation.",
+        "Surfaced from Home as an 'Aftercare check-in' nudge and an in-progress aftercare card; notifications inbox carries day-N check-ins.",
+        "'Something's wrong' routes into Report a concern (creport)."
+      ],
+      "data_model": [
+        {
+          "entity": "AftercareProtocol",
+          "fields": "id, tenant_id, treatment_type, steps[]{day, guidance}, product_picks[]",
+          "notes": "Keyed to treatment_type; product picks are care recommendations, never S4."
+        },
+        {
+          "entity": "(reuses) Visit/Treatment",
+          "fields": "PRD-05 — recent treatment that selects the protocol",
+          "notes": "Drives which protocol + day-N the client sees."
+        },
+        {
+          "entity": "(reuses) Notification",
+          "fields": "PRD-07 — day-N aftercare check-ins, always-on transactional care content",
+          "notes": "Not gated by marketing opt-out."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-09/CLIENT-CARE",
+        "PRD-09/CLIENT-CONCERN"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Day-by-day aftercare protocol matched to the recent treatment",
+          "note": "Behaviour: select and render the aftercare protocol matching the client's most recent treatment, stepping through recovery day by day. Requirements: protocol is keyed to treatment_type from the visit (PRD-05); day-N check-ins arrive as transactional care notifications (PRD-07) that are always delivered regardless of marketing opt-out; the in-progress aftercare card and Home nudge deep-link in."
+        },
+        {
+          "title": "Matched product picks as care recommendations",
+          "note": "Behaviour: present matched skincare/recovery product picks alongside the guidance. Requirements: picks are care recommendations only — never S4 (Schedule 4 prescription-only medicine) and never presented/priced in a way that breaches the AU advertising rules; tapping a pick routes to the retail/care item, not a prescription medicine."
+        },
+        {
+          "title": "'Something's wrong' escalation into Report-a-concern",
+          "note": "Behaviour: a prominent escalation affordance hands off to the Report-a-concern flow. Requirements: it routes into PRD-09/CLIENT-CONCERN (description + urgency + optional photo handled as clinical media), which raises a staff follow-up (PRD-07) and can escalate to an adverse event (PRD-05) / complaint (PRD-11); the client gets an immediate acknowledgement."
         }
       ]
     },
@@ -269,8 +424,16 @@
       ],
       "tasks": [
         {
-          "title": "Provider app: day schedule + open-patient consult/consent gate",
-          "note": "Provider Flutter flavour with Entra ID workforce SSO (tenant-scoped). Build the 'Today · Room X' schedule from PRD-02 (arrival times, highlight a self-checked-in client with 'Start visit', others 'Open'). On opening a patient, render the 'Consent & prescriber authorisation' status block and evaluate the PRD-03/04 gate server-side: disable the charting entry points and show outstanding items until it passes; then expose quick links to injection map / photos / finalise. Bottom tabs Schedule / Patient / Medicines / Tasks."
+          "title": "Provider Flutter flavour: shell + Entra workforce SSO",
+          "note": "Behaviour: stand up the provider flavour of the shared Flutter codebase with bottom tabs Schedule / Patient / Medicines / Tasks, sharing auth, the API client and the design system. Sign-in via Entra ID workforce SSO (single sign-on), tenant-scoped. Requirements: the session is pinned to the tenant and carried on every call; thumb-first, gloves-on usability (UX §1); this is the same flavour the room-side charting (PROVIDER-ROOMSIDE) and offline (PROVIDER-OFFLINE) stories extend."
+        },
+        {
+          "title": "'Today · Room X' day schedule with ready-to-start highlight",
+          "note": "Behaviour: build the practitioner's day list from PRD-02 (arrival times), highlighting a self-checked-in client as ready with 'Start visit' and others as 'Open'. Requirements: reflects the live visit lifecycle (checked_in drives the highlight); reads the practitioner's own day; opening a row goes to the patient with the gate evaluated."
+        },
+        {
+          "title": "Open-patient consult/consent gate (server-enforced before charting)",
+          "note": "Behaviour: on opening a patient, render the 'Consent & prescriber authorisation' status block and evaluate the PRD-03/04 gate. Requirements: the gate is evaluated server-side — the charting entry points stay disabled and outstanding items are shown until consult + consent pass; once cleared, expose quick links to injection map / photos / finalise (handing off to PROVIDER-ROOMSIDE); the app never bypasses the gate locally."
         }
       ]
     },
@@ -342,12 +505,20 @@
       ],
       "tasks": [
         {
-          "title": "Provider app: injection-mapping canvas + product/units + script link",
-          "note": "Build the tap-to-place injection-mapping canvas on a face/body image (drag to adjust, accurate hit-testing — highest app risk, SPIKE-CANVAS). Per point capture product/units; link the individual script and surface PRD-04 consult/Rx/administration. Thumb-first targets sized for gloved hands (UX §1). Writes to the PRD-05 ChartEntry/InjectionPoint entities via the API."
+          "title": "Pre-flight + consent/script verification step",
+          "note": "Behaviour: a room-side pre-flight read (alerts, allergies, history, goals) and a 'Consent & script' step showing signed consent + the prescriber's authorised dose, both verified before mapping. Requirements: surfaces the PRD-03/04 gate state and the linked script; the injection-map / photos / complete steps stay locked until pre-flight + consent + script pass; thumb-first, gloves-on layout (UX §1)."
         },
         {
-          "title": "Provider app: camera capture (signed-URL upload) + server-side finalise",
-          "note": "Native-camera before/after capture gated on image-use consent: request a per-image signed upload URL (ADR-0009), stream the image to central storage and discard the local file once sync confirms — no photo persists on device after sync (C14), only a transient capture cache. Finalise calls the server seal; re-fetch the sealed, read-only entry so the app shows it immutable (AC6)."
+          "title": "Tap-to-place injection-mapping canvas (product/units, script-linked)",
+          "note": "Behaviour: a tap-to-place injection-mapping canvas on a face/body image — drag to adjust each point, capture product + units per point, with a live units total checked against the script. Requirements: accurate hit-testing on a touch canvas (highest app risk — SPIKE-CANVAS); writes to the PRD-05 ChartEntry/InjectionPoint entities via the API; surfaces PRD-04 consult/Rx/administration; gloved-hand target sizes."
+        },
+        {
+          "title": "Native-camera before/after capture via signed-URL upload (no device retention)",
+          "note": "Behaviour: native-camera before/after capture gated on image-use consent. Requirements: request a per-image signed upload URL (a temporary, expiring link, ADR-0009), stream the image straight to central storage, and discard the local file once sync confirms — no photo persists on device after sync (C14), only a transient capture cache; capture is blocked when image-use consent is absent."
+        },
+        {
+          "title": "Server-side finalise → immutable record + stock decrement",
+          "note": "Behaviour: 'Complete' seals the record. Requirements: finalisation is server-side — it decrements the exact batch/lot (the manufacturer's batch of a medicine vial) from inventory and pushes aftercare to the client app; the app re-fetches the sealed, read-only entry so it shows immutable (AC6); corrections are appended amendments, never edits; finalise is disabled until everything has synced (ties to PROVIDER-OFFLINE)."
         }
       ]
     },
@@ -536,8 +707,24 @@
       ],
       "tasks": [
         {
-          "title": "Reception self-check-in tablet surface",
-          "note": "Locked-down web/PWA (progressive web app) kiosk surface re-using the PRD-02/03 modules. Idle 'Welcome in' attract screen → 'Tap to check in' → booking lookup + light detail confirmation (not a staff login) → prompt/complete outstanding intake (medical history/health check) and consent (PRD-03) → advance Appointment to checked_in (PRD-02), updating the arrivals board and the provider day list. Single-client session with no cross-client data access; auto-timeout back to the attract screen between clients (C10)."
+          "title": "Locked-down kiosk shell + attract screen + session timeout",
+          "note": "Behaviour: a locked-down web/PWA (progressive web app) kiosk surface that idles on a 'Welcome in' attract screen ('Tap to check in') and steps through Find booking · Confirm · Check details · Health check · Sign consent · Checked in. Requirements: a single-client session with NO access to other clients' data and no staff login; auto-timeout back to the attract screen between clients, clearing all state (C10); the device is kiosk-pinned (no browser chrome / navigation away)."
+        },
+        {
+          "title": "Booking lookup + confirm-it's-me (no password)",
+          "note": "Behaviour: 'Find your booking' matches the visit by mobile number (no app or password), then 'Confirm appointment' shows the found booking and the client confirms it's them before anything else happens. Requirements: lookup returns only the matching client's own booking; a light verification (not a staff login); reception can also look it up; rate-limit/guard the public lookup."
+        },
+        {
+          "title": "Details review + today's health check ('anything changed?')",
+          "note": "Behaviour: 'Check your details' is a 10-second contact-details review to keep records current, then 'Today's health check' asks the safety 'anything changed?' question captured before the chair. Requirements: writes back to the PRD-02 client record / PRD-03 intake; the health-check response is the per-visit re-screen feeding the clinician; no clinical record is exposed at the kiosk."
+        },
+        {
+          "title": "Outstanding intake/consent completion at the desk (PRD-03)",
+          "note": "Behaviour: 'Outstanding before your visit' prompts and completes anything unsigned — outstanding intake (medical history) and consent — finished here rather than in the room. Requirements: reuses the SAME PRD-03 intake/consent modules as the client app (no parallel store); the on-device signature posts to the API; the compliance gate stays server-enforced — the kiosk only completes what's outstanding."
+        },
+        {
+          "title": "Advance to checked_in + reception arrivals board feed",
+          "note": "Behaviour: completing check-in advances the Appointment to checked_in and shows 'You're checked in' + what happens next; the staff-facing 'Reception arrivals board' shows who's here, where, and how long they've waited. Requirements: the transition drives the PRD-02 visit lifecycle, updating the arrivals board and the provider's day list instantly; reception and the treatment room are notified; the board is the staff companion the kiosk feeds."
         }
       ]
     },
@@ -602,8 +789,20 @@
       ],
       "tasks": [
         {
-          "title": "Back-office bench-tablet operations surface",
-          "note": "Back-office web/tablet surface composing existing module views (not re-implementing them): a 'Good morning' hub with morning attention items, then panels for open/close checklist + cold-chain log (PRD-11), stock on hand + S4 (Schedule 4 prescription-only medicine) register + waste/disposal (PRD-04), tasks (PRD-07) and shift handover (PRD-11). Apply role gating with the .fin capability so non-owner roles see no money figures; audit every action; shared-device session handling attributes actions to the acting staff member."
+          "title": "Bench-tablet shell + 'Good morning' hub + shared-device sessions",
+          "note": "Behaviour: a back-office web/tablet surface with a left rail (Today · Open & close · Cold chain · Stock · S4 register · Waste log · Tasks & handover) opening on a 'Good morning' hub that pulls the morning's attention items (open/close progress, cold-chain status, expiring stock, last handover) into one glance. Requirements: composes existing module views (does NOT re-implement them); shared-device session handling attributes every action to the acting staff member; role/financial gating applies (owner-only money stays behind the .fin capability); all actions audited."
+        },
+        {
+          "title": "Open/close checklist + cold-chain (fridge) log panels (PRD-11)",
+          "note": "Behaviour: the Open & close panel renders today's checklist (tick items, each recording who/when, with the responsible role) and the Cold chain panel logs AM/PM fridge temperatures with in-range / breach states. Requirements: reuses PRD-11/OPENCLOSE + TEMP-MONITORS — an out-of-2–8°C reading raises the breach pathway (quarantine the affected lot (the manufacturer's batch of a medicine vial) + a job); no parallel data store; audited."
+        },
+        {
+          "title": "Stock-on-hand + S4 register + waste-log panels (PRD-04)",
+          "note": "Behaviour: the Stock panel shows on-hand levels with par lines, expiry watch and one-tap reorder/receive; the S4 register reconciles received vs administered vs wasted against a physical count; the Waste log records witnessed disposal of partial/expired S4 (Schedule 4 prescription-only medicine) vials. Requirements: reuses the PRD-04 StockItem/StockLedger/S4 register/StockDestruction entities (batch + expiry tracked); the register is append-only and reconciled; witnessed-disposal capture is required for traceability; no money figures shown to non-owner roles (.fin)."
+        },
+        {
+          "title": "Tasks panel (PRD-07) + shift-handover panel (PRD-11)",
+          "note": "Behaviour: the Tasks & handover panel shows the team's to-dos / restock nudges / compliance dates (PRD-07 jobs) alongside the shift-to-shift handover note (PRD-11). Requirements: reuses PRD-07/FOLLOWUPS jobs and PRD-11/SHIFT-HANDOVER (add/read, timestamped + attributed); outstanding jobs surface next to the handover so the incoming shift sees both together; the last handover note also appears on the hub."
         }
       ]
     },

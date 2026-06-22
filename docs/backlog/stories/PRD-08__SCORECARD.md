@@ -47,7 +47,11 @@ _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Po
 
 ## Tasks (dev pickup)
 
+- [ ] **Per-practitioner scorecard rows (revenue, retention, rebooking, utilisation, revision)**
+  Behaviour: render one row/card per practitioner showing revenue (owner-gated), retention, rebooking, chair/room utilisation and an outcome/revision signal, on the shared Reports date presets. Requirements: revenue and revenue-per-chair-hour are .fin owner-only and stripped for non-owner roles; the non-money signals (retention, rebooking, utilisation, revision) stay visible to managers; values come from the read-models, never OLTP.
+- [ ] **Scorecard Insights strip (per-practitioner callouts)**
+  Behaviour: an Insights strip surfacing per-practitioner patterns ('Filler earns the most per chair-hour …', 'this injector's rebooking is low') as the readable headline behind the rows. Requirements: generated from the same scorecard projection so a callout never disagrees with a row; money-bearing callouts (per-chair-hour earnings) are owner-only; the strip points the owner at the row to coach from.
+- [ ] **Metric drill-down into underlying clients/appointments**
+  Behaviour: every scorecard metric drills from the number into the actual clients/appointments behind it (e.g. from 'low rebooking' to the list of clients who didn't rebook), so a figure is never a dead end. Requirements: the projection exposes the underlying client/appointment ids per metric; drill-down respects RBAC + .fin (a manager drilling a money metric they can't see is blocked); clinical reads are audited.
 - [ ] **Read-model / projection: per-practitioner scorecard**
-  Slice the business metrics by practitioner and join the clinical outcome/revision signal (from PRD-05) into PractitionerScorecard keyed by practitioner+period: revenue, revenue-per-chair-hour, retention, rebooking, utilisation, revision rate. Tag money fields owner-financial. Support drill-down by exposing the underlying client/appointment ids per metric.
-- [ ] **Web UI: practitioner scorecard + drill-down**
-  Build the Scorecard tab (default Reports tab): the Insights strip plus per-practitioner rows/cards, with .fin gating on money metrics (non-money signals stay visible to managers). Each metric drills into the underlying client/appointment list. Share the date presets with the business view.
+  Behaviour: slice the business metrics by practitioner and join the clinical outcome/revision signal (from PRD-05) into PractitionerScorecard keyed by practitioner+period: revenue, revenue-per-chair-hour, retention, rebooking, utilisation, revision rate. Requirements: tag money fields owner-financial; expose the underlying client/appointment ids per metric to power drill-down; reads the BUSINESS-DASH metrics + clinical outcomes, eventual consistency acceptable.

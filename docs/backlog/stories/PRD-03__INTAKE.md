@@ -49,9 +49,11 @@ _Prototype screen: prototype.html — Forms & consent; client-app.html intake/co
 
 ## Tasks (dev pickup)
 
-- [ ] **Configurable, versioned IntakeForm + JSON field schema**
-  Model IntakeForm (name, version, fields as a JSON schema, required flag) so admins can define fields without code; bump version on change. Validate submitted answers against the schema server-side. Tenant-scoped (RLS (row-level security)). Seed the v1 medical-history & screening template (history checkboxes, contraindication items).
 - [ ] **IntakeResponse capture + auto-link to chart/appointment**
-  Endpoint to submit an IntakeResponse from the client app/web/kiosk: stamp form_version, store answers(json), derive contraindication_flags, set submitted_at, and auto-link to client_id + appointment_id so it appears on the chart. Required-and-current responses feed the GATING evaluation. Re-screen vs full form chosen by new/returning. Audited.
-- [ ] **Staff Forms & consent intake status + send/chase UI**
-  Forms & consent screen: templates table (form/type/version/status) and recent submissions with per-client intake status (complete / pending — link sent). Actions to send or chase an intake link (via PRD-07). The client-app/kiosk intake wizard (history → safety check → wellbeing → consent → image use → done) renders the configured form.
+  Behaviour: an endpoint that submits an IntakeResponse from the client app / web / kiosk. Requirements: stamp form_version, store answers(json), derive contraindication_flags, set submitted_at, and auto-link to client_id + appointment_id so it appears on the chart; the response is validated server-side against the form's JSON schema; required-and-current responses feed the GATING evaluation; audited.
+- [ ] **Re-screen vs full form (new/returning)**
+  Behaviour: a returning client gets a quick medical re-screen; a new client gets the full intake form. Requirements: the form variant is chosen from the booking's new_or_returning flag (PRD-02); both stamp the form_version they were answered against; the quick re-screen still captures any changed contraindications.
+- [ ] **Medical-history step + quick safety check**
+  Behaviour: the intake wizard's medical-history step (checkboxes incl. pregnancy/breastfeeding, blood thinners, cold-sore history, latex/lidocaine allergies, and 'None of the above') followed by a 'quick safety check' summary. Requirements: selections derive contraindication_flags; the safety check summarises whether any contraindication was flagged for the nurse; rendered identically in the client app and at the reception check-in tablet.
+- [ ] **Staff Forms & consent: intake status + send/chase**
+  Behaviour: the staff Forms & consent screen showing recent submissions with per-client intake status (complete / pending — link sent) and actions to send or chase an intake link. Requirements: send/chase goes via PRD-07; status reflects whether a required, current IntakeResponse exists; rows deep-link to the client.

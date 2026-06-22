@@ -47,7 +47,13 @@ _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Po
 
 ## Tasks (dev pickup)
 
+- [ ] **Capacity KPI tiles (overall utilisation + idle capacity)**
+  Behaviour: a row of headline tiles for overall chair utilisation and idle capacity over the selected window. Requirements: utilisation = booked vs available minutes from the read-models; idle capacity is shown as hours (the dollar value of idle time lives on the scorecard, not here); operational metric only, no money figures; shares the Reports date presets.
+- [ ] **Utilisation by practitioner and by resource (overview)**
+  Behaviour: the overview sub-view shows utilisation by practitioner and by room/chair/device as tiles/bars. Requirements: available time per resource comes from the roster (PRD-01 ROSTER) and resource definitions (PRD-11 ROOMS-DEVICES), booked time from appointments; bars make under-used resources obvious; reads the read-models, never OLTP.
+- [ ] **Utilisation trends sub-view (time series)**
+  Behaviour: the trends sub-view (goRepSub 'trends') plots utilisation over time so the owner can see direction, not just a snapshot. Requirements: time-series query over the capacity projection for the selected resources/window; consistent with the overview totals; operational only.
+- [ ] **Quiet-window highlight + hand-off to waitlist / recall fill**
+  Behaviour: highlight recurring low-utilisation windows (e.g. 'Wed runs at just 63% utilisation') and offer a hand-off to fill them. Requirements: the same quiet-window data feeds the Reception waitlist (PRD-02 WAITLIST) and recall (PRD-07 RECALL) fill loop; the hand-off creates the matching follow-up action; quiet-window detection is configurable (threshold + horizon).
 - [ ] **Read-model / projection: capacity & utilisation**
-  Project CapacityMetrics = booked vs available minutes by practitioner, room/chair and device over a window, computing utilisation and detecting quiet windows (recurring low-utilisation slots). Available time comes from the roster (PRD-01 ROSTER) and resource definitions (PRD-11 ROOMS-DEVICES); booked time from appointments. Support overview + trend (time-series) queries over the read schema.
-- [ ] **Web UI: capacity report (overview + trends) with quiet-window fill**
-  Build the Capacity tab with overview/trends sub-views (goRepSub): utilisation by resource as tiles/bars (overview) and over time (trends), with quiet windows highlighted and a hand-off action into waitlist/recall fill (PRD-02/PRD-07). Operational metric only — no money figures.
+  Behaviour: project CapacityMetrics = booked vs available minutes by practitioner, room/chair and device over a window, computing utilisation and detecting quiet windows (recurring low-utilisation slots). Requirements: available time from roster (PRD-01 ROSTER) + resource definitions (PRD-11 ROOMS-DEVICES), booked time from appointments; support overview + trend (time-series) queries over the read schema; eventual consistency acceptable; operational, no money.

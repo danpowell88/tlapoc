@@ -51,5 +51,9 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 
 ## Tasks (dev pickup)
 
-- [ ] **Provider app: day schedule + open-patient consult/consent gate**
-  Provider Flutter flavour with Entra ID workforce SSO (tenant-scoped). Build the 'Today · Room X' schedule from PRD-02 (arrival times, highlight a self-checked-in client with 'Start visit', others 'Open'). On opening a patient, render the 'Consent & prescriber authorisation' status block and evaluate the PRD-03/04 gate server-side: disable the charting entry points and show outstanding items until it passes; then expose quick links to injection map / photos / finalise. Bottom tabs Schedule / Patient / Medicines / Tasks.
+- [ ] **Provider Flutter flavour: shell + Entra workforce SSO**
+  Behaviour: stand up the provider flavour of the shared Flutter codebase with bottom tabs Schedule / Patient / Medicines / Tasks, sharing auth, the API client and the design system. Sign-in via Entra ID workforce SSO (single sign-on), tenant-scoped. Requirements: the session is pinned to the tenant and carried on every call; thumb-first, gloves-on usability (UX §1); this is the same flavour the room-side charting (PROVIDER-ROOMSIDE) and offline (PROVIDER-OFFLINE) stories extend.
+- [ ] **'Today · Room X' day schedule with ready-to-start highlight**
+  Behaviour: build the practitioner's day list from PRD-02 (arrival times), highlighting a self-checked-in client as ready with 'Start visit' and others as 'Open'. Requirements: reflects the live visit lifecycle (checked_in drives the highlight); reads the practitioner's own day; opening a row goes to the patient with the gate evaluated.
+- [ ] **Open-patient consult/consent gate (server-enforced before charting)**
+  Behaviour: on opening a patient, render the 'Consent & prescriber authorisation' status block and evaluate the PRD-03/04 gate. Requirements: the gate is evaluated server-side — the charting entry points stay disabled and outstanding items are shown until consult + consent pass; once cleared, expose quick links to injection map / photos / finalise (handing off to PROVIDER-ROOMSIDE); the app never bypasses the gate locally.

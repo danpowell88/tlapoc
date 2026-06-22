@@ -414,16 +414,24 @@
       ],
       "tasks": [
         {
-          "title": "Job model + signal projections (migrations)",
-          "note": "Model Job (tenant_id + RLS (row-level security)) per ADR-0023: type, optional client/conversation/appointment links, assignee (role|person), status (open|snoozed|done), source (manual|auto|recall|system), due_at.\n- Existing signals project INTO this queue (recall due, unanswered conversation, negative review, no-show, stock/expiry, client concern) rather than separate tables.\n- Role-scoping ('my queue') via the concerns model."
+          "title": "Unified Job model + signal projections",
+          "note": "Behaviour: one Job entity backs the whole queue — type (recall|callback|reply|review|concern|consent|stock|restock|admin), optional client/conversation/appointment links, assignee (role|person), status (open|snoozed|done), source (manual|auto|recall|system), due_at. Existing signals project INTO this one queue rather than living in separate UIs: recall due (RECALL), unanswered conversations (INBOX), negative reviews (REVIEWS), no-shows (PRD-02), stock/expiry alerts, client concern reports (PRD-09). Requirements: tenant-scoped with RLS (row-level security); projections don't create duplicate tables — they surface as Jobs; per ADR-0023."
         },
         {
-          "title": "Jobs API: lifecycle, flag, rules/keyword auto-categorise, projections",
-          "note": "Server-side.\n- Lifecycle endpoints: create/open/done/snooze/reopen/reassign; flag a message/client -> Job.\n- Auto-categorise inbound conversations by rules/keyword (no AI): map category (Complaint -> Lead-Nurse callback; Booking -> Reception reply-&-book; Pricing -> Reception reply) to a Job; idempotent (don't double-create for an already-open conversation job).\n- Project recall (RECALL), reviews (REVIEWS), no-shows (PRD-02), stock/expiry and concerns (PRD-09) into the queue; audit all status changes (ADR-0010)."
+          "title": "Job lifecycle actions (open / done / snooze / reopen / reassign / callback)",
+          "note": "Behaviour: each job supports open (jumps to the chat/client/report), mark done, snooze, reopen, reassign (cycles the role) and callback; every status change is audited. Requirements: actions are server-authoritative; reassign cycles through the role set; snooze hides until a due time; all transitions write an AuditEvent (ADR-0010); the queue is role-scoped so 'Mine' shows only the current user's/role's jobs."
         },
         {
-          "title": "Follow-ups web UI: filters, job rows, actions, nav badge",
-          "note": "Angular per the screenshot.\n- Filter pills (Open / Mine / Snoozed / Done) with counts; 'Auto-detect from inbox' action.\n- Job rows: type badge, assignee, source tag, due + client; primary link (open chat / open client / view report) + done checkbox + Snooze / Reassign.\n- Nav count badge + dashboard 'follow-ups' list; role-scoped 'Mine'; loading/empty ('queue clear')/error states."
+          "title": "Manual flag -> Job",
+          "note": "Behaviour: staff can flag any message or client and it becomes a Job so it can't get lost ('Flag a message and it can't get lost'). Requirements: a manual flag sets source=manual and an appropriate type/assignee; flagging is available from the inbox and the client record; idempotent (re-flagging an already-open item doesn't duplicate)."
+        },
+        {
+          "title": "Rules/keyword auto-categorisation (no AI)",
+          "note": "Behaviour: inbound comms auto-categorise into jobs by rules/keyword (NO AI) — e.g. a 'Complaint' conversation → a Lead-Nurse callback job; a 'Booking' enquiry → a Reception reply-&-book job; a 'Pricing' enquiry → a Reception reply job; an 'Auto-detect from inbox' action triggers a sweep. Requirements: rules/keyword only (auto-categorisation is a UX aid, not a safety control — jobs are advisory and human-actioned); idempotent (don't double-create for an already-open conversation job); the assigned role follows the category."
+        },
+        {
+          "title": "Follow-ups web UI (filters, job rows, actions, nav badge)",
+          "note": "Behaviour: the Follow-ups screen shows filter pills (Open / Mine / Snoozed / Done) with counts and an 'Auto-detect from inbox' action; each job row has a type badge, assignee, source tag (auto-detected / flagged / recall / system), due + client link, a primary action (open chat / open client / view report), a done checkbox and Snooze / Reassign. A count badge in the nav and a dashboard 'follow-ups' list keep it visible. Requirements: role-scoped 'Mine'; loading/empty ('queue clear')/error states; the nav badge reflects the open count live."
         }
       ]
     },
@@ -540,16 +548,24 @@
       ],
       "tasks": [
         {
-          "title": "Automation model over Sequence (migrations)",
-          "note": "Model Automation (tenant_id + RLS (row-level security)): trigger, treatment_type, sequence_id, kind (transactional|marketing), enabled.\n- A thin wrapper over Sequence (REMINDERS-CARE) — does not duplicate the engine.\n- kind carries through to the consent gate."
+          "title": "Automation model over Sequence + on/off toggle",
+          "note": "Behaviour: an Automation is a thin, toggleable wrapper over a Sequence — trigger (booking|visit|interval) + treatment_type + sequence_id + kind (transactional|marketing) + enabled. Toggling an automation off stops the underlying Sequence from triggering; toggling on resumes it. Requirements: tenant-scoped with RLS (row-level security); does NOT duplicate the sequence engine (REMINDERS-CARE/RECALL) — it configures it; kind carries through to the consent gate."
         },
         {
-          "title": "Automation toggle/edit API + engine wiring",
-          "note": "Server-side.\n- Endpoints to list/enable/disable/edit automations per treatment type; toggling enabled gates whether the linked Sequence triggers.\n- Marketing-kind automations gate on consent + suppression (C23); transactional always send.\n- Stats (sent/booked/returned) read from NotificationLog + outcomes."
+          "title": "Per-treatment-type editing of automations",
+          "note": "Behaviour: each automation can be edited per treatment type so a filler client and a skin client get the right cadence/content (e.g. Recall — anti-wrinkle ~12 wks vs a different interval for filler). Requirements: editing changes the linked Sequence's steps/offsets/templates; changes are owner/front-desk gated; the default set matches the prototype cards (Recall, Aftercare, Win-back, Birthday, No-show follow-up, Review request)."
+        },
+        {
+          "title": "Transactional vs marketing consent split (C23)",
+          "note": "Behaviour: the screen states 'Flows run automatically on the right trigger. All respect opt-in & unsubscribe (Spam Act).' Marketing automations (recall nudge, win-back, birthday, review request) gate on marketing consent + suppression; transactional ones (reminders, aftercare) always send. Requirements: the kind flag drives the gate via MARKETING-CONSENT; a marketing automation never sends to a non-consented/suppressed contact; content never names/prices S4 (Schedule 4 prescription-only medicine) (C9). Review request is off by default."
+        },
+        {
+          "title": "Automation live stats (sent / booked / returned)",
+          "note": "Behaviour: each automation card shows live stats — e.g. 'Recall 42 sent · 18 booked', 'Aftercare 96 sent (30d)', 'Win-back 128 sent · 11 returned', 'No-show 9 sent · 5 rebooked'. Requirements: stats read from NotificationLog (sends) joined to outcomes (bookings/returns) over a rolling window; computed server-side, not hand-entered."
         },
         {
           "title": "Automations web UI (cards + toggles)",
-          "note": "Angular per the screenshot.\n- Automation cards with channel + audience + live stats and an on/off toggle (toggleAuto); per-treatment editing; the 'all respect opt-in & unsubscribe' note.\n- Owner/front-desk gated; loading/empty/error states."
+          "note": "Behaviour: the Automations screen renders automation cards with channel + audience + live stats and an on/off toggle (toggleAuto), plus per-treatment editing and the 'all respect opt-in & unsubscribe (Spam Act)' note. Requirements: owner/front-desk gated; Review request shown off by default; loading/empty/error states."
         }
       ]
     },
@@ -609,12 +625,24 @@
       ],
       "tasks": [
         {
-          "title": "Review model + complaint-keyword auto-detect (migrations)",
-          "note": "Model Review (tenant_id + RLS (row-level security)): source, rating, body, names_s4, status.\n- Request-all: review requests gate only on consent (C23), never on sentiment (ACL — Australian Consumer Law).\n- Auto-detect: rating <=3 OR a complaint-keyword match flags needs-follow-up.\n- No repost-as-marketing field/feature exists (prevents prohibited testimonials)."
+          "title": "Request-all review requests (no sentiment gating - ACL)",
+          "note": "Behaviour: post-visit review requests go to ALL eligible (consented) clients — there is NO sentiment pre-screen ('Requests go to every eligible client (no sentiment gating — ACCC)'). Requirements: gate only on marketing consent (C23), never on predicted happiness; review gating (asking only happy clients) is misleading conduct under the ACL (Australian Consumer Law) and must not be implementable. Model Review (source, rating, body, names_s4, status) tenant-scoped with RLS (row-level security)."
         },
         {
-          "title": "Reviews API: request, reply, acknowledge, flag -> Job; testimonial caution",
-          "note": "Server-side.\n- Send review requests to all eligible consented clients (no gating); reply/acknowledge endpoints; flag -> create a review Job (Follow-ups) assigned Lead Nurse (clinical/unhappy) or Reception.\n- Auto-detect: scan reviews, raise review Jobs for ≤3★/complaint matches idempotently.\n- When a review names an S4 (Schedule 4 prescription-only medicine) result, surface the caution (don't reshare — prohibited testimonial, C9/ADR-0032); the platform offers no repost action. KPI (key performance indicator) read-model (avg, count, response rate, needs-follow-up)."
+          "title": "Reply / acknowledge / flag a review",
+          "note": "Behaviour: staff can Reply to, Acknowledge, or Flag any review (reviewReply / reviewAck / reviewFlag). Flagging a review raises a review Job into the Follow-ups queue (PRD-07/FOLLOWUPS) assigned Lead Nurse for clinical/unhappy reviews, Reception otherwise. Requirements: reply/acknowledge update the review status; flag -> Job is idempotent; actions audited."
+        },
+        {
+          "title": "Auto-detect negative reviews / complaint keywords -> Job",
+          "note": "Behaviour: negative reviews (≤3★) and complaint-keyword matches (unhappy/refund/rude/pain/no one called...) are auto-detected and shown with a 'needs follow-up' badge, raising review Jobs into Follow-ups so a bad review becomes an action, not just a notification; an 'Auto-detect follow-ups' action sweeps on demand. Requirements: rating ≤3 OR keyword match flags needs-follow-up; raising Jobs is idempotent; routing follows the same Lead-Nurse/Reception split."
+        },
+        {
+          "title": "S4 testimonial caution (C9) - no repost-as-marketing feature",
+          "note": "Behaviour: where a review names an S4 (Schedule 4 prescription-only medicine) result, staff see a caution: 'Names an S4 result — replying is fine, but don't reshare it publicly (would be a prohibited testimonial)'. Requirements: the platform offers NO feature to repost/embed a review as marketing, so an S4-endorsing review can't be weaponised into a prohibited testimonial (National Law s133 / TGA Code, C9/ADR-0032); names_s4 drives the caution; replying is always allowed."
+        },
+        {
+          "title": "Reviews screen UI + reputation KPIs",
+          "note": "Behaviour: the Growth -> Reviews screen shows KPI cards (Avg rating, Reviews, Response rate, Needs follow-up), the request-all/no-gating explainer, per-review Reply/Acknowledge/Flag actions, the 'needs follow-up' badge on ≤3★, the S4 testimonial caution banner, and a footer noting campaigns/social live in external tools (Mailchimp, Meta Business Suite). Requirements: KPI read-model (avg, count, response rate, needs-follow-up); owner/staff gated; loading/empty/error states."
         }
       ]
     },
@@ -673,16 +701,24 @@
       ],
       "tasks": [
         {
-          "title": "Lead model as a projection over conversations (migrations)",
-          "note": "Model Lead (tenant_id + RLS (row-level security)) per ADR-0033: name, contact, source, interest, stage, next_action, optional conversation_id + converted_client_id, consent.\n- A thin pipeline layer over the inbox; stage transitions feed conversion read-models."
+          "title": "Lead pipeline model + stages (projection over conversations)",
+          "note": "Behaviour: a Lead is a thin pipeline layer over the inbox (ADR-0033) — name, contact, source (Instagram DM / Website widget / Facebook / Referral / Google), interest, stage (new / consult / won / lost), next_action, optional linked conversation, plus consent state. Staff move a lead between stages as it progresses. Requirements: tenant-scoped with RLS (row-level security); stage transitions feed the conversion read-models; an enquiry from the inbox becomes a pipeline card."
         },
         {
-          "title": "Leads API: pipeline stages, convert-to-client, consent-gated nudges, Follow-ups",
-          "note": "Server-side.\n- CRUD leads; move stage (new/consult/won/lost); convert -> create/link a client + (optional) booking, preserving enquiry history.\n- Outbound nudges gate on marketing consent (C23); 1:1 service replies exempt.\n- Lead follow-ups raise Jobs into Follow-ups; conversion KPI (key performance indicator) read-model (open, consults, conversion %, avg days)."
+          "title": "Convert lead -> client / booking (preserve history)",
+          "note": "Behaviour: converting a lead creates or links a client and (optionally) a booking, preserving the original enquiry history. Requirements: the linked conversation/history is retained on the resulting client; converted_client_id is stamped; conversion moves the lead to 'won'."
         },
         {
-          "title": "Leads (CRM) web UI: kanban + KPIs + convert",
-          "note": "Angular per the screenshot.\n- Kanban columns (New enquiry / Consult booked / Converted / Lost) with lead cards (source + consent dot); KPI (key performance indicator) cards; convert-to-client/booking action; the 1:1-vs-public-advertising note.\n- Front-desk/owner gated; loading/empty/error states."
+          "title": "Consent-gated outbound nudges (1:1 replies exempt, C23)",
+          "note": "Behaviour: a 1:1 service reply to a lead is fine (not public advertising), but any proactive outbound nudge to a lead gates on marketing consent — the board shows a consent dot per lead. Requirements: outbound nudges route through MARKETING-CONSENT (consent + suppression, C23); 1:1 replies are exempt; advertising compliance (C9) for campaigns/social stays clinic-owned in external tools."
+        },
+        {
+          "title": "Lead follow-ups -> Follow-ups queue + conversion KPIs",
+          "note": "Behaviour: lead follow-ups surface in the unified Follow-ups queue (e.g. 'Reply & book — Friday consult'); a conversion KPI read-model powers the cards (Open leads, Consults booked, Conversion %, Avg days). Requirements: lead Jobs project into PRD-07/FOLLOWUPS; KPI (key performance indicator) figures computed server-side from stage transitions."
+        },
+        {
+          "title": "Leads (CRM) web UI (kanban + KPIs + convert)",
+          "note": "Behaviour: the Growth -> Leads screen shows KPI cards and kanban columns (New enquiry / Consult booked / Converted / Lost) with lead cards (source + consent dot), a convert-to-client/booking action, and the '1:1 replies aren't public advertising; outbound nudges need opt-in consent' note. Requirements: front-desk/owner gated; loading/empty/error states; cards reflect stage moves live."
         }
       ]
     },

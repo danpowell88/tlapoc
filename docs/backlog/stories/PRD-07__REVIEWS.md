@@ -50,13 +50,13 @@ _Prototype screen: prototype.html — Comms & growth (Inbox/Automations/Campaign
 
 ## Tasks (dev pickup)
 
-- [ ] **Review model + complaint-keyword auto-detect (migrations)**
-  Model Review (tenant_id + RLS (row-level security)): source, rating, body, names_s4, status.
-  - Request-all: review requests gate only on consent (C23), never on sentiment (ACL — Australian Consumer Law).
-  - Auto-detect: rating <=3 OR a complaint-keyword match flags needs-follow-up.
-  - No repost-as-marketing field/feature exists (prevents prohibited testimonials).
-- [ ] **Reviews API: request, reply, acknowledge, flag -> Job; testimonial caution**
-  Server-side.
-  - Send review requests to all eligible consented clients (no gating); reply/acknowledge endpoints; flag -> create a review Job (Follow-ups) assigned Lead Nurse (clinical/unhappy) or Reception.
-  - Auto-detect: scan reviews, raise review Jobs for ≤3★/complaint matches idempotently.
-  - When a review names an S4 (Schedule 4 prescription-only medicine) result, surface the caution (don't reshare — prohibited testimonial, C9/ADR-0032); the platform offers no repost action. KPI (key performance indicator) read-model (avg, count, response rate, needs-follow-up).
+- [ ] **Request-all review requests (no sentiment gating - ACL)**
+  Behaviour: post-visit review requests go to ALL eligible (consented) clients — there is NO sentiment pre-screen ('Requests go to every eligible client (no sentiment gating — ACCC)'). Requirements: gate only on marketing consent (C23), never on predicted happiness; review gating (asking only happy clients) is misleading conduct under the ACL (Australian Consumer Law) and must not be implementable. Model Review (source, rating, body, names_s4, status) tenant-scoped with RLS (row-level security).
+- [ ] **Reply / acknowledge / flag a review**
+  Behaviour: staff can Reply to, Acknowledge, or Flag any review (reviewReply / reviewAck / reviewFlag). Flagging a review raises a review Job into the Follow-ups queue (PRD-07/FOLLOWUPS) assigned Lead Nurse for clinical/unhappy reviews, Reception otherwise. Requirements: reply/acknowledge update the review status; flag -> Job is idempotent; actions audited.
+- [ ] **Auto-detect negative reviews / complaint keywords -> Job**
+  Behaviour: negative reviews (≤3★) and complaint-keyword matches (unhappy/refund/rude/pain/no one called...) are auto-detected and shown with a 'needs follow-up' badge, raising review Jobs into Follow-ups so a bad review becomes an action, not just a notification; an 'Auto-detect follow-ups' action sweeps on demand. Requirements: rating ≤3 OR keyword match flags needs-follow-up; raising Jobs is idempotent; routing follows the same Lead-Nurse/Reception split.
+- [ ] **S4 testimonial caution (C9) - no repost-as-marketing feature**
+  Behaviour: where a review names an S4 (Schedule 4 prescription-only medicine) result, staff see a caution: 'Names an S4 result — replying is fine, but don't reshare it publicly (would be a prohibited testimonial)'. Requirements: the platform offers NO feature to repost/embed a review as marketing, so an S4-endorsing review can't be weaponised into a prohibited testimonial (National Law s133 / TGA Code, C9/ADR-0032); names_s4 drives the caution; replying is always allowed.
+- [ ] **Reviews screen UI + reputation KPIs**
+  Behaviour: the Growth -> Reviews screen shows KPI cards (Avg rating, Reviews, Response rate, Needs follow-up), the request-all/no-gating explainer, per-review Reply/Acknowledge/Flag actions, the 'needs follow-up' badge on ≤3★, the S4 testimonial caution banner, and a footer noting campaigns/social live in external tools (Mailchimp, Meta Business Suite). Requirements: KPI read-model (avg, count, response rate, needs-follow-up); owner/staff gated; loading/empty/error states.

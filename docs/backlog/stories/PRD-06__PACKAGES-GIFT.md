@@ -49,19 +49,13 @@ _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rew
 
 ## Tasks (dev pickup)
 
-- [ ] **Package/GiftCard/AccountBalance model (migrations)**
-  Model Package, GiftCard and AccountBalance (tenant_id + RLS (row-level security)).
-  - Package: total_visits/remaining decremented on redemption.
-  - GiftCard: code, initial, running balance, status, optional assigned client; partial redemption supported.
-  - AccountBalance: client store-credit + AR (accounts receivable) ageing buckets.
-  - Deferred-revenue treatment is recognised in Xero (the clinic's cloud accounting system) (PRD-10), not re-implemented here.
-- [ ] **Sell/redeem API: package decrement, gift balance draw-down, credit/AR**
-  Server-side commands/queries.
-  - Sell package / issue gift card / apply store credit; redeem a package visit (decrement remaining, guard against 0) and draw down a gift-card balance at checkout (partial allowed).
-  - Redemptions write to the Closeout (the daily reconciliation of takings) and the Xero (the clinic's cloud accounting system) post.
-  - Expose client credit + AR (accounts receivable)-ageing read queries (owner/manager gated). Gift cards stay schedule-neutral; the rewards engine still blocks S4 (Schedule 4 prescription-only medicine) earn/redeem at checkout.
-- [ ] **Gift-cards web UI + Client-360 'visits remaining'**
-  Angular per the screenshot.
-  - Gift-cards screen: tile list (code, balance of initial, assignment status), 'Issue gift card' action, search; balances reflect checkout redemptions live.
-  - Client 360: package 'visits remaining' chip and redemption history.
-  - Loading/empty/error states; owner/manager gate on credit/AR (accounts receivable) figures.
+- [ ] **Packages / series: sell + redeem (decrement visits-remaining)**
+  Behaviour: a Package is a pre-paid course of treatments (total_visits) with a running 'remaining' count, sold at checkout and redeemed one session at a time when the client attends; the Client 360 shows 'visits remaining' and the redemption history. Requirements: redeeming decrements remaining and guards against going below 0 (a depleted package can't redeem); redemption posts to the Closeout (the daily reconciliation of takings) and to Xero (PRD-10) — deferred revenue on sale, recognised on redemption, with the accounting treatment owned by Xero, not re-implemented here. A package is tied to a service_id so only matching sessions draw it down.
+- [ ] **Gift cards: issue, balance-track, partial redeem (balances sync to checkout)**
+  Behaviour: a gift card has a code, an initial value and a running balance; it can be issued ('Issue gift card'), assigned to a client or left unassigned, partially redeemed against any future sale, and shows status (active / redeemed / unassigned). The Gift-cards screen tiles each card as 'balance of initial' (e.g. 'GC-4471 H. Lawson $120 of $150', 'GC-3320 redeemed $0 of $100', 'GC-2207 gift — unassigned $200 of $200'). Requirements: balances sync live to checkout so a draw-down at the till is reflected immediately; partial redemption supported; a gift card is schedule-neutral (it buys anything) BUT the rewards engine still blocks S4 (Schedule 4 prescription-only medicine) earn/redeem at checkout (C9). Redemptions post to Closeout + Xero.
+- [ ] **Client store-credit + AR (accounts receivable) ageing**
+  Behaviour: an AccountBalance per client holds store-credit (usable as a checkout deduction) and AR (accounts receivable) ageing buckets (what the client owes, by age) for owner/manager visibility. Requirements: store credit applied at checkout decrements the balance; AR ageing is surfaced to owner/manager only; all money figures here are owner-gated (.fin) — Reception sees memberships/packages but not credit/AR dollar figures. Feeds the Client 360 billing tab.
+- [ ] **Sell/redeem API (package decrement, gift draw-down, credit/AR queries)**
+  Behaviour: server-side commands/queries — sell package / issue gift card / apply store credit; redeem a package visit (decrement remaining, guard 0) and draw down a gift-card balance at checkout (partial allowed); expose client-credit + AR-ageing read queries (owner/manager gated). Requirements: redemptions write to the Closeout and the Xero post; gift cards stay schedule-neutral while the rewards engine still blocks S4 (Schedule 4 prescription-only medicine) earn/redeem; every table tenant-scoped with RLS (row-level security). Deferred-revenue recognition is Xero's (PRD-10), not duplicated here.
+- [ ] **Gift-cards web UI + Client-360 'visits remaining' chip**
+  Behaviour: the Gift-cards screen renders a tile list (code, balance of initial, assignment status) with an 'Issue gift card' action and search; balances reflect checkout redemptions live. The Client 360 shows a package 'visits remaining' chip and redemption history. Requirements: loading/empty/error states; owner/manager gate (.fin) on credit/AR figures; tiles update without a full reload when a redemption happens at the till.

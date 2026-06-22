@@ -1,6 +1,6 @@
 # PRD-05 — Clinical charting: injection mapping & before/after
 
-> **Stage / Milestone:** M3 · Consult, prescribing, S4 & charting (PRD-04, PRD-05)  ·  **Phase:** 1  ·  **Stories:** 13
+> **Stage / Milestone:** M3 · Consult, prescribing, S4 & charting (PRD-04, PRD-05)  ·  **Phase:** 1  ·  **Stories:** 14
 
 The clinical record that matches the Aesthetic Record / Pabau bar: a guided charting flow opening with product & lot selection, on-image/diagram injection mapping (product · units · depth · site · batch-lot), standardised before/after photos with comparison, immutable finalised notes with audited amendments, and adverse-event logging that feeds the TGA/DAEN pathway — usable room-side on the provider app, even offline.
 
@@ -10,8 +10,9 @@ The clinical record that matches the Aesthetic Record / Pabau bar: a guided char
 
 | Key | Story | Type | Priority | Est | Tasks |
 |---|---|---|---|---|---|
-| `NOTE-TEMPLATE` | [Guided toxin treatment note & pre-treatment review](../stories/PRD-05__NOTE-TEMPLATE.md) | Story | P0 | 5 | 3 |
-| `MAPPING` | [Injection-mapping canvas (per-point lot)](../stories/PRD-05__MAPPING.md) | Story | P0 | 5 | 6 |
+| `NOTE-TEMPLATE` | [Guided toxin treatment note & pre-treatment review](../stories/PRD-05__NOTE-TEMPLATE.md) | Story | P0 | 5 | 5 |
+| `MAPPING` | [Injection-mapping canvas (per-point lot)](../stories/PRD-05__MAPPING.md) | Story | P0 | 5 | 5 |
+| `PRODUCT-LOT-PICKER` | [Charting product & batch (lot) selector](../stories/PRD-05__PRODUCT-LOT-PICKER.md) | Story | P0 | 5 | 3 |
 | `PHOTOS` | [Standardised before/after photos + compare](../stories/PRD-05__PHOTOS.md) | Story | P1 | 3 | 4 |
 | `IMMUTABILITY` | [Immutable finalisation & audited amendments](../stories/PRD-05__IMMUTABILITY.md) | Story | P0 | 5 | 3 |
 | `OFFLINE` | [Offline queue & sync for room-side charting](../stories/PRD-05__OFFLINE.md) | Story | P1 | 3 | 4 |
@@ -24,4 +25,4 @@ The clinical record that matches the Aesthetic Record / Pabau bar: a guided char
 | `COMPLICATION-LIBRARY` | [Complication protocol library & response kits](../stories/PRD-05__COMPLICATION-LIBRARY.md) | Story | P1 | 3 | 4 |
 | `OUTCOMES` | [Outcomes & revision tracking](../stories/PRD-05__OUTCOMES.md) | Story | P2 | 1 | 1 |
 
-_Totals: 13 stories · 36 tasks._
+_Totals: 14 stories · 40 tasks._

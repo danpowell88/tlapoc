@@ -49,9 +49,9 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 
 ## Tasks (dev pickup)
 
-- [ ] **Resource register: rooms/chairs/devices CRUD**
-  Manage the shared Resource entity (type[room|chair|device], name, location_id, status, optional licence_note). CRUD on Operations → Rooms & devices; show utilisation. Same entity the PRD-02 calendar books against.
-- [ ] **Expose resources to calendar + conflict-flagging**
-  Make resources available to the PRD-02 calendar for booking and conflict-flagging (PRD-02/WALKINS): a device resource can't be assigned to two concurrent appointments / two rooms at once.
+- [ ] **Resource register: rooms/chairs/devices CRUD + utilisation**
+  Behaviour: manage rooms, chairs and devices as bookable resources on Operations → Rooms & devices (cards with utilisation bars; devices carry a licence note, e.g. Candela GentleLase · Class 4 laser · QLD laser licence). Requirements: CRUD the shared Resource entity (type[room|chair|device], name, location_id, status, optional licence_note) — the SAME entity the PRD-02 calendar books against (no duplicate model); tenant-scoped.
+- [ ] **Expose resources to the calendar + conflict-flagging**
+  Behaviour: make resources available to the PRD-02 calendar for booking and conflict-flagging. Requirements: a device resource can't be assigned to two concurrent appointments / two rooms at once (PRD-02/WALKINS surfaces the conflict before confirm); availability reflects each resource's status in real time.
 - [ ] **Out-of-service status + link to equipment maintenance**
-  Out-of-service status removes a resource from availability (can't be scheduled while down). A device Resource carries an optional link to its Equipment maintenance record (PRD-11/EQUIPMENT) — same physical device.
+  Behaviour: marking a resource out-of-service removes it from availability, and a device resource links to its maintenance record. Requirements: an out-of-service resource can't be scheduled while down; a device Resource carries an optional link to its Equipment maintenance record (PRD-11/EQUIPMENT) so the same physical device has one identity across booking and servicing.

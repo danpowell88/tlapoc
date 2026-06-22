@@ -51,17 +51,13 @@ Defaults match the prototype: earn 1 pt / $1 on non-S4; redeem 200 pts = $20 off
 
 ## Tasks (dev pickup)
 
-- [ ] **RewardRule/RewardLedger model + non-S4 eligibility constraint (migrations)**
-  Model RewardRule and RewardLedger (tenant_id + RLS (row-level security)).
-  - RewardRule.eligible_items reference catalog items; a DB/domain constraint forbids any S4-scheduled (Schedule 4 prescription-only medicine) item being added to a rule's eligible set.
-  - RewardLedger records earned/redeemed/balance per client with a ref to the originating invoice/visit.
-- [ ] **Rewards engine: earn/redeem with live schedule re-check**
-  Server-side earn/redeem logic.
-  - Earn on completed non-S4 (non-Schedule 4) spend (1 pt/$1 default) and visit milestones; redeem (200 pts = $20 off non-S4) only against non-S4 lines.
-  - At checkout, recompute eligibility against the live line's schedule flag — never trust a cached/UI value; an S4 (Schedule 4 prescription-only medicine) line is inert.
-  - Endpoints to define/list reward rules and query a client's ledger/balance.
-- [ ] **Enforce the S4 reward block as a server-side invariant + audit**
-  C9 invariant that cannot be bypassed via the API.
-  - Reject any rule-config call whose eligible_items include an S4 (Schedule 4 prescription-only medicine) item — return a clear blocked-action reason (what's blocked / which item / why) for the UI banner and disabled controls.
-  - Reject any earn/redeem/discount targeting an S4 line at checkout.
-  - Audit both the block events and successful non-S4 redemptions (ADR-0010 audit trail).
+- [ ] **Points program: earn + redeem (non-S4) into the RewardLedger**
+  Behaviour: clients earn points on completed non-S4 spend (default 1 pt / $1) and visit milestones, and redeem them against non-S4 lines (default 200 pts = $20 off non-S4); earn/redeem land in a per-client RewardLedger (earned / redeemed / balance) with a ref to the originating invoice/visit. Requirements: redemption only ever discounts a non-S4 line; the ledger surfaces on the Client 360 and the client-app Rewards; defaults match the prototype but are configurable.
+- [ ] **Tiers (Silver / Gold / Platinum) + top balances**
+  Behaviour: clients are banded into loyalty tiers (Silver · Gold · Platinum) by their balance/activity, and the Loyalty screen shows a 'Top balances' list (e.g. 'Amelia Ross 1,240 pts'). Requirements: tier thresholds are owner-configurable; tier is derived from the ledger; top-balance visibility is a staff read (no money figures, so not .fin-gated, but client PII access is audited).
+- [ ] **S4 reward block at config time (C9 invariant)**
+  Behaviour: a RewardRule's eligible_items reference catalogue items; attempting to add an S4 (Schedule 4 prescription-only medicine) item to a rule's eligible set is rejected with a clear blocked-action reason (what's blocked / which item / why). Requirements: enforce as a DB/domain constraint AND at the API — not a UI nicety; the schedule flag (PRD-04/ADR-0014) is the source of truth; the loyalty screen states 'Points never earn or redeem on S4 medicines — enforced at checkout'; audit the block (ADR-0010).
+- [ ] **S4 reward block at checkout (live schedule re-check) + audit**
+  Behaviour: at checkout the engine recomputes eligibility against the LIVE line schedule and refuses to earn, redeem or discount against any S4 line — the S4 line's reward/points control is inert/disabled with a tooltip. Requirements: never trust a cached/UI eligibility value; the refusal is server-side and returns a clear reason for the disabled control; audit both blocked attempts and successful non-S4 redemptions. This is the same invariant POS surfaces as 'S4 · no rewards'.
+- [ ] **Loyalty screen UI (points program + tiers + top balances)**
+  Behaviour: the Loyalty screen shows the Points program (Earn '1 pt / $1 on non-S4', Redeem '200 pts = $20 off non-S4'), Tiers (Silver · Gold · Platinum), the rule note 'Points never earn or redeem on S4 medicines — enforced at checkout', and Top balances. Requirements: earn/redeem also visible on Client 360 + client-app Rewards; S4 catalogue items render disabled reward/discount controls with a tooltip; loading/empty/error states.

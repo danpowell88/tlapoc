@@ -52,11 +52,11 @@ _Prototype screen: prototype.html — Operations → Open/close & fridge log; ba
 
 ## Tasks (dev pickup)
 
-- [ ] **OpenCloseChecklist: configurable templates + daily instances**
-  Model OpenCloseChecklist (type[open|close], items[]{label, done, role}, completed_by, at). Configurable per-clinic checklist templates instantiated per day/type; each item carries a responsible role (Reception/Nurse/Lead Nurse). Audited.
-- [ ] **Open/close checklist UI**
-  Today's open/close checklist view (ops-openclose + back-office tablet): tick items, attributed to who/when, with the role label per item; show completion state.
-- [ ] **FridgeLog: twice-daily manual temp entry (openFridge/saveFridge)**
-  Per-fridge AM/PM manual temperature entry (openFridge → modal → saveFridge). Record temp, period, actor, at; show 'in range' / 'warm spike — recovered' states. Fallback alongside the live monitor feed (TEMP-MONITORS).
+- [ ] **Configurable open/close checklist templates + daily instances**
+  Behaviour: per-clinic open and close checklist templates (items each carrying a responsible role, e.g. 'Fridge 1 AM temp logged' · Reception, 'Autoclave run & cycle logged' · Lead Nurse) instantiated per day and type. Requirements: model OpenCloseChecklist (type[open|close], items[]{label, done, role}, completed_by, at) tenant/location-scoped under RLS (row-level security); templates are editable; each daily instance is independent and audited.
+- [ ] **Open/close checklist UI (tick, attribute, complete)**
+  Behaviour: today's open/close checklist on Operations (ops-openclose) and the back-office tablet — tick each item, with the role label, recording who/when, and show overall completion. Requirements: each tick attributes to the acting staff member + timestamp; completion state surfaces on the back-office hub's morning attention items; some items deep-link to the relevant log (cold chain, S4 register).
+- [ ] **Twice-daily manual fridge-temp log (openFridge/saveFridge)**
+  Behaviour: per-fridge AM/PM manual temperature entry (openFridge → modal → saveFridge) recording temp, period, actor and time, with 'in range' / 'warm spike — recovered' states. Requirements: model FridgeLog (fridge_id, period[am|pm], temp, at, actor_id, breach); this manual log is the fallback alongside the live monitor feed (TEMP-MONITORS) and both reconcile into one cold-chain (the unbroken temperature-controlled storage required for medicines) record.
 - [ ] **Fridge breach pathway (quarantine lot + job) + inspection feed**
-  A reading outside the safe band (toxin 2–8°C) sets breach=true, quarantines the affected lot (PRD-04 cold-chain) and raises a job (PRD-07) automatically. Reconcile manual + device readings into one cold-chain record (C13); feed logs to the PRD-08 inspection pack.
+  Behaviour: a reading outside the safe band (toxin 2–8°C) is a breach. Requirements: set breach=true, quarantine the affected lot (the manufacturer's batch of a medicine vial) via PRD-04 cold-chain, and raise a job (PRD-07) automatically; reconcile manual + device readings into one evidenced cold-chain record (C13); feed logs to the PRD-08 inspection-readiness pack; the breach path must stay intact regardless of source (manual or monitor).

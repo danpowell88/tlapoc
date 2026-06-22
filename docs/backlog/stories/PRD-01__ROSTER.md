@@ -52,7 +52,11 @@ Management is capability-gated: Owner/Lead manage the roster and approve leave; 
 
 ## Tasks (dev pickup)
 
-- [ ] **Roster & leave model + availability derivation**
-  Model RosterShift (per staff + location) and TimeOff with an approval status, all tenant_id + RLS (row-level security). Compute bookable availability as shifts minus approved leave, intersected with the canInject (the derived cleared-to-inject gate)/scope check for the requested service — and expose it as the query PRD-02 booking consumes so it cannot offer a slot for an off or non-compliant practitioner. Record engagement type usage for downstream attribution (it lives on StaffProfile). Audit every roster/leave change and leave approval.
-- [ ] **Roster & leave UI (Team workspace)**
-  Build Team -> Roster & leave (team-roster.png): the weekly grid (day columns x practitioner rows) with editable rostered cells and the Leave list with pending/approved status chips and approve/decline actions. Show the ADR-0029 availability banner. Owner/Lead edit; Reception read-only (capability-gate to team:manage for edits, read for frontdesk). No payroll/commission UI here — attribution is downstream (ADR-0027).
+- [ ] **Weekly roster grid (editable shifts, per staff + location)**
+  Behaviour: the weekly roster grid (team-roster.png) — day columns × practitioner rows with shaded rostered cells, editable by Owner/Lead. Requirements: model RosterShift per staff + location (tenant_id + RLS); Reception sees the grid read-only (it needs to see who's in, not edit shifts); the ADR-0029 banner states the roster is the source of truth for booking availability; every shift change is audited.
+- [ ] **Leave list with pending/approved status + approve/decline**
+  Behaviour: the Leave list below the grid — entries with kind (annual/personal/other), dates and a status chip (Pending/Approved/Declined), with approve/decline actions for Owner/Lead. Requirements: approved leave blocks availability, pending does not yet block but is visible; approve/decline is gated to team:manage and audited; model TimeOff with the approval status.
+- [ ] **Bookable-availability derivation (the query PRD-02 consumes)**
+  Behaviour: compute bookable availability = roster shifts − approved leave, intersected with the canInject (the derived cleared-to-inject gate)/scope check for the requested service. Requirements: expose this as the exact query PRD-02 booking consumes so the diary can never offer a slot for an off or non-compliant practitioner; a practitioner is bookable for an S4 (Schedule 4 prescription-only medicine) service only when rostered AND canInject is true (ADR-0029).
+- [ ] **Engagement-type recording for downstream attribution**
+  Behaviour: record each staff member's engagement type (employee/contractor) — it already lives on StaffProfile from CREDENTIALS — for downstream commission/pay attribution and the contractor compliance banner. Requirements: the platform attributes revenue by engagement type but is explicitly NOT a payroll/super engine (ADR-0027); no payroll/commission UI here — attribution is downstream.

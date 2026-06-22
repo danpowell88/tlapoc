@@ -55,11 +55,11 @@ _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Po
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations: Policy + PolicySignoff**
-  Add Policy (versioned, body, target roles, updated_at) and PolicySignoff (per policy_version + staff_id + signed_at). Migrations + RLS (row-level security) (Row-Level Security)/tenancy. Publishing a new version is a new Policy version row that supersedes the prior and invalidates prior sign-offs for the unsigned-count computation.
-- [ ] **Backend: versioning, publish-resets-signoff, outstanding tracking**
-  Implement publish (new version) → reset sign-off for that policy and raise a re-acknowledgement Job per relevant staff member (ADR-0023). Compute the signed-count (e.g. 5/6) and the unsigned-policies count for the Overview tile. signPolicy records the acting staff against the current version with a timestamp. Capability-gate to the compliance concern.
-- [ ] **Enforce audit on sign-off**
-  Every sign-off and every policy publish is append-only audited (ADR-0010) — the audit trail is the evidence the inspection pack (INSPECTION-PACK) and an inspector rely on. Surface sign-off status into the inspection-pack 'Policies & procedures sign-off' category.
-- [ ] **Web UI: policies list + sign-off**
-  Build gov-policies: the policy table (Policy/Version/Updated/Signed/action), Sign action (increments signed count, toast 'Acknowledged <version> — <policy>', complete state at full count), and the per-staff outstanding view. Update the Overview 'Unsigned policies' count on action. Governance area; no money figures.
+- [ ] **Policy table + per-policy sign-off action**
+  Behaviour: build the policies table (gov-policies) — Policy, Version, Updated, Signed count (e.g. 5/6 signed, 6/6 complete), action — with a Sign action that records the acting staff against the CURRENT version with a timestamp. Requirements: Sign increments the signed count, shows the toast 'Acknowledged <version> — <policy>' and renders 'complete' at full count; the Signed column is the live signed-vs-total count; capability-gate to the compliance concern; no money figures.
+- [ ] **Policy versioning + publish-resets-sign-off + re-acknowledgement tasks**
+  Behaviour: policies are versioned; publishing a new version resets everyone's sign-off for that policy and raises a re-acknowledgement task per relevant staff member. Requirements: a new version supersedes the prior and invalidates prior sign-offs for the unsigned-count computation; each re-acknowledgement is a Job (ADR-0023) targeted to the relevant roles; outstanding sign-offs surface rather than silently going stale.
+- [ ] **Unsigned-policies count + inspection-pack feed**
+  Behaviour: compute the 'Unsigned policies' count for the Governance Overview tile and surface sign-off status into the inspection-pack 'Policies & procedures sign-off' category (INSPECTION-PACK). Requirements: the count is policies not fully signed at the current version; it updates live on Sign/publish; the inspection pack reads the same status so the tile and the pack agree.
+- [ ] **Append-only audit on sign-off + publish**
+  Behaviour: every sign-off and every policy publish is append-only audited (ADR-0010) — the audit trail is the evidence the inspection pack and an inspector rely on. Requirements: capture actor/policy/version/timestamp; no edit/delete path; the per-staff outstanding view reads from the same sign-off records; governance area, no money figures.

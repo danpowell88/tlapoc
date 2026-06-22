@@ -51,9 +51,11 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 
 ## Tasks (dev pickup)
 
-- [ ] **Walk-in / same-day add-on booking flow (gate-respecting)**
-  Quick-add flow from the Schedule that attaches an existing or new client, picks a free practitioner+resource via the availability engine, and books source=walkin. For S4 (Schedule 4 prescription-only medicine) services, the resulting appointment still carries the consult (the assessment appointment where suitability is established and an S4 prescription can be written) gate (consult_id null ⇒ charting blocked) and requires consent — walk-ins never bypass C1/C5. Same-day add-on appends a service to an in-progress visit on a free resource.
-- [ ] **Resource conflict-flagging before confirm + tags**
-  Before a walk-in/add-on confirms, check the chosen room/chair/device is free for the whole block incl. buffers and surface any conflict inline (block confirm until resolved). Support appointment tags[] (vip, first_time) set at booking and rendered on the calendar block. Feed resource utilisation.
-- [ ] **Walk-in UI on the Schedule grid**
-  Render walk-in blocks distinctly (e.g. 'Walk-in NEW') and add the quick-add affordance from an open/quiet cell. Show VIP/first-time tags. Surface the conflict warning before confirmation. Reuse the move/cancel modal.
+- [ ] **Walk-in booking flow (gate-respecting, source=walkin)**
+  Behaviour: a quick-add flow from the Schedule that attaches an existing or creates a new client, picks a free practitioner+resource via the availability engine, and books source=walkin. Requirements: for an S4 (Schedule 4 prescription-only medicine) service the resulting appointment still carries the consult (the assessment appointment where suitability is established and an S4 prescription can be written) gate (consult_id null ⇒ charting blocked) and still requires consent — a walk-in never bypasses C1/C5; the Appointment is identical to a desk/online booking but tagged source=walkin.
+- [ ] **Same-day add-on to an in-progress visit**
+  Behaviour: append an additional service to a visit already underway. Requirements: the add-on must land on a free resource for its whole block incl. buffers; it inherits the visit's client and respects the same scope/gate rules; an S4 add-on still needs consult + consent.
+- [ ] **Resource conflict-flagging before confirm**
+  Behaviour: before a walk-in/add-on confirms, verify the chosen room/chair/device is free for the whole block including buffers and surface any conflict inline. Requirements: confirmation is blocked until the conflict is resolved; the check feeds resource utilisation; conflicts are visually unmistakable.
+- [ ] **VIP / first-time tags + distinct walk-in rendering**
+  Behaviour: support appointment tags[] (vip, first_time) set at booking and render walk-in blocks distinctly (e.g. 'Walk-in NEW') with a quick-add affordance from an open/quiet cell. Requirements: tags render on the calendar block and on the appointment; reuse the existing move/cancel modal; the conflict warning shows before confirmation.

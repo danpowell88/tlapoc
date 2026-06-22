@@ -149,12 +149,98 @@
       ],
       "tasks": [
         {
-          "title": "Read-model / projection: business metrics + targets",
-          "note": "Project GROWTH/PERFORMANCE/FINANCE metrics from the payments, membership, appointment and lifecycle events into BusinessMetrics keyed by period (+optional practitioner), plus the RewardCostVsRetention join over the PRD-06 reward ledger. Persist ClinicTarget per tenant and compute variance vs target/prior-period server-side. Tag money fields owner-financial. Support the 7d/30d/90d/custom windows and per-practitioner slicing as query parameters over the projection, not OLTP scans."
+          "title": "Date-range presets, custom range & per-practitioner filter",
+          "note": "Behaviour: a header period control (7d / 30d / 90d presets plus a custom range) and a per-practitioner switch that re-scope every tile on the screen; a sub-header echoes the active window ('last 30 days · figures synthetic'). Requirements: changing the period or practitioner re-queries the read-models (not OLTP) and re-computes every band against the matching comparison window; the selection persists per user and is the single source of truth all three bands and the Insights strip read from."
         },
         {
-          "title": "Web UI: business dashboards (Revenue / Retention / Memberships)",
-          "note": "Build the Reports tabs in Angular: date presets + custom range, the Insights strip (Opportunity/Watch/On-track generated from target variance), the three metric bands as value/target/variance tiles, and the Targets editor (Apply/Reset, persisted per clinic). Wire .fin gating so money tiles are suppressed for non-owner roles while counts/ops metrics remain. Per-practitioner switch re-queries the read-model. Match the prototype's metric set and copy tone."
+          "title": "Insights strip (Opportunity / Watch / On-track callouts)",
+          "note": "Behaviour: a strip of plain-language cards above the bands that translate the numbers into action ('Conversion is 38% vs your 40% target — closing that gap is about 1 more member a month'), each tagged Opportunity, Watch or On-track. Requirements: generated server-side from target/prior-period variance (not hand-authored copy); cards are derived from the same BusinessMetrics + ClinicTarget the tiles use so they never disagree with a tile; ordering surfaces the most material gap first."
+        },
+        {
+          "title": "GROWTH band tiles (MRR, active members, net change, new members MTD)",
+          "note": "Behaviour: the GROWTH band renders MRR (monthly recurring revenue), Active members, Net member change and New members MTD, each tile showing value, target and a coloured variance. Requirements: MRR is money and owner-gated (.fin) — stripped server-side for non-owner roles, who still see the member counts; variance colouring is driven by ClinicTarget; each tile drills into the underlying members/appointments."
+        },
+        {
+          "title": "PERFORMANCE band tiles (conversion, retention, rebooking, no-show)",
+          "note": "Behaviour: the PERFORMANCE band renders Conversion, Retention, Rebooking and No-show, each with value / target / variance and a green state when the target is met (no-show uses a ceiling, not a floor). Requirements: these are operational metrics visible to managers without .fin; computed over the appointment/lifecycle projections; each drills into its underlying client/appointment list."
+        },
+        {
+          "title": "FINANCE band tiles (revenue + MoM, prepaid liability, to-reactivate, autopay success)",
+          "note": "Behaviour: the FINANCE band renders Revenue last month (+ month-on-month), Prepaid liability, To-reactivate value and Autopay success. Requirements: every dollar figure here is owner-only (.fin) and stripped for non-owner roles; revenue/MoM read the payments projection, prepaid liability the package/membership projection, autopay success the dunning signal (PRD-06); the autopay-success rate may show to a payments role per the gating rule while the dollar figures stay owner-only."
+        },
+        {
+          "title": "Owner Targets editor (set, apply, reset; persisted per clinic)",
+          "note": "Behaviour: an editable row of owner targets (MRR target, Active members, Conversion %, Retention %, Rebooking %, No-show max) with Apply targets / Reset. Requirements: persists ClinicTarget per tenant; applying re-colours every tile's variance and regenerates the Insights callouts; the editor is owner-only and the note states figures are saved per clinic (the prototype's 'saved in this browser only' becomes real per-tenant persistence)."
+        },
+        {
+          "title": "Read-model / projection: business metrics + reward-cost-vs-retention",
+          "note": "Behaviour: project GROWTH/PERFORMANCE/FINANCE metrics from the payments, membership, appointment and lifecycle events into BusinessMetrics keyed by period (+ optional practitioner), plus the RewardCostVsRetention join over the PRD-06 reward ledger so the owner can see whether loyalty spend buys retention. Requirements: compute variance vs target/prior-period server-side; tag money fields owner-financial so the gate can strip them; support the 7d/30d/90d/custom windows and per-practitioner slicing as query parameters over the read schema, never OLTP scans; eventual consistency acceptable."
+        }
+      ]
+    },
+    {
+      "key": "RETENTION-COHORTS",
+      "title": "Retention cohort analysis & at-risk worklist",
+      "as_a": "owner",
+      "i_want": "a cohort retention grid and an at-risk / lapsed client list I can act on",
+      "so_that": "I can see whether new clients actually stick and win back the ones slipping away",
+      "context": "Plainly: the Retention tab's deeper analysis — a cohort grid showing, for each month's intake of new clients, how many are still active over time, plus a list of clients who are at-risk or lapsed with a one-click hand-off into the recall worklist. Where it fits: a sibling of the business dashboards (PRD-08/BUSINESS-DASH) in the Reporting layer (step 6 of the clinic-first build); it reads the same reporting read-models (PRD-08/READ-MODELS) the dashboards do, but is a distinct analytical surface — a triangle cohort matrix and an actionable client list rather than headline tiles. The at-risk list hands off to the follow-up/recall queue (PRD-07) so a number on the report becomes a call, never a dead end. New-vs-returning and the headline retention/rebooking rates stay on BUSINESS-DASH; this story owns the cohort matrix and the at-risk/lapsed worklist. A cohort is the group of clients who first visited in the same month.",
+      "notes": "",
+      "acceptance": [
+        "A cohort grid shows, per first-visit month, the percentage of that cohort still active at N months since first visit (a triangle that shortens for newer cohorts).",
+        "The grid reads from the reporting read-models, never OLTP, and is date/window aware like the rest of Reports.",
+        "An at-risk / lapsed list surfaces clients past their expected return window, each with last-seen, value and a reason they are at-risk.",
+        "Each at-risk client has a one-click hand-off that creates a reactivation follow-up job (PRD-07), respecting marketing consent.",
+        "Operational signals are visible to managers; any lifetime-value / dollar figure is owner-only (.fin)."
+      ],
+      "detail": [
+        "The cohort matrix is the truest measure of whether new clients stick: each row is the clients who first visited in a given month, and reading left-to-right shows how many are still active 1, 2, 3 … months on. Newer cohorts naturally have shorter rows (less history), so the grid is a triangle; colour encodes the retained percentage so decay patterns are visible at a glance.",
+        "Alongside the grid sits the at-risk / lapsed worklist: clients past their expected return cadence for their treatment type, each showing last-seen, an at-risk reason (e.g. 'anti-wrinkle client, 14 weeks since last visit') and — owner-only — their value at risk. The list is the actionable counterpart to the headline retention rate on BUSINESS-DASH.",
+        "Acting on a client hands straight off to the recall/win-back loop: a one-click action queues a reactivation follow-up job (PRD-07) so the report drives a call rather than just describing a problem; the hand-off honours the client's marketing-consent state.",
+        "This reads from the reporting read-models (READ-MODELS) over appointment, client and visit data and is date/window-aware like the rest of Reports. Cohort membership and retained-state are operational; any lifetime-value / dollar figure is owner-gated (.fin) and stripped for non-owner roles."
+      ],
+      "ui_spec": [
+        "Prototype: Reports → Retention & rebooking (reports.png, goRep('retention')) — the 'Cohort retention · % still active by months since first visit' grid (repCohorts) with the explainer that each row is a first-visit-month group, and the 'At-risk & lapsed clients' card (repAtRisk) with an 'Open follow-ups →' action.",
+        "Cohort grid: rows = first-visit month, columns = months since first visit, cell = % of that cohort still active, colour-graded; newer cohorts render as a shorter triangle.",
+        "At-risk list: client, last-seen, at-risk reason, value-at-risk (.fin owner-only), and a per-row 'queue reactivation' hand-off into Follow-ups.",
+        "Date presets shared with the business view; operational signals visible to managers, money owner-gated."
+      ],
+      "data_model": [
+        {
+          "entity": "(read) RetentionCohort",
+          "fields": "cohort_month, months_since, cohort_size, still_active, retained_pct",
+          "notes": "Projection over first-visit + subsequent-visit events; one cell per (cohort_month, months_since); operational (no money)."
+        },
+        {
+          "entity": "(read) AtRiskClient",
+          "fields": "client_id, last_seen, treatment_type, expected_cadence, at_risk_reason, value_at_risk",
+          "notes": "Clients past expected return cadence; value_at_risk owner-gated (.fin); feeds the reactivation hand-off."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-08/BUSINESS-DASH"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Read-model / projection: cohort retention matrix",
+          "note": "Behaviour: project RetentionCohort = for each first-visit month, the percentage of that cohort still active at each months-since offset, producing the triangle matrix. Requirements: computed over the appointment/visit read-models (READ-MODELS), never OLTP; 'still active' uses a defined activity window; newer cohorts have fewer offsets (shorter rows); date/window-aware; eventual consistency acceptable; operational metric, no money."
+        },
+        {
+          "title": "Read-model / projection: at-risk & lapsed clients",
+          "note": "Behaviour: project AtRiskClient = clients past the expected return cadence for their treatment type, with last-seen, an at-risk reason and (owner-only) value-at-risk. Requirements: cadence is per treatment type; value_at_risk is tagged owner-financial and stripped for non-owner roles; expose the underlying client ids so the list drills into the 360 profile."
+        },
+        {
+          "title": "Cohort grid UI (colour-graded triangle matrix)",
+          "note": "Behaviour: render the cohort matrix as a colour-graded grid (rows = first-visit month, columns = months since first visit) with the explainer copy and a per-row legend. Requirements: cells colour by retained percentage; newer cohorts render shorter; horizontally scrollable at width; shares the Reports date presets; no money figures."
+        },
+        {
+          "title": "At-risk list UI + reactivation hand-off to Follow-ups",
+          "note": "Behaviour: render the at-risk / lapsed list (client, last-seen, reason, value-at-risk) with a per-row 'queue reactivation' action and an 'Open follow-ups →' link. Requirements: the hand-off creates a reactivation follow-up job (PRD-07) honouring marketing consent; value-at-risk is .fin owner-only; rows deep-link into the client 360 profile; the reactivation action is idempotent (no duplicate job for the same client)."
         }
       ]
     },
@@ -234,20 +320,36 @@
       ],
       "tasks": [
         {
-          "title": "Read-model / projection: compliance metrics + expiry/retention watch",
-          "note": "Project ComplianceMetric values (consent coverage, cooling-off adherence, stock-discrepancy from PRD-04 reconciliation, reg-expiry from credentials) over the read-models + AuditEvent. Compute consult-before-script as 100%-by-construction: read it from the absence of unlinked-script audit events and flag any cross-check exception explicitly rather than averaging. Build ExpiryWatch/RetentionDue lists that carry their basis (AHPRA (Australian Health Practitioner Regulation Agency) expiry date / the C18 retention rule). Eventual consistency acceptable."
+          "title": "Consent-coverage & cooling-off adherence metrics",
+          "note": "Behaviour: render consent-coverage (share of treatments with a current, version-correct consent on file) and cooling-off adherence (C6, under-18 7-day wait honoured) as compliance metrics with their basis. Requirements: computed over the read-models + AuditEvent stream (ADR-0013/0010); a gap surfaces as a flagged exception with a deep link to the affected client/visit, never a silently-averaged number; eventual consistency acceptable; no money figures."
         },
         {
-          "title": "Register exports (S4 register, breach, complaints) as immutable evidence",
-          "note": "Build the export queries that produce a complete S4 (Schedule 4 prescription-only medicine) administration register (lot+expiry per administration, ordered, tamper-evident), the breach register (C22) and complaints register (C24). Each export is a point-in-time artefact recorded as a RegisterExport row + an AuditEvent (who/when/params). No mutation of source data; exports are reproducible from the read-models."
+          "title": "Consult-before-script adherence (100% by construction, exceptions flagged)",
+          "note": "Behaviour: surface consult-before-script adherence (C1) as 100% by construction — the PRD-04 domain invariant makes a script without a linked synchronous consult impossible to record. Requirements: read it from the ABSENCE of unlinked-script audit events rather than averaging a soft percentage; if any cross-check finds an exception, flag it explicitly with its source rather than diluting the headline; expand the acronyms (S4, consult) in the surface copy."
+        },
+        {
+          "title": "S4 register export (immutable administration record)",
+          "note": "Behaviour: export a complete S4 (Schedule 4 prescription-only medicine) medicines register — every administration with its lot + expiry, ordered and tamper-evident (C8). Requirements: each export is a point-in-time evidence artefact recorded as a RegisterExport row + an AuditEvent (who/when/params); no mutation of source data; reproducible from the administration-register projection, not an OLTP scan."
         },
         {
           "title": "Lot → clients recall lookup",
-          "note": "Reuse PRD-04 RECALL-LOOKUP: given a lot number, return every client treated from that lot (via the administration register projection), with treatment date and contactability, as the input both to the recall campaign (gov-recalls) and the register export. Must be instant at clinic volumes (indexed projection, not an OLTP scan)."
+          "note": "Behaviour: given a lot number, return every client treated from that lot with treatment date and contactability — the input both to the recall campaign (gov-recalls / DAEN) and the register export. Requirements: reuse PRD-04 RECALL-LOOKUP over the administration-register projection; must be instant at clinic volumes (indexed projection, not an OLTP scan); the result set is itself audit-logged as a sensitive read."
         },
         {
-          "title": "Web UI: Governance Overview + register-export actions",
-          "note": "Build the Governance Overview (gov-overview.png): status tile band (Inspection-ready/Open AE/Unsigned policies/Active recalls), 'Needs attention' list with deep links to source, 'Quietly handled for you' assurances, and the Key-terms expander. Wire the export/download actions for S4 (Schedule 4 prescription-only medicine) register, lot-recall, breach and complaints. Render expiry-watch and retention-due lists with their basis. Capability-gate to the compliance concern; no money figures."
+          "title": "Breach & complaints registers (viewable + exportable)",
+          "note": "Behaviour: present the notifiable-data-breach register (C22, sourced from PRD-01 BREACH) and the complaints register (C24, including the right to complain to AHPRA) as viewable, exportable lists. Requirements: each export is a RegisterExport artefact recorded against the audit trail; the registers read their source modules (the dashboard composes, it does not own the breach/complaint records); capability-gated to the compliance concern; no money figures."
+        },
+        {
+          "title": "Registration-expiry watch & records-due-for-destruction lists (with basis)",
+          "note": "Behaviour: render the registration-expiry watch (C19) and records-due-for-destruction (C18) lists, each row showing not just a date but WHY it is on the list. Requirements: the expiry watch carries the AHPRA (Australian Health Practitioner Regulation Agency) expiry date (from CREDENTIALS); the retention list carries the C18 retention rule that made the record eligible (adults ≥7yr from last contact; minors to 25; indefinite where a complaint/adverse outcome exists); both project over the read-models; eventual consistency acceptable."
+        },
+        {
+          "title": "Governance Overview tile band + 'Needs attention' + 'Quietly handled' columns",
+          "note": "Behaviour: build the Governance Overview (gov-overview.png) — the live status tile band (Inspection-ready Review/Ready, Open AE cases, Unsigned policies, Active recalls), the 'Needs attention' column with per-item deep links into source, the 'Quietly handled for you' assurance column (registrations & indemnity current, cold-chain logged twice daily in range, last stocktake reconciled, client-privacy self-served), and the Key-terms expander explaining the acronyms. Requirements: tiles and the needs-attention list derive from the compliance metrics + the open AE/policy/recall counts and live-update on action; the 'quietly handled' assurances read cross-module signals (PRD-04 cold chain/stock, PRD-01 privacy) — read-only here; capability-gate to the compliance concern; no money figures."
+        },
+        {
+          "title": "Read-model / projection: compliance metrics + expiry/retention watch",
+          "note": "Behaviour: project ComplianceMetric values (consent coverage, cooling-off adherence, stock-discrepancy from PRD-04 reconciliation, reg-expiry from credentials) and the ExpiryWatch/RetentionDue lists over the read-models + AuditEvent. Requirements: compute consult-before-script as 100%-by-construction from the absence of unlinked-script audit events; each list carries its basis (AHPRA expiry date / the C18 retention rule); RegisterExport rows are immutable and audited; eventual consistency acceptable."
         }
       ]
     },
@@ -318,20 +420,24 @@
       ],
       "tasks": [
         {
-          "title": "Backend: AE → DAEN classification, routing & prefill",
-          "note": "From an AdverseEvent (PRD-05), build a DaenReport: set seriousness, route to medicine vs device by the product's modality/regClass (ADR-0025), and prefill the report fields from AE + administration + product/lot data. Flag mandatory cases by rule (unapproved-goods-under-authority; serious device event at a hospital/day-hospital facility from 21 Mar 2026 — ASDER) with the basis recorded, defaulting to voluntary otherwise. Status machine: submit_due/open → submitted. No direct TGA (Therapeutic Goods Administration) API (ADR-0031)."
+          "title": "AE → DAEN classification, route (medicine vs device) & prefill",
+          "note": "Behaviour: from an AdverseEvent (PRD-05) build a DaenReport — set seriousness, route to medicine vs device by the product's modality/regClass (ADR-0025; toxin/filler-as-medicine → DAEN Medicines, device-class filler/PDO threads/RF → DAEN Devices), and prefill the report fields from the AE + administration + product/lot data. Requirements: routing is derived from the product, not chosen by hand; prefill is server-side; status machine submit_due/open → submitted; no direct TGA (Therapeutic Goods Administration) API in v1 (ADR-0031) — prefill + portal hand-off only."
         },
         {
-          "title": "Recall execution + acknowledgement tracking",
-          "note": "Turn a lot safety notice into a RecallCampaign over the affected-clients set (lot→clients lookup), dispatch SMS+call via the notifier (PRD-07), and track per-client RecallAcknowledgement to produce the acknowledgement trail (e.g. 9 of 14 acknowledged) shown as an inspector-ready evidence artefact. Recall messaging is a safety message and overrides marketing opt-out."
+          "title": "Mandatory-reporting flag (voluntary by default, basis recorded)",
+          "note": "Behaviour: flag the defined mandatory cases — unapproved-goods-supplied-under-authority, and serious device events at hospital/day-hospital facilities from 21 Mar 2026 (ASDER) — while defaulting to voluntary-but-encouraged otherwise. Requirements: when a case is mandatory the mandatory_basis is recorded and shown; the obligation is never asserted universally (most room-based clinics fall outside the device rule); the voluntary-encouraged note appears for the rest."
         },
         {
-          "title": "Enforce compliance gate + audit events",
-          "note": "All DAEN (Database of Adverse Event Notifications) and recall actions are append-only audited (ADR-0010): generating the prefill, marking submitted (with portal reference + reported date), launching a recall, and each acknowledgement. Capability-gate to the compliance concern. The audit entries are what surface in the inspection pack and the Overview counts."
+          "title": "AE list UI (gov-ae) + prefilled DAEN modal + mark-submitted",
+          "note": "Behaviour: build the AE table (Case, Product/lot, Route as a colour-coded chip, Severity, Status, Report action) and the prefilled DAEN (Database of Adverse Event Notifications) modal — route/product/lot/severity summary, the 'voluntary but strongly encouraged · prefilled for the <portal> portal' note, and Submit/export. Requirements: submitting marks the case Submitted, stamps a reported date and writes an AuditEvent; the toast reads 'DAEN report marked submitted · audit-logged'; the Overview AE count decrements on submit."
         },
         {
-          "title": "Web UI: AE list, DAEN modal, recalls",
-          "note": "Build gov-ae (AE table with Case/Product-lot/Route/Severity/Status/Report and the colour-coded route chips) and the prefilled DAEN (Database of Adverse Event Notifications) modal (route/product/lot/severity summary, voluntary-encouraged note, Submit/export → status Submitted + reported date + toast). Build gov-recalls (recall cards with lot, sponsor notice, acknowledgement progress bar, Run recall). Update the Overview AE/recall counts on action."
+          "title": "Recall execution UI (gov-recalls) + acknowledgement tracking",
+          "note": "Behaviour: build the recalls tab — a recall card per lot (lot, sponsor field-safety notice, an acknowledgement progress bar e.g. '9 of 14 acknowledged · 64%') and a 'Run recall' action. Requirements: Run recall turns the lot safety notice into a RecallCampaign over the affected-clients set (lot→clients lookup), dispatches SMS + call via the notifier (PRD-07) and creates a follow-up job to chase the remaining clients; track per-client RecallAcknowledgement to build the inspector-ready acknowledgement trail; recall/safety messaging overrides marketing opt-out."
+        },
+        {
+          "title": "Append-only audit on all DAEN & recall actions",
+          "note": "Behaviour: every DAEN and recall action is append-only audited (ADR-0010) — generating the prefill, marking submitted (with portal reference + reported date), launching a recall, and each per-client acknowledgement. Requirements: capability-gate to the compliance concern; these audit entries are exactly what surface in the inspection pack (INSPECTION-PACK) and the Governance Overview counts; no money figures."
         }
       ]
     },
@@ -514,20 +620,20 @@
       ],
       "tasks": [
         {
-          "title": "Backend: inspection-pack assembly + readiness state",
-          "note": "Build the pack assembler: for each ticked category, pull the current evidence from its source (registrations from PRD-01, consent coverage + S4 (Schedule 4 prescription-only medicine) register + breach/complaints from COMPLIANCE-DASH RegisterExport, retention/destruction + cold-chain from PRD-04/PRD-11, policy sign-off from POLICIES) into one dated artefact, persist an InspectionPack row referencing the included exports. Compute InspectionReadiness (ready/review) from category completeness (unsigned policies / lapsed registration → review) for the Overview tile."
+          "title": "Category checklist + dated pack assembly",
+          "note": "Behaviour: the owner ticks the categories to include (Registration currency, Consent coverage, Policies & procedures sign-off, Records retention/destruction log, S4 register + reconciliation, Cold-chain & destruction records, Breach & complaints registers) and 'Build pack' assembles them into one dated bundle. Requirements: each ticked category pulls CURRENT evidence from its source at build time (registrations from PRD-01, consent coverage + S4 (Schedule 4 prescription-only medicine) register + breach/complaints from COMPLIANCE-DASH RegisterExport, retention/destruction + cold-chain from PRD-04/PRD-11, policy sign-off from POLICIES); persist an InspectionPack row referencing the included exports; the build produces the dated result line ('inspection-pack-YYYY-MM-DD.pdf · N evidence categories bundled') + toast; no money figures."
         },
         {
-          "title": "Enforce audit on pack generation",
-          "note": "Pack generation is append-only audited (ADR-0010): an AuditEvent capturing actor, timestamp, ticked categories and the referenced exports — the pack is itself a piece of governance evidence. Capability-gate to the compliance concern."
+          "title": "Inspection-readiness state (Review / Ready) on the Overview tile",
+          "note": "Behaviour: compute InspectionReadiness (ready / review) from category completeness and drive the Governance Overview 'Inspection-ready' tile. Requirements: unsigned policies or a lapsed registration make it 'Review'; the tile reflects readiness live as the underlying categories change; reads the same sources the pack assembles from so the tile and a freshly-built pack agree."
         },
         {
-          "title": "Hub: DSAR (APP 12/13) + breach-drill launchers",
-          "note": "Wire the cross-case governance launchers into the hub: a DSAR (data subject access request) (Data Subject Access Request) / access-and-correction action (APP 12/13, REQ-SEC-8, ties to PRD-01 PRIVACY-RIGHTS) and a notifiable-data-breach drill (REQ-SEC-9, ties to PRD-01 BREACH). The hub launches the existing flows and projects their state — it does not relocate the guardrails (ADR-0030)."
+          "title": "Append-only audit on pack generation",
+          "note": "Behaviour: pack generation is itself governance evidence — every build writes an AuditEvent (actor, timestamp, ticked categories, referenced exports). Requirements: append-only (ADR-0010); capability-gate to the compliance concern; the audit entry references the included RegisterExport artefacts so the pack is reproducible and traceable."
         },
         {
-          "title": "Web UI: Audit pack builder",
-          "note": "Build gov-audit: the category checklist (seven categories, pre-ticked), 'Build pack' producing the dated result line ('inspection-pack-YYYY-MM-DD.pdf · N evidence categories bundled') + toast, and the Overview Inspection-ready tile reflecting readiness. Link Policies, DSAR (data subject access request) and breach-drill from the hub. No money figures."
+          "title": "Hub launchers: DSAR (APP 12/13) + notifiable-breach drill",
+          "note": "Behaviour: wire the cross-case governance launchers into the hub — a DSAR (Data Subject Access Request) / access-and-correction action (APP 12/13, REQ-SEC-8, ties to PRD-01 PRIVACY-RIGHTS) and a notifiable-data-breach drill (REQ-SEC-9, ties to PRD-01 BREACH). Requirements: the hub LAUNCHES the existing flows and projects their state — it does not relocate the guardrails (ADR-0030); both are capability-gated to compliance/owner; no money figures."
         }
       ]
     },
@@ -625,12 +731,20 @@
       ],
       "tasks": [
         {
-          "title": "Read-model / projection: per-practitioner scorecard",
-          "note": "Slice the business metrics by practitioner and join the clinical outcome/revision signal (from PRD-05) into PractitionerScorecard keyed by practitioner+period: revenue, revenue-per-chair-hour, retention, rebooking, utilisation, revision rate. Tag money fields owner-financial. Support drill-down by exposing the underlying client/appointment ids per metric."
+          "title": "Per-practitioner scorecard rows (revenue, retention, rebooking, utilisation, revision)",
+          "note": "Behaviour: render one row/card per practitioner showing revenue (owner-gated), retention, rebooking, chair/room utilisation and an outcome/revision signal, on the shared Reports date presets. Requirements: revenue and revenue-per-chair-hour are .fin owner-only and stripped for non-owner roles; the non-money signals (retention, rebooking, utilisation, revision) stay visible to managers; values come from the read-models, never OLTP."
         },
         {
-          "title": "Web UI: practitioner scorecard + drill-down",
-          "note": "Build the Scorecard tab (default Reports tab): the Insights strip plus per-practitioner rows/cards, with .fin gating on money metrics (non-money signals stay visible to managers). Each metric drills into the underlying client/appointment list. Share the date presets with the business view."
+          "title": "Scorecard Insights strip (per-practitioner callouts)",
+          "note": "Behaviour: an Insights strip surfacing per-practitioner patterns ('Filler earns the most per chair-hour …', 'this injector's rebooking is low') as the readable headline behind the rows. Requirements: generated from the same scorecard projection so a callout never disagrees with a row; money-bearing callouts (per-chair-hour earnings) are owner-only; the strip points the owner at the row to coach from."
+        },
+        {
+          "title": "Metric drill-down into underlying clients/appointments",
+          "note": "Behaviour: every scorecard metric drills from the number into the actual clients/appointments behind it (e.g. from 'low rebooking' to the list of clients who didn't rebook), so a figure is never a dead end. Requirements: the projection exposes the underlying client/appointment ids per metric; drill-down respects RBAC + .fin (a manager drilling a money metric they can't see is blocked); clinical reads are audited."
+        },
+        {
+          "title": "Read-model / projection: per-practitioner scorecard",
+          "note": "Behaviour: slice the business metrics by practitioner and join the clinical outcome/revision signal (from PRD-05) into PractitionerScorecard keyed by practitioner+period: revenue, revenue-per-chair-hour, retention, rebooking, utilisation, revision rate. Requirements: tag money fields owner-financial; expose the underlying client/appointment ids per metric to power drill-down; reads the BUSINESS-DASH metrics + clinical outcomes, eventual consistency acceptable."
         }
       ]
     },
@@ -682,12 +796,24 @@
       ],
       "tasks": [
         {
-          "title": "Read-model / projection: capacity & utilisation",
-          "note": "Project CapacityMetrics = booked vs available minutes by practitioner, room/chair and device over a window, computing utilisation and detecting quiet windows (recurring low-utilisation slots). Available time comes from the roster (PRD-01 ROSTER) and resource definitions (PRD-11 ROOMS-DEVICES); booked time from appointments. Support overview + trend (time-series) queries over the read schema."
+          "title": "Capacity KPI tiles (overall utilisation + idle capacity)",
+          "note": "Behaviour: a row of headline tiles for overall chair utilisation and idle capacity over the selected window. Requirements: utilisation = booked vs available minutes from the read-models; idle capacity is shown as hours (the dollar value of idle time lives on the scorecard, not here); operational metric only, no money figures; shares the Reports date presets."
         },
         {
-          "title": "Web UI: capacity report (overview + trends) with quiet-window fill",
-          "note": "Build the Capacity tab with overview/trends sub-views (goRepSub): utilisation by resource as tiles/bars (overview) and over time (trends), with quiet windows highlighted and a hand-off action into waitlist/recall fill (PRD-02/PRD-07). Operational metric only — no money figures."
+          "title": "Utilisation by practitioner and by resource (overview)",
+          "note": "Behaviour: the overview sub-view shows utilisation by practitioner and by room/chair/device as tiles/bars. Requirements: available time per resource comes from the roster (PRD-01 ROSTER) and resource definitions (PRD-11 ROOMS-DEVICES), booked time from appointments; bars make under-used resources obvious; reads the read-models, never OLTP."
+        },
+        {
+          "title": "Utilisation trends sub-view (time series)",
+          "note": "Behaviour: the trends sub-view (goRepSub 'trends') plots utilisation over time so the owner can see direction, not just a snapshot. Requirements: time-series query over the capacity projection for the selected resources/window; consistent with the overview totals; operational only."
+        },
+        {
+          "title": "Quiet-window highlight + hand-off to waitlist / recall fill",
+          "note": "Behaviour: highlight recurring low-utilisation windows (e.g. 'Wed runs at just 63% utilisation') and offer a hand-off to fill them. Requirements: the same quiet-window data feeds the Reception waitlist (PRD-02 WAITLIST) and recall (PRD-07 RECALL) fill loop; the hand-off creates the matching follow-up action; quiet-window detection is configurable (threshold + horizon)."
+        },
+        {
+          "title": "Read-model / projection: capacity & utilisation",
+          "note": "Behaviour: project CapacityMetrics = booked vs available minutes by practitioner, room/chair and device over a window, computing utilisation and detecting quiet windows (recurring low-utilisation slots). Requirements: available time from roster (PRD-01 ROSTER) + resource definitions (PRD-11 ROOMS-DEVICES), booked time from appointments; support overview + trend (time-series) queries over the read schema; eventual consistency acceptable; operational, no money."
         }
       ]
     },
@@ -744,12 +870,85 @@
       ],
       "tasks": [
         {
-          "title": "Read-model / projection: true-cost / margin (COGS)",
-          "note": "Project MarginByService = revenue − COGS (cost of goods sold) per service (and per practitioner) over a window, where COGS (Cost of Goods Sold) = product/vial cost (from the per-product/per-unit stock model + VIAL-RECON, PRD-04) + consumables. Tag all fields owner-financial. Expose the margin figures to the PRD-06 PRICING-WHATIF planner. This is attribution over the read schema, not a ledger — no payroll/PO/AP/BAS computation (ADR-0027)."
+          "title": "True-cost / margin-per-treatment table",
+          "note": "Behaviour: a per-treatment table netting off the full cost of each treatment — product/S4, single-use consumables (needles, tips, peels) and per-use device cost (laser/RF tips, CoolSculpting applicators) — to show true cost, margin and margin-per-chair-hour, not just revenue. Requirements: product/vial cost comes from the per-product/per-unit stock model + vial reconciliation (PRD-04 VIAL-RECON); consumables and device-per-use come from the cost catalogue (PRD-08 COST-CATALOGUE); every figure is owner-only (.fin); this is attribution, not accounting."
         },
         {
-          "title": "Web UI: Finance true-cost / margin (owner-only)",
-          "note": "Build the Finance hub (finance.png): Xero-connected banner, the owner-gated tiles (Revenue today, This month, Avg/visit, Membership MRR (monthly recurring revenue)), the Pricing & what-if and Reporting cards, the true-cost/margin-per-treatment view, and the explicit 'Handled in Xero, not here' footnote drawing the attribution/accounting boundary. Gate the entire area behind .fin."
+          "title": "Finance hub tiles + Pricing/Reporting cards + Xero boundary footnote",
+          "note": "Behaviour: build the Finance landing (finance.png) — the Xero-connected banner, the owner-gated tiles (Revenue today, This month, Avg/visit, Membership MRR), the 'Pricing & what-if' and 'Reporting' cards linking onward, and the explicit 'Handled in Xero / integrations, not here' footnote (payroll & super, commission/pay-splits, supplier POs & AP, refund reconciliation, GST/BAS lodgement). Requirements: the footnote draws the attribution/accounting boundary (ADR-0027); the entire Finance area is gated behind .fin (owner-only)."
+        },
+        {
+          "title": "Margin feed to the pricing & what-if planner",
+          "note": "Behaviour: expose the per-service margin figures to the PRD-06 PRICING-WHATIF planner so a price change can be modelled against real cost. Requirements: the planner reads the MarginByService projection (ADR-0022); margins stay owner-only across the hand-off; changing a cost input (COST-CATALOGUE) flows through to both the margin table and the planner."
+        },
+        {
+          "title": "Read-model / projection: true-cost / margin (COGS)",
+          "note": "Behaviour: project MarginByService = revenue − COGS per service (and per practitioner) over a window, where COGS = product/vial cost (per-product/per-unit stock model + VIAL-RECON, PRD-04) + consumables + device-per-use (COST-CATALOGUE). Requirements: tag all fields owner-financial; attribution over the read schema, not a ledger — no payroll/PO/AP/BAS computation (ADR-0027); eventual consistency acceptable."
+        }
+      ]
+    },
+    {
+      "key": "COST-CATALOGUE",
+      "title": "Per-procedure cost catalogue (cost inputs)",
+      "as_a": "owner",
+      "i_want": "to maintain the product, consumable and per-use device cost of each procedure in one place",
+      "so_that": "every margin report and pricing model stays honest from a single source of truth",
+      "context": "Plainly: the place the owner sets, once, what each treatment actually costs to deliver — the S4/product cost, the single-use consumables (needles, tips, peels) and the per-use device cost (laser/RF tips, CoolSculpting applicators) — so the true-cost/margin reporting and the pricing planner all read the same numbers. Where it fits: a sibling of the true-cost/margin reporting (PRD-08/TRUE-COST) in the Reporting layer (step 6 of the clinic-first build); it is the INPUT surface (maintained via Settings → Cost catalogue) that feeds the margin projection and the pricing & what-if planner (PRD-06), and its consumable definitions also feed Stock so usage decrements automatically. Where TRUE-COST reports margin, this story owns the editable cost components behind it. Every figure here is money and owner-only (.fin).",
+      "notes": "",
+      "acceptance": [
+        "Each procedure has editable cost components: product/S4, consumables, and per-use device cost, deriving a cost-per-procedure.",
+        "The catalogue is the single source the true-cost/margin report (TRUE-COST) and the pricing & what-if planner (PRD-06) read — change a cost once and every report stays consistent.",
+        "Consumable definitions feed Stock so usage decrements automatically rather than being counted by hand.",
+        "The entire surface is owner-only (.fin); non-owner roles never see cost figures.",
+        "Cost changes are audited so a margin figure can be traced to the inputs that produced it."
+      ],
+      "detail": [
+        "A clinic under-counts true cost when consumables and device-per-use are left out — CoolSculpting applicators and laser tips especially. This story is the per-procedure cost catalogue that fixes that: for each treatment the owner maintains the product/S4 cost, the single-use consumables cost (needles, tips, peels) and the per-use device cost (laser/RF tips, applicators), which derive a cost-per-procedure.",
+        "It is the INPUT behind the true-cost/margin report (TRUE-COST): maintain each component once and every margin report and pricing model stays honest, because they all read this catalogue rather than re-keying figures. The product/S4 unit cost still reconciles against the per-product/per-unit stock model + vial reconciliation (PRD-04 VIAL-RECON); this catalogue owns the consumable and device-per-use components.",
+        "Consumable definitions also feed Stock: defining a procedure's consumables here means finalising that treatment decrements those items automatically, rather than someone counting tips by hand. The catalogue is maintained via Settings → Cost catalogue in the live build.",
+        "Every figure here is money and is gated behind the owner financial capability (.fin) — non-owner roles never see cost inputs. Changes are audited so any margin number can be traced back to the cost inputs and the version in force when it was computed."
+      ],
+      "ui_spec": [
+        "Prototype: Reports → Revenue tab (reports.png) — the 'Cost inputs · per-procedure' table (repCostInputs): Treatment, Product/S4, Consumables, Device/use, Cost/procedure, with the note that demo figures are editable via Settings → Cost catalogue and that consumables feed Stock so usage decrements automatically.",
+        "Editable per-procedure rows for the three cost components; the derived Cost/procedure updates live and flows into the True-cost & margin table above it.",
+        "Owner-only (.fin) throughout; a change writes an audit entry."
+      ],
+      "data_model": [
+        {
+          "entity": "ProcedureCost",
+          "fields": "id, tenant_id, service_id, product_cost, consumables_cost, device_per_use_cost, cost_per_procedure(derived), updated_at, updated_by",
+          "notes": "Single source for COGS components; product_cost reconciles with VIAL-RECON (PRD-04); owner-gated (.fin); changes audited."
+        },
+        {
+          "entity": "ConsumableUsage (ref)",
+          "fields": "service_id, stock_item_id, qty_per_procedure",
+          "notes": "Links a procedure's consumables to Stock so finalising a treatment decrements them automatically."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-08/TRUE-COST"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "ProcedureCost model + cost-per-procedure derivation",
+          "note": "Behaviour: model ProcedureCost per service with editable product/S4, consumables and per-use device cost, deriving cost_per_procedure. Requirements: tenant-scoped (+ RLS); product cost reconciles against the per-product/per-unit stock model + VIAL-RECON (PRD-04); all fields owner-financial (.fin); changes are append-only audited so a margin figure traces to its inputs."
+        },
+        {
+          "title": "Single-source feed to margin report + pricing planner",
+          "note": "Behaviour: expose the catalogue as the single source the true-cost/margin report (TRUE-COST) and the pricing & what-if planner (PRD-06 PRICING-WHATIF) read. Requirements: changing a cost once re-flows into both surfaces (no re-keying); margins/costs stay owner-only across the hand-off; eventual consistency acceptable for the downstream projections."
+        },
+        {
+          "title": "Consumable → Stock usage link (auto-decrement)",
+          "note": "Behaviour: a procedure's consumable definitions feed Stock so finalising that treatment decrements the consumable items automatically. Requirements: model qty-per-procedure against stock items; the decrement happens on chart finalisation (PRD-05) consistent with the S4 lot deduction; no hand-counting."
+        },
+        {
+          "title": "Cost catalogue editor UI (owner-only)",
+          "note": "Behaviour: the Settings → Cost catalogue editor — per-procedure rows for the three cost components with a live-updating Cost/procedure, surfaced read-through on the Reports Revenue tab. Requirements: gate the entire surface behind .fin (owner-only); non-owner roles never see cost figures; edits validate and persist and write an audit entry; the note explains consumables feed Stock."
         }
       ]
     },
@@ -814,20 +1013,20 @@
       ],
       "tasks": [
         {
-          "title": "Data model & migrations: Policy + PolicySignoff",
-          "note": "Add Policy (versioned, body, target roles, updated_at) and PolicySignoff (per policy_version + staff_id + signed_at). Migrations + RLS (row-level security) (Row-Level Security)/tenancy. Publishing a new version is a new Policy version row that supersedes the prior and invalidates prior sign-offs for the unsigned-count computation."
+          "title": "Policy table + per-policy sign-off action",
+          "note": "Behaviour: build the policies table (gov-policies) — Policy, Version, Updated, Signed count (e.g. 5/6 signed, 6/6 complete), action — with a Sign action that records the acting staff against the CURRENT version with a timestamp. Requirements: Sign increments the signed count, shows the toast 'Acknowledged <version> — <policy>' and renders 'complete' at full count; the Signed column is the live signed-vs-total count; capability-gate to the compliance concern; no money figures."
         },
         {
-          "title": "Backend: versioning, publish-resets-signoff, outstanding tracking",
-          "note": "Implement publish (new version) → reset sign-off for that policy and raise a re-acknowledgement Job per relevant staff member (ADR-0023). Compute the signed-count (e.g. 5/6) and the unsigned-policies count for the Overview tile. signPolicy records the acting staff against the current version with a timestamp. Capability-gate to the compliance concern."
+          "title": "Policy versioning + publish-resets-sign-off + re-acknowledgement tasks",
+          "note": "Behaviour: policies are versioned; publishing a new version resets everyone's sign-off for that policy and raises a re-acknowledgement task per relevant staff member. Requirements: a new version supersedes the prior and invalidates prior sign-offs for the unsigned-count computation; each re-acknowledgement is a Job (ADR-0023) targeted to the relevant roles; outstanding sign-offs surface rather than silently going stale."
         },
         {
-          "title": "Enforce audit on sign-off",
-          "note": "Every sign-off and every policy publish is append-only audited (ADR-0010) — the audit trail is the evidence the inspection pack (INSPECTION-PACK) and an inspector rely on. Surface sign-off status into the inspection-pack 'Policies & procedures sign-off' category."
+          "title": "Unsigned-policies count + inspection-pack feed",
+          "note": "Behaviour: compute the 'Unsigned policies' count for the Governance Overview tile and surface sign-off status into the inspection-pack 'Policies & procedures sign-off' category (INSPECTION-PACK). Requirements: the count is policies not fully signed at the current version; it updates live on Sign/publish; the inspection pack reads the same status so the tile and the pack agree."
         },
         {
-          "title": "Web UI: policies list + sign-off",
-          "note": "Build gov-policies: the policy table (Policy/Version/Updated/Signed/action), Sign action (increments signed count, toast 'Acknowledged <version> — <policy>', complete state at full count), and the per-staff outstanding view. Update the Overview 'Unsigned policies' count on action. Governance area; no money figures."
+          "title": "Append-only audit on sign-off + publish",
+          "note": "Behaviour: every sign-off and every policy publish is append-only audited (ADR-0010) — the audit trail is the evidence the inspection pack and an inspector rely on. Requirements: capture actor/policy/version/timestamp; no edit/delete path; the per-staff outstanding view reads from the same sign-off records; governance area, no money figures."
         }
       ]
     }

@@ -46,7 +46,11 @@ Edge cases: an unknown/estimated DOB still derives a defensible age band; a soft
 
 ## Tasks (dev pickup)
 
-- [ ] **Client core record, DOB capture & age derivation**
-  Model the Client core (tenant_id + RLS (row-level security)) with DOB (date of birth) and derive under18 + current age server-side at read time so they stay correct across a birthday with no batch job. Expose the derived flag/age to PRD-03/06/07 (cooling-off, pricing) and to the patient-header age chip. Support soft-delete (deleted_at; excluded from active/bookable/search views; row + history retained for RETENTION/AUDIT — never hard-deleted here).
+- [ ] **Client core record + server-side age / under-18 derivation**
+  Behaviour: model the Client core (tenant_id + RLS (row-level security)) with DOB (date of birth) and derive under18 + current age server-side AT READ TIME so they stay correct across a birthday with no batch job (a client who is 17 today is 18 on their birthday automatically). Requirements: expose the derived flag/age to PRD-03/06/07 (the under-18 cooling-off C6 and the S4 advertising/pricing C9 rules) so every consumer reads one answer instead of re-implementing date maths; an unknown/estimated DOB still derives a defensible age band.
+- [ ] **Soft-delete with audit (retention/destruction stays RETENTION's job)**
+  Behaviour: support soft-delete (deleted_at) so a deleted client is excluded from active/bookable/search views but the row and its history remain. Requirements: never hard-delete here — destruction is RETENTION's job; a soft-deleted client cannot be booked or appear in active search; the delete writes an audit event.
 - [ ] **Duplicate detection & reviewed merge**
-  Surface duplicate/merge candidates (matching name + DOB (date of birth) + contact) as suggestions, never auto-merging two real people. Merge is a reviewed action that re-points history to the surviving record and writes an audit event. Soft-deleted and merged-away records stay out of active views.
+  Behaviour: surface duplicate/merge candidates (matching name + DOB (date of birth) + contact) as suggestions, never auto-merging two real people. Requirements: merge is a reviewed action that re-points history to the surviving record and writes an audit event; soft-deleted and merged-away records stay out of active views (full client directory + 360 profile are PRD-02).
+- [ ] **Patient-header age / under-18 chip surface**
+  Behaviour: expose the derived age + under-18 status as the patient-header age chip (the visible signal staff always see, e.g. '34 · Brisbane'), consumed by the Client 360 header (PRD-02/CLIENT-360). Requirements: the chip reads the server-derived age/flag (never a hand-set field); the under-18 state is the at-a-glance gate signal a clinician sees before charting; the directory + full profile that host it are PRD-02.
