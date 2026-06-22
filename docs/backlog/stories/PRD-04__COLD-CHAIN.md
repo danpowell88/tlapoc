@@ -1,4 +1,4 @@
-# Temperature logging & excursion alerts
+# Temperature logging & excursion alerts (manual + ESP32) (MVP)
 
 > **Epic:** [PRD-04 — Consult, prescribing & S4 medicines governance (the moat)](../epics/PRD-04.md)  ·  **Key:** `PRD-04/COLD-CHAIN`  ·  **Type:** Story  ·  **Stage:** M3  ·  **Priority:** P1  ·  **Estimate:** 3 pts  ·  **Area:** backend, integration
 >
@@ -61,5 +61,3 @@ Excursion history (start/end, min/max, affected lots, action) is retained and vi
   Single internal ingestReading(): manual log endpoint POST /locations/{id}/temp and device endpoint POST /clinics/{slug}/fridges/{fid}/readings (bearer token scoped per fridge, Idempotency-Key dedupe). On every reading apply the 2-8C rule server-side: out-of-range opens/extends an Excursion, sets StockItem.quarantined on affected lots, and raises a breach job (PRD-11). Return in_range + alert. Heartbeat watcher: no reading >2 intervals -> monitor offline job; battery-low/mains-loss/fw-behind -> facility jobs.
 - [ ] **Excursion-quarantine gate + retained history + audit**
   A quarantined lot ('Do not use') is not selectable at administration (feeds PRD-04/ADMIN-GATE). Retain full Excursion history (start/end, min/max, affected lots, action, resolving actor) visibly - the evidence cold-chain held for every administered lot (C13). Keep the manual twice-daily min/max log as an audit fallback. Audit excursions, quarantines and un-quarantine decisions.
-- [ ] **Commercial-logger adapters (Testo / Dickson / LogTag) - integration**
-  Per-vendor adapter normalising each payload into the canonical reading shape (their device -> our fridgeId, unit -> C, timestamp -> ISO-8601), converging on the same ingestReading()/2-8C rule/breach pathway. Webhook-in (vendor pushes; Testo, Disruptive) verifying the vendor signature; poll-out (we pull on a timer; DicksonONE has no webhook and stores F -> convert). Config per fridge: which source is the instrument-of-record vs early-warning (ADR-0036).

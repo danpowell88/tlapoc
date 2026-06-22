@@ -1,4 +1,4 @@
-# Versioned e-signed consent with mandated content
+# Versioned e-signed consent — basic signature capture
 
 > **Epic:** [PRD-03 — Intake, consent & compliance gating](../epics/PRD-03.md)  ·  **Key:** `PRD-03/CONSENT`  ·  **Type:** Story  ·  **Stage:** M2  ·  **Priority:** P0  ·  **Estimate:** 5 pts  ·  **Area:** backend
 >
@@ -49,8 +49,4 @@ Capture is verbal + written: the client reads the plain-language reader and e-si
 ## Tasks (dev pickup)
 
 - [ ] **E-signature capture bound to template_version (+ verbal)**
-  Behaviour: an endpoint that records a client's e-signature against the exact consent version they read. Requirements: create a ConsentSignature referencing the EXACT template_version, with signature_ref (typed full name / signature), signed_at and a verbal_confirmed flag (practitioner confirmation); a later template change does NOT invalidate or rebind an existing signature; retained per C18 (PRD-01 RETENTION); audited; feeds the GATING evaluation (current, version-matched).
-- [ ] **Plain-language consent reader + type-to-sign (client/kiosk)**
-  Behaviour: the client-app/kiosk consent step — a scrollable plain-language reader of the mandated content (nature, risks/benefits/alternatives, practitioner qualifications, costs, realistic-outcome language, AHPRA-despite-NDA complaint line), an 'I've read and understood' acknowledgement, and a type-your-full-name-to-sign field. Requirements: renders the exact template_version being signed; the same flow runs in the client app and at the reception check-in tablet; submitting calls the e-signature endpoint.
-- [ ] **Consent status chip + blocked-action banner**
-  Behaviour: surface consent state to staff. Requirements: render a 'Consent ✓' or version-mismatch chip on the patient / charting header driven by the gate; when consent is missing or superseded the blocked-action banner names exactly what is missing and links the fix (send consent link); reuses the shared GATING banner.
+  Behaviour: an endpoint that records a client's e-signature against the exact consent version they read. Requirements: create a ConsentSignature referencing the EXACT template_version, with signature_ref (typed full name / signature), signed_at and a verbal_confirmed flag (practitioner confirmation); a later template change does NOT invalidate or rebind an existing signature; retained per C18 (PRD-01 RETENTION); audited; feeds the GATING evaluation (current, version-matched). The plain-language reader UI and the consent status chip/banner are follow-ups.

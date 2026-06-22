@@ -1,4 +1,4 @@
-# Per-procedure cost catalogue (cost inputs)
+# Per-procedure cost catalogue (core: cost model + editor)
 
 > **Epic:** [PRD-08 — Reporting & compliance dashboards (Governance hub)](../epics/PRD-08.md)  ·  **Key:** `PRD-08/COST-CATALOGUE`  ·  **Type:** Story  ·  **Stage:** M5  ·  **Priority:** P2  ·  **Estimate:** 2 pts  ·  **Area:** —
 >
@@ -51,9 +51,5 @@ Every figure here is money and is gated behind the owner financial capability (.
 
 - [ ] **ProcedureCost model + cost-per-procedure derivation**
   Behaviour: model ProcedureCost per service with editable product/S4, consumables and per-use device cost, deriving cost_per_procedure. Requirements: tenant-scoped (+ RLS); product cost reconciles against the per-product/per-unit stock model + VIAL-RECON (PRD-04); all fields owner-financial (.fin); changes are append-only audited so a margin figure traces to its inputs.
-- [ ] **Single-source feed to margin report + pricing planner**
-  Behaviour: expose the catalogue as the single source the true-cost/margin report (TRUE-COST) and the pricing & what-if planner (PRD-06 PRICING-WHATIF) read. Requirements: changing a cost once re-flows into both surfaces (no re-keying); margins/costs stay owner-only across the hand-off; eventual consistency acceptable for the downstream projections.
-- [ ] **Consumable → Stock usage link (auto-decrement)**
-  Behaviour: a procedure's consumable definitions feed Stock so finalising that treatment decrements the consumable items automatically. Requirements: model qty-per-procedure against stock items; the decrement happens on chart finalisation (PRD-05) consistent with the S4 lot deduction; no hand-counting.
 - [ ] **Cost catalogue editor UI (owner-only)**
   Behaviour: the Settings → Cost catalogue editor — per-procedure rows for the three cost components with a live-updating Cost/procedure, surfaced read-through on the Reports Revenue tab. Requirements: gate the entire surface behind .fin (owner-only); non-owner roles never see cost figures; edits validate and persist and write an audit entry; the note explains consumables feed Stock.

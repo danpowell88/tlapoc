@@ -17,7 +17,7 @@
   "stories": [
     {
       "key": "CALENDAR",
-      "title": "Multi-resource calendar (practitioner + room)",
+      "title": "Multi-resource calendar — basic grid & booking",
       "context": "The multi-resource calendar is the first feature built in Reception (PRD-02), the front-of-house entry point to a visit, and sits directly on top of Foundations (PRD-01) — it consumes the practitioner roster and the canInject (the derived gate deciding whether a staff member may administer injectables right now) scope-of-practice gate. It is the diary that every other booking surface draws on. In the build timeline it comes after the platform and Foundations are in place and before everything else in Reception: the booking wizard, online self-booking, walk-ins and the visit lifecycle all reuse the availability engine this story creates, and it precedes the Intake/Consent gating (PRD-03) that runs between booking and treatment. As front desk, I want a day/week/room calendar showing practitioners and rooms with correct service durations and buffers, so that I can run the diary at a glance and book without clashes.  Front desk needs a fast day/week/room calendar with service durations, buffers and rosters — the core of the diary.",
       "as_a": "front desk",
       "i_want": "a day/week/room calendar showing practitioners and rooms with correct service durations and buffers",
@@ -82,34 +82,272 @@
       ],
       "tasks": [
         {
-          "title": "Calendar header & date navigation",
-          "note": "Behaviour: a sticky header with Today / prev / next, a date picker and a range label that reflects the active view; remembers the last-used date+view per user. Requirements: jumping to any date re-queries that range; Today resets to the current day; keyboard shortcuts (t=today, arrows=step). The header drives every other element on the screen (the grid, filters and quiet-windows all react to the selected range)."
+          "title": "Appointment + Resource data model & availability function",
+          "note": "Behaviour: model the Appointment (client, service, practitioner, room, start/end, status, source) and Resource (room/chair/device) entities, and the single (derived) Availability function = RosterShift − TimeOff − existing Appointments, ∩ canInject (the derived gate deciding whether a staff member may administer injectables right now) for the service's schedule class, ∩ a free Resource for the whole block including buffers. Requirements: tenant-scoped (RLS (row-level security)); the availability function is the one engine the wizard, online booking and walk-ins all reuse; an unrostered or uncredentialled staffer is never offered for an S4 (Schedule 4 prescription-only medicine) service."
         },
         {
-          "title": "Day / week view toggle & time-axis layout",
-          "note": "Behaviour: switch between a single-day and a Mon-Fri week layout; the time axis spans configured opening hours with off-hours visually muted; selectable slot interval (e.g. 15 min). Requirements: the choice persists per user; week view collapses resource columns into day columns; closed days/public holidays render non-bookable."
+          "title": "Core booking API (create + conflict check)",
+          "note": "Behaviour: a create-appointment endpoint that books a practitioner AND a room/chair/device together for the service's real duration plus buffer/processing/turnaround. Requirements: a booking is valid only if BOTH resources are free for the whole block; scope-of-practice is enforced server-side (S4 only for canInject roles); a clashing room/chair/device is rejected with a structured reason; the created Appointment is the same entity desk, online and walk-in bookings produce."
         },
         {
-          "title": "Resource & practitioner filters",
-          "note": "Behaviour: filter the visible columns by practitioner, room and treatment type (multi-select), plus a 'my schedule' quick filter. Requirements: filters compose (AND); only practitioners rostered for the range are offered (reads the roster); the active filter set persists in the URL/state so a refresh or share keeps it."
+          "title": "Minimal day-view grid (practitioner × room columns)",
+          "note": "Behaviour: a single-day calendar rendering practitioner × room columns over hourly rows, each appointment in its slot consuming both a practitioner and a room, plus a '+ New' affordance to open the booking wizard. Requirements: appointments render in the correct slot for their duration incl. buffers; unrostered periods and TimeOff render as unavailable (not bookable); conflicts/double-books are visually unmistakable. Header date-nav, day/week toggle, filters, drag-to-book and status-coloured cards are follow-ups."
+        }
+      ]
+    },
+    {
+      "key": "CALENDAR-HEADER-NAV",
+      "title": "Calendar: header & date navigation",
+      "as_a": "front desk",
+      "i_want": "a calendar header with Today / previous / next and a date picker that re-queries the diary for any date",
+      "so_that": "I can jump around the diary quickly and always know which range I'm looking at",
+      "context": "Plainly: the sticky toolbar at the top of the schedule that controls which date range the calendar shows. Where it fits: a follow-up to the multi-resource calendar basic grid (PRD-02/CALENDAR) that adds date navigation on top of the single-day grid; it is the control every other element on the schedule reacts to (the grid, later the filters and the quiet-windows panel all re-query around the selected range). It sits in Reception (PRD-02), the front-of-house entry point to a visit.",
+      "notes": "",
+      "acceptance": [
+        "A sticky header shows Today / previous / next, a date picker and a range label reflecting the active view.",
+        "Jumping to any date re-queries the calendar for that range; Today resets to the current day.",
+        "Keyboard shortcuts step the range (t = today, arrows = previous/next).",
+        "The last-used date is remembered per user across sessions."
+      ],
+      "detail": [
+        "The basic calendar renders a single day; this follow-up adds the navigation that lets the desk move through the diary. A sticky header carries Today, previous and next controls, a date picker, and a range label that always states the period currently shown.",
+        "Navigating to any date re-queries the availability + appointment data for that range so the grid repaints; Today snaps back to the current day. Keyboard shortcuts (t = today, left/right arrows = step) make moving through a busy week fast.",
+        "The last-used date is persisted per user so reopening the schedule lands where they left off. This control becomes the single source of the active range that the grid, and later the filters and quiet-windows panel, all read."
+      ],
+      "ui_spec": [
+        "Prototype: Schedule (schedule.png) — the week-range stepper and date controls in the header above the grid.",
+        "Sticky header: Today button, prev/next chevrons, a date picker, and a human-readable range label (e.g. 'Mon 23 — Fri 27 Jun').",
+        "Changing the date repaints the grid for the new range; keyboard shortcuts (t, arrows) step it."
+      ],
+      "data_model": [
+        {
+          "entity": "(extends CALENDAR)",
+          "fields": "no new entities; adds a per-user last-viewed date/view preference",
+          "notes": "Re-queries the existing Appointment + Availability data for the selected range; stores a small UI preference per user."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-02/CALENDAR"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Sticky header with Today / prev / next + date picker",
+          "note": "Behaviour: a sticky calendar header with Today, previous and next controls, a date picker and a range label reflecting the active view. Requirements: jumping to any date re-queries the appointment/availability data for that range and repaints the grid; Today resets to the current day; keyboard shortcuts (t = today, arrows = step)."
         },
         {
-          "title": "Multi-resource grid & occupancy rendering",
-          "note": "Behaviour: columns are practitioner x room resources; each appointment renders in its slot and consumes BOTH a practitioner and a room; the grid shows occupancy density and flags conflicts/double-books. Requirements: a booking is valid only if both resources are free; scope-of-practice (the canInject gate) is reflected so non-injectors are never shown as available for S4 work; conflicts are visually unmistakable."
+          "title": "Per-user last-viewed-date persistence",
+          "note": "Behaviour: remember the last-used date per user. Requirements: persist a small per-user preference so reopening the schedule lands on the last viewed date; the header is the single source of the active range every other schedule element reads."
+        }
+      ]
+    },
+    {
+      "key": "CALENDAR-DAYWEEK",
+      "title": "Calendar: day / week view toggle & time-axis layout",
+      "as_a": "front desk",
+      "i_want": "to switch the calendar between a single-day and a Mon–Fri week layout with a sensible time axis",
+      "so_that": "I can see one day in detail or the whole week at a glance",
+      "context": "Plainly: the toggle that flips the schedule between a detailed single-day view and a week overview, and the time axis both share. Where it fits: a follow-up to the multi-resource calendar basic grid (PRD-02/CALENDAR), which ships day-view only; this adds the week layout and the configurable time axis. It reads the active range from the header navigation (PRD-02/CALENDAR-HEADER-NAV) and sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "A toggle switches between a single-day and a Mon–Fri week layout.",
+        "The time axis spans configured opening hours with off-hours visually muted; the slot interval is selectable (e.g. 15 min).",
+        "Week view collapses resource columns into day columns.",
+        "Closed days and public holidays render non-bookable; the choice persists per user."
+      ],
+      "detail": [
+        "The basic grid shows a single day; this follow-up adds a day/week toggle and the time-axis layout both views share. Week view recasts the grid into Mon–Fri day columns for a whole-week overview; day view keeps the detailed practitioner × room columns.",
+        "The time axis spans the clinic's configured opening hours, with off-hours muted, and the slot interval (e.g. 15 minutes) is selectable so the grid granularity matches how the clinic books. Closed days and public holidays render non-bookable in both layouts.",
+        "The chosen view persists per user (alongside the last-viewed date from CALENDAR-HEADER-NAV) so the schedule reopens the way each user prefers."
+      ],
+      "ui_spec": [
+        "Prototype: Schedule (schedule.png) — the Day/Week toggle in the header.",
+        "Day view: practitioner × room columns with hourly rows; week view: Mon–Fri day columns.",
+        "Time axis spans opening hours with off-hours muted; closed days/holidays render non-bookable; selectable slot interval."
+      ],
+      "data_model": [
+        {
+          "entity": "(extends CALENDAR)",
+          "fields": "no new entities; adds a per-user view (day|week) + slot-interval preference; reads opening-hours / closed-days config",
+          "notes": "Re-lays-out the same Appointment + Availability data; opening hours and public holidays come from clinic config."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-02/CALENDAR"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Day / week toggle + week-column layout",
+          "note": "Behaviour: a toggle that switches between a single-day grid and a Mon–Fri week layout. Requirements: week view collapses the practitioner × room columns into day columns; day view keeps the detailed resource columns; the choice persists per user; both read the active range from the header."
         },
         {
-          "title": "Slot interaction: drag-to-book, move & resize",
-          "note": "Behaviour: click an empty slot to start a booking; drag an appointment to move it; resize to change duration; everything snaps to the slot interval. Requirements: availability (practitioner scope + room free + roster) is re-checked server-side on drop and the move is rejected with a reason if invalid; optimistic UI updates immediately then confirms or rolls back."
+          "title": "Time-axis layout (opening hours, slot interval, closed days)",
+          "note": "Behaviour: a time axis spanning the configured opening hours with off-hours muted and a selectable slot interval (e.g. 15 min). Requirements: closed days and public holidays render non-bookable; the slot interval governs how appointments snap; opening hours and holidays come from clinic config."
+        }
+      ]
+    },
+    {
+      "key": "CALENDAR-FILTERS",
+      "title": "Calendar: resource & practitioner filters",
+      "as_a": "front desk",
+      "i_want": "to filter the calendar by practitioner, room and treatment type, with a 'my schedule' quick filter",
+      "so_that": "I can focus on just the columns I care about on a busy day",
+      "context": "Plainly: the filter controls that narrow which practitioner/room columns and which treatment types the schedule shows. Where it fits: a follow-up to the multi-resource calendar basic grid (PRD-02/CALENDAR); the basic grid shows every resource, and this adds the ability to pare it down. It reads the rostered practitioners for the active range (the same roster the availability engine uses) and sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "Multi-select filters by practitioner, room and treatment type narrow the visible columns/blocks.",
+        "A 'my schedule' quick filter shows only the signed-in practitioner's columns.",
+        "Filters compose (AND); only practitioners rostered for the range are offered.",
+        "The active filter set persists in the URL/state so a refresh or share keeps it."
+      ],
+      "detail": [
+        "On a busy day the full practitioner × room grid is noisy; this follow-up lets the desk filter the visible columns by practitioner, room and treatment type (multi-select), plus a 'my schedule' quick filter that isolates the signed-in practitioner's columns.",
+        "Filters compose with AND, and only practitioners rostered for the active range are offered as filter options (reads the same roster the availability engine uses), so the filter list never offers someone who isn't working.",
+        "The active filter set is encoded in the URL/state so a page refresh keeps it and a shared link reproduces the same filtered view."
+      ],
+      "ui_spec": [
+        "Prototype: Schedule (schedule.png) — practitioner/room/treatment-type filter controls and a 'my schedule' quick filter above the grid.",
+        "Multi-select chips; the colour legend (anti-wrinkle / filler / skin / consult) ties treatment-type filtering to the grid blocks.",
+        "The active filter set persists in the URL/state across refresh and share."
+      ],
+      "data_model": [
+        {
+          "entity": "(extends CALENDAR)",
+          "fields": "no new entities; a filter state (practitioner_ids[], room_ids[], treatment_types[], my_schedule) held in URL/state",
+          "notes": "Filters the existing Appointment + resource set; rostered-practitioner options read from the roster."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-02/CALENDAR"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Multi-select practitioner / room / treatment-type filters + 'my schedule'",
+          "note": "Behaviour: multi-select filters for practitioner, room and treatment type plus a 'my schedule' quick filter. Requirements: filters compose (AND); only practitioners rostered for the active range are offered as options (reads the roster); 'my schedule' isolates the signed-in practitioner's columns."
         },
         {
-          "title": "Appointment cards & status colours",
-          "note": "Behaviour: each card shows client, treatment and status (booked / confirmed / arrived / in-progress / complete / cancelled / no-show) with a colour legend and quick actions. Requirements: status drives the colour; clicking opens the appointment detail; a no-show raises a follow-up job (PRD-07); arrived/in-progress feed the check-in and treatment-room surfaces."
+          "title": "Filter-state persistence in URL/state",
+          "note": "Behaviour: keep the active filter set across refresh and share. Requirements: encode the filter set in the URL/state so a refresh restores it and a shared link reproduces the same filtered view."
+        }
+      ]
+    },
+    {
+      "key": "CALENDAR-DRAG",
+      "title": "Calendar: drag-to-book, move & resize",
+      "as_a": "front desk",
+      "i_want": "to click an empty slot to start a booking and drag or resize an appointment to reschedule it",
+      "so_that": "I can rearrange the diary directly on the grid without re-keying a booking",
+      "context": "Plainly: the direct-manipulation interactions on the calendar grid — click-to-book an empty slot, drag an appointment to move it, resize to change its duration. Where it fits: a follow-up to the multi-resource calendar basic grid (PRD-02/CALENDAR), which renders appointments but doesn't yet let you move them on the grid. It re-uses the basic's server-side availability engine on every drop, and sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "Clicking an empty slot starts a booking; dragging an appointment moves it; resizing changes its duration.",
+        "All interactions snap to the configured slot interval.",
+        "Availability (practitioner scope + room free + roster) is re-checked server-side on drop and an invalid move is rejected with a reason.",
+        "The UI updates optimistically then confirms or rolls back."
+      ],
+      "detail": [
+        "The basic grid renders appointments statically; this follow-up adds direct manipulation. Clicking an empty slot starts a booking at that time/resource; dragging an appointment moves it to a new slot/resource; resizing the block changes its duration. Everything snaps to the configured slot interval.",
+        "Every drop re-runs the SAME server-side availability check the basic engine owns — practitioner scope (canInject for S4), a free room/chair/device for the whole block incl. buffers, and the roster — and an invalid move is rejected with a structured reason rather than silently committing a clash.",
+        "The interaction updates optimistically so the grid feels immediate, then confirms against the server or rolls back if the move is rejected, keeping the displayed diary always consistent with what is actually bookable."
+      ],
+      "ui_spec": [
+        "Prototype: Schedule (schedule.png) — in move mode, valid drop targets show a dashed add-location affordance and conflicting room/chair/device usage is flagged inline.",
+        "Click an empty cell to begin a booking; drag a block to move; resize the block edge to change duration; everything snaps to the slot interval.",
+        "An invalid drop is rejected with a reason; the optimistic block reverts on rollback."
+      ],
+      "data_model": [
+        {
+          "entity": "(extends CALENDAR)",
+          "fields": "no new entities; mutates Appointment.start/end/practitioner_id/room_id on move/resize",
+          "notes": "Re-validates against the same (derived) Availability function on every drop; no new schema."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-02/CALENDAR"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Drag-to-book / move / resize with slot snapping",
+          "note": "Behaviour: click an empty slot to start a booking, drag an appointment to move it, and resize to change duration, all snapping to the slot interval. Requirements: the gesture maps to a move/resize of the same Appointment; the surface stays usable on a busy grid; conflicting drop targets are flagged inline."
+        },
+        {
+          "title": "Server-side re-validation on drop (optimistic + rollback)",
+          "note": "Behaviour: re-check availability when an appointment is dropped or resized. Requirements: the move re-runs the SAME server-side availability check (practitioner scope + free room/chair/device incl. buffers + roster) and is rejected with a structured reason if invalid; the UI updates optimistically then confirms or rolls back."
+        }
+      ]
+    },
+    {
+      "key": "CALENDAR-STATUS-CARDS",
+      "title": "Calendar: appointment cards, status colours & summary strip",
+      "as_a": "front desk",
+      "i_want": "appointment cards colour-coded by status and treatment, with a summary strip of counts and utilisation",
+      "so_that": "I can read the day's state at a glance and act on each appointment from the grid",
+      "context": "Plainly: the visual treatment of each appointment block (colour by treatment type, status icons, quick actions) plus the summary strip of counts and utilisation above the grid. Where it fits: a follow-up to the multi-resource calendar basic grid (PRD-02/CALENDAR), which renders plain blocks; this adds the operational signal the front desk runs on. Status feeds the visit lifecycle (PRD-02/LIFECYCLE) and a no-show raises a follow-up job (PRD-07). It sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "Each appointment card shows client, treatment and status with a colour legend (anti-wrinkle / filler / skin / consult).",
+        "Status (booked / confirmed / arrived / in-progress / complete / cancelled / no-show) drives the card colour and quick actions; clicking opens the appointment detail.",
+        "A summary strip surfaces total appointments, per-treatment-type counts, chairs-booked utilisation % and idle chair-hours.",
+        "A no-show raises a follow-up job (PRD-07); arrived/in-progress feed the check-in and treatment-room surfaces."
+      ],
+      "detail": [
+        "The basic grid renders plain blocks; this follow-up makes each appointment card carry its operational meaning — client name, treatment and status — colour-coded by treatment type with a legend (anti-wrinkle / filler / skin / consult) and by status, with quick actions. Clicking a card opens the appointment detail / move-cancel modal.",
+        "Above the grid a summary strip surfaces the signal the desk runs on: total appointments, per-treatment-type counts as chips, chairs-booked utilisation %, and idle chair-hours, derived from the day's appointments and resources.",
+        "Status drives behaviour beyond colour: a no-show raises a follow-up job in the PRD-07 queue, and arrived/in-progress states feed the check-in and treatment-room surfaces. The status set ties to the visit lifecycle (PRD-02/LIFECYCLE)."
+      ],
+      "ui_spec": [
+        "Prototype: Schedule (schedule.png) — appointment blocks colour-coded by treatment type with a legend, carrying client name, type and status icons.",
+        "Summary strip above the grid: total appointments (14), chairs booked (68%), idle chair time (~12h), and per-type counts as chips.",
+        "Tap a card to open the move/cancel modal; status colours distinguish booked / confirmed / arrived / in-progress / complete / cancelled / no-show."
+      ],
+      "data_model": [
+        {
+          "entity": "(extends CALENDAR)",
+          "fields": "no new entities; derives card colour from service.treatment_type and Appointment.status; computes a (derived) DaySummary (counts, utilisation %, idle chair-hours)",
+          "notes": "Reads the basic's Appointment + Resource data; status transitions are owned by LIFECYCLE; a no-show raises a Job (PRD-07)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-02/CALENDAR"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Status/treatment-coloured appointment cards + quick actions",
+          "note": "Behaviour: each appointment card shows client, treatment and status, colour-coded by treatment type (legend: anti-wrinkle / filler / skin / consult) and by status, with quick actions. Requirements: status drives the colour; clicking opens the appointment detail/modal; a no-show raises a follow-up job (PRD-07) and arrived/in-progress feed check-in and treatment-room surfaces."
+        },
+        {
+          "title": "Summary strip (counts, utilisation, idle chair-hours)",
+          "note": "Behaviour: a strip above the grid with total appointments, per-treatment-type counts, chairs-booked utilisation % and idle chair-hours. Requirements: figures derive from the day's appointments and resources; per-type counts render as chips; utilisation and idle hours surface the operational signal the desk runs on."
         }
       ]
     },
     {
       "key": "QUIET-WINDOWS",
-      "title": "Quiet windows to fill (idle-slot recovery)",
+      "title": "Quiet windows — basic idle-slot detection & list",
       "as_a": "front-of-house lead",
       "i_want": "to see upcoming quiet windows and fill them in one click",
       "so_that": "idle chairs are recovered before they cost us and before stock expires",
@@ -155,26 +393,153 @@
       "priority": "P1",
       "tasks": [
         {
-          "title": "Idle-slot detection (quiet-window projection)",
-          "note": "Behaviour: project upcoming slots where a resource is free during opening hours, ranked by idle duration and proximity. Requirements: configurable quietness threshold and rolling horizon; excludes closed days, time-off and blocked time; refreshes as bookings change. Reads occupancy from the calendar (PRD-02/CALENDAR)."
+          "title": "QuietWindow projection (read-model)",
+          "note": "Behaviour: model the QuietWindow read-model (resource_id, date, start, end, idle_minutes, score) projected from appointments + roster + opening hours. Requirements: project upcoming slots where a resource is free during opening hours; excludes closed days, time-off and blocked time; refreshed as bookings change; reads occupancy from the calendar (PRD-02/CALENDAR)."
         },
         {
-          "title": "Cost-per-treatment / savings framing",
-          "note": "Behaviour: show why a window matters - an idle chair raises staff cost-per-treatment - with an estimated figure. Requirements: all dollar/cost figures are owner-only and stripped for non-owner roles (the .fin capability); non-owners see the window and the prompt to fill it, but no money."
-        },
+          "title": "Idle-slot detection & ranked list UI",
+          "note": "Behaviour: a 'Quiet windows to fill' panel listing upcoming windows (resource, day, idle duration) ranked by how quiet and how soon. Requirements: configurable quietness threshold and rolling horizon (e.g. next 14 days); the list refreshes as bookings change; the cost framing, stock-expiry tie-in and one-click fill actions are follow-ups."
+        }
+      ]
+    },
+    {
+      "key": "QUIET-WINDOWS-COST",
+      "title": "Quiet windows: cost-per-treatment / savings framing",
+      "as_a": "owner",
+      "i_want": "each quiet window to show the cost of leaving it idle",
+      "so_that": "I can see the financial reason to fill it",
+      "context": "Plainly: the owner-only dollar framing on each quiet window — an idle chair spreads fixed staff cost across fewer treatments, so cost-per-treatment rises. Where it fits: a follow-up to the quiet-windows basic detection (PRD-02/QUIET-WINDOWS) that adds the financial rationale on top of the window list. It honours owner-only financial gating: all money figures sit behind the .fin capability and are stripped for non-owner roles. It sits in the Reception schedule (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "Each window shows the business reason to fill it (an idle chair raises staff cost-per-treatment), with an estimated figure.",
+        "All dollar/cost figures are owner-only and stripped for non-owner roles (the .fin capability).",
+        "Non-owners see the window and the prompt to fill it, but no money figures."
+      ],
+      "detail": [
+        "The basic panel lists quiet windows; this follow-up adds the why. Each window is framed with the consequence of leaving it idle — fixed staff cost spread across fewer treatments raises cost-per-treatment — with an estimated dollar figure so the owner can weigh whether to fill it.",
+        "The financial framing respects owner-only financial gating: the server strips all dollar/cost figures for non-owner roles (the .fin capability). A non-owner such as Reception still sees the window and the prompt to fill it, but never the money.",
+        "This is purely additive over the basic list — it adds a money annotation, not a new detection mechanism."
+      ],
+      "ui_spec": [
+        "'Quiet windows to fill' panel header with a savings icon and the one-line rationale (filling idle chairs cuts staff cost-per-treatment).",
+        "An owner-only cost/savings figure on each window card, rendered only when the .fin capability is present.",
+        "Non-owner roles see the window and Fill prompt with the money figures hidden."
+      ],
+      "data_model": [
         {
-          "title": "Stock-expiry / FEFO tie-in",
-          "note": "Behaviour: surface lots nearing expiry and match them to quiet windows that could absorb the stock. Requirements: pulls expiring lots from injectables inventory (PRD-04) ordered first-expiry-first-out (FEFO); flags the write-off avoided; links through to the stock item."
-        },
+          "entity": "(extends QUIET-WINDOWS)",
+          "fields": "no new entities; adds a derived owner-only cost-per-treatment estimate per QuietWindow",
+          "notes": "Money figures gated behind .fin (owner-only) and stripped server-side for non-owner roles."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-02/QUIET-WINDOWS"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
-          "title": "Fill action: recall / waitlist offer / campaign",
-          "note": "Behaviour: a one-click action to fill a window via the recall worklist, a waitlist offer, or a small targeted campaign. Requirements: creates the matching follow-up jobs (PRD-07); honours each client's marketing-consent state; records a FillAction for audit."
+          "title": "Cost-per-treatment estimate per window (.fin-gated)",
+          "note": "Behaviour: annotate each quiet window with the cost of leaving it idle — an idle chair raises staff cost-per-treatment — and an estimated figure. Requirements: all dollar/cost figures are owner-only and stripped server-side for non-owner roles (the .fin capability); non-owners see the window and the prompt to fill it, but no money."
+        }
+      ]
+    },
+    {
+      "key": "QUIET-WINDOWS-FEFO",
+      "title": "Quiet windows: stock-expiry / FEFO tie-in",
+      "as_a": "front-of-house lead",
+      "i_want": "quiet windows to flag where soon-to-expire stock could be used",
+      "so_that": "we book treatments that consume that stock before it must be written off",
+      "context": "Plainly: matching lots of injectable stock that are nearing expiry to nearby quiet windows that could absorb them. Where it fits: a follow-up to the quiet-windows basic detection (PRD-02/QUIET-WINDOWS) that cross-references inventory against the window list. It reads expiring lots from injectables inventory (PRD-04) ordered first-expiry-first-out (FEFO — the rule that the earliest-expiring batch is used first). It sits in the Reception schedule (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "Lots nearing expiry are surfaced against quiet windows that could absorb them.",
+        "Expiring lots are pulled from injectables inventory (PRD-04) ordered first-expiry-first-out (FEFO).",
+        "Each match flags the write-off avoided and links through to the stock item."
+      ],
+      "detail": [
+        "The basic panel lists quiet windows; this follow-up cross-references inventory so the clinic can fill those windows with treatments that consume soon-to-expire stock. Lots nearing expiry are matched to nearby quiet windows that could absorb the stock before it must be written off.",
+        "Expiring lots are pulled from injectables inventory (PRD-04) ordered first-expiry-first-out (FEFO — the earliest-expiring batch is consumed first), so the windows surfaced are the ones that would genuinely use the at-risk stock.",
+        "Each match flags the write-off it would avoid and links through to the underlying stock item, turning a quiet window into a concrete reason to fill it."
+      ],
+      "ui_spec": [
+        "An inline stock-expiry hint on cards where an expiring lot could be absorbed (e.g. 'Lot expiring ~6 wks — 3 quiet windows could absorb it').",
+        "The hint names the lot and links through to the stock item; it shows the write-off that filling the windows would avoid."
+      ],
+      "data_model": [
+        {
+          "entity": "(extends QUIET-WINDOWS)",
+          "fields": "no new entities; reads expiring Lot/batch records from PRD-04 inventory (FEFO-ordered) and matches them to QuietWindows",
+          "notes": "Read-only cross-reference; the lot/batch entity is owned by injectables inventory (PRD-04)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-02/QUIET-WINDOWS"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Match FEFO-expiring lots to quiet windows",
+          "note": "Behaviour: surface lots nearing expiry and match them to quiet windows that could absorb the stock. Requirements: pull expiring lots from injectables inventory (PRD-04) ordered first-expiry-first-out (FEFO — earliest-expiring batch first); flag the write-off avoided; link through to the stock item."
+        }
+      ]
+    },
+    {
+      "key": "QUIET-WINDOWS-FILL",
+      "title": "Quiet windows: one-click fill (recall / waitlist / campaign)",
+      "as_a": "front-of-house lead",
+      "i_want": "to fill a quiet window in one click via recall, a waitlist offer or a targeted campaign",
+      "so_that": "the chair gets booked before it sits idle",
+      "context": "Plainly: the action that turns a quiet window into a booking attempt — a one-click choice of recall, a waitlist offer, or a small targeted campaign. Where it fits: a follow-up to the quiet-windows basic detection (PRD-02/QUIET-WINDOWS) that adds the fill action on top of the window list. The fill hands off to existing channels: it creates follow-up jobs handled by Comms (PRD-07) and honours each client's marketing-consent state. It sits in the Reception schedule (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "A one-click fill action offers recall, a waitlist offer or a targeted campaign.",
+        "The action creates the matching follow-up jobs (PRD-07).",
+        "It honours each client's marketing-consent state.",
+        "Each fill records a FillAction for audit."
+      ],
+      "detail": [
+        "The basic panel detects and lists quiet windows; this follow-up adds the action that fills them. A one-click control offers three routes — a recall worklist entry, a waitlist offer to a waiting client, or a small targeted campaign — each handed off to existing channels rather than re-built here.",
+        "Each route becomes a follow-up job in the PRD-07 queue and honours the client's marketing-consent state (a campaign never goes to someone who hasn't consented). The window itself is unchanged; this is the demand-side action layered on top.",
+        "Every fill records a FillAction (which window, which kind, which job it created, who and when) so the desk has an audit of what was done to fill each window."
+      ],
+      "ui_spec": [
+        "A Fill affordance per quiet-window card opening a small chooser: recall / waitlist offer / targeted campaign.",
+        "Choosing a route creates the matching follow-up job and confirms it; a campaign route respects marketing consent.",
+        "The fill is recorded against the window (FillAction) for audit."
+      ],
+      "data_model": [
+        {
+          "entity": "FillAction",
+          "fields": "id, quiet_window_ref, kind(recall|waitlist|campaign), created_job_id, actor_id, at",
+          "notes": "Audit of what was done to fill a window; the created job is owned by Comms (PRD-07)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-02/QUIET-WINDOWS"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "One-click fill (recall / waitlist offer / campaign) + FillAction",
+          "note": "Behaviour: a one-click action to fill a window via the recall worklist, a waitlist offer, or a small targeted campaign. Requirements: creates the matching follow-up jobs (PRD-07); honours each client's marketing-consent state; records a FillAction (window, kind, created job, actor, at) for audit."
         }
       ]
     },
     {
       "key": "ONLINE-BOOK",
-      "title": "Online self-booking (scope-aware)",
+      "title": "Online self-booking — basic scope-aware flow",
       "context": "Online self-booking is the public, client-facing front door to Reception (PRD-02): it lets a client book themselves onto the same diary the front desk runs, reusing the multi-resource calendar (PRD-02/CALENDAR) availability engine and the credentialing from Foundations (PRD-01/CREDENTIALS). It sits early in the clinic-first flow but faces outward, so it is deliberately constrained: an injectable can only ever offer a cleared injector, prices and brand names for prescription medicines are withheld, and a completed booking hands straight off to the Intake/Consent step (PRD-03) that must be satisfied before any treatment can proceed.  Clients self-book service → practitioner → slot online; injectable services only offer cleared RN/NP and the public page uses generic names (C4/C9).",
       "as_a": "client",
       "i_want": "to book a consult/treatment online by choosing service, practitioner and time",
@@ -240,28 +605,165 @@
       ],
       "tasks": [
         {
-          "title": "Service-selection step ('What can we help with?')",
-          "note": "Behaviour: the public service list rendered as generic-named cards; S4 (Schedule 4 prescription-only medicine) services carry a 'Consultation required' tag, no price, and 'Pricing is confirmed privately with your practitioner' copy. Requirements: reads PublicBookingConfig (generic_names, display_name_overrides, withhold_s4_prices); the server returns ALREADY-SANITISED data so the browser never receives an S4 brand or price (C9, configuration policy not an advertising linter); only bookable services appear."
+          "title": "Public scope-aware booking flow (service → practitioner → slot)",
+          "note": "Behaviour: the public service → practitioner → slot wizard that reuses the desk availability engine. Requirements: after a service is chosen offer only practitioners who can perform it — for an S4 (Schedule 4 prescription-only medicine) service only cleared RN/NP (the canInject gate), with a 'next available' shortcut (C4); the slot grid shows only genuinely bookable slots (roster ∩ canInject ∩ free room/chair/device incl. buffers), identical to the desk engine; an ineligible practitioner is never returned for an S4 service; the public surface is rate-limited and bot-protected."
         },
         {
-          "title": "Practitioner step (scope-filtered for S4)",
-          "note": "Behaviour: after a service is chosen, offer only practitioners who can perform it — for an S4 service only cleared RN/NP (the canInject gate), with a 'next available' shortcut. Requirements: the eligible-practitioner list comes from the SAME server-side availability engine as the desk (CALENDAR); an ineligible practitioner is never returned for an S4 service (C4); 'no preference' picks the soonest eligible injector."
-        },
+          "title": "Confirm + create (source=online) + intake/consent handoff",
+          "note": "Behaviour: a confirmation/summary that commits the booking and hands straight off to the intake + consent send. Requirements: the create endpoint sets source=online and re-runs the same server-side conflict/scope checks as the desk (an S4 booking with an ineligible practitioner is rejected); on success it triggers the PRD-03 intake + consent send and shows the 'kept private' assurance; the created Appointment is identical to a desk/walk-in booking. Generic public naming, DOB/under-18 capture and the owner customise panel are follow-ups."
+        }
+      ]
+    },
+    {
+      "key": "ONLINE-BOOK-GENERIC-NAMES",
+      "title": "Online self-booking: generic names & withheld S4 prices (C9)",
+      "as_a": "client",
+      "i_want": "the public booking page to show generic service names and not advertise prescription-medicine prices",
+      "so_that": "the clinic stays within the advertising rules for prescription-only cosmetic medicines",
+      "context": "Plainly: the configuration that makes the public booking page use generic service names and withhold prices for prescription-only (S4) medicines, tagging them 'consultation required'. Where it fits: a follow-up to online self-booking basic (PRD-02/ONLINE-BOOK) that adds the advertising-compliance layer on top of the public flow. It satisfies compliance criterion C9 (TGA/AHPRA advertising of prescription medicines) via a per-tenant PublicBookingConfig — a configuration policy, not an automated linter — and shares that policy with the public booking page in Comms (PRD-07). It sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "Public service names are generic and S4 prices are withheld by configuration (C9).",
+        "S4 services are tagged 'Consultation required' and shown price-free ('Pricing is confirmed privately with your practitioner').",
+        "The server returns already-sanitised data so the browser never receives an S4 brand or price.",
+        "Naming/pricing is driven by a per-tenant PublicBookingConfig, shared with PRD-07 BOOKING-PAGE."
+      ],
+      "detail": [
+        "The basic online flow books a service; this follow-up constrains how services are PRESENTED publicly to meet the advertising rules for prescription-only medicines (C9). Services show clinic-customised generic display names (no S4 brands or 'anti-wrinkle injection' wording), and S4 services are tagged 'Consultation required' and shown price-free.",
+        "Crucially the sanitisation happens server-side: the public endpoint returns ALREADY-SANITISED data so the browser never receives an S4 brand name or price. This is a configuration policy (a per-tenant PublicBookingConfig with generic_names, display_name_overrides and withhold_s4_prices), not an automated advertising linter.",
+        "The same PublicBookingConfig policy is shared with the public booking page in Comms (PRD-07 BOOKING-PAGE), so the clinic configures naming/pricing compliance once and it applies wherever a service is offered publicly."
+      ],
+      "ui_spec": [
+        "Prototype: public booking widget (booking-widget.png) — 'What can we help with?' service list with generic display names; S4 services tagged 'Consultation required' and shown price-free, 'Pricing is confirmed privately with your practitioner'.",
+        "S4 cards never show a brand name or price; non-S4 services may show price per config.",
+        "The public-booking.png 'Compliant by configuration' panel reflects: generic names, withheld prices, S4 always price-free + 'consultation required'."
+      ],
+      "data_model": [
         {
-          "title": "Slot-grid step (public availability)",
-          "note": "Behaviour: a date/time slot grid showing only genuinely bookable slots for the chosen service + practitioner. Requirements: slots = roster ∩ canInject ∩ free room/chair/device for the whole block incl. buffers, identical to the desk engine; taken/over-capacity slots are not selectable; the surface is rate-limited and bot-protected since it is public."
-        },
+          "entity": "PublicBookingConfig",
+          "fields": "tenant_id, generic_names(bool), withhold_s4_prices(bool), display_name_overrides(map), embed_token",
+          "notes": "Drives naming/pricing per C9 (shared with PRD-07 BOOKING-PAGE); a config setting, not a linter."
+        }
+      ],
+      "refs": {
+        "compliance": [
+          "C9"
+        ]
+      },
+      "depends_on": [
+        "PRD-02/ONLINE-BOOK"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
-          "title": "Details / account step (DOB capture + under-18 flag)",
-          "note": "Behaviour: capture the client's details, create or match an account, and capture date of birth; show 'Your details are kept private & used only to manage your booking'. Requirements: derive under_18 from DOB and stamp it on the resulting Appointment so PRD-03 COOLING-OFF/GATING can enforce the 7-day cooling-off (the mandatory wait before a cosmetic procedure can proceed) + payment block; emit a domain event (a fact emitted when something happens in the system) so downstream gates react; guardian/contact capture is deferred to PRD-03."
-        },
+          "title": "Server-side public sanitisation (generic names, withheld S4 prices)",
+          "note": "Behaviour: the public service list returns generic-named cards; S4 (Schedule 4 prescription-only medicine) services carry a 'Consultation required' tag, no price, and 'Pricing is confirmed privately with your practitioner' copy. Requirements: read PublicBookingConfig (generic_names, display_name_overrides, withhold_s4_prices); the server returns ALREADY-SANITISED data so the browser never receives an S4 brand or price (C9, a configuration policy not an advertising linter); only bookable services appear."
+        }
+      ]
+    },
+    {
+      "key": "ONLINE-BOOK-DOB",
+      "title": "Online self-booking: DOB capture & under-18 flag",
+      "as_a": "system",
+      "i_want": "to capture the client's date of birth at online account creation and flag under-18 bookings",
+      "so_that": "the downstream cooling-off and payment block can be enforced for minors",
+      "context": "Plainly: capturing date of birth when a client creates an account during online booking, and stamping an under-18 flag on the resulting appointment. Where it fits: a follow-up to online self-booking basic (PRD-02/ONLINE-BOOK) that adds the details/account step's age capture. The under-18 flag is what lets Intake & Consent (PRD-03/COOLING-OFF and PRD-03/GATING) enforce the mandatory 7-day cooling-off and payment block for minors. It sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "The details/account step captures date of birth and creates or matches an account.",
+        "Under-18 is derived from DOB and stamped on the resulting Appointment.",
+        "A domain event is emitted so downstream gates (PRD-03) react to the under-18 flag.",
+        "The 'kept private' assurance is shown; guardian/contact capture is deferred to PRD-03."
+      ],
+      "detail": [
+        "The basic online flow confirms and creates a booking; this follow-up adds the details/account step's age capture. On account creation the client's date of birth is captured (or matched to an existing account), with the 'Your details are kept private & used only to manage your booking' assurance.",
+        "Under-18 is DERIVED from the DOB and stamped on the resulting Appointment so that Intake & Consent (PRD-03) can later enforce the 7-day cooling-off (the mandatory wait before a cosmetic procedure can proceed) and the payment block for minors. A domain event (a fact emitted when something happens in the system) is emitted so the downstream gates react.",
+        "Guardian and additional contact capture is deferred to PRD-03 (GUARDIAN-CONSENT); this story only captures DOB and sets the flag the gates read."
+      ],
+      "ui_spec": [
+        "Prototype: public booking widget (booking-widget.png) — the 'your details / account' step with DOB capture and 'Your details are kept private & used only to manage your booking'.",
+        "DOB field on the details step; the resulting Appointment carries the derived under-18 flag.",
+        "No guardian capture here — the under-18 path's guardian co-sign is handled in PRD-03."
+      ],
+      "data_model": [
         {
-          "title": "Confirm step + create (source=online) + intake/consent handoff",
-          "note": "Behaviour: a confirmation/summary that commits the booking and hands straight off to the intake + consent send. Requirements: the create endpoint sets source=online and re-runs the same server-side conflict/scope checks as the desk (an S4 booking with an ineligible practitioner is rejected); on success it triggers the PRD-03 intake + consent send and shows the 'kept private' assurance; the created Appointment is identical to a desk/walk-in booking."
-        },
+          "entity": "Client (ref)",
+          "fields": "dob, under_18(derived)",
+          "notes": "DOB captured at account create; under-18 flag stamped on the Appointment and feeds PRD-03 cooling-off (C6)."
+        }
+      ],
+      "refs": {
+        "compliance": [
+          "C6"
+        ]
+      },
+      "depends_on": [
+        "PRD-02/ONLINE-BOOK"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
-          "title": "Owner customise panel ('Compliant by configuration')",
-          "note": "Behaviour: the owner-facing embed/customise view (brand colour, clinic name, service selection) plus the 'Compliant by configuration' summary — generic names, withheld prices, S4 always price-free + 'consultation required', 'no deposit / card on file in v1'. Requirements: writes PublicBookingConfig (incl. embed_token for the embeddable widget); shared policy with PRD-07 BOOKING-PAGE; capability-gated to owner."
+          "title": "DOB capture + under-18 flag on the Appointment",
+          "note": "Behaviour: the details/account step captures date of birth, creates or matches an account, and shows the 'kept private' assurance. Requirements: derive under_18 from DOB and stamp it on the resulting Appointment so PRD-03 COOLING-OFF/GATING can enforce the 7-day cooling-off (the mandatory wait before a cosmetic procedure can proceed) + payment block; emit a domain event (a fact emitted when something happens in the system) so downstream gates react; guardian/contact capture is deferred to PRD-03."
+        }
+      ]
+    },
+    {
+      "key": "ONLINE-BOOK-CUSTOMISE",
+      "title": "Online self-booking: owner customise & embed panel",
+      "as_a": "owner",
+      "i_want": "to customise and embed the public booking widget and see its compliance posture at a glance",
+      "so_that": "the booking page matches our brand and I can confirm it's compliant by configuration",
+      "context": "Plainly: the owner-facing view that brands, configures and embeds the public booking widget, with a 'Compliant by configuration' summary. Where it fits: a follow-up to online self-booking basic (PRD-02/ONLINE-BOOK) that adds the owner customise/embed surface. It writes the per-tenant PublicBookingConfig (including the embed token) — the same policy the generic-names follow-up (PRD-02/ONLINE-BOOK-GENERIC-NAMES) and the PRD-07 public booking page share. It is capability-gated to the owner and sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "The owner can customise the widget (brand colour, clinic name, service selection) and obtain an embed token.",
+        "A 'Compliant by configuration' summary shows generic names, withheld prices, S4 always price-free + 'consultation required', and 'no deposit / card on file in v1'.",
+        "The panel writes PublicBookingConfig (incl. embed_token), shared policy with PRD-07 BOOKING-PAGE.",
+        "The customise panel is capability-gated to owner."
+      ],
+      "detail": [
+        "The basic online flow is the client-facing wizard; this follow-up adds the OWNER-facing view that brands and embeds it. The owner sets the brand colour, clinic name and which services appear, and obtains an embed token for the embeddable widget.",
+        "Alongside customisation sits a 'Compliant by configuration' summary that states the public surface's posture: generic names, withheld prices, S4 always price-free and 'consultation required', and 'no deposit / card on file in v1'. It reassures the owner that compliance is achieved by configuration, not manual policing.",
+        "The panel writes the per-tenant PublicBookingConfig (including embed_token) — the same policy object the generic-names follow-up and the PRD-07 public booking page read — so naming/pricing/embedding are configured in one place. The view is capability-gated to the owner."
+      ],
+      "ui_spec": [
+        "Prototype: the embeddable/customise view (public-booking.png) — brand colour, clinic name, service selection, and the embeddable widget controls.",
+        "The 'Compliant by configuration' panel: generic names, withheld prices, S4 always price-free + 'consultation required', and 'no deposit / card on file in v1'.",
+        "Capability-gated to owner; produces the embed token for the widget."
+      ],
+      "data_model": [
+        {
+          "entity": "PublicBookingConfig (extends ONLINE-BOOK-GENERIC-NAMES)",
+          "fields": "tenant_id, brand_colour, clinic_name, service_selection[], embed_token (+ generic_names / withhold_s4_prices / display_name_overrides)",
+          "notes": "The owner customise panel writes this config (incl. embed_token); shared policy with PRD-07 BOOKING-PAGE."
+        }
+      ],
+      "refs": {
+        "compliance": [
+          "C9"
+        ]
+      },
+      "depends_on": [
+        "PRD-02/ONLINE-BOOK"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Owner customise/embed panel ('Compliant by configuration')",
+          "note": "Behaviour: the owner-facing embed/customise view (brand colour, clinic name, service selection) plus the 'Compliant by configuration' summary — generic names, withheld prices, S4 (Schedule 4 prescription-only medicine) always price-free + 'consultation required', 'no deposit / card on file in v1'. Requirements: writes PublicBookingConfig (incl. embed_token for the embeddable widget); shared policy with PRD-07 BOOKING-PAGE; capability-gated to owner."
         }
       ]
     },
@@ -339,7 +841,7 @@
     },
     {
       "key": "LIFECYCLE",
-      "title": "Visit lifecycle & status state-machine",
+      "title": "Visit lifecycle — basic status state-machine",
       "context": "The visit lifecycle is the status spine that carries a client through a visit in Reception (PRD-02): it turns a booking made on the calendar (PRD-02/CALENDAR) into a tracked journey from arrival to checkout, and is what the Today board, reminders and the consent/consult gates all read. It sits after the calendar and before reminders (PRD-02/REMINDERS) and waitlist backfill in the clinic-first flow; downstream it also feeds the check-in kiosk (PRD-09) and the no-show follow-up jobs in Comms (PRD-07). As front desk, I want a clear visit status flow with check-in, an in-room-now indicator and late/no-show flags, so that the team always knows where each client is in the visit.  Bookings move through booked → reminded → checked-in → in-room → checked-out, with late/no-show flags and role hand-offs (REQ-BOOK-7).",
       "as_a": "front desk",
       "i_want": "a clear visit status flow with check-in, an in-room-now indicator and late/no-show flags",
@@ -402,17 +904,189 @@
           "note": "Behaviour: model Appointment.status as a state machine (booked→reminded→checked_in→in_room→for_checkout→checked_out, plus late/no_show/cancelled) with role hand-offs. Requirements: transition endpoints validate legal transitions server-side and reject illegal ones; each write appends a VisitEvent (from/to/actor/at) to the audit stream; every transition emits a domain event (a fact emitted when something happens in the system) for the Today board, reminders and read models (a query-optimised view built from domain events)."
         },
         {
-          "title": "Booking capture: new-vs-returning, reason, roster",
-          "note": "Behaviour: at booking, capture new_or_returning, reason/notes and the rostered practitioner on the Appointment. Requirements: new-vs-returning selects the intake type downstream (full intake vs quick re-screen); reason and practitioner feed recall and reporting; respects the roster so a booking can't be taken against an unrostered practitioner."
-        },
+          "title": "Minimal Today list with check-in (per-row status chips)",
+          "note": "Behaviour: a 'Today's schedule' list where each row shows its current status chip and a check-in-on-arrival action driving the transition API. Requirements: rows reflect the live status from transition events; the action calls the validated transition endpoint; the booking-capture fields, the no-show→job rule, the KPI tiles + in-room strip, and the full role-aware action set are follow-ups."
+        }
+      ]
+    },
+    {
+      "key": "LIFECYCLE-BOOKING-CAPTURE",
+      "title": "Visit lifecycle: booking capture (new/returning, reason, roster)",
+      "as_a": "front desk",
+      "i_want": "the booking to capture whether the client is new or returning, the reason, and the rostered practitioner",
+      "so_that": "the right intake is sent and recall and reporting have what they need",
+      "context": "Plainly: capturing the few booking fields that drive what happens downstream — new-versus-returning (which intake is sent), the reason for the visit, and which rostered practitioner. Where it fits: a follow-up to the visit lifecycle basic state-machine (PRD-02/LIFECYCLE) that adds the booking-time capture fields. New-vs-returning selects the intake variant in Intake & Consent (PRD-03); reason and practitioner feed recall and reporting. It sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "New-vs-returning, reason/notes and the rostered practitioner are captured on the Appointment.",
+        "New-vs-returning selects the intake type downstream (full intake vs quick re-screen).",
+        "Reason and practitioner feed recall and reporting.",
+        "A booking can't be taken against an unrostered practitioner."
+      ],
+      "detail": [
+        "The basic state-machine tracks status; this follow-up captures the booking-time fields those downstream flows depend on. At booking, the Appointment records new_or_returning, a reason/notes field, and the rostered practitioner.",
+        "New-vs-returning selects the intake variant downstream (a new client gets the full intake; a returning client gets a quick re-screen — PRD-03/INTAKE), and the reason and practitioner feed recall and reporting.",
+        "The capture respects the roster so a booking can't be taken against a practitioner who isn't working at that time."
+      ],
+      "ui_spec": [
+        "Prototype: the booking flow captures Returning/New, a reason/notes field, and the practitioner (booking-wizard.png / dashboard.png).",
+        "New-vs-returning visibly changes the intake hint (full vs quick re-screen).",
+        "The practitioner field only offers rostered practitioners."
+      ],
+      "data_model": [
         {
-          "title": "No-show flag → auto follow-up call job (late = flag only)",
+          "entity": "Appointment (booking fields, extends LIFECYCLE)",
+          "fields": "new_or_returning, reason, practitioner_id",
+          "notes": "Captured at booking; drives intake type (full vs re-screen), recall and reporting."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-02/LIFECYCLE"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Capture new-vs-returning, reason, rostered practitioner",
+          "note": "Behaviour: at booking, capture new_or_returning, reason/notes and the rostered practitioner on the Appointment. Requirements: new-vs-returning selects the intake type downstream (full intake vs quick re-screen); reason and practitioner feed recall and reporting; respects the roster so a booking can't be taken against an unrostered practitioner."
+        }
+      ]
+    },
+    {
+      "key": "LIFECYCLE-NOSHOW-JOB",
+      "title": "Visit lifecycle: no-show flag → auto follow-up job",
+      "as_a": "front desk",
+      "i_want": "flagging a no-show to automatically raise a follow-up call",
+      "so_that": "no missed appointment is ever lost without a recovery attempt",
+      "context": "Plainly: when reception flags a row as a no-show, the system automatically creates a follow-up call task so the client is chased; flagging 'late' just marks the row. Where it fits: a follow-up to the visit lifecycle basic state-machine (PRD-02/LIFECYCLE) that wires the no-show transition to the follow-up/job queue. The created job is handled by Comms (PRD-07). It sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "A no_show transition auto-creates a follow-up CALL job (assignee = reception, source = system, due = today).",
+        "Flagging 'late' raises no job; it only marks the row.",
+        "The job-creation is idempotent — re-flagging never duplicates the job.",
+        "The created job lands in the PRD-07 follow-up/job queue."
+      ],
+      "detail": [
+        "The basic state-machine supports the no_show and late transitions; this follow-up gives no-show a consequence. Flagging a row no-show auto-creates a recovery task so the no-show (a client who misses an appointment without notice) is always chased.",
+        "A no_show transition creates a follow-up CALL job in the PRD-07 jobs queue (assignee = reception, source = system, due = today); flagging late only marks the row and raises no job.",
+        "The job creation is idempotent — re-flagging the same appointment never duplicates the job — so the recovery worklist stays clean."
+      ],
+      "ui_spec": [
+        "Prototype: Today (dashboard.png) — a no-show row links into Follow-ups; Late and No-show are distinct flags.",
+        "Flagging no-show creates a follow-up call; flagging late only marks the row.",
+        "The follow-up appears in the PRD-07 jobs queue."
+      ],
+      "data_model": [
+        {
+          "entity": "(extends LIFECYCLE)",
+          "fields": "no new entities; a no_show transition raises a Job (PRD-07)",
+          "notes": "Idempotent job creation; the Job entity is owned by Comms (PRD-07)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-02/LIFECYCLE"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "No-show → auto follow-up call job (late = flag only)",
           "note": "Behaviour: flagging a row no-show auto-creates a recovery task; flagging late only marks the row. Requirements: a no_show transition creates a Follow-up CALL job in the PRD-07 jobs queue (assignee=reception, source=system, due=today) so the no-show (a client who misses an appointment without notice) is recovered; late raises no job; idempotent — re-flagging never duplicates the job."
-        },
+        }
+      ]
+    },
+    {
+      "key": "LIFECYCLE-TODAY-BOARD",
+      "title": "Visit lifecycle: Today KPI tiles & in-room strip",
+      "as_a": "front desk",
+      "i_want": "Today header tiles and a 'WITH YOU NOW' in-room strip",
+      "so_that": "I can see the day's state and who's in treatment at a glance",
+      "context": "Plainly: the Today dashboard's summary — KPI tiles (appointments, checked in, awaiting consent, stock, follow-ups) and a 'WITH YOU NOW' strip showing who is currently in-room. Where it fits: a follow-up to the visit lifecycle basic state-machine (PRD-02/LIFECYCLE) that adds the at-a-glance Today board on top of the status data. The 'awaiting consent' tile ties to the consult/consent gates (PRD-02/CONSULT-GATE, PRD-03/GATING). It sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "Today header tiles show appointments, checked in, awaiting consent, stock and follow-ups.",
+        "A 'WITH YOU NOW' strip lists every appointment in the in_room state with Open chart / Profile quick links.",
+        "Tiles derive from today's appointments + gate state and live-update from transition events.",
+        "The 'awaiting consent' tile reflects the consult/consent gate."
+      ],
+      "detail": [
+        "The basic list shows rows; this follow-up adds the Today board's summary view. Header KPI tiles surface appointments, checked in, awaiting consent, stock and follow-ups, derived from today's appointments and the gate state.",
+        "A 'WITH YOU NOW' in-room strip lists every appointment currently in the in_room state, each with Open chart and Profile quick links so a clinician can jump straight to the right record.",
+        "Everything live-updates from the transition events the basic state-machine emits; the 'awaiting consent' tile reflects the consult/consent gate, tying the lifecycle to the compliance gates."
+      ],
+      "ui_spec": [
+        "Prototype: Today (dashboard.png) — KPI tiles (appointments, checked in, awaiting consent, stock, follow-ups) and a 'WITH YOU NOW' in-room strip (client + Open chart/Profile).",
+        "Tiles live-update from transition events; the in-room strip lists in_room appointments.",
+        "'Awaiting consent — treatment gated until done' tile ties the lifecycle to the gates."
+      ],
+      "data_model": [
+        {
+          "entity": "(derived) TodaySummary (extends LIFECYCLE)",
+          "fields": "= today's appointments + gate state → tile counts; in_room appointments → in-room strip",
+          "notes": "Read-model fed by transition events; the gate state comes from the consult/consent gates."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-02/LIFECYCLE"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Today KPI tiles + 'WITH YOU NOW' in-room strip",
           "note": "Behaviour: the Today header tiles (appointments, checked in, awaiting consent, stock, follow-ups) and a 'WITH YOU NOW' strip showing who is in-room with Open chart / Profile quick links. Requirements: tiles derive from today's appointments + gate state and live-update from transition events; the in-room strip lists every appointment in the in_room state; the 'awaiting consent' tile reflects the gate (ties to the consult/consent gates)."
-        },
+        }
+      ]
+    },
+    {
+      "key": "LIFECYCLE-ROW-ACTIONS",
+      "title": "Visit lifecycle: per-row role-appropriate next actions",
+      "as_a": "front desk",
+      "i_want": "each Today row to offer the next action for whoever owns the visit now",
+      "so_that": "the team always sees the one right thing to do next",
+      "context": "Plainly: the per-row action buttons on the Today schedule (Confirmed / Start / Resume / Late / No-show / Profile) that surface the next legal step for the visit's current owner. Where it fits: a follow-up to the visit lifecycle basic state-machine (PRD-02/LIFECYCLE) that adds the role-aware action set on top of the status chips. Each action calls the validated transition API and reflects the consult/consent gate. It sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "Each row shows the next action for whoever owns it now (Confirmed / Start / Resume / Late / No-show / Profile).",
+        "Each action calls the transition API and is shown only when legal for the row's state and the user's role.",
+        "The row reflects the consult/consent gate ('Awaiting consent — treatment gated') and deep-links to chart/profile.",
+        "Rows live-update from transition events."
+      ],
+      "detail": [
+        "The basic list shows a status chip per row; this follow-up adds the role-appropriate next action. Each 'Today's schedule' row surfaces the one next step for whoever owns it now — Confirmed, Start, Resume, Late, No-show, Profile — handing off automatically as the visit moves between roles.",
+        "Each action calls the validated transition API and is shown only when the transition is legal for the row's state and the user's role, so a user never sees an action they can't take.",
+        "The row reflects the consult/consent gate ('Awaiting consent — treatment gated until done') and deep-links to the chart/profile; everything live-updates from the transition events the basic emits."
+      ],
+      "ui_spec": [
+        "Prototype: Today (dashboard.png) — each row's status chips + actions (Confirmed, Start, Late, No-show, Resume, Profile).",
+        "Actions appear only when legal for the row's state and the user's role; rows deep-link to chart/profile.",
+        "A gated row shows 'Awaiting consent — treatment gated'."
+      ],
+      "data_model": [
+        {
+          "entity": "(extends LIFECYCLE)",
+          "fields": "no new entities; derives the legal next-actions set from Appointment.status + user role + gate state",
+          "notes": "Each action calls the basic's transition API; gate state from the consult/consent gates."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-02/LIFECYCLE"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Per-row status chips + role-appropriate next action",
           "note": "Behaviour: each 'Today's schedule' row shows its current status chip and the next action for whoever owns it now (Confirmed / Start / Resume / Late / No-show / Profile). Requirements: each action calls the transition API and is shown only when legal for the row's state and the user's role; the row reflects the consult/consent gate ('Awaiting consent — treatment gated') and deep-links to chart/profile; live-updates from transition events."
@@ -421,7 +1095,7 @@
     },
     {
       "key": "REMINDERS",
-      "title": "Reminders & self-service reschedule/cancel",
+      "title": "Reminders — basic scheduling & dispatch",
       "context": "Reminders and self-service reschedule/cancel keep the diary accurate without a phone call. The story sits in Reception (PRD-02) on top of the visit lifecycle (PRD-02/LIFECYCLE) — a confirm/decline or cancel moves the lifecycle status and frees the slot — and just before the waitlist (PRD-02/WAITLIST), which backfills the freed slot. It owns the booking-side scheduling, the self-service actions and the cancellation policy; the actual message delivery (SMS/app/email) is provided later by Comms (PRD-07), so this story schedules and reacts but does not itself send.  Clients get reminders they can confirm/decline and can self-reschedule or cancel within policy without calling.",
       "as_a": "client",
       "i_want": "appointment reminders I can confirm/decline and the ability to reschedule or cancel within policy myself",
@@ -476,17 +1150,151 @@
       ],
       "tasks": [
         {
-          "title": "Reminder scheduling + dispatch",
-          "note": "Behaviour: create ReminderSchedule rows when an appointment is booked or moved, with send_at relative to start per template; a scheduled job dispatches due reminders. Requirements: delivery goes through the PRD-07 INotifier (SMS/app/email) — this story schedules and reacts but does not itself send; reschedule/cancel reschedules or cancels the pending reminder; idempotent (a due reminder is dispatched once)."
+          "title": "ReminderSchedule + relative scheduling",
+          "note": "Behaviour: create ReminderSchedule rows (channel, template_id, send_at, status) when an appointment is booked or moved, with send_at relative to start per template. Requirements: rescheduling/cancelling the appointment reschedules or cancels the pending reminder; tenant-scoped; the confirm/decline handling, self-service reschedule/cancel and the policy settings UI are follow-ups."
         },
         {
-          "title": "Confirm / decline handling from the reminder",
+          "title": "Dispatch due reminders via PRD-07 INotifier (idempotent)",
+          "note": "Behaviour: a scheduled job dispatches due reminders. Requirements: delivery goes through the PRD-07 INotifier (SMS/app/email) — this story schedules and reacts but does not itself send; idempotent (a due reminder is dispatched once)."
+        }
+      ]
+    },
+    {
+      "key": "REMINDERS-CONFIRM-DECLINE",
+      "title": "Reminders: confirm / decline handling",
+      "as_a": "client",
+      "i_want": "to confirm or decline my appointment straight from the reminder",
+      "so_that": "the clinic knows I'm coming and a declined slot can be reused",
+      "context": "Plainly: the confirm/decline links carried by a reminder that let a client respond without calling, updating the appointment and freeing a declined slot. Where it fits: a follow-up to the reminders basic scheduling & dispatch (PRD-02/REMINDERS) that adds client response handling on top of the sent reminder. A confirm updates the visit lifecycle status; a decline frees the slot and emits the event the waitlist (PRD-02/WAITLIST) backfills from. It sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "The reminder carries confirm/decline links the client can action without calling.",
+        "A confirm updates Appointment.status (→ reminded/confirmed) and shows a 'Confirmed' chip on the Schedule/Today board.",
+        "A decline frees the slot and emits the slot-freed event the waitlist listens to.",
+        "Links resolve to authenticated-by-token public endpoints and are idempotent."
+      ],
+      "detail": [
+        "The basic story schedules and dispatches reminders; this follow-up adds the client's response. Each reminder carries confirm/decline links the client can action without calling the clinic.",
+        "A confirm link updates Appointment.status (→ reminded/confirmed) and shows a 'Confirmed' chip on the Schedule/Today board; a decline frees the slot and emits the slot-freed event the waitlist (PRD-02/WAITLIST) listens to for backfill.",
+        "The links resolve to authenticated-by-token public endpoints (no login needed) and are idempotent so a repeated click never double-applies."
+      ],
+      "ui_spec": [
+        "Client app / SMS / email: a reminder with confirm/decline actions (self-service, no call needed).",
+        "Desk: a 'Confirmed' chip on the appointment in the Schedule/Today board (schedule.png).",
+        "A decline frees the slot and feeds the waitlist backfill."
+      ],
+      "data_model": [
+        {
+          "entity": "(extends REMINDERS)",
+          "fields": "ReminderSchedule.status → confirmed|declined; a confirm/decline updates Appointment.status",
+          "notes": "A decline emits the slot-freed event WAITLIST consumes; token-authenticated public endpoints."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-02/REMINDERS"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Confirm / decline links + status update + slot-freed event",
           "note": "Behaviour: the reminder carries confirm/decline links the client can action without calling. Requirements: a confirm link updates Appointment.status (→ reminded/confirmed) and shows a 'Confirmed' chip on the Schedule/Today board; a decline frees the slot and emits the slot-freed event WAITLIST listens to; links resolve to authenticated-by-token public endpoints; idempotent."
-        },
+        }
+      ]
+    },
+    {
+      "key": "REMINDERS-SELF-SERVICE",
+      "title": "Reminders: self-service reschedule / cancel within policy",
+      "as_a": "client",
+      "i_want": "to reschedule or cancel my appointment myself within the clinic's policy",
+      "so_that": "I don't need to call and the diary stays accurate",
+      "context": "Plainly: letting a client move or cancel their own appointment within the clinic's cancellation window, freeing the slot when they do. Where it fits: a follow-up to the reminders basic scheduling & dispatch (PRD-02/REMINDERS) that adds client self-service on top of the reminder. It reuses the availability engine to move and emits the slot-freed event the waitlist (PRD-02/WAITLIST) backfills from. There is no deposit and no auto-charge in v1. It sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "A client can self-reschedule or cancel within the cancellation window.",
+        "Inside the window: reuse the availability engine to move, or cancel and free the slot (emitting the slot-freed event).",
+        "Outside the window: apply the configured rule (block/flag/message) with NO charge or deposit in v1.",
+        "All self-service actions are audited."
+      ],
+      "detail": [
+        "The basic story sends reminders; this follow-up lets the client act on their booking without calling. Within the configurable cancellation window the client can self-reschedule (reusing the same availability engine to find a new slot) or cancel.",
+        "A cancel or successful reschedule frees the original slot and emits the slot-freed event the waitlist (PRD-02/WAITLIST) backfills from, keeping the diary accurate.",
+        "Outside the cancellation window the configured rule applies (block/flag/message) — there is NO deposit and NO auto-charge in v1 (REQ-BOOK-3). All self-service actions are audited. The window itself comes from the cancellation policy (PRD-02/REMINDERS-POLICY)."
+      ],
+      "ui_spec": [
+        "Client app / SMS / email: reschedule/cancel links (self-service within policy).",
+        "Inside the window the client picks a new slot via the availability engine or cancels; outside it the configured rule shows.",
+        "v1 explicitly states 'no auto-charge'."
+      ],
+      "data_model": [
+        {
+          "entity": "(extends REMINDERS)",
+          "fields": "no new entities; reuses the availability engine to move and the CancellationPolicy to enforce the window",
+          "notes": "Inside-window move/cancel frees the slot (emits slot-freed for WAITLIST); no charge/deposit in v1; audited."
+        }
+      ],
+      "refs": {
+        "req": [
+          "REQ-BOOK-3"
+        ]
+      },
+      "depends_on": [
+        "PRD-02/REMINDERS"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Self-service reschedule / cancel within policy",
           "note": "Behaviour: the client can self-reschedule or cancel within the cancellation window. Requirements: enforce CancellationPolicy.window_hours server-side — inside the window reuse the availability engine to move, or cancel and free the slot (emits the slot-freed event for WAITLIST); outside the window apply the configured rule (block/flag/message) with NO charge or deposit in v1; all actions audited."
-        },
+        }
+      ]
+    },
+    {
+      "key": "REMINDERS-POLICY",
+      "title": "Reminders: cancellation / no-show policy settings",
+      "as_a": "owner / manager",
+      "i_want": "to configure the cancellation window and no-show rule",
+      "so_that": "self-service reschedule/cancel and no-show handling follow our policy",
+      "context": "Plainly: the per-tenant settings that define the cancellation window, the no-show rule, and whether self-service reschedule is allowed. Where it fits: a follow-up to the reminders basic scheduling & dispatch (PRD-02/REMINDERS) that adds the policy these behaviours read. It is the source of truth the self-service endpoints (PRD-02/REMINDERS-SELF-SERVICE) enforce and is surfaced to the client at confirm time (ties to PRD-02/BOOKING-WIZARD). There is no auto-charge in v1. It sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "A per-tenant settings screen configures window_hours, no_show_rule and allow_self_reschedule.",
+        "Settings validate and persist.",
+        "The plain-language 'no auto-charge in v1' note is surfaced.",
+        "The policy is shown to the client at confirm time and is the source of truth the self-service endpoints enforce."
+      ],
+      "detail": [
+        "The basic story schedules reminders; this follow-up owns the cancellation/no-show policy those self-service behaviours depend on. A per-tenant settings screen configures the cancellation window_hours, the no_show_rule, and allow_self_reschedule.",
+        "Settings validate and persist, and surface the plain-language 'no auto-charge in v1' note so the owner understands there is no deposit/charge mechanism in this version.",
+        "The policy is shown to the client at confirm time (ties to PRD-02/BOOKING-WIZARD's confirmation step) and is the single source of truth the self-service reschedule/cancel endpoints (PRD-02/REMINDERS-SELF-SERVICE) enforce."
+      ],
+      "ui_spec": [
+        "Settings: cancellation/no-show policy (window hours, rule, allow self-reschedule); v1 states 'no auto-charge'.",
+        "The policy is shown to the client at confirm time (booking-wizard.png confirmation step).",
+        "Validated and persisted per tenant."
+      ],
+      "data_model": [
+        {
+          "entity": "CancellationPolicy",
+          "fields": "tenant_id, window_hours, no_show_rule, allow_self_reschedule(bool)",
+          "notes": "No deposit/auto-charge in v1; governs the self-service reschedule/cancel boundary (PRD-02/REMINDERS-SELF-SERVICE)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-02/REMINDERS"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Cancellation / no-show policy settings UI",
           "note": "Behaviour: a per-tenant settings screen for window_hours, no_show_rule and allow_self_reschedule. Requirements: validate and persist; surface the plain-language 'no auto-charge in v1' note; the policy is shown to the client at confirm time (ties to BOOKING-WIZARD's confirmation step) and is the source of truth the self-service endpoints enforce."
@@ -495,7 +1303,7 @@
     },
     {
       "key": "WAITLIST",
-      "title": "Waitlist & cancellation backfill",
+      "title": "Waitlist — basic entries & management",
       "context": "The waitlist keeps the diary full by auto-offering a freed slot when a booking cancels or no-shows. It sits late in Reception (PRD-02), built on top of reminders (PRD-02/REMINDERS, which emit the slot-freed event) and the calendar (PRD-02/CALENDAR, whose utilisation data surfaces the quiet windows to fill). It is the demand-side counterpart to the lifecycle and reminder flow: where those free a slot, the waitlist matches a waiting client to it — always re-running the same scope/resource availability checks so a backfilled booking still honours the rules. As front desk, I want a waitlist that auto-offers a freed slot when an appointment cancels or no-shows, so that we keep the diary full.  Clients can join a waitlist; cancellations/no-shows auto-offer the freed slot to fill quiet windows.",
       "as_a": "front desk",
       "i_want": "a waitlist that auto-offers a freed slot when an appointment cancels or no-shows",
@@ -545,26 +1353,158 @@
       ],
       "tasks": [
         {
-          "title": "Waitlist entry CRUD (client + service + window + priority)",
+          "title": "WaitlistEntry CRUD (client + service + window + priority)",
           "note": "Behaviour: add/view/remove a WaitlistEntry capturing client, service, desired date/time window and priority. Requirements: tenant-scoped; an entry is the demand record matched against freed slots; priority + FIFO ordering decides who is offered first; status defaults to waiting."
         },
         {
+          "title": "Minimal waitlist management list",
+          "note": "Behaviour: a screen reachable from the Schedule to add and view waiting clients for a service/window. Requirements: lists current waiting entries with their service/window/priority; the auto-matching backfill engine, the offer lifecycle and the cancel/no-show backfill prompt are follow-ups."
+        }
+      ]
+    },
+    {
+      "key": "WAITLIST-MATCHING",
+      "title": "Waitlist: matching / backfill engine on slot-freed",
+      "as_a": "front desk",
+      "i_want": "a freed slot to be auto-offered to the best matching waiting client",
+      "so_that": "cancellations and no-shows are filled without manual chasing",
+      "context": "Plainly: the engine that, when an appointment cancels or no-shows, automatically offers the freed slot to the best-matching waiting client. Where it fits: a follow-up to the waitlist basic entries & management (PRD-02/WAITLIST) that adds the demand-side matching on top of the entry list. It subscribes to the slot-freed event from reminders/lifecycle (PRD-02/REMINDERS, PRD-02/LIFECYCLE) and re-uses the same scope-aware availability engine so a backfilled booking still honours the rules. It sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "When a booking cancels or no-shows, the freed slot is auto-offered to the best matching waiting entry.",
+        "Matching subscribes to the slot-freed event and matches by service + window + scope/resource feasibility via the same availability engine.",
+        "An offer is created with an expiry and dispatched (PRD-07).",
+        "Matching is idempotent and tenant-scoped."
+      ],
+      "detail": [
+        "The basic story captures waiting clients; this follow-up adds the engine that matches them to freed slots. When a booking cancels or no-shows, the freed slot is automatically offered to the best matching waiting entry (priority + FIFO).",
+        "Matching subscribes to the slot-freed event (from PRD-02/REMINDERS and PRD-02/LIFECYCLE) and matches on service + desired window + scope/resource feasibility via the SAME availability engine the desk and online booking use — so a backfilled booking still honours scope and resource rules.",
+        "It creates an offer with an expires_at and dispatches it (PRD-07). The matching is idempotent and tenant-scoped so a single slot-freed event never produces duplicate offers."
+      ],
+      "ui_spec": [
+        "No new primary screen — the engine reacts to slot-freed events behind the scenes.",
+        "A dispatched offer is delivered via PRD-07; the offer state appears on the waitlist management list.",
+        "Matching respects the same scope/resource feasibility as the booking engine."
+      ],
+      "data_model": [
+        {
+          "entity": "(extends WAITLIST)",
+          "fields": "WaitlistEntry.status → offered; offered_at, expires_at set on match",
+          "notes": "Subscribes to the slot-freed event (REMINDERS/LIFECYCLE); matches via the shared availability engine; idempotent."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-02/WAITLIST"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
           "title": "Matching / backfill engine on slot-freed",
           "note": "Behaviour: when a booking cancels or no-shows the freed slot is auto-offered to the best matching waiting entry. Requirements: subscribe to the slot-freed event (from REMINDERS/LIFECYCLE); match by service + window + scope/resource feasibility via the SAME availability engine; create an offer with expires_at and dispatch it (PRD-07); idempotent and tenant-scoped."
-        },
+        }
+      ]
+    },
+    {
+      "key": "WAITLIST-OFFER-LIFECYCLE",
+      "title": "Waitlist: offer lifecycle (offered → accepted / expired)",
+      "as_a": "front desk",
+      "i_want": "an offered slot to be held briefly then accepted or rolled on to the next client",
+      "so_that": "a freed slot is filled fairly and never left in limbo",
+      "context": "Plainly: the lifecycle of a waitlist offer — it holds the slot for a short window, then either books it (accepted) or rolls on to the next matching client (expired). Where it fits: a follow-up to the waitlist basic entries & management (PRD-02/WAITLIST) that adds offer state handling on top of the matching engine (PRD-02/WAITLIST-MATCHING). Accepting books via the same scope/conflict checks as any booking. It sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "An offer holds the slot for a short window, then accepts or rolls on.",
+        "On accept: book via the create endpoint with full scope/conflict checks and mark accepted.",
+        "On expiry: mark expired and roll the offer to the next matching entry.",
+        "Every state (offered/accepted/expired, with timestamps) is tracked per entry."
+      ],
+      "detail": [
+        "The matching engine creates an offer; this follow-up runs its lifecycle. An offer holds the freed slot for a short window so the offered client has time to respond, then resolves one of two ways.",
+        "On accept, the slot is booked via the create endpoint with full scope/conflict checks (so a backfilled booking still honours the rules) and the entry is marked accepted. On expiry, the entry is marked expired and the offer rolls on to the next matching waiting entry.",
+        "Every state — offered, accepted, expired, with timestamps — is tracked per entry so the desk can see who was offered what and when, giving a clear audit of how a slot was filled."
+      ],
+      "ui_spec": [
+        "The waitlist management list shows each entry's live offer state (offered / accepted / expired) with timestamps.",
+        "An accepted offer creates the booking; an expired offer rolls to the next entry.",
+        "The desk can see who was offered what and when."
+      ],
+      "data_model": [
+        {
+          "entity": "(extends WAITLIST)",
+          "fields": "WaitlistEntry.status transitions offered → accepted | expired; offered_at, expires_at tracked",
+          "notes": "Accept books via the shared create endpoint with full scope/conflict checks; expiry rolls to the next matching entry."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-02/WAITLIST",
+        "PRD-02/WAITLIST-MATCHING"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Offer lifecycle: offered → accepted / expired",
           "note": "Behaviour: an offer holds the slot for a short window, then accepts or rolls on. Requirements: on accept, book via the create endpoint with full scope/conflict checks and mark accepted; on expiry, mark expired and roll the offer to the next matching entry; every state (offered/accepted/expired, with timestamps) is tracked per entry so the desk can see who was offered what and when."
-        },
+        }
+      ]
+    },
+    {
+      "key": "WAITLIST-BACKFILL-PROMPT",
+      "title": "Waitlist: cancel/no-show backfill prompt",
+      "as_a": "front desk",
+      "i_want": "a prompt to offer a slot to the waitlist when an appointment cancels or no-shows",
+      "so_that": "I can trigger backfill at the moment a slot opens",
+      "context": "Plainly: the prompt that appears on the Schedule when an appointment is cancelled or no-showed, offering to fill the slot from the waitlist. Where it fits: a follow-up to the waitlist basic entries & management (PRD-02/WAITLIST) that adds the desk-facing trigger on top of the matching engine (PRD-02/WAITLIST-MATCHING). It surfaces the matching engine and quiet-window fill suggestions from the calendar's utilisation data. It sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "A prompt appears when an appointment is cancelled/no-showed ('offer this slot to the waitlist').",
+        "The backfill prompt triggers the matching engine.",
+        "Quiet-window fill suggestions surface from utilisation data.",
+        "The prompt is reachable from the Schedule."
+      ],
+      "detail": [
+        "The matching engine runs on slot-freed events; this follow-up gives the desk an explicit trigger. When an appointment is cancelled or no-showed, a prompt appears on the Schedule offering to fill the freed slot from the waitlist.",
+        "Acting on the prompt triggers the matching engine (PRD-02/WAITLIST-MATCHING) to offer the slot to the best matching waiting entry. Quiet-window fill suggestions also surface from the calendar's utilisation data (the amber cells / quiet-windows panel).",
+        "The prompt is reachable from the Schedule so the desk acts at the moment a slot opens, keeping the diary full."
+      ],
+      "ui_spec": [
+        "Prototype: Schedule (schedule.png) — a backfill prompt when an appointment cancels/no-shows ('offer this slot to the waitlist'), and quiet-window fill suggestions from utilisation data.",
+        "The prompt triggers the matching engine; reachable from the Schedule.",
+        "Quiet-window suggestions tie to the calendar utilisation data."
+      ],
+      "data_model": [
         {
-          "title": "Waitlist management UI + cancel/no-show backfill prompt",
-          "note": "Behaviour: a screen to add/view waiting clients for a service/window and see offered/accepted/expired status, plus a prompt when an appointment is cancelled/no-showed ('offer this slot to the waitlist'). Requirements: the backfill prompt triggers the matching engine; the management list reflects live offer states; reachable from the Schedule."
+          "entity": "(extends WAITLIST)",
+          "fields": "no new entities; the prompt triggers WAITLIST-MATCHING on a cancel/no-show",
+          "notes": "Reads calendar utilisation for quiet-window suggestions; offers via the matching engine."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-02/WAITLIST",
+        "PRD-02/WAITLIST-MATCHING"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Cancel/no-show backfill prompt + quiet-window suggestions",
+          "note": "Behaviour: a prompt when an appointment is cancelled/no-showed ('offer this slot to the waitlist'), plus quiet-window fill suggestions from utilisation data. Requirements: the backfill prompt triggers the matching engine; the suggestions read the calendar's utilisation data; reachable from the Schedule."
         }
       ]
     },
     {
       "key": "WALKINS",
-      "title": "Walk-ins, same-day add-ons & resources",
+      "title": "Walk-ins — basic gate-respecting booking",
       "context": "Walk-ins and same-day add-ons let Reception (PRD-02) capture opportunistic demand at the desk. The story sits on top of the calendar (PRD-02/CALENDAR) — reusing its availability engine and room/chair/device resources — and the visit lifecycle, and is deliberately gate-respecting: nothing about a walk-in bypasses scope-of-practice or the compliance gates.  In the flow it complements scheduled and online bookings: an injectable walk-in still feeds the consult gate (PRD-02/CONSULT-GATE) and the Intake/Consent step (PRD-03) before any treatment, exactly as a planned injectable booking would.  As front desk, I want to add walk-ins and same-day add-ons against available rooms/chairs/devices, so that we capture opportunistic demand without breaking the rules or double-booking resources.  Walk-ins and same-day add-ons are supported but gate-respecting (an injectable walk-in still needs a consult first); room/chair/device resources are scheduled with conflict-flagging.",
       "as_a": "front desk",
       "i_want": "to add walk-ins and same-day add-ons against available rooms/chairs/devices",
@@ -617,16 +1557,142 @@
       "tasks": [
         {
           "title": "Walk-in booking flow (gate-respecting, source=walkin)",
-          "note": "Behaviour: a quick-add flow from the Schedule that attaches an existing or creates a new client, picks a free practitioner+resource via the availability engine, and books source=walkin. Requirements: for an S4 (Schedule 4 prescription-only medicine) service the resulting appointment still carries the consult (the assessment appointment where suitability is established and an S4 prescription can be written) gate (consult_id null ⇒ charting blocked) and still requires consent — a walk-in never bypasses C1/C5; the Appointment is identical to a desk/online booking but tagged source=walkin."
-        },
+          "note": "Behaviour: a quick-add flow from the Schedule that attaches an existing or creates a new client, picks a free practitioner+resource via the availability engine, and books source=walkin. Requirements: for an S4 (Schedule 4 prescription-only medicine) service the resulting appointment still carries the consult (the assessment appointment where suitability is established and an S4 prescription can be written) gate (consult_id null ⇒ charting blocked) and still requires consent — a walk-in never bypasses C1/C5; the Appointment is identical to a desk/online booking but tagged source=walkin. Same-day add-ons, resource conflict-flagging and VIP/first-time tags are follow-ups."
+        }
+      ]
+    },
+    {
+      "key": "WALKINS-ADDON",
+      "title": "Walk-ins: same-day add-on to an in-progress visit",
+      "as_a": "front desk",
+      "i_want": "to append an extra service to a visit that's already underway",
+      "so_that": "we can treat opportunistically without starting a new booking",
+      "context": "Plainly: adding an extra service to a client whose visit is already in progress. Where it fits: a follow-up to the walk-ins basic gate-respecting booking (PRD-02/WALKINS) that adds same-day add-ons on top of the walk-in flow. It re-uses the calendar (PRD-02/CALENDAR) availability engine and respects the same scope and compliance gates — an S4 (Schedule 4 prescription-only medicine) add-on still needs a consult and consent. It sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "An extra service can be appended to a visit already underway.",
+        "The add-on must land on a free resource for its whole block incl. buffers.",
+        "It inherits the visit's client and respects the same scope/gate rules.",
+        "An S4 add-on still needs consult + consent."
+      ],
+      "detail": [
+        "The basic walk-in flow books a new appointment; this follow-up lets the desk append an additional service to a visit already in progress without re-keying the client.",
+        "The add-on must land on a free resource for its whole block including buffers (using the same availability engine), and inherits the in-progress visit's client.",
+        "It respects the same scope and compliance gates as any booking: an S4 add-on still carries the consult gate (charting blocked until a consult is linked) and still requires consent — an add-on never bypasses the rules."
+      ],
+      "ui_spec": [
+        "Prototype: Schedule (schedule.png) — append a service to an in-progress visit from the appointment/visit context.",
+        "The add-on picks a free resource for its whole block incl. buffers and inherits the visit's client.",
+        "An S4 add-on shows it still needs consult + consent before charting."
+      ],
+      "data_model": [
+        {
+          "entity": "Appointment (extends WALKINS)",
+          "fields": "an additional Appointment line on the same visit/client; source=walkin",
+          "notes": "Lands on a free Resource for the whole block incl. buffers; S4 add-on still requires consult_id + consent."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-02/WALKINS"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Same-day add-on to an in-progress visit",
           "note": "Behaviour: append an additional service to a visit already underway. Requirements: the add-on must land on a free resource for its whole block incl. buffers; it inherits the visit's client and respects the same scope/gate rules; an S4 add-on still needs consult + consent."
-        },
+        }
+      ]
+    },
+    {
+      "key": "WALKINS-CONFLICT",
+      "title": "Walk-ins: resource conflict-flagging before confirm",
+      "as_a": "front desk",
+      "i_want": "a walk-in or add-on to flag any resource clash before I confirm it",
+      "so_that": "we never double-book a room, chair or device",
+      "context": "Plainly: checking that the chosen room/chair/device is free for the whole block before a walk-in or add-on is confirmed, and flagging any clash inline. Where it fits: a follow-up to the walk-ins basic gate-respecting booking (PRD-02/WALKINS) that adds resource conflict-flagging on top of the walk-in/add-on flow. It re-uses the calendar's resource model and feeds utilisation. It sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "Before a walk-in/add-on confirms, the chosen room/chair/device is verified free for the whole block including buffers.",
+        "Any conflict is surfaced inline.",
+        "Confirmation is blocked until the conflict is resolved.",
+        "The check feeds resource utilisation; conflicts are visually unmistakable."
+      ],
+      "detail": [
+        "The basic walk-in flow books against an available resource; this follow-up adds explicit conflict-flagging at the confirm step. Before a walk-in or same-day add-on confirms, the chosen room/chair/device is verified free for the whole block including buffers.",
+        "Any conflict is surfaced inline and confirmation is blocked until it is resolved, so the desk can't accidentally double-book a resource under time pressure.",
+        "The check feeds resource utilisation and the conflicts are rendered visually unmistakably, consistent with how the calendar flags clashes."
+      ],
+      "ui_spec": [
+        "Prototype: Schedule (schedule.png) — resource conflicts flagged before confirm on a walk-in/add-on.",
+        "The confirm action is blocked while a conflict stands; the clash is shown inline.",
+        "The check feeds resource utilisation."
+      ],
+      "data_model": [
+        {
+          "entity": "Resource (ref, extends WALKINS)",
+          "fields": "free/busy for the block incl. buffers",
+          "notes": "Conflict-checked before a walk-in/add-on confirms; surfaces utilisation."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-02/WALKINS"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Resource conflict-flagging before confirm",
           "note": "Behaviour: before a walk-in/add-on confirms, verify the chosen room/chair/device is free for the whole block including buffers and surface any conflict inline. Requirements: confirmation is blocked until the conflict is resolved; the check feeds resource utilisation; conflicts are visually unmistakable."
-        },
+        }
+      ]
+    },
+    {
+      "key": "WALKINS-TAGS",
+      "title": "Walk-ins: VIP / first-time tags & distinct rendering",
+      "as_a": "front desk",
+      "i_want": "VIP and first-time tags on appointments and walk-in blocks rendered distinctly",
+      "so_that": "the team spots walk-ins and special clients at a glance",
+      "context": "Plainly: appointment tags (VIP, first-time) set at booking, and rendering walk-in blocks distinctly on the calendar with a quick-add affordance. Where it fits: a follow-up to the walk-ins basic gate-respecting booking (PRD-02/WALKINS) that adds tagging and distinct rendering on top of the walk-in flow. It re-uses the existing move/cancel modal and the calendar block rendering. It sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "Appointment tags[] (vip, first_time) can be set at booking.",
+        "Walk-in blocks render distinctly (e.g. 'Walk-in NEW') with a quick-add affordance from an open/quiet cell.",
+        "Tags render on the calendar block and on the appointment.",
+        "The existing move/cancel modal is reused and the conflict warning shows before confirmation."
+      ],
+      "detail": [
+        "The basic walk-in flow creates the appointment; this follow-up adds the visual signal. Appointments can carry tags[] (vip, first_time) set at booking, and walk-in blocks render distinctly on the calendar (e.g. 'Walk-in NEW') with a quick-add affordance from an open/quiet cell.",
+        "Tags render both on the calendar block and on the appointment record so the team spots a VIP or first-time client and any walk-in at a glance.",
+        "It reuses the existing move/cancel modal, and the conflict warning (PRD-02/WALKINS-CONFLICT) still shows before confirmation — this story only adds the tagging and distinct rendering."
+      ],
+      "ui_spec": [
+        "Prototype: Schedule (schedule.png) — a 'Walk-in NEW · Skin' block rendered distinctly; VIP / first-time tags on the appointment.",
+        "A quick-add affordance from an open/quiet cell; tags render on the block and the appointment.",
+        "Reuses the move/cancel modal; the conflict warning shows before confirm."
+      ],
+      "data_model": [
+        {
+          "entity": "Appointment (extends WALKINS)",
+          "fields": "tags[] (vip|first_time)",
+          "notes": "Tags set at booking; render on the calendar block and the appointment; walk-in blocks render distinctly."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-02/WALKINS"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "VIP / first-time tags + distinct walk-in rendering",
           "note": "Behaviour: support appointment tags[] (vip, first_time) set at booking and render walk-in blocks distinctly (e.g. 'Walk-in NEW') with a quick-add affordance from an open/quiet cell. Requirements: tags render on the calendar block and on the appointment; reuse the existing move/cancel modal; the conflict warning shows before confirmation."
@@ -635,7 +1701,7 @@
     },
     {
       "key": "CLIENT-360",
-      "title": "Client 360° profile",
+      "title": "Client 360° profile — basic aggregation & header",
       "context": "The Client 360 profile is the single record everything in Reception (PRD-02) hangs off — the CRM (client relationship management) view any staff member opens to see one client whole. It builds on the core client record from Foundations (PRD-01/CLIENT-CORE) and aggregates data owned by the consent (PRD-03), clinical (PRD-04/05), payments (PRD-06) and compliance (PRD-11) modules. It is a read aggregation, not a source of truth: this story composes and presents the picture (with the at-a-glance gate chips a clinician reads before charting), while each underlying part stays owned by its module; the directory story (PRD-02/CLIENT-DIR) is how staff find their way into it.  Any staff member can open a client's full profile: history, contacts, medical flags, consents, photos, memberships, balances, comms and complaints.",
       "as_a": "staff member",
       "i_want": "a single 360° client profile pulling together history, medical flags, consents, photos, memberships, balances and comms",
@@ -694,25 +1760,154 @@
         },
         {
           "title": "Profile header: compliance/age chips + quick actions",
-          "note": "Behaviour: the header shows avatar, name, member/VIP tag and demographics, with chips for Consent current / Image use / Balance / Allergy / under-18 cooling-off (the mandatory wait before a cosmetic procedure can proceed), plus Open chart and Checkout quick actions. Requirements: chips are driven by the gate state and are the at-a-glance read a clinician makes before charting; Open chart is hidden unless the role has chart capability; the Balance chip honours .fin (owner-only)."
-        },
+          "note": "Behaviour: the header shows avatar, name, member/VIP tag and demographics, with chips for Consent current / Image use / Balance / Allergy / under-18 cooling-off (the mandatory wait before a cosmetic procedure can proceed), plus Open chart and Checkout quick actions. Requirements: chips are driven by the gate state and are the at-a-glance read a clinician makes before charting; Open chart is hidden unless the role has chart capability; the Balance chip honours .fin (owner-only). The Overview, clinical and commercial tabs are follow-ups."
+        }
+      ]
+    },
+    {
+      "key": "CLIENT-360-OVERVIEW",
+      "title": "Client 360: Overview tab (recent activity & at-a-glance)",
+      "as_a": "staff member",
+      "i_want": "an Overview tab with recent activity and an at-a-glance panel on the client profile",
+      "so_that": "I get the gist of a client the moment I open their record",
+      "context": "Plainly: the default tab of the Client 360 profile — recent activity and an at-a-glance panel (visits count, last seen, referred-by). Where it fits: a follow-up to the Client 360 basic aggregation & header (PRD-02/CLIENT-360) that adds the default tab on top of the header. It reads via the aggregation API and honours owner-only financial gating (lifetime spend is .fin-gated). It sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "The Overview tab shows recent activity (treatments, rewards, skin) and an at-a-glance panel (visits count, last seen, referred-by).",
+        "Lifetime spend / money figures in the at-a-glance are gated behind the .fin capability (owner-only).",
+        "It reads via the aggregation API and deep-links into the relevant record."
+      ],
+      "detail": [
+        "The basic story provides the aggregation API and the header; this follow-up adds the default Overview tab. It shows recent activity (treatments, rewards, skin) and an at-a-glance panel summarising the client — visits count, last seen, referred-by.",
+        "Money figures in the at-a-glance, such as lifetime spend, are gated behind the .fin capability (owner-only) and stripped for non-owner roles, consistent with the platform's financial gating.",
+        "All data is read via the Client 360 aggregation API (this story is presentation, not a new source of truth), and each item deep-links into the relevant underlying record."
+      ],
+      "ui_spec": [
+        "Prototype: Client 360 (client-360.png) — Overview tab: recent activity + at-a-glance (visits, last seen, referred-by); lifetime spend is .fin-gated.",
+        "Money figures hidden for non-owner roles; items deep-link into the relevant record.",
+        "Default tab on opening the profile."
+      ],
+      "data_model": [
         {
-          "title": "Overview tab (recent activity + at-a-glance)",
+          "entity": "(reads CLIENT-360 aggregation)",
+          "fields": "recent activity + at-a-glance (visits, last seen, referred-by, lifetime spend[.fin])",
+          "notes": "Presentation over the aggregation API; lifetime spend gated behind .fin (owner-only)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-02/CLIENT-360"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Overview tab (recent activity + at-a-glance, .fin-gated spend)",
           "note": "Behaviour: the default tab showing recent activity (treatments, rewards, skin) and an at-a-glance panel (visits count, last seen, referred-by). Requirements: lifetime spend / money figures in the at-a-glance are .fin-gated (owner-only); reads via the aggregation API; deep-links into the relevant record."
-        },
+        }
+      ]
+    },
+    {
+      "key": "CLIENT-360-CLINICAL-TABS",
+      "title": "Client 360: clinical & visit tabs (Visits / Treatment plan / Consents & forms)",
+      "as_a": "staff member",
+      "i_want": "tabs for visit history, treatment plan and consents & forms on the client profile",
+      "so_that": "I can review a client's clinical history and consent state in one place",
+      "context": "Plainly: the clinical tabs of the Client 360 profile — visit history, the treatment plan, and consents & forms. Where it fits: a follow-up to the Client 360 basic aggregation & header (PRD-02/CLIENT-360) that adds the clinical tabs on top of the header. Each reads its owning module's data via the aggregation API and respects role-based access control so Reception sees limited clinical info. It sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "Tabs render visit history, the treatment plan, and consents & forms.",
+        "Each reads its owning module's data via the aggregation API.",
+        "RBAC is respected (reception sees limited clinical info, not the full clinical record).",
+        "Tabs deep-link into charting / follow-ups and clinical reads are audited."
+      ],
+      "detail": [
+        "The basic story provides the aggregation API and the header; this follow-up adds the clinical tabs. Tabs render visit history, the treatment plan, and consents & forms.",
+        "Each tab reads its owning module's data (visits, plan, consent/intake) via the Client 360 aggregation API and respects role-based access control (RBAC) — Reception sees limited clinical info, not the full clinical record.",
+        "Tabs deep-link into charting and follow-ups, and every clinical read is audited (C10), consistent with the basic story's audit obligations."
+      ],
+      "ui_spec": [
+        "Prototype: Client 360 (client-360.png) — Visits, Treatment plan, and Consents & forms tabs.",
+        "Each reads its owning module via the aggregation API; reception sees limited clinical info.",
+        "Tabs deep-link into charting / follow-ups; clinical reads audited."
+      ],
+      "data_model": [
+        {
+          "entity": "(reads CLIENT-360 aggregation)",
+          "fields": "Visits, Treatment plan, Consents & forms (owned by PRD-04/05/03)",
+          "notes": "Presentation over the aggregation API; RBAC limits reception's clinical view; reads audited (C10)."
+        }
+      ],
+      "refs": {
+        "compliance": [
+          "C10"
+        ]
+      },
+      "depends_on": [
+        "PRD-02/CLIENT-360"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Clinical & visit tabs (Visits / Treatment plan / Consents & forms)",
           "note": "Behaviour: tabs rendering visit history, the treatment plan, and consents & forms. Requirements: each reads its owning module's data via the aggregation API and respects RBAC (reception sees limited clinical info, not the full clinical record); deep-links into charting / follow-ups; clinical reads are audited."
-        },
+        }
+      ]
+    },
+    {
+      "key": "CLIENT-360-COMMERCIAL-TABS",
+      "title": "Client 360: commercial tabs (Membership & rewards / Billing / Notes & comms)",
+      "as_a": "staff member",
+      "i_want": "tabs for membership & rewards, billing and notes & comms on the client profile",
+      "so_that": "I can see a client's commercial and communication history in one place",
+      "context": "Plainly: the commercial tabs of the Client 360 profile — membership & rewards, billing, and notes & comms. Where it fits: a follow-up to the Client 360 basic aggregation & header (PRD-02/CLIENT-360) that adds the commercial tabs on top of the header. It honours owner-only financial gating: the Billing tab and money figures sit behind the .fin capability, stripped for non-owner roles such as Reception (who may see memberships but no money). It sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "Tabs render membership & rewards, billing, and notes & comms.",
+        "The Billing tab and any money figures are gated behind the .fin capability (owner-only) and stripped for non-owner roles such as Reception (who may see memberships but no money).",
+        "Reads via the aggregation API and deep-links into checkout."
+      ],
+      "detail": [
+        "The basic story provides the aggregation API and the header; this follow-up adds the commercial tabs. Tabs render membership & rewards, billing, and notes & comms.",
+        "Financial gating is the key constraint: the Billing tab and any money figures are gated behind the .fin capability (owner-only) and stripped for non-owner roles — Reception may see memberships but no money figures.",
+        "All data is read via the Client 360 aggregation API, and the commercial tabs deep-link into checkout."
+      ],
+      "ui_spec": [
+        "Prototype: Client 360 (client-360.png) — Membership & rewards, Billing (.fin), and Notes & comms tabs.",
+        "Billing tab and money figures gated behind .fin (owner-only); reception sees memberships but no money.",
+        "Reads via the aggregation API; deep-links into checkout."
+      ],
+      "data_model": [
         {
-          "title": "Commercial tabs (Membership & rewards / Billing / Notes & comms)",
+          "entity": "(reads CLIENT-360 aggregation)",
+          "fields": "Membership & rewards, Billing[.fin], Notes & comms (owned by PRD-06/07)",
+          "notes": "Presentation over the aggregation API; Billing/money gated behind .fin (owner-only)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-02/CLIENT-360"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Commercial tabs (Membership & rewards / Billing[.fin] / Notes & comms)",
           "note": "Behaviour: tabs for membership & rewards, billing, and notes & comms. Requirements: the Billing tab and any money figures are gated behind the .fin capability (owner-only) and stripped for non-owner roles such as Reception (who may see memberships but no money); reads via the aggregation API; deep-links into checkout."
         }
       ]
     },
     {
       "key": "PHOTOS-GALLERY",
-      "title": "Before/after photo gallery (image-use-gated)",
+      "title": "Before/after photo gallery — basic consent-gated view",
       "as_a": "clinician",
       "i_want": "a before/after photo gallery on the client profile that only opens when image-use consent is on file",
       "so_that": "I can review treatment progress without ever exposing photos the client hasn't consented to",
@@ -763,12 +1958,102 @@
         },
         {
           "title": "Signed-URL serving (no local storage)",
-          "note": "Behaviour: serve each thumbnail/full image through a short-lived signed URL (a temporary, expiring link). Requirements: no photo is downloaded, cached or stored on the device (ADR-0009); on a consent-withdrawn event no new signed URLs are issued; URLs expire quickly and are per-view."
-        },
+          "note": "Behaviour: serve each thumbnail/full image through a short-lived signed URL (a temporary, expiring link). Requirements: no photo is downloaded, cached or stored on the device (ADR-0009); on a consent-withdrawn event no new signed URLs are issued; URLs expire quickly and are per-view. The before/after compare grid and the photo-view audit events are follow-ups."
+        }
+      ]
+    },
+    {
+      "key": "PHOTOS-GALLERY-COMPARE",
+      "title": "Before/after photo gallery: compare & grouping UI",
+      "as_a": "clinician",
+      "i_want": "to view before/after pairs side-by-side and grouped by treatment/date",
+      "so_that": "I can read a client's treatment progress at a glance",
+      "context": "Plainly: the gallery's presentation — grouping images by treatment/date and showing before/after pairs side-by-side. Where it fits: a follow-up to the before/after gallery basic consent-gated view (PRD-02/PHOTOS-GALLERY) that adds the compare/grouping presentation on top of the consent-gated, signed-URL photo set. It still renders only when image-use consent is granted (the basic's gate). It sits on the Client 360 profile in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "Before/after pairs can be compared side-by-side and are grouped by treatment/date.",
+        "Pairs are matched on kind(before|after) + treatment_ref.",
+        "There is no download/save affordance.",
+        "It renders only when image-use consent is granted (the basic's gate)."
+      ],
+      "detail": [
+        "The basic story serves the consent-gated photo set via signed URLs; this follow-up adds the presentation a clinician reads. The Photos tab groups images by treatment/date and lets the clinician view before/after pairs side-by-side.",
+        "Pairs are matched on kind(before|after) + treatment_ref so the right before and after sit together, and there is no download/save affordance — images stay served via the basic's short-lived signed URLs.",
+        "It renders only when image-use consent is currently granted, inheriting the basic's consent gate; nothing here weakens the consent or no-local-storage rules."
+      ],
+      "ui_spec": [
+        "Prototype: Client 360 (client-360.png) Photos tab — the before/after gallery grid grouped by treatment/date with side-by-side compare.",
+        "Pairs matched on kind(before|after) + treatment_ref; no download/save affordance.",
+        "Renders only when image-use consent is on file."
+      ],
+      "data_model": [
+        {
+          "entity": "(extends PHOTOS-GALLERY)",
+          "fields": "no new entities; groups the consent-gated GalleryView by treatment_ref/date and pairs kind(before|after)",
+          "notes": "Presentation only; still gated on current image-use consent and served via signed URLs."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-02/PHOTOS-GALLERY"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Before/after compare + grouping UI",
           "note": "Behaviour: a Photos-tab grid that groups images by treatment/date and lets a clinician view before/after pairs side-by-side. Requirements: pairs are matched on kind(before|after) + treatment_ref; no download/save affordance; renders only when consent is granted."
-        },
+        }
+      ]
+    },
+    {
+      "key": "PHOTOS-GALLERY-AUDIT",
+      "title": "Before/after photo gallery: photo-view audit events",
+      "as_a": "compliance officer",
+      "i_want": "every photo view recorded in the audit log",
+      "so_that": "image access is demonstrable to a regulator",
+      "context": "Plainly: writing an audit record every time a clinical photo is viewed in the gallery. Where it fits: a follow-up to the before/after gallery basic consent-gated view (PRD-02/PHOTOS-GALLERY) that adds view-level auditing on top of the consent-gated, signed-URL photo set. It satisfies compliance criteria C10 (audited PII access) and C14 (image-use consent) by making image access demonstrable. It sits on the Client 360 profile in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "Every photo view is recorded (actor, client, photo, at) in the append-only audit stream.",
+        "Image access is demonstrable to a regulator (C10/C14).",
+        "Viewing while consent is withdrawn is impossible by construction (no URL issued by the basic)."
+      ],
+      "detail": [
+        "The basic story serves the consent-gated photo set; this follow-up adds the audit trail over it. Every time a photo is viewed, an AuditEvent (actor, client_id, photo_id, at) is written to the append-only audit stream (ADR-0010).",
+        "This makes image access demonstrable to a regulator (C10/C14) — the clinic can show exactly who viewed which client's photos and when.",
+        "Viewing while consent is withdrawn is impossible by construction (the basic issues no signed URL when consent is withdrawn), so the audit trail only ever records consent-valid views."
+      ],
+      "ui_spec": [
+        "No new screen — auditing is behind the gallery view in the Photos tab (client-360.png).",
+        "Each photo view writes an AuditEvent to the append-only stream.",
+        "No view is possible while consent is withdrawn (no signed URL issued)."
+      ],
+      "data_model": [
+        {
+          "entity": "AuditEvent (ref)",
+          "fields": "actor, client_id, photo_id, at",
+          "notes": "Append-only (ADR-0010); written on every photo view; image access demonstrable (C10/C14)."
+        }
+      ],
+      "refs": {
+        "compliance": [
+          "C10",
+          "C14"
+        ]
+      },
+      "depends_on": [
+        "PRD-02/PHOTOS-GALLERY"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Photo-view audit events (C10/C14)",
           "note": "Behaviour: every time a photo is viewed, record it. Requirements: write an AuditEvent (actor, client_id, photo_id, at) to the append-only stream (ADR-0010) so image access is demonstrable to a regulator; viewing while consent is withdrawn is impossible by construction (no URL issued)."
@@ -777,7 +2062,7 @@
     },
     {
       "key": "CLIENT-DIR",
-      "title": "Client directory: search, filter, merge, soft-delete",
+      "title": "Client directory — basic search & list",
       "context": "The client directory is how the front desk finds anyone fast and keeps the client list clean. It sits in Reception (PRD-02) directly on top of the Client 360 profile (PRD-02/CLIENT-360) — a directory row opens that profile — and powers the global header search across the staff app shell. In the flow it is the entry point into a client record: search and filter find the person, duplicate-merge and audited soft-delete keep the record accurate, and true destruction is left to the retention policy in Foundations (PRD-01/RETENTION) rather than done here. As front desk, I want to search and filter clients, merge duplicates and soft-delete with audit, so that the client list stays accurate and findable.  A searchable client directory with duplicate merge and audited soft-delete keeps the record clean.",
       "as_a": "front desk",
       "i_want": "to search and filter clients, merge duplicates and soft-delete with audit",
@@ -831,25 +2116,160 @@
       "tasks": [
         {
           "title": "Directory search/filter API + index",
-          "note": "Behaviour: a searchable, paginated directory over name/phone/email. Requirements: back it with a search index for fast prefix/fuzzy match; tenant RLS (row-level security); exclude soft-deleted clients from active results; money columns (lifetime) flagged .fin so the UI can gate them (owner-only); the same endpoint powers the global header search."
+          "note": "Behaviour: a searchable, paginated directory over name/phone/email. Requirements: back it with a search index for fast prefix/fuzzy match; tenant RLS (row-level security); exclude soft-deleted clients from active results; money columns (lifetime) flagged .fin so the UI can gate them (owner-only)."
         },
+        {
+          "title": "Clients table (row opens Client 360)",
+          "note": "Behaviour: the Clients screen — a search box and a table (Client / Status / Last visit / Lifetime[.fin] / Membership / Next) where a row opens Client 360. Requirements: the Lifetime column is .fin-gated (owner-only); reads the directory search API. Segment filters, audited soft-delete and the global header search wiring are follow-ups."
+        }
+      ]
+    },
+    {
+      "key": "CLIENT-DIR-SEGMENTS",
+      "title": "Client directory: segment filters (All / Members / At-risk / New)",
+      "as_a": "front desk",
+      "i_want": "to filter the client directory by segment",
+      "so_that": "I can focus on members, at-risk clients or new clients quickly",
+      "context": "Plainly: filter chips on the client directory that narrow it to All / Members / At-risk / New. Where it fits: a follow-up to the client directory basic search & list (PRD-02/CLIENT-DIR) that adds segment filtering on top of the search/list. Segments derive from membership state, recall risk and join date. It sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "Filter chips narrow the directory to All / Members / At-risk / New.",
+        "Segments derive from membership state, recency/recall risk and join date.",
+        "Segments compose with the search query.",
+        "The active segment persists so a refresh keeps it."
+      ],
+      "detail": [
+        "The basic directory provides search and the Clients table; this follow-up adds segment filtering. Filter chips narrow the directory to All / Members / At-risk / New.",
+        "The segments derive from membership state (Members), recency/recall risk (At-risk) and join date (New), so each chip reflects a meaningful operational cut of the client base.",
+        "Segments compose with the active search query, and the active segment persists across a refresh so the desk keeps its filtered view."
+      ],
+      "ui_spec": [
+        "Prototype: Clients (clients.png) — segment filter chips (All / Members / At-risk / New) above the table.",
+        "Segments compose with the search box; the active segment persists across refresh.",
+        "Each segment reflects membership/recall-risk/join-date."
+      ],
+      "data_model": [
+        {
+          "entity": "(extends CLIENT-DIR)",
+          "fields": "no new entities; derives segments from membership state, recall risk and join date",
+          "notes": "Composes with the directory search query; the active segment persists in state."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-02/CLIENT-DIR"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Segment filters (All / Members / At-risk / New)",
           "note": "Behaviour: filter chips that narrow the directory to All / Members / At-risk / New. Requirements: segments derive from membership state, recency/recall risk and join date; compose with the search query; the active segment persists so a refresh keeps it."
-        },
+        }
+      ]
+    },
+    {
+      "key": "CLIENT-DIR-SOFT-DELETE",
+      "title": "Client directory: audited soft-delete",
+      "as_a": "front desk",
+      "i_want": "to soft-delete a client with an audit trail",
+      "so_that": "the active list stays clean without destroying history",
+      "context": "Plainly: removing a client from active views without destroying their history, with an audit entry. Where it fits: a follow-up to the client directory basic search & list (PRD-02/CLIENT-DIR) that adds audited soft-delete on top of the directory. It deliberately never hard-deletes — true destruction is governed by the retention policy in Foundations (PRD-01/RETENTION). It sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "Soft-deleting a client sets deleted_at and writes an audit entry.",
+        "Deleted clients are excluded from search/active lists but retained.",
+        "True destruction is governed by PRD-01 RETENTION only, never here.",
+        "The action is capability-gated."
+      ],
+      "detail": [
+        "The basic directory finds and lists clients; this follow-up adds audited soft-delete to keep the list clean. Soft-deleting a client sets deleted_at and writes an audit entry.",
+        "A soft-deleted client is excluded from search and active lists (the basic already excludes deleted_at rows) but is retained — nothing is destroyed.",
+        "Soft-delete never hard-deletes: true destruction is governed solely by the retention policy in Foundations (PRD-01/RETENTION), respecting the clinic's retention obligations. The action is capability-gated."
+      ],
+      "ui_spec": [
+        "Prototype: Clients (clients.png) — a soft-delete action on a client.",
+        "Deleted clients drop from active views; the action writes an audit entry.",
+        "Capability-gated; never a hard delete."
+      ],
+      "data_model": [
+        {
+          "entity": "Client (extends CLIENT-DIR)",
+          "fields": "deleted_at",
+          "notes": "Soft-delete sets deleted_at and excludes from active views; never hard-deleted (PRD-01 RETENTION governs destruction)."
+        }
+      ],
+      "refs": {
+        "compliance": [
+          "C10"
+        ]
+      },
+      "depends_on": [
+        "PRD-02/CLIENT-DIR"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Soft-delete (audited) + active-view exclusion",
           "note": "Behaviour: soft-deleting a client removes them from active views without destroying history. Requirements: set deleted_at and write an audit entry; deleted clients are excluded from search/active lists but retained (true destruction is governed by PRD-01 RETENTION only, never here); capability-gated."
-        },
+        }
+      ]
+    },
+    {
+      "key": "CLIENT-DIR-HEADER-SEARCH",
+      "title": "Client directory: global header search wiring",
+      "as_a": "front desk",
+      "i_want": "the global header search to jump straight to a client from anywhere",
+      "so_that": "I can find a client without navigating to the directory first",
+      "context": "Plainly: wiring the staff app shell's global header search box to the client directory so it jumps straight to a client from any screen. Where it fits: a follow-up to the client directory basic search & list (PRD-02/CLIENT-DIR) that surfaces the directory search through the global header. It reuses the basic's directory search API and deep-links to the matched Client 360. It sits in Reception (PRD-02) but is reachable across the whole staff shell.",
+      "notes": "",
+      "acceptance": [
+        "The global header search jumps straight to a client from anywhere in the shell.",
+        "It reads the same directory API as the Clients screen.",
+        "It deep-links to the matched Client 360.",
+        "Soft-deleted clients are excluded (inherited from the basic search)."
+      ],
+      "detail": [
+        "The basic directory provides the search API and the Clients screen; this follow-up surfaces that search through the staff app shell's global header so the desk can find a client from any screen without first navigating to the directory.",
+        "The header search reads the SAME directory search API as the Clients screen (no separate index), so results are consistent and soft-deleted clients are excluded.",
+        "A match deep-links straight to the client's Client 360 profile, making client lookup a one-step action from anywhere in the shell."
+      ],
+      "ui_spec": [
+        "Prototype: the global header search ('Search clients, appointments, invoices…') jumps straight to a client.",
+        "Reads the same directory API as the Clients screen; deep-links to the matched Client 360.",
+        "Reachable from anywhere in the staff shell."
+      ],
+      "data_model": [
         {
-          "title": "Clients table + global header search wiring",
-          "note": "Behaviour: the Clients screen — search box, segment chips and a table (Client / Status / Last visit / Lifetime[.fin] / Membership / Next) where a row opens Client 360 — plus the global header search that jumps straight to a client from anywhere in the shell. Requirements: the Lifetime column is .fin-gated (owner-only); the header search reads the same directory API and deep-links to the matched Client 360."
+          "entity": "(reuses CLIENT-DIR)",
+          "fields": "no new entities; the header search calls the directory search API",
+          "notes": "Same endpoint/index as the Clients screen; deep-links to Client 360; excludes soft-deleted clients."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-02/CLIENT-DIR"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Global header search wiring (deep-link to Client 360)",
+          "note": "Behaviour: the global header search jumps straight to a client from anywhere in the shell. Requirements: the header search reads the same directory API as the Clients screen and deep-links to the matched Client 360; soft-deleted clients are excluded (inherited from the basic search)."
         }
       ]
     },
     {
       "key": "CLIENT-MERGE",
-      "title": "Duplicate detection & client merge (audited, history-preserving)",
+      "title": "Client merge — basic duplicate detection & review",
       "as_a": "front desk",
       "i_want": "to find duplicate client records and merge them into one without losing any history",
       "so_that": "a client has a single accurate record and no visit, consent or invoice is orphaned",
@@ -895,12 +2315,97 @@
       "tasks": [
         {
           "title": "Duplicate detection heuristics + candidate review",
-          "note": "Behaviour: surface candidate duplicate pairs for the desk to review. Requirements: score pairs on name / date-of-birth / phone / email match heuristics; present the two records side-by-side with matching fields highlighted; a merge is always staff-confirmed, never automatic; tenant-scoped."
-        },
+          "note": "Behaviour: surface candidate duplicate pairs for the desk to review. Requirements: score pairs on name / date-of-birth / phone / email match heuristics; present the two records side-by-side with matching fields highlighted; a merge is always staff-confirmed, never automatic; tenant-scoped. The merge transaction and the confirmation/retirement UI are follow-ups."
+        }
+      ]
+    },
+    {
+      "key": "CLIENT-MERGE-TRANSACTION",
+      "title": "Client merge: re-point all child records + MergeLog",
+      "as_a": "front desk",
+      "i_want": "merging two clients to move all their history onto one surviving record",
+      "so_that": "no visit, consent or invoice is orphaned when duplicates are merged",
+      "context": "Plainly: the transaction that actually merges two client records — nominating a surviving primary and re-pointing every child record onto it, with an audit log. Where it fits: a follow-up to the client merge basic duplicate detection & review (PRD-02/CLIENT-MERGE) that adds the merge engine on top of the candidate review. Because a merge moves clinical and consent records between identities it is server-enforced in one transaction, capability-gated and audited; it never hard-deletes (PRD-01/RETENTION governs destruction). It sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "A merge nominates a surviving primary and re-points ALL child records (appointments/visits, consents, image-consent, photos, invoices, memberships, rewards, jobs) to it, preserving history.",
+        "A MergeLog records primary_id, merged_id, actor, timestamp and per-type re-pointed counts (audited, reversible reference).",
+        "The merge is server-enforced in one transaction and capability-gated.",
+        "Nothing is hard-deleted (PRD-01/RETENTION governs destruction)."
+      ],
+      "detail": [
+        "The basic story surfaces candidate duplicate pairs; this follow-up runs the merge. A confirmed merge nominates a surviving primary and a merged record, then re-homes everything.",
+        "The merge runs as a single server-side transaction that re-points EVERY child record — appointments/visits, consents and image-consent, photos, invoices, memberships, rewards and follow-up jobs — from the merged client onto the primary, preserving all history; nothing is deleted.",
+        "It writes a MergeLog capturing primary_id, merged_id, actor, timestamp and the counts re-pointed per type, giving an audited, reversible reference. The merged identity is retired but its history lives on under the primary (PRD-01/RETENTION governs any true destruction). The action is capability-gated."
+      ],
+      "ui_spec": [
+        "Prototype: Clients (clients.png) — the merge runs from the confirmed candidate pair.",
+        "The merge re-points all child records onto the surviving primary in one transaction.",
+        "A MergeLog entry is written for audit/reversal reference."
+      ],
+      "data_model": [
+        {
+          "entity": "MergeLog",
+          "fields": "id, tenant_id, primary_id, merged_id, at, actor_id, repointed_counts(json)",
+          "notes": "Audited; merge re-points child records to the primary and preserves history; reversible reference (never a hard delete)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-02/CLIENT-MERGE"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Merge transaction: re-point all child records + MergeLog",
           "note": "Behaviour: merging nominates a surviving primary and re-homes everything from the merged record. Requirements: in a single server-side transaction, re-point ALL child records (appointments/visits, consents, image-consent, photos, invoices, memberships, rewards, jobs) to the primary, preserving history; write a MergeLog (primary_id, merged_id, actor, at, repointed_counts per type); server-enforced and capability-gated; nothing is hard-deleted (PRD-01/RETENTION governs destruction)."
-        },
+        }
+      ]
+    },
+    {
+      "key": "CLIENT-MERGE-CONFIRM-UI",
+      "title": "Client merge: confirmation UI & post-merge retirement",
+      "as_a": "front desk",
+      "i_want": "a clear confirmation before a merge and the merged record retired afterwards",
+      "so_that": "I can see exactly what a merge will do and trust it's logged",
+      "context": "Plainly: the confirmation step shown before a merge commits, and the retired state of the merged record afterwards. Where it fits: a follow-up to the client merge basic duplicate detection & review (PRD-02/CLIENT-MERGE) that adds the safety UI around the merge transaction (PRD-02/CLIENT-MERGE-TRANSACTION). It surfaces the per-type counts that will be re-pointed and the MergeLog for audit/reversal reference. It sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "A confirmation step before committing names the surviving primary and lists the per-type counts that will be re-pointed, warning the action is logged.",
+        "After merge the merged identity drops from active views while its history shows under the primary.",
+        "The MergeLog entry is viewable for audit/reversal reference."
+      ],
+      "detail": [
+        "The transaction follow-up does the merge; this follow-up wraps it in a safe, legible UI. A confirmation step before committing names the surviving primary, lists the per-type counts that will be re-pointed, and warns that the action is logged.",
+        "After the merge the merged identity drops from active views while its full history shows under the surviving primary, so the desk sees one clean record.",
+        "The MergeLog entry written by the transaction is viewable for audit and reversal reference, closing the loop on a legible, accountable merge."
+      ],
+      "ui_spec": [
+        "Prototype: Clients (clients.png) — a merge confirmation naming the surviving primary, the per-type re-pointed counts, and a 'this action is logged' warning.",
+        "Post-merge, the merged record is retired from active views; history shows under the primary.",
+        "The MergeLog entry is viewable for audit/reversal reference."
+      ],
+      "data_model": [
+        {
+          "entity": "(reads CLIENT-MERGE-TRANSACTION)",
+          "fields": "no new entities; reads the planned re-point counts pre-commit and the MergeLog post-commit",
+          "notes": "Presentation/safety layer over the merge transaction; the merged identity is retired, not deleted."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-02/CLIENT-MERGE",
+        "PRD-02/CLIENT-MERGE-TRANSACTION"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Merge confirmation UI + post-merge retirement",
           "note": "Behaviour: a confirmation step before committing and a retired state after. Requirements: the confirmation names the surviving primary, lists the per-type counts that will be re-pointed, and warns the action is logged; after merge the merged identity drops from active views while its history shows under the primary; the MergeLog entry is viewable for audit/reversal reference."
@@ -953,7 +2458,7 @@
     },
     {
       "key": "BOOKING-WIZARD",
-      "title": "Staff booking wizard (service → practitioner → time → client → confirm)",
+      "title": "Staff booking wizard — basic scope-aware flow",
       "context": "Built on the calendar (PRD-02/CALENDAR) availability engine and the service catalogue (PRD-02/SERVICE-CATALOGUE), the staff booking wizard is the desk and phone counterpart to online self-booking and the path most bookings in Reception (PRD-02) flow through, applying the same scope rules at the desk as online. In the flow it is front-of-house entry to a visit: a guided service → practitioner → time → client → confirm that creates the booking and kicks off the Intake/Consent send (PRD-03) which must be complete before treatment can start. As front desk, I want a guided booking wizard to create an appointment in a few steps, so that I can book clients quickly at the desk or over the phone.  The prototype's front-desk 'New booking' wizard (service select, slot pick, client attach, confirm) is the staff counterpart to client self-booking, and the entry point most bookings flow through.",
       "as_a": "front desk",
       "i_want": "a guided booking wizard to create an appointment in a few steps",
@@ -1011,30 +2516,115 @@
       ],
       "tasks": [
         {
-          "title": "Step 1 — service selection (generic names, schedule shown)",
-          "note": "Behaviour: service cards showing duration / price / schedule (e.g. 'Anti-wrinkle · 45 min · from $11/unit · S4') with a header note that public names stay generic and injectables offer RN/NP only. Requirements: only bookable services appear; the schedule flag on each card drives the downstream scope filtering; selecting a service advances the stepper."
+          "title": "Steps 1–3 — service → practitioner → slot (scope-aware)",
+          "note": "Behaviour: the wizard's service card step (duration/price/schedule shown), the scope-filtered practitioner step, and the time-slot grid. Requirements: only bookable services appear and the schedule flag drives downstream scope filtering; for an S4 (Schedule 4 prescription-only medicine) service only cleared RN/NP are offered (the canInject gate, C4), with a 'Next available' shortcut; slots = roster ∩ canInject ∩ free room/chair/device incl. buffers from the SAME shared availability engine as CALENDAR/online, taken slots struck through."
         },
         {
-          "title": "Step 2 — practitioner selection (scope-filtered + Next available)",
-          "note": "Behaviour: practitioner cards for the chosen service, with a 'Next available' shortcut. Requirements: for an S4 (Schedule 4 prescription-only medicine) service only cleared RN/NP are offered (the canInject gate, C4); the eligible list comes from the SAME server-side availability engine as CALENDAR/online — no client-side scope logic; 'Next available' resolves to the soonest eligible injector."
-        },
+          "title": "Step 4 (minimal) + Step 5 — attach client, confirm & create (source=desk)",
+          "note": "Behaviour: a minimal client step that attaches an existing client, then a confirm/summary that commits the booking. Requirements: on confirm, call the create endpoint (source=desk) with full server-side scope/conflict checks; the created Appointment is identical to online/walk-in. Inline new-client creation + under-18 + intake/consent send, and the policy display + reminder scheduling, are follow-ups."
+        }
+      ]
+    },
+    {
+      "key": "BOOKING-WIZARD-CLIENT-STEP",
+      "title": "Staff booking wizard: new-client creation, under-18 & intake/consent send",
+      "as_a": "front desk",
+      "i_want": "to create a new client inline at the booking step and send their intake & consent",
+      "so_that": "a first-time client is set up and gated correctly without leaving the wizard",
+      "context": "Plainly: enriching the wizard's client step so the desk can create a new client inline (capturing date of birth), flag under-18, choose the right intake variant, and send the intake + consent links. Where it fits: a follow-up to the staff booking wizard basic scope-aware flow (PRD-02/BOOKING-WIZARD), which only attaches existing clients. New-vs-returning selects the intake variant in Intake & Consent (PRD-03), the under-18 flag feeds cooling-off, and the send kicks off PRD-03 GATING. It sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "An existing client can be attached or a new one created inline capturing DOB.",
+        "Under-18 is derived and stamped from the DOB.",
+        "The Returning/New toggle changes the intake hint (returning = quick re-screen; new = full intake + history + BDD + consent).",
+        "A 'Send intake + consent links now (treatment can't start until complete)' checkbox wires to the PRD-03 intake + consent send."
+      ],
+      "detail": [
+        "The basic wizard attaches an existing client; this follow-up enriches the client step. The desk can attach a returning client or create a new one inline, capturing date of birth and a reason/notes field.",
+        "The Returning/New toggle changes the intake hint (returning gets a quick medical re-screen; new gets full intake + medical history + BDD screen + consent), and under_18 is derived and stamped from the DOB so cooling-off can be enforced downstream.",
+        "A 'Send intake + consent links now (treatment can't start until complete)' checkbox wires to the PRD-03 intake + consent send, tying the booking to the GATING flow that must be complete before treatment."
+      ],
+      "ui_spec": [
+        "Prototype: 'New booking' wizard (booking-wizard.png) step 4 — attach Returning/New client + reason + 'Send intake + consent links now (treatment can't start until complete)'.",
+        "New creates the client inline capturing DOB; the Returning/New toggle changes the intake hint.",
+        "Under-18 derived from DOB; the checkbox triggers the PRD-03 send."
+      ],
+      "data_model": [
         {
-          "title": "Step 3 — time-slot grid (roster ∩ availability)",
-          "note": "Behaviour: a slot grid for the chosen service + practitioner with taken slots struck through. Requirements: slots = roster ∩ canInject ∩ free room/chair/device for the whole block incl. buffers, from the shared engine; over-capacity/taken slots are disabled; the server returns only genuinely bookable slots."
-        },
+          "entity": "Client (ref, extends BOOKING-WIZARD)",
+          "fields": "new|returning, dob/under_18, reason",
+          "notes": "Attach existing or create inline; under-18 flagged; drives intake type + cooling-off; the checkbox triggers the PRD-03 intake + consent send."
+        }
+      ],
+      "refs": {
+        "compliance": [
+          "C6"
+        ]
+      },
+      "depends_on": [
+        "PRD-02/BOOKING-WIZARD"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
-          "title": "Step 4 — client step (attach existing / create inline + under-18)",
+          "title": "Client step: attach existing / create inline + under-18 + intake/consent send",
           "note": "Behaviour: search/attach a returning client or create a new one inline capturing DOB, plus a reason/notes field and a 'Send intake + consent links now (treatment can't start until complete)' checkbox. Requirements: the Returning/New toggle changes the intake hint (returning = quick re-screen; new = full intake + history + BDD + consent); derive and stamp under_18 from DOB; the checkbox wires to the PRD-03 intake + consent send."
-        },
+        }
+      ]
+    },
+    {
+      "key": "BOOKING-WIZARD-CONFIRM",
+      "title": "Staff booking wizard: confirm with policy & reminder scheduling",
+      "as_a": "front desk",
+      "i_want": "the confirm step to show the cancellation policy and schedule a reminder",
+      "so_that": "the client knows the policy and gets a reminder without me doing anything extra",
+      "context": "Plainly: enriching the wizard's confirm step so it shows the cancellation policy and schedules the appointment reminder when the booking is created. Where it fits: a follow-up to the staff booking wizard basic scope-aware flow (PRD-02/BOOKING-WIZARD), whose confirm step just creates the booking. The reminder is scheduled via Comms (PRD-07) and the policy is read from the cancellation policy settings (PRD-02/REMINDERS-POLICY). It sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "The confirm step shows the booking summary and the cancellation policy.",
+        "Confirming schedules the reminder (PRD-07, e.g. 24h prior).",
+        "The confirmation shows 'Reminder scheduled' (and 'Intake + consent sent' when the send was set).",
+        "The created Appointment is identical to online/walk-in."
+      ],
+      "detail": [
+        "The basic wizard's confirm step commits the booking; this follow-up enriches it. The summary now shows the cancellation policy (read from PRD-02/REMINDERS-POLICY) so the client is informed at booking time.",
+        "On confirm, the appointment reminder is scheduled (PRD-07, e.g. 24h prior) and the intake/consent send is triggered if the checkbox was set, with the confirmation showing 'Intake + consent sent · Reminder scheduled'.",
+        "The created Appointment remains identical to an online or walk-in booking — this story only adds the policy display and reminder scheduling to the confirm step."
+      ],
+      "ui_spec": [
+        "Prototype: 'New booking' wizard (booking-wizard.png) step 5 confirm — summary, 'Intake + consent SMS sent', 'Reminder scheduled for 24h prior'.",
+        "The cancellation policy is shown on the summary.",
+        "Confirming schedules the reminder via PRD-07."
+      ],
+      "data_model": [
         {
-          "title": "Step 5 — confirm (policy + create source=desk + reminder)",
-          "note": "Behaviour: a summary that shows the cancellation policy and commits the booking. Requirements: on confirm, call the create endpoint (source=desk) with full server-side scope/conflict checks, schedule the reminder (PRD-07, e.g. 24h prior), and trigger the intake/consent send if the checkbox was set; show 'Intake + consent sent · Reminder scheduled'; the created Appointment is identical to online/walk-in."
+          "entity": "(extends BOOKING-WIZARD)",
+          "fields": "no new entities; the confirm step reads CancellationPolicy and schedules a ReminderSchedule",
+          "notes": "Reminder scheduled via PRD-07; policy from PRD-02/REMINDERS-POLICY; the Appointment is identical to online/walk-in."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-02/BOOKING-WIZARD"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Confirm step: policy display + reminder scheduling",
+          "note": "Behaviour: a summary that shows the cancellation policy and, on confirm, schedules the reminder. Requirements: show the cancellation policy on the summary; schedule the reminder (PRD-07, e.g. 24h prior) and trigger the intake/consent send if the checkbox was set; show 'Intake + consent sent · Reminder scheduled'; the created Appointment is identical to online/walk-in."
         }
       ]
     },
     {
       "key": "SERVICE-CATALOGUE",
-      "title": "Services & treatment-menu admin (durations, eligible roles, S4 flag)",
+      "title": "Services & treatment menu — basic catalogue & S4 flag",
       "context": "The service catalogue is the treatment menu that defines every bookable service, and the single switch that makes booking behave correctly per service. It sits in Reception (PRD-02) and depends on the medicines/products catalogue in Injectables (PRD-04/PRODUCT-CATALOGUE) for the stock a service consumes. It is foundational to the booking surfaces: the S4/non-S4 schedule flag set here is what drives scope-aware booking (the booking wizard and online self-booking only offer cleared injectors), rewards eligibility (PRD-06), and the generic public-page naming (PRD-07) — so this catalogue is read everywhere a service is offered, priced or charted. As owner / manager, I want to manage the menu of services with durations, eligible roles and the S4 flag, so that booking, rewards and the public page all behave correctly per service.  The prototype's clinical Treatment menu + admin services list defines bookable services with durations, eligible roles, and the S4/non-S4 flag that drives scope-aware booking, rewards eligibility and public-page naming.",
       "as_a": "owner / manager",
       "i_want": "to manage the menu of services with durations, eligible roles and the S4 flag",
@@ -1096,13 +2686,154 @@
           "note": "Behaviour: model Service (id/name/public_name/category/duration/buffer/price/schedule/reg_class/unit/eligible_roles[]/requires[]/product_id?). Requirements: the schedule flag (ADR-0014/0021) is the single source of truth; persist with tenant RLS (row-level security); derive rewards_eligible = (schedule != S4 (Schedule 4 prescription-only medicine))."
         },
         {
-          "title": "Schedule flag wired to scope, rewards and public naming",
-          "note": "Behaviour: make the schedule flag actually drive behaviour across the platform. Requirements: the availability engine restricts S4 (Schedule 4 prescription-only medicine) to canInject roles (C4); the rewards engine (PRD-06) is constrained to non-S4 by this flag (C9/REQ-MEMB-7); the public booking config (ONLINE-BOOK) uses the generic name + withholds price for S4; the requires(consult/rx/s4_lot/standard_consent) declaration is read by charting (PRD-05) and the gates; product_id links to PRODUCT-CATALOGUE for stock decrement."
-        },
+          "title": "Minimal services-list admin (create/view)",
+          "note": "Behaviour: a basic services list to create and view services with their duration/buffer, eligible roles, price and schedule flag. Requirements: only the core list + create/view; cross-platform wiring of the schedule flag, the audit + S4-control validation, the treatment-menu card UI, and the Active/Archived/All filter are follow-ups."
+        }
+      ]
+    },
+    {
+      "key": "SERVICE-CATALOGUE-WIRING",
+      "title": "Service catalogue: schedule flag wired to scope, rewards & public naming",
+      "as_a": "owner / manager",
+      "i_want": "the S4 schedule flag to actually drive scope, rewards and public naming across the platform",
+      "so_that": "classifying a service once makes booking, rewards and the public page all behave correctly",
+      "context": "Plainly: making the S4/non-S4 schedule flag the master switch it's meant to be — driving scope-aware booking, rewards eligibility, public-page naming and the charting requirements. Where it fits: a follow-up to the services & treatment menu basic catalogue (PRD-02/SERVICE-CATALOGUE), which defines the flag; this wires it across the platform. It is read by the availability engine (PRD-02/CALENDAR), the rewards engine (PRD-06), the public booking config (PRD-02/ONLINE-BOOK) and charting (PRD-05). It sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "The availability engine restricts S4 to canInject roles (C4).",
+        "The rewards engine (PRD-06) is constrained to non-S4 by this flag (C9/REQ-MEMB-7).",
+        "The public booking config (ONLINE-BOOK) uses the generic name + withholds price for S4 (PRD-07).",
+        "The requires(consult/rx/s4_lot/standard_consent) declaration is read by charting (PRD-05) and the gates; product_id links to PRODUCT-CATALOGUE for stock decrement."
+      ],
+      "detail": [
+        "The basic catalogue defines each Service and its schedule flag; this follow-up makes that single classification (ADR-0014/0021) actually drive behaviour everywhere a service is offered, priced or charted.",
+        "The availability engine restricts S4 (Schedule 4 prescription-only medicine) services to canInject roles (C4 — only cleared injectors); the rewards engine (PRD-06) is constrained to non-S4 by the flag (C9/REQ-MEMB-7 — no earn/redeem/discount on a prescription medicine); the public booking config (PRD-02/ONLINE-BOOK, shared with PRD-07) uses the generic name and withholds price for S4.",
+        "Each service's requires(consult/rx/s4_lot/standard_consent) declaration is read by charting (PRD-05) and the gates, and product_id links to the medicines/products catalogue (PRD-04/PRODUCT-CATALOGUE) so stock decrements on administration."
+      ],
+      "ui_spec": [
+        "No new primary screen — the flag's effects show wherever a service is offered (booking, rewards, public page, charting).",
+        "S4 services are offered only to canInject roles in booking and never earn/redeem rewards.",
+        "The public page uses the generic name and withholds price for S4 (Compounded GLP-1 blocked banner illustrates catalogue-driven enforcement)."
+      ],
+      "data_model": [
         {
-          "title": "Capability-gated catalogue admin + audit",
+          "entity": "Service (extends SERVICE-CATALOGUE)",
+          "fields": "schedule(S4|non-S4), requires(consult|rx|s4_lot|standard_consent), product_id?, rewards_eligible(derived)",
+          "notes": "The schedule flag (ADR-0014/0021) is read by the availability engine, rewards engine, public booking config and charting; product_id links to PRD-04/PRODUCT-CATALOGUE."
+        }
+      ],
+      "refs": {
+        "compliance": [
+          "C4",
+          "C9"
+        ]
+      },
+      "depends_on": [
+        "PRD-02/SERVICE-CATALOGUE"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Wire schedule flag to scope, rewards, public naming and charting",
+          "note": "Behaviour: make the schedule flag actually drive behaviour across the platform. Requirements: the availability engine restricts S4 (Schedule 4 prescription-only medicine) to canInject roles (C4); the rewards engine (PRD-06) is constrained to non-S4 by this flag (C9/REQ-MEMB-7); the public booking config (ONLINE-BOOK) uses the generic name + withholds price for S4; the requires(consult/rx/s4_lot/standard_consent) declaration is read by charting (PRD-05) and the gates; product_id links to PRODUCT-CATALOGUE for stock decrement."
+        }
+      ]
+    },
+    {
+      "key": "SERVICE-CATALOGUE-ADMIN",
+      "title": "Service catalogue: capability-gated admin & audit",
+      "as_a": "owner / manager",
+      "i_want": "catalogue changes gated to prescriber/owner, audited, and S4 reward controls disabled",
+      "so_that": "only authorised staff change the menu and a prescription medicine can never be discounted",
+      "context": "Plainly: the governance around editing the catalogue — capability-gating to prescriber/owner, auditing every change, archiving instead of deleting, and refusing to enable reward/discount controls on S4 services. Where it fits: a follow-up to the services & treatment menu basic catalogue (PRD-02/SERVICE-CATALOGUE) that adds the admin governance on top of create/view. The S4-no-rewards rule (C9) is enforced here. It sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "Add/edit/archive is gated to prescriber/owner capability.",
+        "Every change writes an AuditEvent.",
+        "S4 services cannot have reward/discount controls enabled (validated server-side, C9).",
+        "Archive (never hard-delete) so past bookings keep their service history."
+      ],
+      "detail": [
+        "The basic catalogue allows create/view; this follow-up adds the governance. Add/edit/archive of a service is gated to prescriber (a practitioner authorised to write a prescription) / owner capability, so the menu can't be changed by an unauthorised role.",
+        "Every change writes an AuditEvent so catalogue history is demonstrable, and S4 (Schedule 4 prescription-only medicine) services cannot have reward/discount controls enabled — validated server-side (C9/REQ-MEMB-7: you can't discount or incentivise a prescription medicine).",
+        "Services are archived rather than hard-deleted, so past bookings keep their service history intact."
+      ],
+      "ui_spec": [
+        "Prototype: Clinical → Treatment menu (clinical-menu.png) — Edit/Archive per card, capability-gated admin; changes audited.",
+        "The S4 tag disables reward/discount controls; archive (never delete) retires a service.",
+        "Capability-gated to prescriber/owner."
+      ],
+      "data_model": [
+        {
+          "entity": "AuditEvent (ref)",
+          "fields": "actor, service_id, change, at",
+          "notes": "Catalogue changes audited; admin capability-gated (prescriber/owner); S4 reward controls disabled server-side (C9)."
+        }
+      ],
+      "refs": {
+        "compliance": [
+          "C9"
+        ]
+      },
+      "depends_on": [
+        "PRD-02/SERVICE-CATALOGUE"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Capability-gated catalogue admin + audit + S4-no-rewards validation",
           "note": "Behaviour: add/edit/archive a service from the admin surface. Requirements: gated to prescriber (a practitioner authorised to write a prescription)/owner capability; every change writes an AuditEvent; S4 (Schedule 4 prescription-only medicine) services cannot have reward/discount controls enabled (validated server-side); archive (never hard-delete) so past bookings keep their service history."
-        },
+        }
+      ]
+    },
+    {
+      "key": "SERVICE-CATALOGUE-CARD-UI",
+      "title": "Service catalogue: treatment-menu card UI & status filter",
+      "as_a": "owner / manager",
+      "i_want": "treatment cards that show what each service drives, with an Active/Archived/All filter and add/edit",
+      "so_that": "I can read and manage the menu at a glance",
+      "context": "Plainly: the treatment-menu card UI — each service card showing its details and a 'Charting & compliance this drives' summary — plus the Active/Archived/All filter and add/edit affordances. Where it fits: a follow-up to the services & treatment menu basic catalogue (PRD-02/SERVICE-CATALOGUE) that adds the rich card presentation and status filtering on top of the basic list. It surfaces the schedule flag's downstream effects (PRD-02/SERVICE-CATALOGUE-WIRING) per card. It sits in Reception (PRD-02).",
+      "notes": "",
+      "acceptance": [
+        "Cards per service show category, schedule + reg class, unit, performed-by roles, price, duration, linked stock, adverse-event route, and a 'Charting & compliance this drives' summary.",
+        "S4 cards are visibly tagged and their reward/discount controls disabled.",
+        "A status filter (Active / Archived / All), a '+ Add treatment' action and per-card Edit/Archive are present.",
+        "Filtering reflects each service's archived state; archive retires a service without breaking historical bookings."
+      ],
+      "detail": [
+        "The basic catalogue shows a minimal list; this follow-up adds the rich treatment-menu card UI. Each card shows category, schedule + regulatory class, unit, performed-by roles, price, duration, linked stock, adverse-event route, and a 'Charting & compliance this drives' summary (synchronous consult · individual S4 script · batch-lot select · standard consent · rewards-eligible vs S4 'not rewards-eligible').",
+        "S4 (Schedule 4 prescription-only medicine) cards are visibly tagged and their reward/discount controls disabled, surfacing the catalogue-driven enforcement to the owner.",
+        "A status filter (Active / Archived / All), a '+ Add treatment' action and per-card Edit/Archive complete the management surface; filtering reflects each service's archived state and archive retires a service without breaking historical bookings."
+      ],
+      "ui_spec": [
+        "Prototype: Clinical → Treatment menu (clinical-menu.png) — each card shows category, schedule (S4/non-S4) + regulatory class, unit, performed-by roles, price, duration, linked stock, AE route, and 'Charting & compliance this drives'.",
+        "Active/Archived/All filter; '+ Add treatment'; Edit/Archive per card; the S4 tag marks services and disables reward/discount controls.",
+        "(Compounded GLP-1 blocked banner illustrates catalogue-driven enforcement.)"
+      ],
+      "data_model": [
+        {
+          "entity": "(reads SERVICE-CATALOGUE)",
+          "fields": "no new entities; renders Service fields + the 'requires'/rewards_eligible derivation as a card; status(Active|Archived) filter",
+          "notes": "Presentation over the basic catalogue; S4 cards visibly tagged and reward controls disabled."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-02/SERVICE-CATALOGUE"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Treatment-menu card UI ('Charting & compliance this drives')",
           "note": "Behaviour: cards per service showing category, schedule + reg class, unit, performed-by roles, price, duration, linked stock, adverse-event route, and a 'Charting & compliance this drives' summary (synchronous consult · individual S4 script · batch-lot select · standard consent · rewards-eligible vs S4 'not rewards-eligible'). Requirements: visibly tag S4 cards and disable their reward/discount controls; capability-gate the admin actions."

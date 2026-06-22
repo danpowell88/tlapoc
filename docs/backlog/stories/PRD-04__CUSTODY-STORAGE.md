@@ -1,4 +1,4 @@
-# Custody & secure storage
+# Custody & secure storage: exclusive-custody binding (MVP)
 
 > **Epic:** [PRD-04 — Consult, prescribing & S4 medicines governance (the moat)](../epics/PRD-04.md)  ·  **Key:** `PRD-04/CUSTODY-STORAGE`  ·  **Type:** Story  ·  **Stage:** M3  ·  **Priority:** P0  ·  **Estimate:** 5 pts  ·  **Area:** backend
 >
@@ -53,9 +53,7 @@ The header surface ('custody Dr Lee NP - locked fridge') and the per-lot custody
 
 ## Tasks (dev pickup)
 
-- [ ] **StockLocation + AccessLog model (exclusive custody, attestation) (model & migration)**
-  Add StockLocation: id, tenant_id, name, custodian_id, exclusive_custody_attested(bool), store_contact, cabinet_monitor_id (nullable); RLS by tenant. Add AccessLog: id, tenant_id, location_id, actor_id/badge_id (nullable), at, event(open|close|tamper_*|sensor_disagreement|heartbeat), attributed(bool), seq(monotonic). StockItem.location_id + custodian_id FK to the location. AccessLog is append-only.
+- [ ] **StockLocation model + exclusive-custody binding (model & migration)**
+  Add StockLocation: id, tenant_id, name, custodian_id, exclusive_custody_attested(bool), store_contact, cabinet_monitor_id (nullable); RLS by tenant. StockItem.location_id + custodian_id FK to the location. The custodian binding + exclusive-custody attestation is the visible 'custody Dr Lee NP - locked fridge' surface on every stock view.
 - [ ] **Custody/storage API + exclusive-custody rule**
-  Endpoints: POST/PATCH /locations (custodian, attestation, store_contact), POST /locations/{id}/custody (take/transfer custody - capability-gated to NP/prescriber). Enforce: only a prescribe-S4 staffer can be custodian (C7); record exclusive_custody_attested + store_contact (GAP-3). Flag a remote prescriber consigning stock to a clinic without their exclusive on-site custody as non-compliant (surface it, don't silently allow). RNs may possess-to-administer only.
-- [ ] **Cabinet-monitor ingest + access-log policy + audit**
-  Endpoint POST /clinics/{slug}/cabinets/{id}/events: verify the per-cabinet bearer token + HMAC X-Signature, dedupe on Idempotency-Key, check monotonic seq (gap/reset = tamper). Server decides policy from raw signals: raise a facility job on unattributed open (no recent badge tap), after-hours, door-left-ajar (no close), any tamper_*/sensor_disagreement, missed heartbeat (>2 intervals) or seq gap. Write every access event to AccessLog + audit (C15).
+  Endpoints: POST/PATCH /locations (custodian, attestation, store_contact), POST /locations/{id}/custody (take/transfer custody - capability-gated to NP/prescriber). Enforce: only a prescribe-S4 staffer can be custodian (C7); record exclusive_custody_attested + store_contact (GAP-3). Flag a remote prescriber consigning stock to a clinic without their exclusive on-site custody as non-compliant (surface it, don't silently allow). RNs may possess-to-administer only. A custody change is audited.

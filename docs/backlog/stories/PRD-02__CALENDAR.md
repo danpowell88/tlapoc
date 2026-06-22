@@ -1,4 +1,4 @@
-# Multi-resource calendar (practitioner + room)
+# Multi-resource calendar — basic grid & booking
 
 > **Epic:** [PRD-02 — Booking & scheduling (+ client/CRM basics)](../epics/PRD-02.md)  ·  **Key:** `PRD-02/CALENDAR`  ·  **Type:** Story  ·  **Stage:** M2  ·  **Priority:** P0  ·  **Estimate:** 5 pts  ·  **Area:** web
 >
@@ -58,15 +58,9 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 
 ## Tasks (dev pickup)
 
-- [ ] **Calendar header & date navigation**
-  Behaviour: a sticky header with Today / prev / next, a date picker and a range label that reflects the active view; remembers the last-used date+view per user. Requirements: jumping to any date re-queries that range; Today resets to the current day; keyboard shortcuts (t=today, arrows=step). The header drives every other element on the screen (the grid, filters and quiet-windows all react to the selected range).
-- [ ] **Day / week view toggle & time-axis layout**
-  Behaviour: switch between a single-day and a Mon-Fri week layout; the time axis spans configured opening hours with off-hours visually muted; selectable slot interval (e.g. 15 min). Requirements: the choice persists per user; week view collapses resource columns into day columns; closed days/public holidays render non-bookable.
-- [ ] **Resource & practitioner filters**
-  Behaviour: filter the visible columns by practitioner, room and treatment type (multi-select), plus a 'my schedule' quick filter. Requirements: filters compose (AND); only practitioners rostered for the range are offered (reads the roster); the active filter set persists in the URL/state so a refresh or share keeps it.
-- [ ] **Multi-resource grid & occupancy rendering**
-  Behaviour: columns are practitioner x room resources; each appointment renders in its slot and consumes BOTH a practitioner and a room; the grid shows occupancy density and flags conflicts/double-books. Requirements: a booking is valid only if both resources are free; scope-of-practice (the canInject gate) is reflected so non-injectors are never shown as available for S4 work; conflicts are visually unmistakable.
-- [ ] **Slot interaction: drag-to-book, move & resize**
-  Behaviour: click an empty slot to start a booking; drag an appointment to move it; resize to change duration; everything snaps to the slot interval. Requirements: availability (practitioner scope + room free + roster) is re-checked server-side on drop and the move is rejected with a reason if invalid; optimistic UI updates immediately then confirms or rolls back.
-- [ ] **Appointment cards & status colours**
-  Behaviour: each card shows client, treatment and status (booked / confirmed / arrived / in-progress / complete / cancelled / no-show) with a colour legend and quick actions. Requirements: status drives the colour; clicking opens the appointment detail; a no-show raises a follow-up job (PRD-07); arrived/in-progress feed the check-in and treatment-room surfaces.
+- [ ] **Appointment + Resource data model & availability function**
+  Behaviour: model the Appointment (client, service, practitioner, room, start/end, status, source) and Resource (room/chair/device) entities, and the single (derived) Availability function = RosterShift − TimeOff − existing Appointments, ∩ canInject (the derived gate deciding whether a staff member may administer injectables right now) for the service's schedule class, ∩ a free Resource for the whole block including buffers. Requirements: tenant-scoped (RLS (row-level security)); the availability function is the one engine the wizard, online booking and walk-ins all reuse; an unrostered or uncredentialled staffer is never offered for an S4 (Schedule 4 prescription-only medicine) service.
+- [ ] **Core booking API (create + conflict check)**
+  Behaviour: a create-appointment endpoint that books a practitioner AND a room/chair/device together for the service's real duration plus buffer/processing/turnaround. Requirements: a booking is valid only if BOTH resources are free for the whole block; scope-of-practice is enforced server-side (S4 only for canInject roles); a clashing room/chair/device is rejected with a structured reason; the created Appointment is the same entity desk, online and walk-in bookings produce.
+- [ ] **Minimal day-view grid (practitioner × room columns)**
+  Behaviour: a single-day calendar rendering practitioner × room columns over hourly rows, each appointment in its slot consuming both a practitioner and a room, plus a '+ New' affordance to open the booking wizard. Requirements: appointments render in the correct slot for their duration incl. buffers; unrostered periods and TimeOff render as unavailable (not bookable); conflicts/double-books are visually unmistakable. Header date-nav, day/week toggle, filters, drag-to-book and status-coloured cards are follow-ups.

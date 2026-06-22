@@ -1,4 +1,4 @@
-# Visit lifecycle & status state-machine
+# Visit lifecycle — basic status state-machine
 
 > **Epic:** [PRD-02 — Booking & scheduling (+ client/CRM basics)](../epics/PRD-02.md)  ·  **Key:** `PRD-02/LIFECYCLE`  ·  **Type:** Story  ·  **Stage:** M2  ·  **Priority:** P1  ·  **Estimate:** 3 pts  ·  **Area:** web
 >
@@ -57,11 +57,5 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 
 - [ ] **Visit state-machine + transition API (server-validated)**
   Behaviour: model Appointment.status as a state machine (booked→reminded→checked_in→in_room→for_checkout→checked_out, plus late/no_show/cancelled) with role hand-offs. Requirements: transition endpoints validate legal transitions server-side and reject illegal ones; each write appends a VisitEvent (from/to/actor/at) to the audit stream; every transition emits a domain event (a fact emitted when something happens in the system) for the Today board, reminders and read models (a query-optimised view built from domain events).
-- [ ] **Booking capture: new-vs-returning, reason, roster**
-  Behaviour: at booking, capture new_or_returning, reason/notes and the rostered practitioner on the Appointment. Requirements: new-vs-returning selects the intake type downstream (full intake vs quick re-screen); reason and practitioner feed recall and reporting; respects the roster so a booking can't be taken against an unrostered practitioner.
-- [ ] **No-show flag → auto follow-up call job (late = flag only)**
-  Behaviour: flagging a row no-show auto-creates a recovery task; flagging late only marks the row. Requirements: a no_show transition creates a Follow-up CALL job in the PRD-07 jobs queue (assignee=reception, source=system, due=today) so the no-show (a client who misses an appointment without notice) is recovered; late raises no job; idempotent — re-flagging never duplicates the job.
-- [ ] **Today KPI tiles + 'WITH YOU NOW' in-room strip**
-  Behaviour: the Today header tiles (appointments, checked in, awaiting consent, stock, follow-ups) and a 'WITH YOU NOW' strip showing who is in-room with Open chart / Profile quick links. Requirements: tiles derive from today's appointments + gate state and live-update from transition events; the in-room strip lists every appointment in the in_room state; the 'awaiting consent' tile reflects the gate (ties to the consult/consent gates).
-- [ ] **Per-row status chips + role-appropriate next action**
-  Behaviour: each 'Today's schedule' row shows its current status chip and the next action for whoever owns it now (Confirmed / Start / Resume / Late / No-show / Profile). Requirements: each action calls the transition API and is shown only when legal for the row's state and the user's role; the row reflects the consult/consent gate ('Awaiting consent — treatment gated') and deep-links to chart/profile; live-updates from transition events.
+- [ ] **Minimal Today list with check-in (per-row status chips)**
+  Behaviour: a 'Today's schedule' list where each row shows its current status chip and a check-in-on-arrival action driving the transition API. Requirements: rows reflect the live status from transition events; the action calls the validated transition endpoint; the booking-capture fields, the no-show→job rule, the KPI tiles + in-room strip, and the full role-aware action set are follow-ups.

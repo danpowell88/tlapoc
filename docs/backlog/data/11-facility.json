@@ -17,16 +17,16 @@
   "stories": [
     {
       "key": "FACILITY",
-      "title": "Facility accreditation & expiry alerts",
-      "context": "Plainly: record each location's accreditation and get warned before it lapses, so the clinic never operates out of accreditation. Where it fits: Facility/Ops is the operational backbone around the clinical core, built after the clinical and reporting layers; accreditation status feeds the inspection pack (PRD-08) and Governance. Per-location accreditation status + expiry alerts before lapse (REQ-FAC-1, C20).",
+      "title": "Facility accreditation register (basic)",
+      "context": "Plainly: record each location's accreditation — scheme, status, expiry and evidence — so the clinic knows where it stands. Where it fits: Facility/Ops is the operational backbone around the clinical core, built after the clinical and reporting layers; this basic slice is the accreditation record + its UI, with expiry alerts and the blocking-vs-advisory enforcement added as follow-ups. Accreditation status feeds the inspection pack (PRD-08) and Governance (REQ-FAC-1, C20).",
       "as_a": "owner",
-      "i_want": "to record facility accreditation and be alerted before it expires",
-      "so_that": "we never lapse on accreditation",
+      "i_want": "to record each location's facility accreditation",
+      "so_that": "I have an evidenced record of our accreditation status",
       "acceptance": [
-        "Per-location accreditation status recorded.",
-        "Expiry alerts fire before lapse.",
-        "Whether accreditation is blocking or advisory is configurable (open question).",
-        "Records are audited."
+        "Per-location accreditation status recorded (scheme, status, expiry, evidence).",
+        "The certificate attaches as evidence (media).",
+        "Records are audited and feed Governance ('Registrations & indemnity: current') + the PRD-08 inspection pack.",
+        "Expiry alerts and the blocking-vs-advisory enforcement are added by the follow-ups (FACILITY-ALERTS, FACILITY-ENFORCE)."
       ],
       "refs": {
         "req": [
@@ -48,17 +48,18 @@
       ],
       "priority": "P2",
       "detail": [
-        "Per-location facility accreditation recorded with scheme (ACSQHC (Australian Commission on Safety and Quality in Health Care)/NSQHS (National Safety and Quality Health Service standards) where applicable, or a state licence), status, expiry and evidence reference; expiry alerts fire ahead of lapse. Per RECON-2 (non-surgical injectables), accreditation is treated as optional/conditional, so blocking-vs-advisory is configurable per clinic (the open question), defaulting advisory.",
-        "Records are audited and current status feeds the inspection pack (PRD-08) and Governance ('Registrations & indemnity: current'). Evidences the clinic's facility obligations (C20)."
+        "Per-location facility accreditation recorded with scheme (ACSQHC (Australian Commission on Safety and Quality in Health Care)/NSQHS (National Safety and Quality Health Service standards) where applicable, or a state licence), status, expiry and evidence reference; the certificate attaches as evidence_ref (media).",
+        "Records are audited and current status feeds the inspection pack (PRD-08) and Governance ('Registrations & indemnity: current'). Expiry alerts (FACILITY-ALERTS) and the blocking-vs-advisory enforcement (FACILITY-ENFORCE) are added by the follow-ups. Evidences the clinic's facility obligations (C20)."
       ],
       "ui_spec": [
-        "Prototype: Operations (ops-equipment area) / facility profile — accreditation status per location (scheme, status, expiry, evidence) with expiry alerts."
+        "Prototype: Operations (ops-equipment area) / facility profile — accreditation status per location (scheme, status, expiry, evidence) with an edit/renew action.",
+        "Expiry alerts + blocking-vs-advisory are the follow-ups (FACILITY-ALERTS, FACILITY-ENFORCE)."
       ],
       "data_model": [
         {
           "entity": "FacilityAccreditation",
           "fields": "id, tenant_id, location_id, scheme, status, expiry, evidence_ref",
-          "notes": "Expiry alerts; blocking-vs-advisory configurable; audited."
+          "notes": "Per-location record; audited."
         }
       ],
       "tasks": [
@@ -69,11 +70,93 @@
         {
           "title": "Facility profile: per-location accreditation UI",
           "note": "Behaviour: a facility-profile view listing each location's accreditation (scheme, status, expiry, evidence link) with an edit/renew action. Requirements: surfaces on the operations view; feeds Governance's 'Registrations & indemnity: current' status; current status flows into the PRD-08 inspection pack."
-        },
+        }
+      ]
+    },
+    {
+      "key": "FACILITY-ALERTS",
+      "title": "Facility: accreditation expiry alerts",
+      "context": "Plainly: get warned ahead of an accreditation lapsing so renewal happens in time. Where it fits: a follow-up to the facility accreditation register (PRD-11/FACILITY) that adds scheduled expiry alerts; it reads the FacilityAccreditation record and raises a job/notification via the jobs scheduler. The clinic never operates silently out of accreditation.",
+      "as_a": "owner",
+      "i_want": "to be alerted before a facility accreditation expires",
+      "so_that": "we renew in time and never lapse",
+      "acceptance": [
+        "Expiry alerts fire ahead of an accreditation lapsing, on a configurable lead-time.",
+        "An alert raises a job/notification via the jobs scheduler.",
+        "The alert reads the FacilityAccreditation expiry (no parallel store).",
+        "The clinic never operates silently out of accreditation."
+      ],
+      "notes": "",
+      "detail": [
+        "Warn ahead of an accreditation lapsing: schedule expiry alerts (configurable lead-time before expiry) via the jobs scheduler, raising a job/notification so renewal happens in time. The alert reads the FacilityAccreditation.expiry from the register (PRD-11/FACILITY) — no parallel store.",
+        "The clinic never operates silently out of accreditation. Whether a lapse blocks or merely warns is the enforcement follow-up (FACILITY-ENFORCE); this story is the warning itself."
+      ],
+      "ui_spec": [
+        "Prototype: Operations / facility profile — expiry alerts ahead of lapse on each accreditation row.",
+        "Configurable lead-time; raises a job/notification."
+      ],
+      "data_model": [
+        {
+          "entity": "(reuses) FacilityAccreditation",
+          "fields": "PRD-11/FACILITY — reads expiry to schedule alerts",
+          "notes": "Extends FACILITY; alert raises a Job/Notification via the scheduler."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-11/FACILITY"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Accreditation expiry alerts (scheduled)",
           "note": "Behaviour: warn ahead of an accreditation lapsing. Requirements: schedule expiry alerts (configurable lead-time before expiry) via the jobs scheduler, raising a job/notification so renewal happens in time; never operate silently out of accreditation."
-        },
+        }
+      ]
+    },
+    {
+      "key": "FACILITY-ENFORCE",
+      "title": "Facility: blocking-vs-advisory enforcement",
+      "context": "Plainly: let each clinic choose whether a lapsed accreditation blocks operations or merely warns. Where it fits: a follow-up to the facility accreditation register (PRD-11/FACILITY) that adds the enforcement decision; per RECON-2 (non-surgical injectables) accreditation is optional/conditional, so this is a per-clinic config flag read at the relevant guard points, defaulting advisory (the open question).",
+      "as_a": "owner",
+      "i_want": "to choose whether a lapsed accreditation blocks or merely warns",
+      "so_that": "enforcement matches our clinic's regulatory posture",
+      "acceptance": [
+        "A per-clinic config flag (blocking | advisory) is read at the relevant guard points.",
+        "It defaults advisory per RECON-2 (accreditation optional/conditional for non-surgical injectables — the open question).",
+        "When blocking, a lapsed accreditation gates the guarded operation; when advisory, it warns only.",
+        "Accreditation changes are audited."
+      ],
+      "notes": "",
+      "detail": [
+        "Let each clinic choose whether a lapsed accreditation blocks or merely warns: a per-clinic config flag (blocking | advisory) read at the relevant guard points. It defaults advisory per RECON-2 (accreditation optional/conditional for non-surgical injectables — the open question).",
+        "When set to blocking, a lapsed accreditation gates the guarded operation; when advisory, it surfaces a warning only. Accreditation changes are audited. This builds on the register (PRD-11/FACILITY) and complements the warning alerts (FACILITY-ALERTS)."
+      ],
+      "ui_spec": [
+        "Prototype: Operations / facility profile — blocking-vs-advisory setting per clinic (defaults advisory).",
+        "Read at the relevant guard points; accreditation changes audited."
+      ],
+      "data_model": [
+        {
+          "entity": "(reuses) FacilityAccreditation + clinic config",
+          "fields": "per-clinic flag accreditation_enforcement(blocking|advisory)",
+          "notes": "Extends FACILITY; read at guard points; defaults advisory (RECON-2 open question)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-11/FACILITY"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Blocking-vs-advisory config flag",
           "note": "Behaviour: let each clinic choose whether a lapsed accreditation blocks or merely warns. Requirements: a per-clinic config flag (blocking | advisory) read at the relevant guard points, defaulting advisory per RECON-2 (accreditation optional/conditional for non-surgical injectables — the open question); audit accreditation changes."
@@ -153,16 +236,16 @@
     },
     {
       "key": "EMERGENCY-KIT",
-      "title": "Emergency kit & continuity-of-care",
-      "context": "Plainly: track the emergency drugs and kit (for filler vascular occlusion and anaphylaxis) with expiry alerts, and record a backup contact for when the prescriber is unavailable. Where it fits: part of the operational backbone (Facility/Ops) around the clinical core; it sits beside the complication-response flow (PRD-05). Track the emergency kit (hyaluronidase, anaphylaxis) with expiry alerts and record a continuity-of-care contact (REQ-FAC-3, C20).",
+      "title": "Emergency kit register (basic)",
+      "context": "Plainly: track the emergency drugs and kit (for filler vascular occlusion and anaphylaxis) — what each item is for, quantity and expiry — so staff know what's on hand. Where it fits: part of the operational backbone (Facility/Ops) around the clinical core; this basic slice is the kit register + add/remove, with expiry alerts, the complication-protocol link + 'Start response', and the continuity-of-care contact added as follow-ups. Track the emergency kit (REQ-FAC-3, C20).",
       "as_a": "owner",
-      "i_want": "to track the emergency kit with expiry alerts and record a continuity-of-care contact",
-      "so_that": "we're prepared for complications and cover when a prescriber is unavailable",
+      "i_want": "to track the emergency kit (what each item is for, quantity, expiry)",
+      "so_that": "we know what's on hand for a complication",
       "acceptance": [
-        "Emergency-kit items (incl. hyaluronidase, anaphylaxis) raise expiry alerts before lapse.",
-        "A continuity-of-care contact is recorded and visible when the treating practitioner/prescriber is unavailable.",
-        "Emergency/complication protocol links are surfaced.",
-        "Ties into the complication-response flow (PRD-05)."
+        "Emergency-kit items (incl. hyaluronidase, adrenaline, hydrocortisone) are recorded with what each is for, quantity and expiry.",
+        "The register supports add/remove (saveKit/newKit/removeKit).",
+        "It is the source of truth for what's available during a complication response.",
+        "Expiry alerts, the complication-protocol link, and the continuity-of-care contact are added by the follow-ups (KIT-ALERTS, KIT-PROTOCOLS, CONTINUITY-CONTACT)."
       ],
       "refs": {
         "req": [
@@ -172,8 +255,7 @@
           "C20"
         ],
         "prd_ac": [
-          "AC1",
-          "AC4"
+          "AC1"
         ]
       },
       "labels": [
@@ -185,38 +267,157 @@
       ],
       "priority": "P2",
       "detail": [
-        "Track the emergency kit (hyaluronidase for filler vascular occlusion, adrenaline 1:1000 for anaphylaxis, hydrocortisone, etc.) with what each item is for, quantity and expiry, raising expiry alerts before lapse (add/remove via saveKit/newKit/removeKit). Surfaced from Clinical → Complication protocols so the kit sits beside the time-critical response steps; 'Start response' launches a timestamped checklist that logs the drug used and routes an adverse event (ties to PRD-05).",
-        "A continuity-of-care contact (name, role, phone) is recorded and visible when the treating practitioner/prescriber is unavailable. Ensures the clinic is prepared for complications (C20)."
+        "Track the emergency kit (hyaluronidase for filler vascular occlusion, adrenaline 1:1000 for anaphylaxis, hydrocortisone, etc.) with what each item is for, quantity and expiry (add/remove via saveKit/newKit/removeKit). This register is the source of truth for what's available during a complication response.",
+        "Expiry alerts (KIT-ALERTS), surfacing the kit beside the complication protocols with 'Start response' (KIT-PROTOCOLS), and the continuity-of-care contact (CONTINUITY-CONTACT) are added by the follow-ups. Ensures the clinic knows its emergency stock (C20)."
       ],
       "ui_spec": [
         "Prototype: Clinical → Complication protocols (clinical-safety) — Emergency kit register (Item · For · Qty · Expiry; Add item / Remove via saveKit/newKit/removeKit).",
-        "Protocol cards (Vascular occlusion, Anaphylaxis) with numbered steps + 'Start response'; continuity-of-care contact surfaced when the prescriber is unavailable."
+        "Expiry alerts, the 'Start response' protocol link and the continuity contact are the follow-ups."
       ],
       "data_model": [
         {
           "entity": "EmergencyKitItem",
           "fields": "id, tenant_id, location_id, name(hyaluronidase|adrenaline|hydrocortisone|...), for, expiry, quantity",
-          "notes": "Expiry alerts; linked from complication protocols."
-        },
-        {
-          "entity": "ContinuityContact",
-          "fields": "id, tenant_id, name, role, phone",
-          "notes": "Surfaced when the prescriber is unavailable."
+          "notes": "Source of truth for the kit; alerts + protocol link in the follow-ups."
         }
       ],
       "tasks": [
         {
           "title": "EmergencyKitItem register + add/remove",
           "note": "Behaviour: track the emergency drugs/kit (hyaluronidase for filler vascular occlusion, adrenaline 1:1000 for anaphylaxis, hydrocortisone, etc.) with what each is for, quantity and expiry. Requirements: model EmergencyKitItem (tenant_id, location_id, name, for, expiry, quantity); register UI (Item · For · Qty · Expiry) with add/remove (prototype saveKit/newKit/removeKit); this is the source of truth for what's available during a complication response."
-        },
+        }
+      ]
+    },
+    {
+      "key": "KIT-ALERTS",
+      "title": "Emergency kit: expiry alerts",
+      "context": "Plainly: flag a lapsing emergency-kit item before it expires, so a time-critical drug like adrenaline is never found expired during an emergency. Where it fits: a follow-up to the emergency kit register (PRD-11/EMERGENCY-KIT) that adds scheduled expiry alerts; it reads the EmergencyKitItem expiry and raises an alert via the jobs scheduler.",
+      "as_a": "owner",
+      "i_want": "to be alerted before an emergency-kit item expires",
+      "so_that": "a time-critical drug is never found expired in an emergency",
+      "acceptance": [
+        "A lapsing kit item raises an expiry alert before it expires, on a configurable lead-time.",
+        "Alerts are scheduled via the jobs scheduler.",
+        "The alert reads the EmergencyKitItem.expiry from the register (no parallel store).",
+        "A time-critical item (e.g. adrenaline) is never found expired during an emergency."
+      ],
+      "notes": "",
+      "detail": [
+        "Flag a lapsing kit item before it expires: schedule expiry alerts (configurable lead-time) via the jobs scheduler so a time-critical item (e.g. adrenaline) is never found expired during an emergency. The alert reads the EmergencyKitItem.expiry from the register (PRD-11/EMERGENCY-KIT) — no parallel store.",
+        "This mirrors the facility accreditation alerts pattern (FACILITY-ALERTS) but for the emergency kit. It complements the register basic by keeping the kit current."
+      ],
+      "ui_spec": [
+        "Prototype: Clinical → Complication protocols — expiry flag/alert on each kit item near lapse.",
+        "Configurable lead-time; raises a job/notification via the scheduler."
+      ],
+      "data_model": [
+        {
+          "entity": "(reuses) EmergencyKitItem",
+          "fields": "PRD-11/EMERGENCY-KIT — reads expiry to schedule alerts",
+          "notes": "Extends EMERGENCY-KIT; alert raises a Job/Notification via the scheduler."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-11/EMERGENCY-KIT"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Emergency-kit expiry alerts (scheduled)",
           "note": "Behaviour: flag a lapsing kit item before it expires. Requirements: schedule expiry alerts (configurable lead-time) via the jobs scheduler so a time-critical item (e.g. adrenaline) is never found expired during an emergency."
-        },
+        }
+      ]
+    },
+    {
+      "key": "KIT-PROTOCOLS",
+      "title": "Emergency kit: complication protocols + 'Start response'",
+      "context": "Plainly: show the emergency kit beside the time-critical complication protocol cards (vascular occlusion, anaphylaxis) and let staff launch a timestamped response that logs the drug used and routes an adverse event (an unwanted medical occurrence after a treatment). Where it fits: a follow-up to the emergency kit register (PRD-11/EMERGENCY-KIT) that adds the clinical surface; 'Start response' opens the complication-response flow (PRD-05), keeping the breach/complication pathway intact.",
+      "as_a": "clinician",
+      "i_want": "the kit beside the complication protocols with a 'Start response' action",
+      "so_that": "I can act fast and the response is logged when a complication occurs",
+      "acceptance": [
+        "The kit register surfaces on Clinical → Complication protocols next to the Vascular-occlusion / Anaphylaxis cards.",
+        "'Start response' opens a timestamped checklist (PRD-05 complication response).",
+        "The response records the kit item used and routes an adverse event.",
+        "The breach/complication pathway stays intact."
+      ],
+      "notes": "",
+      "detail": [
+        "Show the kit register beside the time-critical protocol cards and let staff launch a response: surface the kit on Clinical → Complication protocols next to the Vascular-occlusion / Anaphylaxis cards (numbered steps). 'Start response' opens a timestamped checklist (PRD-05 complication response) that records the kit item used and routes an adverse event (an unwanted medical occurrence after a treatment).",
+        "The breach/complication pathway stays intact. This composes the kit register (PRD-11/EMERGENCY-KIT) into the clinical safety surface; the kit remains the source of truth for what's available."
+      ],
+      "ui_spec": [
+        "Prototype: Clinical → Complication protocols (clinical-safety) — protocol cards (Vascular occlusion, Anaphylaxis) with numbered steps + 'Start response', kit register alongside.",
+        "'Start response' opens a timestamped checklist that logs the kit item used and routes an adverse event."
+      ],
+      "data_model": [
+        {
+          "entity": "(reuses) EmergencyKitItem + ComplicationResponse",
+          "fields": "PRD-11/EMERGENCY-KIT kit alongside the PRD-05 complication-response checklist",
+          "notes": "Extends EMERGENCY-KIT; 'Start response' logs the kit item used + routes an adverse event."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-11/EMERGENCY-KIT",
+        "PRD-05/ADVERSE-EVENT"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Surface kit from complication protocols + 'Start response' link",
           "note": "Behaviour: show the kit register beside the time-critical protocol cards and let staff launch a response. Requirements: surface the kit on Clinical → Complication protocols next to the Vascular-occlusion / Anaphylaxis cards; 'Start response' opens a timestamped checklist (PRD-05 complication response) that records the kit item used and routes an adverse event (an unwanted medical occurrence after a treatment) — the breach/complication pathway stays intact."
-        },
+        }
+      ]
+    },
+    {
+      "key": "CONTINUITY-CONTACT",
+      "title": "Continuity-of-care contact",
+      "context": "Plainly: record a backup contact for when the treating practitioner/prescriber is unavailable, satisfying the AHPRA (Australian Health Practitioner Regulation Agency) continuity-of-care obligation. Where it fits: a follow-up to the emergency kit register (PRD-11/EMERGENCY-KIT) that adds continuity-of-care; the contact is surfaced when the prescriber is unavailable, beside the complication-response flow.",
+      "as_a": "owner",
+      "i_want": "to record a continuity-of-care contact for when a prescriber is unavailable",
+      "so_that": "there's cover and a named fallback when the treating practitioner can't be reached",
+      "acceptance": [
+        "A continuity-of-care contact (name, role, phone) is recorded.",
+        "It is visible when the treating practitioner/prescriber is unavailable.",
+        "It satisfies the AHPRA continuity-of-care obligation (C20).",
+        "Records are audited."
+      ],
+      "notes": "",
+      "detail": [
+        "Record a backup contact for when the prescriber is unavailable: model ContinuityContact (name, role, phone) and surface it when the treating practitioner/prescriber is unavailable, satisfying the AHPRA (Australian Health Practitioner Regulation Agency) continuity-of-care obligation (C20).",
+        "It sits beside the complication-response flow (PRD-05) so cover is to hand in an emergency. This complements the emergency kit register (PRD-11/EMERGENCY-KIT) as the people-side of being prepared."
+      ],
+      "ui_spec": [
+        "Prototype: Clinical → Complication protocols (clinical-safety) — continuity-of-care contact surfaced when the prescriber is unavailable.",
+        "Name · Role · Phone; audited."
+      ],
+      "data_model": [
+        {
+          "entity": "ContinuityContact",
+          "fields": "id, tenant_id, name, role, phone",
+          "notes": "New entity; surfaced when the prescriber is unavailable; complements EMERGENCY-KIT."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-11/EMERGENCY-KIT"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "ContinuityContact record + visibility",
           "note": "Behaviour: record a backup contact for when the prescriber is unavailable. Requirements: model ContinuityContact (name, role, phone) and surface it when the treating practitioner/prescriber is unavailable, satisfying the AHPRA (Australian Health Practitioner Regulation Agency) continuity-of-care obligation (C20)."
@@ -225,24 +426,23 @@
     },
     {
       "key": "COMPLAINTS",
-      "title": "Complaints register with AHPRA pathway",
-      "context": "Plainly: a register for logging complaints against a client/treatment that always shows the AHPRA (Australian Health Practitioner Regulation Agency) pathway and keeps the related record indefinitely. Where it fits: part of the operational backbone (Facility/Ops) around the clinical core; complaints feed reporting (PRD-08) and a complaint flag drives indefinite retention via the foundations retention engine (PRD-01). A complaints/adverse-outcome register linked to client/treatment that surfaces complaint mechanisms incl. AHPRA (NDA (non-disclosure agreement) doesn't remove the right), feeds retention (complaint → indefinite) and reporting (REQ-CLI-4, C24).",
+      "title": "Complaints register with AHPRA pathway (basic)",
+      "context": "Plainly: a register for logging complaints against a client/treatment that always shows the AHPRA (Australian Health Practitioner Regulation Agency) pathway. Where it fits: part of the operational backbone (Facility/Ops) around the clinical core; this basic slice is the complaint register + the mandated AHPRA-pathway surface, with the indefinite-retention flag and the reporting/raise-from-conversation hooks added as follow-ups. Handles complaints correctly with the mandated pathway (REQ-CLI-4, C24).",
       "as_a": "manager",
       "i_want": "to log a complaint against a client/treatment and have the system surface the AHPRA pathway",
-      "so_that": "complaints are handled correctly and retained",
+      "so_that": "complaints are logged correctly with the mandated pathway shown",
       "acceptance": [
-        "A complaint links to the client/treatment and surfaces complaint mechanisms incl. AHPRA (noting NDA doesn't remove the right).",
-        "A complaint flag drives indefinite retention of the related record (C18, PRD-01).",
-        "Complaints feed the register/reporting (PRD-08).",
-        "A complaint can be raised from a conversation (links PRD-07)."
+        "A complaint links to the client/treatment and can be worked to resolution (log, view, update status/resolution).",
+        "Logging surfaces complaint mechanisms incl. the right to complain to AHPRA — explicitly noting an NDA (non-disclosure agreement) doesn't remove that right.",
+        "The register lives in Governance.",
+        "Indefinite retention and the reporting/raise-from-conversation hooks are added by the follow-ups (COMPLAINT-RETENTION, COMPLAINT-REPORTING)."
       ],
       "refs": {
         "req": [
           "REQ-CLI-4"
         ],
         "compliance": [
-          "C24",
-          "C18"
+          "C24"
         ],
         "prd_ac": [
           "AC3"
@@ -257,18 +457,18 @@
       ],
       "priority": "P1",
       "detail": [
-        "A complaints / adverse-outcome register linked to client/treatment that surfaces complaint mechanisms including AHPRA (explicitly noting an NDA doesn't remove that right). Logging a complaint sets an indefinite-retention flag on the related record (C18, PRD-01) — exempting it from the normal destruction schedule for as long as the complaint exists — and feeds reporting (PRD-08) and Governance. A complaint can be raised directly from a conversation (PRD-07 inbox).",
-        "Handles complaints correctly and retains them (C24)."
+        "A complaints / adverse-outcome register linked to client/treatment that surfaces complaint mechanisms including AHPRA (Australian Health Practitioner Regulation Agency) — explicitly noting an NDA (non-disclosure agreement) doesn't remove that right. Staff log, view, update status/resolution and link to client + treatment from the Governance register.",
+        "Logging a complaint sets the indefinite-retention flag (COMPLAINT-RETENTION) and feeds reporting / raise-from-conversation (COMPLAINT-REPORTING) — both added by the follow-ups. Handles complaints correctly with the mandated pathway shown (C24)."
       ],
       "ui_spec": [
         "Prototype: Governance → Overview (gov-overview) complaints register; raise a complaint linked to client/treatment with the AHPRA pathway surfaced.",
-        "Surfaces in Governance ('Open AE cases', 'Needs attention'); can be raised from a conversation (PRD-07)."
+        "Retention flag + reporting/raise-from-conversation are the follow-ups (COMPLAINT-RETENTION, COMPLAINT-REPORTING)."
       ],
       "data_model": [
         {
           "entity": "Complaint",
           "fields": "id, tenant_id, client_id, treatment_ref, status, pathway(ahpra|internal), opened_at, resolution",
-          "notes": "Sets indefinite-retention flag (C18); feeds reporting."
+          "notes": "Register + AHPRA pathway; retention + reporting in the follow-ups."
         }
       ],
       "tasks": [
@@ -279,11 +479,95 @@
         {
           "title": "Surface AHPRA pathway at log time",
           "note": "Behaviour: always show the external complaint pathway when a complaint is logged. Requirements: surface the complaint mechanisms including the right to complain to AHPRA (Australian Health Practitioner Regulation Agency) — explicitly noting an NDA (non-disclosure agreement) doesn't remove that right — as guidance copy on the form (C24)."
-        },
+        }
+      ]
+    },
+    {
+      "key": "COMPLAINT-RETENTION",
+      "title": "Complaint → indefinite retention flag",
+      "context": "Plainly: logging a complaint must keep the related record from being destroyed for as long as the complaint exists. Where it fits: a follow-up to the complaints register (PRD-11/COMPLAINTS) that wires the indefinite-retention flag into the foundations retention engine (PRD-01); the engine reads the flag and exempts the record from the normal destruction schedule. A compliance control (C18).",
+      "as_a": "manager",
+      "i_want": "a logged complaint to keep the related record from being destroyed",
+      "so_that": "we retain everything tied to a complaint for as long as it exists",
+      "acceptance": [
+        "Logging a complaint sets an indefinite-retention flag on the related record.",
+        "The PRD-01 retention engine reads the flag and exempts that record from the normal destruction schedule.",
+        "The exemption holds for as long as the complaint exists (C18).",
+        "Setting/clearing the flag is audited."
+      ],
+      "notes": "",
+      "detail": [
+        "A complaint must keep the related record from being destroyed: logging a complaint (PRD-11/COMPLAINTS) sets an indefinite-retention flag on the related record. The PRD-01 retention engine reads it and exempts that record from the normal destruction schedule for as long as the complaint exists (C18).",
+        "This is the retention arm of the complaints workflow, separate from the reporting hooks (COMPLAINT-REPORTING). Setting and clearing the flag is audited."
+      ],
+      "ui_spec": [
+        "Prototype: Governance — a logged complaint marks the related record as indefinitely retained.",
+        "PRD-01 retention engine exempts the flagged record from destruction; flag changes audited."
+      ],
+      "data_model": [
+        {
+          "entity": "(reuses) Complaint + RetentionRule",
+          "fields": "PRD-11/COMPLAINTS complaint sets an indefinite-retention flag read by the PRD-01 retention engine",
+          "notes": "Extends COMPLAINTS; exempts the related record from destruction for the complaint's life (C18)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-11/COMPLAINTS",
+        "PRD-01/PRIVACY-RIGHTS"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P1",
+      "tasks": [
         {
           "title": "Complaint → indefinite retention flag",
           "note": "Behaviour: a complaint must keep the related record from being destroyed. Requirements: logging a complaint sets an indefinite-retention flag on the related record; the PRD-01 retention engine reads it and exempts that record from the normal destruction schedule for as long as the complaint exists (C18)."
-        },
+        }
+      ]
+    },
+    {
+      "key": "COMPLAINT-REPORTING",
+      "title": "Complaints: reporting feed + raise-from-conversation",
+      "context": "Plainly: complaints feed the wider Governance/reporting picture and can be started directly from an inbox conversation. Where it fits: a follow-up to the complaints register (PRD-11/COMPLAINTS) that adds the reporting feed and the raise-from-conversation hook; it surfaces complaints in reporting (PRD-08) and the Governance command centre, and links a PRD-07 inbox thread to a new complaint.",
+      "as_a": "manager",
+      "i_want": "complaints to feed reporting and be raisable from a conversation",
+      "so_that": "complaints are visible in the wider picture and easy to open from an inbox thread",
+      "acceptance": [
+        "Complaints feed the register/reporting (PRD-08) and the Governance command centre ('Open AE cases', 'Needs attention').",
+        "A complaint can be raised directly from a PRD-07 inbox conversation.",
+        "Raising from a conversation links the thread to the new complaint.",
+        "The link is recorded and audited."
+      ],
+      "notes": "",
+      "detail": [
+        "Complaints feed the wider picture and can start from an inbox thread: feed complaints into the register/reporting (PRD-08) and the Governance command centre ('Open AE cases', 'Needs attention'). Allow a complaint to be raised directly from a PRD-07 inbox conversation, linking the thread to the new complaint.",
+        "This builds on the complaints register basic (PRD-11/COMPLAINTS), wiring it into reporting and the comms inbox. The conversation→complaint link is recorded and audited."
+      ],
+      "ui_spec": [
+        "Prototype: Governance ('Open AE cases', 'Needs attention') surfaces complaints; raise a complaint from a PRD-07 conversation.",
+        "Reporting (PRD-08) includes complaints; the inbox thread links to the new complaint."
+      ],
+      "data_model": [
+        {
+          "entity": "(reuses) Complaint + Conversation",
+          "fields": "PRD-11/COMPLAINTS complaint feeds PRD-08 reporting; PRD-07 conversation links to a new complaint",
+          "notes": "Extends COMPLAINTS; reporting feed + conversation→complaint link, audited."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-11/COMPLAINTS",
+        "PRD-07/FOLLOWUPS"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Feed reporting + raise-from-conversation",
           "note": "Behaviour: complaints feed the wider picture and can start from an inbox thread. Requirements: feed complaints into the register/reporting (PRD-08) and the Governance command centre ('Open AE cases', 'Needs attention'); allow a complaint to be raised directly from a PRD-07 inbox conversation, linking the thread to the new complaint."
@@ -341,23 +625,22 @@
     },
     {
       "key": "OPENCLOSE",
-      "title": "Daily open/close checklist & fridge log",
-      "context": "Plainly: the twice-daily safe-open/safe-close routine — a checklist plus a manual fridge-temperature log, where an out-of-range reading quarantines the affected stock and raises a job. Where it fits: part of the operational backbone (Facility/Ops) around the clinical core; the manual log is the fallback alongside automated monitors and reconciles into one cold-chain (the unbroken temperature-controlled storage required for medicines) record with the medicines module (PRD-04). The prototype's Operations → Open/close & fridge log (openFridge/saveFridge) is a twice-daily routine: an open/close checklist plus a manual fridge-temperature log with a breach pathway.",
+      "title": "Daily open/close checklist (basic)",
+      "context": "Plainly: the daily safe-open/safe-close routine at its core — a configurable checklist that's ticked off and recorded with who/when. Where it fits: part of the operational backbone (Facility/Ops) around the clinical core; this basic slice is the checklist model + the open/close run + the log, with the manual fridge-temperature log and its breach pathway added as follow-ups (which reconcile into one cold-chain (the unbroken temperature-controlled storage required for medicines) record with the medicines module, PRD-04). The daily open/close discipline.",
       "as_a": "staff member",
-      "i_want": "a daily open/close checklist and a twice-daily fridge-temperature log",
-      "so_that": "the clinic opens/closes safely and cold-chain is evidenced",
+      "i_want": "a daily open/close checklist that's recorded with who/when",
+      "so_that": "the clinic opens and closes safely with an audit trail",
       "acceptance": [
         "Configurable open and close checklists are completed and recorded with who/when.",
-        "A twice-daily fridge log captures temperature; an out-of-range reading triggers the breach pathway (quarantine lot (the manufacturer's batch of a medicine vial) + job).",
+        "Each tick attributes to the acting staff member + timestamp; overall completion is shown.",
         "Logs are audited and feed the inspection pack (PRD-08).",
-        "Ties into automated temperature monitors (PRD-11/TEMP-MONITORS, PRD-04/COLD-CHAIN)."
+        "The manual fridge-temperature log and its breach pathway are added by the follow-up (OPENCLOSE-FRIDGE)."
       ],
       "refs": {
         "req": [
           "REQ-FAC-2"
         ],
         "compliance": [
-          "C13",
           "C20"
         ],
         "adr": [
@@ -376,23 +659,18 @@
         "PRD-04/COLD-CHAIN"
       ],
       "detail": [
-        "A twice-daily routine: a configurable open and close checklist (items attributed to a role — e.g. 'Fridge 1 AM temp logged' · Reception, 'Autoclave run & cycle logged' · Lead Nurse) completed and recorded with who/when, plus a manual fridge-temperature log per fridge (AM/PM). An out-of-range reading triggers the breach pathway: quarantine the affected lot (PRD-04) + raise a job (PRD-07) automatically; openFridge/saveFridge drive the entry, with 'in range' / 'warm spike — recovered' states.",
-        "Logs are audited and feed the inspection pack (PRD-08); the manual log is the fallback alongside automated monitors (TEMP-MONITORS) and reconciles into one cold-chain record (C13). The daily safe open/close discipline."
+        "A daily routine: a configurable open and close checklist (items attributed to a role — e.g. 'Fridge 1 AM temp logged' · Reception, 'Autoclave run & cycle logged' · Lead Nurse) completed and recorded with who/when. Each daily instance is independent and audited; some items deep-link to the relevant log (cold chain, S4 register).",
+        "Logs are audited and feed the inspection pack (PRD-08); completion state surfaces on the back-office hub's morning attention items. The manual fridge-temperature log and its breach pathway are added by the follow-up (OPENCLOSE-FRIDGE), which reconciles into one cold-chain record with the automated monitors (TEMP-MONITORS). The daily safe open/close discipline."
       ],
       "ui_spec": [
         "Prototype: Operations → Open / close & fridge log (ops-openclose); also on the back-office tablet (backroom).",
-        "Checklist items with done-state + role; per-fridge AM/PM 'Manual log' temp entry; 'in range' / 'warm spike — recovered'; breach → quarantine lot + job (openFridge/saveFridge)."
+        "Checklist items with done-state + role; recording who/when; overall completion shown. The fridge-temp log + breach are the follow-up (OPENCLOSE-FRIDGE)."
       ],
       "data_model": [
         {
           "entity": "OpenCloseChecklist",
           "fields": "id, tenant_id, location_id, type(open|close), items[]{label, done, role}, completed_by, at",
           "notes": "Configurable checklist; audited."
-        },
-        {
-          "entity": "FridgeLog",
-          "fields": "id, tenant_id, location_id, fridge_id, period(am|pm), temp, at, actor_id, breach(bool)",
-          "notes": "Out-of-range → quarantine lot + Job (PRD-04/PRD-07)."
         }
       ],
       "tasks": [
@@ -403,7 +681,49 @@
         {
           "title": "Open/close checklist UI (tick, attribute, complete)",
           "note": "Behaviour: today's open/close checklist on Operations (ops-openclose) and the back-office tablet — tick each item, with the role label, recording who/when, and show overall completion. Requirements: each tick attributes to the acting staff member + timestamp; completion state surfaces on the back-office hub's morning attention items; some items deep-link to the relevant log (cold chain, S4 register)."
-        },
+        }
+      ]
+    },
+    {
+      "key": "OPENCLOSE-FRIDGE",
+      "title": "Open/close: manual fridge-temp log + breach pathway",
+      "context": "Plainly: the twice-daily manual fridge-temperature log that hangs off the open/close routine, where an out-of-range reading quarantines the affected stock and raises a job. Where it fits: a follow-up to the open/close basic (PRD-11/OPENCLOSE) that adds the cold-chain (the unbroken temperature-controlled storage required for medicines) manual log; it is the fallback alongside the automated monitors (PRD-11/TEMP-MONITORS) and reconciles with the medicines module (PRD-04) into one evidenced cold-chain record. The breach pathway is safety-critical and must stay intact regardless of source.",
+      "as_a": "staff member",
+      "i_want": "a twice-daily manual fridge-temperature log with an automatic breach pathway",
+      "so_that": "cold-chain is evidenced and a warm fridge quarantines stock and raises a job",
+      "acceptance": [
+        "A twice-daily manual fridge log per fridge captures temperature with 'in range' / 'warm spike — recovered' states.",
+        "A reading outside the safe band (toxin 2–8°C) is a breach: quarantine the affected lot (PRD-04) + raise a job (PRD-07) automatically.",
+        "Manual + device readings reconcile into one evidenced cold-chain record (C13); logs feed the inspection pack (PRD-08).",
+        "The breach path stays intact regardless of source (manual or monitor)."
+      ],
+      "notes": "",
+      "detail": [
+        "Per-fridge AM/PM manual temperature entry (openFridge → modal → saveFridge) recording temp, period, actor and time, with 'in range' / 'warm spike — recovered' states. This manual log is the fallback alongside the live monitor feed (TEMP-MONITORS); both reconcile into one cold-chain (the unbroken temperature-controlled storage required for medicines) record per fridge.",
+        "A reading outside the safe band (toxin 2–8°C) is a breach: set breach=true, quarantine the affected lot (the manufacturer's batch of a medicine vial) via PRD-04 cold-chain, and raise a job (PRD-07) automatically. The reconciled record feeds the PRD-08 inspection-readiness pack (C13); the breach path must stay intact regardless of source (manual or monitor)."
+      ],
+      "ui_spec": [
+        "Prototype: Operations → Open / close & fridge log (ops-openclose); also on the back-office tablet (backroom).",
+        "Per-fridge AM/PM 'Manual log' temp entry; 'in range' / 'warm spike — recovered'; breach → quarantine lot + job (openFridge/saveFridge)."
+      ],
+      "data_model": [
+        {
+          "entity": "FridgeLog",
+          "fields": "id, tenant_id, location_id, fridge_id, period(am|pm), temp, at, actor_id, breach(bool)",
+          "notes": "Extends OPENCLOSE; out-of-range → quarantine lot + Job (PRD-04/PRD-07); reconciles with TEMP-MONITORS."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-11/OPENCLOSE",
+        "PRD-04/COLD-CHAIN"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P1",
+      "tasks": [
         {
           "title": "Twice-daily manual fridge-temp log (openFridge/saveFridge)",
           "note": "Behaviour: per-fridge AM/PM manual temperature entry (openFridge → modal → saveFridge) recording temp, period, actor and time, with 'in range' / 'warm spike — recovered' states. Requirements: model FridgeLog (fridge_id, period[am|pm], temp, at, actor_id, breach); this manual log is the fallback alongside the live monitor feed (TEMP-MONITORS) and both reconcile into one cold-chain (the unbroken temperature-controlled storage required for medicines) record."
@@ -416,8 +736,8 @@
     },
     {
       "key": "TEMP-MONITORS",
-      "title": "Temperature monitor management",
-      "context": "Plainly: manage the wireless fridge sensors, watch their temperature charts, and act when one reports an out-of-range reading or goes silent. Where it fits: part of the operational backbone (Facility/Ops) around the clinical core; the automated feed and the manual fridge log (OPENCLOSE) reconcile into one evidenced cold-chain (the unbroken temperature-controlled storage required for medicines) record with the medicines module (PRD-04). The prototype's Operations → Temperature monitors (openMonitor/monitorJob) manages wireless cold-chain sensors (the ESP32 (a low-cost Wi-Fi microcontroller) design), charts readings and raises breach jobs.",
+      "title": "Temperature monitor management (basic)",
+      "context": "Plainly: manage the wireless fridge sensors, watch their temperature charts, and act when one reports an out-of-range reading or goes silent. Where it fits: part of the operational backbone (Facility/Ops) around the clinical core; this basic slice provisions the monitors, ingests + charts their readings, and runs the excursion/dead-monitor breach pathway (kept in the basic because cold-chain breach is safety-critical), with the manual+device reconciliation added as a follow-up. The prototype's Operations → Temperature monitors (openMonitor/monitorJob) manages wireless cold-chain (the unbroken temperature-controlled storage required for medicines) sensors (the ESP32 (a low-cost Wi-Fi microcontroller) design).",
       "as_a": "owner / staff",
       "i_want": "to manage temperature monitors, see their readings and act on breaches",
       "so_that": "cold-chain is continuously evidenced without manual logging",
@@ -425,7 +745,7 @@
         "Monitors can be registered/provisioned per fridge/location and authenticate to the per-clinic API.",
         "Readings chart over time; a breach raises a job and flags affected stock.",
         "Missing heartbeats (dead monitor) are detected and surfaced.",
-        "Manual fridge log (OPENCLOSE) and monitors reconcile into one cold-chain record (C13)."
+        "The manual+device reconciliation into one cold-chain record is added by the follow-up (MONITOR-RECONCILE)."
       ],
       "refs": {
         "req": [
@@ -452,11 +772,11 @@
       ],
       "detail": [
         "Manage wireless cold-chain sensors (the ESP32 design): one monitor per fridge streams readings to this clinic's private API endpoint over WiFi, giving continuous data, instant excursion alerts and a tamper-evident trail. Register/provision monitors per fridge/location (each with a per-device API key); the view shows per-monitor status (online/offline), charted temp, last-seen/signal/firmware/power and summary tiles. Readings chart over time; an excursion raises a breach job and flags affected stock; missing heartbeats surface under Needs attention with 'Raise job' (monitorJob → Lead Nurse).",
-        "The automated feed and the manual fridge log (OPENCLOSE) reconcile into one cold-chain record (C13). Continuous, evidenced cold-chain without manual logging."
+        "The excursion/dead-monitor breach pathway stays in this basic because cold-chain breach is safety-critical. The automated feed and the manual fridge log (OPENCLOSE-FRIDGE) reconcile into one cold-chain record in the follow-up (MONITOR-RECONCILE, C13). Continuous, evidenced cold-chain without manual logging."
       ],
       "ui_spec": [
         "Prototype: Operations → Temperature monitors (ops-monitors) — tiles Monitors/Online/Last sync/Needs attention; per-monitor cards (name·TM-id·fridge, online/offline, charted temp, Last seen/Signal/Firmware/Power, 'healthy' or 'Raise job', 'Details →').",
-        "Dead-monitor/offline detection ('no recent data'); breach raises a job to Lead Nurse + flags stock (openMonitor/monitorJob)."
+        "Dead-monitor/offline detection ('no recent data'); breach raises a job to Lead Nurse + flags stock (openMonitor/monitorJob). Reconciliation is the follow-up (MONITOR-RECONCILE)."
       ],
       "data_model": [
         {
@@ -467,7 +787,7 @@
         {
           "entity": "(reuses) TempLog/Excursion",
           "fields": "PRD-04 COLD-CHAIN — device readings + excursions",
-          "notes": "Manual + device readings reconcile into one record."
+          "notes": "Device readings land here; manual+device reconcile in the follow-up (MONITOR-RECONCILE)."
         }
       ],
       "tasks": [
@@ -481,26 +801,68 @@
         },
         {
           "title": "Excursion + dead-monitor (heartbeat) detection → breach job",
-          "note": "Behaviour: a heartbeat watchdog flags monitors with no recent data as offline ('no recent data', '3h 12m ago') under Needs attention; an excursion (or offline / battery-low / firmware condition) raises a breach job. Requirements: monitorJob creates a job to the Lead Nurse carrying the reason and flags the affected stock; 'Raise job' surfaces on the card; the excursion path mirrors the manual breach pathway (OPENCLOSE)."
-        },
+          "note": "Behaviour: a heartbeat watchdog flags monitors with no recent data as offline ('no recent data', '3h 12m ago') under Needs attention; an excursion (or offline / battery-low / firmware condition) raises a breach job. Requirements: monitorJob creates a job to the Lead Nurse carrying the reason and flags the affected stock; 'Raise job' surfaces on the card; the excursion path mirrors the manual breach pathway (OPENCLOSE-FRIDGE)."
+        }
+      ]
+    },
+    {
+      "key": "MONITOR-RECONCILE",
+      "title": "Cold-chain: reconcile device + manual readings",
+      "context": "Plainly: merge the automated monitor readings with the manual fridge-log entries into one evidenced cold-chain (the unbroken temperature-controlled storage required for medicines) history per fridge, so an inspector sees a single unbroken chain. Where it fits: a follow-up to the monitor basic (PRD-11/TEMP-MONITORS) that adds reconciliation; it joins the device feed with the manual log (PRD-11/OPENCLOSE-FRIDGE) and the medicines cold-chain (PRD-04) into one record that feeds the inspection pack.",
+      "as_a": "owner / staff",
+      "i_want": "device and manual fridge readings merged into one cold-chain record",
+      "so_that": "an inspector sees a single unbroken chain regardless of source",
+      "acceptance": [
+        "Device readings and the manual FridgeLog entries (OPENCLOSE-FRIDGE) merge into a single evidenced cold-chain record per fridge.",
+        "There is one history regardless of source (C13).",
+        "The reconciled record feeds the PRD-08 inspection pack and demonstrates an unbroken chain to a regulator.",
+        "Breaches from either source remain in the one record."
+      ],
+      "notes": "",
+      "detail": [
+        "Merge device readings with the manual FridgeLog entries (PRD-11/OPENCLOSE-FRIDGE) into a single evidenced cold-chain (the unbroken temperature-controlled storage required for medicines) record per fridge: one history regardless of source (C13). The reconciled record is what feeds the inspection pack and demonstrates an unbroken chain to a regulator.",
+        "Breaches raised from either the monitor (PRD-11/TEMP-MONITORS) or the manual log remain in the one record so nothing is lost. This is the reconciliation arm that completes the cold-chain evidence picture across both basics."
+      ],
+      "ui_spec": [
+        "Prototype: Operations → Temperature monitors / Open-close fridge log — one reconciled cold-chain history per fridge.",
+        "One history regardless of source; feeds the PRD-08 inspection pack."
+      ],
+      "data_model": [
+        {
+          "entity": "(reuses) TempLog/FridgeLog",
+          "fields": "PRD-04 device readings + PRD-11/OPENCLOSE-FRIDGE manual entries reconciled into one record",
+          "notes": "Extends TEMP-MONITORS; one cold-chain history per fridge (C13); feeds inspection pack."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-11/TEMP-MONITORS",
+        "PRD-11/OPENCLOSE-FRIDGE"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P1",
+      "tasks": [
         {
           "title": "Reconcile device + manual readings into one cold-chain record",
-          "note": "Behaviour: merge device readings with the manual FridgeLog entries (OPENCLOSE) into a single evidenced cold-chain (the unbroken temperature-controlled storage required for medicines) record per fridge. Requirements: one history regardless of source (C13); the reconciled record is what feeds the inspection pack and demonstrates an unbroken chain to a regulator."
+          "note": "Behaviour: merge device readings with the manual FridgeLog entries (OPENCLOSE-FRIDGE) into a single evidenced cold-chain (the unbroken temperature-controlled storage required for medicines) record per fridge. Requirements: one history regardless of source (C13); the reconciled record is what feeds the inspection pack and demonstrates an unbroken chain to a regulator."
         }
       ]
     },
     {
       "key": "ROOMS-DEVICES",
-      "title": "Rooms & devices register",
-      "context": "Plainly: keep the clinic's rooms, chairs and devices as bookable resources so the calendar reflects real capacity and flags conflicts. Where it fits: part of the operational backbone (Facility/Ops) around the clinical core; these resources are what the booking calendar (PRD-02) schedules against. The prototype's Operations → Rooms & devices manages the bookable rooms/chairs/devices that the calendar schedules against (resource conflict-flagging in PRD-02).",
+      "title": "Rooms & devices register (basic)",
+      "context": "Plainly: keep the clinic's rooms, chairs and devices on file as bookable resources with their attributes and utilisation. Where it fits: part of the operational backbone (Facility/Ops) around the clinical core; this basic slice is the resource register itself (the same entity the booking calendar schedules against), with calendar exposure + conflict-flagging and the out-of-service/equipment-link added as follow-ups. The prototype's Operations → Rooms & devices manages the bookable rooms/chairs/devices (PRD-02).",
       "as_a": "manager",
-      "i_want": "to manage the clinic's rooms, chairs and devices as bookable resources",
-      "so_that": "scheduling reflects real capacity and avoids conflicts",
+      "i_want": "to manage the clinic's rooms, chairs and devices as resources",
+      "so_that": "there's one register of real capacity to schedule against",
       "acceptance": [
-        "Rooms/chairs/devices can be created/edited with attributes (type, location, status).",
-        "Resources are available to the calendar for booking + conflict-flagging (PRD-02/WALKINS).",
-        "Out-of-service status removes a resource from availability.",
-        "Device records link to equipment maintenance (PRD-11/EQUIPMENT)."
+        "Rooms/chairs/devices can be created/edited with attributes (type, location, status, optional licence note).",
+        "Cards show utilisation; devices carry a licence note (e.g. Candela GentleLase · Class 4 laser · QLD laser licence).",
+        "CRUD the SAME shared Resource entity the PRD-02 calendar books against (no duplicate model); tenant-scoped.",
+        "Calendar exposure + conflict-flagging and the out-of-service/equipment-link are added by the follow-ups (RESOURCE-CALENDAR, RESOURCE-SERVICE)."
       ],
       "refs": {
         "req": [
@@ -521,29 +883,111 @@
         "PRD-02/CALENDAR"
       ],
       "detail": [
-        "Manage the clinic's rooms, chairs and devices as bookable resources the calendar schedules against (conflict-flagging in PRD-02 — a device can't be in two rooms at once). Create/edit with attributes (type, location, status); prototype shows Room 1/2/3 and devices (Candela GentleLase · Class 4 laser · QLD laser licence, Lumecca IPL (intense pulsed light device) · TAS IPL only) with utilisation. Out-of-service status removes a resource from availability; device records link to equipment maintenance (PRD-11/EQUIPMENT).",
-        "Keeps scheduling honest about real capacity."
+        "Manage the clinic's rooms, chairs and devices as bookable resources: create/edit with attributes (type, location, status); the prototype shows Room 1/2/3 and devices (Candela GentleLase · Class 4 laser · QLD laser licence, Lumecca IPL (intense pulsed light device) · TAS IPL only) with utilisation. This basic CRUDs the shared Resource entity — the SAME entity the PRD-02 calendar books against (no duplicate model).",
+        "Exposing resources to the calendar for conflict-flagging (RESOURCE-CALENDAR) and the out-of-service status + equipment-maintenance link (RESOURCE-SERVICE) are added by the follow-ups. Keeps one honest register of real capacity."
       ],
       "ui_spec": [
-        "Prototype: Operations → Rooms & devices (ops-resources) — cards for rooms (Treatment/Skin) and devices (utilisation bars, licence notes); create/edit (type, location, status); out-of-service toggles availability.",
-        "Calendar flags conflicts (a device can't be in two rooms)."
+        "Prototype: Operations → Rooms & devices (ops-resources) — cards for rooms (Treatment/Skin) and devices (utilisation bars, licence notes); create/edit (type, location, status).",
+        "Calendar conflict-flagging + out-of-service/equipment-link are the follow-ups (RESOURCE-CALENDAR, RESOURCE-SERVICE)."
       ],
       "data_model": [
         {
           "entity": "Resource",
           "fields": "(shared with PRD-02) id, tenant_id, type(room|chair|device), name, location_id, status, licence_note?",
-          "notes": "Out-of-service removes from availability; device links to Equipment."
+          "notes": "The SAME entity the PRD-02 calendar books against; calendar exposure + equipment link in the follow-ups."
         }
       ],
       "tasks": [
         {
           "title": "Resource register: rooms/chairs/devices CRUD + utilisation",
           "note": "Behaviour: manage rooms, chairs and devices as bookable resources on Operations → Rooms & devices (cards with utilisation bars; devices carry a licence note, e.g. Candela GentleLase · Class 4 laser · QLD laser licence). Requirements: CRUD the shared Resource entity (type[room|chair|device], name, location_id, status, optional licence_note) — the SAME entity the PRD-02 calendar books against (no duplicate model); tenant-scoped."
-        },
+        }
+      ]
+    },
+    {
+      "key": "RESOURCE-CALENDAR",
+      "title": "Resources: calendar exposure + conflict-flagging",
+      "context": "Plainly: make the rooms/chairs/devices register available to the booking calendar so a device can't be double-booked into two rooms at once. Where it fits: a follow-up to the rooms & devices register (PRD-11/ROOMS-DEVICES) that wires resources into the booking calendar (PRD-02); availability reflects each resource's status in real time and PRD-02/WALKINS surfaces a conflict before confirm.",
+      "as_a": "manager",
+      "i_want": "resources exposed to the calendar with conflict-flagging",
+      "so_that": "scheduling avoids double-booking a room or device",
+      "acceptance": [
+        "Resources are available to the PRD-02 calendar for booking and conflict-flagging.",
+        "A device resource can't be assigned to two concurrent appointments / two rooms at once.",
+        "PRD-02/WALKINS surfaces the conflict before confirm.",
+        "Availability reflects each resource's status in real time."
+      ],
+      "notes": "",
+      "detail": [
+        "Make resources available to the PRD-02 calendar for booking and conflict-flagging: a device resource can't be assigned to two concurrent appointments / two rooms at once (PRD-02/WALKINS surfaces the conflict before confirm). Availability reflects each resource's status in real time.",
+        "This builds on the resource register (PRD-11/ROOMS-DEVICES), turning the register into live scheduling capacity. The out-of-service status that removes a resource from availability is its own follow-up (RESOURCE-SERVICE)."
+      ],
+      "ui_spec": [
+        "Prototype: Operations → Rooms & devices feeds the PRD-02 calendar; calendar flags conflicts (a device can't be in two rooms).",
+        "Availability reflects resource status in real time; conflict surfaced before confirm (WALKINS)."
+      ],
+      "data_model": [
+        {
+          "entity": "(reuses) Resource",
+          "fields": "(shared with PRD-02) exposed for booking + conflict-flagging",
+          "notes": "Extends ROOMS-DEVICES; PRD-02 calendar books against it; conflict surfaced before confirm."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-11/ROOMS-DEVICES",
+        "PRD-02/CALENDAR"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Expose resources to the calendar + conflict-flagging",
           "note": "Behaviour: make resources available to the PRD-02 calendar for booking and conflict-flagging. Requirements: a device resource can't be assigned to two concurrent appointments / two rooms at once (PRD-02/WALKINS surfaces the conflict before confirm); availability reflects each resource's status in real time."
-        },
+        }
+      ]
+    },
+    {
+      "key": "RESOURCE-SERVICE",
+      "title": "Resources: out-of-service + equipment-maintenance link",
+      "context": "Plainly: marking a resource out-of-service removes it from availability, and a device resource links to its maintenance record so the same physical device has one identity across booking and servicing. Where it fits: a follow-up to the rooms & devices register (PRD-11/ROOMS-DEVICES) that adds the out-of-service status and the equipment link (PRD-11/EQUIPMENT).",
+      "as_a": "manager",
+      "i_want": "to take a resource out of service and link a device to its maintenance record",
+      "so_that": "a device down for service can't be booked and has one identity across booking and servicing",
+      "acceptance": [
+        "Marking a resource out-of-service removes it from availability — it can't be scheduled while down.",
+        "A device Resource carries an optional link to its Equipment maintenance record (PRD-11/EQUIPMENT).",
+        "The same physical device has one identity across booking and servicing.",
+        "Status changes are audited."
+      ],
+      "notes": "",
+      "detail": [
+        "Marking a resource out-of-service removes it from availability, and a device resource links to its maintenance record: an out-of-service resource can't be scheduled while down. A device Resource carries an optional link to its Equipment maintenance record (PRD-11/EQUIPMENT) so the same physical device has one identity across booking and servicing.",
+        "This builds on the resource register (PRD-11/ROOMS-DEVICES) and complements the calendar exposure (RESOURCE-CALENDAR) by honouring the out-of-service state. Status changes are audited."
+      ],
+      "ui_spec": [
+        "Prototype: Operations → Rooms & devices (ops-resources) — out-of-service toggles availability; device links to its Equipment maintenance record.",
+        "Out-of-service can't be scheduled; one device identity across booking + servicing."
+      ],
+      "data_model": [
+        {
+          "entity": "(reuses) Resource + Equipment",
+          "fields": "Resource.status=out_of_service removes from availability; device Resource → Equipment maintenance link (PRD-11/EQUIPMENT)",
+          "notes": "Extends ROOMS-DEVICES; one device identity across booking and servicing."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-11/ROOMS-DEVICES",
+        "PRD-11/EQUIPMENT"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Out-of-service status + link to equipment maintenance",
           "note": "Behaviour: marking a resource out-of-service removes it from availability, and a device resource links to its maintenance record. Requirements: an out-of-service resource can't be scheduled while down; a device Resource carries an optional link to its Equipment maintenance record (PRD-11/EQUIPMENT) so the same physical device has one identity across booking and servicing."
@@ -552,16 +996,16 @@
     },
     {
       "key": "EQUIPMENT",
-      "title": "Equipment & maintenance register",
-      "context": "Plainly: track servicing, validation and calibration of equipment (autoclave validation, spore testing, laser service) with due-date reminders so devices stay safe and in-service. Where it fits: part of the operational backbone (Facility/Ops) around the clinical core; promoted from the FAC-WORKFLOWS placeholder, it feeds the inspection pack (PRD-08). The prototype's Operations → Equipment & maintenance tracks sterilisation/equipment servicing (autoclave validation, spore testing, laser service/calibration) with due dates — promoted from the FAC-WORKFLOWS placeholder.",
+      "title": "Equipment & maintenance register (basic)",
+      "context": "Plainly: a register of the clinic's serviceable equipment with each item's service/validation/calibration cadence and last/next-due dates. Where it fits: part of the operational backbone (Facility/Ops) around the clinical core, promoted from the FAC-WORKFLOWS placeholder; this basic slice is the Equipment entity (linked to its bookable device), the MaintenanceRecord schedules and the register table, with due/overdue alerts and evidence-logging added as follow-ups. The prototype's Operations → Equipment & maintenance tracks servicing with due dates.",
       "as_a": "owner",
-      "i_want": "to track equipment servicing, validation and calibration with reminders",
-      "so_that": "devices stay safe, validated and within service",
+      "i_want": "a register of equipment with their service/validation/calibration schedules",
+      "so_that": "I can see each device's cadence and when it's next due",
       "acceptance": [
-        "Equipment records hold service/validation/calibration schedules (e.g. autoclave validation, spore testing, laser service).",
-        "Due/overdue items raise alerts and surface on the operations view.",
-        "Service events are logged with evidence and audited.",
-        "Feeds the inspection-readiness pack (PRD-08)."
+        "Equipment records (linked to a bookable device Resource) hold service/validation/calibration schedules (e.g. autoclave validation, spore testing, laser service).",
+        "MaintenanceRecord holds the standard/cadence and derives due/overdue against done_at.",
+        "The register table (Equipment · Standard/cadence · Last · Next due · Status OK / Due soon) surfaces on Operations; 'Optional per clinic' is shown.",
+        "Due/overdue alerts and evidence-logged service events are added by the follow-ups (EQUIPMENT-ALERTS, EQUIPMENT-EVIDENCE)."
       ],
       "refs": {
         "req": [
@@ -587,12 +1031,12 @@
         "PRD-11/ROOMS-DEVICES"
       ],
       "detail": [
-        "An equipment & maintenance register tracking servicing/validation/calibration with a standard/cadence and last/next-due dates: autoclave validation + spore testing (AS 5369:2023), laser service/calibration — e.g. Autoclave (Melag) · spore weekly · next due Oct 2026 · OK; Candela GentleLase · service + calibration · next due Aug 2026 · Due soon. Due/overdue items raise alerts (facility jobs) and service events are logged with evidence (report/spore result) and audited. Feeds the inspection pack (PRD-08); Equipment links to a bookable Resource (device) from ROOMS-DEVICES. Optional per clinic.",
-        "Keeps devices safe, validated and in-service (promoted from the FAC-WORKFLOWS placeholder)."
+        "An equipment & maintenance register tracking servicing/validation/calibration with a standard/cadence and last/next-due dates: autoclave validation + spore testing (AS 5369:2023), laser service/calibration — e.g. Autoclave (Melag) · spore weekly · next due Oct 2026 · OK; Candela GentleLase · service + calibration · next due Aug 2026 · Due soon. The register table surfaces on Operations; Equipment links to a bookable Resource (device) from ROOMS-DEVICES. Optional per clinic.",
+        "Due/overdue alerts (EQUIPMENT-ALERTS) and logging service events with evidence (EQUIPMENT-EVIDENCE) are added by the follow-ups. Keeps a register of devices and their schedules (promoted from the FAC-WORKFLOWS placeholder)."
       ],
       "ui_spec": [
         "Prototype: Operations → Equipment & maintenance (ops-equipment) — table Equipment · Standard/cadence · Last · Next due · Status (OK / Due soon); 'Optional per clinic'.",
-        "Due/overdue raise facility jobs; service events logged with evidence; feeds the inspection pack."
+        "Due/overdue alerts + evidence-logged service events are the follow-ups (EQUIPMENT-ALERTS, EQUIPMENT-EVIDENCE)."
       ],
       "data_model": [
         {
@@ -603,7 +1047,7 @@
         {
           "entity": "MaintenanceRecord",
           "fields": "id, equipment_id, kind(service|validation|calibration|spore_test), standard, due_at, done_at, evidence_ref, status",
-          "notes": "Due/overdue alerts; inspection evidence; audited."
+          "notes": "Holds the cadence + derives due/overdue; alerts + evidence-logging in the follow-ups."
         }
       ],
       "tasks": [
@@ -616,9 +1060,95 @@
           "note": "Behaviour: hold each item's servicing/validation/calibration cadence and compute when it's due. Requirements: model MaintenanceRecord (equipment_id, kind[service|validation|calibration|spore_test], standard, due_at, done_at, evidence_ref, status) holding the standard/cadence (e.g. AS 5369:2023 spore weekly) and deriving due/overdue against done_at; supports autoclave validation + spore testing and laser service/calibration."
         },
         {
-          "title": "Register UI + due/overdue alerts",
-          "note": "Behaviour: the Equipment & maintenance register table (Equipment · Standard/cadence · Last · Next due · Status OK / Due soon) on Operations. Requirements: due/overdue items raise alerts (facility jobs via the scheduler) and surface on the operations view; 'Optional per clinic' is shown; renew/log actions are reachable from the row."
-        },
+          "title": "Equipment & maintenance register table UI",
+          "note": "Behaviour: the Equipment & maintenance register table (Equipment · Standard/cadence · Last · Next due · Status OK / Due soon) on Operations. Requirements: lists each item with its derived due/overdue status; 'Optional per clinic' is shown; renew/log actions are reachable from the row (the log action is built in EQUIPMENT-EVIDENCE)."
+        }
+      ]
+    },
+    {
+      "key": "EQUIPMENT-ALERTS",
+      "title": "Equipment: due/overdue maintenance alerts",
+      "context": "Plainly: raise alerts when an equipment service/validation/calibration is due or overdue so devices stay within service. Where it fits: a follow-up to the equipment register (PRD-11/EQUIPMENT) that adds scheduled due/overdue alerts; it reads the MaintenanceRecord due dates and raises facility jobs via the scheduler, surfacing on the operations view.",
+      "as_a": "owner",
+      "i_want": "alerts when equipment maintenance is due or overdue",
+      "so_that": "devices stay validated and within service",
+      "acceptance": [
+        "Due/overdue items raise alerts (facility jobs via the scheduler).",
+        "Alerts surface on the operations view.",
+        "The alert reads the MaintenanceRecord due/overdue status from the register (no parallel store).",
+        "Devices don't silently fall out of service."
+      ],
+      "notes": "",
+      "detail": [
+        "Raise alerts when an equipment service/validation/calibration is due or overdue: due/overdue items raise alerts (facility jobs via the scheduler) and surface on the operations view. The alert reads the MaintenanceRecord due/overdue status from the register (PRD-11/EQUIPMENT) — no parallel store.",
+        "This mirrors the facility/kit alerts pattern but for equipment maintenance. It complements the register basic by keeping devices within service; the evidence-logging of a completed service is its own follow-up (EQUIPMENT-EVIDENCE)."
+      ],
+      "ui_spec": [
+        "Prototype: Operations → Equipment & maintenance — due/overdue rows raise facility jobs and surface on the operations view.",
+        "Scheduler-driven alerts read the MaintenanceRecord due dates."
+      ],
+      "data_model": [
+        {
+          "entity": "(reuses) MaintenanceRecord",
+          "fields": "PRD-11/EQUIPMENT — reads due_at/status to raise due/overdue alerts",
+          "notes": "Extends EQUIPMENT; alert raises a facility Job via the scheduler."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-11/EQUIPMENT"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Due/overdue maintenance alerts (scheduled)",
+          "note": "Behaviour: warn when an equipment service/validation/calibration is due or overdue. Requirements: due/overdue items raise alerts (facility jobs via the scheduler) by reading the MaintenanceRecord due/overdue status and surface on the operations view; devices never silently fall out of service."
+        }
+      ]
+    },
+    {
+      "key": "EQUIPMENT-EVIDENCE",
+      "title": "Equipment: log service events with evidence",
+      "context": "Plainly: log a completed service event with proof (service report / spore-test result) so a regulator can see devices are validated and in-service. Where it fits: a follow-up to the equipment register (PRD-11/EQUIPMENT) that adds evidence-logging; setting done_at attaches the evidence and is audited, feeding the inspection-readiness pack (PRD-08).",
+      "as_a": "owner",
+      "i_want": "to log a completed service event with its evidence",
+      "so_that": "a regulator can see devices are validated and in-service",
+      "acceptance": [
+        "Setting done_at on a MaintenanceRecord attaches evidence_ref (service report / spore-test result).",
+        "The service event is audited.",
+        "Equipment status + evidence feed the PRD-08 inspection-readiness pack.",
+        "Logging is reachable from the register row."
+      ],
+      "notes": "",
+      "detail": [
+        "Log a completed service event with proof: setting done_at attaches evidence_ref (service report / spore-test result) and is audited. Equipment status + evidence feed the PRD-08 inspection-readiness pack so a regulator can see devices are validated and in-service.",
+        "This builds on the equipment register (PRD-11/EQUIPMENT) by closing out a maintenance item with evidence, and complements the due/overdue alerts (EQUIPMENT-ALERTS) — logging a service resets the next-due cadence. Reachable from the register row."
+      ],
+      "ui_spec": [
+        "Prototype: Operations → Equipment & maintenance — log a service event from the row, attaching evidence (report / spore result).",
+        "Setting done_at + evidence feeds the PRD-08 inspection pack; audited."
+      ],
+      "data_model": [
+        {
+          "entity": "(reuses) MaintenanceRecord",
+          "fields": "PRD-11/EQUIPMENT — done_at + evidence_ref (service report / spore-test result)",
+          "notes": "Extends EQUIPMENT; logging a service event is audited and feeds the inspection pack."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-11/EQUIPMENT"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Log service events with evidence + inspection feed",
           "note": "Behaviour: log a completed service event with proof. Requirements: setting done_at attaches evidence_ref (service report / spore-test result) and is audited; equipment status + evidence feed the PRD-08 inspection-readiness pack so a regulator can see devices are validated and in-service."
@@ -627,16 +1157,16 @@
     },
     {
       "key": "CALL-LOG",
-      "title": "Call / phone log",
-      "context": "Plainly: log inbound/outbound phone calls against a client and raise a callback when needed, so phone interactions are not lost. Where it fits: part of the operational backbone (Facility/Ops) around the clinical core; calls route into the shared follow-up queue (PRD-07). The prototype's Operations → Call log records inbound/outbound phone interactions against clients and raises follow-ups (the phone is still a primary clinic channel).",
+      "title": "Call / phone log (basic)",
+      "context": "Plainly: log inbound/outbound phone calls against a client so phone interactions aren't lost. Where it fits: part of the operational backbone (Facility/Ops) around the clinical core; this basic slice is the CallLog entity + the log-a-call UI, with the callback/comms-history bridge and the shared follow-up queue added as follow-ups (which route into the shared queue, PRD-07). The phone is still a primary clinic channel.",
       "as_a": "front desk",
-      "i_want": "to log phone calls against a client and raise a follow-up if needed",
-      "so_that": "phone interactions aren't lost and callbacks happen",
+      "i_want": "to log inbound/outbound phone calls against a client",
+      "so_that": "phone interactions aren't lost",
       "acceptance": [
-        "Calls can be logged (direction, client link, summary, outcome).",
-        "A call can raise a follow-up job (PRD-07) and appears in the client's comms history.",
+        "Calls can be logged (direction, client link, number, summary, outcome).",
+        "The call-log UI (Time · Number · Who · Note) records a call against a client.",
         "Logs are tenant-scoped and audited.",
-        "A missed-call/callback can be tracked to resolution."
+        "The callback/comms-history bridge and the shared follow-up queue are added by the follow-ups (CALL-FOLLOWUP, CALL-QUEUE)."
       ],
       "refs": {
         "req": [
@@ -657,29 +1187,111 @@
         "PRD-07/FOLLOWUPS"
       ],
       "detail": [
-        "Log inbound/outbound phone calls against a client (direction, number, summary, outcome) and raise a follow-up job if needed; calls appear in the client's comms history and a missed-call/callback can be tracked to resolution ('Log callback'). Missed calls auto-text-back and become callback jobs; walk-ins and waitlist offers route through the same follow-up queue. Tenant-scoped and audited.",
-        "Captures phone interactions so nothing is lost (the phone is still a primary clinic channel)."
+        "Log inbound/outbound phone calls against a client (direction, number, summary, outcome): model CallLog and provide a call-log UI (Time · Number · Who · Note) to record a call against a client. Tenant-scoped and audited.",
+        "Raising a follow-up callback + showing the call in the client's comms history (CALL-FOLLOWUP) and routing walk-ins/waitlist offers through the same queue (CALL-QUEUE) are added by the follow-ups. Captures phone interactions so nothing is lost (the phone is still a primary clinic channel)."
       ],
       "ui_spec": [
-        "Prototype: Operations → Call log (ops-phone) — Time · Number · Who · Note (missed → text-back sent; 'Asked to move Fri appt'); 'Log callback'; Walk-in / Offer from waitlist route through the same queue.",
-        "Log a call against a client; raise a follow-up; appears in comms history."
+        "Prototype: Operations → Call log (ops-phone) — Time · Number · Who · Note; log a call against a client.",
+        "Callback/comms-history + shared queue are the follow-ups (CALL-FOLLOWUP, CALL-QUEUE)."
       ],
       "data_model": [
         {
           "entity": "CallLog",
           "fields": "id, tenant_id, client_id?, direction(in|out), number, summary, outcome, at, actor_id",
-          "notes": "Can raise a Job (PRD-07); appears in comms history; audited."
+          "notes": "Logged + audited; callback/comms-history + shared queue in the follow-ups."
         }
       ],
       "tasks": [
         {
           "title": "CallLog entity + log a call",
           "note": "Behaviour: log inbound/outbound phone calls against a client. Requirements: model CallLog (tenant_id, client_id?, direction[in|out], number, summary, outcome, at, actor_id) under RLS (row-level security, the database-level tenant isolation), audited; call-log UI (Time · Number · Who · Note) to record a call against a client."
-        },
+        }
+      ]
+    },
+    {
+      "key": "CALL-FOLLOWUP",
+      "title": "Call log: callback job + comms history",
+      "context": "Plainly: a logged call can spawn a callback job and shows up in the client's comms history, and missed calls auto-text-back and become callback jobs tracked to resolution. Where it fits: a follow-up to the call log basic (PRD-11/CALL-LOG) that bridges calls into the follow-up queue (PRD-07) and the client's comms history. Nothing slips through after a missed call.",
+      "as_a": "front desk",
+      "i_want": "a call to raise a callback and appear in the client's comms history",
+      "so_that": "callbacks happen and the call is visible in the client's history",
+      "acceptance": [
+        "A call can raise a follow-up Job (PRD-07).",
+        "A linked call appears in the client's comms history.",
+        "Missed calls auto-text-back and become callback jobs.",
+        "A missed-call/callback is tracked to resolution ('Log callback')."
+      ],
+      "notes": "",
+      "detail": [
+        "A call can spawn a callback and is visible in the client's history: a call can raise a follow-up Job (PRD-07); a linked call appears in the client's comms history; missed calls auto-text-back and become callback jobs; a missed-call/callback is tracked to resolution ('Log callback').",
+        "This builds on the call log basic (PRD-11/CALL-LOG), bridging calls into the follow-up worklist and the comms timeline. The shared queue that also carries walk-ins/waitlist offers is its own follow-up (CALL-QUEUE)."
+      ],
+      "ui_spec": [
+        "Prototype: Operations → Call log (ops-phone) — missed → text-back sent; 'Log callback'; call appears in comms history.",
+        "A call raises a follow-up; missed-call/callback tracked to resolution."
+      ],
+      "data_model": [
+        {
+          "entity": "(reuses) CallLog + Job",
+          "fields": "PRD-11/CALL-LOG call raises a PRD-07 follow-up Job; linked call shows in comms history",
+          "notes": "Extends CALL-LOG; missed-call auto-text-back → callback job tracked to resolution."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-11/CALL-LOG",
+        "PRD-07/FOLLOWUPS"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Call → follow-up job + comms history",
           "note": "Behaviour: a call can spawn a callback and is visible in the client's history. Requirements: a call can raise a follow-up Job (PRD-07); a linked call appears in the client's comms history; missed calls auto-text-back and become callback jobs; a missed-call/callback is tracked to resolution ('Log callback')."
-        },
+        }
+      ]
+    },
+    {
+      "key": "CALL-QUEUE",
+      "title": "Call log: shared follow-up queue (walk-ins / waitlist)",
+      "context": "Plainly: the front desk works one queue, not several — call callbacks, walk-ins and waitlist offers all land in one worklist. Where it fits: a follow-up to the call log basic (PRD-11/CALL-LOG) that routes walk-ins and waitlist offers through the SAME follow-up queue (PRD-07) as call callbacks. One worklist instead of scattered lists.",
+      "as_a": "front desk",
+      "i_want": "walk-ins and waitlist offers to share the same queue as call callbacks",
+      "so_that": "I work one worklist instead of several",
+      "acceptance": [
+        "Walk-ins and waitlist offers route through the SAME follow-up queue as call callbacks.",
+        "Call, walk-in and waitlist actions all land in one worklist.",
+        "The queue reuses the PRD-07 follow-up/job model (no parallel store).",
+        "Each item is tracked to resolution."
+      ],
+      "notes": "",
+      "detail": [
+        "The front desk works one queue, not several: route walk-ins and waitlist offers through the SAME follow-up queue (PRD-07) as call callbacks so call, walk-in and waitlist actions all land in one worklist.",
+        "This builds on the call log basic (PRD-11/CALL-LOG) and the callback bridge (CALL-FOLLOWUP), unifying the front-desk worklist. Each item is tracked to resolution; the queue reuses the PRD-07 follow-up/job model — no parallel store."
+      ],
+      "ui_spec": [
+        "Prototype: Operations → Call log (ops-phone) — Walk-in / Offer from waitlist route through the same queue as call callbacks.",
+        "One worklist for call, walk-in and waitlist actions."
+      ],
+      "data_model": [
+        {
+          "entity": "(reuses) Job",
+          "fields": "PRD-07 — walk-ins / waitlist offers / call callbacks share one follow-up queue",
+          "notes": "Extends CALL-LOG; one worklist, no parallel store; each item tracked to resolution."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-11/CALL-LOG",
+        "PRD-07/FOLLOWUPS"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Shared follow-up queue (walk-ins / waitlist offers)",
           "note": "Behaviour: the front desk works one queue, not several. Requirements: route walk-ins and waitlist offers through the SAME follow-up queue as call callbacks so call, walk-in and waitlist actions all land in one worklist."

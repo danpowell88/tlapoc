@@ -1,4 +1,4 @@
-# Configurable intake-form builder (versioned templates)
+# Intake-form builder — basic versioned templates
 
 > **Epic:** [PRD-03 — Intake, consent & compliance gating](../epics/PRD-03.md)  ·  **Key:** `PRD-03/FORM-BUILDER`  ·  **Type:** Story  ·  **Stage:** M2  ·  **Priority:** P1  ·  **Estimate:** 3 pts  ·  **Area:** —
 >
@@ -46,8 +46,4 @@ Submitted answers are validated server-side against the active schema; templates
 ## Tasks (dev pickup)
 
 - [ ] **Versioned IntakeForm + JSON field schema**
-  Behaviour: model IntakeForm (name, version, fields as a JSON schema, required flag) so admins define fields without code. Requirements: tenant-scoped (RLS (row-level security)); editing publishes a NEW version and supersedes the old; old versions are immutable so a bound IntakeResponse stays valid; seed the v1 medical-history & screening template (history checkboxes, contraindication items, the embedded BDD/wellbeing block).
-- [ ] **Server-side answer validation against the active schema**
-  Behaviour: validate every submitted set of answers against the form's field schema. Requirements: enforced server-side (a malformed/out-of-schema submission is rejected); required fields must be present for the response to count toward the GATING evaluation; the response is stamped with the exact form_version validated against.
-- [ ] **Form-builder admin UI (add/reorder/require fields)**
-  Behaviour: a Forms & consent editor to add/reorder fields (checkbox/radio/text), mark required, and tag contraindication items, reached via '+ New template'. Requirements: editing a current form warns it will publish a new version; superseded versions remain viewable for responses bound to them; capability-gated admin.
+  Behaviour: model IntakeForm (name, version, fields as a JSON schema, required flag) so admins define fields without code. Requirements: tenant-scoped (RLS (row-level security)); editing publishes a NEW version and supersedes the old; old versions are immutable so a bound IntakeResponse stays valid; seed the v1 medical-history & screening template (history checkboxes, contraindication items, the embedded BDD/wellbeing block). The server-side answer validation and the form-builder admin UI are follow-ups.

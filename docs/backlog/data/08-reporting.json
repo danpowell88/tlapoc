@@ -86,7 +86,7 @@
     },
     {
       "key": "BUSINESS-DASH",
-      "title": "Business analytics dashboards",
+      "title": "Business analytics dashboards (core: metrics read-model + headline tiles)",
       "context": "This is the owner's business-intelligence screen: the revenue, retention and membership numbers needed to run the clinic, shown as live tiles with targets and variance. It sits in the Reporting layer (step 6 of the clinic-first build): it reads entirely from the reporting read-models (READ-MODELS), so it depends on those being in place, and the practitioner Scorecard (SCORECARD) is built on top of it. All money figures stay owner-only. Revenue, retention/churn, no-shows, cancellations, conversion, at-risk, big spenders, membership MRR (Monthly Recurring Revenue)/churn and per-practitioner mix, date-filterable (REQ-RPT-1/2). Money figures owner-gated.",
       "as_a": "owner",
       "i_want": "dashboards for revenue, retention, no-shows, conversion, at-risk, big spenders and membership MRR/churn, filterable by date and practitioner",
@@ -149,38 +149,296 @@
       ],
       "tasks": [
         {
-          "title": "Date-range presets, custom range & per-practitioner filter",
-          "note": "Behaviour: a header period control (7d / 30d / 90d presets plus a custom range) and a per-practitioner switch that re-scope every tile on the screen; a sub-header echoes the active window ('last 30 days · figures synthetic'). Requirements: changing the period or practitioner re-queries the read-models (not OLTP) and re-computes every band against the matching comparison window; the selection persists per user and is the single source of truth all three bands and the Insights strip read from."
+          "title": "Read-model / projection: business metrics (period + comparison window)",
+          "note": "Behaviour: project the core business metrics from the payments, membership, appointment and lifecycle events into BusinessMetrics keyed by period (+ optional practitioner), each with its value and a comparison window (prior period) for variance. Requirements: compute variance server-side; tag money fields owner-financial so the gate can strip them for non-owner roles; query over the read schema (READ-MODELS), never OLTP scans; eventual consistency acceptable. (The GROWTH/PERFORMANCE/FINANCE band breakdowns, the reward-cost-vs-retention join, the Insights strip and Targets are follow-ups.)"
         },
+        {
+          "title": "Headline metric tiles + 7d/30d/90d date presets",
+          "note": "Behaviour: render the headline business tiles (value + prior-period variance) reading the BusinessMetrics projection, with a header date-preset control (7d / 30d / 90d) that re-scopes every tile and a sub-header echoing the active window ('last 30 days · figures synthetic'). Requirements: changing the preset re-queries the read-models (not OLTP) and re-computes against the matching comparison window; money tiles are .fin-gated (owner-only) — non-owner roles see counts/ops metrics but no dollars; the date selection is the single source of truth the follow-up bands read from. (Custom range + per-practitioner slicing is the follow-up BUSINESS-DASH-FILTERS.)"
+        }
+      ]
+    },
+    {
+      "key": "BUSINESS-DASH-FILTERS",
+      "title": "Business dashboards: custom range & per-practitioner filter",
+      "context": "Plainly: extends the business dashboard's date control with a custom (any-dates) range and a per-practitioner switch, so the owner can slice every tile to an arbitrary window or to one clinician. Where it fits: a follow-up to the business analytics core (PRD-08/BUSINESS-DASH) that adds the richer scoping on top of the 7d/30d/90d presets that ship in the basic. It re-queries the same reporting read-models (PRD-08/READ-MODELS) the core does, and the selection persists per user as the single source of truth every band reads from. Money figures stay owner-only (.fin).",
+      "as_a": "owner",
+      "i_want": "a custom date range and a per-practitioner filter on the business dashboards",
+      "so_that": "I can scope every metric to any window or to a single clinician",
+      "notes": "",
+      "acceptance": [
+        "A custom date range (any start/end) is available alongside the 7d/30d/90d presets from the core.",
+        "A per-practitioner switch re-scopes every tile on the screen to one clinician.",
+        "Changing the range or practitioner re-queries the read-models (not OLTP) and re-computes every tile against the matching comparison window.",
+        "The selection persists per user and is the single source of truth all bands and callouts read from; money figures stay owner-only (.fin)."
+      ],
+      "detail": [
+        "The business dashboard core (PRD-08/BUSINESS-DASH) ships the 7d/30d/90d date presets. This follow-up adds the two richer scoping controls the prototype shows: a custom date range (arbitrary start/end) and a per-practitioner switch, so the owner can ask 'how did April look' or 'how is this one injector doing' rather than only the fixed windows.",
+        "Changing the range or the practitioner re-queries the reporting read-models (PRD-08/READ-MODELS) — never OLTP — and re-computes every tile against the matching comparison window. The selection persists per user and is the single source of truth all the metric bands and the Insights strip read from, so the whole screen stays consistent. Money figures remain owner-only (.fin) under any slice."
+      ],
+      "ui_spec": [
+        "Prototype: Reports header — the custom-range control beside the 7d/30d/90d presets and the per-practitioner switch; the sub-header echoes the active window ('last 30 days · figures synthetic').",
+        "Changing the range/practitioner re-scopes every tile; the selection persists per user; money figures stay .fin-gated (owner-only)."
+      ],
+      "data_model": [
+        {
+          "entity": "(read) BusinessMetrics (extends PRD-08/BUSINESS-DASH)",
+          "fields": "adds custom date-range + per-practitioner slicing as query parameters over the existing projection",
+          "notes": "No new entity — extends the BusinessMetrics query with custom-range + practitioner parameters; money fields stay owner-gated."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-08/BUSINESS-DASH"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Custom range + per-practitioner query over the business read-models",
+          "note": "Behaviour: extend the BusinessMetrics query (PRD-08/BUSINESS-DASH) with a custom date range (any start/end) and a per-practitioner slice as query parameters over the read schema, never OLTP. Requirements: re-compute every tile against the matching comparison window; money fields stay owner-financial (stripped for non-owner roles)."
+        },
+        {
+          "title": "Custom-range + per-practitioner controls (persisted, single source of truth)",
+          "note": "Behaviour: a custom-range control beside the presets and a per-practitioner switch that re-scope every tile and the Insights strip; the sub-header echoes the active window. Requirements: the selection persists per user and is the single source of truth all bands read from; changing it re-queries the read-models; money figures stay .fin-gated (owner-only)."
+        }
+      ]
+    },
+    {
+      "key": "BUSINESS-DASH-GROWTH",
+      "title": "Business dashboards: GROWTH band tiles",
+      "context": "Plainly: the GROWTH band of the business dashboard — Monthly Recurring Revenue (MRR), Active members, Net member change and New members this month — each tile showing value, target and a coloured variance. Where it fits: a follow-up to the business analytics core (PRD-08/BUSINESS-DASH) that adds the growth-metric band over the core's BusinessMetrics projection and headline tiles. MRR is money and owner-only (.fin); the member counts stay visible to managers without the money.",
+      "as_a": "owner",
+      "i_want": "a GROWTH band of MRR, active members, net member change and new members MTD",
+      "so_that": "I can see membership growth at a glance with variance against target",
+      "notes": "",
+      "acceptance": [
+        "The GROWTH band renders MRR, Active members, Net member change and New members MTD, each with value, target and a coloured variance.",
+        "MRR is owner-gated (.fin) — stripped server-side for non-owner roles, who still see the member counts.",
+        "Variance colouring is driven by the owner targets (ClinicTarget).",
+        "Each tile drills into the underlying members/appointments."
+      ],
+      "detail": [
+        "The GROWTH band renders the membership-growth metrics: MRR (Monthly Recurring Revenue), Active members, Net member change and New members MTD (month-to-date), each tile showing value, target and a coloured variance against that target. It reads the core BusinessMetrics projection (PRD-08/BUSINESS-DASH) sliced for these fields.",
+        "MRR is money and owner-gated behind the owner-only financial (.fin) capability — stripped server-side for non-owner roles, who still see the member counts (active / net change / new) as operational figures. Variance colouring is driven by the owner targets (ClinicTarget, from the Targets editor follow-up), and each tile drills into the underlying members/appointments so a number is never a dead end."
+      ],
+      "ui_spec": [
+        "Prototype: Reports — the GROWTH band: MRR, Active members, Net member change, New members MTD; each tile shows value, target and variance.",
+        "MRR tile hidden for non-owner roles (.fin); the member-count tiles stay visible; variance colouring from ClinicTarget; tiles drill into members/appointments."
+      ],
+      "data_model": [
+        {
+          "entity": "(read) BusinessMetrics (GROWTH slice, extends PRD-08/BUSINESS-DASH)",
+          "fields": "mrr (owner-gated), active_members, net_member_change, new_members_mtd",
+          "notes": "Extends the BusinessMetrics projection; MRR money field owner-financial; member counts operational."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-08/BUSINESS-DASH"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "GROWTH band tiles (MRR, active members, net change, new members MTD)",
+          "note": "Behaviour: the GROWTH band renders MRR (monthly recurring revenue), Active members, Net member change and New members MTD, each tile showing value, target and a coloured variance. Requirements: MRR is money and owner-gated (.fin) — stripped server-side for non-owner roles, who still see the member counts; variance colouring is driven by ClinicTarget; each tile drills into the underlying members/appointments."
+        }
+      ]
+    },
+    {
+      "key": "BUSINESS-DASH-PERF",
+      "title": "Business dashboards: PERFORMANCE band tiles",
+      "context": "Plainly: the PERFORMANCE band of the business dashboard — Conversion, Retention, Rebooking and No-show — each tile showing value, target and variance, with a green state when the target is met. Where it fits: a follow-up to the business analytics core (PRD-08/BUSINESS-DASH) that adds the operational-performance band over the core's projection and tiles. These are operational metrics visible to managers without the owner-only financial (.fin) capability — no money figures.",
+      "as_a": "owner",
+      "i_want": "a PERFORMANCE band of conversion, retention, rebooking and no-show",
+      "so_that": "I can track operational performance against target",
+      "notes": "",
+      "acceptance": [
+        "The PERFORMANCE band renders Conversion, Retention, Rebooking and No-show, each with value / target / variance.",
+        "A green state shows when the target is met (no-show uses a ceiling, not a floor).",
+        "These are operational metrics visible to managers without .fin (no money figures).",
+        "Each tile drills into its underlying client/appointment list."
+      ],
+      "detail": [
+        "The PERFORMANCE band renders the operational-performance metrics: Conversion, Retention, Rebooking and No-show, each tile showing value, target and variance, with a green state when the target is met. No-show is read against a ceiling rather than a floor (lower is better), so its green state is the inverse of the others.",
+        "These are operational metrics computed over the appointment/lifecycle projections (PRD-08/BUSINESS-DASH BusinessMetrics) and are visible to managers without the owner-only financial (.fin) capability — there are no money figures in this band. Each tile drills into its underlying client/appointment list (e.g. from a low rebooking rate to the clients who didn't rebook)."
+      ],
+      "ui_spec": [
+        "Prototype: Reports — the PERFORMANCE band: Conversion, Retention, Rebooking, No-show; each tile shows value / target / variance with a green state when met.",
+        "Operational metrics visible to managers (no .fin gating); no-show uses a ceiling; tiles drill into the client/appointment list."
+      ],
+      "data_model": [
+        {
+          "entity": "(read) BusinessMetrics (PERFORMANCE slice, extends PRD-08/BUSINESS-DASH)",
+          "fields": "conversion, retention, rebooking, no_show_rate",
+          "notes": "Extends the BusinessMetrics projection; operational metrics (no money); no-show compared against a ceiling."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-08/BUSINESS-DASH"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "PERFORMANCE band tiles (conversion, retention, rebooking, no-show)",
+          "note": "Behaviour: the PERFORMANCE band renders Conversion, Retention, Rebooking and No-show, each with value / target / variance and a green state when the target is met (no-show uses a ceiling, not a floor). Requirements: these are operational metrics visible to managers without .fin; computed over the appointment/lifecycle projections; each drills into its underlying client/appointment list."
+        }
+      ]
+    },
+    {
+      "key": "BUSINESS-DASH-FINANCE",
+      "title": "Business dashboards: FINANCE band tiles",
+      "context": "Plainly: the FINANCE band of the business dashboard — Revenue last month (+ month-on-month), Prepaid liability, To-reactivate value and Autopay success — the money metrics for running the clinic. Where it fits: a follow-up to the business analytics core (PRD-08/BUSINESS-DASH) that adds the financial band over the core's projection and tiles. Every dollar figure here is owner-only behind the owner-only financial (.fin) capability; only the autopay-success rate may show to a payments role.",
+      "as_a": "owner",
+      "i_want": "a FINANCE band of revenue (+ month-on-month), prepaid liability, to-reactivate value and autopay success",
+      "so_that": "I can see the clinic's money metrics in one band",
+      "notes": "",
+      "acceptance": [
+        "The FINANCE band renders Revenue last month (+ month-on-month), Prepaid liability, To-reactivate value and Autopay success.",
+        "Every dollar figure is owner-only (.fin) and stripped for non-owner roles.",
+        "Revenue/MoM read the payments projection, prepaid liability the package/membership projection, autopay success the dunning signal (PRD-06).",
+        "The autopay-success rate may show to a payments role per the gating rule while the dollar figures stay owner-only."
+      ],
+      "detail": [
+        "The FINANCE band renders the money metrics: Revenue last month with its month-on-month (MoM) change, Prepaid liability (outstanding prepaid package/membership value), To-reactivate value, and Autopay success. It reads several projections — revenue/MoM from the payments projection, prepaid liability from the package/membership projection, autopay success from the dunning signal (PRD-06).",
+        "Every dollar figure here is gated behind the owner-only financial (.fin) capability and stripped server-side for non-owner roles. The one nuance: the autopay-success rate (a percentage, not a dollar) may show to a payments role per the gating rule, while the dollar figures stay owner-only."
+      ],
+      "ui_spec": [
+        "Prototype: Reports — the FINANCE band: Revenue last month (+MoM), Prepaid liability, To reactivate, Autopay success.",
+        "Every dollar figure .fin-gated (owner-only); the autopay-success rate may show to a payments role; revenue/MoM, prepaid liability and autopay read their respective projections (PRD-06 for dunning)."
+      ],
+      "data_model": [
+        {
+          "entity": "(read) BusinessMetrics (FINANCE slice, extends PRD-08/BUSINESS-DASH)",
+          "fields": "revenue (+ mom), prepaid_liability, reactivation_value, autopay_success",
+          "notes": "Extends the BusinessMetrics projection; all dollar fields owner-financial; autopay-success rate may show to a payments role."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-08/BUSINESS-DASH"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "FINANCE band tiles (revenue + MoM, prepaid liability, to-reactivate, autopay success)",
+          "note": "Behaviour: the FINANCE band renders Revenue last month (+ month-on-month), Prepaid liability, To-reactivate value and Autopay success. Requirements: every dollar figure here is owner-only (.fin) and stripped for non-owner roles; revenue/MoM read the payments projection, prepaid liability the package/membership projection, autopay success the dunning signal (PRD-06); the autopay-success rate may show to a payments role per the gating rule while the dollar figures stay owner-only."
+        }
+      ]
+    },
+    {
+      "key": "BUSINESS-DASH-INSIGHTS",
+      "title": "Business dashboards: Insights strip + reward-cost-vs-retention",
+      "context": "Plainly: the strip of plain-language callouts above the metric bands that translate the numbers into action ('Conversion is 38% vs your 40% target — about 1 more member a month'), tagged Opportunity / Watch / On-track, plus the reward-cost-vs-retention figure that says whether loyalty spend is buying retention. Where it fits: a follow-up to the business analytics core (PRD-08/BUSINESS-DASH) that sits on the same BusinessMetrics + targets the tiles use. The callouts are generated server-side so they never disagree with a tile; money-bearing callouts (reward cost) stay owner-only (.fin).",
+      "as_a": "owner",
+      "i_want": "plain-language insight callouts and a reward-cost-vs-retention read on my dashboard",
+      "so_that": "I know what to act on and whether loyalty spend is buying retention",
+      "notes": "",
+      "acceptance": [
+        "An Insights strip of plain-language cards sits above the bands, each tagged Opportunity, Watch or On-track.",
+        "Callouts are generated server-side from target/prior-period variance (not hand-authored), derived from the same BusinessMetrics + ClinicTarget the tiles use, so they never disagree with a tile.",
+        "Ordering surfaces the most material gap first.",
+        "A reward-cost-vs-retention surface (from PRD-06 rewards) shows whether loyalty spend buys retention; money figures are owner-only (.fin)."
+      ],
+      "detail": [
+        "The Insights strip translates the dashboard numbers into action: plain-language cards above the metric bands ('Conversion is 38% vs your 40% target — closing that gap is about 1 more member a month'), each tagged Opportunity, Watch or On-track. They are generated server-side from target / prior-period variance (not hand-authored copy) and derived from the same BusinessMetrics + ClinicTarget the tiles use, so a callout never disagrees with a tile. Ordering surfaces the most material gap first.",
+        "Alongside it, the reward-cost-vs-retention surface joins the PRD-06 reward ledger to retention (RewardCostVsRetention) so the owner can see whether loyalty spend is actually buying retention — cost per retained client. The reward-cost figures are money and stay owner-gated behind the owner-only financial (.fin) capability."
+      ],
+      "ui_spec": [
+        "Prototype: Reports — the Insights strip of Opportunity / Watch / On-track cards in plain language above the metric bands.",
+        "Callouts generated server-side from the same BusinessMetrics + ClinicTarget the tiles use (never disagree with a tile); most material gap first.",
+        "Reward-cost vs retention surfaces (from PRD-06 rewards); reward-cost money figures .fin-gated (owner-only)."
+      ],
+      "data_model": [
+        {
+          "entity": "(read) RewardCostVsRetention",
+          "fields": "period, reward_cost, retained_clients, cost_per_retained",
+          "notes": "Joins PRD-06 reward ledger to retention; owner-gated (.fin)."
+        },
+        {
+          "entity": "(derived) Insight callout",
+          "fields": "from BusinessMetrics + ClinicTarget variance → {tag(opportunity|watch|on_track), copy, materiality}",
+          "notes": "Generated server-side from the same metrics+targets the tiles use; never disagrees with a tile."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-08/BUSINESS-DASH"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Insights strip (Opportunity / Watch / On-track callouts)",
           "note": "Behaviour: a strip of plain-language cards above the bands that translate the numbers into action ('Conversion is 38% vs your 40% target — closing that gap is about 1 more member a month'), each tagged Opportunity, Watch or On-track. Requirements: generated server-side from target/prior-period variance (not hand-authored copy); cards are derived from the same BusinessMetrics + ClinicTarget the tiles use so they never disagree with a tile; ordering surfaces the most material gap first."
         },
         {
-          "title": "GROWTH band tiles (MRR, active members, net change, new members MTD)",
-          "note": "Behaviour: the GROWTH band renders MRR (monthly recurring revenue), Active members, Net member change and New members MTD, each tile showing value, target and a coloured variance. Requirements: MRR is money and owner-gated (.fin) — stripped server-side for non-owner roles, who still see the member counts; variance colouring is driven by ClinicTarget; each tile drills into the underlying members/appointments."
-        },
+          "title": "Read-model / projection: reward-cost vs retention",
+          "note": "Behaviour: project RewardCostVsRetention by joining the PRD-06 reward ledger to retention so the owner sees whether loyalty spend buys retention (cost per retained client). Requirements: tag the reward-cost money fields owner-financial so the gate strips them for non-owner roles; read over the read schema (READ-MODELS), never OLTP; eventual consistency acceptable."
+        }
+      ]
+    },
+    {
+      "key": "BUSINESS-DASH-TARGETS",
+      "title": "Business dashboards: owner Targets editor",
+      "context": "Plainly: the editable row of owner targets (MRR target, Active members, Conversion %, Retention %, Rebooking %, No-show max) that drives every tile's variance colouring and the Insights callouts. Where it fits: a follow-up to the business analytics core (PRD-08/BUSINESS-DASH) that makes the comparison targets editable and persistent. Targets persist per clinic (the prototype's 'saved in this browser only' becomes real per-tenant persistence); the editor is owner-only (.fin).",
+      "as_a": "owner",
+      "i_want": "to set, apply and reset the targets my dashboard measures against",
+      "so_that": "variance colouring and insights reflect the goals I actually set",
+      "notes": "",
+      "acceptance": [
+        "An editable row of owner targets (MRR target, Active members, Conversion %, Retention %, Rebooking %, No-show max) with Apply targets / Reset.",
+        "Targets persist as ClinicTarget per tenant.",
+        "Applying re-colours every tile's variance and regenerates the Insights callouts.",
+        "The editor is owner-only (.fin); the note states figures are saved per clinic."
+      ],
+      "detail": [
+        "The Targets editor is the editable row of owner-set targets — MRR (Monthly Recurring Revenue) target, Active members, Conversion %, Retention %, Rebooking %, No-show max — with Apply targets / Reset controls. These targets are the comparison the whole dashboard measures against.",
+        "Targets persist as ClinicTarget per tenant — the prototype's 'saved in this browser only' becomes real per-clinic persistence. Applying re-colours every tile's variance (across the GROWTH/PERFORMANCE/FINANCE bands) and regenerates the Insights callouts so the whole screen reflects the goals the owner actually set. The editor is owner-only behind the owner-only financial (.fin) capability, and the note states figures are saved per clinic."
+      ],
+      "ui_spec": [
+        "Prototype: Reports — the Targets editor row (MRR target, Active members, Conversion %, Retention %, Rebooking %, No-show max) with Apply targets / Reset.",
+        "Applying re-colours every tile's variance and regenerates Insights; editor owner-only (.fin); the note states figures are saved per clinic (real per-tenant persistence)."
+      ],
+      "data_model": [
         {
-          "title": "PERFORMANCE band tiles (conversion, retention, rebooking, no-show)",
-          "note": "Behaviour: the PERFORMANCE band renders Conversion, Retention, Rebooking and No-show, each with value / target / variance and a green state when the target is met (no-show uses a ceiling, not a floor). Requirements: these are operational metrics visible to managers without .fin; computed over the appointment/lifecycle projections; each drills into its underlying client/appointment list."
-        },
-        {
-          "title": "FINANCE band tiles (revenue + MoM, prepaid liability, to-reactivate, autopay success)",
-          "note": "Behaviour: the FINANCE band renders Revenue last month (+ month-on-month), Prepaid liability, To-reactivate value and Autopay success. Requirements: every dollar figure here is owner-only (.fin) and stripped for non-owner roles; revenue/MoM read the payments projection, prepaid liability the package/membership projection, autopay success the dunning signal (PRD-06); the autopay-success rate may show to a payments role per the gating rule while the dollar figures stay owner-only."
-        },
+          "entity": "ClinicTarget",
+          "fields": "tenant_id, mrr_target, active_member_target, conversion_target, retention_target, rebooking_target, no_show_ceiling",
+          "notes": "Owner-set; persisted per tenant; drives variance colouring + Insights callouts across the bands."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-08/BUSINESS-DASH"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Owner Targets editor (set, apply, reset; persisted per clinic)",
           "note": "Behaviour: an editable row of owner targets (MRR target, Active members, Conversion %, Retention %, Rebooking %, No-show max) with Apply targets / Reset. Requirements: persists ClinicTarget per tenant; applying re-colours every tile's variance and regenerates the Insights callouts; the editor is owner-only and the note states figures are saved per clinic (the prototype's 'saved in this browser only' becomes real per-tenant persistence)."
-        },
-        {
-          "title": "Read-model / projection: business metrics + reward-cost-vs-retention",
-          "note": "Behaviour: project GROWTH/PERFORMANCE/FINANCE metrics from the payments, membership, appointment and lifecycle events into BusinessMetrics keyed by period (+ optional practitioner), plus the RewardCostVsRetention join over the PRD-06 reward ledger so the owner can see whether loyalty spend buys retention. Requirements: compute variance vs target/prior-period server-side; tag money fields owner-financial so the gate can strip them; support the 7d/30d/90d/custom windows and per-practitioner slicing as query parameters over the read schema, never OLTP scans; eventual consistency acceptable."
         }
       ]
     },
     {
       "key": "RETENTION-COHORTS",
-      "title": "Retention cohort analysis & at-risk worklist",
+      "title": "Retention cohort analysis (core: cohort grid)",
       "as_a": "owner",
       "i_want": "a cohort retention grid and an at-risk / lapsed client list I can act on",
       "so_that": "I can see whether new clients actually stick and win back the ones slipping away",
@@ -231,12 +489,54 @@
           "note": "Behaviour: project RetentionCohort = for each first-visit month, the percentage of that cohort still active at each months-since offset, producing the triangle matrix. Requirements: computed over the appointment/visit read-models (READ-MODELS), never OLTP; 'still active' uses a defined activity window; newer cohorts have fewer offsets (shorter rows); date/window-aware; eventual consistency acceptable; operational metric, no money."
         },
         {
-          "title": "Read-model / projection: at-risk & lapsed clients",
-          "note": "Behaviour: project AtRiskClient = clients past the expected return cadence for their treatment type, with last-seen, an at-risk reason and (owner-only) value-at-risk. Requirements: cadence is per treatment type; value_at_risk is tagged owner-financial and stripped for non-owner roles; expose the underlying client ids so the list drills into the 360 profile."
-        },
-        {
           "title": "Cohort grid UI (colour-graded triangle matrix)",
           "note": "Behaviour: render the cohort matrix as a colour-graded grid (rows = first-visit month, columns = months since first visit) with the explainer copy and a per-row legend. Requirements: cells colour by retained percentage; newer cohorts render shorter; horizontally scrollable at width; shares the Reports date presets; no money figures."
+        }
+      ]
+    },
+    {
+      "key": "RETENTION-ATRISK",
+      "title": "Retention: at-risk / lapsed worklist + reactivation hand-off",
+      "as_a": "owner",
+      "i_want": "an at-risk / lapsed client list I can act on, with a one-click hand-off into recall",
+      "so_that": "I can win back clients who are slipping away rather than just watching the number",
+      "context": "Plainly: the actionable list beside the cohort grid — clients past their expected return window, each with last-seen, a reason they're at-risk and (owner-only) the value at risk, plus a one-click 'queue reactivation' that hands them into the recall worklist. Where it fits: a follow-up to the retention cohort analysis (PRD-08/RETENTION-COHORTS) that adds the worklist counterpart to the cohort grid. It reads the same reporting read-models (PRD-08/READ-MODELS) and hands off to the follow-up/recall queue (PRD-07) so a number becomes a call, never a dead end. Operational signals are visible to managers; any lifetime-value / dollar figure is owner-only (.fin).",
+      "notes": "",
+      "acceptance": [
+        "An at-risk / lapsed list surfaces clients past their expected return window, each with last-seen, value and a reason they are at-risk.",
+        "Each at-risk client has a one-click hand-off that creates a reactivation follow-up job (PRD-07), respecting marketing consent.",
+        "The reactivation action is idempotent (no duplicate job for the same client); rows deep-link into the client 360 profile.",
+        "Operational signals are visible to managers; any lifetime-value / dollar figure is owner-only (.fin)."
+      ],
+      "detail": [
+        "Alongside the cohort grid (PRD-08/RETENTION-COHORTS) sits the at-risk / lapsed worklist: clients past their expected return cadence for their treatment type, each showing last-seen, an at-risk reason (e.g. 'anti-wrinkle client, 14 weeks since last visit') and — owner-only — their value at risk. The list is the actionable counterpart to the headline retention rate on BUSINESS-DASH.",
+        "Acting on a client hands straight off to the recall / win-back loop: a one-click 'queue reactivation' action creates a reactivation follow-up job (PRD-07) so the report drives a call rather than just describing a problem; the hand-off honours the client's marketing-consent state and is idempotent (no duplicate job for the same client). Rows deep-link into the client 360 profile.",
+        "This reads from the reporting read-models (PRD-08/READ-MODELS) over appointment, client and visit data and is date/window-aware like the rest of Reports. Cadence and at-risk reason are operational; any lifetime-value / dollar figure is owner-gated (.fin) and stripped for non-owner roles."
+      ],
+      "ui_spec": [
+        "Prototype: Reports → Retention & rebooking (reports.png, goRep('retention')) — the 'At-risk & lapsed clients' card (repAtRisk) with an 'Open follow-ups →' action.",
+        "At-risk list: client, last-seen, at-risk reason, value-at-risk (.fin owner-only), and a per-row 'queue reactivation' hand-off into Follow-ups.",
+        "Date presets shared with the business view; operational signals visible to managers, money owner-gated."
+      ],
+      "data_model": [
+        {
+          "entity": "(read) AtRiskClient",
+          "fields": "client_id, last_seen, treatment_type, expected_cadence, at_risk_reason, value_at_risk",
+          "notes": "Clients past expected return cadence; value_at_risk owner-gated (.fin); feeds the reactivation hand-off."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-08/RETENTION-COHORTS"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Read-model / projection: at-risk & lapsed clients",
+          "note": "Behaviour: project AtRiskClient = clients past the expected return cadence for their treatment type, with last-seen, an at-risk reason and (owner-only) value-at-risk. Requirements: cadence is per treatment type; value_at_risk is tagged owner-financial and stripped for non-owner roles; expose the underlying client ids so the list drills into the 360 profile."
         },
         {
           "title": "At-risk list UI + reactivation hand-off to Follow-ups",
@@ -246,7 +546,7 @@
     },
     {
       "key": "COMPLIANCE-DASH",
-      "title": "Compliance dashboards & register exports",
+      "title": "Compliance dashboards (core: overview band + consent & consult adherence)",
       "context": "This is the compliance half of the Governance hub: it turns the clinic's everyday records into audit-ready evidence — consent coverage, the prescription-medicine register, recalls, registration and retention watch, and the breach/complaints registers. It sits in the Reporting layer (step 6 of the clinic-first build): it reads from the reporting read-models (READ-MODELS) plus the audit stream and reuses the lot-recall lookup from Injectables (PRD-04), so it depends on both. The owner exceptions digest (ATTENTION-DIGEST) and the inspection-readiness pack (INSPECTION-PACK) are built on top of it. No money figures appear here. Consent coverage, consult-before-script adherence (C1), S4 (Schedule 4 prescription-only medicine) register export (C8), lot→clients recall, cooling-off adherence (C6), registration-expiry watch (C19), records-retention-due (C18), S4 stock discrepancies (C17), breach (C22) & complaints (C24) registers (REQ-RPT-3).",
       "as_a": "compliance officer",
       "i_want": "compliance dashboards and exports covering consent, consult-before-script, the S4 register, recalls, expiry and the breach/complaints registers",
@@ -320,6 +620,10 @@
       ],
       "tasks": [
         {
+          "title": "Read-model / projection: core compliance metrics",
+          "note": "Behaviour: project the core ComplianceMetric values — consent coverage, cooling-off adherence (C6), and consult-before-script adherence (C1) — over the read-models + AuditEvent stream (ADR-0013/0010). Requirements: compute consult-before-script as 100%-by-construction from the ABSENCE of unlinked-script audit events; a gap surfaces as a flagged exception, never a silently-averaged number; eventual consistency acceptable; no money figures. (Stock-discrepancy and the expiry/retention watch projections are the follow-up COMPLIANCE-DASH-EXPIRY; register exports are separate follow-ups.)"
+        },
+        {
           "title": "Consent-coverage & cooling-off adherence metrics",
           "note": "Behaviour: render consent-coverage (share of treatments with a current, version-correct consent on file) and cooling-off adherence (C6, under-18 7-day wait honoured) as compliance metrics with their basis. Requirements: computed over the read-models + AuditEvent stream (ADR-0013/0010); a gap surfaces as a flagged exception with a deep link to the affected client/visit, never a silently-averaged number; eventual consistency acceptable; no money figures."
         },
@@ -328,28 +632,198 @@
           "note": "Behaviour: surface consult-before-script adherence (C1) as 100% by construction — the PRD-04 domain invariant makes a script without a linked synchronous consult impossible to record. Requirements: read it from the ABSENCE of unlinked-script audit events rather than averaging a soft percentage; if any cross-check finds an exception, flag it explicitly with its source rather than diluting the headline; expand the acronyms (S4, consult) in the surface copy."
         },
         {
+          "title": "Governance Overview tile band + 'Needs attention' + 'Quietly handled' columns",
+          "note": "Behaviour: build the Governance Overview (gov-overview.png) — the live status tile band (Inspection-ready Review/Ready, Open AE cases, Unsigned policies, Active recalls), the 'Needs attention' column with per-item deep links into source, the 'Quietly handled for you' assurance column (registrations & indemnity current, cold-chain logged twice daily in range, last stocktake reconciled, client-privacy self-served), and the Key-terms expander explaining the acronyms. Requirements: tiles and the needs-attention list derive from the compliance metrics + the open AE/policy/recall counts and live-update on action; the 'quietly handled' assurances read cross-module signals (PRD-04 cold chain/stock, PRD-01 privacy) — read-only here; capability-gate to the compliance concern; no money figures."
+        }
+      ]
+    },
+    {
+      "key": "COMPLIANCE-DASH-S4REGISTER",
+      "title": "Compliance: S4 register export",
+      "context": "Plainly: a one-click export of the complete Schedule 4 (S4, prescription-only medicine) medicines register — every administration with its lot and expiry — as a tamper-evident, dated evidence file an inspector can be handed. Where it fits: a follow-up to the compliance dashboards core (PRD-08/COMPLIANCE-DASH) that adds the first of the register exports. It reads the administration-register projection (PRD-08/READ-MODELS), not OLTP, and each export is recorded as immutable evidence against the audit trail. No money figures.",
+      "as_a": "compliance officer",
+      "i_want": "to export a complete, immutable S4 medicines register",
+      "so_that": "I can evidence every controlled-medicine administration in an inspection",
+      "notes": "",
+      "acceptance": [
+        "The S4 register exports a complete record of administrations, each with lot + expiry, ordered and tamper-evident (C8).",
+        "Each export is a point-in-time evidence artefact recorded as a RegisterExport row + an AuditEvent (who / when / params).",
+        "No mutation of source data; the export is reproducible from the administration-register projection, not an OLTP scan.",
+        "No money figures."
+      ],
+      "detail": [
+        "The S4 (Schedule 4 prescription-only medicine) register export produces a complete, ordered, tamper-evident record of every administration with its lot + expiry (C8) — the controlled-medicine evidence an AHPRA / TGA / state-Health inspector asks for. It reads the administration-register projection (PRD-08/READ-MODELS), never an OLTP scan, so it is reproducible and never touches the clinical write path.",
+        "Each export is a point-in-time evidence artefact: it writes a RegisterExport row plus an AuditEvent capturing who exported it, when and with what parameters, and it never mutates the source data. The export is one of the categories the inspection-readiness pack (PRD-08/INSPECTION-PACK) later assembles. No money figures appear."
+      ],
+      "ui_spec": [
+        "Prototype: Governance → Overview register exports — the S4 register download/export action.",
+        "Each export records a RegisterExport row + an AuditEvent; reproducible from the administration-register projection; no money figures."
+      ],
+      "data_model": [
+        {
+          "entity": "RegisterExport (extends PRD-08/COMPLIANCE-DASH)",
+          "fields": "id, tenant_id, type(s4_register), params(date_range?), generated_at, actor_id, artifact_ref",
+          "notes": "Immutable point-in-time evidence; recorded against the audit trail (C8); reproducible from the administration-register projection."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-08/COMPLIANCE-DASH"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
           "title": "S4 register export (immutable administration record)",
           "note": "Behaviour: export a complete S4 (Schedule 4 prescription-only medicine) medicines register — every administration with its lot + expiry, ordered and tamper-evident (C8). Requirements: each export is a point-in-time evidence artefact recorded as a RegisterExport row + an AuditEvent (who/when/params); no mutation of source data; reproducible from the administration-register projection, not an OLTP scan."
-        },
+        }
+      ]
+    },
+    {
+      "key": "COMPLIANCE-DASH-RECALL",
+      "title": "Compliance: lot → clients recall lookup",
+      "context": "Plainly: type in a medicine lot number and instantly get every client treated from that lot, with treatment date and contactability — the lookup that turns a product safety notice into a recall list. Where it fits: a follow-up to the compliance dashboards core (PRD-08/COMPLIANCE-DASH) that reuses the Injectables recall lookup (PRD-04/RECALL-LOOKUP) over the administration-register projection. It is the input both to the recall campaign (gov-recalls / DAEN) and the S4 register export; the result set is itself audit-logged as a sensitive read. No money figures.",
+      "as_a": "compliance officer",
+      "i_want": "to look up every client treated from a given medicine lot",
+      "so_that": "a lot safety notice can be turned into a recall instantly",
+      "notes": "",
+      "acceptance": [
+        "Given a lot number, the lookup returns every client treated from that lot with treatment date and contactability.",
+        "It reuses PRD-04 RECALL-LOOKUP over the administration-register projection.",
+        "It is instant at clinic volumes (indexed projection, not an OLTP scan).",
+        "The result set is itself audit-logged as a sensitive read; no money figures."
+      ],
+      "detail": [
+        "The lot → clients recall lookup takes a lot (batch) number and returns every client treated from that lot, with treatment date and contactability. It is the input both to the recall campaign (gov-recalls / DAEN) and the S4 register export (PRD-08/COMPLIANCE-DASH-S4REGISTER) — a lot safety notice becomes an actionable recall list rather than a manual hunt.",
+        "It reuses the Injectables recall lookup (PRD-04/RECALL-LOOKUP) over the administration-register projection, so it must be instant at clinic volumes (an indexed projection, never an OLTP scan). Because it returns who-was-treated-with-what, the result set is itself audit-logged as a sensitive read (ADR-0010). No money figures appear."
+      ],
+      "ui_spec": [
+        "Prototype: Governance → Overview register exports — the lot-recall lookup (enter a lot, return affected clients).",
+        "Reuses PRD-04 RECALL-LOOKUP; instant at clinic volumes; the result set is audit-logged as a sensitive read; no money figures."
+      ],
+      "data_model": [
+        {
+          "entity": "(read) LotRecallLookup",
+          "fields": "lot_ref → [{client_id, treatment_date, contactability}]",
+          "notes": "Reuses PRD-04/RECALL-LOOKUP over the administration-register projection (indexed, not OLTP); the lookup itself is audited as a sensitive read."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-08/COMPLIANCE-DASH",
+        "PRD-04/RECALL-LOOKUP"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Lot → clients recall lookup",
           "note": "Behaviour: given a lot number, return every client treated from that lot with treatment date and contactability — the input both to the recall campaign (gov-recalls / DAEN) and the register export. Requirements: reuse PRD-04 RECALL-LOOKUP over the administration-register projection; must be instant at clinic volumes (indexed projection, not an OLTP scan); the result set is itself audit-logged as a sensitive read."
-        },
+        }
+      ]
+    },
+    {
+      "key": "COMPLIANCE-DASH-REGISTERS",
+      "title": "Compliance: breach & complaints registers",
+      "context": "Plainly: the notifiable-data-breach register and the complaints register, presented as viewable and exportable lists on the compliance dashboard. Where it fits: a follow-up to the compliance dashboards core (PRD-08/COMPLIANCE-DASH) that surfaces two more register exports. The dashboard composes these from their source modules (the breach workflow PRD-01/BREACH and the complaints records) rather than owning the records; each export is recorded against the audit trail. Capability-gated to the compliance concern; no money figures.",
+      "as_a": "compliance officer",
+      "i_want": "to view and export the breach and complaints registers",
+      "so_that": "I can evidence our breach and complaint handling in an inspection",
+      "notes": "",
+      "acceptance": [
+        "The notifiable-data-breach register (C22, sourced from PRD-01 BREACH) and the complaints register (C24, including the right to complain to AHPRA) are viewable, exportable lists.",
+        "Each export is a RegisterExport artefact recorded against the audit trail.",
+        "The registers read their source modules — the dashboard composes, it does not own the breach/complaint records.",
+        "Capability-gated to the compliance concern; no money figures."
+      ],
+      "detail": [
+        "This follow-up surfaces two further registers on the compliance dashboard: the notifiable-data-breach register (C22, sourced from the breach workflow PRD-01/BREACH) and the complaints register (C24, including the right to complain to AHPRA — Australian Health Practitioner Regulation Agency), each as a viewable, exportable list.",
+        "The dashboard composes these from their source modules — it reads the breach and complaint records, it does not own them. Each export is a RegisterExport artefact recorded against the audit trail (a point-in-time evidence file, like the S4 register). The surface is capability-gated to the compliance concern; no money figures appear."
+      ],
+      "ui_spec": [
+        "Prototype: Governance → Overview register exports — the breach register and complaints register download/export actions.",
+        "Each export records a RegisterExport artefact against the audit trail; the registers read their source modules (PRD-01 BREACH + complaints); capability-gated to the compliance concern; no money figures."
+      ],
+      "data_model": [
+        {
+          "entity": "RegisterExport (extends PRD-08/COMPLIANCE-DASH)",
+          "fields": "type(breach|complaints), params(date_range?), generated_at, actor_id, artifact_ref",
+          "notes": "Composes the breach (PRD-01/BREACH) + complaints source records; immutable; recorded against the audit trail (C22/C24)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-08/COMPLIANCE-DASH"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Breach & complaints registers (viewable + exportable)",
           "note": "Behaviour: present the notifiable-data-breach register (C22, sourced from PRD-01 BREACH) and the complaints register (C24, including the right to complain to AHPRA) as viewable, exportable lists. Requirements: each export is a RegisterExport artefact recorded against the audit trail; the registers read their source modules (the dashboard composes, it does not own the breach/complaint records); capability-gated to the compliance concern; no money figures."
+        }
+      ]
+    },
+    {
+      "key": "COMPLIANCE-DASH-EXPIRY",
+      "title": "Compliance: registration-expiry watch & records-due lists",
+      "context": "Plainly: two watchlists on the compliance dashboard — practitioner registrations approaching expiry, and client records that have reached their legal destruction-due date — each row showing not just a date but WHY it is on the list. Where it fits: a follow-up to the compliance dashboards core (PRD-08/COMPLIANCE-DASH) that adds the expiry/retention projections beyond the core consent/consult metrics. The expiry watch reads credential expiry (PRD-01/CREDENTIALS) and the records-due list the retention rules (PRD-01/RETENTION); both project over the read-models. No money figures.",
+      "as_a": "compliance officer",
+      "i_want": "a registration-expiry watch and a records-due-for-destruction list, each showing its basis",
+      "so_that": "an inspector sees not just a number but why each item is on the list",
+      "notes": "",
+      "acceptance": [
+        "The registration-expiry watch (C19) and records-due-for-destruction (C18) lists render with their basis.",
+        "The expiry watch carries the AHPRA expiry date (from CREDENTIALS).",
+        "The records-due list carries the C18 retention rule that made the record eligible (adults ≥7yr from last contact; minors to 25; indefinite where a complaint/adverse outcome exists).",
+        "Both project over the read-models; eventual consistency acceptable; no money figures."
+      ],
+      "detail": [
+        "This follow-up adds the two watchlists the compliance dashboard needs beyond the core consent/consult metrics: the registration-expiry watch (C19) — practitioner registrations approaching or past expiry — and the records-due-for-destruction list (C18) — client records that have reached their legal retention horizon. The point is that each row shows not just a date but its basis, so an inspector sees why each item is on the list.",
+        "The expiry watch carries the AHPRA (Australian Health Practitioner Regulation Agency) expiry date sourced from credentials (PRD-01/CREDENTIALS); the records-due list carries the C18 retention rule that made the record eligible (adults ≥7yr from last contact; minors to 25; indefinite where a complaint / adverse outcome exists), sourced from the retention engine (PRD-01/RETENTION). Both are projected over the read-models with eventual consistency acceptable. It also includes the S4 stock-discrepancy metric (C17, from the PRD-04 reconciliation) as a read. No money figures appear."
+      ],
+      "ui_spec": [
+        "Prototype: Governance → Overview — the registration-expiry watch and records-due lists, each row showing its basis (AHPRA expiry date / the retention rule); the 'Key terms' expander explains the acronyms.",
+        "Both project over the read-models; the stock-discrepancy (C17) metric reads the PRD-04 reconciliation; no money figures."
+      ],
+      "data_model": [
+        {
+          "entity": "(read) ExpiryWatch / RetentionDue",
+          "fields": "subject_ref, basis(ahpra_expiry|retention_rule), due_date, status",
+          "notes": "Renders with its basis (C18/C19); expiry from CREDENTIALS, retention rule from RETENTION; projected over the read-models."
         },
+        {
+          "entity": "ComplianceMetric (stock_discrepancy slice, extends PRD-08/COMPLIANCE-DASH)",
+          "fields": "key(stock_discrepancy), value, basis, computed_at",
+          "notes": "S4 stock-discrepancy (C17) read from the PRD-04 reconciliation; extends the core ComplianceMetric."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-08/COMPLIANCE-DASH"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Registration-expiry watch & records-due-for-destruction lists (with basis)",
           "note": "Behaviour: render the registration-expiry watch (C19) and records-due-for-destruction (C18) lists, each row showing not just a date but WHY it is on the list. Requirements: the expiry watch carries the AHPRA (Australian Health Practitioner Regulation Agency) expiry date (from CREDENTIALS); the retention list carries the C18 retention rule that made the record eligible (adults ≥7yr from last contact; minors to 25; indefinite where a complaint/adverse outcome exists); both project over the read-models; eventual consistency acceptable."
         },
         {
-          "title": "Governance Overview tile band + 'Needs attention' + 'Quietly handled' columns",
-          "note": "Behaviour: build the Governance Overview (gov-overview.png) — the live status tile band (Inspection-ready Review/Ready, Open AE cases, Unsigned policies, Active recalls), the 'Needs attention' column with per-item deep links into source, the 'Quietly handled for you' assurance column (registrations & indemnity current, cold-chain logged twice daily in range, last stocktake reconciled, client-privacy self-served), and the Key-terms expander explaining the acronyms. Requirements: tiles and the needs-attention list derive from the compliance metrics + the open AE/policy/recall counts and live-update on action; the 'quietly handled' assurances read cross-module signals (PRD-04 cold chain/stock, PRD-01 privacy) — read-only here; capability-gate to the compliance concern; no money figures."
-        },
-        {
-          "title": "Read-model / projection: compliance metrics + expiry/retention watch",
-          "note": "Behaviour: project ComplianceMetric values (consent coverage, cooling-off adherence, stock-discrepancy from PRD-04 reconciliation, reg-expiry from credentials) and the ExpiryWatch/RetentionDue lists over the read-models + AuditEvent. Requirements: compute consult-before-script as 100%-by-construction from the absence of unlinked-script audit events; each list carries its basis (AHPRA expiry date / the C18 retention rule); RegisterExport rows are immutable and audited; eventual consistency acceptable."
+          "title": "Stock-discrepancy metric read (C17)",
+          "note": "Behaviour: surface the S4 (Schedule 4 prescription-only medicine) stock-discrepancy metric (C17) as a ComplianceMetric read from the PRD-04 vial reconciliation. Requirements: extends the core ComplianceMetric projection; computed over the read-models + AuditEvent; eventual consistency acceptable; no money figures."
         }
       ]
     },
@@ -889,7 +1363,7 @@
     },
     {
       "key": "COST-CATALOGUE",
-      "title": "Per-procedure cost catalogue (cost inputs)",
+      "title": "Per-procedure cost catalogue (core: cost model + editor)",
       "as_a": "owner",
       "i_want": "to maintain the product, consumable and per-use device cost of each procedure in one place",
       "so_that": "every margin report and pricing model stays honest from a single source of truth",
@@ -939,16 +1413,96 @@
           "note": "Behaviour: model ProcedureCost per service with editable product/S4, consumables and per-use device cost, deriving cost_per_procedure. Requirements: tenant-scoped (+ RLS); product cost reconciles against the per-product/per-unit stock model + VIAL-RECON (PRD-04); all fields owner-financial (.fin); changes are append-only audited so a margin figure traces to its inputs."
         },
         {
+          "title": "Cost catalogue editor UI (owner-only)",
+          "note": "Behaviour: the Settings → Cost catalogue editor — per-procedure rows for the three cost components with a live-updating Cost/procedure, surfaced read-through on the Reports Revenue tab. Requirements: gate the entire surface behind .fin (owner-only); non-owner roles never see cost figures; edits validate and persist and write an audit entry; the note explains consumables feed Stock."
+        }
+      ]
+    },
+    {
+      "key": "COST-CATALOGUE-FEED",
+      "title": "Cost catalogue: single-source feed to margin report + pricing planner",
+      "as_a": "owner",
+      "i_want": "the cost catalogue to be the single source my margin report and pricing planner read",
+      "so_that": "I change a cost once and every report and model stays consistent",
+      "context": "Plainly: wiring the per-procedure cost catalogue so the true-cost/margin report and the pricing what-if planner both read it — change a cost once and both update, with no re-keying. Where it fits: a follow-up to the per-procedure cost catalogue core (PRD-08/COST-CATALOGUE), which owns the editable cost components; this story makes those components the single source of truth the downstream surfaces consume. Margins and costs stay owner-only (.fin) across the hand-off.",
+      "notes": "",
+      "acceptance": [
+        "The catalogue is the single source the true-cost/margin report (TRUE-COST) and the pricing & what-if planner (PRD-06) read.",
+        "Changing a cost once re-flows into both surfaces (no re-keying).",
+        "Margins/costs stay owner-only (.fin) across the hand-off.",
+        "Eventual consistency acceptable for the downstream projections."
+      ],
+      "detail": [
+        "This follow-up makes the per-procedure cost catalogue (PRD-08/COST-CATALOGUE) the single source of truth the downstream money surfaces read: the true-cost/margin report (PRD-08/TRUE-COST) and the pricing & what-if planner (PRD-06/PRICING-WHATIF, ADR-0022). Change a consumable or device-per-use cost once in the catalogue and both surfaces reflect it — there is no re-keying of figures, so a margin and a price model can never silently disagree on what a treatment costs.",
+        "Costs and margins stay gated behind the owner-only financial (.fin) capability across the hand-off. The downstream projections may be eventually consistent (a cost change re-flows a moment later), consistent with the rest of Reporting."
+      ],
+      "ui_spec": [
+        "No new screen — this is the wiring that makes the catalogue's figures flow into the True-cost & margin table (TRUE-COST) and the Pricing & what-if planner (PRD-06).",
+        "A cost change in the catalogue re-flows into both; margins/costs stay .fin owner-only across the hand-off."
+      ],
+      "data_model": [
+        {
+          "entity": "ProcedureCost (extends PRD-08/COST-CATALOGUE)",
+          "fields": "consumed by MarginByService (TRUE-COST) + the PRD-06 pricing planner",
+          "notes": "No new entity — exposes the existing ProcedureCost as the single source both downstream surfaces read; owner-gated."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-08/COST-CATALOGUE"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
           "title": "Single-source feed to margin report + pricing planner",
           "note": "Behaviour: expose the catalogue as the single source the true-cost/margin report (TRUE-COST) and the pricing & what-if planner (PRD-06 PRICING-WHATIF) read. Requirements: changing a cost once re-flows into both surfaces (no re-keying); margins/costs stay owner-only across the hand-off; eventual consistency acceptable for the downstream projections."
-        },
+        }
+      ]
+    },
+    {
+      "key": "COST-CATALOGUE-STOCK",
+      "title": "Cost catalogue: consumable → Stock auto-decrement",
+      "as_a": "owner",
+      "i_want": "a procedure's consumable definitions to decrement Stock automatically when the treatment is finalised",
+      "so_that": "consumable usage is counted by the system, not by hand",
+      "context": "Plainly: linking each procedure's consumable definitions to Stock so that finalising the treatment automatically decrements those items (needles, tips, peels) — no one counting tips by hand. Where it fits: a follow-up to the per-procedure cost catalogue core (PRD-08/COST-CATALOGUE), which owns the consumable cost components; this story turns those definitions into automatic stock movements. The decrement happens on chart finalisation (PRD-05), consistent with the existing S4 lot deduction.",
+      "notes": "",
+      "acceptance": [
+        "A procedure's consumable definitions feed Stock so finalising that treatment decrements those items automatically.",
+        "Quantity-per-procedure is modelled against stock items.",
+        "The decrement happens on chart finalisation (PRD-05), consistent with the S4 lot deduction.",
+        "No hand-counting of consumables."
+      ],
+      "detail": [
+        "A clinic under-counts true cost — and runs out of supplies unexpectedly — when consumable usage is tracked by hand. This follow-up links each procedure's consumable definitions (from the cost catalogue, PRD-08/COST-CATALOGUE) to Stock: defining that a treatment uses N needles / tips / peels means finalising that treatment decrements those items automatically.",
+        "Quantity-per-procedure is modelled against the relevant stock items (ConsumableUsage). The decrement fires on chart finalisation (PRD-05), in the same step and consistent with the existing S4 lot deduction, so consumables and S4 stock are kept honest the same way — no hand-counting."
+      ],
+      "ui_spec": [
+        "No new screen — the catalogue's consumable definitions drive an automatic Stock decrement on chart finalisation; the catalogue note explains 'consumables feed Stock so usage decrements automatically'.",
+        "Decrement is consistent with the S4 lot deduction on finalisation (PRD-05)."
+      ],
+      "data_model": [
+        {
+          "entity": "ConsumableUsage",
+          "fields": "service_id, stock_item_id, qty_per_procedure",
+          "notes": "Links a procedure's consumables (PRD-08/COST-CATALOGUE) to Stock so finalising a treatment decrements them automatically (PRD-05)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-08/COST-CATALOGUE"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Consumable → Stock usage link (auto-decrement)",
           "note": "Behaviour: a procedure's consumable definitions feed Stock so finalising that treatment decrements the consumable items automatically. Requirements: model qty-per-procedure against stock items; the decrement happens on chart finalisation (PRD-05) consistent with the S4 lot deduction; no hand-counting."
-        },
-        {
-          "title": "Cost catalogue editor UI (owner-only)",
-          "note": "Behaviour: the Settings → Cost catalogue editor — per-procedure rows for the three cost components with a live-updating Cost/procedure, surfaced read-through on the Reports Revenue tab. Requirements: gate the entire surface behind .fin (owner-only); non-owner roles never see cost figures; edits validate and persist and write an audit entry; the note explains consumables feed Stock."
         }
       ]
     },

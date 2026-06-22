@@ -1,4 +1,4 @@
-# Quiet windows to fill (idle-slot recovery)
+# Quiet windows — basic idle-slot detection & list
 
 > **Epic:** [PRD-02 — Booking & scheduling (+ client/CRM basics)](../epics/PRD-02.md)  ·  **Key:** `PRD-02/QUIET-WINDOWS`  ·  **Type:** Story  ·  **Stage:** M2  ·  **Priority:** P1  ·  **Estimate:** 3 pts  ·  **Area:** —
 >
@@ -49,11 +49,7 @@ Filling a window hands off to existing channels: a recall worklist entry, a wait
 
 ## Tasks (dev pickup)
 
-- [ ] **Idle-slot detection (quiet-window projection)**
-  Behaviour: project upcoming slots where a resource is free during opening hours, ranked by idle duration and proximity. Requirements: configurable quietness threshold and rolling horizon; excludes closed days, time-off and blocked time; refreshes as bookings change. Reads occupancy from the calendar (PRD-02/CALENDAR).
-- [ ] **Cost-per-treatment / savings framing**
-  Behaviour: show why a window matters - an idle chair raises staff cost-per-treatment - with an estimated figure. Requirements: all dollar/cost figures are owner-only and stripped for non-owner roles (the .fin capability); non-owners see the window and the prompt to fill it, but no money.
-- [ ] **Stock-expiry / FEFO tie-in**
-  Behaviour: surface lots nearing expiry and match them to quiet windows that could absorb the stock. Requirements: pulls expiring lots from injectables inventory (PRD-04) ordered first-expiry-first-out (FEFO); flags the write-off avoided; links through to the stock item.
-- [ ] **Fill action: recall / waitlist offer / campaign**
-  Behaviour: a one-click action to fill a window via the recall worklist, a waitlist offer, or a small targeted campaign. Requirements: creates the matching follow-up jobs (PRD-07); honours each client's marketing-consent state; records a FillAction for audit.
+- [ ] **QuietWindow projection (read-model)**
+  Behaviour: model the QuietWindow read-model (resource_id, date, start, end, idle_minutes, score) projected from appointments + roster + opening hours. Requirements: project upcoming slots where a resource is free during opening hours; excludes closed days, time-off and blocked time; refreshed as bookings change; reads occupancy from the calendar (PRD-02/CALENDAR).
+- [ ] **Idle-slot detection & ranked list UI**
+  Behaviour: a 'Quiet windows to fill' panel listing upcoming windows (resource, day, idle duration) ranked by how quiet and how soon. Requirements: configurable quietness threshold and rolling horizon (e.g. next 14 days); the list refreshes as bookings change; the cost framing, stock-expiry tie-in and one-click fill actions are follow-ups.

@@ -183,7 +183,7 @@
     },
     {
       "key": "CREDENTIALS",
-      "title": "Staff credentials + canInject compliance gate",
+      "title": "Staff credentials + canInject compliance gate (core: records + derivation)",
       "context": "Plainly: this records each clinician's registration, training and insurance, and from them works out a single yes/no — is this person cleared to inject right now. It comes just after the permission layer in Foundations. That cleared-to-inject answer is consumed everywhere it matters downstream — booking only offers a cleared injector, and the treatment screens block an injection by anyone who is not cleared — so this story unblocks the clinical and reception epics. Staff profiles hold AHPRA (Australian Health Practitioner Regulation Agency) reg #, type, status/expiry, conditions, ≥1yr-experience flag, CPD (continuing professional development) and cosmetic-cover PII (professional-indemnity insurance); these derive a single canInject (the single derived gate deciding whether a clinician may inject right now) gate. Must accept the new designated RN (registered nurse) prescriber role.",
       "as_a": "owner",
       "i_want": "structured credential + CPD + cosmetic-cover-insurance records that derive whether each practitioner is cleared to treat/inject",
@@ -263,17 +263,64 @@
         },
         {
           "title": "canInject derivation (read-only) + designated/partnered prescriber",
-          "note": "Behaviour: compute canInject (the single derived gate deciding whether a clinician may inject right now) server-side exactly per the prototype rule — scope==inject AND registration current AND cosmetic_cover AND insurance in date — and show it read-only ('cleared to treat' / 'Blocked'); it is computed, never set by hand. Requirements: recompute on any credential change; publish it as the single signal booking (PRD-02), the charting/administration gates (PRD-04/05), the exceptions digest and Follow-ups all consume; support the designated/partnered RN prescriber arrangement (prescriber_mode self|partnered + partnered_prescriber_id) so an RN may administer under a recorded prescriber without holding the prescribe capability."
+          "note": "Behaviour: compute canInject (the single derived gate deciding whether a clinician may inject right now) server-side exactly per the prototype rule — scope==inject AND registration current AND cosmetic_cover AND insurance in date — and show it read-only ('cleared to treat' / 'Blocked'); it is computed, never set by hand. Requirements: recompute on any credential change; publish it as the single signal booking (PRD-02), the charting/administration gates (PRD-04/05), the exceptions digest and Follow-ups all consume; support the designated/partnered RN prescriber arrangement (prescriber_mode self|partnered + partnered_prescriber_id) so an RN may administer under a recorded prescriber without holding the prescribe capability. Manual-verify (a verified-on date per credential) is the v1 baseline; AHPRA PIE auto-verification is the follow-up CREDENTIALS-PIE."
+        }
+      ]
+    },
+    {
+      "key": "CREDENTIALS-PIE",
+      "title": "Credentials: AHPRA PIE register auto-verification",
+      "context": "Plainly: a verify button on each credential that checks the practitioner's registration straight against the AHPRA (Australian Health Practitioner Regulation Agency) register over its Practitioner Information Exchange (PIE) lookup, instead of someone confirming it by hand. Where it fits: a follow-up to the staff-credentials core (PRD-01/CREDENTIALS) — that story ships with a first-class manual-verify (a recorded verified-on date); this adds the automated AHPRA lookup on top, while keeping the manual fallback always present. The register status pulled by PIE feeds the same canInject gate the core derives, so a PIE-pulled lapse blocks injecting exactly like a manual one.",
+      "as_a": "owner",
+      "i_want": "to auto-verify a practitioner's AHPRA registration against the AHPRA PIE register",
+      "so_that": "registration currency is confirmed from the source, not just keyed in by hand",
+      "notes": "",
+      "acceptance": [
+        "A verify action on a registration credential attempts AHPRA PIE auto-verification where approved and records verified_method=pie + verified_on.",
+        "PIE is treated as best-effort: the first-class manual-verify (verified_method=manual + verified_on) is always available as a fallback.",
+        "A status pulled from PIE (current / lapsed / suspended) feeds the canInject derivation (CREDENTIALS) like any other credential change.",
+        "The verify action is gated to owner/lead (team:manage) and audited."
+      ],
+      "detail": [
+        "AHPRA register auto-verification via the Practitioner Information Exchange (PIE — the AHPRA Practitioner Information Exchange register lookup) lets a verify action on a registration credential confirm the practitioner's number, type and status directly against the AHPRA register rather than relying on a hand-keyed entry. On success it stamps verified_method=pie and verified_on so the record shows it was machine-verified and when.",
+        "PIE is approval-gated SOAP, so it is treated as best-effort: the first-class manual-verify path from the core (PRD-01/CREDENTIALS) — storing verified_method=manual + verified_on — is always present as a fallback when PIE is unavailable or not approved for the tenant. A status change pulled from PIE (e.g. lapsed or suspended) is treated exactly like any other credential change: it feeds the canInject (the single derived gate deciding whether a clinician may inject right now) derivation owned by CREDENTIALS, so a PIE-pulled lapse blocks injecting automatically.",
+        "The verify action is gated to owner/lead (team:manage) and every verify (PIE or manual) is audited so there is a record of who confirmed each registration and how."
+      ],
+      "ui_spec": [
+        "Prototype: Team → People & credentials (team-people.png) — the per-credential verify action with a PIE auto-verify attempt and a manual-verify fallback storing a verified-on date.",
+        "On the credential detail view, the verify control shows the last verified method (PIE / manual) and verified-on date; a failed PIE attempt falls back to manual without losing the action.",
+        "Gated to owner/lead (team:manage); the verify writes an audit entry."
+      ],
+      "data_model": [
+        {
+          "entity": "Credential (extends PRD-01/CREDENTIALS)",
+          "fields": "uses existing verified_method(pie|manual) + verified_on",
+          "notes": "No new entity — this story wires the PIE auto-verify path onto the existing Credential.verified_method/verified_on; the manual path is already in the core."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-01/CREDENTIALS"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "AHPRA PIE auto-verify path with manual fallback",
+          "note": "Behaviour: a verify action on a registration credential that attempts AHPRA (Australian Health Practitioner Regulation Agency) PIE (the AHPRA Practitioner Information Exchange register lookup) auto-verification where approved, falling back to the first-class manual-verify (from CREDENTIALS) when PIE is unavailable or not approved. Requirements: PIE is approval-gated SOAP — treat as best-effort; record verified_method (pie|manual) + verified_on either way; the verify action is gated to owner/lead (team:manage) and audited."
         },
         {
-          "title": "AHPRA PIE auto-verify with first-class manual-verify fallback",
-          "note": "Behaviour: a verify action on each credential that attempts AHPRA (Australian Health Practitioner Regulation Agency) PIE (the AHPRA Practitioner Information Exchange register lookup) auto-verification where approved and always falls back to a first-class manual-verify storing verified_method + verified_on. Requirements: PIE is approval-gated SOAP — treat as best-effort with the manual fallback always present; a verified-on date is recorded either way; CRUD + verify are gated to owner/lead (team:manage)."
+          "title": "Feed PIE-pulled status into canInject",
+          "note": "Behaviour: a status pulled from PIE (current / lapsed / suspended) updates the registration credential and feeds the canInject (the single derived cleared-to-inject gate) derivation owned by CREDENTIALS, so a PIE-pulled lapse or suspension blocks injecting automatically. Requirements: treat a PIE status change exactly like any other credential change (recompute canInject); no separate gate — this story only supplies a fresher status to the existing derivation."
         }
       ]
     },
     {
       "key": "REG-WATCH",
-      "title": "Registration / PII / CPD expiry alerting",
+      "title": "Registration / PII / CPD expiry alerting (core: scheduled watch + auto-lapse)",
       "context": "Plainly: this watches every clinician's registration, insurance and training and warns before any of them lapses, so the clinic is never caught treating with an out-of-date practitioner. It builds straight on the credentials story. It feeds the owner's daily 'needs attention' list and the clinic's to-do queue, and on an actual lapse it automatically removes the practitioner from bookable slots — so it protects every booking and treatment that follows. Staff must be alerted before registration, insurance or CPD (continuing professional development) lapses so the clinic is never unknowingly non-compliant.",
       "as_a": "owner",
       "i_want": "to be alerted before a practitioner's registration, cosmetic insurance or CPD lapses",
@@ -335,24 +382,153 @@
         {
           "title": "Auto-lapse → canInject flips not-cleared (the block is automatic)",
           "note": "Behaviour: on an actual lapse (or a PIE status change like suspended), the practitioner stops being bookable and S4 administration by them is blocked — with no human action. Requirements: CREDENTIALS owns the canInject (the derived cleared-to-inject gate) derivation; this story ensures the watch's lapse outcome is reflected so booking (PRD-02) and administration (PRD-04/05) block automatically; the alert is the PROMPT to renew before that happens, not the gate itself."
+        }
+      ]
+    },
+    {
+      "key": "REG-WATCH-ROUTING",
+      "title": "Reg-watch: role-targeted routing to digest + Follow-ups",
+      "context": "Plainly: an expiry alert shouldn't shout at everyone — this routes each credential alert to the people who can act on it (Lead nurse, nurse practitioner, owner), lands it in the owner's 'needs attention' digest and the clinic to-do queue, and audits who acknowledged it. Where it fits: a follow-up to the registration/PII/CPD expiry-alerting core (PRD-01/REG-WATCH) — that story raises the alerts and auto-lapses canInject; this adds where the alerts go and the acknowledge trail. The watch and auto-lapse stay in the core; this is purely the routing/acknowledge layer on top.",
+      "as_a": "owner",
+      "i_want": "credential expiry alerts routed to the people who can act and tracked to acknowledgement",
+      "so_that": "the right person sees each warning and there is a record they actioned it",
+      "notes": "",
+      "acceptance": [
+        "Alerts are routed by concern (compliance / hr / stockAlert) to Lead / NP / owner — not to every RN.",
+        "Open alerts project into the owner needs-attention digest (PRD-08/ATTENTION-DIGEST) and as expiry tasks into the Follow-ups queue (ADR-0023).",
+        "Acknowledge / dismiss writes an audit event (who / when).",
+        "Routing/acknowledge is idempotent — a re-scan does not duplicate an open alert."
+      ],
+      "detail": [
+        "Credential alerts are role-targeted by concern rather than broadcast: registration / insurance / CPD currency is a Lead / NP (nurse practitioner) / owner concern (the stockAlert / compliance / hr concerns in the persona model), not every RN (registered nurse)'s, so the warning lands with someone who can renew or cover.",
+        "Open alerts feed two surfaces — the owner needs-attention digest (PRD-08/ATTENTION-DIGEST) and the unified Follow-ups queue (ADR-0023) as expiry tasks — so an expiry is both visible at a glance and actionable as a job. Acknowledge / dismiss on an alert writes an audit event so there is a record of who saw and actioned each warning, and the whole path is idempotent so a daily re-scan never duplicates an open alert."
+      ],
+      "ui_spec": [
+        "Prototype: the credential alerts surface as amber/red items routed to Lead/NP/owner; an acknowledge/dismiss action on an alert is audited.",
+        "Open alerts mirror into the owner needs-attention digest (PRD-08/ATTENTION-DIGEST) and the Follow-ups queue as expiry tasks.",
+        "Routing is concern-driven (compliance/hr/stockAlert), not every-RN broadcast."
+      ],
+      "data_model": [
+        {
+          "entity": "CredentialAlert (extends PRD-01/REG-WATCH)",
+          "fields": "uses existing acknowledged_by / acknowledged_at; routed by concern; projects to ATTENTION-DIGEST + Follow-ups",
+          "notes": "No new entity — adds the routing/acknowledge layer over the CredentialAlert the core already raises."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-01/REG-WATCH"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Concern-based routing to digest + Follow-ups",
+          "note": "Behaviour: route open CredentialAlerts by concern (compliance / hr / stockAlert) to Lead / NP (nurse practitioner) / owner — not every RN (registered nurse) — and project them into the owner needs-attention digest (PRD-08/ATTENTION-DIGEST) and as expiry tasks into the Follow-ups queue (ADR-0023). Requirements: idempotent so a re-scan does not duplicate an open alert; the alert is the prompt to renew, the auto-lapse (REG-WATCH core) is the actual gate."
         },
         {
-          "title": "Role-targeted routing to digest + Follow-ups, with audited acknowledge",
-          "note": "Behaviour: route alerts by concern (compliance/hr/stockAlert) to Lead/NP (nurse practitioner)/owner — not every RN (registered nurse) — projecting them into the owner needs-attention digest (PRD-08) and as expiry tasks into the Follow-ups queue (ADR-0023). Requirements: acknowledge/dismiss writes an audit event (who/when); idempotent so a re-scan does not duplicate an open alert."
-        },
+          "title": "Audited acknowledge / dismiss",
+          "note": "Behaviour: acknowledge / dismiss on an alert records who saw and actioned it. Requirements: writes an audit event (actor / when); a dismissed-then-re-raised condition does not create a duplicate open alert."
+        }
+      ]
+    },
+    {
+      "key": "REG-WATCH-BOARD",
+      "title": "Reg-watch: 'who is cleared to inject today' compliance board",
+      "context": "Plainly: the at-a-glance Team board that shows, per practitioner, whether their registration, CPD and cosmetic indemnity all hold — and therefore whether they are bookable for S4 (Schedule 4 prescription-only medicine) today — with a red banner counting anyone flagged not-bookable. Where it fits: a follow-up to the registration/PII/CPD expiry-alerting core (PRD-01/REG-WATCH) that gives the watch a human-readable home screen. It reads the canInject derivation (PRD-01/CREDENTIALS) and the alerts the core raises; it sets no gate itself — it visualises the gate that already exists.",
+      "as_a": "manager",
+      "i_want": "a compliance board showing who is cleared to inject today and who is blocked",
+      "so_that": "I can see at a glance who I can book for S4 and why anyone is blocked",
+      "notes": "",
+      "acceptance": [
+        "The board shows a per-practitioner table: Registration (current·date / expired), CPD (X/Yh / behind), Indemnity (covers cosmetic / EXCLUDES cosmetic), Bookable-for-S4 (Yes / Blocked).",
+        "An explainer states an injector is bookable for S4 only when ALL of registration / CPD / cosmetic indemnity hold.",
+        "A red banner counts injectors flagged not-bookable for S4 (or shows the green all-clear).",
+        "Cells use emerald / amber / rose states; non-AHPRA practitioners render n/a; capability-gated to team:manage / the compliance concern."
+      ],
+      "detail": [
+        "Team → Compliance board (team-compliance.png) is the 'who is cleared to inject today' screen: a per-practitioner table with Registration (current·date / expired), CPD (continuing professional development, X/Yh or behind), Indemnity (covers cosmetic / EXCLUDES cosmetic) and Bookable-for-S4 (Yes / Blocked) columns, an explainer note ('an injector is bookable for S4 only when ALL of these hold: current registration, enough CPD, indemnity that covers cosmetic'), and a red banner counting injectors flagged not-bookable for S4 (Schedule 4 prescription-only medicine) — or the green all-clear when everyone holds.",
+        "The board is a read view over the canInject (the single derived cleared-to-inject gate) derivation (PRD-01/CREDENTIALS) and the alerts the watch (PRD-01/REG-WATCH) raises — it visualises the gate, it does not set it. Cells use the emerald / amber / rose states the derivation drives; non-AHPRA (Australian Health Practitioner Regulation Agency) practitioners render n/a. The surface is capability-gated to team:manage / the compliance concern."
+      ],
+      "ui_spec": [
+        "Prototype: Team → Compliance board (team-compliance.png) — explainer note, a red 'N injector flagged not-bookable for S4' banner (or green all-clear), and the per-practitioner table with Registration / CPD / Indemnity-cosmetic / Bookable-for-S4 columns.",
+        "Cells use emerald/amber/rose states from the canInject derivation; non-AHPRA practitioners render n/a.",
+        "Capability-gated to team:manage / the compliance concern."
+      ],
+      "data_model": [
         {
-          "title": "Compliance board UI ('who is cleared to inject today')",
-          "note": "Behaviour: build Team → Compliance board (team-compliance.png) — the explainer note ('an injector is bookable for S4 only when ALL of these hold: current registration, enough CPD, indemnity that covers cosmetic'), a red 'N injector flagged not-bookable for S4 (Schedule 4 prescription-only medicine)' banner (or the green all-clear), and the per-practitioner table with Registration / CPD (continuing professional development) / Indemnity-cosmetic / Bookable-for-S4 columns. Requirements: cells use emerald/amber/rose states; non-AHPRA practitioners render n/a; capability-gate to team:manage / the compliance concern."
-        },
+          "entity": "(read) ComplianceBoard",
+          "fields": "per practitioner: registration state, cpd state, cosmetic-indemnity state, bookable_for_s4 (= canInject)",
+          "notes": "Read view over the canInject derivation (PRD-01/CREDENTIALS) + CredentialAlerts (PRD-01/REG-WATCH); no new write model — it visualises the existing gate."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-01/REG-WATCH"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
-          "title": "Amber early-warning countdown chips ('Renews in Nd')",
-          "note": "Behaviour: surface the amber early-warning chips ('Renews in Nd' for reg/insurance ≤40 days out, 'CPD behind X/Yh' when CPD is under threshold) on the People & Compliance views. Requirements: the countdown is derived from the credential expiry/CPD figures; the same items also surface in the owner needs-attention digest and Follow-ups; the chip is read-only signal, not an editable field."
+          "title": "Compliance board table + not-bookable banner",
+          "note": "Behaviour: build Team → Compliance board (team-compliance.png) — the explainer note, the red 'N injector flagged not-bookable for S4 (Schedule 4 prescription-only medicine)' banner (or green all-clear), and the per-practitioner table with Registration / CPD (continuing professional development) / Indemnity-cosmetic / Bookable-for-S4 columns. Requirements: cells use emerald/amber/rose states read from the canInject (the derived cleared-to-inject gate) derivation (CREDENTIALS); non-AHPRA practitioners render n/a; capability-gate to team:manage / the compliance concern; the board sets no gate — it visualises the existing one."
+        }
+      ]
+    },
+    {
+      "key": "REG-WATCH-CHIPS",
+      "title": "Reg-watch: amber early-warning countdown chips",
+      "context": "Plainly: the small amber 'Renews in Nd' and 'CPD behind X/Yh' chips that appear on the People and Compliance views before anything lapses, so a renewal is prompted early rather than discovered late. Where it fits: a follow-up to the registration/PII/CPD expiry-alerting core (PRD-01/REG-WATCH) that adds the early-warning visual cue on the credential views. The chip is a read-only derived signal off the credential expiry/CPD figures — it does not gate anything; the auto-lapse in the core is the gate.",
+      "as_a": "manager",
+      "i_want": "amber early-warning chips showing how soon a credential renews or how far CPD is behind",
+      "so_that": "I act before a registration or insurance lapses rather than after",
+      "notes": "",
+      "acceptance": [
+        "Amber 'Renews in Nd' chips show on the People & Compliance views for registration/insurance within the warning window (≤40 days).",
+        "A 'CPD behind X/Yh' chip shows when CPD done is under the required threshold.",
+        "The countdown is derived from the credential expiry / CPD figures (read-only signal, not an editable field).",
+        "The same items also surface in the owner needs-attention digest and Follow-ups."
+      ],
+      "detail": [
+        "The amber early-warning chips give a visible head-start before a lapse: a 'Renews in Nd' chip on registration or cosmetic insurance within the ≤40-day warning window (the prototype's threshold), and a 'CPD behind X/Yh' chip when CPD (continuing professional development) done is under the required threshold. They render on the People & credentials and Compliance views alongside the derived status.",
+        "The chip is a read-only derived signal computed from the credential expiry / CPD figures — never a hand-set field — so it stays correct as dates move. It does not gate anything: the auto-lapse in the core (PRD-01/REG-WATCH) is the gate; the chip is the early prompt. The same items also surface in the owner needs-attention digest (PRD-08) and the Follow-ups queue."
+      ],
+      "ui_spec": [
+        "Prototype: amber early-warning chips ('Renews in Nd' for reg/insurance ≤40 days out, 'CPD behind X/Yh' when CPD is under threshold) on the People & Compliance views.",
+        "Read-only derived signal off the credential expiry/CPD figures, not an editable field; the same items also surface in the owner needs-attention digest and Follow-ups."
+      ],
+      "data_model": [
+        {
+          "entity": "(derived) ExpiryCountdown",
+          "fields": "from Credential.expiry / CPD done-vs-required → 'Renews in Nd' (≤40d) / 'CPD behind X/Yh'",
+          "notes": "Read-only derived signal over the existing Credential figures (PRD-01/CREDENTIALS); no new write model; not a gate."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-01/REG-WATCH"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Amber early-warning countdown chips on People & Compliance views",
+          "note": "Behaviour: surface the amber early-warning chips — 'Renews in Nd' for registration/insurance ≤40 days out, 'CPD behind X/Yh' when CPD (continuing professional development) is under threshold — on the People & credentials and Compliance views. Requirements: the countdown is derived from the credential expiry/CPD figures (read-only signal, not an editable field); the same items also surface in the owner needs-attention digest and Follow-ups; the chip is the early prompt, not the gate (the auto-lapse in REG-WATCH is the gate)."
         }
       ]
     },
     {
       "key": "ROSTER",
-      "title": "Rosters & engagement type",
+      "title": "Rosters & engagement type (core: roster grid + availability)",
       "context": "Plainly: this records who is working when, and combines that with who is cleared to treat, to decide who can actually be booked. It sits in Foundations just after credentials. The diary (the Reception epic that comes next) reads directly from it, so it can only ever offer a slot backed by a rostered, cleared practitioner — this story unblocks booking availability. A roster (plus employee/contractor engagement type) drives booking availability and feeds commission/pay attribution downstream.",
       "as_a": "manager",
       "i_want": "to record staff rosters/time-off and each person's engagement type",
@@ -412,13 +588,97 @@
           "note": "Behaviour: the weekly roster grid (team-roster.png) — day columns × practitioner rows with shaded rostered cells, editable by Owner/Lead. Requirements: model RosterShift per staff + location (tenant_id + RLS); Reception sees the grid read-only (it needs to see who's in, not edit shifts); the ADR-0029 banner states the roster is the source of truth for booking availability; every shift change is audited."
         },
         {
-          "title": "Leave list with pending/approved status + approve/decline",
-          "note": "Behaviour: the Leave list below the grid — entries with kind (annual/personal/other), dates and a status chip (Pending/Approved/Declined), with approve/decline actions for Owner/Lead. Requirements: approved leave blocks availability, pending does not yet block but is visible; approve/decline is gated to team:manage and audited; model TimeOff with the approval status."
+          "title": "Bookable-availability derivation (the query PRD-02 consumes)",
+          "note": "Behaviour: compute bookable availability = roster shifts − approved leave, intersected with the canInject (the derived cleared-to-inject gate)/scope check for the requested service. Requirements: expose this as the exact query PRD-02 booking consumes so the diary can never offer a slot for an off or non-compliant practitioner; a practitioner is bookable for an S4 (Schedule 4 prescription-only medicine) service only when rostered AND canInject is true (ADR-0029). (Leave is the follow-up ROSTER-LEAVE; until it lands, availability subtracts no approved leave.)"
+        }
+      ]
+    },
+    {
+      "key": "ROSTER-LEAVE",
+      "title": "Roster: time-off / leave list with approval",
+      "context": "Plainly: the leave list under the roster grid where staff time-off is recorded and Owner/Lead approve or decline it — and where approved leave then carves a practitioner out of the bookable diary. Where it fits: a follow-up to the roster core (PRD-01/ROSTER) that adds the time-off side of availability. The roster core ships the shift grid and the availability query (roster ∩ canInject); this story adds the 'minus approved leave' term and the approval workflow that drives it.",
+      "as_a": "manager",
+      "i_want": "to record staff time-off and approve or decline it",
+      "so_that": "an approved day off automatically removes that practitioner from the bookable diary",
+      "notes": "",
+      "acceptance": [
+        "A leave list under the roster grid records time-off per staff member with kind (annual / personal / other) and dates.",
+        "Each entry has a status chip (Pending / Approved / Declined); Owner/Lead can approve or decline.",
+        "Approved leave blocks bookable availability (subtracted in the ROSTER availability derivation); pending does not yet block but is visible.",
+        "Approve / decline is gated to team:manage and audited."
+      ],
+      "detail": [
+        "Below the weekly grid sits the Leave list: entries per staff member with a kind (annual / personal / other) and dates, each carrying a status chip (Pending / Approved / Declined). The prototype shows the worked examples ('Dr Lena Park · Annual leave · Thu 26 – Fri 27 Jun · Pending', 'Chloe Adams · Personal · Mon 23 Jun · Approved'). Owner/Lead approve or decline; Reception sees it read-only.",
+        "Approved leave is the 'minus approved leave' term in the roster core's availability derivation (PRD-01/ROSTER) — an approved day off carves the practitioner out of the bookable diary (PRD-02) so they can't be booked while away; a pending request is visible but does not yet block. Approve / decline is gated to team:manage and audited so leave decisions are on the record."
+      ],
+      "ui_spec": [
+        "Prototype: Team → Roster & leave (team-roster.png) — the Leave list below the grid (e.g. 'Dr Lena Park · Annual leave · Thu 26 – Fri 27 Jun · Pending', 'Chloe Adams · Personal · Mon 23 Jun · Approved') with status chips.",
+        "Owner/Lead approve/decline; Reception sees it read-only; approved leave blocks availability, pending does not yet block but is visible."
+      ],
+      "data_model": [
+        {
+          "entity": "TimeOff",
+          "fields": "id, tenant_id, staff_id, kind(annual|personal|other), start, end, status(pending|approved|declined), approved_by",
+          "notes": "Approved leave blocks availability (feeds the ROSTER availability derivation); pending does not yet block but is visible."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-01/ROSTER"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Leave list + approve/decline workflow",
+          "note": "Behaviour: the Leave list below the grid — entries with kind (annual/personal/other), dates and a status chip (Pending/Approved/Declined), with approve/decline actions for Owner/Lead and a read-only view for Reception. Requirements: model TimeOff with the approval status; approve/decline is gated to team:manage and audited."
         },
         {
-          "title": "Bookable-availability derivation (the query PRD-02 consumes)",
-          "note": "Behaviour: compute bookable availability = roster shifts − approved leave, intersected with the canInject (the derived cleared-to-inject gate)/scope check for the requested service. Requirements: expose this as the exact query PRD-02 booking consumes so the diary can never offer a slot for an off or non-compliant practitioner; a practitioner is bookable for an S4 (Schedule 4 prescription-only medicine) service only when rostered AND canInject is true (ADR-0029)."
-        },
+          "title": "Approved leave subtracted from bookable availability",
+          "note": "Behaviour: approved leave is subtracted in the roster core's availability derivation (PRD-01/ROSTER) so an approved day off removes the practitioner from the bookable diary (PRD-02); pending leave is visible but does not yet block. Requirements: this only supplies the 'minus approved leave' term — the availability query itself lives in ROSTER."
+        }
+      ]
+    },
+    {
+      "key": "ROSTER-ENGAGEMENT",
+      "title": "Roster: engagement-type recording for attribution",
+      "context": "Plainly: recording whether each staff member is an employee or a contractor, so downstream revenue attribution and the contractor compliance banner can use it — without the app becoming a payroll system. Where it fits: a follow-up to the roster core (PRD-01/ROSTER); the engagement-type field already lives on StaffProfile (from PRD-01/CREDENTIALS), so this story is the deliberate recording of it for downstream use. Explicitly attribution only: the platform attributes revenue by engagement type but is NOT a payroll/super engine (ADR-0027).",
+      "as_a": "manager",
+      "i_want": "each staff member's engagement type (employee / contractor) recorded",
+      "so_that": "downstream revenue attribution and the contractor compliance banner can use it",
+      "notes": "",
+      "acceptance": [
+        "Engagement type (employee / contractor) is recorded per staff member (already on StaffProfile from CREDENTIALS).",
+        "The engagement type is available to downstream commission/pay attribution and the contractor compliance banner.",
+        "No payroll / commission UI here — attribution is downstream.",
+        "The platform attributes revenue by engagement type but is explicitly not a payroll/super engine (ADR-0027)."
+      ],
+      "detail": [
+        "Each staff member's engagement type (employee / contractor) is recorded for downstream use — it already lives on StaffProfile from PRD-01/CREDENTIALS, so this story is its deliberate capture and exposure rather than a new field. It feeds downstream commission/pay attribution and the contractor compliance banner (ADR-0027).",
+        "The boundary is explicit: the platform attributes revenue by engagement type but is NOT a payroll/super engine (ADR-0027) — there is no payroll or commission UI here; the attribution itself happens downstream (Reporting / Xero). This story only makes the engagement type a first-class, recorded input."
+      ],
+      "ui_spec": [
+        "Prototype: engagement type (Contractor/Employee) shown on the People & credentials card (team-people.png); recorded per staff member.",
+        "No payroll/commission UI here — the engagement type is an input to downstream attribution and the contractor compliance banner (ADR-0027)."
+      ],
+      "data_model": [
+        {
+          "entity": "StaffProfile (extends PRD-01/CREDENTIALS)",
+          "fields": "uses existing engagement_type(employee|contractor)",
+          "notes": "No new entity — records/exposes the engagement type already on StaffProfile for downstream attribution; the platform is not a payroll engine (ADR-0027)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-01/ROSTER"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Engagement-type recording for downstream attribution",
           "note": "Behaviour: record each staff member's engagement type (employee/contractor) — it already lives on StaffProfile from CREDENTIALS — for downstream commission/pay attribution and the contractor compliance banner. Requirements: the platform attributes revenue by engagement type but is explicitly NOT a payroll/super engine (ADR-0027); no payroll/commission UI here — attribution is downstream."
@@ -803,7 +1063,7 @@
     },
     {
       "key": "CLIENT-CORE",
-      "title": "Client core record: DOB & under-18 flag",
+      "title": "Client core record: DOB & under-18 flag (core: record + age derivation)",
       "context": "Plainly: this is the bare-bones client record — enough to capture date of birth and work out whether the client is under 18, which several later rules depend on. It is a small Foundations story built on tenancy. The full client directory and profile come later in the Reception epic; this story exists early only so that age-based rules (cooling-off, advertising/pricing) have a single trustworthy source. The client record captures DOB (date of birth) and derives an under-18 flag that feeds cooling-off (C6) and advertising/pricing (C9) elsewhere.",
       "as_a": "system",
       "i_want": "to capture client DOB and derive an under-18 flag",
@@ -853,15 +1113,135 @@
         {
           "title": "Client core record + server-side age / under-18 derivation",
           "note": "Behaviour: model the Client core (tenant_id + RLS (row-level security)) with DOB (date of birth) and derive under18 + current age server-side AT READ TIME so they stay correct across a birthday with no batch job (a client who is 17 today is 18 on their birthday automatically). Requirements: expose the derived flag/age to PRD-03/06/07 (the under-18 cooling-off C6 and the S4 advertising/pricing C9 rules) so every consumer reads one answer instead of re-implementing date maths; an unknown/estimated DOB still derives a defensible age band."
-        },
+        }
+      ]
+    },
+    {
+      "key": "CLIENT-CORE-SOFTDELETE",
+      "title": "Client core: soft-delete with audit",
+      "context": "Plainly: deleting a client hides them from active and bookable views without ever destroying the row — the record and its history stay for retention and audit. Where it fits: a follow-up to the client core record (PRD-01/CLIENT-CORE), which ships the DOB record + age derivation; this adds the delete lifecycle. Deliberately not destruction: physically destroying records is PRD-01/RETENTION's job — here a soft-delete just excludes the client from active use and writes an audit event.",
+      "as_a": "system",
+      "i_want": "to soft-delete a client so they leave active/bookable/search views but their row and history remain",
+      "so_that": "deletion is reversible and lawful, with destruction left to the retention engine",
+      "notes": "",
+      "acceptance": [
+        "A soft-deleted client (deleted_at set) is excluded from active / bookable / search views but the row and its history remain.",
+        "The client is never hard-deleted here — destruction is RETENTION's job.",
+        "A soft-deleted client cannot be booked or appear in active search.",
+        "The delete writes an audit event."
+      ],
+      "detail": [
+        "Soft-delete stamps deleted_at so a deleted client drops out of active, bookable and search views while the row and all its history are preserved. This is the lifecycle plumbing on top of the client core record (PRD-01/CLIENT-CORE): a deleted client cannot be booked or surface in active search, but nothing is physically removed.",
+        "The boundary with retention is deliberate: this story never hard-deletes — lawful physical destruction (with the destruction register + certificate) is PRD-01/RETENTION's job, and a soft-delete does not override a legal retention period or a litigation hold. Every soft-delete writes an audit event so there is a record of who removed a client and when."
+      ],
+      "ui_spec": [
+        "Surfaces as the delete/restore lifecycle on the client record; a soft-deleted client is excluded from active/bookable/search views (the full client directory + 360 profile are PRD-02).",
+        "No hard-delete affordance — destruction is RETENTION's job; the delete writes an audit event."
+      ],
+      "data_model": [
+        {
+          "entity": "Client (extends PRD-01/CLIENT-CORE)",
+          "fields": "uses existing deleted_at",
+          "notes": "No new entity — adds the soft-delete lifecycle over the Client core; never hard-deletes (destruction is RETENTION)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-01/CLIENT-CORE"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Soft-delete with audit (retention/destruction stays RETENTION's job)",
           "note": "Behaviour: support soft-delete (deleted_at) so a deleted client is excluded from active/bookable/search views but the row and its history remain. Requirements: never hard-delete here — destruction is RETENTION's job; a soft-deleted client cannot be booked or appear in active search; the delete writes an audit event."
-        },
+        }
+      ]
+    },
+    {
+      "key": "CLIENT-CORE-DEDUPE",
+      "title": "Client core: duplicate detection & reviewed merge",
+      "context": "Plainly: spotting two records that look like the same person (matching name, DOB and contact) and offering a reviewed merge — never silently merging, because a false merge of two real people is dangerous. Where it fits: a follow-up to the client core record (PRD-01/CLIENT-CORE) that adds duplicate handling on top of the core record. Merge is a reviewed action that re-points history to the surviving record and is audited; the full client directory and 360 profile remain PRD-02.",
+      "as_a": "system",
+      "i_want": "duplicate client records surfaced as merge candidates and a reviewed, audited merge",
+      "so_that": "duplicates are cleaned up without ever falsely merging two real people",
+      "notes": "",
+      "acceptance": [
+        "Duplicate / merge candidates (matching name + DOB + contact) are surfaced as suggestions, never auto-merged.",
+        "Merge is a reviewed action that re-points history to the surviving record.",
+        "A merge writes an audit event.",
+        "Merged-away (and soft-deleted) records stay out of active views (full directory + 360 profile are PRD-02)."
+      ],
+      "detail": [
+        "Duplicate handling surfaces merge candidates — records matching on name + DOB (date of birth) + contact — as advisory suggestions only. It never auto-merges, because falsely merging two real people who happen to share details is far worse than leaving a suspected duplicate flagged.",
+        "Merge is therefore a reviewed action: an operator confirms, the merge re-points clinical/booking history onto the surviving record, and the action writes an audit event. Merged-away records (and soft-deleted ones, PRD-01/CLIENT-CORE-SOFTDELETE) stay out of active views. The full client directory, search and 360 profile that host this in everyday use are PRD-02."
+      ],
+      "ui_spec": [
+        "Surfaces as a merge-candidates suggestion (matching name + DOB + contact) with a reviewed confirm-merge action; never an automatic merge.",
+        "Merge re-points history to the surviving record and writes an audit event; merged-away records stay out of active views (full directory + 360 profile are PRD-02)."
+      ],
+      "data_model": [
+        {
+          "entity": "Client (extends PRD-01/CLIENT-CORE)",
+          "fields": "merge re-points history to the surviving Client; merged-away records excluded from active views",
+          "notes": "No new entity — adds advisory duplicate detection + a reviewed merge over the Client core; never auto-merges."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-01/CLIENT-CORE"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Duplicate detection & reviewed merge",
           "note": "Behaviour: surface duplicate/merge candidates (matching name + DOB (date of birth) + contact) as suggestions, never auto-merging two real people. Requirements: merge is a reviewed action that re-points history to the surviving record and writes an audit event; soft-deleted and merged-away records stay out of active views (full client directory + 360 profile are PRD-02)."
-        },
+        }
+      ]
+    },
+    {
+      "key": "CLIENT-CORE-AGECHIP",
+      "title": "Client core: patient-header age / under-18 chip",
+      "context": "Plainly: the little age chip on the patient header (e.g. '34 · Brisbane') that shows a client's age and, when relevant, their under-18 status — the at-a-glance signal a clinician sees before charting. Where it fits: a follow-up to the client core record (PRD-01/CLIENT-CORE) that surfaces the server-derived age/flag visually; it is consumed by the Client 360 header (PRD-02/CLIENT-360). The chip is purely a read surface over the core's derivation — never a hand-set field — so it can't drift from the gate rules that depend on it.",
+      "as_a": "clinician",
+      "i_want": "the client's age and under-18 status shown as a chip on the patient header",
+      "so_that": "I see the at-a-glance age/gate signal before I chart",
+      "notes": "",
+      "acceptance": [
+        "The derived age + under-18 status render as the patient-header age chip (e.g. '34 · Brisbane').",
+        "The chip reads the server-derived age/flag (never a hand-set field).",
+        "The under-18 state is the at-a-glance gate signal a clinician sees before charting.",
+        "It is consumed by the Client 360 header (PRD-02/CLIENT-360); the directory + full profile that host it are PRD-02."
+      ],
+      "detail": [
+        "The patient-header age chip is the visible surface of the core's server-side age derivation (PRD-01/CLIENT-CORE): the client's current age and, where relevant, their under-18 status, shown at-a-glance (the prototype's Client 360 header age, e.g. '34 · Brisbane', alongside the consent/VIP chips).",
+        "It reads the server-derived age/flag at read time and is never a hand-set field, so it always agrees with the cooling-off (C6) and advertising/pricing (C9) rules that consume the same derivation. The under-18 state is the gate signal a clinician sees before charting. The chip is hosted by the Client 360 header (PRD-02/CLIENT-360); the directory and full profile around it are PRD-02."
+      ],
+      "ui_spec": [
+        "Prototype: the Client 360 header (client-360.png) shows the age (e.g. '34') alongside consent chips ('Consent current', 'Image use', 'Allergy: none') and VIP/member tag.",
+        "The under-18/age chip reads the server-derived age/flag (never hand-set); consumed by the UX age chip on the patient header (PRD-02/CLIENT-360)."
+      ],
+      "data_model": [
+        {
+          "entity": "(read) PatientHeaderAgeChip",
+          "fields": "from Client.under18 / age (derived, PRD-01/CLIENT-CORE)",
+          "notes": "Read-only surface over the core's age derivation; never a hand-set field; hosted by the Client 360 header (PRD-02)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-01/CLIENT-CORE"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Patient-header age / under-18 chip surface",
           "note": "Behaviour: expose the derived age + under-18 status as the patient-header age chip (the visible signal staff always see, e.g. '34 · Brisbane'), consumed by the Client 360 header (PRD-02/CLIENT-360). Requirements: the chip reads the server-derived age/flag (never a hand-set field); the under-18 state is the at-a-glance gate signal a clinician sees before charting; the directory + full profile that host it are PRD-02."

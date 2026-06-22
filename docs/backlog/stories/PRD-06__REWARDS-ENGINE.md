@@ -1,4 +1,4 @@
-# Rewards engine — non-S4 only
+# Rewards engine — non-S4 points earn/redeem + S4 block (core)
 
 > **Epic:** [PRD-06 — Payments (in-person POS + autopay), memberships & non-S4 rewards](../epics/PRD-06.md)  ·  **Key:** `PRD-06/REWARDS-ENGINE`  ·  **Type:** Story  ·  **Stage:** M4  ·  **Priority:** P0  ·  **Estimate:** 5 pts  ·  **Area:** backend
 >
@@ -6,8 +6,8 @@
 
 ## Background
 
-As a client, I want to earn and redeem rewards on non-S4 items only, so that I'm rewarded without breaching S4 advertising rules.
-What this is, plainly: the loyalty rules — points and perks earned and spent — built so they can never touch a prescription injectable. Where it sits: it depends on the PRD-04 product catalogue's schedule flag and underpins later loyalty work; it lives in the Payments/commerce layer after the clinical core. Visit-based + membership rewards that the engine blocks from ever applying to S4 (Schedule 4 prescription-only medicine) items; configuring an S4 reward is blocked (REQ-MEMB-4/5/7, C9/ADR-0014).
+As a client, I want to earn and redeem points on non-S4 items only, so that I'm rewarded without breaching S4 advertising rules.
+What this is, plainly: the loyalty core — earn and redeem points on non-S4 spend, built so it can NEVER touch a prescription injectable, with that block enforced both when a reward is configured and again at checkout. This is the minimal end-to-end core; loyalty tiers/top balances and the loyalty admin screen are added as their own follow-ups. Where it sits: it depends on the PRD-04 product catalogue's schedule flag and underpins later loyalty work; it lives in the Payments/commerce layer after the clinical core. Points earn/redeem that the engine blocks from ever applying to S4 (Schedule 4 prescription-only medicine) items; configuring an S4 reward is blocked (REQ-MEMB-4/5/7, C9/ADR-0014).
 
 ## How it works
 
@@ -17,15 +17,15 @@ Defaults match the prototype: earn 1 pt / $1 on non-S4; redeem 200 pts = $20 off
 
 ## Requirements
 
-- To earn and redeem rewards on non-S4 items only.
+- To earn and redeem points on non-S4 items only.
 - Compliance: [C9](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
 
 ## Acceptance Criteria
 
-- [ ] Visit-based rewards (milestones / every-Nth-visit) and membership perks apply to non-S4 items, add-ons or account/gift credit.
+- [ ] Points earn on completed non-S4 spend (default 1 pt / $1) and visit milestones, and redeem against non-S4 lines (default 200 pts = $20 off non-S4); earn/redeem land in a per-client RewardLedger.
 - [ ] The engine refuses to earn, redeem or discount against any S4-flagged item (server-side invariant, re-checked at checkout).
 - [ ] Attempting to configure a reward whose eligible items include an S4 item is blocked with a clear reason.
-- [ ] The catalog schedule flag (PRD-04/ADR-0014) drives eligibility; earn/redeem land in the RewardLedger.
+- [ ] The catalog schedule flag (PRD-04/ADR-0014) drives eligibility; blocked attempts and non-S4 redemptions are audited.
 
 ## UI designs / screenshots
 
@@ -53,11 +53,7 @@ Defaults match the prototype: earn 1 pt / $1 on non-S4; redeem 200 pts = $20 off
 
 - [ ] **Points program: earn + redeem (non-S4) into the RewardLedger**
   Behaviour: clients earn points on completed non-S4 spend (default 1 pt / $1) and visit milestones, and redeem them against non-S4 lines (default 200 pts = $20 off non-S4); earn/redeem land in a per-client RewardLedger (earned / redeemed / balance) with a ref to the originating invoice/visit. Requirements: redemption only ever discounts a non-S4 line; the ledger surfaces on the Client 360 and the client-app Rewards; defaults match the prototype but are configurable.
-- [ ] **Tiers (Silver / Gold / Platinum) + top balances**
-  Behaviour: clients are banded into loyalty tiers (Silver · Gold · Platinum) by their balance/activity, and the Loyalty screen shows a 'Top balances' list (e.g. 'Amelia Ross 1,240 pts'). Requirements: tier thresholds are owner-configurable; tier is derived from the ledger; top-balance visibility is a staff read (no money figures, so not .fin-gated, but client PII access is audited).
 - [ ] **S4 reward block at config time (C9 invariant)**
   Behaviour: a RewardRule's eligible_items reference catalogue items; attempting to add an S4 (Schedule 4 prescription-only medicine) item to a rule's eligible set is rejected with a clear blocked-action reason (what's blocked / which item / why). Requirements: enforce as a DB/domain constraint AND at the API — not a UI nicety; the schedule flag (PRD-04/ADR-0014) is the source of truth; the loyalty screen states 'Points never earn or redeem on S4 medicines — enforced at checkout'; audit the block (ADR-0010).
 - [ ] **S4 reward block at checkout (live schedule re-check) + audit**
   Behaviour: at checkout the engine recomputes eligibility against the LIVE line schedule and refuses to earn, redeem or discount against any S4 line — the S4 line's reward/points control is inert/disabled with a tooltip. Requirements: never trust a cached/UI eligibility value; the refusal is server-side and returns a clear reason for the disabled control; audit both blocked attempts and successful non-S4 redemptions. This is the same invariant POS surfaces as 'S4 · no rewards'.
-- [ ] **Loyalty screen UI (points program + tiers + top balances)**
-  Behaviour: the Loyalty screen shows the Points program (Earn '1 pt / $1 on non-S4', Redeem '200 pts = $20 off non-S4'), Tiers (Silver · Gold · Platinum), the rule note 'Points never earn or redeem on S4 medicines — enforced at checkout', and Top balances. Requirements: earn/redeem also visible on Client 360 + client-app Rewards; S4 catalogue items render disabled reward/discount controls with a tooltip; loading/empty/error states.

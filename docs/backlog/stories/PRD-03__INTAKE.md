@@ -1,4 +1,4 @@
-# Pre-visit intake forms
+# Pre-visit intake — basic capture & chart-link
 
 > **Epic:** [PRD-03 — Intake, consent & compliance gating](../epics/PRD-03.md)  ·  **Key:** `PRD-03/INTAKE`  ·  **Type:** Story  ·  **Stage:** M2  ·  **Priority:** P0  ·  **Estimate:** 5 pts  ·  **Area:** client-app, backend
 >
@@ -51,9 +51,5 @@ _Prototype screen: prototype.html — Forms & consent; client-app.html intake/co
 
 - [ ] **IntakeResponse capture + auto-link to chart/appointment**
   Behaviour: an endpoint that submits an IntakeResponse from the client app / web / kiosk. Requirements: stamp form_version, store answers(json), derive contraindication_flags, set submitted_at, and auto-link to client_id + appointment_id so it appears on the chart; the response is validated server-side against the form's JSON schema; required-and-current responses feed the GATING evaluation; audited.
-- [ ] **Re-screen vs full form (new/returning)**
-  Behaviour: a returning client gets a quick medical re-screen; a new client gets the full intake form. Requirements: the form variant is chosen from the booking's new_or_returning flag (PRD-02); both stamp the form_version they were answered against; the quick re-screen still captures any changed contraindications.
-- [ ] **Medical-history step + quick safety check**
-  Behaviour: the intake wizard's medical-history step (checkboxes incl. pregnancy/breastfeeding, blood thinners, cold-sore history, latex/lidocaine allergies, and 'None of the above') followed by a 'quick safety check' summary. Requirements: selections derive contraindication_flags; the safety check summarises whether any contraindication was flagged for the nurse; rendered identically in the client app and at the reception check-in tablet.
-- [ ] **Staff Forms & consent: intake status + send/chase**
-  Behaviour: the staff Forms & consent screen showing recent submissions with per-client intake status (complete / pending — link sent) and actions to send or chase an intake link. Requirements: send/chase goes via PRD-07; status reflects whether a required, current IntakeResponse exists; rows deep-link to the client.
+- [ ] **Minimal intake submission UI (client/web)**
+  Behaviour: a minimal client-facing intake form that submits an IntakeResponse for the booked appointment. Requirements: renders the configured fields and posts to the capture endpoint; the new/returning variant, the medical-history step + safety check, and the staff send/chase surface are follow-ups.

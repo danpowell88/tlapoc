@@ -1,4 +1,4 @@
-# Lot → clients recall lookup & medicine register
+# Lot → clients recall lookup & medicine register (MVP)
 
 > **Epic:** [PRD-04 — Consult, prescribing & S4 medicines governance (the moat)](../epics/PRD-04.md)  ·  **Key:** `PRD-04/RECALL-LOOKUP`  ·  **Type:** Story  ·  **Stage:** M3  ·  **Priority:** P0  ·  **Estimate:** 5 pts  ·  **Area:** backend
 >
@@ -54,9 +54,7 @@ The medicine register is the same immutable Administration data, queryable by da
 
 ## Tasks (dev pickup)
 
-- [ ] **Recall entity + lot index over Administration (model & migration)**
-  Add Recall: id, tenant_id, lot, reason, started_at, status, acknowledgements[]{client_id, at, via}; RLS by tenant. Add the index on Administration(lot_id) (and (lot_id, client_id)) that makes the lot->clients lookup instant. Build the MedicineRegister read model as a queryable view over the immutable Administration stream (date, product, prescriber, administrator, client, lot, units) - no denormalised copy that could drift (ADR-0013).
-- [ ] **Recall lookup + register query/export API**
-  Endpoints: GET /recall/lookup?lot=... returns every Administration for the lot (client, at, units, administrator, prescriber); POST /recall starts a Recall (lot, reason) and seeds acknowledgement tracking; PATCH /recall/{id}/ack records a client acknowledgement (via sms|call|app). GET /register queryable by date/product/prescriber/administrator with an export (audit pack). Recall safety comms are sent even to marketing-opt-out clients (safety, not promotion).
-- [ ] **Immutability guarantee + acknowledgement trail audit**
-  The register/recall read strictly from the append-only Administration stream (ADR-0010) so the exported register is provably complete and tamper-evident. Audit recall start, each acknowledgement and each register export - the X-of-N acknowledged trail and the export log are the inspector-facing evidence (C8). Full recall execution + DAEN routing detail hand off to the Governance hub (PRD-08/11).
+- [ ] **Lot index over Administration + MedicineRegister read model (model & migration)**
+  Add the index on Administration(lot_id) (and (lot_id, client_id)) that makes the lot->clients lookup instant. Build the MedicineRegister read model as a queryable view over the immutable Administration stream (date, product, prescriber, administrator, client, lot, units) - no denormalised copy that could drift (ADR-0013). RLS by tenant.
+- [ ] **Recall lookup + register query/export API + immutability guarantee**
+  Endpoints: GET /recall/lookup?lot=... returns every Administration for the lot (client, at, units, administrator, prescriber); GET /register queryable by date/product/prescriber/administrator with an export (audit pack). The register/recall read strictly from the append-only Administration stream (ADR-0010) so the exported register is provably complete and tamper-evident; audit each register export - the export log is inspector-facing evidence (C8).

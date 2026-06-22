@@ -1,4 +1,4 @@
-# Checkout assist & post-visit rebooking
+# Post-visit rebooking on the treatment interval (core)
 
 > **Epic:** [PRD-06 — Payments (in-person POS + autopay), memberships & non-S4 rewards](../epics/PRD-06.md)  ·  **Key:** `PRD-06/CHECKOUT-ASSIST`  ·  **Type:** Story  ·  **Stage:** M4  ·  **Priority:** P2  ·  **Estimate:** 2 pts  ·  **Area:** web
 >
@@ -6,8 +6,8 @@
 
 ## Background
 
-As a front desk, I want checkout to suggest relevant non-S4 upsells and prompt rebooking at the right interval, so that I help clients and keep them on cadence.
-What this is, plainly: gentle, rules-safe prompts at the till — a quiet membership or restock nudge, a one-line rapport cue, and an offer to rebook the next visit at the right interval. Where it sits: it layers onto the POS checkout and ties out to the calendar (PRD-02) and recall (PRD-07); it sits in the Payments layer after the clinical core. Subtle membership/restock upsell + client rapport panel + post-checkout rebooking on the treatment interval (REQ-PAY-6, ADR-0022).
+As a front desk, I want checkout to prompt rebooking the next visit at the right interval, so that I keep clients on cadence before they leave.
+What this is, plainly: after payment, offer the next visit at the right interval — pick a slot or text the options — so the client leaves with their next appointment booked. This is the minimal end-to-end core; the subtle 'Worth mentioning' upsell panel, the client-rapport panel and the 'Pairs well with today's treatment' cross-sell are each added as their own follow-ups. Where it sits: it layers onto the POS checkout and ties out to the calendar (PRD-02) and recall (PRD-07); it sits in the Payments layer after the clinical core. Post-checkout rebooking on the treatment interval (REQ-PAY-6, ADR-0022).
 
 ## How it works
 
@@ -16,14 +16,14 @@ After payment, the post-checkout rebooking view offers the next visit on the tre
 
 ## Requirements
 
-- Checkout to suggest relevant non-S4 upsells and prompt rebooking at the right interval.
+- Checkout to prompt rebooking the next visit at the right interval.
 
 ## Acceptance Criteria
 
-- [ ] Checkout shows a subtle 'Worth mentioning' upsell (membership/restock) and a client-rapport panel derived from history.
-- [ ] A non-S4 'Pairs well with today's treatment' cross-sell row matches aftercare/retail to the cart, showing margin.
-- [ ] Post-checkout rebooking is offered on the treatment interval (slot pick or text options); booking creates the appointment (PRD-02).
-- [ ] No upsell or cross-sell discounts or promotes an S4 item.
+- [ ] After payment, a rebook view offers the next visit on the treatment interval (toxin ~12 weeks): pick a slot or 'Text her the options'.
+- [ ] Booking a slot creates the appointment (PRD-02); the text/recall nudge ties to PRD-07.
+- [ ] A non-S4 restock-reminder can be toggled on; no rebooking prompt discounts or promotes an S4 item.
+- [ ] Slots come from the calendar availability engine (scope-aware).
 
 ## UI designs / screenshots
 
@@ -48,11 +48,5 @@ _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rew
 
 ## Tasks (dev pickup)
 
-- [ ] **'Worth mentioning' upsell panel (membership / restock / rebook cue)**
-  Behaviour: a subtle 'Worth mentioning' panel surfaces derived prompts at the till — a membership offer if the client isn't a member ('Not a member — offer Glow Club · $89/mo') with an 'Add to sale' action, a likely retail restock ('Likely low on retinol serum — bought 10 wks ago, lasts ~8') with an 'Add restock' action, and a 'Toxin due ~now' rebook cue. Requirements: suggestions are derived (membership status + stock ageing + treatment interval), computed server-side; the copy is a quiet staff nudge ('suggest, don't push'); none of these ever discount or promote an S4 (Schedule 4 prescription-only medicine) item.
-- [ ] **Client-rapport panel (derived from history)**
-  Behaviour: a one-line rapport panel derived from the client record — preferences ('Natural finish · a chamomile tea on arrival'), recent treatments, and a connection cue ('Birthday in 12 days · referred by Hannah L.') — to help the desk personalise. Requirements: read-only, derived from the Client 360; no money figures; respects RBAC (no clinical detail beyond what reception may see).
-- [ ] **'Pairs well with today's treatment' non-S4 cross-sell**
-  Behaviour: a cross-sell row matches non-S4 aftercare/retail to what was treated (toxin → arnica/recovery serum; filler → lip balm; skin → SPF/HA serum; etc.), each card showing price, margin (e.g. '+$21 margin') and an 'Add' action that appends the line to the cart. Requirements: matched from cart signals server-side; S4 (Schedule 4 prescription-only medicine) items are suppressed entirely; margin figures are owner-relevant but shown to the desk as a selling aid (no daily-takings exposure); empty state when the cart already covers aftercare.
 - [ ] **Post-payment rebooking on the treatment interval**
-  Behaviour: after payment, a rebook view offers the next visit on the treatment interval (toxin ~12 weeks) — a slot grid to pick a time or 'Text her the options', plus a non-S4 restock-reminder toggle. Booking a slot creates the appointment (PRD-02); the text/recall nudge ties to PRD-07. Requirements: slots come from the calendar availability engine (scope-aware); 'Text her the options' sends via INotifier (PRD-07) honouring consent; confirming sets confirmation + reminders. No S4 discount/promotion anywhere.
+  Behaviour: after payment, a rebook view offers the next visit on the treatment interval (toxin ~12 weeks) — a slot grid to pick a time or 'Text her the options', plus a non-S4 restock-reminder toggle. Booking a slot creates the appointment (PRD-02); the text/recall nudge ties to PRD-07. Requirements: slots come from the calendar availability engine (scope-aware); 'Text her the options' sends via INotifier (PRD-07) honouring consent; confirming sets confirmation + reminders. No S4 (Schedule 4 prescription-only medicine) discount/promotion anywhere.

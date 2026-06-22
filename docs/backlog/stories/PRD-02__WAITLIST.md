@@ -1,4 +1,4 @@
-# Waitlist & cancellation backfill
+# Waitlist — basic entries & management
 
 > **Epic:** [PRD-02 — Booking & scheduling (+ client/CRM basics)](../epics/PRD-02.md)  ·  **Key:** `PRD-02/WAITLIST`  ·  **Type:** Story  ·  **Stage:** M2  ·  **Priority:** P1  ·  **Estimate:** 3 pts  ·  **Area:** web
 >
@@ -50,11 +50,7 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 
 ## Tasks (dev pickup)
 
-- [ ] **Waitlist entry CRUD (client + service + window + priority)**
+- [ ] **WaitlistEntry CRUD (client + service + window + priority)**
   Behaviour: add/view/remove a WaitlistEntry capturing client, service, desired date/time window and priority. Requirements: tenant-scoped; an entry is the demand record matched against freed slots; priority + FIFO ordering decides who is offered first; status defaults to waiting.
-- [ ] **Matching / backfill engine on slot-freed**
-  Behaviour: when a booking cancels or no-shows the freed slot is auto-offered to the best matching waiting entry. Requirements: subscribe to the slot-freed event (from REMINDERS/LIFECYCLE); match by service + window + scope/resource feasibility via the SAME availability engine; create an offer with expires_at and dispatch it (PRD-07); idempotent and tenant-scoped.
-- [ ] **Offer lifecycle: offered → accepted / expired**
-  Behaviour: an offer holds the slot for a short window, then accepts or rolls on. Requirements: on accept, book via the create endpoint with full scope/conflict checks and mark accepted; on expiry, mark expired and roll the offer to the next matching entry; every state (offered/accepted/expired, with timestamps) is tracked per entry so the desk can see who was offered what and when.
-- [ ] **Waitlist management UI + cancel/no-show backfill prompt**
-  Behaviour: a screen to add/view waiting clients for a service/window and see offered/accepted/expired status, plus a prompt when an appointment is cancelled/no-showed ('offer this slot to the waitlist'). Requirements: the backfill prompt triggers the matching engine; the management list reflects live offer states; reachable from the Schedule.
+- [ ] **Minimal waitlist management list**
+  Behaviour: a screen reachable from the Schedule to add and view waiting clients for a service/window. Requirements: lists current waiting entries with their service/window/priority; the auto-matching backfill engine, the offer lifecycle and the cancel/no-show backfill prompt are follow-ups.

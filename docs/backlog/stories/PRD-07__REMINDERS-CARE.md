@@ -1,4 +1,4 @@
-# Reminders, confirmations & care sequences
+# Appointment reminders & confirmations — basic sequence (core)
 
 > **Epic:** [PRD-07 — Communications, reminders & recall](../epics/PRD-07.md)  ·  **Key:** `PRD-07/REMINDERS-CARE`  ·  **Type:** Story  ·  **Stage:** M4  ·  **Priority:** P1  ·  **Estimate:** 3 pts  ·  **Area:** backend
 >
@@ -6,36 +6,35 @@
 
 ## Background
 
-As a client, I want timely reminders I can confirm/decline and pre-/after-care instructions for my treatment, so that I'm prepared and cared for around my visit.
-Two jobs that keep clients prepared and cared-for: appointment reminders/confirmations, and pre-care + aftercare instruction sequences timed to each treatment type. A reminder a client can confirm or decline keeps the book accurate; a day-0 and day-3 aftercare touch after a treatment reduces worry and complications. These are transactional messages — exempt from marketing opt-in, but they still avoid S4 references.  Appointment reminders/confirmations plus pre-care and aftercare sequences (multi-touch, timed per treatment type) (REQ-NOTIF-2). Transactional messages are exempt from opt-in.
+As a client, I want timely reminders I can confirm or decline, so that I remember my visit and the book stays accurate.
+This is the minimal end-to-end core: appointment reminders/confirmations a client can confirm or decline, sent per template over the sequence engine. The pre-care and aftercare instruction sequences are each added as their own follow-ups. A reminder a client can confirm or decline keeps the book accurate. These are transactional messages — exempt from marketing opt-in, but they still avoid S4 references. Appointment reminders/confirmations on the sequence engine (REQ-NOTIF-2). Transactional messages are exempt from opt-in.
 
 ## How it works
 
-A Sequence is a multi-touch flow bound to a trigger (booking or visit) and a treatment_type, with ordered steps {offset, channel, template_key}. A SequenceRun tracks one client's progress through a sequence for a given appointment, recording per-step status. Reminders/confirmations send per template (via INotifier); a confirm/decline action updates the appointment (PRD-02) and a reschedule link routes back into booking.
-Pre-care (e.g. avoid blood thinners before toxin) and aftercare (day-0 + day-3 care tips) are sequences keyed by treatment type, so a filler client and a skin-needling client get the right cadence and content. Because reminders and aftercare are transactional (Spam Act exempt), they send regardless of marketing opt-in and have no unsubscribe-gating — but they still must not name or price S4 items (C9). Recall/marketing sequences (RECALL, win-back, birthday) are the consented path. All sends log to the comms history.
+A Sequence is a multi-touch flow bound to a trigger (booking or visit) and a treatment_type, with ordered steps {offset, channel, template_key}. A SequenceRun tracks one client's progress through a sequence for a given appointment, recording per-step status. This basic slice ships the reminder/confirmation flow on that engine: reminders/confirmations send per template (via INotifier); a confirm/decline action updates the appointment (PRD-02) and a reschedule link routes back into booking.
+Because reminders are transactional (Spam Act exempt), they send regardless of marketing opt-in and have no unsubscribe-gating — but they still must not name or price S4 (Schedule 4 prescription-only medicine) items (C9). Pre-care and aftercare instruction sequences are added as follow-ups on this same engine; recall/marketing sequences (RECALL, win-back, birthday) are the consented path. All sends log to the comms history.
 
 ## Requirements
 
-- Timely reminders I can confirm/decline and pre-/after-care instructions for my treatment.
+- Timely reminders I can confirm or decline.
 
 ## Acceptance Criteria
 
 - [ ] Appointment reminders/confirmations send per template; confirm/decline updates the appointment and a reschedule link routes to booking (PRD-02).
-- [ ] Pre-care and aftercare sequences are multi-touch and timed per treatment type.
+- [ ] The Sequence/SequenceRun model backs multi-touch flows; this basic slice ships the reminder/confirmation flow on it.
 - [ ] Transactional messages send regardless of marketing opt-in (no unsubscribe-gating) and avoid S4 references.
 - [ ] All sends are logged to the comms history.
 
 ## UI designs / screenshots
 
-- Prototype: Comms -> Automations configures the reminder/aftercare sequences (e.g. 'Aftercare sequence — Day 0 + day 3 care tips after each visit · SMS · Post-treatment'); sends appear in the client's comms history.
-- Reminder messages include confirm/decline + reschedule links (PRD-02 REMINDERS).
+- Prototype: Comms -> Automations configures the reminder sequence; reminder messages include confirm/decline + reschedule links (PRD-02 REMINDERS); sends appear in the client's comms history.
 
 ![marketing-auto — prototype screen](../screens/marketing-auto.png)
 
 ## Suggested data model
 
 - **Sequence** — id, tenant_id, trigger(booking|visit), treatment_type, kind(transactional|marketing), steps[]{offset, channel, template_key}
-  - _Multi-touch, timed per treatment._
+  - _Multi-touch, timed per treatment; consumed by the pre-care/aftercare follow-ups too._
 - **SequenceRun** — id, sequence_id, client_id, appointment_id, step_status[]{step, status, sent_at}
   - _Transactional runs are opt-in exempt; per-step status tracked._
 
@@ -49,10 +48,10 @@ Pre-care (e.g. avoid blood thinners before toxin) and aftercare (day-0 + day-3 c
   Model Sequence + SequenceRun (tenant_id + RLS (row-level security)).
   - Sequence: trigger (booking|visit), treatment_type, kind (transactional|marketing), ordered steps {offset, channel, template_key}.
   - SequenceRun: one per client+appointment with per-step status + sent_at.
-  - kind distinguishes the opt-in-exempt transactional path from the consented marketing path.
-- [ ] **Sequence engine: trigger -> timed steps, confirm/decline, transactional/consent split**
-  Server-side engine (shared with RECALL + AUTOMATIONS).
-  - On a trigger (booking made / visit completed), start a SequenceRun and schedule steps at their offsets; dispatch each via INotifier at its time.
+  - kind distinguishes the opt-in-exempt transactional path from the consented marketing path. This model is shared by the pre-care/aftercare follow-ups, RECALL and AUTOMATIONS.
+- [ ] **Sequence engine + reminders/confirmations (trigger -> timed steps, confirm/decline)**
+  Server-side engine (shared with the care follow-ups, RECALL + AUTOMATIONS), shipped with the reminder/confirmation flow on it.
+  - On a trigger (booking made), start a SequenceRun and schedule steps at their offsets; dispatch each via INotifier at its time.
   - Reminder confirm/decline updates the Appointment (PRD-02); reschedule link routes to booking.
-  - Transactional sequences send regardless of marketing consent; marketing sequences gate on consent + suppression (MARKETING-CONSENT). Either way, content must not name/price S4 (Schedule 4 prescription-only medicine) (C9).
+  - Transactional sequences send regardless of marketing consent; content must not name/price S4 (Schedule 4 prescription-only medicine) (C9).
   - Endpoints to define sequences + query runs; log every send.

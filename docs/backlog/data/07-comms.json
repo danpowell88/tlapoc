@@ -88,14 +88,14 @@
     },
     {
       "key": "REMINDERS-CARE",
-      "title": "Reminders, confirmations & care sequences",
-      "context": "Two jobs that keep clients prepared and cared-for: appointment reminders/confirmations, and pre-care + aftercare instruction sequences timed to each treatment type. A reminder a client can confirm or decline keeps the book accurate; a day-0 and day-3 aftercare touch after a treatment reduces worry and complications. These are transactional messages — exempt from marketing opt-in, but they still avoid S4 references.  Appointment reminders/confirmations plus pre-care and aftercare sequences (multi-touch, timed per treatment type) (REQ-NOTIF-2). Transactional messages are exempt from opt-in.",
+      "title": "Appointment reminders & confirmations — basic sequence (core)",
+      "context": "This is the minimal end-to-end core: appointment reminders/confirmations a client can confirm or decline, sent per template over the sequence engine. The pre-care and aftercare instruction sequences are each added as their own follow-ups. A reminder a client can confirm or decline keeps the book accurate. These are transactional messages — exempt from marketing opt-in, but they still avoid S4 references. Appointment reminders/confirmations on the sequence engine (REQ-NOTIF-2). Transactional messages are exempt from opt-in.",
       "as_a": "client",
-      "i_want": "timely reminders I can confirm/decline and pre-/after-care instructions for my treatment",
-      "so_that": "I'm prepared and cared for around my visit",
+      "i_want": "timely reminders I can confirm or decline",
+      "so_that": "I remember my visit and the book stays accurate",
       "acceptance": [
         "Appointment reminders/confirmations send per template; confirm/decline updates the appointment and a reschedule link routes to booking (PRD-02).",
-        "Pre-care and aftercare sequences are multi-touch and timed per treatment type.",
+        "The Sequence/SequenceRun model backs multi-touch flows; this basic slice ships the reminder/confirmation flow on it.",
         "Transactional messages send regardless of marketing opt-in (no unsubscribe-gating) and avoid S4 references.",
         "All sends are logged to the comms history."
       ],
@@ -118,18 +118,17 @@
         "PRD-07/CHANNELS"
       ],
       "detail": [
-        "A Sequence is a multi-touch flow bound to a trigger (booking or visit) and a treatment_type, with ordered steps {offset, channel, template_key}. A SequenceRun tracks one client's progress through a sequence for a given appointment, recording per-step status. Reminders/confirmations send per template (via INotifier); a confirm/decline action updates the appointment (PRD-02) and a reschedule link routes back into booking.",
-        "Pre-care (e.g. avoid blood thinners before toxin) and aftercare (day-0 + day-3 care tips) are sequences keyed by treatment type, so a filler client and a skin-needling client get the right cadence and content. Because reminders and aftercare are transactional (Spam Act exempt), they send regardless of marketing opt-in and have no unsubscribe-gating — but they still must not name or price S4 items (C9). Recall/marketing sequences (RECALL, win-back, birthday) are the consented path. All sends log to the comms history."
+        "A Sequence is a multi-touch flow bound to a trigger (booking or visit) and a treatment_type, with ordered steps {offset, channel, template_key}. A SequenceRun tracks one client's progress through a sequence for a given appointment, recording per-step status. This basic slice ships the reminder/confirmation flow on that engine: reminders/confirmations send per template (via INotifier); a confirm/decline action updates the appointment (PRD-02) and a reschedule link routes back into booking.",
+        "Because reminders are transactional (Spam Act exempt), they send regardless of marketing opt-in and have no unsubscribe-gating — but they still must not name or price S4 (Schedule 4 prescription-only medicine) items (C9). Pre-care and aftercare instruction sequences are added as follow-ups on this same engine; recall/marketing sequences (RECALL, win-back, birthday) are the consented path. All sends log to the comms history."
       ],
       "ui_spec": [
-        "Prototype: Comms -> Automations configures the reminder/aftercare sequences (e.g. 'Aftercare sequence — Day 0 + day 3 care tips after each visit · SMS · Post-treatment'); sends appear in the client's comms history.",
-        "Reminder messages include confirm/decline + reschedule links (PRD-02 REMINDERS)."
+        "Prototype: Comms -> Automations configures the reminder sequence; reminder messages include confirm/decline + reschedule links (PRD-02 REMINDERS); sends appear in the client's comms history."
       ],
       "data_model": [
         {
           "entity": "Sequence",
           "fields": "id, tenant_id, trigger(booking|visit), treatment_type, kind(transactional|marketing), steps[]{offset, channel, template_key}",
-          "notes": "Multi-touch, timed per treatment."
+          "notes": "Multi-touch, timed per treatment; consumed by the pre-care/aftercare follow-ups too."
         },
         {
           "entity": "SequenceRun",
@@ -138,17 +137,105 @@
         }
       ],
       "background": [
-        "Two jobs that keep clients prepared and cared-for: appointment reminders/confirmations, and pre-care + aftercare instruction sequences timed to each treatment type. A reminder a client can confirm or decline keeps the book accurate; a day-0 and day-3 aftercare touch after a treatment reduces worry and complications.",
-        "These are transactional messages — exempt from marketing opt-in, but they still avoid S4 references."
+        "Appointment reminders/confirmations keep clients on time and the book accurate. A reminder a client can confirm or decline catches no-shows before they happen.",
+        "These are transactional messages — exempt from marketing opt-in, but they still avoid S4 references. Pre-care and aftercare instruction sequences build on this same engine as follow-ups."
       ],
       "tasks": [
         {
           "title": "Sequence/SequenceRun model (migrations)",
-          "note": "Model Sequence + SequenceRun (tenant_id + RLS (row-level security)).\n- Sequence: trigger (booking|visit), treatment_type, kind (transactional|marketing), ordered steps {offset, channel, template_key}.\n- SequenceRun: one per client+appointment with per-step status + sent_at.\n- kind distinguishes the opt-in-exempt transactional path from the consented marketing path."
+          "note": "Model Sequence + SequenceRun (tenant_id + RLS (row-level security)).\n- Sequence: trigger (booking|visit), treatment_type, kind (transactional|marketing), ordered steps {offset, channel, template_key}.\n- SequenceRun: one per client+appointment with per-step status + sent_at.\n- kind distinguishes the opt-in-exempt transactional path from the consented marketing path. This model is shared by the pre-care/aftercare follow-ups, RECALL and AUTOMATIONS."
         },
         {
-          "title": "Sequence engine: trigger -> timed steps, confirm/decline, transactional/consent split",
-          "note": "Server-side engine (shared with RECALL + AUTOMATIONS).\n- On a trigger (booking made / visit completed), start a SequenceRun and schedule steps at their offsets; dispatch each via INotifier at its time.\n- Reminder confirm/decline updates the Appointment (PRD-02); reschedule link routes to booking.\n- Transactional sequences send regardless of marketing consent; marketing sequences gate on consent + suppression (MARKETING-CONSENT). Either way, content must not name/price S4 (Schedule 4 prescription-only medicine) (C9).\n- Endpoints to define sequences + query runs; log every send."
+          "title": "Sequence engine + reminders/confirmations (trigger -> timed steps, confirm/decline)",
+          "note": "Server-side engine (shared with the care follow-ups, RECALL + AUTOMATIONS), shipped with the reminder/confirmation flow on it.\n- On a trigger (booking made), start a SequenceRun and schedule steps at their offsets; dispatch each via INotifier at its time.\n- Reminder confirm/decline updates the Appointment (PRD-02); reschedule link routes to booking.\n- Transactional sequences send regardless of marketing consent; content must not name/price S4 (Schedule 4 prescription-only medicine) (C9).\n- Endpoints to define sequences + query runs; log every send."
+        }
+      ]
+    },
+    {
+      "key": "PRECARE",
+      "title": "Pre-care instruction sequences (per treatment type)",
+      "context": "Plainly: timed pre-treatment instructions — for example, avoid blood thinners before toxin — sent ahead of a booked visit and tailored to the treatment. Where it fits: a follow-up to the basic appointment reminders/confirmations (PRD-07/REMINDERS-CARE) that adds pre-care sequences on the same sequence engine. Pre-care is transactional (Spam Act exempt) so it sends regardless of marketing opt-in, but it still must not name or price S4 (Schedule 4 prescription-only medicine) items (C9). Keyed by treatment type so a filler client and a skin-needling client get the right cadence and content. All sends log to the comms history.",
+      "as_a": "client",
+      "i_want": "pre-care instructions before my treatment, tailored to what I'm having",
+      "so_that": "I arrive properly prepared",
+      "notes": "",
+      "acceptance": [
+        "A pre-care Sequence is keyed by treatment type and timed ahead of the booked visit, sent on the existing sequence engine (PRD-07/REMINDERS-CARE).",
+        "Pre-care is transactional (Spam Act exempt) — it sends regardless of marketing opt-in (no unsubscribe-gating).",
+        "Pre-care content must not name or price S4 (Schedule 4 prescription-only medicine) items (C9).",
+        "All sends log to the comms history."
+      ],
+      "detail": [
+        "Pre-care (e.g. avoid blood thinners before toxin) is a Sequence keyed by treatment type and timed ahead of the booked visit, running on the sequence engine from the basic reminders/confirmations story (PRD-07/REMINDERS-CARE). A filler client and a skin-needling client get the right pre-care content.",
+        "Pre-care is transactional (Spam Act exempt) so it sends regardless of marketing opt-in and has no unsubscribe-gating — but it still must not name or price S4 (Schedule 4 prescription-only medicine) items (C9). All sends log to the comms history."
+      ],
+      "ui_spec": [
+        "Prototype: Comms -> Automations — a pre-care sequence per treatment type (timed before the visit); sends appear in the client's comms history."
+      ],
+      "data_model": [
+        {
+          "entity": "Sequence (extends PRD-07/REMINDERS-CARE)",
+          "fields": "trigger=booking, treatment_type, kind=transactional, steps timed before the visit",
+          "notes": "No new entity; pre-care content; transactional (opt-in exempt); no S4 references (C9)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-07/REMINDERS-CARE"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Pre-care sequences per treatment type (transactional, no S4)",
+          "note": "Behaviour: a pre-care Sequence keyed by treatment type sends timed pre-treatment instructions ahead of the booked visit on the engine from PRD-07/REMINDERS-CARE. Requirements: transactional (Spam Act exempt, no unsubscribe-gating); content must not name/price S4 (Schedule 4 prescription-only medicine) (C9); all sends log to the comms history."
+        }
+      ]
+    },
+    {
+      "key": "AFTERCARE",
+      "title": "Aftercare instruction sequences (day-0 + day-3, per treatment type)",
+      "context": "Plainly: care tips sent after a treatment — a day-0 and a day-3 touch tailored to the treatment — to reduce worry and complications. Where it fits: a follow-up to the basic appointment reminders/confirmations (PRD-07/REMINDERS-CARE) that adds aftercare sequences on the same sequence engine, triggered by a completed visit. Aftercare is transactional (Spam Act exempt) so it sends regardless of marketing opt-in, but it still must not name or price S4 (Schedule 4 prescription-only medicine) items (C9). Keyed by treatment type. All sends log to the comms history.",
+      "as_a": "client",
+      "i_want": "aftercare instructions after my treatment, tailored to what I had",
+      "so_that": "I recover well and know what to watch for",
+      "notes": "",
+      "acceptance": [
+        "An aftercare Sequence keyed by treatment type sends a day-0 and a day-3 touch after a completed visit, on the existing sequence engine (PRD-07/REMINDERS-CARE).",
+        "Aftercare is transactional (Spam Act exempt) — it sends regardless of marketing opt-in (no unsubscribe-gating).",
+        "Aftercare content must not name or price S4 (Schedule 4 prescription-only medicine) items (C9).",
+        "All sends log to the comms history."
+      ],
+      "detail": [
+        "Aftercare (day-0 + day-3 care tips) is a Sequence keyed by treatment type, triggered by a completed visit, running on the sequence engine from the basic reminders/confirmations story (PRD-07/REMINDERS-CARE). A multi-touch day-0 and day-3 cadence reduces worry and complications, with the right content per treatment type.",
+        "Aftercare is transactional (Spam Act exempt) so it sends regardless of marketing opt-in and has no unsubscribe-gating — but it still must not name or price S4 (Schedule 4 prescription-only medicine) items (C9). All sends log to the comms history."
+      ],
+      "ui_spec": [
+        "Prototype: Comms -> Automations — 'Aftercare sequence — Day 0 + day 3 care tips after each visit · SMS · Post-treatment'; sends appear in the client's comms history."
+      ],
+      "data_model": [
+        {
+          "entity": "Sequence (extends PRD-07/REMINDERS-CARE)",
+          "fields": "trigger=visit, treatment_type, kind=transactional, steps at day-0 + day-3",
+          "notes": "No new entity; aftercare content; transactional (opt-in exempt); no S4 references (C9)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-07/REMINDERS-CARE"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Aftercare sequences (day-0 + day-3, per treatment type, transactional, no S4)",
+          "note": "Behaviour: an aftercare Sequence keyed by treatment type sends a day-0 and a day-3 care touch after a completed visit on the engine from PRD-07/REMINDERS-CARE. Requirements: transactional (Spam Act exempt, no unsubscribe-gating); content must not name/price S4 (Schedule 4 prescription-only medicine) (C9); all sends log to the comms history."
         }
       ]
     },
@@ -289,15 +376,15 @@
     },
     {
       "key": "BOOKING-PAGE",
-      "title": "Public booking page: generic names, S4 prices withheld",
-      "context": "The public booking page is the one outward-facing surface the platform owns, so it must not breach the advertising rules: it uses generic service names and withholds S4 prices automatically, driven by configuration off the catalog schedule flag — not by an automated advertising linter (which was withdrawn from scope, ADR-0034).  Everything else about advertising compliance is the clinic's responsibility in its external tools.",
+      "title": "Public booking page: schedule-driven generic names & withheld S4 prices (core)",
+      "context": "The public booking page is the one outward-facing surface the platform owns, so it must not breach the advertising rules: it uses generic service names and withholds S4 prices automatically, driven by configuration off the catalog schedule flag — not by an automated advertising linter (which was withdrawn from scope, ADR-0034). This is the minimal end-to-end core — the config model, the schedule-driven render and the no-public-S4 server-side invariant; the Settings config screen with the live preview is a follow-up. Everything else about advertising compliance is the clinic's responsibility in its external tools.",
       "as_a": "owner",
       "i_want": "my public booking page to use generic service names and withhold S4 prices automatically",
       "so_that": "we don't reference S4 in public advertising",
       "acceptance": [
         "The booking page renders generic service names and withholds S4 prices for any S4-flagged service (configuration-driven).",
         "No brands, 'anti-wrinkle injections', prices or #botox appear for S4 services (e.g. 'Pricing discussed at consult').",
-        "Configuration is driven by the catalog schedule flag (PRD-04/ADR-0014), shared with PRD-02 ONLINE-BOOK.",
+        "Configuration is driven by the catalog schedule flag (PRD-04/ADR-0014), shared with PRD-02 ONLINE-BOOK; the no-public-S4 rule is a server-side invariant (audited), not a UI nicety.",
         "There is no advertising linter; compliance beyond this page is clinic-owned (external tools)."
       ],
       "refs": {
@@ -356,25 +443,65 @@
         {
           "title": "Enforce no-public-S4 as a server-side invariant + audit",
           "note": "C9 invariant on the public surface the app owns.\n- The public render must never expose an S4 (Schedule 4 prescription-only medicine) service's brand/clinical name/price/imagery when the policy is on; assert this server-side so a UI/client change can't leak it.\n- Audit config changes (ADR-0010). (No advertising linter — external advertising is clinic-owned, ADR-0034.)"
-        },
+        }
+      ]
+    },
+    {
+      "key": "BOOKING-PAGE-SETTINGS",
+      "title": "Public booking page: Settings config screen + live preview",
+      "context": "Plainly: the owner's Settings screen for the public booking page — toggles for generic names / withheld S4 prices / no S4 imagery and SEO metadata, with a live preview showing how S4 vs non-S4 services will appear. Where it fits: a follow-up to the public booking page core (PRD-07/BOOKING-PAGE), which holds the config model, the schedule-driven render and the no-public-S4 invariant; this adds the configuration surface owners use to set the policy. It is client-facing/outward configuration so it arrives late in the clinic-first build. Owner/admin gated; the no-public-S4 invariant still lives server-side in the core.",
+      "as_a": "owner",
+      "i_want": "a Settings screen with a live preview to configure my public booking page",
+      "so_that": "I can set the policy and see exactly how services will appear publicly",
+      "notes": "",
+      "acceptance": [
+        "A Settings -> Public booking page panel exposes the policy toggles (generic names / withhold S4 prices / no S4 imagery) and SEO (search engine optimisation) metadata fields.",
+        "A live Preview shows how S4 vs non-S4 services render (price withheld for S4-flagged services).",
+        "Owner/admin gated; loading/empty/error states handled.",
+        "The no-public-S4 server-side invariant (PRD-07/BOOKING-PAGE) still holds regardless of what the UI shows."
+      ],
+      "detail": [
+        "A Settings -> Public booking page panel exposes the policy toggles (generic_names / withhold_s4_prices / no_s4_imagery) and SEO (search engine optimisation) metadata fields, plus a live Preview showing how S4 vs non-S4 services render — e.g. 'Cosmetic consultation $50 · 30 min', 'Anti-wrinkle treatment — Pricing discussed at consult', 'Skin treatment from $180'.",
+        "This is the configuration surface over the public booking page core (PRD-07/BOOKING-PAGE); it edits the PublicBookingConfig the core renders from. The settings screen states the policy plainly: 'Service names stay generic, S4 prices withheld and no S4 imagery — set by clinic policy when configuring the page & its SEO metadata.' Owner/admin gated; the no-public-S4 invariant remains a server-side guarantee in the core, so a UI change can't leak an S4 (Schedule 4 prescription-only medicine) name/price."
+      ],
+      "ui_spec": [
+        "Prototype: Settings -> Public booking page — 'Public booking widget · Service names stay generic, S4 prices withheld and no S4 imagery — set by clinic policy when configuring the page & its SEO metadata'; a live Preview (e.g. 'Cosmetic consultation $50 · 30 min', 'Anti-wrinkle treatment — Pricing discussed at consult', 'Skin treatment from $180', 'Book a consultation')."
+      ],
+      "data_model": [
+        {
+          "entity": "PublicBookingConfig (edits PRD-07/BOOKING-PAGE)",
+          "fields": "generic_names, withhold_s4_prices, no_s4_imagery, seo_metadata",
+          "notes": "Settings screen edits the existing config; no new entity; the render + invariant live in the core."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-07/BOOKING-PAGE"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Settings -> Public booking page web UI + live preview",
-          "note": "Angular per the screenshot.\n- Public-booking-widget panel with the policy toggles (generic names / withhold S4 (Schedule 4 prescription-only medicine) prices / no S4 imagery) and SEO (search engine optimisation) metadata fields.\n- Live Preview showing how S4 vs non-S4 services render (price withheld for S4).\n- Owner/admin gated; loading/empty/error states."
+          "note": "Behaviour: a Public-booking-widget panel with the policy toggles (generic names / withhold S4 — Schedule 4 prescription-only medicine — prices / no S4 imagery) and SEO (search engine optimisation) metadata fields, plus a live Preview showing how S4 vs non-S4 services render (price withheld for S4). Requirements: edits the PublicBookingConfig the core (PRD-07/BOOKING-PAGE) renders; owner/admin gated; loading/empty/error states; the no-public-S4 invariant remains server-side in the core."
         }
       ]
     },
     {
       "key": "FOLLOWUPS",
-      "title": "Unified follow-up / job queue",
-      "context": "Follow-ups used to scatter: a recall worklist here, a dashboard 'needs attention' there, unanswered inbox messages somewhere else — and anything no one replied to could quietly fall through the cracks. This story makes one queue: recall, needs-attention and unanswered-comms items all merge into a single 'what needs doing' list, staff can flag any message so it isn't lost, and inbound comms auto-categorise into jobs by rules/keyword (no AI). It is the single cross-clinic to-do list (ADR-0023).  Scattered recall / needs-attention / unanswered-comms items merge into one queue; staff can flag any message; inbound comms auto-categorise into jobs (rules/keyword, no AI) (REQ-NOTIF-7, ADR-0023).",
+      "title": "Unified follow-up / job queue — projected signals + lifecycle (core)",
+      "context": "Follow-ups used to scatter: a recall worklist here, a dashboard 'needs attention' there, unanswered inbox messages somewhere else — and anything no one replied to could quietly fall through the cracks. This story makes one queue: recall, needs-attention and unanswered-comms items all merge into a single 'what needs doing' list. This is the minimal end-to-end core — the unified Job model, existing signals projecting into it, the lifecycle actions and the queue UI; manual flagging and rules/keyword auto-categorisation are each added as their own follow-ups. It is the single cross-clinic to-do list (ADR-0023). (REQ-NOTIF-7, ADR-0023).",
       "as_a": "staff member",
-      "i_want": "one follow-up queue that merges recalls, needs-attention items and flagged messages",
+      "i_want": "one follow-up queue that merges recalls, needs-attention items and unanswered comms",
       "so_that": "nothing falls through the cracks",
       "acceptance": [
-        "Recall, needs-attention and unanswered-comms items merge into a single queue.",
-        "Any message/client can be flagged so it isn't lost (manual -> Job).",
-        "Inbound comms auto-categorise into jobs by rules/keyword (no AI).",
-        "A no-show (PRD-02) and negative reviews (REVIEWS) raise jobs into this queue; the queue is role-scoped and audited."
+        "Recall, needs-attention and unanswered-comms items merge into a single queue (existing signals project in as Jobs, not duplicate tables).",
+        "Each job supports the lifecycle actions (open / done / snooze / reopen / reassign / callback); every status change is audited.",
+        "A no-show (PRD-02) and negative reviews (REVIEWS) raise jobs into this queue; the queue is role-scoped ('Mine').",
+        "Manual flagging and rules/keyword auto-categorisation are added by follow-ups."
       ],
       "refs": {
         "req": [
@@ -422,16 +549,94 @@
           "note": "Behaviour: each job supports open (jumps to the chat/client/report), mark done, snooze, reopen, reassign (cycles the role) and callback; every status change is audited. Requirements: actions are server-authoritative; reassign cycles through the role set; snooze hides until a due time; all transitions write an AuditEvent (ADR-0010); the queue is role-scoped so 'Mine' shows only the current user's/role's jobs."
         },
         {
-          "title": "Manual flag -> Job",
-          "note": "Behaviour: staff can flag any message or client and it becomes a Job so it can't get lost ('Flag a message and it can't get lost'). Requirements: a manual flag sets source=manual and an appropriate type/assignee; flagging is available from the inbox and the client record; idempotent (re-flagging an already-open item doesn't duplicate)."
-        },
-        {
-          "title": "Rules/keyword auto-categorisation (no AI)",
-          "note": "Behaviour: inbound comms auto-categorise into jobs by rules/keyword (NO AI) — e.g. a 'Complaint' conversation → a Lead-Nurse callback job; a 'Booking' enquiry → a Reception reply-&-book job; a 'Pricing' enquiry → a Reception reply job; an 'Auto-detect from inbox' action triggers a sweep. Requirements: rules/keyword only (auto-categorisation is a UX aid, not a safety control — jobs are advisory and human-actioned); idempotent (don't double-create for an already-open conversation job); the assigned role follows the category."
-        },
-        {
           "title": "Follow-ups web UI (filters, job rows, actions, nav badge)",
-          "note": "Behaviour: the Follow-ups screen shows filter pills (Open / Mine / Snoozed / Done) with counts and an 'Auto-detect from inbox' action; each job row has a type badge, assignee, source tag (auto-detected / flagged / recall / system), due + client link, a primary action (open chat / open client / view report), a done checkbox and Snooze / Reassign. A count badge in the nav and a dashboard 'follow-ups' list keep it visible. Requirements: role-scoped 'Mine'; loading/empty ('queue clear')/error states; the nav badge reflects the open count live."
+          "note": "Behaviour: the Follow-ups screen shows filter pills (Open / Mine / Snoozed / Done) with counts; each job row has a type badge, assignee, source tag (recall / system), due + client link, a primary action (open chat / open client / view report), a done checkbox and Snooze / Reassign. A count badge in the nav and a dashboard 'follow-ups' list keep it visible. Requirements: role-scoped 'Mine'; loading/empty ('queue clear')/error states; the nav badge reflects the open count live. (The 'Auto-detect from inbox' action ships with the auto-categorisation follow-up.)"
+        }
+      ]
+    },
+    {
+      "key": "FOLLOWUPS-FLAG",
+      "title": "Follow-ups: manual flag → Job",
+      "context": "Plainly: let staff flag any message or client so it becomes a Job in the queue and can't get lost. Where it fits: a follow-up to the unified queue core (PRD-07/FOLLOWUPS), which merges projected signals; this adds the manual capture path so a human can put anything into the queue. Flagging is available from the inbox and the client record and is idempotent. The queue stays role-scoped and audited.",
+      "as_a": "staff member",
+      "i_want": "to flag any message or client so it becomes a follow-up Job",
+      "so_that": "anything that needs a human can't get lost",
+      "notes": "",
+      "acceptance": [
+        "Staff can flag any message or client and it becomes a Job ('Flag a message and it can't get lost').",
+        "A manual flag sets source=manual with an appropriate type/assignee.",
+        "Flagging is available from the inbox and the client record.",
+        "Flagging is idempotent — re-flagging an already-open item doesn't duplicate."
+      ],
+      "detail": [
+        "Staff can flag any message or client and it becomes a Job in the unified queue (PRD-07/FOLLOWUPS) so it can't get lost ('Flag a message and it can't get lost'). A manual flag sets source=manual and an appropriate type/assignee.",
+        "Flagging is available from the inbox and the client record; it is idempotent — re-flagging an already-open item doesn't duplicate. This extends the unified queue core (PRD-07/FOLLOWUPS); the queue stays role-scoped and audited."
+      ],
+      "ui_spec": [
+        "Prototype: Follow-ups / inbox / client record — a 'Flag' action that raises a Job with a 'flagged' source tag."
+      ],
+      "data_model": [
+        {
+          "entity": "Job (extends PRD-07/FOLLOWUPS)",
+          "fields": "source=manual; raised from a message/client",
+          "notes": "No new entity; manual flag path; idempotent."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-07/FOLLOWUPS"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Manual flag -> Job (from inbox + client record, idempotent)",
+          "note": "Behaviour: flagging a message/client raises a Job (source=manual) with an appropriate type/assignee. Requirements: available from the inbox and the client record; idempotent (re-flagging an already-open item doesn't duplicate); role-scoped + audited."
+        }
+      ]
+    },
+    {
+      "key": "FOLLOWUPS-AUTOCAT",
+      "title": "Follow-ups: rules/keyword auto-categorisation (no AI)",
+      "context": "Plainly: read inbound comms and turn them into the right kind of Job automatically by rules and keywords — a complaint becomes a Lead-Nurse callback, a booking enquiry a Reception reply — with no AI. Where it fits: a follow-up to the unified queue core (PRD-07/FOLLOWUPS), which merges signals and supports lifecycle actions; this adds automatic categorisation of inbound comms into jobs. Auto-categorisation is a UX aid, not a safety control — jobs are advisory and human-actioned. Idempotent. An 'Auto-detect from inbox' action triggers a sweep.",
+      "as_a": "staff member",
+      "i_want": "inbound comms auto-sorted into the right kind of follow-up Job",
+      "so_that": "enquiries land with the right person without manual triage",
+      "notes": "",
+      "acceptance": [
+        "Inbound comms auto-categorise into jobs by rules/keyword (NO AI) — e.g. 'Complaint' → Lead-Nurse callback; 'Booking' → Reception reply-&-book; 'Pricing' → Reception reply.",
+        "An 'Auto-detect from inbox' action triggers a sweep.",
+        "Categorisation is a UX aid, not a safety control — jobs are advisory and human-actioned.",
+        "Auto-creation is idempotent — it doesn't double-create for an already-open conversation job; the assigned role follows the category."
+      ],
+      "detail": [
+        "Inbound comms auto-categorise into jobs by rules/keyword (NO AI) — e.g. a 'Complaint' conversation → a Lead-Nurse callback job; a 'Booking' enquiry → a Reception reply-&-book job; a 'Pricing' enquiry → a Reception reply job; an 'Auto-detect from inbox' action triggers a sweep. This extends the unified queue core (PRD-07/FOLLOWUPS).",
+        "Rules/keyword only — auto-categorisation is a UX aid, not a safety control; jobs are advisory and human-actioned. Auto-creation is idempotent (don't double-create for an already-open conversation job); the assigned role follows the category."
+      ],
+      "ui_spec": [
+        "Prototype: Follow-ups — an 'Auto-detect from inbox' button; auto-created job rows carry an 'auto-detected' source tag."
+      ],
+      "data_model": [
+        {
+          "entity": "Job (extends PRD-07/FOLLOWUPS)",
+          "fields": "source=auto; type/assignee from the matched rule/keyword",
+          "notes": "No new entity; rules/keyword only (no AI); idempotent."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-07/FOLLOWUPS"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Rules/keyword auto-categorisation (no AI) + 'Auto-detect from inbox' sweep",
+          "note": "Behaviour: inbound comms auto-categorise into jobs by rules/keyword (NO AI); an 'Auto-detect from inbox' action sweeps on demand. Requirements: rules/keyword only (UX aid, not a safety control — advisory, human-actioned); idempotent (don't double-create for an already-open conversation job); the assigned role follows the category."
         }
       ]
     },
@@ -498,16 +703,16 @@
     },
     {
       "key": "AUTOMATIONS",
-      "title": "Automation builder (triggers → timed messages)",
-      "context": "Reminders, aftercare and recall shouldn't need a human to remember them. The Automations screen is the management UI over the sequence engine: each automation maps a trigger (booking, visit, interval) to a timed sequence of messages, and can be switched on/off and tuned per treatment type — so the right message goes out at the right time, hands-off. It drives the same engine as REMINDERS-CARE and RECALL.  The prototype's Comms → Automations screen (toggleAuto) configures the reminder/aftercare/recall sequences as toggleable automations. This is the management UI over PRD-07's sequence engine.",
+      "title": "Automation builder — toggleable automations + consent split (core)",
+      "context": "Reminders, aftercare and recall shouldn't need a human to remember them. The Automations screen is the management UI over the sequence engine: each automation maps a trigger (booking, visit, interval) to a timed sequence of messages and can be switched on/off. This is the minimal end-to-end core — the toggleable Automation wrapper, the transactional-vs-marketing consent split (C23) and a basic cards UI; per-treatment-type editing and live stats are each added as their own follow-ups. It drives the same engine as REMINDERS-CARE and RECALL (this is UI + orchestration, not a re-implemented engine). (REQ-NOTIF-2/3, C23).",
       "as_a": "owner / front desk",
-      "i_want": "to configure automations that send the right message at the right time per trigger",
-      "so_that": "reminders, aftercare and recall run hands-off",
+      "i_want": "to switch automations on/off, with marketing ones respecting consent",
+      "so_that": "reminders, aftercare and recall run hands-off and compliantly",
       "acceptance": [
-        "Automations map a trigger (booking, visit, interval) to a timed sequence of messages.",
-        "Each automation can be enabled/disabled and edited per treatment type.",
-        "Marketing automations respect opt-in/unsubscribe (C23); transactional ones always send.",
-        "Automations drive the same sequence engine as REMINDERS-CARE and RECALL."
+        "Automations map a trigger (booking, visit, interval) to a timed sequence and can be enabled/disabled (toggling off stops the underlying Sequence from triggering).",
+        "Marketing automations respect opt-in/unsubscribe (C23); transactional ones always send; content never names/prices S4 (C9).",
+        "Automations drive the same sequence engine as REMINDERS-CARE and RECALL (no re-implemented engine).",
+        "Per-treatment-type editing and live stats are added by follow-ups."
       ],
       "refs": {
         "req": [
@@ -552,35 +757,113 @@
           "note": "Behaviour: an Automation is a thin, toggleable wrapper over a Sequence — trigger (booking|visit|interval) + treatment_type + sequence_id + kind (transactional|marketing) + enabled. Toggling an automation off stops the underlying Sequence from triggering; toggling on resumes it. Requirements: tenant-scoped with RLS (row-level security); does NOT duplicate the sequence engine (REMINDERS-CARE/RECALL) — it configures it; kind carries through to the consent gate."
         },
         {
-          "title": "Per-treatment-type editing of automations",
-          "note": "Behaviour: each automation can be edited per treatment type so a filler client and a skin client get the right cadence/content (e.g. Recall — anti-wrinkle ~12 wks vs a different interval for filler). Requirements: editing changes the linked Sequence's steps/offsets/templates; changes are owner/front-desk gated; the default set matches the prototype cards (Recall, Aftercare, Win-back, Birthday, No-show follow-up, Review request)."
-        },
-        {
           "title": "Transactional vs marketing consent split (C23)",
           "note": "Behaviour: the screen states 'Flows run automatically on the right trigger. All respect opt-in & unsubscribe (Spam Act).' Marketing automations (recall nudge, win-back, birthday, review request) gate on marketing consent + suppression; transactional ones (reminders, aftercare) always send. Requirements: the kind flag drives the gate via MARKETING-CONSENT; a marketing automation never sends to a non-consented/suppressed contact; content never names/prices S4 (Schedule 4 prescription-only medicine) (C9). Review request is off by default."
         },
         {
-          "title": "Automation live stats (sent / booked / returned)",
-          "note": "Behaviour: each automation card shows live stats — e.g. 'Recall 42 sent · 18 booked', 'Aftercare 96 sent (30d)', 'Win-back 128 sent · 11 returned', 'No-show 9 sent · 5 rebooked'. Requirements: stats read from NotificationLog (sends) joined to outcomes (bookings/returns) over a rolling window; computed server-side, not hand-entered."
-        },
-        {
           "title": "Automations web UI (cards + toggles)",
-          "note": "Behaviour: the Automations screen renders automation cards with channel + audience + live stats and an on/off toggle (toggleAuto), plus per-treatment editing and the 'all respect opt-in & unsubscribe (Spam Act)' note. Requirements: owner/front-desk gated; Review request shown off by default; loading/empty/error states."
+          "note": "Behaviour: the Automations screen renders automation cards with channel + audience and an on/off toggle (toggleAuto), plus the 'all respect opt-in & unsubscribe (Spam Act)' note. Requirements: owner/front-desk gated; Review request shown off by default; loading/empty/error states. (Per-treatment editing and live stats ship with their follow-ups.)"
+        }
+      ]
+    },
+    {
+      "key": "AUTOMATIONS-PER-TREATMENT",
+      "title": "Automations: per-treatment-type editing",
+      "context": "Plainly: let each automation be tuned per treatment type, so a filler client and a skin client get the right cadence and content (e.g. recall at ~12 weeks for anti-wrinkle vs a different interval for filler). Where it fits: a follow-up to the automations core (PRD-07/AUTOMATIONS), which toggles automations on/off; this adds per-treatment editing of the linked Sequence. Editing changes the linked Sequence's steps/offsets/templates; owner/front-desk gated.",
+      "as_a": "owner / front desk",
+      "i_want": "to edit each automation per treatment type",
+      "so_that": "different treatments get the right cadence and content",
+      "notes": "",
+      "acceptance": [
+        "Each automation can be edited per treatment type (e.g. Recall — anti-wrinkle ~12 wks vs a different interval for filler).",
+        "Editing changes the linked Sequence's steps/offsets/templates (PRD-07/REMINDERS-CARE).",
+        "Changes are owner/front-desk gated.",
+        "The default set matches the prototype cards (Recall, Aftercare, Win-back, Birthday, No-show follow-up, Review request)."
+      ],
+      "detail": [
+        "Each automation can be edited per treatment type so a filler client and a skin client get the right cadence/content (e.g. Recall — anti-wrinkle ~12 wks vs a different interval for filler). This extends the automations core (PRD-07/AUTOMATIONS).",
+        "Editing changes the linked Sequence's steps/offsets/templates (PRD-07/REMINDERS-CARE); changes are owner/front-desk gated; the default set matches the prototype cards (Recall, Aftercare, Win-back, Birthday, No-show follow-up, Review request)."
+      ],
+      "ui_spec": [
+        "Prototype: Comms -> Automations — per-treatment editing of each automation card (cadence/content per treatment type)."
+      ],
+      "data_model": [
+        {
+          "entity": "Automation (extends PRD-07/AUTOMATIONS)",
+          "fields": "per-treatment_type editing of the linked Sequence steps/offsets/templates",
+          "notes": "No new entity; edits the linked Sequence (PRD-07/REMINDERS-CARE)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-07/AUTOMATIONS"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Per-treatment-type editing of automations",
+          "note": "Behaviour: each automation can be edited per treatment type (e.g. Recall — anti-wrinkle ~12 wks vs a different interval for filler). Requirements: editing changes the linked Sequence's steps/offsets/templates (PRD-07/REMINDERS-CARE); owner/front-desk gated; the default set matches the prototype cards."
+        }
+      ]
+    },
+    {
+      "key": "AUTOMATIONS-STATS",
+      "title": "Automations: live stats (sent / booked / returned)",
+      "context": "Plainly: show each automation's real performance — how many sent, and how many led to a booking or return — so the owner can see what's working. Where it fits: a follow-up to the automations core (PRD-07/AUTOMATIONS), which renders the cards/toggles; this adds the live stat line on each card. Stats read from NotificationLog (PRD-07/CHANNELS) joined to outcomes (bookings/returns) over a rolling window, computed server-side.",
+      "as_a": "owner",
+      "i_want": "each automation to show how many messages it sent and how many converted",
+      "so_that": "I can see which flows are working",
+      "notes": "",
+      "acceptance": [
+        "Each automation card shows live stats — e.g. 'Recall 42 sent · 18 booked', 'Aftercare 96 sent (30d)', 'Win-back 128 sent · 11 returned', 'No-show 9 sent · 5 rebooked'.",
+        "Stats read from NotificationLog (PRD-07/CHANNELS) joined to outcomes (bookings/returns) over a rolling window.",
+        "Stats are computed server-side, not hand-entered.",
+        "Loading/empty states are handled per card."
+      ],
+      "detail": [
+        "Each automation card shows live stats — e.g. 'Recall 42 sent · 18 booked', 'Aftercare 96 sent (30d)', 'Win-back 128 sent · 11 returned', 'No-show 9 sent · 5 rebooked'. This extends the automations core (PRD-07/AUTOMATIONS) card UI.",
+        "Stats read from NotificationLog (PRD-07/CHANNELS) sends joined to outcomes (bookings/returns) over a rolling window; computed server-side, not hand-entered."
+      ],
+      "ui_spec": [
+        "Prototype: Comms -> Automations — live stats on each card ('42 sent · 18 booked', etc.)."
+      ],
+      "data_model": [
+        {
+          "entity": "(read-model over NotificationLog + outcomes)",
+          "fields": "per-automation sends joined to bookings/returns over a rolling window",
+          "notes": "No new entity; computed server-side; reads PRD-07/CHANNELS NotificationLog."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-07/AUTOMATIONS"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Automation live stats (sent / booked / returned)",
+          "note": "Behaviour: each automation card shows live stats (sent · booked/returned/rebooked over a rolling window). Requirements: read from NotificationLog (PRD-07/CHANNELS) joined to outcomes; computed server-side, not hand-entered; per-card loading/empty states."
         }
       ]
     },
     {
       "key": "REVIEWS",
-      "title": "Reviews & reputation (request, acknowledge, flag, auto-follow-up)",
-      "context": "Reputation matters, but in Australia a review feature is a compliance trap: review gating (only asking happy clients) is misleading conduct under the ACL, and reposting a review that endorses an S4 result becomes a prohibited testimonial (National Law s133, TGA Code). So this feature is built request-all (no sentiment gating), reply-yes, repost-S4-no, and it closes the loop by auto-raising follow-up jobs for negative reviews. (Phase 2 in scope, but with real mechanics — request, acknowledge, reply, flag, auto-detect.)  The prototype's Growth → Reviews screen (scanReviews/reviewReply/reviewFlag/reviewAck) requests reviews, replies/acknowledges, and auto-raises follow-up jobs for negative reviews (≤3★) — with a staff caution against resharing an S4-endorsing review as a prohibited testimonial.",
+      "title": "Reviews & reputation — request-all, reply/acknowledge/flag + S4 caution (core)",
+      "context": "Reputation matters, but in Australia a review feature is a compliance trap: review gating (only asking happy clients) is misleading conduct under the ACL, and reposting a review that endorses an S4 result becomes a prohibited testimonial (National Law s133, TGA Code). So this core is built request-all (no sentiment gating), reply-yes, repost-S4-no. This is the minimal end-to-end core — request, reply/acknowledge/flag and the S4 testimonial caution; the auto-detect-negative-reviews→Job loop and the Reviews screen with reputation KPIs are each added as their own follow-ups. (Phase 2 in scope, but with real mechanics.)",
       "as_a": "owner",
-      "i_want": "to request reviews and manage replies, with negative ones auto-raising follow-ups",
-      "so_that": "reputation is managed and problems are caught early",
+      "i_want": "to request reviews and reply/acknowledge/flag them, without ever resharing an S4 testimonial",
+      "so_that": "reputation is managed compliantly",
       "acceptance": [
-        "Review requests are sent to all eligible consented clients (no sentiment gating — ACL); reply/acknowledge supported.",
-        "Negative reviews (≤3★) and complaint-keyword matches auto-raise review jobs into the Follow-ups queue (Lead Nurse for clinical, Reception otherwise).",
+        "Review requests are sent to all eligible consented clients (no sentiment gating — ACL); reply/acknowledge/flag supported.",
         "A caution warns against resharing an S4-endorsing review as a prohibited testimonial (C9); the platform has no repost-as-marketing feature.",
-        "No sentiment-gating of who is asked (request-all)."
+        "Flagging a review raises a review Job into the Follow-ups queue (Lead Nurse for clinical/unhappy, Reception otherwise).",
+        "Auto-detect of negative reviews and the reputation KPIs/screen are added by follow-ups."
       ],
       "refs": {
         "req": [
@@ -633,31 +916,111 @@
           "note": "Behaviour: staff can Reply to, Acknowledge, or Flag any review (reviewReply / reviewAck / reviewFlag). Flagging a review raises a review Job into the Follow-ups queue (PRD-07/FOLLOWUPS) assigned Lead Nurse for clinical/unhappy reviews, Reception otherwise. Requirements: reply/acknowledge update the review status; flag -> Job is idempotent; actions audited."
         },
         {
-          "title": "Auto-detect negative reviews / complaint keywords -> Job",
-          "note": "Behaviour: negative reviews (≤3★) and complaint-keyword matches (unhappy/refund/rude/pain/no one called...) are auto-detected and shown with a 'needs follow-up' badge, raising review Jobs into Follow-ups so a bad review becomes an action, not just a notification; an 'Auto-detect follow-ups' action sweeps on demand. Requirements: rating ≤3 OR keyword match flags needs-follow-up; raising Jobs is idempotent; routing follows the same Lead-Nurse/Reception split."
-        },
-        {
           "title": "S4 testimonial caution (C9) - no repost-as-marketing feature",
           "note": "Behaviour: where a review names an S4 (Schedule 4 prescription-only medicine) result, staff see a caution: 'Names an S4 result — replying is fine, but don't reshare it publicly (would be a prohibited testimonial)'. Requirements: the platform offers NO feature to repost/embed a review as marketing, so an S4-endorsing review can't be weaponised into a prohibited testimonial (National Law s133 / TGA Code, C9/ADR-0032); names_s4 drives the caution; replying is always allowed."
-        },
+        }
+      ]
+    },
+    {
+      "key": "REVIEWS-AUTODETECT",
+      "title": "Reviews: auto-detect negative reviews / complaint keywords → Job",
+      "context": "Plainly: catch the bad reviews automatically — anything ≤3 stars or matching complaint keywords gets a 'needs follow-up' badge and raises a Job so it becomes an action, not just a notification. Where it fits: a follow-up to the reviews core (PRD-07/REVIEWS), which handles request/reply/acknowledge/flag; this closes the loop by auto-raising follow-up Jobs for negative reviews. Jobs route into the unified Follow-ups queue (PRD-07/FOLLOWUPS) with the same Lead-Nurse/Reception split, and raising is idempotent. An 'Auto-detect follow-ups' action sweeps on demand.",
+      "as_a": "owner",
+      "i_want": "negative reviews to auto-raise follow-up jobs",
+      "so_that": "a bad review becomes an action and problems are caught early",
+      "notes": "",
+      "acceptance": [
+        "Negative reviews (≤3★) and complaint-keyword matches (unhappy/refund/rude/pain/no one called...) are auto-detected and shown with a 'needs follow-up' badge.",
+        "Detected reviews raise review Jobs into the Follow-ups queue (PRD-07/FOLLOWUPS) with the same Lead-Nurse/Reception routing as the core.",
+        "An 'Auto-detect follow-ups' action sweeps on demand.",
+        "Raising Jobs is idempotent (no duplicate for an already-open review job)."
+      ],
+      "detail": [
+        "Negative reviews (≤3★) and complaint-keyword matches (unhappy/refund/rude/pain/no one called...) are auto-detected and shown with a 'needs follow-up' badge, raising review Jobs into the Follow-ups queue (PRD-07/FOLLOWUPS) so a bad review becomes an action, not just a notification; an 'Auto-detect follow-ups' action sweeps on demand. This extends the reviews core (PRD-07/REVIEWS).",
+        "Rating ≤3 OR a keyword match flags needs-follow-up; raising Jobs is idempotent; routing follows the same Lead-Nurse (clinical/unhappy) / Reception (otherwise) split as the core's manual flag."
+      ],
+      "ui_spec": [
+        "Prototype: Growth -> Reviews — 'needs follow-up' badge on ≤3★ and complaint matches; 'Auto-detect follow-ups' (scanReviews)."
+      ],
+      "data_model": [
+        {
+          "entity": "Review (extends PRD-07/REVIEWS)",
+          "fields": "rating/keyword match → needs-follow-up + review Job (PRD-07/FOLLOWUPS)",
+          "notes": "No new entity; auto-detect over the core Review; idempotent Job raising."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-07/REVIEWS"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Auto-detect negative reviews / complaint keywords -> Job",
+          "note": "Behaviour: negative reviews (≤3★) and complaint-keyword matches are auto-detected, shown with a 'needs follow-up' badge, and raise review Jobs into Follow-ups (PRD-07/FOLLOWUPS); an 'Auto-detect follow-ups' action sweeps on demand. Requirements: rating ≤3 OR keyword match flags needs-follow-up; idempotent Job raising; same Lead-Nurse/Reception routing as the core."
+        }
+      ]
+    },
+    {
+      "key": "REVIEWS-SCREEN-KPI",
+      "title": "Reviews: screen UI + reputation KPIs",
+      "context": "Plainly: the Growth → Reviews screen — KPI cards (avg rating, review count, response rate, needs-follow-up), the request-all explainer, per-review actions and the S4 caution banner. Where it fits: a follow-up to the reviews core (PRD-07/REVIEWS), which holds the request/reply/flag mechanics and the S4 caution, and surfaces the auto-detect badge (PRD-07/REVIEWS-AUTODETECT); this is the management screen and reputation read-model on top. Campaigns/social posting stay in the clinic's external tools.",
+      "as_a": "owner",
+      "i_want": "a Reviews screen with reputation KPIs and per-review actions",
+      "so_that": "I can manage reputation at a glance",
+      "notes": "",
+      "acceptance": [
+        "The Growth -> Reviews screen shows KPI cards (Avg rating, Reviews, Response rate, Needs follow-up) and the request-all/no-gating explainer.",
+        "Per-review Reply/Acknowledge/Flag actions and the 'needs follow-up' badge on ≤3★ are shown, plus the S4 testimonial caution banner.",
+        "A footer notes campaigns/social live in external tools (Mailchimp, Meta Business Suite).",
+        "KPI read-model (avg, count, response rate, needs-follow-up); owner/staff gated; loading/empty/error states."
+      ],
+      "detail": [
+        "The Growth -> Reviews screen shows KPI cards (Avg rating, Reviews, Response rate, Needs follow-up), the request-all/no-gating explainer, per-review Reply/Acknowledge/Flag actions (from PRD-07/REVIEWS), the 'needs follow-up' badge on ≤3★ (from PRD-07/REVIEWS-AUTODETECT), the S4 testimonial caution banner, and a footer noting campaigns/social live in external tools (Mailchimp, Meta Business Suite).",
+        "A KPI read-model computes avg rating, review count, response rate and needs-follow-up. Owner/staff gated; loading/empty/error states handled. This is the presentation/read-model layer over the reviews core (PRD-07/REVIEWS)."
+      ],
+      "ui_spec": [
+        "Prototype: Growth -> Reviews — KPI cards (Avg rating 4.4★, Reviews 48, Response rate 89%, Needs follow-up); 'Requests go to every eligible client (no sentiment gating — ACCC). Reply to any review and acknowledge it; negative reviews & complaints are auto-flagged for follow-up. Never repost one endorsing an S4 result.'; per-review Reply / Acknowledge / Flag; 'needs follow-up' badge on ≤3★; S4 testimonial caution banner; footer noting campaigns/social live in external tools."
+      ],
+      "data_model": [
+        {
+          "entity": "(KPI read-model over PRD-07/REVIEWS)",
+          "fields": "avg rating, review count, response rate, needs-follow-up count",
+          "notes": "No new entity; read-model over the core Review; owner/staff gated."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-07/REVIEWS"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Reviews screen UI + reputation KPIs",
-          "note": "Behaviour: the Growth -> Reviews screen shows KPI cards (Avg rating, Reviews, Response rate, Needs follow-up), the request-all/no-gating explainer, per-review Reply/Acknowledge/Flag actions, the 'needs follow-up' badge on ≤3★, the S4 testimonial caution banner, and a footer noting campaigns/social live in external tools (Mailchimp, Meta Business Suite). Requirements: KPI read-model (avg, count, response rate, needs-follow-up); owner/staff gated; loading/empty/error states."
+          "note": "Behaviour: the Growth -> Reviews screen shows KPI cards (Avg rating, Reviews, Response rate, Needs follow-up), the request-all/no-gating explainer, per-review Reply/Acknowledge/Flag, the 'needs follow-up' badge on ≤3★, the S4 (Schedule 4 prescription-only medicine) testimonial caution banner, and a footer noting campaigns/social live in external tools. Requirements: KPI read-model (avg, count, response rate, needs-follow-up); owner/staff gated; loading/empty/error states."
         }
       ]
     },
     {
       "key": "LEADS-CRM",
-      "title": "Lead / prospect CRM",
-      "context": "Most enquiries arrive asking the one thing a clinic can't answer publicly ('how much is Botox?'), via IG/FB DM, the website widget or phone. A 1:1 reply isn't public advertising, so a lead pipeline lets reception convert privately and stops enquiries getting lost. This is a thin CRM over the inbox: track prospects who haven't booked, move them to consult/won/lost, and convert to a client/booking preserving history. Phase 2 in scope, with real pipeline mechanics.  The prototype's Growth → Leads (CRM) screen tracks enquiries who haven't booked yet, over the inbox (ADR-0033).",
+      "title": "Lead / prospect CRM — pipeline, stages & convert (core)",
+      "context": "Most enquiries arrive asking the one thing a clinic can't answer publicly ('how much is Botox?'), via IG/FB DM, the website widget or phone. A 1:1 reply isn't public advertising, so a lead pipeline lets reception convert privately and stops enquiries getting lost. This is the minimal end-to-end core — a thin CRM over the inbox: track prospects who haven't booked, move them through stages, and convert to a client/booking preserving history. The consent-gated outbound nudges and the conversion KPIs / Follow-ups-queue projection are each added as their own follow-ups. Phase 2 in scope, with real pipeline mechanics (ADR-0033).",
       "as_a": "front desk / owner",
-      "i_want": "to track leads/prospects through to booking",
+      "i_want": "to track leads/prospects through stages and convert them to a client/booking",
       "so_that": "enquiries don't get lost and convert better",
       "acceptance": [
-        "Leads are captured with source, stage and next action (over the inbox).",
-        "A lead can convert to a client/booking, preserving the enquiry history.",
-        "Lead follow-ups surface in the Follow-ups queue.",
-        "Outbound marketing to leads respects Spam-Act consent (C23); 1:1 service replies are exempt."
+        "Leads are captured with source, interest, stage (new / consult / won / lost) and next action, as a projection over the inbox (ADR-0033).",
+        "A lead can be moved between stages; an enquiry from the inbox becomes a pipeline card.",
+        "A lead can convert to a client/booking, preserving the enquiry history (converted_client_id stamped, stage → won).",
+        "Outbound nudges (consent-gated) and conversion KPIs / Follow-ups projection are added by follow-ups."
       ],
       "refs": {
         "req": [
@@ -702,23 +1065,102 @@
       "tasks": [
         {
           "title": "Lead pipeline model + stages (projection over conversations)",
-          "note": "Behaviour: a Lead is a thin pipeline layer over the inbox (ADR-0033) — name, contact, source (Instagram DM / Website widget / Facebook / Referral / Google), interest, stage (new / consult / won / lost), next_action, optional linked conversation, plus consent state. Staff move a lead between stages as it progresses. Requirements: tenant-scoped with RLS (row-level security); stage transitions feed the conversion read-models; an enquiry from the inbox becomes a pipeline card."
+          "note": "Behaviour: a Lead is a thin pipeline layer over the inbox (ADR-0033) — name, contact, source (Instagram DM / Website widget / Facebook / Referral / Google), interest, stage (new / consult / won / lost), next_action, optional linked conversation, plus consent state. Staff move a lead between stages as it progresses. Requirements: tenant-scoped with RLS (row-level security); an enquiry from the inbox becomes a pipeline card. (Conversion read-models ship with the KPI follow-up.)"
         },
         {
           "title": "Convert lead -> client / booking (preserve history)",
           "note": "Behaviour: converting a lead creates or links a client and (optionally) a booking, preserving the original enquiry history. Requirements: the linked conversation/history is retained on the resulting client; converted_client_id is stamped; conversion moves the lead to 'won'."
         },
         {
-          "title": "Consent-gated outbound nudges (1:1 replies exempt, C23)",
-          "note": "Behaviour: a 1:1 service reply to a lead is fine (not public advertising), but any proactive outbound nudge to a lead gates on marketing consent — the board shows a consent dot per lead. Requirements: outbound nudges route through MARKETING-CONSENT (consent + suppression, C23); 1:1 replies are exempt; advertising compliance (C9) for campaigns/social stays clinic-owned in external tools."
-        },
+          "title": "Leads (CRM) web UI (kanban + convert)",
+          "note": "Behaviour: the Growth -> Leads screen shows kanban columns (New enquiry / Consult booked / Converted / Lost) with lead cards (source), a convert-to-client/booking action, and the '1:1 replies aren't public advertising' note. Requirements: front-desk/owner gated; loading/empty/error states; cards reflect stage moves live. (KPI cards and the per-lead consent dot ship with their follow-ups.)"
+        }
+      ]
+    },
+    {
+      "key": "LEADS-NUDGES",
+      "title": "Leads: consent-gated outbound nudges (1:1 replies exempt, C23)",
+      "context": "Plainly: a 1:1 reply to a lead is fine (not public advertising), but any proactive outbound nudge to a lead must respect marketing consent — so the board shows a consent dot per lead and nudges route through the consent + suppression gate. Where it fits: a follow-up to the leads core (PRD-07/LEADS-CRM), which tracks and converts leads; this adds the compliant outbound-nudge path. Outbound nudges route through MARKETING-CONSENT (consent + suppression, C23); 1:1 service replies are exempt; advertising compliance (C9) for campaigns/social stays clinic-owned in external tools.",
+      "as_a": "front desk / owner",
+      "i_want": "outbound nudges to leads to respect marketing consent",
+      "so_that": "we follow up compliantly while 1:1 replies stay free",
+      "notes": "",
+      "acceptance": [
+        "A 1:1 service reply to a lead is exempt (not public advertising); any proactive outbound nudge gates on marketing consent.",
+        "Outbound nudges route through MARKETING-CONSENT (consent + suppression, C23).",
+        "The board shows a consent dot per lead.",
+        "Advertising compliance (C9) for campaigns/social stays clinic-owned in external tools."
+      ],
+      "detail": [
+        "A 1:1 service reply to a lead is fine (not public advertising), but any proactive outbound nudge to a lead gates on marketing consent — the board shows a consent dot per lead. This extends the leads core (PRD-07/LEADS-CRM).",
+        "Outbound nudges route through MARKETING-CONSENT (consent + suppression, C23); 1:1 replies are exempt; advertising compliance (C9) for campaigns/social stays clinic-owned in external tools."
+      ],
+      "ui_spec": [
+        "Prototype: Growth -> Leads (CRM) — a consent dot per lead card; 'outbound nudges need opt-in consent' note; outbound nudge action gated on consent."
+      ],
+      "data_model": [
         {
-          "title": "Lead follow-ups -> Follow-ups queue + conversion KPIs",
-          "note": "Behaviour: lead follow-ups surface in the unified Follow-ups queue (e.g. 'Reply & book — Friday consult'); a conversion KPI read-model powers the cards (Open leads, Consults booked, Conversion %, Avg days). Requirements: lead Jobs project into PRD-07/FOLLOWUPS; KPI (key performance indicator) figures computed server-side from stage transitions."
-        },
+          "entity": "Lead (extends PRD-07/LEADS-CRM)",
+          "fields": "consent(bool) drives the nudge gate + consent dot",
+          "notes": "No new entity; nudges route via PRD-07/MARKETING-CONSENT (C23); 1:1 replies exempt."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-07/LEADS-CRM"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
-          "title": "Leads (CRM) web UI (kanban + KPIs + convert)",
-          "note": "Behaviour: the Growth -> Leads screen shows KPI cards and kanban columns (New enquiry / Consult booked / Converted / Lost) with lead cards (source + consent dot), a convert-to-client/booking action, and the '1:1 replies aren't public advertising; outbound nudges need opt-in consent' note. Requirements: front-desk/owner gated; loading/empty/error states; cards reflect stage moves live."
+          "title": "Consent-gated outbound nudges + per-lead consent dot (C23)",
+          "note": "Behaviour: proactive outbound nudges to a lead gate on marketing consent (consent + suppression via PRD-07/MARKETING-CONSENT); 1:1 replies are exempt; the board shows a consent dot per lead. Requirements: never nudge a non-consented/suppressed lead (C23); advertising compliance (C9) for campaigns/social stays clinic-owned in external tools."
+        }
+      ]
+    },
+    {
+      "key": "LEADS-KPI-FOLLOWUPS",
+      "title": "Leads: conversion KPIs + Follow-ups queue projection",
+      "context": "Plainly: show the pipeline's health — open leads, consults booked, conversion %, average days — and surface lead follow-ups in the unified queue so they get worked. Where it fits: a follow-up to the leads core (PRD-07/LEADS-CRM), which tracks and converts leads; this adds the conversion read-model and the projection of lead follow-ups into the Follow-ups queue (PRD-07/FOLLOWUPS). KPI figures are computed server-side from stage transitions.",
+      "as_a": "front desk / owner",
+      "i_want": "conversion KPIs and lead follow-ups surfaced in the unified queue",
+      "so_that": "I can see pipeline health and work lead follow-ups in one place",
+      "notes": "",
+      "acceptance": [
+        "A conversion KPI read-model powers the cards (Open leads, Consults booked, Conversion %, Avg days), computed server-side from stage transitions.",
+        "Lead follow-ups surface in the unified Follow-ups queue (e.g. 'Reply & book — Friday consult').",
+        "Lead Jobs project into PRD-07/FOLLOWUPS (no duplicate table).",
+        "Front-desk/owner gated; loading/empty/error states."
+      ],
+      "detail": [
+        "A conversion KPI read-model powers the cards (Open leads, Consults booked, Conversion %, Avg days), computed server-side from the stage transitions tracked by the leads core (PRD-07/LEADS-CRM). Lead follow-ups surface in the unified Follow-ups queue (e.g. 'Reply & book — Friday consult').",
+        "Lead Jobs project into PRD-07/FOLLOWUPS rather than a duplicate table. This extends the leads core (PRD-07/LEADS-CRM). Front-desk/owner gated; loading/empty/error states handled."
+      ],
+      "ui_spec": [
+        "Prototype: Growth -> Leads (CRM) — KPI cards (Open leads, Consults booked, Conversion %, Avg days); lead follow-ups appear in the Follow-ups queue."
+      ],
+      "data_model": [
+        {
+          "entity": "(conversion read-model over PRD-07/LEADS-CRM) + Job projection",
+          "fields": "open leads, consults booked, conversion %, avg days; lead Jobs → PRD-07/FOLLOWUPS",
+          "notes": "No new entity; KPIs from stage transitions; lead follow-ups project as Jobs."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-07/LEADS-CRM"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Conversion KPIs + lead follow-ups -> Follow-ups queue",
+          "note": "Behaviour: a conversion KPI read-model powers the cards (Open leads, Consults booked, Conversion %, Avg days); lead follow-ups surface in the unified Follow-ups queue (PRD-07/FOLLOWUPS). Requirements: KPI (key performance indicator) figures computed server-side from stage transitions; lead Jobs project into PRD-07/FOLLOWUPS (no duplicate table); front-desk/owner gated."
         }
       ]
     },

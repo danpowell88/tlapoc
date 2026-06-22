@@ -1,4 +1,4 @@
-# Client app: book → intake → consent journey
+# Client app: shell, sign-in & home (basic)
 
 > **Epic:** [PRD-09 — Apps (Flutter): client & provider](../epics/PRD-09.md)  ·  **Key:** `PRD-09/CLIENT-JOURNEY`  ·  **Type:** Story  ·  **Stage:** M5  ·  **Priority:** P1  ·  **Estimate:** 3 pts  ·  **Area:** client-app
 >
@@ -6,8 +6,8 @@
 
 ## Background
 
-As a client, I want to book, complete intake and e-sign consent entirely in the app, so that I'm ready for my visit without paperwork.
-Plainly: this is the client's phone app for getting ready before a visit — sign in, book, fill in the medical-history form and sign consent, all in one place. Where it fits: the client-facing Flutter apps come last in the build, after the staff web app and clinical core, reusing the booking (PRD-02) and intake/consent (PRD-03) modules already built. A client can complete the full pre-visit journey entirely in-app (REQ-APP-1).
+As a client, I want to sign in to the app and see my next appointment on a home screen, so that I have a working app that knows who I am and when I'm next in.
+Plainly: this is the client's phone app at its most basic — sign in and land on a home screen that shows your next appointment. Where it fits: the client-facing Flutter apps come last in the build, after the staff web app and clinical core; this basic slice stands up the client flavour of the shared codebase and the home landing, and is the foundation the booking, intake/consent and push follow-ups build on. A client can sign in and see their next appointment in-app (REQ-APP-1).
 
 ## How it works
 
@@ -16,7 +16,7 @@ Home surfaces the next appointment and an amber 'Finish your pre-visit forms' nu
 
 ## Requirements
 
-- To book, complete intake and e-sign consent entirely in the app.
+- To sign in to the app and see my next appointment on a home screen.
 
 ## Acceptance Criteria
 
@@ -56,11 +56,5 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 
 - [ ] **Client Flutter flavour: shell, sign-in & tenant-pinned session**
   Behaviour: stand up the client flavour of the shared Flutter codebase — bottom tabs (Home / Book / My care / Rewards / Account), the design system and the API client. Sign-in via Entra External ID (social / email / OTP one-time passcode). Requirements: the chosen tenant is pinned into a session held in platform secure storage (Keychain / Keystore); every API call carries the tenant + token; sign-out clears it; no clinical data is stored app-local. This shell is shared with CLIENT-CARE / CLIENT-PRIVACY (same flavour, other tabs).
-- [ ] **Home / 'For you' landing (next appointment + pre-visit nudge)**
-  Behaviour: the Home tab greets the client and shows a NEXT APPOINTMENT card (treatment, time, injector, room, 'View details') plus an amber 'Finish your pre-visit forms' nudge when intake/consent is outstanding. Requirements: the nudge is driven by the server-side gate state (PRD-03) and deep-links into the forms; quick actions (Book / Messages / Photos / Rewards) route to the relevant screens; nothing here is the source of truth — it reflects the booking + gate read.
-- [ ] **In-app booking flow over PRD-02 (service → practitioner → slot → confirm)**
-  Behaviour: the Book tab walks service → practitioner → day/time → review → 'You're booked!', surfacing the SAME scope-aware availability as the desk. Requirements: injectable (S4 — Schedule 4 prescription-only medicine) services show generic names, no price and 'pricing confirmed privately' and only offer cleared RN/NP; slots and the create call go through the PRD-02/ONLINE-BOOK endpoints; the resulting Appointment is identical to a desk booking (source=online) and triggers the intake/consent send.
-- [ ] **Intake + per-treatment consent + image-use consent (PRD-03), e-signed on device**
-  Behaviour: the pre-visit forms screen completes the PRD-03 medical-history / BDD (body dysmorphic disorder) intake and e-signs per-treatment consent plus a SEPARATE, withdrawable image-use consent, ending on 'All set'. Requirements: the on-device signature is captured and posted to the API (records live server-side, no parallel app store); the treatment gate stays server-enforced — the app only reflects outstanding items; image-use consent is its own toggle the client can later withdraw.
-- [ ] **Push token registration + in-app notification inbox (PRD-07)**
-  Behaviour: register a push token at sign-in and render reminders / recall as push plus an in-app inbox. Requirements: notifications are delivered by PRD-07 (this surface only receives and displays them); transactional care/appointment messages are always shown; the inbox drives the Home pre-visit nudge; tapping a notification deep-links to the relevant screen.
+- [ ] **Home / 'For you' landing (next appointment)**
+  Behaviour: the Home tab greets the client and shows a NEXT APPOINTMENT card (treatment, time, injector, room, 'View details'). Requirements: reads the client's next booking over PRD-02 via the API; nothing here is the source of truth — it reflects the booking read; the pre-visit nudge, quick-action routing and push inbox are added by the follow-ups (CLIENT-INTAKE, CLIENT-PUSH).

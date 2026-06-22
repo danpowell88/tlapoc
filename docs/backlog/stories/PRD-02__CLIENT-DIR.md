@@ -1,4 +1,4 @@
-# Client directory: search, filter, merge, soft-delete
+# Client directory — basic search & list
 
 > **Epic:** [PRD-02 — Booking & scheduling (+ client/CRM basics)](../epics/PRD-02.md)  ·  **Key:** `PRD-02/CLIENT-DIR`  ·  **Type:** Story  ·  **Stage:** M2  ·  **Priority:** P2  ·  **Estimate:** 2 pts  ·  **Area:** web
 >
@@ -50,10 +50,6 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 ## Tasks (dev pickup)
 
 - [ ] **Directory search/filter API + index**
-  Behaviour: a searchable, paginated directory over name/phone/email. Requirements: back it with a search index for fast prefix/fuzzy match; tenant RLS (row-level security); exclude soft-deleted clients from active results; money columns (lifetime) flagged .fin so the UI can gate them (owner-only); the same endpoint powers the global header search.
-- [ ] **Segment filters (All / Members / At-risk / New)**
-  Behaviour: filter chips that narrow the directory to All / Members / At-risk / New. Requirements: segments derive from membership state, recency/recall risk and join date; compose with the search query; the active segment persists so a refresh keeps it.
-- [ ] **Soft-delete (audited) + active-view exclusion**
-  Behaviour: soft-deleting a client removes them from active views without destroying history. Requirements: set deleted_at and write an audit entry; deleted clients are excluded from search/active lists but retained (true destruction is governed by PRD-01 RETENTION only, never here); capability-gated.
-- [ ] **Clients table + global header search wiring**
-  Behaviour: the Clients screen — search box, segment chips and a table (Client / Status / Last visit / Lifetime[.fin] / Membership / Next) where a row opens Client 360 — plus the global header search that jumps straight to a client from anywhere in the shell. Requirements: the Lifetime column is .fin-gated (owner-only); the header search reads the same directory API and deep-links to the matched Client 360.
+  Behaviour: a searchable, paginated directory over name/phone/email. Requirements: back it with a search index for fast prefix/fuzzy match; tenant RLS (row-level security); exclude soft-deleted clients from active results; money columns (lifetime) flagged .fin so the UI can gate them (owner-only).
+- [ ] **Clients table (row opens Client 360)**
+  Behaviour: the Clients screen — a search box and a table (Client / Status / Last visit / Lifetime[.fin] / Membership / Next) where a row opens Client 360. Requirements: the Lifetime column is .fin-gated (owner-only); reads the directory search API. Segment filters, audited soft-delete and the global header search wiring are follow-ups.

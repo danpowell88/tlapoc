@@ -1,4 +1,4 @@
-# Body contouring charting (e.g. CoolSculpting)
+# Body contouring charting: body map & applicator/cycle capture (MVP)
 
 > **Epic:** [PRD-05 — Clinical charting: injection mapping & before/after](../epics/PRD-05.md)  ·  **Key:** `PRD-05/BODY-CONTOURING`  ·  **Type:** Story  ·  **Stage:** M3  ·  **Priority:** P2  ·  **Estimate:** 1 pts  ·  **Area:** provider-app
 >
@@ -60,5 +60,5 @@ _Prototype screen: prototype.html — Clinical → Body contouring (body map)._
 
 ## Tasks (dev pickup)
 
-- [ ] **Body-contouring charting: body map, applicator/cycle capture + cost roll-up**
-  EF Core: BodyChart (areas[]{region, applicator, cycles, params}, totals, consumable_cost, chair_minutes) + BodyMeasurement, linked to a ChartEntry (treatment_type=body-contouring, non-S4 device-class - no lot/Rx). tenant_id + Row-Level Security (RLS, the per-tenant database isolation). Build the body-map UI (tap regions to place applicators, -/+ cycles per area, per-area applicator/cost/time table, summary tiles) plus standardised body photos (PHOTOS rules) and circumference measurements over the course. Roll per-cycle applicator cost into True cost & margin (PRD-08); feed sessions into plans (TREATMENT-PLANS) + outcomes (OUTCOMES); finalise locks the chart (IMMUTABILITY); device-gate where a licence/patch-test applies. Extends the MODALITY model (ADR-0025).
+- [ ] **Body-contouring charting: body map + applicator/cycle capture**
+  EF Core: BodyChart (areas[]{region, applicator, cycles, params}, totals, chair_minutes) linked to a ChartEntry (treatment_type=body-contouring, non-S4 device-class - no lot/Rx). tenant_id + Row-Level Security (RLS, the per-tenant database isolation). Build the body-map UI (tap regions to place applicators, -/+ cycles per area, per-area applicator/time table, summary tiles). Finalise locks the chart (IMMUTABILITY); device-gate where a licence/patch-test applies. Extends the MODALITY model (ADR-0025). The consumable-cost roll-up into True cost & margin (PRD-05/BODY-CONTOURING-COST) and the photos+measurements over the course (PRD-05/BODY-CONTOURING-PROGRESS) are follow-ups.

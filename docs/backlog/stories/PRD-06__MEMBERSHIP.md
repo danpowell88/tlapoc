@@ -1,4 +1,4 @@
-# Memberships with automatic autopay & dunning
+# Membership join + card-on-file — basic enrolment (core)
 
 > **Epic:** [PRD-06 — Payments (in-person POS + autopay), memberships & non-S4 rewards](../epics/PRD-06.md)  ·  **Key:** `PRD-06/MEMBERSHIP`  ·  **Type:** Story  ·  **Stage:** M4  ·  **Priority:** P0  ·  **Estimate:** 5 pts  ·  **Area:** backend
 >
@@ -6,8 +6,8 @@
 
 ## Background
 
-As a client, I want to join a membership and have my card auto-charged on schedule, so that I get member perks without manual payments.
-What this is, plainly: clients join a monthly plan, store a card once, and the platform charges that card automatically on schedule — chasing politely if a charge fails rather than dropping the member. Where it sits: it builds on the PAYMENT-PROVIDER card-on-file token and is the clinic's recurring-revenue engine; it arrives in the Payments layer after the clinical core, and its lifecycle feeds reporting (PRD-08). Membership plans/tiers with automatic recurring billing from a tokenised card-on-file (added online/in-app or at desk) and failed-payment dunning — the scheduled retry-and-chase when a recurring payment fails — (REQ-MEMB-1/2/3).
+As a client, I want to join a membership and store a card on file, so that I'm enrolled and ready to be billed for member perks.
+What this is, plainly: a client joins a monthly plan and stores a card once, so the clinic holds a tokenised card-on-file ready to charge. This is the minimal end-to-end core; the autopay scheduler, failed-payment dunning, lifecycle states, benefit auto-apply and the members list/KPIs are each added as their own follow-ups. Where it sits: it builds on the PAYMENT-PROVIDER card-on-file token and is the first brick of the clinic's recurring-revenue engine; it arrives in the Payments layer after the clinical core. Membership enrolment with a tokenised card-on-file (added online/in-app or at desk) (REQ-MEMB-1/2/3).
 
 ## How it works
 
@@ -17,14 +17,14 @@ Lifecycle — join / pause / cancel / win-back — is tracked and feeds MRR (mon
 
 ## Requirements
 
-- To join a membership and have my card auto-charged on schedule.
+- To join a membership and store a card on file.
 
 ## Acceptance Criteria
 
-- [ ] A membership auto-charges on schedule from a stored token (card added online/in-app or in person).
-- [ ] A failed charge triggers a dunning (retry-and-chase) recovery sequence (retry + client notice + follow-up) before lapse, with a manual Retry.
-- [ ] Lifecycle (join/pause/cancel/win-back) is tracked and feeds MRR (monthly recurring revenue)/churn reporting (PRD-08).
-- [ ] Benefits/credits auto-apply at checkout; all money figures are owner-gated.
+- [ ] A client can join a plan, creating a Membership that ties them to the plan with a tokenised card-on-file.
+- [ ] The card-on-file can be captured online, in the client app, or at the desk; only the token + brand/last4 are stored (never a PAN).
+- [ ] A next_charge_at is set on enrolment; the actual recurring charging is added by the autopay follow-up.
+- [ ] All money figures are owner-gated (.fin).
 
 ## UI designs / screenshots
 
@@ -48,15 +48,7 @@ Lifecycle — join / pause / cancel / win-back — is tracked and feeds MRR (mon
 
 ## Tasks (dev pickup)
 
-- [ ] **Membership join + card-on-file capture (online / in-app / desk)**
-  Behaviour: a client joins a plan and stores a card once; the token can be captured online, in the client app, or at the desk. A Membership ties the client to a plan with a tokenised card-on-file (a PaymentMethodToken from PAYMENT-PROVIDER), a billing schedule and a next_charge_at. Requirements: only the token + brand/last4 are stored (never a PAN — primary account number); the client app shows 'Visa ···· 4242 — Used for membership autopay' and 'renews 1 Jul · autopay is on'; capability/consent appropriate to the surface. NOTE this is a client-facing/online capability and arrives LATE in the clinic-first build.
-- [ ] **Autopay scheduler (off-session recurring charge)**
-  Behaviour: a scheduled job picks up memberships where next_charge_at <= now and charges the stored card off-session via IPaymentProvider.recurringCharge, then advances next_charge_at to the next period. Requirements: idempotent per period (a retry never double-bills the same period); each charge writes a ProviderTxn and feeds the Closeout/Xero like any payment; autopay is built on the Square card-on-file recurring spike (SPIKE-SQUARE). All money figures owner-gated.
-- [ ] **Failed-payment dunning (retry-and-chase) state machine + manual Retry**
-  Behaviour: a failed charge does NOT lapse the member immediately — it opens a DunningAttempt sequence (dunning = the scheduled retry-and-chase when a recurring payment fails): back-off retries, a client notice to update their card, a 'Payment failed' state and a follow-up Job; only after the sequence exhausts does the membership lapse. The members list shows 'Payment failed · Retry' with a manual Retry. Requirements: notices go via INotifier (PRD-07); the follow-up lands in the Follow-ups queue (PRD-07/FOLLOWUPS); retries are idempotent; the manual Retry re-attempts the current period without skipping it.
-- [ ] **Membership lifecycle (join / pause / cancel / win-back) -> MRR/churn**
-  Behaviour: the membership moves through join → active → paused → cancelled, with a win-back path; each transition is tracked. Requirements: lifecycle transitions emit events for the MRR (monthly recurring revenue) and churn read-models (PRD-08); pause suspends billing without losing the card-on-file; cancel stops future charges; win-back re-activates. Owner-gated money figures throughout.
-- [ ] **Member benefits / credits auto-apply at checkout (non-S4 only)**
-  Behaviour: a member's benefits and credits apply automatically at the till — member pricing, 10% off non-S4, periodic complimentary add-on — appearing as deduction lines on the sale (PRD-06/POS). Requirements: benefits NEVER apply to an S4 (Schedule 4 prescription-only medicine) line (C9) — re-checked server-side against the live line schedule; the per-plan benefit set is defined by the plan (PRD-06/MEMBERSHIP-PLANS); money figures owner-gated.
-- [ ] **Members & billing list UI + overview KPIs**
-  Behaviour: the Members & billing screen lists each member with Plan, Since, Autopay (card last4), Next charge and Status (Active / 'Payment failed · Retry'); the Overview tab shows headline KPIs (active members, recurring/mo MRR, avg tenure, failed payments) and a 'Needs action' panel (failed payment → Fix, renewals this week, referrals→joined). Requirements: the MRR/recurring figures are owner-only (.fin) — Reception may see membership status but not the money; failed-payment rows link to the dunning Retry; live-update as charges/dunning resolve. Plan definitions live in PRD-06/MEMBERSHIP-PLANS.
+- [ ] **Membership model + join (ties client to plan, sets next_charge_at)**
+  Behaviour: joining a plan creates a Membership tying the client to a plan_id with a billing schedule and an initial next_charge_at. Requirements: tenant-scoped with RLS (row-level security); plan definitions come from PRD-06/MEMBERSHIP-PLANS; status starts active; all money figures owner-gated (.fin). The recurring charging itself is the autopay follow-up.
+- [ ] **Card-on-file capture (online / in-app / desk)**
+  Behaviour: the member stores a card once; the token can be captured online, in the client app, or at the desk. A tokenised card-on-file (a PaymentMethodToken from PRD-06/PAYMENT-PROVIDER) is linked to the Membership. Requirements: only the token + brand/last4 are stored (never a PAN — primary account number); the client app shows 'Visa ···· 4242 — Used for membership autopay'; capability/consent appropriate to the surface. NOTE the online/in-app capture is a client-facing capability and arrives LATE in the clinic-first build; the desk capture is available earlier.

@@ -1,4 +1,4 @@
-# Charting product & batch (lot) selector
+# Charting product & batch (lot) selector (MVP)
 
 > **Epic:** [PRD-05 — Clinical charting: injection mapping & before/after](../epics/PRD-05.md)  ·  **Key:** `PRD-05/PRODUCT-LOT-PICKER`  ·  **Type:** Story  ·  **Stage:** M3  ·  **Priority:** P0  ·  **Estimate:** 5 pts  ·  **Area:** —
 >
@@ -53,5 +53,5 @@ When a product has no usable lot, the picker shows a 'no in-date stock — recei
   Behaviour: given a product, return only its lawfully-usable lots — on-hand > 0, not Depleted/Expired, in-date, in the correct custody location, ARTG (Australian Register of Therapeutic Goods)-verified and not quarantined by a cold-chain breach (PRD-04/COLD-CHAIN). Requirements: the selectable set must be exactly the set the administration gate (PRD-04/ADMIN-GATE) would accept, so a chartable lot can never be one finalise will reject; reads inventory (PRD-04/STOCK-RECEIVE, CUSTODY-STORAGE) server-side; tenant-scoped (RLS, the per-tenant database isolation).
 - [ ] **Product → lot dropdowns + lot-info line + empty state**
   Behaviour: a Product dropdown filters the Batch/lot dropdown to the selected product's selectable lots, each labelled 'lot · exp …' with an expiring warning; a lot-info line summarises on-hand · location · in-date/expiring · S4 vs non-S4; a 'no in-date stock — receive or pick another product' empty state shows when none qualify (prototype setChartProd/renderChartProduct). Requirements: the helper copy states units deduct from this lot on finalise and only in-date/in-custody/ARTG stock is selectable; read-only roles see the chosen product/lot statically.
-- [ ] **Lot-selection gate on point placement + default-lot wiring**
-  Behaviour: no injection point can be placed until a valid lot is selected; once chosen, the lot becomes the default wired into every point's deduction and updates the active 'Product · lot' label on the map. Requirements: enforce the 'lot required before points' rule on the server too (not just the UI) so a draft can't carry points without a lot; the selected_lot_id is what the finalise deduction and the lot→client register link draw against (PRD-04/ADMIN-GATE, VIAL-RECON).
+- [ ] **Selected-lot persistence on the ChartEntry**
+  Behaviour: choosing a lot sets ChartEntry.selected_product_id + selected_lot_id and shows the active 'Product · lot' label on the map. Requirements: persist the selection on the draft so it survives sync; the selected_lot_id is what the finalise deduction and the lot→client register link draw against (PRD-04/ADMIN-GATE, VIAL-RECON). The hard 'lot required before any point' enforcement is a follow-up (PRD-05/PRODUCT-LOT-PICKER-GATE).

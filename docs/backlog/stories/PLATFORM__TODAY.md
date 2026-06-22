@@ -1,4 +1,4 @@
-# Role-tailored Today dashboard
+# Role-tailored Today dashboard (core: greeting + today's schedule)
 
 > **Epic:** [PLATFORM — Platform shell, navigation & cross-cutting UX](../epics/PLATFORM.md)  ·  **Key:** `PLATFORM/TODAY`  ·  **Type:** Story  ·  **Stage:** M1  ·  **Priority:** P1  ·  **Estimate:** 3 pts  ·  **Area:** web
 >
@@ -52,11 +52,7 @@ _Prototype screen: prototype.html — Today (waiting / in-room / checked-out)._
 
 ## Tasks (dev pickup)
 
-- [ ] **Greeting + at-a-glance stat cards (Appointments / Checked in / Awaiting consent / Stock)**
-  Behaviour: the Today header — a personalised greeting ('Good morning, Lena'), a date/at-a-glance line ('14 appointments · 3 checked in') and the row of stat cards (Appointments, Checked in · waiting, Awaiting consent 'treatment gated until done', Stock on hand). Requirements: each card derives from today's appointments + gate state and live-updates from lifecycle/transition events; the 'Awaiting consent' card reflects the consult/consent gate; cards are concern-tagged (data-concern) and shown per active role; any money card is .fin-gated (owner-only).
-- [ ] **Today's schedule with lifecycle pills + 'WITH YOU NOW' in-room strip**
-  Behaviour: the Today's schedule list — each appointment with its current status and the next-action pill for whoever owns it now (Late / Start / No-show / Confirmed / In treatment / Resume) — plus a 'WITH YOU NOW' in-room strip showing who is being treated with Open-chart / Profile quick links. Requirements: the live waiting / in-room / checked-out state comes from the appointment/visit state machine (ADR-0024); each pill calls the lifecycle transition and is shown only when legal for the row's state and the user's role; rows deep-link into the in-flight visit (Open chart / Profile / Resume / Checkout); live-updates from transition events.
-- [ ] **Follow-ups preview panel + needs-attention digest**
-  Behaviour: a Follow-ups preview previewing the Jobs queue and (for the owner) the needs-attention exceptions strip (overdue recalls, unbilled visits, credential expiries from REG-WATCH, failed payments). Requirements: the preview reads the Jobs queue (ADR-0023) with an 'Open queue →' link; the needs-attention items mirror ATTENTION-DIGEST (PRD-08) and deep-link to source; money-bearing items (failed payments) are .fin-gated/genericised for non-owner roles; concern-tailored so reception sees front-desk items, the owner the business digest.
-- [ ] **Today read aggregation (role + .fin filtered)**
-  Behaviour: the read aggregation powering Today — live visit state (waiting / in-room / checked-out) and the day's schedule from the appointment/visit state machine (ADR-0024), the needs-attention digest and the Follow-ups preview from the Jobs queue (ADR-0023). Requirements: filter widget data by the active role's concerns; strip money figures server-side for non-owner roles (FIN-GATING) so the payload is already safe before the UI hides anything; no separate write model (it's a read aggregation); loading/empty/error states.
+- [ ] **Today read aggregation (role-filtered) + greeting/at-a-glance header**
+  Behaviour: the minimal end-to-end Today — a personalised greeting ('Good morning, Lena') and a date/at-a-glance line ('14 appointments · 3 checked in') over a read aggregation of today's appointments. Requirements: it is a read aggregation (no new write model); filter widget data by the active role's concerns (data-concern) so each role lands on a relevant Today; no separate persistence; loading/empty/error states.
+- [ ] **Today's schedule list with lifecycle status**
+  Behaviour: the Today's schedule list — each of the day's appointments with its current lifecycle state (waiting / confirmed / in treatment / checked-out) read from the appointment/visit state machine (ADR-0024), in time order. Requirements: live-updates from transition events; rows show the at-a-glance state for the day; this is the read view only — the next-action pills and quick links are the follow-up TODAY-PILLS.

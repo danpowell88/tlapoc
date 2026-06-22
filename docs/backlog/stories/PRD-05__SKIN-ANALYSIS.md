@@ -1,4 +1,4 @@
-# Skin analysis & assessment (with AI scan, advisory)
+# Skin analysis: structured assessment & zone scoring (MVP)
 
 > **Epic:** [PRD-05 — Clinical charting: injection mapping & before/after](../epics/PRD-05.md)  ·  **Key:** `PRD-05/SKIN-ANALYSIS`  ·  **Type:** Story  ·  **Stage:** M3  ·  **Priority:** P2  ·  **Estimate:** 1 pts  ·  **Area:** provider-app
 >
@@ -58,5 +58,5 @@ _Prototype screen: prototype.html — Clinical → Skin analysis (scan + push-to
 
 ## Tasks (dev pickup)
 
-- [ ] **Skin assessment record + scoring UI (manual v1; AI advisory Phase 2)**
-  EF Core: SkinAssessment + SkinZoneScore (per-concern percentile-vs-cohort score, recommended service), tenant_id + Row-Level Security (RLS, the per-tenant database isolation), indexed by client for trend. API to record/retrieve assessments and trend them across visits; below-threshold concerns surface recommended-plan chips that feed TREATMENT-PLANS; a consent-respecting push-to-client summary (C14 image-use + AU storage for image-backed assessments). UI: the concern-score bars, skin-age vs actual, trend sparkline and recommended-plan chips per the prototype. Keep AI auto-scoring advisory + human-confirmed and gated to Phase 2 (ADR-0020) - v1 records manually; mark source manual vs ai_advisory.
+- [ ] **Skin assessment record + zone-score UI (manual v1; AI advisory marked)**
+  EF Core: SkinAssessment + SkinZoneScore (per-concern percentile-vs-cohort score), tenant_id + Row-Level Security (RLS, the per-tenant database isolation), indexed by client for trend. API to record/retrieve assessments and trend them across visits. UI: the concern-score bars, skin-age vs actual and the trend sparkline per the prototype. Keep AI auto-scoring advisory + human-confirmed and gated to Phase 2 (ADR-0020) - v1 records manually; mark source manual vs ai_advisory. The recommended-plan chips (PRD-05/SKIN-ANALYSIS-RECOMMEND) and the consent-respecting push-to-client (PRD-05/SKIN-ANALYSIS-PUSH) are follow-ups.

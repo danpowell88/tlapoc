@@ -1,48 +1,46 @@
-# Client app: my care, memberships, rewards & card-on-file
+# Client app: my care health hub (basic)
 
 > **Epic:** [PRD-09 — Apps (Flutter): client & provider](../epics/PRD-09.md)  ·  **Key:** `PRD-09/CLIENT-CARE`  ·  **Type:** Story  ·  **Stage:** M5  ·  **Priority:** P2  ·  **Estimate:** 2 pts  ·  **Area:** client-app
 >
-> **Depends on:** `PRD-06/MEMBERSHIP`, `PRD-05/PHOTOS`
+> **Depends on:** `PRD-09/CLIENT-JOURNEY`, `PRD-05/PHOTOS`
 
 ## Background
 
-As a client, I want to view my photos, memberships, rewards and balance and add a card-on-file, so that I can self-serve my care and payments.
-Plainly: the parts of the client app where someone reviews their own care, memberships, rewards and balance, and saves a card for membership billing. Where it fits: a late, outward-facing surface that reuses the modules built earlier (PRD-05 photos, PRD-06 payments/memberships/rewards). Clients view consented before/after photos, memberships, rewards/perks and balances, and add a card-on-file for autopay (REQ-APP-1).
+As a client, I want to view my visit history, treatment plan, medicines and documents, so that I can see my own care in one place.
+Plainly: the My care tab of the client app where someone reviews their own care — past visits, treatment plan, their medicines and downloadable documents. Where it fits: a late, outward-facing surface that reuses the modules built earlier (PRD-05 clinical, PRD-06 commerce); this basic slice stands up the read-only health hub, and the rewards, card-on-file, before/after gallery and aftercare are its follow-up siblings. Clients view their own care history in-app (REQ-APP-1).
 
 ## How it works
 
-My care/Rewards/Account tabs: visit history + consent-gated before/after photos (served via short-lived signed URLs (temporary, expiring links to stored photos), ADR-0009, never on device); points/perks/gift cards over PRD-06; profile, memberships, the client's own balance, and add/replace a tokenised card-on-file (Square) that feeds PRD-06 autopay (automatic recurring membership billing).
-No one-off online checkout (v1 payments are in-person). Self-service for care history and payments.
+The My care health hub lists past visits, the ongoing treatment plan (what's due / course progress), the client's own medicines (S4 — Schedule 4 prescription-only medicine — record) and downloadable documents (signed consents, treatment records, receipts, aftercare PDFs). All read-only over the owning modules (PRD-05 clinical, PRD-06 commerce) via the API — no parallel app store.
+The medicines view is shown privately and never priced or advertised (AU advertising rules); documents download through the secure channel. The before/after gallery, day-by-day aftercare, rewards and the card-on-file are their own follow-up siblings (PHOTO-COMPARE, AFTERCARE-GUIDE, CLIENT-REWARDS, CLIENT-ACCOUNT). Self-service for care history.
 
 ## Requirements
 
-- To view my photos, memberships, rewards and balance and add a card-on-file.
-- Compliance: [C14](https://github.com/danpowell88/tlapoc/blob/main/docs/02-requirements.md#6-compliance-requirements-auqld--restated-as-acceptance-criteria)
+- To view my visit history, treatment plan, medicines and documents.
 
 ## Acceptance Criteria
 
-- [ ] Consent-gated before/after photo viewing.
-- [ ] Memberships, rewards/perks and balances visible.
-- [ ] Card-on-file can be added in-app (feeds PRD-06 autopay).
-- [ ] No one-off online checkout is exposed.
+- [ ] The My care tab lists past visits and the ongoing treatment plan (what's due / course progress).
+- [ ] The client's own medicines (S4 record) are shown privately and never priced or advertised.
+- [ ] Documents (signed consents, treatment records, receipts, aftercare PDFs) download through the secure channel.
+- [ ] All read-only over the owning modules (PRD-05 clinical, PRD-06 commerce) — no app-local store.
 
 ## UI designs / screenshots
 
 _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.html._
 
-- Prototype: client-app — My care (visit history, photos gated by image-use consent), Rewards (redeem points, perks, gift cards), Account (profile, memberships, balance, 'Update card on file').
-- Photo viewing is image-use-consent-gated and served via signed URLs.
+- Prototype: client-app — My care (visit history, treatment plan, medicines, documents).
+- Medicines shown privately, never priced/advertised; documents download via the secure channel.
+- Before/after gallery + aftercare are sibling sub-screens (PHOTO-COMPARE, AFTERCARE-GUIDE).
 
 ![client-app — prototype screen](../screens/client-app.png)
 
 ## Suggested data model
 
-- **(reuses) Photo** — PRD-05 — signed-URL view (ADR-0009), image-use-consent-gated
-  - _Never bundled/persisted in the app._
-- **(reuses) Membership/RewardLedger/AccountBalance** — PRD-06 — membership, points/perks, client balance
-  - _Client sees own figures only._
-- **(reuses) PaymentMethodToken** — PRD-06 — provider-tokenised card-on-file (Square)
-  - _Feeds autopay; no one-off checkout._
+- **(reuses) Visit/TreatmentPlan** — PRD-05 — visit history + ongoing treatment plan (what's due / course progress)
+  - _Read-only; client sees own care only._
+- **(reuses) Medicine/Document** — PRD-05/PRD-06 — client's own S4 medicine record; signed consents, treatment records, receipts, aftercare PDFs
+  - _Medicines never priced/advertised; documents download via the secure channel._
 
 ## Other
 
@@ -52,7 +50,3 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 
 - [ ] **My care tab: visit history + treatment plan + medicines + documents**
   Behaviour: the My care health hub lists past visits, the ongoing treatment plan (what's due / course progress), the client's own medicines (S4 — Schedule 4 prescription-only medicine — record) and downloadable documents (signed consents, treatment records, receipts, aftercare PDFs). Requirements: all read-only over the owning modules (PRD-05 clinical, PRD-06 commerce) via the API; the medicines view is shown privately and never priced or advertised (AU advertising rules); documents download through the secure channel. The before/after gallery and the day-by-day aftercare are their own siblings (PHOTO-COMPARE, AFTERCARE-GUIDE).
-- [ ] **Rewards tab over PRD-06 (points, perks, gift cards, referrals)**
-  Behaviour: the Rewards tab shows the membership card, points balance / ledger, member perks, milestones, a give-$25/get-$25 referral with tracking, and gift-card redeem. Requirements: reads PRD-06 reward/membership data, the client's OWN figures only; rewards are never applied to S4 medicines (you can't discount or incentivise a prescription medicine); redemptions post back to PRD-06.
-- [ ] **Account tab: profile, memberships, own balance + card-on-file (Square tokenise)**
-  Behaviour: the Account tab surfaces profile, memberships, the client's own balance and 'Update card on file'. Requirements: card capture uses the Square SDK (software development kit) to tokenise on-device — no PAN (the raw card number) is ever stored or sent; the token posts to PRD-06 to feed membership autopay (automatic recurring billing); the client sees only their own balances, never clinic revenue; NO one-off online checkout is exposed (v1 payments are in-person). The 'Your data & privacy' entry point (CLIENT-PRIVACY) lives beneath these actions.

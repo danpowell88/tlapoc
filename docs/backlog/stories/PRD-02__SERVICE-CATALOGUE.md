@@ -1,4 +1,4 @@
-# Services & treatment-menu admin (durations, eligible roles, S4 flag)
+# Services & treatment menu — basic catalogue & S4 flag
 
 > **Epic:** [PRD-02 — Booking & scheduling (+ client/CRM basics)](../epics/PRD-02.md)  ·  **Key:** `PRD-02/SERVICE-CATALOGUE`  ·  **Type:** Story  ·  **Stage:** M2  ·  **Priority:** P1  ·  **Estimate:** 3 pts  ·  **Area:** web
 >
@@ -56,11 +56,5 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 
 - [ ] **Service entity + schedule(S4|non-S4) classification**
   Behaviour: model Service (id/name/public_name/category/duration/buffer/price/schedule/reg_class/unit/eligible_roles[]/requires[]/product_id?). Requirements: the schedule flag (ADR-0014/0021) is the single source of truth; persist with tenant RLS (row-level security); derive rewards_eligible = (schedule != S4 (Schedule 4 prescription-only medicine)).
-- [ ] **Schedule flag wired to scope, rewards and public naming**
-  Behaviour: make the schedule flag actually drive behaviour across the platform. Requirements: the availability engine restricts S4 (Schedule 4 prescription-only medicine) to canInject roles (C4); the rewards engine (PRD-06) is constrained to non-S4 by this flag (C9/REQ-MEMB-7); the public booking config (ONLINE-BOOK) uses the generic name + withholds price for S4; the requires(consult/rx/s4_lot/standard_consent) declaration is read by charting (PRD-05) and the gates; product_id links to PRODUCT-CATALOGUE for stock decrement.
-- [ ] **Capability-gated catalogue admin + audit**
-  Behaviour: add/edit/archive a service from the admin surface. Requirements: gated to prescriber (a practitioner authorised to write a prescription)/owner capability; every change writes an AuditEvent; S4 (Schedule 4 prescription-only medicine) services cannot have reward/discount controls enabled (validated server-side); archive (never hard-delete) so past bookings keep their service history.
-- [ ] **Treatment-menu card UI ('Charting & compliance this drives')**
-  Behaviour: cards per service showing category, schedule + reg class, unit, performed-by roles, price, duration, linked stock, adverse-event route, and a 'Charting & compliance this drives' summary (synchronous consult · individual S4 script · batch-lot select · standard consent · rewards-eligible vs S4 'not rewards-eligible'). Requirements: visibly tag S4 cards and disable their reward/discount controls; capability-gate the admin actions.
-- [ ] **Active / Archived / All filter + add/edit affordances**
-  Behaviour: a status filter (Active / Archived / All), a '+ Add treatment' action and per-card Edit/Archive. Requirements: filtering reflects each service's archived state; archive retires a service without breaking historical bookings; add/edit open the capability-gated admin form.
+- [ ] **Minimal services-list admin (create/view)**
+  Behaviour: a basic services list to create and view services with their duration/buffer, eligible roles, price and schedule flag. Requirements: only the core list + create/view; cross-platform wiring of the schedule flag, the audit + S4-control validation, the treatment-menu card UI, and the Active/Archived/All filter are follow-ups.

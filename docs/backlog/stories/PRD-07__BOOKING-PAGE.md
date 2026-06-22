@@ -1,4 +1,4 @@
-# Public booking page: generic names, S4 prices withheld
+# Public booking page: schedule-driven generic names & withheld S4 prices (core)
 
 > **Epic:** [PRD-07 — Communications, reminders & recall](../epics/PRD-07.md)  ·  **Key:** `PRD-07/BOOKING-PAGE`  ·  **Type:** Story  ·  **Stage:** M4  ·  **Priority:** P1  ·  **Estimate:** 3 pts  ·  **Area:** web
 >
@@ -7,7 +7,7 @@
 ## Background
 
 As a owner, I want my public booking page to use generic service names and withhold S4 prices automatically, so that we don't reference S4 in public advertising.
-The public booking page is the one outward-facing surface the platform owns, so it must not breach the advertising rules: it uses generic service names and withholds S4 prices automatically, driven by configuration off the catalog schedule flag — not by an automated advertising linter (which was withdrawn from scope, ADR-0034).  Everything else about advertising compliance is the clinic's responsibility in its external tools.
+The public booking page is the one outward-facing surface the platform owns, so it must not breach the advertising rules: it uses generic service names and withholds S4 prices automatically, driven by configuration off the catalog schedule flag — not by an automated advertising linter (which was withdrawn from scope, ADR-0034). This is the minimal end-to-end core — the config model, the schedule-driven render and the no-public-S4 server-side invariant; the Settings config screen with the live preview is a follow-up. Everything else about advertising compliance is the clinic's responsibility in its external tools.
 
 ## How it works
 
@@ -23,7 +23,7 @@ This is configuration-driven, not a linter: the schedule flag is the single sour
 
 - [ ] The booking page renders generic service names and withholds S4 prices for any S4-flagged service (configuration-driven).
 - [ ] No brands, 'anti-wrinkle injections', prices or #botox appear for S4 services (e.g. 'Pricing discussed at consult').
-- [ ] Configuration is driven by the catalog schedule flag (PRD-04/ADR-0014), shared with PRD-02 ONLINE-BOOK.
+- [ ] Configuration is driven by the catalog schedule flag (PRD-04/ADR-0014), shared with PRD-02 ONLINE-BOOK; the no-public-S4 rule is a server-side invariant (audited), not a UI nicety.
 - [ ] There is no advertising linter; compliance beyond this page is clinic-owned (external tools).
 
 ## UI designs / screenshots
@@ -61,8 +61,3 @@ _Prototype screen: prototype.html — Comms & growth (Inbox/Automations/Campaign
   C9 invariant on the public surface the app owns.
   - The public render must never expose an S4 (Schedule 4 prescription-only medicine) service's brand/clinical name/price/imagery when the policy is on; assert this server-side so a UI/client change can't leak it.
   - Audit config changes (ADR-0010). (No advertising linter — external advertising is clinic-owned, ADR-0034.)
-- [ ] **Settings -> Public booking page web UI + live preview**
-  Angular per the screenshot.
-  - Public-booking-widget panel with the policy toggles (generic names / withhold S4 (Schedule 4 prescription-only medicine) prices / no S4 imagery) and SEO (search engine optimisation) metadata fields.
-  - Live Preview showing how S4 vs non-S4 services render (price withheld for S4).
-  - Owner/admin gated; loading/empty/error states.

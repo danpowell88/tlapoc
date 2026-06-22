@@ -1,4 +1,4 @@
-# Online self-booking (scope-aware)
+# Online self-booking — basic scope-aware flow
 
 > **Epic:** [PRD-02 — Booking & scheduling (+ client/CRM basics)](../epics/PRD-02.md)  ·  **Key:** `PRD-02/ONLINE-BOOK`  ·  **Type:** Story  ·  **Stage:** M2  ·  **Priority:** P0  ·  **Estimate:** 5 pts  ·  **Area:** web
 >
@@ -52,15 +52,7 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 
 ## Tasks (dev pickup)
 
-- [ ] **Service-selection step ('What can we help with?')**
-  Behaviour: the public service list rendered as generic-named cards; S4 (Schedule 4 prescription-only medicine) services carry a 'Consultation required' tag, no price, and 'Pricing is confirmed privately with your practitioner' copy. Requirements: reads PublicBookingConfig (generic_names, display_name_overrides, withhold_s4_prices); the server returns ALREADY-SANITISED data so the browser never receives an S4 brand or price (C9, configuration policy not an advertising linter); only bookable services appear.
-- [ ] **Practitioner step (scope-filtered for S4)**
-  Behaviour: after a service is chosen, offer only practitioners who can perform it — for an S4 service only cleared RN/NP (the canInject gate), with a 'next available' shortcut. Requirements: the eligible-practitioner list comes from the SAME server-side availability engine as the desk (CALENDAR); an ineligible practitioner is never returned for an S4 service (C4); 'no preference' picks the soonest eligible injector.
-- [ ] **Slot-grid step (public availability)**
-  Behaviour: a date/time slot grid showing only genuinely bookable slots for the chosen service + practitioner. Requirements: slots = roster ∩ canInject ∩ free room/chair/device for the whole block incl. buffers, identical to the desk engine; taken/over-capacity slots are not selectable; the surface is rate-limited and bot-protected since it is public.
-- [ ] **Details / account step (DOB capture + under-18 flag)**
-  Behaviour: capture the client's details, create or match an account, and capture date of birth; show 'Your details are kept private & used only to manage your booking'. Requirements: derive under_18 from DOB and stamp it on the resulting Appointment so PRD-03 COOLING-OFF/GATING can enforce the 7-day cooling-off (the mandatory wait before a cosmetic procedure can proceed) + payment block; emit a domain event (a fact emitted when something happens in the system) so downstream gates react; guardian/contact capture is deferred to PRD-03.
-- [ ] **Confirm step + create (source=online) + intake/consent handoff**
-  Behaviour: a confirmation/summary that commits the booking and hands straight off to the intake + consent send. Requirements: the create endpoint sets source=online and re-runs the same server-side conflict/scope checks as the desk (an S4 booking with an ineligible practitioner is rejected); on success it triggers the PRD-03 intake + consent send and shows the 'kept private' assurance; the created Appointment is identical to a desk/walk-in booking.
-- [ ] **Owner customise panel ('Compliant by configuration')**
-  Behaviour: the owner-facing embed/customise view (brand colour, clinic name, service selection) plus the 'Compliant by configuration' summary — generic names, withheld prices, S4 always price-free + 'consultation required', 'no deposit / card on file in v1'. Requirements: writes PublicBookingConfig (incl. embed_token for the embeddable widget); shared policy with PRD-07 BOOKING-PAGE; capability-gated to owner.
+- [ ] **Public scope-aware booking flow (service → practitioner → slot)**
+  Behaviour: the public service → practitioner → slot wizard that reuses the desk availability engine. Requirements: after a service is chosen offer only practitioners who can perform it — for an S4 (Schedule 4 prescription-only medicine) service only cleared RN/NP (the canInject gate), with a 'next available' shortcut (C4); the slot grid shows only genuinely bookable slots (roster ∩ canInject ∩ free room/chair/device incl. buffers), identical to the desk engine; an ineligible practitioner is never returned for an S4 service; the public surface is rate-limited and bot-protected.
+- [ ] **Confirm + create (source=online) + intake/consent handoff**
+  Behaviour: a confirmation/summary that commits the booking and hands straight off to the intake + consent send. Requirements: the create endpoint sets source=online and re-runs the same server-side conflict/scope checks as the desk (an S4 booking with an ineligible practitioner is rejected); on success it triggers the PRD-03 intake + consent send and shows the 'kept private' assurance; the created Appointment is identical to a desk/walk-in booking. Generic public naming, DOB/under-18 capture and the owner customise panel are follow-ups.

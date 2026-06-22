@@ -1,4 +1,4 @@
-# Retention cohort analysis & at-risk worklist
+# Retention cohort analysis (core: cohort grid)
 
 > **Epic:** [PRD-08 — Reporting & compliance dashboards (Governance hub)](../epics/PRD-08.md)  ·  **Key:** `PRD-08/RETENTION-COHORTS`  ·  **Type:** Story  ·  **Stage:** M5  ·  **Priority:** P2  ·  **Estimate:** 2 pts  ·  **Area:** —
 >
@@ -52,9 +52,5 @@ This reads from the reporting read-models (READ-MODELS) over appointment, client
 
 - [ ] **Read-model / projection: cohort retention matrix**
   Behaviour: project RetentionCohort = for each first-visit month, the percentage of that cohort still active at each months-since offset, producing the triangle matrix. Requirements: computed over the appointment/visit read-models (READ-MODELS), never OLTP; 'still active' uses a defined activity window; newer cohorts have fewer offsets (shorter rows); date/window-aware; eventual consistency acceptable; operational metric, no money.
-- [ ] **Read-model / projection: at-risk & lapsed clients**
-  Behaviour: project AtRiskClient = clients past the expected return cadence for their treatment type, with last-seen, an at-risk reason and (owner-only) value-at-risk. Requirements: cadence is per treatment type; value_at_risk is tagged owner-financial and stripped for non-owner roles; expose the underlying client ids so the list drills into the 360 profile.
 - [ ] **Cohort grid UI (colour-graded triangle matrix)**
   Behaviour: render the cohort matrix as a colour-graded grid (rows = first-visit month, columns = months since first visit) with the explainer copy and a per-row legend. Requirements: cells colour by retained percentage; newer cohorts render shorter; horizontally scrollable at width; shares the Reports date presets; no money figures.
-- [ ] **At-risk list UI + reactivation hand-off to Follow-ups**
-  Behaviour: render the at-risk / lapsed list (client, last-seen, reason, value-at-risk) with a per-row 'queue reactivation' action and an 'Open follow-ups →' link. Requirements: the hand-off creates a reactivation follow-up job (PRD-07) honouring marketing consent; value-at-risk is .fin owner-only; rows deep-link into the client 360 profile; the reactivation action is idempotent (no duplicate job for the same client).

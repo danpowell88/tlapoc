@@ -17,17 +17,16 @@
   "stories": [
     {
       "key": "XERO",
-      "title": "Xero invoice/payment sync",
-      "context": "This story removes double-entry into the accounting system: when a sale is taken, the platform automatically posts the matching invoice and payment into Xero with the right account and tax code, so the books reconcile without re-keying. It sits in the Integrations layer (step 10 of the clinic-first build), deliberately late — external systems are wired up once the internal data is solid. It is driven by checkout completion (PRD-06 POS), so it depends on that, and its data residency is governed by the sub-processor posture (SUBPROCESSOR-POSTURE). Money handling here is owner/bookkeeper-only. On checkout, create/sync invoice + payment (and payouts) in Xero with account/GST (Goods and Services Tax, Australia's 10%) mapping, retries and reconciliation status, behind IAccountingExport (REQ-INT-1).",
+      "title": "Xero invoice/payment sync (basic)",
+      "context": "This story removes double-entry into the accounting system at its core: when a sale is taken, the platform posts the matching invoice and payment into Xero with the right account and tax code. It sits in the Integrations layer (step 10 of the clinic-first build), deliberately late — external systems are wired up once the internal data is solid. It is driven by checkout completion (PRD-06 POS), so it depends on that; this basic slice is the IAccountingExport port + account/GST mapping + post-on-checkout, with the resilient idempotent SyncJob + OAuth lifecycle and the reconciliation UI added as follow-ups. Money handling here is owner/bookkeeper-only (REQ-INT-1).",
       "as_a": "owner",
       "i_want": "completed sales/payments to post to Xero with the right account and GST",
       "so_that": "my books reconcile without re-keying",
       "acceptance": [
         "A completed sale creates the corresponding Xero invoice + payment (and payout where applicable) with the correct account + GST.",
         "GST is computed per line from the catalogue tax code (not a flat total/11); services vs retail vs memberships map to the right accounts.",
-        "Each post is a SyncJob that retries on transient failure (backoff, rate-limit-aware, idempotent — no double-post) and shows a reconciliation status (pending/synced/failed).",
         "Implemented behind IAccountingExport (provider swappable without touching checkout); the AccountMapping is tenant-configurable.",
-        "AU/APP-8 sub-processor posture applies to the Xero connection (ties to SUBPROCESSOR-POSTURE)."
+        "The resilient idempotent SyncJob + OAuth lifecycle (XERO-SYNCJOB) and the reconciliation UI (XERO-RECON-UI) are added by the follow-ups."
       ],
       "refs": {
         "req": [
@@ -54,28 +53,23 @@
       "detail": [
         "On checkout completion (PRD-06 POS), the platform posts the sale to Xero with no re-keying: it creates/syncs the corresponding invoice + payment (and, where applicable, the processor payout) behind an IAccountingExport port (ADR-0012). The app is not the ledger — pricing, reporting and the clinical/commercial decisions stay in the app; the books live in Xero (ADR-0027). This removes the double-entry that the clinic does today between the PMS and the accountant.",
         "Posting is driven by an AccountMapping: each line is coded by item type — services vs retail vs memberships map to the right Xero account — and GST is computed per line from the catalogue tax code (not the prototype's flat total/11), producing a correct invoice and BAS (Business Activity Statement, the GST return)-relevant figures. The default account/GST mapping for services vs retail vs memberships is an open question to settle with the bookkeeper.",
-        "Sync is asynchronous and resilient: each post is a SyncJob that retries on transient failure (with backoff, honouring Xero rate limits and idempotency so a retry never double-posts) and carries a reconciliation status (pending / synced / failed) surfaced on the Integrations Xero card. Because it sits behind IAccountingExport, the accounting provider is swappable without touching checkout. All money handling here is owner/bookkeeper-gated."
+        "This basic posts on checkout behind the port; the resilient idempotent SyncJob with backoff/rate-limit/idempotency + the OAuth token lifecycle (XERO-SYNCJOB) and the Settings → Integrations reconciliation card (XERO-RECON-UI) are added by the follow-ups. The AU/APP-8 sub-processor posture applies to the Xero connection (SUBPROCESSOR-POSTURE). All money handling here is owner/bookkeeper-gated."
       ],
       "ui_spec": [
-        "Prototype: Settings → Integrations (settings-integrations.png) — Xero card 'Connected', 'Push invoices & payments on checkout.', Configure → (account/GST mapping + sync/reconciliation status).",
-        "Finance (finance.png): 'Xero connected. Invoices, payments, bills & BAS sync automatically. Manage integrations.' banner — per-sale posting is automatic from Checkout (no manual step).",
-        "Configure: OAuth connect, AccountMapping editor (service/retail/membership → Xero account + GST code), reconciliation status list (pending/synced/failed with retry)."
+        "Prototype: Settings → Integrations (settings-integrations.png) — Xero card 'Connected', 'Push invoices & payments on checkout.'.",
+        "Finance (finance.png): 'Xero connected.' banner — per-sale posting is automatic from Checkout (no manual step).",
+        "The full Configure card (AccountMapping editor + reconciliation list with retry) is the follow-up (XERO-RECON-UI); this basic codes per-line account/GST behind the port."
       ],
       "data_model": [
         {
           "entity": "IntegrationConnection",
           "fields": "id, tenant_id, provider(xero), oauth_tokens, status, region",
-          "notes": "OAuth connection; AU/APP-8 posture (SUBPROCESSOR-POSTURE)."
+          "notes": "OAuth connection; full OAuth lifecycle/refresh in XERO-SYNCJOB; AU/APP-8 posture (SUBPROCESSOR-POSTURE)."
         },
         {
           "entity": "AccountMapping",
           "fields": "tenant_id, item_type(service|retail|membership), xero_account_code, gst_code",
           "notes": "Drives per-line account coding + GST; tenant-configurable; defaults open question."
-        },
-        {
-          "entity": "SyncJob",
-          "fields": "id, tenant_id, provider, ref(invoice|payment|payout), external_id?, status(pending|synced|failed), retries, last_error?, reconciled(bool), idempotency_key",
-          "notes": "Retry + reconciliation status; idempotent so a retry never double-posts."
         }
       ],
       "tasks": [
@@ -86,11 +80,97 @@
         {
           "title": "Account mapping + per-line GST coding",
           "note": "Behaviour: code each line to the right Xero account and tax. Requirements: drive coding from a tenant-configurable AccountMapping (item_type service/retail/membership → xero_account_code + gst_code); compute GST (Goods and Services Tax, Australia's 10%) per line from the catalogue tax code (NOT a flat total/11) so the invoice and BAS (Business Activity Statement) figures are correct; the default service/retail/membership mapping is an open question to settle with the bookkeeper."
+        }
+      ]
+    },
+    {
+      "key": "XERO-SYNCJOB",
+      "title": "Xero: resilient idempotent SyncJob + OAuth lifecycle",
+      "context": "This story makes the Xero posting resilient and reconcilable: each post becomes a retrying, idempotent SyncJob and the OAuth token lifecycle is handled so the connection stays live. It sits in the Integrations layer (step 10 of the clinic-first build) as a follow-up to the Xero basic (PRD-10/XERO) that adds resilience around the post-on-checkout already built; the data residency posture is governed by SUBPROCESSOR-POSTURE. A retry never double-posts.",
+      "as_a": "owner",
+      "i_want": "Xero posting to retry safely on failure and keep its connection alive",
+      "so_that": "a transient failure or token expiry never loses or duplicates a posted sale",
+      "acceptance": [
+        "Each post is a SyncJob that retries on transient failure (backoff, rate-limit-aware).",
+        "Posting is idempotent — a retry never double-posts.",
+        "The SyncJob carries a reconciliation status (pending/synced/failed).",
+        "The OAuth token lifecycle/refresh is handled so the connection stays live."
+      ],
+      "notes": "",
+      "detail": [
+        "Make posting resilient and reconcilable: each post (built by the Xero basic, PRD-10/XERO) becomes a SyncJob with backoff retry that is rate-limit aware and idempotent (an operation safe to repeat — a retry never double-posts, keyed by an idempotency_key), carrying a reconciliation status (pending/synced/failed).",
+        "Handle the OAuth token lifecycle/refresh so the connection stays live, and surface the status for reconciliation (the operator-facing reconciliation card is XERO-RECON-UI). Because it sits behind IAccountingExport, the accounting provider is swappable without touching checkout. Money handling here is owner/bookkeeper-gated."
+      ],
+      "ui_spec": [
+        "No new screen of its own — the SyncJob status it produces is surfaced by the reconciliation card (XERO-RECON-UI).",
+        "OAuth connect/refresh keeps the IntegrationConnection live; idempotency_key guards against double-posting on retry."
+      ],
+      "data_model": [
+        {
+          "entity": "SyncJob",
+          "fields": "id, tenant_id, provider, ref(invoice|payment|payout), external_id?, status(pending|synced|failed), retries, last_error?, reconciled(bool), idempotency_key",
+          "notes": "New entity extending XERO; retry + reconciliation status; idempotent so a retry never double-posts."
         },
+        {
+          "entity": "(reuses) IntegrationConnection",
+          "fields": "PRD-10/XERO — OAuth token lifecycle/refresh handled here",
+          "notes": "Keeps the Xero connection live; AU/APP-8 posture (SUBPROCESSOR-POSTURE)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-10/XERO"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P1",
+      "tasks": [
         {
           "title": "Resilient SyncJob: idempotent retries + reconciliation status + OAuth lifecycle",
           "note": "Behaviour: make posting resilient and reconcilable. Requirements: each post is a SyncJob with backoff retry that is rate-limit aware and idempotent (an operation safe to repeat — a retry never double-posts), carrying a reconciliation status (pending/synced/failed); handle the OAuth token lifecycle/refresh; surface the status for reconciliation."
-        },
+        }
+      ]
+    },
+    {
+      "key": "XERO-RECON-UI",
+      "title": "Xero: Settings card + mapping editor + reconciliation list",
+      "context": "This story gives the owner/bookkeeper the operator surface for the Xero integration: connect, edit the account/GST mapping, and watch the reconciliation status with a manual retry. It sits in the Integrations layer (step 10 of the clinic-first build) as a follow-up to the Xero basic (PRD-10/XERO) and the SyncJob (PRD-10/XERO-SYNCJOB), surfacing what they produce; it shows the AU/APP-8 posture on the card (SUBPROCESSOR-POSTURE). Owner/bookkeeper-gated.",
+      "as_a": "owner",
+      "i_want": "a Settings card to connect Xero, edit the mapping and watch reconciliation",
+      "so_that": "I can configure the integration and see that every sale posted",
+      "acceptance": [
+        "The Settings → Integrations Xero card provides OAuth connect/disconnect + status.",
+        "An AccountMapping editor (service/retail/membership → Xero account + GST code) is provided.",
+        "A reconciliation status list (pending/synced/failed) with a manual retry is shown.",
+        "The 'Xero connected' assurance is mirrored on Finance; the card shows the AU/APP-8 posture; owner/bookkeeper-gated."
+      ],
+      "notes": "",
+      "detail": [
+        "The Settings → Integrations Xero card: OAuth connect/disconnect + status, the AccountMapping editor (service/retail/membership → Xero account + GST code), and the reconciliation status list (pending/synced/failed) with a manual retry — surfacing the SyncJob status (PRD-10/XERO-SYNCJOB) for reconciliation.",
+        "Mirror the 'Xero connected' assurance on Finance; show the AU/APP-8 (Australian Privacy Principle 8, cross-border disclosure) posture on the card (SUBPROCESSOR-POSTURE). Owner/bookkeeper-gated; no money figures leak to non-owner roles. This is the operator-facing complement to the headless basic + SyncJob."
+      ],
+      "ui_spec": [
+        "Prototype: Settings → Integrations (settings-integrations.png) — Xero card Configure → OAuth connect, AccountMapping editor (service/retail/membership → Xero account + GST code), reconciliation status list (pending/synced/failed with retry).",
+        "Finance (finance.png): 'Xero connected … Manage integrations.' banner; card shows the AU/APP-8 posture (SUBPROCESSOR-POSTURE)."
+      ],
+      "data_model": [
+        {
+          "entity": "(reuses) AccountMapping/SyncJob/IntegrationConnection",
+          "fields": "PRD-10/XERO + XERO-SYNCJOB — mapping edited, SyncJob status listed, OAuth connect/disconnect",
+          "notes": "Extends XERO; operator surface only; owner/bookkeeper-gated."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-10/XERO",
+        "PRD-10/XERO-SYNCJOB"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Web UI: Xero card (connect, mapping editor, reconciliation list)",
           "note": "Behaviour: the Settings → Integrations Xero card. Requirements: OAuth connect/disconnect + status, the AccountMapping editor (service/retail/membership → Xero account + GST code), and the reconciliation status list (pending/synced/failed) with a manual retry; mirror the 'Xero connected' assurance on Finance; owner/bookkeeper-gated; show the AU/APP-8 (Australian Privacy Principle 8, cross-border disclosure) posture on the card (SUBPROCESSOR-POSTURE)."
@@ -99,17 +179,16 @@
     },
     {
       "key": "CALENDAR-SYNC",
-      "title": "Two-way calendar sync (M365 / Google)",
-      "context": "This story keeps each practitioner's appointments in sync with their own Outlook or Google calendar both ways: clinic bookings appear in their personal calendar, and personal busy-time blocks their clinic availability, so they have one source of truth for their time. It sits in the Integrations layer (step 10 of the clinic-first build), built after the booking calendar it syncs with (PRD-02 CALENDAR). Sync is per-staff opt-in; calendar providers are sub-processors governed by the residency posture (SUBPROCESSOR-POSTURE). Appointments sync both ways with Outlook/Google; external busy events block availability, behind ICalendarProvider (REQ-INT-2).",
+      "title": "Calendar sync: outbound push (basic)",
+      "context": "This story pushes each practitioner's clinic appointments into their own Outlook or Google calendar, so their clinic bookings appear alongside their personal time. It sits in the Integrations layer (step 10 of the clinic-first build), built after the booking calendar it syncs with (PRD-02 CALENDAR). Sync is per-staff opt-in; calendar providers are sub-processors governed by the residency posture (SUBPROCESSOR-POSTURE). This basic slice is the outbound push behind ICalendarProvider plus the per-staff connect; the inbound busy-time → availability blocking is the follow-up (CALENDAR-INBOUND) (REQ-INT-2).",
       "as_a": "practitioner",
-      "i_want": "my appointments to appear in Outlook/Google and external busy-time to block my availability",
-      "so_that": "I have one source of truth for my time",
+      "i_want": "my clinic appointments to appear in my Outlook/Google calendar",
+      "so_that": "my clinic bookings sit alongside my personal time",
       "acceptance": [
-        "Creating/moving/cancelling a clinic appointment reflects in the linked Outlook/Google calendar, and external busy events block availability in booking (PRD-02).",
+        "Creating/moving/cancelling a clinic appointment reflects in the linked Outlook/Google calendar.",
         "Sync is per-staff opt-in (each practitioner connects their own M365/Google account; nothing syncs until connected).",
-        "Conflict-resolution rules are supported (open question); the default treats external busy-time as blocking-only — it never mutates a clinic appointment.",
-        "Implemented behind ICalendarProvider (M365/Google swappable); each sync action is logged.",
-        "External event titles are privacy-safe per clinic config; calendar providers honour the AU/APP-8 posture."
+        "Implemented behind ICalendarProvider (M365/Google swappable); each sync action is logged; external event titles are privacy-safe per clinic config.",
+        "The inbound busy-time → availability blocking is added by the follow-up (CALENDAR-INBOUND)."
       ],
       "refs": {
         "req": [
@@ -134,26 +213,25 @@
         "PRD-02/CALENDAR"
       ],
       "detail": [
-        "Two-way sync of appointments with staff calendars — Microsoft 365 (MS Graph) and Google Calendar — behind an ICalendarProvider port (ADR-0012, promoted to bidirectional under ADR-0036). Creating, moving or cancelling a clinic appointment reflects in the practitioner's linked calendar; and external busy events created in their personal calendar flow back and block their availability in booking (PRD-02 CALENDAR), so a practitioner has one source of truth for their time and the clinic never double-books over a dentist appointment.",
-        "Sync is per-staff opt-in: each practitioner connects their own M365/Google account (OAuth), choosing the calendar and a two-way mode; nothing syncs for staff who haven't connected. Outbound pushes are driven by appointment lifecycle events; inbound busy-time is pulled (polling or change-notifications) and projected as availability blocks. Conflict-resolution rules — what wins when an external event and a clinic booking overlap — are an open question; the safe default treats external busy-time as blocking-only (it never deletes or moves a clinic appointment).",
-        "Each sync action is logged (direction, appointment, result) for troubleshooting. Because it sits behind ICalendarProvider, M365 and Google are interchangeable adapters and a new provider needs no core change. No clinical detail leaks into the external calendar beyond what the clinic configures (privacy-safe event titles); calendar providers are sub-processors subject to the AU/APP-8 (Australian Privacy Principle 8, cross-border disclosure) posture (SUBPROCESSOR-POSTURE)."
+        "Outbound sync of appointments to staff calendars — Microsoft 365 (MS Graph) and Google Calendar — behind an ICalendarProvider port (ADR-0012, bidirectional under ADR-0036). Creating, moving or cancelling a clinic appointment reflects in the practitioner's linked calendar, so their clinic bookings appear in their personal calendar.",
+        "Sync is per-staff opt-in: each practitioner connects their own M365/Google account (OAuth), choosing the calendar and the sync mode; nothing syncs for staff who haven't connected. Outbound pushes are driven by appointment lifecycle events; each sync action is logged (direction, appointment, result) for troubleshooting. No clinical detail leaks into the external calendar beyond what the clinic configures (privacy-safe event titles); calendar providers are sub-processors subject to the AU/APP-8 (Australian Privacy Principle 8, cross-border disclosure) posture (SUBPROCESSOR-POSTURE).",
+        "Because it sits behind ICalendarProvider, M365 and Google are interchangeable adapters and a new provider needs no core change. The inbound busy-time pulled back to block clinic availability — so the clinic never double-books over a personal appointment — is the follow-up (CALENDAR-INBOUND)."
       ],
       "ui_spec": [
-        "Prototype: Settings → Integrations (settings-integrations.png) — 'Calendar sync (M365 / Google)' card, 'Two-way — external events block availability.', currently 'Outbound only', Connect →.",
-        "Per-staff connect (M365/Google OAuth) + two-way sync toggle + calendar picker.",
-        "Schedule (schedule.png, PRD-02): external busy time shows as unavailable; clinic appointments appear in the staff's external calendar.",
-        "Sync log / status per staff link (last sync, errors)."
+        "Prototype: Settings → Integrations (settings-integrations.png) — 'Calendar sync (M365 / Google)' card, currently 'Outbound only', Connect →.",
+        "Per-staff connect (M365/Google OAuth) + sync-mode + calendar picker; per-staff status (last sync, errors).",
+        "Schedule (schedule.png, PRD-02): clinic appointments appear in the staff's external calendar. Inbound busy-time blocking is the follow-up (CALENDAR-INBOUND)."
       ],
       "data_model": [
         {
           "entity": "CalendarLink",
           "fields": "id, staff_id, provider(m365|google), oauth_tokens, calendar_id, sync_mode(two_way|outbound), status, region",
-          "notes": "Per-staff opt-in; AU/APP-8 posture (SUBPROCESSOR-POSTURE)."
+          "notes": "Per-staff opt-in; outbound here, two_way enabled by CALENDAR-INBOUND; AU/APP-8 posture (SUBPROCESSOR-POSTURE)."
         },
         {
           "entity": "SyncLog",
           "fields": "id, calendar_link_id, appointment_id?, external_event_id?, direction(out|in), at, result(ok|error), detail?",
-          "notes": "Inbound busy events project as availability blocks; outbound on appointment lifecycle."
+          "notes": "Outbound on appointment lifecycle here; inbound direction added by CALENDAR-INBOUND."
         }
       ],
       "tasks": [
@@ -162,12 +240,59 @@
           "note": "Behaviour: a clinic appointment appears in the practitioner's linked Outlook/Google calendar. Requirements: implement M365 (MS Graph) and Google adapters behind ICalendarProvider (ADR-0012/0036) so the providers are interchangeable; on appointment create/move/cancel lifecycle events, upsert/delete the external event with a privacy-safe title (no clinical detail beyond what the clinic configures) and store the external id; log each sync (SyncLog)."
         },
         {
-          "title": "Inbound busy-time → availability blocks (blocking-only default)",
-          "note": "Behaviour: external busy events in a practitioner's personal calendar block their clinic availability. Requirements: pull external busy events (polling or change-notifications) and project them as availability blocks consumed by PRD-02 booking; the default conflict rule is blocking-only — external busy-time never deletes or moves a clinic appointment (conflict resolution beyond that is the open question); so the clinic never double-books over a personal appointment."
+          "title": "Per-staff connect UI + sync-mode toggle",
+          "note": "Behaviour: the Settings → Integrations calendar card and the per-staff connect flow. Requirements: each practitioner connects their OWN M365/Google account (OAuth + token refresh), picks the calendar, sets the sync mode, and sees status + last-sync/error; nothing syncs until a staff member opts in; clinic appointments appear in the staff's external calendar; show the AU/APP-8 (Australian Privacy Principle 8, cross-border disclosure) posture (SUBPROCESSOR-POSTURE). The two-way 'external events block availability' mode is enabled by CALENDAR-INBOUND."
+        }
+      ]
+    },
+    {
+      "key": "CALENDAR-INBOUND",
+      "title": "Calendar sync: inbound busy-time → availability blocks",
+      "context": "This story pulls each practitioner's personal busy-time back into the clinic so it blocks their clinic availability — the clinic never double-books over a dentist appointment. It sits in the Integrations layer (step 10 of the clinic-first build) as a follow-up to the outbound-push basic (PRD-10/CALENDAR-SYNC), promoting the link to two-way under ADR-0036; the default treats external busy-time as blocking-only — it never mutates a clinic appointment. Calendar providers honour the AU/APP-8 posture (SUBPROCESSOR-POSTURE).",
+      "as_a": "practitioner",
+      "i_want": "my external busy-time to block my clinic availability",
+      "so_that": "the clinic never books me over a personal appointment",
+      "acceptance": [
+        "External busy events created in a practitioner's personal calendar block their availability in booking (PRD-02).",
+        "Inbound busy-time is pulled (polling or change-notifications) and projected as availability blocks.",
+        "The default conflict rule is blocking-only — external busy-time never deletes or moves a clinic appointment (further conflict resolution is the open question).",
+        "The two-way mode toggles on; each inbound sync action is logged; external busy-time shows as unavailable in the Schedule."
+      ],
+      "notes": "",
+      "detail": [
+        "External busy events created in a practitioner's personal calendar flow back and block their availability in booking (PRD-02 CALENDAR), so a practitioner has one source of truth for their time and the clinic never double-books over a dentist appointment. This promotes the per-staff CalendarLink (PRD-10/CALENDAR-SYNC) to two-way (ADR-0036).",
+        "Inbound busy-time is pulled (polling or change-notifications) and projected as availability blocks consumed by PRD-02 booking. The default conflict rule is blocking-only — external busy-time never deletes or moves a clinic appointment (conflict resolution beyond that is the open question). Each inbound sync action is logged (SyncLog, direction=in); external busy-time shows as unavailable in the Schedule. Calendar providers honour the AU/APP-8 (Australian Privacy Principle 8, cross-border disclosure) posture (SUBPROCESSOR-POSTURE)."
+      ],
+      "ui_spec": [
+        "Prototype: Settings → Integrations (settings-integrations.png) — 'Calendar sync' card flips to 'Two-way — external events block availability.' once inbound is on.",
+        "Schedule (schedule.png, PRD-02): external busy time shows as unavailable.",
+        "Inbound sync log / status per staff link (last sync, errors)."
+      ],
+      "data_model": [
+        {
+          "entity": "(reuses) CalendarLink",
+          "fields": "PRD-10/CALENDAR-SYNC — sync_mode promoted to two_way",
+          "notes": "Extends CALENDAR-SYNC; inbound busy events project as availability blocks (blocking-only default)."
         },
         {
-          "title": "Per-staff connect UI + two-way toggle",
-          "note": "Behaviour: the Settings → Integrations calendar card and the per-staff connect flow. Requirements: each practitioner connects their OWN M365/Google account (OAuth + token refresh), picks the calendar, sets a two-way/outbound mode, and sees status + last-sync/error; nothing syncs until a staff member opts in; external busy-time shows as unavailable in the Schedule (PRD-02); show the AU/APP-8 (Australian Privacy Principle 8, cross-border disclosure) posture (SUBPROCESSOR-POSTURE)."
+          "entity": "(reuses) SyncLog",
+          "fields": "direction(in) — inbound busy events pulled + projected",
+          "notes": "Inbound busy-time blocks PRD-02 availability; never mutates a clinic appointment."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-10/CALENDAR-SYNC",
+        "PRD-02/CALENDAR"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Inbound busy-time → availability blocks (blocking-only default)",
+          "note": "Behaviour: external busy events in a practitioner's personal calendar block their clinic availability. Requirements: pull external busy events (polling or change-notifications) and project them as availability blocks consumed by PRD-02 booking; the default conflict rule is blocking-only — external busy-time never deletes or moves a clinic appointment (conflict resolution beyond that is the open question); so the clinic never double-books over a personal appointment."
         }
       ]
     },

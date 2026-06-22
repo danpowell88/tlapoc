@@ -1,4 +1,4 @@
-# BDD / psychological screening instrument
+# BDD / psychological screening — basic instrument & scoring
 
 > **Epic:** [PRD-03 — Intake, consent & compliance gating](../epics/PRD-03.md)  ·  **Key:** `PRD-03/BDD`  ·  **Type:** Story  ·  **Stage:** M2  ·  **Priority:** P0  ·  **Estimate:** 5 pts  ·  **Area:** backend
 >
@@ -47,10 +47,4 @@ Which validated instrument to embed is an open clinical question (the prototype 
 ## Tasks (dev pickup)
 
 - [ ] **Configurable BDD/psychological instrument + scoring**
-  Behaviour: embed a validated screening instrument in intake as a versioned question set that produces a score + boolean flag. Requirements: the instrument is swappable (instrument + instrument_version) so the clinically-chosen tool slots in without rework — v1 uses the prototype's placeholder wellbeing questions; store the answers + score as a ScreeningResult linked to client + appointment; audited.
-- [ ] **Positive-flag surfacing + RN/NP review requirement**
-  Behaviour: a positive score raises a flag the prescriber sees, and an RN/NP must review the result before treatment. Requirements: surface the flag to the prescriber (chip on the charting pre-treatment review + a follow-up signal); record reviewed_by/reviewed_at on review; the GATING evaluation requires an RN/NP-reviewed ScreeningResult before an S4 (Schedule 4 prescription-only medicine) treatment (C3); audited.
-- [ ] **Wellbeing questions in the intake wizard (client/kiosk)**
-  Behaviour: render the 'A few wellbeing questions' step inside the client-app/kiosk intake wizard (e.g. how often the concern is thought about, daily-life impact, realistic expectations) with radio options. Requirements: the same step renders in the client app and at the reception check-in tablet; answers feed the scoring rule; framed as routine for all cosmetic treatments.
-- [ ] **Prescriber/staff screening chip UI**
-  Behaviour: show the screening outcome to staff. Requirements: render a 'BDD screen: clear' or flagged chip on the Charting pre-treatment review, and the screening status within the Forms & consent 'Medical history & screening' template; the flagged state is unmistakable to the prescriber.
+  Behaviour: embed a validated screening instrument in intake as a versioned question set that produces a score + boolean flag. Requirements: the instrument is swappable (instrument + instrument_version) so the clinically-chosen tool slots in without rework — v1 uses the prototype's placeholder wellbeing questions; store the answers + score as a ScreeningResult linked to client + appointment; audited. The RN/NP review requirement, the wellbeing-questions UI and the staff chip are follow-ups.

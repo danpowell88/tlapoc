@@ -74,7 +74,7 @@
     },
     {
       "key": "TODAY",
-      "title": "Role-tailored Today dashboard",
+      "title": "Role-tailored Today dashboard (core: greeting + today's schedule)",
       "context": "Plainly: the landing page staff open onto — the live state of the clinic today and what needs their attention, tailored to their role. It is built on the app shell. Reception sees front-desk tasks, a clinician sees clinical ones, the owner sees the business digest — one screen, role-aware, with one click through to the next action. The prototype opens on a Today board: waiting / in-room / checked-out columns, the day's appointments, the jobs/needs-attention digest and alerts — tailored to the signed-in role's 'concerns' (ADR-0017).",
       "as_a": "staff member",
       "i_want": "a Today landing page showing the live state of the clinic and what needs my attention, tailored to my role",
@@ -123,20 +123,157 @@
       ],
       "tasks": [
         {
-          "title": "Greeting + at-a-glance stat cards (Appointments / Checked in / Awaiting consent / Stock)",
-          "note": "Behaviour: the Today header — a personalised greeting ('Good morning, Lena'), a date/at-a-glance line ('14 appointments · 3 checked in') and the row of stat cards (Appointments, Checked in · waiting, Awaiting consent 'treatment gated until done', Stock on hand). Requirements: each card derives from today's appointments + gate state and live-updates from lifecycle/transition events; the 'Awaiting consent' card reflects the consult/consent gate; cards are concern-tagged (data-concern) and shown per active role; any money card is .fin-gated (owner-only)."
+          "title": "Today read aggregation (role-filtered) + greeting/at-a-glance header",
+          "note": "Behaviour: the minimal end-to-end Today — a personalised greeting ('Good morning, Lena') and a date/at-a-glance line ('14 appointments · 3 checked in') over a read aggregation of today's appointments. Requirements: it is a read aggregation (no new write model); filter widget data by the active role's concerns (data-concern) so each role lands on a relevant Today; no separate persistence; loading/empty/error states."
         },
         {
-          "title": "Today's schedule with lifecycle pills + 'WITH YOU NOW' in-room strip",
-          "note": "Behaviour: the Today's schedule list — each appointment with its current status and the next-action pill for whoever owns it now (Late / Start / No-show / Confirmed / In treatment / Resume) — plus a 'WITH YOU NOW' in-room strip showing who is being treated with Open-chart / Profile quick links. Requirements: the live waiting / in-room / checked-out state comes from the appointment/visit state machine (ADR-0024); each pill calls the lifecycle transition and is shown only when legal for the row's state and the user's role; rows deep-link into the in-flight visit (Open chart / Profile / Resume / Checkout); live-updates from transition events."
+          "title": "Today's schedule list with lifecycle status",
+          "note": "Behaviour: the Today's schedule list — each of the day's appointments with its current lifecycle state (waiting / confirmed / in treatment / checked-out) read from the appointment/visit state machine (ADR-0024), in time order. Requirements: live-updates from transition events; rows show the at-a-glance state for the day; this is the read view only — the next-action pills and quick links are the follow-up TODAY-PILLS."
+        }
+      ]
+    },
+    {
+      "key": "TODAY-STATCARDS",
+      "title": "Today: at-a-glance stat cards",
+      "context": "Plainly: the row of headline number cards at the top of Today — Appointments, Checked in / waiting, Awaiting consent (treatment gated until done) and Stock on hand — so a glance tells you the shape of the day. Where it fits: a follow-up to the role-tailored Today dashboard (PLATFORM/TODAY) that adds the stat-card band above the schedule list. Cards are concern-tagged so each role sees the cards relevant to them, and any money card is gated behind the owner-only financial (.fin) capability.",
+      "as_a": "staff member",
+      "i_want": "a row of at-a-glance stat cards on Today",
+      "so_that": "I can read the shape of the day in one glance",
+      "notes": "",
+      "acceptance": [
+        "Today renders a row of stat cards: Appointments, Checked in · waiting, Awaiting consent ('treatment gated until done'), Stock on hand.",
+        "Each card derives from today's appointments + gate state and live-updates from lifecycle/transition events.",
+        "The 'Awaiting consent' card reflects the consult/consent gate.",
+        "Cards are concern-tagged (data-concern) and shown per active role; any money card is .fin-gated (owner-only)."
+      ],
+      "detail": [
+        "The Today header gains the row of stat cards the prototype shows: Appointments (the day's total), Checked in · waiting (the live front-desk count), Awaiting consent with the 'treatment gated until done' caption (how many visits are still blocked on the consult/consent gate), and Stock on hand. Each card is a derived number over today's appointments and the gate state — not a stored figure — and live-updates as visits move through the lifecycle.",
+        "Cards are concern-tagged (the prototype's data-concern) and shown only if the active role carries the concern, so reception sees front-desk counts and a clinician sees the clinical gate counts. Any money-bearing card is additionally gated behind the owner-only financial (.fin) capability so non-owner roles never see revenue on Today."
+      ],
+      "ui_spec": [
+        "Prototype: Today (dashboard.png) — the stat-card row above the schedule (Appointments / Checked in · waiting / Awaiting consent 'treatment gated until done' / Stock on hand).",
+        "Cards concern-tagged (data-concern) and shown per active role; money cards .fin-gated (owner-only)."
+      ],
+      "data_model": [
+        {
+          "entity": "(read) TodayBoard (extends PLATFORM/TODAY)",
+          "fields": "+ stat-card counts: appointments_today, checked_in, waiting, awaiting_consent, stock_on_hand",
+          "notes": "Derived counts over today's appointments + gate/stock state; concern-tagged + .fin-gated. Extends the TODAY read aggregation; no new write model."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PLATFORM/TODAY"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Stat-card counts in the Today read aggregation",
+          "note": "Behaviour: extend the TODAY read aggregation with the derived counts each card needs — appointments today, checked-in, waiting, awaiting-consent (the consult/consent gate count) and stock on hand. Requirements: derived from today's appointments + gate/stock state, never stored; live-updates from lifecycle/transition events; concern-tag each count so it is only computed/returned for roles that carry the concern; any money figure is stripped server-side for non-owner roles (.fin)."
         },
         {
-          "title": "Follow-ups preview panel + needs-attention digest",
-          "note": "Behaviour: a Follow-ups preview previewing the Jobs queue and (for the owner) the needs-attention exceptions strip (overdue recalls, unbilled visits, credential expiries from REG-WATCH, failed payments). Requirements: the preview reads the Jobs queue (ADR-0023) with an 'Open queue →' link; the needs-attention items mirror ATTENTION-DIGEST (PRD-08) and deep-link to source; money-bearing items (failed payments) are .fin-gated/genericised for non-owner roles; concern-tailored so reception sees front-desk items, the owner the business digest."
+          "title": "Stat-card row UI on Today",
+          "note": "Behaviour: render the stat-card row above the schedule (Appointments / Checked in · waiting / Awaiting consent 'treatment gated until done' / Stock on hand). Requirements: cards shown per the active role's concerns; money cards hidden for non-owner roles (.fin); each card live-updates from the read aggregation."
+        }
+      ]
+    },
+    {
+      "key": "TODAY-PILLS",
+      "title": "Today: lifecycle next-action pills + 'WITH YOU NOW' strip",
+      "context": "Plainly: the Today schedule rows gain a next-action button (Late / Start / No-show / Confirmed / In treatment / Resume) for whoever owns the visit right now, plus a 'WITH YOU NOW' strip of who is in-room being treated with one-click Open-chart / Profile links. Where it fits: a follow-up to the role-tailored Today dashboard (PLATFORM/TODAY) that turns the read-only schedule list into an actionable board. The pills drive the appointment/visit state machine (ADR-0024) and deep-link into the in-flight visit, so a row is never a dead end.",
+      "as_a": "staff member",
+      "i_want": "next-action pills on each appointment and a 'with you now' in-room strip",
+      "so_that": "I can move a visit forward and jump straight into the person in front of me",
+      "notes": "",
+      "acceptance": [
+        "Each schedule row shows the next-action pill legal for its state and the user's role (Late / Start / No-show / Confirmed / In treatment / Resume).",
+        "Pressing a pill calls the appointment/visit lifecycle transition (ADR-0024) and the row updates live.",
+        "A 'WITH YOU NOW' strip shows who is in-room being treated, with Open-chart / Profile quick links.",
+        "Rows deep-link into the in-flight visit (Open chart / Profile / Resume / Checkout)."
+      ],
+      "detail": [
+        "The Today schedule list (PLATFORM/TODAY) becomes actionable: each appointment shows the single next-action pill for whoever owns it now — Late, Start, No-show, Confirmed, In treatment or Resume — and pressing it calls the matching appointment/visit lifecycle transition (ADR-0024). A pill is shown only when it is a legal transition for the row's current state and the acting user's role, so the board can't offer an action the visit or person can't take.",
+        "Above the list, a 'WITH YOU NOW' strip surfaces the in-room visits — who is being treated right now — with Open-chart and Profile quick links so a clinician jumps straight to the person in front of them. Every row deep-links into the in-flight visit (Open chart / Profile / Resume / Checkout), and the board live-updates from transition events so two staff watching Today see the same state."
+      ],
+      "ui_spec": [
+        "Prototype: Today (dashboard.png) — per-appointment lifecycle pills (Late / Start / No-show / Confirmed / In treatment / Resume) and the 'WITH YOU NOW' in-room strip with Open-chart / Profile quick links.",
+        "Each pill is shown only when legal for the row's state + the user's role and calls the lifecycle transition; rows deep-link into the in-flight visit; live-updates from transition events."
+      ],
+      "data_model": [
+        {
+          "entity": "(read) TodayBoard (extends PLATFORM/TODAY)",
+          "fields": "+ per-row legal next-actions (from the appointment/visit state machine), + in-room set for the WITH-YOU-NOW strip",
+          "notes": "Reads the appointment/visit state machine (ADR-0024); no new write model — the pills call existing lifecycle transitions."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PLATFORM/TODAY"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Per-row next-action pills wired to the lifecycle transitions",
+          "note": "Behaviour: render the next-action pill on each schedule row (Late / Start / No-show / Confirmed / In treatment / Resume) and wire it to the appointment/visit lifecycle transition (ADR-0024). Requirements: show a pill only when its transition is legal for the row's current state and the acting user's role; the row updates live on transition; the board reflects transitions made elsewhere."
         },
         {
-          "title": "Today read aggregation (role + .fin filtered)",
-          "note": "Behaviour: the read aggregation powering Today — live visit state (waiting / in-room / checked-out) and the day's schedule from the appointment/visit state machine (ADR-0024), the needs-attention digest and the Follow-ups preview from the Jobs queue (ADR-0023). Requirements: filter widget data by the active role's concerns; strip money figures server-side for non-owner roles (FIN-GATING) so the payload is already safe before the UI hides anything; no separate write model (it's a read aggregation); loading/empty/error states."
+          "title": "'WITH YOU NOW' in-room strip + deep links",
+          "note": "Behaviour: render the 'WITH YOU NOW' strip of in-room visits with Open-chart / Profile quick links, and make every schedule row deep-link into the in-flight visit (Open chart / Profile / Resume / Checkout). Requirements: the in-room set comes from the appointment/visit state machine; quick links respect the user's role; live-updates from transition events."
+        }
+      ]
+    },
+    {
+      "key": "TODAY-DIGEST",
+      "title": "Today: Follow-ups preview + needs-attention digest",
+      "context": "Plainly: the Today panel that previews the clinic's job queue and — for the owner — the 'needs attention' exceptions strip (overdue recalls, unbilled visits, credential expiries, failed payments), each with one click through to fix it. Where it fits: a follow-up to the role-tailored Today dashboard (PLATFORM/TODAY) that adds the worklist preview beside the schedule. It reads the Jobs queue (ADR-0023) and mirrors the owner exceptions digest (PRD-08/ATTENTION-DIGEST); money-bearing items are gated behind the owner-only financial (.fin) capability.",
+      "as_a": "staff member",
+      "i_want": "a Follow-ups preview and a needs-attention exceptions strip on Today",
+      "so_that": "I can see and act on outstanding work without leaving the landing page",
+      "notes": "",
+      "acceptance": [
+        "Today shows a Follow-ups preview of the Jobs queue with an 'Open queue →' link.",
+        "For the owner, a needs-attention strip surfaces exceptions (overdue recalls, unbilled visits, credential expiries from REG-WATCH, failed payments).",
+        "Each item deep-links to its source module for action.",
+        "Items are concern-tailored; money-bearing items (failed payments) are .fin-gated/genericised for non-owner roles."
+      ],
+      "detail": [
+        "Beside the schedule, Today gains a Follow-ups preview that previews the unified Jobs queue (ADR-0023) — the next outstanding tasks — with an 'Open queue →' link into the full worklist, so the landing page shows what's waiting without making someone navigate to find it.",
+        "For the owner, a needs-attention exceptions strip surfaces the cross-platform exceptions that need a decision: overdue recalls, unbilled visits, credential expiries (REG-WATCH), failed payments. These items mirror the owner exceptions digest (PRD-08/ATTENTION-DIGEST) so Today and the Governance Overview never disagree, and each deep-links to its source module (e.g. a failed-payment item jumps to Members & billing) so the strip is a launchpad, not a dead read screen.",
+        "Items are concern-tailored — reception sees front-desk follow-ups, the owner sees the business digest — and money-bearing items (failed payments, revenue) are gated behind the owner-only financial (.fin) capability and genericised or hidden for non-owner roles."
+      ],
+      "ui_spec": [
+        "Prototype: Today (dashboard.png) — the Follow-ups preview panel and (for the owner) the 'Needs attention' exceptions strip; each item has a Fix/Open action that deep-links (e.g. failed membership payment → goSub('memberships','members')).",
+        "Concern-tailored per active role; money-bearing items (failed payments) hidden/genericised for non-owner roles."
+      ],
+      "data_model": [
+        {
+          "entity": "(read) TodayBoard (extends PLATFORM/TODAY)",
+          "fields": "+ Follow-ups preview from the Jobs queue (ADR-0023), + needs-attention items mirroring PRD-08/ATTENTION-DIGEST",
+          "notes": "Reads existing signals (Jobs queue + ATTENTION-DIGEST); no new write model. Each item carries a source deep-link and an owner_financial flag for gating."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PLATFORM/TODAY"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Follow-ups preview panel (Jobs queue) on Today",
+          "note": "Behaviour: render a Follow-ups preview previewing the unified Jobs queue (ADR-0023) — the next outstanding tasks — with an 'Open queue →' link to the full worklist. Requirements: reads the Jobs queue (no new write model); concern-tailored so reception sees front-desk items; loading/empty states; keep it actionable — every item has a next step."
+        },
+        {
+          "title": "Owner needs-attention exceptions strip + deep links",
+          "note": "Behaviour: render the owner needs-attention strip (overdue recalls, unbilled visits, credential expiries from REG-WATCH, failed payments) with per-item Fix/Open actions that deep-link to the source module. Requirements: the items mirror PRD-08/ATTENTION-DIGEST so Today and Governance Overview agree; money-bearing items (failed payments) are .fin-gated/genericised for non-owner roles; concern-tailored per active role."
         }
       ]
     },

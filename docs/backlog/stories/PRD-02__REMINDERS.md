@@ -1,4 +1,4 @@
-# Reminders & self-service reschedule/cancel
+# Reminders — basic scheduling & dispatch
 
 > **Epic:** [PRD-02 — Booking & scheduling (+ client/CRM basics)](../epics/PRD-02.md)  ·  **Key:** `PRD-02/REMINDERS`  ·  **Type:** Story  ·  **Stage:** M2  ·  **Priority:** P1  ·  **Estimate:** 3 pts  ·  **Area:** web
 >
@@ -49,11 +49,7 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 
 ## Tasks (dev pickup)
 
-- [ ] **Reminder scheduling + dispatch**
-  Behaviour: create ReminderSchedule rows when an appointment is booked or moved, with send_at relative to start per template; a scheduled job dispatches due reminders. Requirements: delivery goes through the PRD-07 INotifier (SMS/app/email) — this story schedules and reacts but does not itself send; reschedule/cancel reschedules or cancels the pending reminder; idempotent (a due reminder is dispatched once).
-- [ ] **Confirm / decline handling from the reminder**
-  Behaviour: the reminder carries confirm/decline links the client can action without calling. Requirements: a confirm link updates Appointment.status (→ reminded/confirmed) and shows a 'Confirmed' chip on the Schedule/Today board; a decline frees the slot and emits the slot-freed event WAITLIST listens to; links resolve to authenticated-by-token public endpoints; idempotent.
-- [ ] **Self-service reschedule / cancel within policy**
-  Behaviour: the client can self-reschedule or cancel within the cancellation window. Requirements: enforce CancellationPolicy.window_hours server-side — inside the window reuse the availability engine to move, or cancel and free the slot (emits the slot-freed event for WAITLIST); outside the window apply the configured rule (block/flag/message) with NO charge or deposit in v1; all actions audited.
-- [ ] **Cancellation / no-show policy settings UI**
-  Behaviour: a per-tenant settings screen for window_hours, no_show_rule and allow_self_reschedule. Requirements: validate and persist; surface the plain-language 'no auto-charge in v1' note; the policy is shown to the client at confirm time (ties to BOOKING-WIZARD's confirmation step) and is the source of truth the self-service endpoints enforce.
+- [ ] **ReminderSchedule + relative scheduling**
+  Behaviour: create ReminderSchedule rows (channel, template_id, send_at, status) when an appointment is booked or moved, with send_at relative to start per template. Requirements: rescheduling/cancelling the appointment reschedules or cancels the pending reminder; tenant-scoped; the confirm/decline handling, self-service reschedule/cancel and the policy settings UI are follow-ups.
+- [ ] **Dispatch due reminders via PRD-07 INotifier (idempotent)**
+  Behaviour: a scheduled job dispatches due reminders. Requirements: delivery goes through the PRD-07 INotifier (SMS/app/email) — this story schedules and reacts but does not itself send; idempotent (a due reminder is dispatched once).

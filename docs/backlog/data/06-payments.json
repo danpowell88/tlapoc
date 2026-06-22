@@ -92,8 +92,8 @@
     },
     {
       "key": "POS",
-      "title": "In-person POS checkout (card + cash)",
-      "context": "What this is, plainly: the everyday till at the front desk — add what the client is buying, take the money, print a receipt. Where it sits: it builds directly on the PAYMENT-PROVIDER port and is the first thing a client actually pays through; like all of Payments it sits on top of the booked/charted visit, so it arrives after the clinical core. Front desk takes payment in person via Square card-present or recorded cash, with receipts, partial/split, tips and surcharge config (REQ-PAY-2). Financial figures are owner-gated.",
+      "title": "In-person POS checkout — basic cart + single tender (core)",
+      "context": "What this is, plainly: the everyday till at the front desk — add what the client is buying, take the money once, hand over a receipt. This is the minimal end-to-end core; GST per line, split/partial tenders, gift/package redemption, member rewards and the Square-terminal modal are each added as their own follow-ups. Where it sits: it builds directly on the PAYMENT-PROVIDER port and is the first thing a client actually pays through; like all of Payments it sits on top of the booked/charted visit, so it arrives after the clinical core. Front desk takes payment in person via Square card-present or recorded cash, with a basic receipt (REQ-PAY-2). Financial figures are owner-gated.",
       "as_a": "front desk",
       "i_want": "to take payment in person by Square card or recorded cash with receipts and split/partial support",
       "so_that": "I can check clients out at the desk",
@@ -155,43 +155,267 @@
           "note": "Behaviour: the sale is an Invoice of lines a client is buying — service, retail, package or membership. The desk adds lines (from the booked visit, the treatment menu or retail) and can remove any line; each line shows its name, sub-detail and price, and a schedule tag derived from the catalogue: 'S4 · no rewards' (rose), 'non-S4' (green) or 'membership' (brand). Requirements: the schedule flag on every line comes from the catalogue (PRD-02/SERVICE-CATALOGUE), never hand-set; line type drives downstream tax + reward eligibility; an empty cart renders an empty state. This is the spine the GST, deductions, tenders and suggestions all read."
         },
         {
-          "title": "Per-line GST (goods and services tax) computation",
-          "note": "Behaviour: GST is computed PER LINE — both services and retail are taxable in this clinic — and the totals strip shows Subtotal, 'GST incl.' and Total. Requirements: do NOT take a flat total/11 shortcut; each line carries its own tax_code and GST so a future GST-free line (rare) is handled correctly, and so the Xero (the clinic's cloud accounting system) post (PRD-10) gets per-line tax mapping. GST is shown tax-inclusive per AU convention."
-        },
-        {
           "title": "S4-inert reward/discount controls (C9 enforcement at the line)",
-          "note": "Behaviour: an S4 (Schedule 4 prescription-only medicine) line (e.g. the Anti-wrinkle treatment) shows an 'S4 · no rewards' tag and exposes NO reward, discount or points control; the control is disabled with a tooltip explaining why. Requirements: the rewards engine (PRD-06/REWARDS-ENGINE) refuses to earn/redeem/discount against any S4 line — re-checked server-side at checkout against the live line schedule, never trusting a client/UI value (C9). This invariant is the visible face of the no-S4-incentive rule and must never regress."
+          "note": "Behaviour: an S4 (Schedule 4 prescription-only medicine) line (e.g. the Anti-wrinkle treatment) shows an 'S4 · no rewards' tag and exposes NO reward, discount or points control; the control is disabled with a tooltip explaining why. Requirements: the rewards engine (PRD-06/REWARDS-ENGINE) refuses to earn/redeem/discount against any S4 line — re-checked server-side at checkout against the live line schedule, never trusting a client/UI value (C9). This invariant is the visible face of the no-S4-incentive rule and must be present from the basic slice and never regress."
         },
         {
-          "title": "Member reward + store-credit deduction lines (non-S4 only)",
-          "note": "Behaviour: when the client is a member, a 'Member reward — 10% off non-S4' line and an 'Store credit applied' line appear as their own negative deduction rows beneath the cart, reducing the total. Requirements: the reward is computed only on the non-S4 subtotal (S4 lines excluded); store credit draws from the client AccountBalance (PACKAGES-GIFT); deductions recompute live as lines change. Non-members see neither. All money figures shown here are sale-level (Reception may see them); owner-only read-models (takings/margin) stay behind .fin."
+          "title": "Single-tender payment panel: Square card OR record cash + basic receipt",
+          "note": "Behaviour: a 'Take payment (in person)' panel takes the whole sale on ONE tender — Square card OR recorded cash — and issues a basic receipt; the sale completes and appears in the day's Closeout. Requirements: card goes through IPaymentProvider authorize+capture (PRD-06/PAYMENT-PROVIDER); cash is recorded as an internal tender with no processor call; every tender becomes a Payment row. Split/partial, tips, surcharge, gift-card tender and the Square-terminal progress modal are deliberately OUT of this basic slice (each is its own follow-up). The panel notes 'Membership autopay runs automatically on the card on file.'"
         },
         {
-          "title": "Tender panel: Square card, record cash, gift card (split / partial)",
-          "note": "Behaviour: a 'Take payment (in person)' panel offers Square card, Record cash and Gift card; a sale can be paid by one tender or split/partial across several (e.g. $200 on card + remainder on a gift card). Tips and a configurable card surcharge are supported. Requirements: card goes through IPaymentProvider authorize+capture (PRD-06/PAYMENT-PROVIDER); cash is recorded as an internal tender with no processor call; gift card draws down a balance (PACKAGES-GIFT). Every tender becomes a Payment row and lands in the day's Closeout (PRD-06/CLOSEOUT). The panel notes 'Membership autopay runs automatically on the card on file. Invoice posts to Xero on completion.'"
+          "title": "Checkout API: single-tender sale, take payment, receipt, Closeout",
+          "note": "Behaviour: server-authoritative checkout for the core slice — create/append invoice line, take payment on one tender (card via IPaymentProvider authorize+capture; or cash recorded), issue a receipt, write the sale to the day's Closeout. Requirements: owner-only gate on takings/margin read-models (Reception completes a sale and sees its total only); never trust the client for schedule/eligibility — re-check server-side; the S4-no-incentive invariant holds (no reward/discount control reaches an S4 line). Per-line GST, split/partial tenders, deductions, gift/package redemption and the Xero post are added by their follow-ups. Online one-off checkout stays unexposed (deferred)."
+        }
+      ]
+    },
+    {
+      "key": "POS-GST",
+      "title": "Checkout: per-line GST (goods and services tax)",
+      "as_a": "front desk / owner",
+      "i_want": "GST computed per line on every sale with a clear tax-inclusive totals strip",
+      "so_that": "tax is correct per item and maps cleanly to the accounts",
+      "context": "Plainly: work out the 10% GST (goods and services tax) on each line of the sale, not as a lump on the total, so the figures are right and accounting-ready. Where it fits: a follow-up to the basic in-person POS checkout (PRD-06/POS) that adds per-line tax to a sale that, in the basic slice, just totals line prices. Both services and retail are taxable in this clinic; computing GST per line means a future GST-free line is handled correctly and the eventual Xero (the clinic's cloud accounting system) post (PRD-10) gets per-line tax mapping. Money figures stay owner-aware but the sale total is sale-level (Reception may see it); takings/margin read-models stay behind the owner-only .fin capability.",
+      "notes": "",
+      "acceptance": [
+        "GST (goods and services tax) is computed per line — both services and retail taxable — not as a flat total/11 shortcut.",
+        "Each line carries its own tax_code and GST amount; a GST-free line (rare) computes to zero correctly.",
+        "The totals strip shows Subtotal, 'GST incl.' and Total, tax-inclusive per AU convention.",
+        "Per-line tax is available for the eventual Xero post (PRD-10)."
+      ],
+      "detail": [
+        "GST (goods and services tax) is computed PER LINE — both services and retail are taxable in this clinic — and the totals strip shows Subtotal, 'GST incl.' and Total. Do NOT take a flat total/11 shortcut: each Invoice line carries its own tax_code and gst amount so a future GST-free line is handled correctly, and so the eventual Xero (the clinic's cloud accounting system) post (PRD-10) gets per-line tax mapping.",
+        "GST is shown tax-inclusive per Australian convention. This extends the basic checkout's line list (PRD-06/POS): the same lines now carry tax, and the totals strip replaces the basic running total. The sale total is sale-level (Reception may see it); owner-only takings/margin read-models stay behind .fin."
+      ],
+      "ui_spec": [
+        "Prototype: Checkout totals strip — Subtotal / 'GST incl.' / Total beneath the line list; each line's price is tax-inclusive."
+      ],
+      "data_model": [
+        {
+          "entity": "Invoice (extends PRD-06/POS)",
+          "fields": "+ lines[].tax_code, lines[].gst; totals: subtotal, gst_incl, total",
+          "notes": "Per-line tax_code + gst added to the basic Invoice; no new entity."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-06/POS"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Per-line GST computation + tax_code on each Invoice line",
+          "note": "Behaviour: each Invoice line carries a tax_code and a computed gst amount; GST is summed across lines rather than derived from the total. Requirements: both services and retail taxable; a GST-free tax_code computes to zero; no flat total/11 shortcut; tenant-scoped."
         },
         {
-          "title": "Square-terminal payment modal (Processing -> Approved) + receipt",
-          "note": "Behaviour: taking a card payment opens a terminal modal that shows 'Processing on Square terminal…' then 'Payment approved', after which the sale completes and a receipt can be issued. Requirements: the modal reflects the real ProviderTxn state from the adapter (not a fixed timer in production); a decline surfaces a clear retry/alternate-tender path; on completion the invoice posts to Xero (PRD-10) and the post-checkout rebook view (PRD-06/CHECKOUT-ASSIST) is offered. Receipts are available for card, cash and gift-card sales."
+          "title": "Totals strip (Subtotal / GST incl. / Total) in checkout",
+          "note": "Behaviour: the checkout shows Subtotal, 'GST incl.' and Total, tax-inclusive per AU convention, recomputing live as lines change. Requirements: reads the per-line gst; sale total is sale-level (Reception may see it); owner-only .fin gate on any takings/margin figures."
+        }
+      ]
+    },
+    {
+      "key": "POS-SPLIT-TENDER",
+      "title": "Checkout: split / partial tenders, tips & card surcharge",
+      "as_a": "front desk",
+      "i_want": "to take a sale across more than one payment, with tips and a card surcharge",
+      "so_that": "clients can pay how they like and the sale still balances",
+      "context": "Plainly: let a single sale be paid by more than one payment — say $200 on card and the rest on cash or a gift card — and support a tip and a configurable card surcharge. Where it fits: a follow-up to the basic in-person POS checkout (PRD-06/POS), which takes the whole sale on one tender; this adds multi-tender settlement. Each tender still becomes its own Payment row and lands in the day's Closeout. Money figures stay sale-level for Reception; owner-only takings/margin read-models stay behind .fin. Gift-card draw-down as a tender depends on PRD-06/PACKAGES-GIFT.",
+      "notes": "",
+      "acceptance": [
+        "A sale can be settled by one tender or split/partial across several (e.g. $200 on card + remainder on cash/gift card).",
+        "A tip and a configurable card surcharge are supported and recorded on the relevant Payment.",
+        "Each tender writes its own Payment row and lands in the day's Closeout (PRD-06/CLOSEOUT).",
+        "The remaining balance updates live until the sale is fully settled."
+      ],
+      "detail": [
+        "The basic checkout (PRD-06/POS) settles a sale on one tender; this adds split/partial settlement: a sale can be paid across several Payments (e.g. $200 on card + remainder on a gift card), with a running 'remaining' until fully settled. Tips and a configurable card surcharge are supported and attach to the relevant Payment.",
+        "Card tenders go through IPaymentProvider authorize+capture (PRD-06/PAYMENT-PROVIDER); cash is recorded as an internal tender; gift-card tender draws down a balance (PRD-06/PACKAGES-GIFT). Every tender becomes a Payment row and lands in the day's Closeout (PRD-06/CLOSEOUT). Money figures stay sale-level for Reception; owner-only takings/margin read-models stay behind .fin."
+      ],
+      "ui_spec": [
+        "Prototype: Checkout 'Take payment (in person)' panel — multiple tender rows (Square card / Record cash / Gift card), a 'remaining' figure, tip entry and a card-surcharge line; sale completes only when remaining is zero."
+      ],
+      "data_model": [
+        {
+          "entity": "Payment (extends PRD-06/POS)",
+          "fields": "+ tip, surcharge; split/partial = multiple Payment rows per Invoice",
+          "notes": "Extends the basic Payment; no new entity. Gift-card tender draws on PRD-06/PACKAGES-GIFT."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-06/POS"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Multi-tender settlement (split / partial) with running remaining",
+          "note": "Behaviour: a sale accepts several Payments until the remaining balance is zero; each tender (card / cash / gift card) writes its own Payment row. Requirements: card via IPaymentProvider; cash recorded; gift-card draw-down (PRD-06/PACKAGES-GIFT); the sale only completes when fully settled; idempotent so a retried tender doesn't double-charge."
         },
         {
-          "title": "Checkout API: sale, tenders, split/partial, receipt, Closeout + Xero post",
-          "note": "Behaviour: server-authoritative checkout — create/append invoice line, apply member reward/credit (non-S4 only; reject if a line is S4), take payment (card via IPaymentProvider authorize+capture; cash recorded; gift-card redeem), split/partial across tenders, void/refund, issue receipt. Requirements: on completion write to the day's Closeout and enqueue the Xero post (PRD-10) with per-line account/GST mapping; owner-only gate on takings/margin read-models (Reception completes a sale and sees its total only); never trust the client for schedule/eligibility — re-check server-side. Online one-off checkout stays unexposed (deferred)."
+          "title": "Tips + configurable card surcharge",
+          "note": "Behaviour: a tip and a configurable card surcharge attach to the relevant Payment and show on the receipt and in the Closeout. Requirements: surcharge configurable per tenant; both recorded on the Payment; owner-only .fin gate on any takings figures."
+        }
+      ]
+    },
+    {
+      "key": "POS-DEDUCTIONS",
+      "title": "Checkout: member-reward & store-credit deduction lines (non-S4)",
+      "as_a": "front desk",
+      "i_want": "member rewards and store credit to appear as deduction lines on the sale",
+      "so_that": "members get their benefit automatically without ever touching an S4 item",
+      "context": "Plainly: when a member checks out, show their reward (10% off non-S4) and any store credit as their own negative lines under the cart, reducing the total. Where it fits: a follow-up to the basic in-person POS checkout (PRD-06/POS) that adds the deduction lines a member sees; the basic slice has no deductions. The reward is computed only on the non-S4 subtotal — it must NEVER reduce an S4 (Schedule 4 prescription-only medicine) line (C9) — and store credit draws from the client AccountBalance (PRD-06/PACKAGES-GIFT). All figures here are sale-level (Reception may see them); owner-only takings/margin read-models stay behind .fin.",
+      "notes": "",
+      "acceptance": [
+        "For a member, a 'Member reward — 10% off non-S4' line and a 'Store credit applied' line appear as negative deduction rows beneath the cart.",
+        "The reward is computed only on the non-S4 subtotal; S4 (Schedule 4 prescription-only medicine) lines are excluded (C9), re-checked server-side.",
+        "Store credit draws from the client AccountBalance (PRD-06/PACKAGES-GIFT); deductions recompute live as lines change.",
+        "Non-members see neither line; money figures shown are sale-level (owner-only takings/margin stay behind .fin)."
+      ],
+      "detail": [
+        "When the client is a member, a 'Member reward — 10% off non-S4' line and a 'Store credit applied' line appear as their own negative deduction rows beneath the cart, reducing the total. The reward is computed only on the non-S4 subtotal (S4 lines excluded, C9 — re-checked server-side against the live line schedule, never trusting a UI value); store credit draws from the client AccountBalance (PRD-06/PACKAGES-GIFT). Deductions recompute live as lines change; non-members see neither.",
+        "This extends the basic checkout (PRD-06/POS) and reads the rewards/benefit rules from PRD-06/REWARDS-ENGINE and PRD-06/MEMBERSHIP. All money figures shown here are sale-level (Reception may see them); owner-only read-models (takings/margin) stay behind .fin."
+      ],
+      "ui_spec": [
+        "Prototype: Checkout — 'Member reward — 10% off non-S4' and 'Store credit applied' negative deduction rows beneath the line list, above the totals strip."
+      ],
+      "data_model": [
+        {
+          "entity": "Invoice (extends PRD-06/POS)",
+          "fields": "+ deductions[]{kind(reward|credit), amount}",
+          "notes": "Deductions only on non-S4 subtotal (C9); store credit reads AccountBalance (PRD-06/PACKAGES-GIFT)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-06/POS"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Member-reward deduction line (non-S4 subtotal only, C9)",
+          "note": "Behaviour: a member's reward (default 10% off non-S4) appears as a negative deduction line computed only on the non-S4 subtotal. Requirements: S4 (Schedule 4 prescription-only medicine) lines are excluded server-side against the live schedule (C9); recomputes as lines change; non-members see no line; rule comes from PRD-06/REWARDS-ENGINE / MEMBERSHIP."
+        },
+        {
+          "title": "Store-credit deduction line (draws AccountBalance)",
+          "note": "Behaviour: available store credit appears as a 'Store credit applied' negative line and decrements the client AccountBalance on completion. Requirements: credit reads/writes AccountBalance (PRD-06/PACKAGES-GIFT); deductions recompute live; figures sale-level, owner-only takings/margin behind .fin."
+        }
+      ]
+    },
+    {
+      "key": "POS-TERMINAL-MODAL",
+      "title": "Checkout: Square-terminal modal (Processing → Approved) + decline path",
+      "as_a": "front desk",
+      "i_want": "a clear terminal progress modal when taking a card payment, with a decline path",
+      "so_that": "I can see the card transaction's real state and recover from a decline",
+      "context": "Plainly: when the desk takes a card payment, show a modal that tracks the real Square terminal state — 'Processing…' then 'Payment approved' — and offers a clear path if the card declines. Where it fits: a follow-up to the basic in-person POS checkout (PRD-06/POS), which completes a card sale without a progress modal. The modal reflects the real ProviderTxn state from the Square adapter (PRD-06/PAYMENT-PROVIDER), not a fixed timer; a decline surfaces retry / alternate-tender. On completion the post-checkout rebook view (PRD-06/CHECKOUT-ASSIST) is offered. Money figures stay sale-level for Reception; owner-only takings/margin behind .fin.",
+      "notes": "",
+      "acceptance": [
+        "Taking a card payment opens a terminal modal showing 'Processing on Square terminal…' then 'Payment approved', reflecting the real ProviderTxn state (not a fixed timer).",
+        "A decline surfaces a clear retry / alternate-tender path rather than failing silently.",
+        "On approval the sale completes and the post-checkout rebook view (PRD-06/CHECKOUT-ASSIST) is offered.",
+        "Receipts remain available for card sales."
+      ],
+      "detail": [
+        "Taking a card payment opens a terminal modal that shows 'Processing on Square terminal…' then 'Payment approved', after which the sale completes. The modal reflects the real ProviderTxn state from the Square adapter (PRD-06/PAYMENT-PROVIDER) — not a fixed timer in production — and a decline surfaces a clear retry/alternate-tender path so the desk can recover. On completion the post-checkout rebook view (PRD-06/CHECKOUT-ASSIST) is offered.",
+        "This is a UX layer over the basic card tender in PRD-06/POS; it does not change how the charge is taken, only how its progress and outcome are shown. Money figures stay sale-level for Reception; owner-only takings/margin stay behind .fin."
+      ],
+      "ui_spec": [
+        "Prototype: Square-terminal modal (Processing → Approved) over the checkout; on decline, a retry / choose-another-tender prompt; on approval, the post-checkout rebook view (CHECKOUT-ASSIST)."
+      ],
+      "data_model": [
+        {
+          "entity": "(reads PRD-06/PAYMENT-PROVIDER)",
+          "fields": "ProviderTxn state drives the modal; no new entity",
+          "notes": "Modal mirrors ProviderTxn (auth/capture/decline); extends PRD-06/POS card tender."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-06/POS"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Terminal progress modal bound to ProviderTxn state",
+          "note": "Behaviour: a modal tracks the real ProviderTxn lifecycle (Processing → Approved) from the Square adapter (PRD-06/PAYMENT-PROVIDER). Requirements: reflects real state, not a fixed timer; on approval the sale completes and offers the rebook view (PRD-06/CHECKOUT-ASSIST)."
+        },
+        {
+          "title": "Decline / retry / alternate-tender path",
+          "note": "Behaviour: a declined card shows a clear retry or choose-another-tender prompt rather than failing silently. Requirements: maps the adapter's decline result to a recoverable UI state; never double-charges on retry (idempotent)."
+        }
+      ]
+    },
+    {
+      "key": "POS-XERO-POST",
+      "title": "Checkout: post completed sale to Xero (per-line tax mapping)",
+      "as_a": "owner",
+      "i_want": "completed sales to post to Xero with per-line account and tax mapping",
+      "so_that": "the books reconcile without re-keying invoices",
+      "context": "Plainly: when a sale completes, send the invoice and payment to Xero (the clinic's cloud accounting system) with each line mapped to the right account and tax code. Where it fits: a follow-up to the basic in-person POS checkout (PRD-06/POS); the basic slice records the sale and Closeout in-platform but does not post to Xero. The detailed integration and auth live in PRD-10; this story is the checkout-side enqueue + per-line mapping that PRD-10 consumes. Per-line tax comes from PRD-06/POS-GST. All money figures are owner-only (.fin); the ledger itself lives in Xero.",
+      "notes": "",
+      "acceptance": [
+        "On sale completion the invoice + payment(s) enqueue a Xero (the clinic's cloud accounting system) post with per-line account/tax mapping (PRD-10).",
+        "The post is idempotent — a retried completion never double-posts the same invoice.",
+        "Closeout reconciles to the posted Xero figures (PRD-06/CLOSEOUT).",
+        "All money figures are owner-only (.fin); the ledger lives in Xero, not re-implemented here."
+      ],
+      "detail": [
+        "On completion a sale enqueues a Xero (the clinic's cloud accounting system) post (PRD-10) carrying per-line account/tax mapping (per-line GST from PRD-06/POS-GST). This extends the basic checkout (PRD-06/POS), which records the sale and writes the Closeout but does not post externally. The enqueue is idempotent so a retried completion never double-posts the same invoice.",
+        "The Xero integration, auth and sync engine are owned by PRD-10; this story is the checkout-side hand-off and the per-line mapping. The day's posted invoices/payments should foot to the Closeout totals (PRD-06/CLOSEOUT). All money figures are owner-only (.fin); the actual ledger lives in Xero."
+      ],
+      "ui_spec": [
+        "Prototype: checkout note 'Invoice posts to Xero on completion'; no dedicated screen — surfaces via the Closeout reconciliation and PRD-10 sync status."
+      ],
+      "data_model": [
+        {
+          "entity": "(enqueue to PRD-10)",
+          "fields": "Invoice + Payment(s) → Xero post job with per-line account/tax mapping",
+          "notes": "Per-line tax from PRD-06/POS-GST; idempotent; ledger owned by Xero (PRD-10)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-06/POS"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Enqueue Xero post on completion with per-line mapping",
+          "note": "Behaviour: completing a sale enqueues a Xero post job carrying each line's account + tax code. Requirements: idempotent per invoice (no double-post on retry); per-line tax from PRD-06/POS-GST; the PRD-10 sync engine consumes the job; owner-only (.fin)."
+        },
+        {
+          "title": "Closeout-to-Xero reconciliation hook",
+          "note": "Behaviour: the day's posted invoices/payments foot to the Closeout totals (PRD-06/CLOSEOUT); a mismatch is flagged. Requirements: reconcile against the Xero post, not re-implement the ledger; owner-only."
         }
       ]
     },
     {
       "key": "PACKAGES-GIFT",
-      "title": "Packages/series, gift cards & client balances",
-      "context": "What this is, plainly: selling and redeeming pre-paid value — a course of treatments bought up front, or a gift card — and keeping each client's running balance straight. Where it sits: it extends the POS checkout, so it follows the till and, like the rest of Payments, sits on the booked/charted visit after the clinical core. Sell/redeem packages (visits remaining) and gift cards, track client balances/credit and AR (accounts receivable) ageing (REQ-PAY-3/5).",
+      "title": "Packages/series: sell & redeem (visits remaining) — basic pre-paid value (core)",
+      "context": "What this is, plainly: selling a course of treatments up front and drawing it down one visit at a time, keeping the 'visits remaining' count straight. This is the minimal pre-paid-value core; gift cards, store-credit/AR ageing and the gift-cards admin screen are each added as their own follow-ups. Where it sits: it extends the POS checkout, so it follows the till and, like the rest of Payments, sits on the booked/charted visit after the clinical core. Sell/redeem packages (visits remaining) (REQ-PAY-3/5).",
       "as_a": "front desk",
-      "i_want": "to sell and redeem packages and gift cards and track client balances",
-      "so_that": "clients can pre-pay and carry credit",
+      "i_want": "to sell and redeem a treatment package and see visits remaining",
+      "so_that": "clients can pre-pay a course of treatments",
       "acceptance": [
         "A package/series can be sold and redeemed, decrementing 'visits remaining'; the count shows on the Client 360.",
-        "A gift card can be issued, balance-tracked and partially redeemed at checkout; balances sync to checkout.",
-        "Client store-credit and AR (accounts receivable) ageing are tracked and visible to owner/manager.",
-        "Package/gift redemptions appear in the Closeout and post to Xero (PRD-10)."
+        "Redeeming guards against going below zero (a depleted package can't redeem) and is tied to a service so only matching sessions draw it down.",
+        "Package redemptions appear in the daily Closeout (PRD-06/CLOSEOUT).",
+        "Money figures stay owner-aware; Reception sees the package but not owner-only credit/AR figures."
       ],
       "refs": {
         "req": [
@@ -244,38 +468,121 @@
       "tasks": [
         {
           "title": "Packages / series: sell + redeem (decrement visits-remaining)",
-          "note": "Behaviour: a Package is a pre-paid course of treatments (total_visits) with a running 'remaining' count, sold at checkout and redeemed one session at a time when the client attends; the Client 360 shows 'visits remaining' and the redemption history. Requirements: redeeming decrements remaining and guards against going below 0 (a depleted package can't redeem); redemption posts to the Closeout (the daily reconciliation of takings) and to Xero (PRD-10) — deferred revenue on sale, recognised on redemption, with the accounting treatment owned by Xero, not re-implemented here. A package is tied to a service_id so only matching sessions draw it down."
+          "note": "Behaviour: a Package is a pre-paid course of treatments (total_visits) with a running 'remaining' count, sold at checkout and redeemed one session at a time when the client attends; the Client 360 shows 'visits remaining' and the redemption history. Requirements: redeeming decrements remaining and guards against going below 0 (a depleted package can't redeem); redemption posts to the Closeout (the daily reconciliation of takings) — deferred revenue on sale, recognised on redemption, with the accounting treatment owned by Xero (PRD-10), not re-implemented here. A package is tied to a service_id so only matching sessions draw it down. Tenant-scoped with RLS (row-level security)."
         },
         {
-          "title": "Gift cards: issue, balance-track, partial redeem (balances sync to checkout)",
-          "note": "Behaviour: a gift card has a code, an initial value and a running balance; it can be issued ('Issue gift card'), assigned to a client or left unassigned, partially redeemed against any future sale, and shows status (active / redeemed / unassigned). The Gift-cards screen tiles each card as 'balance of initial' (e.g. 'GC-4471 H. Lawson $120 of $150', 'GC-3320 redeemed $0 of $100', 'GC-2207 gift — unassigned $200 of $200'). Requirements: balances sync live to checkout so a draw-down at the till is reflected immediately; partial redemption supported; a gift card is schedule-neutral (it buys anything) BUT the rewards engine still blocks S4 (Schedule 4 prescription-only medicine) earn/redeem at checkout (C9). Redemptions post to Closeout + Xero."
+          "title": "Package sell/redeem API + Client-360 'visits remaining' chip",
+          "note": "Behaviour: server-side commands — sell package and redeem a package visit (decrement remaining, guard 0); the Client 360 shows a package 'visits remaining' chip and redemption history. Requirements: redemptions write to the Closeout (PRD-06/CLOSEOUT); tied to a service_id so only matching sessions draw down; tenant-scoped with RLS; money figures owner-aware (Reception sees the package, owner-only credit/AR figures are added by the follow-up)."
+        }
+      ]
+    },
+    {
+      "key": "PACKAGES-GIFTCARD",
+      "title": "Gift cards: issue, balance-track & partial redeem",
+      "as_a": "front desk",
+      "i_want": "to issue gift cards, track their balance and partially redeem them at the till",
+      "so_that": "clients can buy and spend pre-paid gift value",
+      "context": "Plainly: sell a gift card with a starting value, track its running balance, and let it be spent (in part) against any future sale. Where it fits: a follow-up to the basic pre-paid value story (PRD-06/PACKAGES-GIFT) that adds gift cards alongside packages. A gift card is schedule-neutral — it buys anything — but the rewards engine still blocks S4 (Schedule 4 prescription-only medicine) earn/redeem at checkout (C9), so spending a gift card on an S4 treatment is fine while earning/redeeming points on that line is not. Balances sync live to checkout so a draw-down at the till reflects immediately. Redemptions post to the Closeout (PRD-06/CLOSEOUT). Money figures stay owner-aware; owner-only credit/AR figures are separate.",
+      "notes": "",
+      "acceptance": [
+        "A gift card can be issued with a code and initial value, assigned to a client or left unassigned, and shows status (active / redeemed / unassigned).",
+        "A gift card can be partially redeemed against any future sale; the balance updates and syncs live to checkout.",
+        "A gift card is schedule-neutral (buys anything) but the rewards engine still blocks S4 (Schedule 4 prescription-only medicine) earn/redeem at checkout (C9).",
+        "Gift-card redemptions appear in the daily Closeout (PRD-06/CLOSEOUT)."
+      ],
+      "detail": [
+        "A GiftCard has a code, an initial value and a running balance; it can be issued ('Issue gift card'), assigned to a client or left unassigned, partially redeemed against any future sale, and shows status (active / redeemed / unassigned). Balances sync live to checkout so a draw-down at the till is reflected immediately; partial redemption is supported.",
+        "A gift card is schedule-neutral — it buys whatever the client likes — BUT the rewards engine still won't earn/redeem points against an S4 (Schedule 4 prescription-only medicine) line at checkout (C9). Redemptions post to the daily Closeout (PRD-06/CLOSEOUT); deferred-revenue recognition is Xero's (PRD-10), not duplicated here. This extends the basic pre-paid-value story (PRD-06/PACKAGES-GIFT)."
+      ],
+      "ui_spec": [
+        "Prototype: Memberships → Gift cards — 'Sell, track & redeem gift cards. Balances sync to checkout.'; 'Issue gift card' button; card tiles showing code, balance 'of' initial, and assignment (e.g. 'GC-4471 H. Lawson $120 of $150', 'GC-3320 redeemed $0 of $100', 'GC-2207 gift — unassigned $200 of $200')."
+      ],
+      "data_model": [
+        {
+          "entity": "GiftCard",
+          "fields": "id, tenant_id, code, initial, balance, status(active|redeemed|void), assigned_client_id?",
+          "notes": "New entity; sell/track/redeem; balances sync to checkout; schedule-neutral but S4 earn/redeem still blocked (C9)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-06/PACKAGES-GIFT"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "GiftCard model: issue, balance-track, partial redeem",
+          "note": "Behaviour: a GiftCard (code, initial, balance, status, optional assigned_client_id) is issued, partially redeemed against any sale, and tracks status. Requirements: balances sync live to checkout; partial redemption supported; redemptions post to Closeout (PRD-06/CLOSEOUT); schedule-neutral but the rewards engine still blocks S4 (Schedule 4 prescription-only medicine) earn/redeem (C9); tenant-scoped with RLS (row-level security)."
         },
         {
-          "title": "Client store-credit + AR (accounts receivable) ageing",
-          "note": "Behaviour: an AccountBalance per client holds store-credit (usable as a checkout deduction) and AR (accounts receivable) ageing buckets (what the client owes, by age) for owner/manager visibility. Requirements: store credit applied at checkout decrements the balance; AR ageing is surfaced to owner/manager only; all money figures here are owner-gated (.fin) — Reception sees memberships/packages but not credit/AR dollar figures. Feeds the Client 360 billing tab."
+          "title": "Gift-cards web UI (tiles + issue + search)",
+          "note": "Behaviour: the Gift-cards screen renders a tile list (code, balance of initial, assignment status) with an 'Issue gift card' action and search; tiles update without a full reload when a redemption happens at the till. Requirements: loading/empty/error states; balances reflect checkout redemptions live."
+        }
+      ]
+    },
+    {
+      "key": "PACKAGES-CREDIT-AR",
+      "title": "Client store-credit & AR (accounts receivable) ageing",
+      "as_a": "owner / manager",
+      "i_want": "to track each client's store credit and what they owe by age",
+      "so_that": "pre-paid credit and receivables are always reconciled and visible",
+      "context": "Plainly: keep a per-client running store-credit balance and an ageing view of anything a client owes, so nothing is lost and overdue amounts are visible. Where it fits: a follow-up to the basic pre-paid value story (PRD-06/PACKAGES-GIFT) that adds the money-balance layer behind packages and gift cards. Store credit is usable as a checkout deduction (PRD-06/POS-DEDUCTIONS draws it down). All money figures here are owner-only (.fin) — Reception sees memberships/packages but not credit or AR (accounts receivable) dollar figures. Feeds the Client 360 billing tab.",
+      "notes": "",
+      "acceptance": [
+        "A per-client AccountBalance holds store-credit and AR (accounts receivable) ageing buckets (what the client owes, by age).",
+        "Store credit applied at checkout decrements the balance (consumed by PRD-06/POS-DEDUCTIONS).",
+        "AR ageing is surfaced to owner/manager only and feeds the Client 360 billing tab.",
+        "All credit/AR money figures are owner-gated (.fin); Reception does not see them."
+      ],
+      "detail": [
+        "An AccountBalance per client holds store-credit (usable as a checkout deduction) and AR (accounts receivable) ageing buckets (what the client owes, grouped by age) for owner/manager visibility. Store credit applied at checkout decrements the balance (the deduction line lives in PRD-06/POS-DEDUCTIONS); AR ageing is surfaced to owner/manager only.",
+        "All money figures here are owner-gated (.fin) — Reception sees memberships/packages but not credit/AR dollar figures. This extends the basic pre-paid-value story (PRD-06/PACKAGES-GIFT) and feeds the Client 360 billing tab."
+      ],
+      "ui_spec": [
+        "Prototype: Client 360 billing tab — store-credit balance + AR (accounts receivable) ageing buckets (owner/manager only); credit applies as a deduction at checkout (PRD-06/POS-DEDUCTIONS)."
+      ],
+      "data_model": [
+        {
+          "entity": "AccountBalance",
+          "fields": "client_id, credit, ar_ageing",
+          "notes": "New entity; client store credit + AR (accounts receivable) ageing; owner/manager visibility (.fin)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-06/PACKAGES-GIFT"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "AccountBalance model: store-credit + AR ageing",
+          "note": "Behaviour: a per-client AccountBalance holds store-credit and AR (accounts receivable) ageing buckets. Requirements: store credit applied at checkout decrements it (consumed by PRD-06/POS-DEDUCTIONS); AR ageing computed by age; tenant-scoped with RLS (row-level security); all figures owner-only (.fin)."
         },
         {
-          "title": "Sell/redeem API (package decrement, gift draw-down, credit/AR queries)",
-          "note": "Behaviour: server-side commands/queries — sell package / issue gift card / apply store credit; redeem a package visit (decrement remaining, guard 0) and draw down a gift-card balance at checkout (partial allowed); expose client-credit + AR-ageing read queries (owner/manager gated). Requirements: redemptions write to the Closeout and the Xero post; gift cards stay schedule-neutral while the rewards engine still blocks S4 (Schedule 4 prescription-only medicine) earn/redeem; every table tenant-scoped with RLS (row-level security). Deferred-revenue recognition is Xero's (PRD-10), not duplicated here."
-        },
-        {
-          "title": "Gift-cards web UI + Client-360 'visits remaining' chip",
-          "note": "Behaviour: the Gift-cards screen renders a tile list (code, balance of initial, assignment status) with an 'Issue gift card' action and search; balances reflect checkout redemptions live. The Client 360 shows a package 'visits remaining' chip and redemption history. Requirements: loading/empty/error states; owner/manager gate (.fin) on credit/AR figures; tiles update without a full reload when a redemption happens at the till."
+          "title": "Client-360 billing tab (credit + AR ageing, owner-gated)",
+          "note": "Behaviour: the Client 360 billing tab shows the store-credit balance and AR ageing buckets to owner/manager only. Requirements: owner-only .fin gate; loading/empty/error states; figures read the AccountBalance, not a separate copy."
         }
       ]
     },
     {
       "key": "CLOSEOUT",
-      "title": "Daily closeout & reconciliation",
-      "context": "What this is, plainly: the end-of-day till balance — count the cash, check the card total against Square, explain any difference, lock it. Where it sits: it reads the day's POS payments and is the bridge to Xero accounting (PRD-10); it follows the till in the Payments layer, on top of the booked/charted visit. End-of-day closeout (reconciliation of takings against recorded payments) balances card + cash (REQ-PAY-4).",
+      "title": "Daily closeout — card + cash rollup, count & lock (core)",
+      "context": "What this is, plainly: the end-of-day till balance — total the card and cash takings, enter the counted cash, note it and lock it. This is the minimal end-to-end core; Square-batch variance detection, the Xero reconciliation and the back-office tablet surface are each added as their own follow-ups. Where it sits: it reads the day's POS payments and is the bridge to Xero accounting (PRD-10); it follows the till in the Payments layer, on top of the booked/charted visit. End-of-day closeout (reconciliation of takings against recorded payments) balances card + cash (REQ-PAY-4).",
       "as_a": "owner",
-      "i_want": "a daily closeout that balances card and cash",
+      "i_want": "a daily closeout that totals card and cash and locks the day",
       "so_that": "the till reconciles every day",
       "acceptance": [
-        "Closeout summarises card and cash tenders for the day per location.",
-        "Variances (counted vs recorded; card vs Square batch) are surfaced and can be noted.",
-        "Closeout figures are owner-gated (not visible to Reception).",
-        "Closeout reconciles to the Xero posting (PRD-10)."
+        "Closeout summarises card and cash tenders for the day per location (one Closeout row per location per trading day).",
+        "The operator enters the counted cash and the closeout records a simple counted-vs-recorded difference.",
+        "The operator can note and lock the closeout; a locked closeout is immutable and stamps closed_by/closed_at.",
+        "Closeout figures are owner-gated (not visible to Reception)."
       ],
       "refs": {
         "req": [
@@ -316,35 +623,164 @@
       ],
       "tasks": [
         {
-          "title": "Card + cash day-rollup per location",
-          "note": "Behaviour: at end of day the closeout summarises the day's tenders per location — card_total (from card Payments, to be reconciled to Square's batch) and cash_total (what the system recorded). One Closeout row per location per trading day. Requirements: totals aggregate from the day's Payment rows (PRD-06/POS); tenant-scoped with RLS (row-level security); the whole surface is owner-only (.fin) — Reception never sees daily takings."
+          "title": "Card + cash day-rollup per location + counted-cash entry",
+          "note": "Behaviour: at end of day the closeout summarises the day's tenders per location — card_total (from card Payments) and cash_total (what the system recorded) — and the operator enters the counted cash, giving a simple counted-vs-recorded difference. One Closeout row per location per trading day. Requirements: totals aggregate from the day's Payment rows (PRD-06/POS); tenant-scoped with RLS (row-level security); the whole surface is owner-only (.fin) — Reception never sees daily takings. (Square-batch variance flagging is a follow-up.)"
         },
         {
-          "title": "Variance: counted-cash entry + card-vs-Square batch",
-          "note": "Behaviour: the operator enters the counted cash; the closeout computes and highlights variance = counted − recorded, and flags card_total vs the Square (the card-payment provider) batch. Requirements: variances are surfaced prominently (not buried) so a miskeyed cash sale or missed refund is caught the same day; a variance can be annotated with an explanation before locking; figures owner-gated."
+          "title": "Note, lock + immutability",
+          "note": "Behaviour: the operator records a note and locks the closeout ('Note locked & saved'); a locked closeout is immutable and stamps closed_by/closed_at. Requirements: once locked the day cannot be silently re-opened/edited (audit any correction); owner-only. (Reconcile-to-Xero is a follow-up.)"
         },
         {
-          "title": "Note, lock + reconcile-to-Xero",
-          "note": "Behaviour: the operator records a note and locks the closeout ('Note locked & saved'); a locked closeout is immutable and stamps closed_by/closed_at. Requirements: reconcile against the Xero (the clinic's cloud accounting system) post (PRD-10) — the day's posted invoices/payments should foot to the closeout totals, and a mismatch is flagged; once locked the day cannot be silently re-opened/edited (audit any correction)."
+          "title": "Closeout web UI (front desk)",
+          "note": "Behaviour: render the closeout at the checkout/desk — card vs cash totals, counted-cash entry, the counted-vs-recorded difference, note + lock, close action. Requirements: owner-only capability gate; loading/empty/error states. (The back-office tablet surface is a follow-up.)"
+        }
+      ]
+    },
+    {
+      "key": "CLOSEOUT-VARIANCE",
+      "title": "Closeout: Square-batch variance detection & annotation",
+      "as_a": "owner",
+      "i_want": "the closeout to flag card-vs-Square-batch and counted-vs-recorded variances prominently",
+      "so_that": "a miskeyed cash sale or missed refund is caught the same day",
+      "context": "Plainly: highlight any gap between what the system recorded and what actually happened — counted cash vs recorded, and the card total vs the Square (the card-payment provider) batch — so it can be explained rather than buried. Where it fits: a follow-up to the basic daily closeout (PRD-06/CLOSEOUT), which records a simple counted-vs-recorded difference; this adds the Square-batch comparison and a prominent, annotatable variance surface. Figures are owner-gated (.fin).",
+      "notes": "",
+      "acceptance": [
+        "The closeout flags card_total against the Square (the card-payment provider) batch, not just counted-vs-recorded cash.",
+        "Variances are surfaced prominently (not buried) so they are caught the same day.",
+        "A variance can be annotated with an explanation before the closeout is locked.",
+        "Variance figures are owner-gated (.fin)."
+      ],
+      "detail": [
+        "The basic closeout (PRD-06/CLOSEOUT) records a counted-vs-recorded cash difference; this follow-up adds the card side — flagging card_total against the Square (the card-payment provider) batch — and makes variances prominent rather than buried, so a miskeyed cash sale or missed refund is caught the same trading day.",
+        "A variance can be annotated with an explanation before the closeout is locked. All figures are owner-gated (.fin)."
+      ],
+      "ui_spec": [
+        "Prototype: Closeout — variance highlight (counted vs recorded; card vs Square batch) with an annotation field, shown before the lock step."
+      ],
+      "data_model": [
+        {
+          "entity": "Closeout (extends PRD-06/CLOSEOUT)",
+          "fields": "+ variance, variance_note; compares card_total to the Square batch",
+          "notes": "Extends the basic Closeout; no new entity."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-06/CLOSEOUT"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Card-vs-Square-batch + counted-vs-recorded variance flagging",
+          "note": "Behaviour: the closeout computes and prominently highlights variance = counted − recorded and flags card_total vs the Square (the card-payment provider) batch. Requirements: surfaced prominently (not buried); owner-only (.fin); reads the day's Payment rows + the Square batch figure."
         },
         {
-          "title": "Closeout web UI (front desk + back-office tablet)",
-          "note": "Behaviour: render the closeout on the checkout/desk and on the back-office tablet (backroom) so the owner can run it away from the front desk — card vs cash totals, counted-cash entry, variance highlight, note + lock, close action. Requirements: owner-only capability gate; loading/empty/error states; the back-office tablet shares the same component/state as the desk view."
+          "title": "Variance annotation before lock",
+          "note": "Behaviour: a variance can be annotated with an explanation before the closeout is locked. Requirements: the note persists on the Closeout and is audited; owner-only."
+        }
+      ]
+    },
+    {
+      "key": "CLOSEOUT-XERO-RECONCILE",
+      "title": "Closeout: reconcile to the Xero posting",
+      "as_a": "owner",
+      "i_want": "the closeout to reconcile against the day's Xero posting",
+      "so_that": "the till totals foot to the accounts and mismatches surface",
+      "context": "Plainly: check that the day's invoices and payments that posted to Xero (the clinic's cloud accounting system) add up to the closeout totals, and flag it if they don't. Where it fits: a follow-up to the basic daily closeout (PRD-06/CLOSEOUT); the basic slice balances and locks the till in-platform but does not cross-check Xero. Depends on the checkout-side Xero post (PRD-06/POS-XERO-POST) and the PRD-10 sync engine that owns the ledger. Figures are owner-gated (.fin).",
+      "notes": "",
+      "acceptance": [
+        "The day's posted invoices/payments (PRD-06/POS-XERO-POST, PRD-10) foot to the closeout totals.",
+        "A mismatch between the posted Xero (the clinic's cloud accounting system) figures and the closeout is flagged.",
+        "Reconciliation does not re-implement the ledger — the ledger lives in Xero (PRD-10).",
+        "Figures are owner-gated (.fin)."
+      ],
+      "detail": [
+        "The basic closeout (PRD-06/CLOSEOUT) balances and locks the till in-platform; this follow-up reconciles it against the Xero (the clinic's cloud accounting system) post (PRD-10) — the day's posted invoices/payments should foot to the closeout totals, and a mismatch is flagged for investigation.",
+        "It does not re-implement the ledger; the accounting treatment lives in Xero. Depends on the checkout-side Xero post (PRD-06/POS-XERO-POST). All figures are owner-gated (.fin)."
+      ],
+      "ui_spec": [
+        "Prototype: Closeout — a 'reconciles to Xero' line comparing posted invoices/payments to the closeout totals, with a mismatch flag."
+      ],
+      "data_model": [
+        {
+          "entity": "(reconciles against PRD-10)",
+          "fields": "compares Closeout totals to the day's Xero-posted invoices/payments",
+          "notes": "No new entity; reads the PRD-06/POS-XERO-POST output owned by PRD-10."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-06/CLOSEOUT"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Reconcile closeout totals to the Xero posting + mismatch flag",
+          "note": "Behaviour: the day's posted invoices/payments (PRD-06/POS-XERO-POST, PRD-10) foot to the closeout totals; a mismatch is flagged. Requirements: read the posted figures from PRD-10, do not re-implement the ledger; owner-only (.fin); audit any mismatch resolution."
+        }
+      ]
+    },
+    {
+      "key": "CLOSEOUT-BACKROOM",
+      "title": "Closeout: back-office tablet surface",
+      "as_a": "owner",
+      "i_want": "to run the daily closeout from the back-office tablet",
+      "so_that": "I can balance the till away from the front desk",
+      "context": "Plainly: make the same daily closeout available on the back-room tablet so the owner can balance and lock the day without standing at the front desk. Where it fits: a follow-up to the basic daily closeout (PRD-06/CLOSEOUT), which renders at the checkout/desk; this surfaces the same closeout on the back-office tablet (backroom device sim), sharing one component/state. Figures are owner-gated (.fin).",
+      "notes": "",
+      "acceptance": [
+        "The closeout renders on the back-office tablet (backroom) with card/cash totals, counted-cash entry, note + lock and close.",
+        "The back-office tablet shares the same component/state as the desk view (no divergent copy).",
+        "Owner-only capability gate is enforced on the tablet surface (.fin).",
+        "Loading/empty/error states are handled."
+      ],
+      "detail": [
+        "The basic closeout (PRD-06/CLOSEOUT) renders at the checkout/desk; this follow-up surfaces the same closeout on the back-office tablet (backroom) so the owner can run it away from the front desk — card vs cash totals, counted-cash entry, note + lock, close.",
+        "The back-office tablet shares the same component/state as the desk view (no divergent copy). Owner-only capability gate is enforced. Loading/empty/error states are handled."
+      ],
+      "ui_spec": [
+        "Prototype: back-office tablet (backroom) closeout surface, mirroring the desk closeout (card vs cash, counted-cash, note + lock)."
+      ],
+      "data_model": [
+        {
+          "entity": "(reuses PRD-06/CLOSEOUT)",
+          "fields": "same Closeout entity, rendered on the backroom surface",
+          "notes": "No new entity; shared component/state with the desk view."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-06/CLOSEOUT"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Back-office tablet closeout surface (shared component/state)",
+          "note": "Behaviour: render the closeout on the back-office tablet (backroom) sharing the same component/state as the desk view. Requirements: owner-only capability gate; loading/empty/error states; no divergent copy of the closeout logic."
         }
       ]
     },
     {
       "key": "MEMBERSHIP",
-      "title": "Memberships with automatic autopay & dunning",
-      "context": "What this is, plainly: clients join a monthly plan, store a card once, and the platform charges that card automatically on schedule — chasing politely if a charge fails rather than dropping the member. Where it sits: it builds on the PAYMENT-PROVIDER card-on-file token and is the clinic's recurring-revenue engine; it arrives in the Payments layer after the clinical core, and its lifecycle feeds reporting (PRD-08). Membership plans/tiers with automatic recurring billing from a tokenised card-on-file (added online/in-app or at desk) and failed-payment dunning — the scheduled retry-and-chase when a recurring payment fails — (REQ-MEMB-1/2/3).",
+      "title": "Membership join + card-on-file — basic enrolment (core)",
+      "context": "What this is, plainly: a client joins a monthly plan and stores a card once, so the clinic holds a tokenised card-on-file ready to charge. This is the minimal end-to-end core; the autopay scheduler, failed-payment dunning, lifecycle states, benefit auto-apply and the members list/KPIs are each added as their own follow-ups. Where it sits: it builds on the PAYMENT-PROVIDER card-on-file token and is the first brick of the clinic's recurring-revenue engine; it arrives in the Payments layer after the clinical core. Membership enrolment with a tokenised card-on-file (added online/in-app or at desk) (REQ-MEMB-1/2/3).",
       "as_a": "client",
-      "i_want": "to join a membership and have my card auto-charged on schedule",
-      "so_that": "I get member perks without manual payments",
+      "i_want": "to join a membership and store a card on file",
+      "so_that": "I'm enrolled and ready to be billed for member perks",
       "acceptance": [
-        "A membership auto-charges on schedule from a stored token (card added online/in-app or in person).",
-        "A failed charge triggers a dunning (retry-and-chase) recovery sequence (retry + client notice + follow-up) before lapse, with a manual Retry.",
-        "Lifecycle (join/pause/cancel/win-back) is tracked and feeds MRR (monthly recurring revenue)/churn reporting (PRD-08).",
-        "Benefits/credits auto-apply at checkout; all money figures are owner-gated."
+        "A client can join a plan, creating a Membership that ties them to the plan with a tokenised card-on-file.",
+        "The card-on-file can be captured online, in the client app, or at the desk; only the token + brand/last4 are stored (never a PAN).",
+        "A next_charge_at is set on enrolment; the actual recurring charging is added by the autopay follow-up.",
+        "All money figures are owner-gated (.fin)."
       ],
       "refs": {
         "req": [
@@ -398,65 +834,272 @@
       ],
       "tasks": [
         {
-          "title": "Membership join + card-on-file capture (online / in-app / desk)",
-          "note": "Behaviour: a client joins a plan and stores a card once; the token can be captured online, in the client app, or at the desk. A Membership ties the client to a plan with a tokenised card-on-file (a PaymentMethodToken from PAYMENT-PROVIDER), a billing schedule and a next_charge_at. Requirements: only the token + brand/last4 are stored (never a PAN — primary account number); the client app shows 'Visa ···· 4242 — Used for membership autopay' and 'renews 1 Jul · autopay is on'; capability/consent appropriate to the surface. NOTE this is a client-facing/online capability and arrives LATE in the clinic-first build."
+          "title": "Membership model + join (ties client to plan, sets next_charge_at)",
+          "note": "Behaviour: joining a plan creates a Membership tying the client to a plan_id with a billing schedule and an initial next_charge_at. Requirements: tenant-scoped with RLS (row-level security); plan definitions come from PRD-06/MEMBERSHIP-PLANS; status starts active; all money figures owner-gated (.fin). The recurring charging itself is the autopay follow-up."
         },
         {
-          "title": "Autopay scheduler (off-session recurring charge)",
-          "note": "Behaviour: a scheduled job picks up memberships where next_charge_at <= now and charges the stored card off-session via IPaymentProvider.recurringCharge, then advances next_charge_at to the next period. Requirements: idempotent per period (a retry never double-bills the same period); each charge writes a ProviderTxn and feeds the Closeout/Xero like any payment; autopay is built on the Square card-on-file recurring spike (SPIKE-SQUARE). All money figures owner-gated."
+          "title": "Card-on-file capture (online / in-app / desk)",
+          "note": "Behaviour: the member stores a card once; the token can be captured online, in the client app, or at the desk. A tokenised card-on-file (a PaymentMethodToken from PRD-06/PAYMENT-PROVIDER) is linked to the Membership. Requirements: only the token + brand/last4 are stored (never a PAN — primary account number); the client app shows 'Visa ···· 4242 — Used for membership autopay'; capability/consent appropriate to the surface. NOTE the online/in-app capture is a client-facing capability and arrives LATE in the clinic-first build; the desk capture is available earlier."
+        }
+      ]
+    },
+    {
+      "key": "MEMBERSHIP-AUTOPAY",
+      "title": "Membership: autopay scheduler (off-session recurring charge)",
+      "as_a": "owner",
+      "i_want": "due memberships to be charged automatically on schedule from the card on file",
+      "so_that": "recurring revenue collects itself without manual chasing",
+      "context": "Plainly: a scheduled job charges each member's stored card on the right day and rolls the date forward, so nobody has to take the payment by hand. Where it fits: a follow-up to the basic membership enrolment (PRD-06/MEMBERSHIP), which stores the card-on-file and sets next_charge_at; this adds the recurring charging itself. It charges off-session via IPaymentProvider.recurringCharge (PRD-06/PAYMENT-PROVIDER), built on the Square card-on-file recurring spike (SPRINT-0/SPIKE-SQUARE). Each charge feeds the Closeout/Xero like any payment. All money figures are owner-gated (.fin).",
+      "notes": "",
+      "acceptance": [
+        "A scheduled job picks up memberships where next_charge_at <= now and charges the stored card off-session via IPaymentProvider.recurringCharge.",
+        "After a successful charge, next_charge_at advances to the next period.",
+        "Charging is idempotent per period — a retry never double-bills the same period.",
+        "Each charge writes a ProviderTxn and feeds the Closeout/Xero like any payment; money figures owner-gated (.fin)."
+      ],
+      "detail": [
+        "A scheduled job picks up memberships where next_charge_at <= now and charges the stored card off-session via IPaymentProvider.recurringCharge (PRD-06/PAYMENT-PROVIDER), then advances next_charge_at to the next period. Charging is idempotent per period — a retry never double-bills the same period.",
+        "Each charge writes a ProviderTxn and feeds the Closeout/Xero like any payment. Autopay is built on the Square card-on-file recurring spike (SPRINT-0/SPIKE-SQUARE). This extends the basic enrolment (PRD-06/MEMBERSHIP); failed-charge handling is the dunning follow-up. All money figures owner-gated (.fin)."
+      ],
+      "ui_spec": [
+        "No dedicated screen — surfaces as charges on the members list (PRD-06/MEMBERSHIP-MEMBERS) and in the daily Closeout; client app shows 'Glow Club renews 1 Jul · autopay is on'."
+      ],
+      "data_model": [
+        {
+          "entity": "Membership (extends PRD-06/MEMBERSHIP)",
+          "fields": "uses schedule + next_charge_at; each charge writes a ProviderTxn (PRD-06/PAYMENT-PROVIDER)",
+          "notes": "No new entity; the scheduler reads/advances next_charge_at."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-06/MEMBERSHIP"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Scheduled off-session recurring charge + advance next_charge_at",
+          "note": "Behaviour: a scheduled job charges memberships due (next_charge_at <= now) off-session via IPaymentProvider.recurringCharge and advances next_charge_at. Requirements: idempotent per period (no double-bill on retry); each charge writes a ProviderTxn and feeds Closeout/Xero; built on SPRINT-0/SPIKE-SQUARE; owner-only (.fin)."
+        }
+      ]
+    },
+    {
+      "key": "MEMBERSHIP-DUNNING",
+      "title": "Membership: failed-payment dunning (retry-and-chase) + manual Retry",
+      "as_a": "owner",
+      "i_want": "a failed membership charge to trigger a polite retry-and-chase rather than instantly dropping the member",
+      "so_that": "recoverable failures are recovered and members aren't lost to a temporary card glitch",
+      "context": "Plainly: when an automatic charge fails, don't lapse the member straight away — retry on a back-off schedule, ask them to update their card, raise a follow-up, and only lapse if it all fails; the desk can also retry by hand. Where it fits: a follow-up to the autopay scheduler (PRD-06/MEMBERSHIP-AUTOPAY), which charges due memberships; this handles the charges that fail. Dunning is the scheduled retry-and-chase when a recurring payment fails. Notices go via INotifier (PRD-07/CHANNELS) and the follow-up lands in the Follow-ups queue (PRD-07/FOLLOWUPS). Money figures owner-gated (.fin).",
+      "notes": "",
+      "acceptance": [
+        "A failed charge opens a DunningAttempt sequence (back-off retries + client notice + follow-up Job) before any lapse.",
+        "Notices go via INotifier (PRD-07/CHANNELS); the follow-up lands in the Follow-ups queue (PRD-07/FOLLOWUPS).",
+        "The members list shows 'Payment failed · Retry' with a manual Retry that re-attempts the current period without skipping it.",
+        "Retries are idempotent; only after the sequence exhausts does the membership lapse. Money figures owner-gated (.fin)."
+      ],
+      "detail": [
+        "A failed charge does NOT lapse the member immediately — it opens a DunningAttempt sequence (dunning = the scheduled retry-and-chase when a recurring payment fails): back-off retries, a client notice to update their card, a 'Payment failed' state and a follow-up Job; only after the sequence exhausts does the membership lapse.",
+        "The members list (PRD-06/MEMBERSHIP-MEMBERS) shows 'Payment failed · Retry' with a manual Retry that re-attempts the current period without skipping it. Notices go via INotifier (PRD-07/CHANNELS); the follow-up lands in the Follow-ups queue (PRD-07/FOLLOWUPS); retries are idempotent. This extends the autopay scheduler (PRD-06/MEMBERSHIP-AUTOPAY). Money figures owner-gated (.fin)."
+      ],
+      "ui_spec": [
+        "Prototype: Members & billing — a member in 'Payment failed · Retry' status with a manual Retry action; client receives an update-card notice."
+      ],
+      "data_model": [
+        {
+          "entity": "DunningAttempt",
+          "fields": "id, membership_id, attempt_no, at, result(success|failed), next_retry_at",
+          "notes": "New entity; back-off retry + client notice + Job on failed charge."
         },
         {
-          "title": "Failed-payment dunning (retry-and-chase) state machine + manual Retry",
-          "note": "Behaviour: a failed charge does NOT lapse the member immediately — it opens a DunningAttempt sequence (dunning = the scheduled retry-and-chase when a recurring payment fails): back-off retries, a client notice to update their card, a 'Payment failed' state and a follow-up Job; only after the sequence exhausts does the membership lapse. The members list shows 'Payment failed · Retry' with a manual Retry. Requirements: notices go via INotifier (PRD-07); the follow-up lands in the Follow-ups queue (PRD-07/FOLLOWUPS); retries are idempotent; the manual Retry re-attempts the current period without skipping it."
+          "entity": "Membership (extends PRD-06/MEMBERSHIP)",
+          "fields": "+ status value 'dunning'",
+          "notes": "Adds the dunning status to the basic Membership lifecycle."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-06/MEMBERSHIP-AUTOPAY"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "DunningAttempt state machine (back-off retry + notice + Job)",
+          "note": "Behaviour: a failed charge opens a DunningAttempt sequence — back-off retries, a client notice to update the card, a 'Payment failed' state and a follow-up Job — before any lapse. Requirements: notices via INotifier (PRD-07/CHANNELS); follow-up to PRD-07/FOLLOWUPS; retries idempotent; lapse only after the sequence exhausts; owner-only (.fin)."
         },
         {
-          "title": "Membership lifecycle (join / pause / cancel / win-back) -> MRR/churn",
-          "note": "Behaviour: the membership moves through join → active → paused → cancelled, with a win-back path; each transition is tracked. Requirements: lifecycle transitions emit events for the MRR (monthly recurring revenue) and churn read-models (PRD-08); pause suspends billing without losing the card-on-file; cancel stops future charges; win-back re-activates. Owner-gated money figures throughout."
+          "title": "Manual Retry from the members list",
+          "note": "Behaviour: the members list shows 'Payment failed · Retry'; a manual Retry re-attempts the current period without skipping it. Requirements: idempotent (no double-bill); reflects the real charge result; owner-only."
+        }
+      ]
+    },
+    {
+      "key": "MEMBERSHIP-LIFECYCLE",
+      "title": "Membership: lifecycle (pause / cancel / win-back) → MRR/churn",
+      "as_a": "owner",
+      "i_want": "to pause, cancel and win back memberships, with each change feeding reporting",
+      "so_that": "members can be managed over time and recurring-revenue trends are visible",
+      "context": "Plainly: let a membership move beyond 'active' — pause it without losing the card, cancel future charges, or win a lapsed member back — and record each move so reporting can show MRR (monthly recurring revenue) and churn. Where it fits: a follow-up to the basic membership enrolment (PRD-06/MEMBERSHIP), which starts a membership active; this adds the rest of the lifecycle. Lifecycle transitions emit events for the MRR and churn read-models (PRD-08). Money figures owner-gated (.fin).",
+      "notes": "",
+      "acceptance": [
+        "A membership can pause (suspends billing without losing the card-on-file), cancel (stops future charges) and win-back (re-activates).",
+        "Each transition is tracked and emits events for the MRR (monthly recurring revenue) and churn read-models (PRD-08).",
+        "Pause does not delete the card-on-file; win-back re-activates from where it left off.",
+        "Owner-gated money figures throughout (.fin)."
+      ],
+      "detail": [
+        "The basic enrolment (PRD-06/MEMBERSHIP) starts a membership active; this follow-up adds the rest of the lifecycle: join → active → paused → cancelled, with a win-back path. Pause suspends billing without losing the card-on-file; cancel stops future charges; win-back re-activates.",
+        "Each transition is tracked and emits events for the MRR (monthly recurring revenue) and churn read-models (PRD-08). Owner-gated money figures throughout (.fin)."
+      ],
+      "ui_spec": [
+        "Prototype: Members & billing — per-member pause / cancel / win-back actions; lifecycle feeds the Overview KPIs and PRD-08 MRR/churn."
+      ],
+      "data_model": [
+        {
+          "entity": "Membership (extends PRD-06/MEMBERSHIP)",
+          "fields": "status(active|paused|cancelled) + win-back transition; emits lifecycle events",
+          "notes": "Extends the basic Membership; events feed PRD-08 MRR/churn read-models."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-06/MEMBERSHIP"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Lifecycle transitions (pause / cancel / win-back) + MRR/churn events",
+          "note": "Behaviour: pause (suspend billing, keep card), cancel (stop future charges), win-back (re-activate); each transition tracked. Requirements: emit events for the PRD-08 MRR (monthly recurring revenue)/churn read-models; pause keeps the card-on-file; owner-only (.fin)."
+        }
+      ]
+    },
+    {
+      "key": "MEMBERSHIP-BENEFITS",
+      "title": "Membership: benefits & credits auto-apply at checkout (non-S4)",
+      "as_a": "front desk",
+      "i_want": "a member's benefits and credits to apply automatically at the till",
+      "so_that": "members get their perks without manual entry and never on an S4 item",
+      "context": "Plainly: when a member checks out, their plan's perks — member pricing, 10% off non-S4, a periodic complimentary add-on — apply themselves as deduction lines, and never touch a prescription injectable. Where it fits: a follow-up to the basic membership enrolment (PRD-06/MEMBERSHIP) that connects a member's plan benefits to the till; it surfaces through the checkout deduction lines (PRD-06/POS-DEDUCTIONS) and reads the per-plan benefit set from PRD-06/MEMBERSHIP-PLANS. Benefits NEVER apply to an S4 (Schedule 4 prescription-only medicine) line (C9), re-checked server-side. Money figures owner-gated (.fin).",
+      "notes": "",
+      "acceptance": [
+        "A member's benefits and credits apply automatically at the till — member pricing, 10% off non-S4, periodic complimentary add-on — as deduction lines on the sale.",
+        "Benefits NEVER apply to an S4 (Schedule 4 prescription-only medicine) line (C9), re-checked server-side against the live line schedule.",
+        "The per-plan benefit set is defined by the plan (PRD-06/MEMBERSHIP-PLANS).",
+        "Money figures owner-gated (.fin)."
+      ],
+      "detail": [
+        "A member's benefits and credits apply automatically at the till — member pricing, 10% off non-S4, periodic complimentary add-on — appearing as deduction lines on the sale (surfaced via PRD-06/POS-DEDUCTIONS). Benefits NEVER apply to an S4 (Schedule 4 prescription-only medicine) line (C9) — re-checked server-side against the live line schedule.",
+        "The per-plan benefit set is defined by the plan (PRD-06/MEMBERSHIP-PLANS). This extends the basic membership enrolment (PRD-06/MEMBERSHIP). Money figures owner-gated (.fin)."
+      ],
+      "ui_spec": [
+        "Prototype: Checkout — member benefit/credit deduction lines (non-S4); the per-plan benefit set comes from PRD-06/MEMBERSHIP-PLANS."
+      ],
+      "data_model": [
+        {
+          "entity": "(reads PRD-06/MEMBERSHIP-PLANS, writes via PRD-06/POS-DEDUCTIONS)",
+          "fields": "benefit set per plan → deduction lines at checkout",
+          "notes": "No new entity; non-S4 only (C9), re-checked server-side."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-06/MEMBERSHIP"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Auto-apply plan benefits/credits at checkout (non-S4, C9)",
+          "note": "Behaviour: a member's plan benefits (member pricing, 10% off non-S4, periodic complimentary add-on) auto-apply as deduction lines at the till. Requirements: NEVER on an S4 (Schedule 4 prescription-only medicine) line (C9), re-checked server-side; benefit set from PRD-06/MEMBERSHIP-PLANS; surfaced via PRD-06/POS-DEDUCTIONS; owner-only (.fin)."
+        }
+      ]
+    },
+    {
+      "key": "MEMBERSHIP-MEMBERS",
+      "title": "Membership: members & billing list + overview KPIs",
+      "as_a": "owner",
+      "i_want": "a members list with billing status and an overview of membership KPIs",
+      "so_that": "I can see who's a member, who's failing payment, and how recurring revenue is tracking",
+      "context": "Plainly: the screen that lists every member with their plan, card and next charge, and an overview of the headline numbers — active members, recurring revenue, failed payments. Where it fits: a follow-up to the basic membership enrolment (PRD-06/MEMBERSHIP) that gives staff/owner the management view; it reflects autopay (PRD-06/MEMBERSHIP-AUTOPAY) and dunning (PRD-06/MEMBERSHIP-DUNNING) state, with failed-payment rows linking to the manual Retry. MRR (monthly recurring revenue) and recurring figures are owner-only (.fin) — Reception may see membership status but not the money. Plan definitions live in PRD-06/MEMBERSHIP-PLANS.",
+      "notes": "",
+      "acceptance": [
+        "The Members & billing screen lists each member with Plan, Since, Autopay (card last4), Next charge and Status (Active / 'Payment failed · Retry').",
+        "The Overview tab shows headline KPIs (active members, recurring/mo MRR, avg tenure, failed payments) and a 'Needs action' panel (failed payment → Fix, renewals this week, referrals→joined).",
+        "MRR/recurring figures are owner-only (.fin) — Reception may see membership status but not the money; failed-payment rows link to the dunning Retry.",
+        "The list live-updates as charges/dunning resolve."
+      ],
+      "detail": [
+        "The Members & billing screen lists each member with Plan, Since, Autopay (card last4), Next charge and Status (Active / 'Payment failed · Retry'); the Overview tab shows headline KPIs (active members, recurring/mo MRR — monthly recurring revenue, avg tenure, failed payments) and a 'Needs action' panel (failed payment → Fix, renewals this week, referrals→joined).",
+        "The MRR/recurring figures are owner-only (.fin) — Reception may see membership status but not the money; failed-payment rows link to the dunning Retry (PRD-06/MEMBERSHIP-DUNNING); the list live-updates as charges/dunning resolve. Plan definitions live in PRD-06/MEMBERSHIP-PLANS. This extends the basic membership enrolment (PRD-06/MEMBERSHIP)."
+      ],
+      "ui_spec": [
+        "Prototype: Memberships → Members & billing — member list with Plan, Since, Autopay (card last4), Next charge, Status (Active / 'Payment failed · Retry'); Overview tab with headline KPIs + a 'Needs action' panel."
+      ],
+      "data_model": [
+        {
+          "entity": "(read-model over PRD-06/MEMBERSHIP + DunningAttempt)",
+          "fields": "member rows + KPIs (active members, MRR, avg tenure, failed payments)",
+          "notes": "No new entity; MRR figures owner-only (.fin); failed rows link to dunning Retry."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-06/MEMBERSHIP"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Members & billing list (Plan / Since / Autopay / Next charge / Status)",
+          "note": "Behaviour: list each member with Plan, Since, Autopay (card last4), Next charge and Status (Active / 'Payment failed · Retry'); failed-payment rows link to the dunning Retry (PRD-06/MEMBERSHIP-DUNNING). Requirements: live-update as charges/dunning resolve; Reception may see status but not money; owner-only (.fin) on recurring figures."
         },
         {
-          "title": "Member benefits / credits auto-apply at checkout (non-S4 only)",
-          "note": "Behaviour: a member's benefits and credits apply automatically at the till — member pricing, 10% off non-S4, periodic complimentary add-on — appearing as deduction lines on the sale (PRD-06/POS). Requirements: benefits NEVER apply to an S4 (Schedule 4 prescription-only medicine) line (C9) — re-checked server-side against the live line schedule; the per-plan benefit set is defined by the plan (PRD-06/MEMBERSHIP-PLANS); money figures owner-gated."
-        },
-        {
-          "title": "Members & billing list UI + overview KPIs",
-          "note": "Behaviour: the Members & billing screen lists each member with Plan, Since, Autopay (card last4), Next charge and Status (Active / 'Payment failed · Retry'); the Overview tab shows headline KPIs (active members, recurring/mo MRR, avg tenure, failed payments) and a 'Needs action' panel (failed payment → Fix, renewals this week, referrals→joined). Requirements: the MRR/recurring figures are owner-only (.fin) — Reception may see membership status but not the money; failed-payment rows link to the dunning Retry; live-update as charges/dunning resolve. Plan definitions live in PRD-06/MEMBERSHIP-PLANS."
+          "title": "Overview KPIs + 'Needs action' panel",
+          "note": "Behaviour: the Overview tab shows headline KPIs (active members, recurring/mo MRR — monthly recurring revenue, avg tenure, failed payments) and a 'Needs action' panel (failed payment → Fix, renewals this week, referrals→joined). Requirements: KPI read-model computed server-side; MRR owner-only (.fin); loading/empty/error states."
         }
       ]
     },
     {
       "key": "MEMBERSHIP-PLANS",
-      "title": "Membership plans & tiers admin",
+      "title": "Membership plans & tiers — define plans + non-S4 benefit constraint (core)",
       "as_a": "owner / manager",
-      "i_want": "to define and manage the membership plans, their tiers, prices and benefits",
-      "so_that": "the right plans are sold and the right benefits apply at checkout",
-      "context": "Plainly: the owner's screen for defining the membership products themselves — what tiers exist (e.g. Glow Club / Radiance / Platinum), what each costs per month, and what perks each includes — so that selling, autopay and benefit auto-apply all read one definition. Where it fits: it sits in the Payments/commerce layer after the clinical core, and is the catalogue half of the membership story (PRD-06/MEMBERSHIP) — MEMBERSHIP runs the recurring billing and the member list against the plans this story defines. The per-plan benefit set this screen curates is what auto-applies as deductions at the till (PRD-06/POS). A membership benefit may never reward an S4 (Schedule 4 prescription-only medicine) item, so the benefit editor is constrained to non-S4. Plan pricing is owner-only (.fin); price changes here are the live-pricing counterpart to the owner's read-only Pricing & what-if planner (PRD-06/PRICING-WHATIF).",
+      "i_want": "to define the membership plans, their tiers, prices and a non-S4 benefit list",
+      "so_that": "the right plans exist for selling, autopay and benefit auto-apply to read",
+      "context": "Plainly: the core for defining the membership products themselves — what tiers exist (e.g. Glow Club / Radiance / Platinum), what each costs per month, and what non-S4 perks each includes — so that selling, autopay and benefit auto-apply all read one definition. This is the minimal end-to-end core; the capability-gated/audited admin with member-term preservation, and the full Plans & packages tab UI, are added as their own follow-ups. Where it fits: it sits in the Payments/commerce layer after the clinical core, and is the catalogue half of the membership story (PRD-06/MEMBERSHIP). A membership benefit may never reward an S4 (Schedule 4 prescription-only medicine) item, so the benefit editor is constrained to non-S4 from the start (C9). Plan pricing is owner-only (.fin).",
       "notes": "",
       "acceptance": [
-        "Plans/tiers are defined with name, monthly price, billing period and a benefit list; '+ New plan' creates one.",
-        "Each plan's benefits are constrained to non-S4 items (a benefit can never reward an S4 item, C9).",
-        "Plan price + member counts + per-tier MRR (monthly recurring revenue) are shown; money figures are owner-only (.fin).",
-        "Editing a plan is capability-gated and audited; existing members keep their terms until migrated."
+        "Plans/tiers are defined with name, monthly price, billing period and a benefit list; a plan can be created.",
+        "Each plan's benefits are constrained to non-S4 items (a benefit can never reward an S4 item, C9), re-checked server-side at config time.",
+        "A plan can be archived (not hard-deleted) to preserve history on existing memberships.",
+        "Plan price figures are owner-only (.fin); the plan is the single definition MEMBERSHIP autopay/member list and POS benefit auto-apply read."
       ],
       "detail": [
-        "A MembershipPlan defines name/tier, monthly price, billing period and a curated benefit list (e.g. '10% off non-S4 retail & facials', 'priority booking', '1 facial / month', 'dedicated nurse'). The Plans tab renders each tier as a card with its price, active-member count and per-tier MRR (monthly recurring revenue), with '+ New plan' to add one and edit/archive per card. This is the definition the rest of the membership machinery reads: MEMBERSHIP charges and lists members against these plans, and the benefits auto-apply at checkout (PRD-06/POS).",
-        "The benefit editor is constrained to non-S4: a plan benefit can discount or reward non-S4 services/retail and account/gift credit, but never an S4 (Schedule 4 prescription-only medicine) item — the same C9 invariant the rewards engine enforces, re-checked server-side at config time. The screen states 'Autopay is card-on-file recurring (added online/in-app, never in person). Member rewards apply to non-S4 only.'",
-        "Plan pricing and the MRR figures are owner-only (.fin) and stripped for non-owner roles. Admin is capability-gated and every change is audited; a price change applies to new sign-ups, while existing members keep their terms until explicitly migrated (no silent re-pricing). This is the live-pricing counterpart to the read-only projections in PRD-06/PRICING-WHATIF."
+        "A MembershipPlan defines name/tier, monthly price, billing period and a curated benefit list (e.g. '10% off non-S4 retail & facials', 'priority booking', '1 facial / month', 'dedicated nurse'). This is the definition the rest of the membership machinery reads: MEMBERSHIP charges and lists members against these plans, and the benefits auto-apply at checkout (PRD-06/MEMBERSHIP-BENEFITS / POS-DEDUCTIONS).",
+        "The benefit editor is constrained to non-S4: a plan benefit can discount or reward non-S4 services/retail and account/gift credit, but never an S4 (Schedule 4 prescription-only medicine) item — the same C9 invariant the rewards engine enforces, re-checked server-side at config time. A plan can be archived (not hard-deleted) to preserve history.",
+        "Plan pricing is owner-only (.fin) and stripped for non-owner roles. The capability-gated/audited admin with member-term preservation, and the full Plans & packages tab UI with per-tier MRR, are follow-ups."
       ],
       "ui_spec": [
-        "Prototype: Memberships -> Plans & packages (memb-plans.png) — tier cards (Glow Club $89/mo, Radiance $149/mo, Platinum $249/mo) each listing benefits (e.g. '10% off non-S4 retail & facials', 'priority booking', 'birthday treat'), active-member count and per-tier MRR (e.g. '412 active · $36,668/mo'); '+ New plan'; footer 'Autopay is card-on-file recurring (added online/in-app, never in person). Member rewards apply to non-S4 only.'",
-        "Per-card Edit/Archive; the benefit editor offers only non-S4 items; owner-only (.fin) on price + MRR figures.",
-        "Packages (pre-paid series) products are defined alongside plans on this tab; selling/redeeming a package happens at checkout (PRD-06/PACKAGES-GIFT)."
+        "Prototype: Memberships -> Plans & packages (memb-plans.png) — tier cards (Glow Club $89/mo, Radiance $149/mo, Platinum $249/mo) each listing benefits (e.g. '10% off non-S4 retail & facials', 'priority booking', 'birthday treat'); a basic create/define form; the benefit editor offers only non-S4 items; owner-only (.fin) on price figures.",
+        "Per-tier MRR, full card Edit/Archive UX and the packages-alongside layout are added by the Plans-tab-UI follow-up."
       ],
       "data_model": [
         {
           "entity": "MembershipPlan",
           "fields": "id, tenant_id, name, tier, price, period, benefits[]{kind(discount|addon|credit), eligible_items(non-S4), value}, active(bool)",
           "notes": "Owner-defined; benefits constrained to non-S4 (C9); consumed by MEMBERSHIP autopay + POS benefit auto-apply."
-        },
-        {
-          "entity": "AuditEvent (ref)",
-          "fields": "actor, plan_id, change, at",
-          "notes": "Plan changes audited; admin capability-gated; existing members keep terms until migrated."
         }
       ],
       "refs": [],
@@ -476,11 +1119,90 @@
         {
           "title": "Non-S4 benefit constraint (C9) at config time",
           "note": "Behaviour: the benefit editor only offers non-S4 items, and any attempt to add an S4 (Schedule 4 prescription-only medicine) item to a plan benefit is rejected with a clear blocked-action reason. Requirements: enforce server-side against the catalogue schedule flag (PRD-04/ADR-0014) — the same invariant the rewards engine uses — so a benefit can never reward/discount an S4 item; audit the block."
-        },
+        }
+      ]
+    },
+    {
+      "key": "MEMBERSHIP-PLANS-ADMIN",
+      "title": "Membership plans: capability-gated admin, audit & member-term preservation",
+      "as_a": "owner / manager",
+      "i_want": "plan edits to be capability-gated and audited, with existing members keeping their terms",
+      "so_that": "pricing changes are controlled and no active member is silently re-priced",
+      "context": "Plainly: lock plan editing to owner/manager, log every change, and make a price change apply only to new sign-ups so current members keep what they joined on until explicitly migrated. Where it fits: a follow-up to the basic plans core (PRD-06/MEMBERSHIP-PLANS), which defines plans with the non-S4 constraint; this adds the governance around editing them. Price/MRR (monthly recurring revenue) figures are owner-only (.fin). This is the live-pricing path that the read-only PRD-06/PRICING-WHATIF planner proposes into.",
+      "notes": "",
+      "acceptance": [
+        "Add/edit/archive a plan is gated to owner/manager capability and every change writes an AuditEvent.",
+        "A price change applies to new sign-ups while existing members keep their terms until explicitly migrated (no silent re-pricing).",
+        "Price + MRR (monthly recurring revenue) figures are owner-only (.fin).",
+        "'Apply' here is the live-pricing path that PRD-06/PRICING-WHATIF proposes into."
+      ],
+      "detail": [
+        "The basic plans core (PRD-06/MEMBERSHIP-PLANS) defines plans with the non-S4 benefit constraint; this follow-up adds the governance: add/edit/archive a plan is gated to owner/manager capability and every change writes an AuditEvent. A price change applies to new sign-ups while existing members keep their terms until explicitly migrated — no silent re-pricing of active members.",
+        "Price + MRR (monthly recurring revenue) figures are owner-only (.fin). 'Apply' here is the live-pricing path that the read-only PRD-06/PRICING-WHATIF planner proposes into."
+      ],
+      "ui_spec": [
+        "Prototype: Memberships -> Plans & packages — per-card Edit/Archive gated to owner/manager; a migrate-existing-members prompt on price change; owner-only (.fin) on price/MRR."
+      ],
+      "data_model": [
+        {
+          "entity": "AuditEvent (ref)",
+          "fields": "actor, plan_id, change, at",
+          "notes": "Plan changes audited; admin capability-gated; existing members keep terms until migrated."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-06/MEMBERSHIP-PLANS"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Capability-gated plan admin + audit + member-term preservation",
           "note": "Behaviour: add/edit/archive a plan is gated to owner/manager capability and every change writes an AuditEvent; a price change applies to new sign-ups while existing members keep their terms until explicitly migrated. Requirements: no silent re-pricing of active members; price + MRR (monthly recurring revenue) figures are owner-only (.fin); 'Apply' here is the live-pricing path that PRD-06/PRICING-WHATIF proposes into."
-        },
+        }
+      ]
+    },
+    {
+      "key": "MEMBERSHIP-PLANS-UI",
+      "title": "Membership plans: Plans & packages tab UI (tier cards + per-tier MRR)",
+      "as_a": "owner / manager",
+      "i_want": "a Plans & packages tab with tier cards showing benefits, member counts and per-tier MRR",
+      "so_that": "I can see and manage the membership products at a glance",
+      "context": "Plainly: the polished Plans & packages screen — each tier as a card with its price, benefits, active-member count and per-tier MRR (monthly recurring revenue), with '+ New plan' and per-card edit/archive, and packages defined alongside. Where it fits: a follow-up to the basic plans core (PRD-06/MEMBERSHIP-PLANS) that gives the management surface; it presents what the plan model defines and the admin follow-up governs. Owner-only (.fin) on price/MRR figures.",
+      "notes": "",
+      "acceptance": [
+        "The Plans tab renders tier cards (name, monthly price, benefit list, active-member count, per-tier MRR) with '+ New plan' and per-card Edit/Archive.",
+        "Packages (pre-paid series products) are defined alongside plans on this tab; selling/redeeming a package happens at checkout (PRD-06/PACKAGES-GIFT).",
+        "Owner-only (.fin) gate on price/MRR; the 'autopay is card-on-file recurring... member rewards apply to non-S4 only' note is shown.",
+        "Loading/empty/error states are handled."
+      ],
+      "detail": [
+        "The Plans tab renders each tier as a card with its price, active-member count and per-tier MRR (monthly recurring revenue), with '+ New plan' to add one and edit/archive per card. Packages (pre-paid series products) are defined alongside plans on this tab; selling/redeeming a package happens at checkout (PRD-06/PACKAGES-GIFT).",
+        "The screen states 'Autopay is card-on-file recurring (added online/in-app, never in person). Member rewards apply to non-S4 only.' Owner-only (.fin) gate on price/MRR figures. This extends the basic plans core (PRD-06/MEMBERSHIP-PLANS) and surfaces the governance from PRD-06/MEMBERSHIP-PLANS-ADMIN."
+      ],
+      "ui_spec": [
+        "Prototype: Memberships -> Plans & packages (memb-plans.png) — tier cards (Glow Club $89/mo, Radiance $149/mo, Platinum $249/mo) each listing benefits, active-member count and per-tier MRR (e.g. '412 active · $36,668/mo'); '+ New plan'; per-card Edit/Archive; footer 'Autopay is card-on-file recurring (added online/in-app, never in person). Member rewards apply to non-S4 only.'; packages defined alongside."
+      ],
+      "data_model": [
+        {
+          "entity": "(read-only over PRD-06/MEMBERSHIP-PLANS + member counts)",
+          "fields": "renders tier cards with price, benefits, member count, per-tier MRR",
+          "notes": "No new entity; per-tier MRR is a read-model; owner-only (.fin)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-06/MEMBERSHIP-PLANS"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Plans & packages tab UI (tier cards + per-tier MRR)",
           "note": "Behaviour: the Plans tab renders tier cards (name, monthly price, benefit list, active-member count, per-tier MRR) with '+ New plan' and per-card Edit/Archive; packages (pre-paid series products) are defined alongside. Requirements: owner-only (.fin) gate on price/MRR; the 'autopay is card-on-file recurring... member rewards apply to non-S4 only' note is shown; loading/empty/error states."
@@ -489,16 +1211,16 @@
     },
     {
       "key": "REWARDS-ENGINE",
-      "title": "Rewards engine — non-S4 only",
-      "context": "What this is, plainly: the loyalty rules — points and perks earned and spent — built so they can never touch a prescription injectable. Where it sits: it depends on the PRD-04 product catalogue's schedule flag and underpins later loyalty work; it lives in the Payments/commerce layer after the clinical core. Visit-based + membership rewards that the engine blocks from ever applying to S4 (Schedule 4 prescription-only medicine) items; configuring an S4 reward is blocked (REQ-MEMB-4/5/7, C9/ADR-0014).",
+      "title": "Rewards engine — non-S4 points earn/redeem + S4 block (core)",
+      "context": "What this is, plainly: the loyalty core — earn and redeem points on non-S4 spend, built so it can NEVER touch a prescription injectable, with that block enforced both when a reward is configured and again at checkout. This is the minimal end-to-end core; loyalty tiers/top balances and the loyalty admin screen are added as their own follow-ups. Where it sits: it depends on the PRD-04 product catalogue's schedule flag and underpins later loyalty work; it lives in the Payments/commerce layer after the clinical core. Points earn/redeem that the engine blocks from ever applying to S4 (Schedule 4 prescription-only medicine) items; configuring an S4 reward is blocked (REQ-MEMB-4/5/7, C9/ADR-0014).",
       "as_a": "client",
-      "i_want": "to earn and redeem rewards on non-S4 items only",
+      "i_want": "to earn and redeem points on non-S4 items only",
       "so_that": "I'm rewarded without breaching S4 advertising rules",
       "acceptance": [
-        "Visit-based rewards (milestones / every-Nth-visit) and membership perks apply to non-S4 items, add-ons or account/gift credit.",
+        "Points earn on completed non-S4 spend (default 1 pt / $1) and visit milestones, and redeem against non-S4 lines (default 200 pts = $20 off non-S4); earn/redeem land in a per-client RewardLedger.",
         "The engine refuses to earn, redeem or discount against any S4-flagged item (server-side invariant, re-checked at checkout).",
         "Attempting to configure a reward whose eligible items include an S4 item is blocked with a clear reason.",
-        "The catalog schedule flag (PRD-04/ADR-0014) drives eligibility; earn/redeem land in the RewardLedger."
+        "The catalog schedule flag (PRD-04/ADR-0014) drives eligibility; blocked attempts and non-S4 redemptions are audited."
       ],
       "refs": {
         "req": [
@@ -558,20 +1280,99 @@
           "note": "Behaviour: clients earn points on completed non-S4 spend (default 1 pt / $1) and visit milestones, and redeem them against non-S4 lines (default 200 pts = $20 off non-S4); earn/redeem land in a per-client RewardLedger (earned / redeemed / balance) with a ref to the originating invoice/visit. Requirements: redemption only ever discounts a non-S4 line; the ledger surfaces on the Client 360 and the client-app Rewards; defaults match the prototype but are configurable."
         },
         {
-          "title": "Tiers (Silver / Gold / Platinum) + top balances",
-          "note": "Behaviour: clients are banded into loyalty tiers (Silver · Gold · Platinum) by their balance/activity, and the Loyalty screen shows a 'Top balances' list (e.g. 'Amelia Ross 1,240 pts'). Requirements: tier thresholds are owner-configurable; tier is derived from the ledger; top-balance visibility is a staff read (no money figures, so not .fin-gated, but client PII access is audited)."
-        },
-        {
           "title": "S4 reward block at config time (C9 invariant)",
           "note": "Behaviour: a RewardRule's eligible_items reference catalogue items; attempting to add an S4 (Schedule 4 prescription-only medicine) item to a rule's eligible set is rejected with a clear blocked-action reason (what's blocked / which item / why). Requirements: enforce as a DB/domain constraint AND at the API — not a UI nicety; the schedule flag (PRD-04/ADR-0014) is the source of truth; the loyalty screen states 'Points never earn or redeem on S4 medicines — enforced at checkout'; audit the block (ADR-0010)."
         },
         {
           "title": "S4 reward block at checkout (live schedule re-check) + audit",
           "note": "Behaviour: at checkout the engine recomputes eligibility against the LIVE line schedule and refuses to earn, redeem or discount against any S4 line — the S4 line's reward/points control is inert/disabled with a tooltip. Requirements: never trust a cached/UI eligibility value; the refusal is server-side and returns a clear reason for the disabled control; audit both blocked attempts and successful non-S4 redemptions. This is the same invariant POS surfaces as 'S4 · no rewards'."
-        },
+        }
+      ]
+    },
+    {
+      "key": "REWARDS-TIERS",
+      "title": "Rewards: loyalty tiers (Silver / Gold / Platinum) + top balances",
+      "as_a": "owner",
+      "i_want": "clients banded into loyalty tiers and a view of the top point balances",
+      "so_that": "loyalty is recognised by tier and the desk can see the clinic's best clients",
+      "context": "Plainly: group clients into tiers (Silver / Gold / Platinum) based on their points, and show a 'top balances' list. Where it fits: a follow-up to the rewards engine core (PRD-06/REWARDS-ENGINE), which runs points earn/redeem into the RewardLedger; this derives tiers and a top-balances view from that ledger. Tier thresholds are owner-configurable; tier is derived (not stored on the client). Top-balance visibility is a staff read with no money figures (so not .fin-gated), but client PII (personally identifiable information) access is audited.",
+      "notes": "",
+      "acceptance": [
+        "Clients are banded into loyalty tiers (Silver · Gold · Platinum) derived from their balance/activity.",
+        "Tier thresholds are owner-configurable; tier is derived from the RewardLedger, not stored separately.",
+        "A 'Top balances' list shows the highest point balances (e.g. 'Amelia Ross 1,240 pts').",
+        "Top-balance visibility is a staff read (no money figures); client PII (personally identifiable information) access is audited."
+      ],
+      "detail": [
+        "Clients are banded into loyalty tiers (Silver · Gold · Platinum) by their balance/activity, derived from the per-client RewardLedger (PRD-06/REWARDS-ENGINE). Tier thresholds are owner-configurable; tier is derived, not stored on the client.",
+        "The Loyalty surface shows a 'Top balances' list (e.g. 'Amelia Ross 1,240 pts'). Top-balance visibility is a staff read — no money figures, so not .fin-gated — but client PII (personally identifiable information) access is audited. This extends the rewards engine core (PRD-06/REWARDS-ENGINE)."
+      ],
+      "ui_spec": [
+        "Prototype: Memberships → Loyalty — Tiers 'Silver · Gold · Platinum' and a Top balances list (e.g. 'Amelia Ross 1,240 pts')."
+      ],
+      "data_model": [
         {
-          "title": "Loyalty screen UI (points program + tiers + top balances)",
-          "note": "Behaviour: the Loyalty screen shows the Points program (Earn '1 pt / $1 on non-S4', Redeem '200 pts = $20 off non-S4'), Tiers (Silver · Gold · Platinum), the rule note 'Points never earn or redeem on S4 medicines — enforced at checkout', and Top balances. Requirements: earn/redeem also visible on Client 360 + client-app Rewards; S4 catalogue items render disabled reward/discount controls with a tooltip; loading/empty/error states."
+          "entity": "(derived over PRD-06/REWARDS-ENGINE RewardLedger)",
+          "fields": "tier = f(balance, owner-configured thresholds); top-balances = ranked ledger balances",
+          "notes": "No new entity; tier derived, not stored; PII access audited."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-06/REWARDS-ENGINE"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Tier derivation (configurable thresholds) + top-balances query",
+          "note": "Behaviour: derive a client's tier (Silver/Gold/Platinum) from their RewardLedger balance against owner-configurable thresholds; expose a top-balances ranked query. Requirements: tier derived, not stored; thresholds owner-configurable; client PII (personally identifiable information) access audited; no money figures so not .fin-gated."
+        }
+      ]
+    },
+    {
+      "key": "REWARDS-LOYALTY-UI",
+      "title": "Rewards: Loyalty screen UI",
+      "as_a": "owner / front desk",
+      "i_want": "a Loyalty screen showing the points program, tiers and top balances",
+      "so_that": "staff can see and explain the loyalty programme at a glance",
+      "context": "Plainly: the screen that lays out the points programme (earn/redeem rules), the tiers and the top balances, with the rule note that points never touch S4. Where it fits: a follow-up to the rewards engine core (PRD-06/REWARDS-ENGINE) and the tiers follow-up (PRD-06/REWARDS-TIERS); it presents what those produce. It also makes the S4 (Schedule 4 prescription-only medicine) block visible — S4 catalogue items render disabled reward/discount controls with a tooltip — and the earn/redeem is also visible on the Client 360 and client-app Rewards.",
+      "notes": "",
+      "acceptance": [
+        "The Loyalty screen shows the Points program (Earn '1 pt / $1 on non-S4', Redeem '200 pts = $20 off non-S4'), Tiers (Silver · Gold · Platinum) and Top balances.",
+        "The rule note 'Points never earn or redeem on S4 medicines — enforced at checkout' is shown.",
+        "S4 (Schedule 4 prescription-only medicine) catalogue items render disabled reward/discount controls with a tooltip.",
+        "Earn/redeem is also visible on the Client 360 and client-app Rewards; loading/empty/error states handled."
+      ],
+      "detail": [
+        "The Loyalty screen shows the Points program (Earn '1 pt / $1 on non-S4', Redeem '200 pts = $20 off non-S4'), Tiers (Silver · Gold · Platinum), the rule note 'Points never earn or redeem on S4 medicines — enforced at checkout', and Top balances. It presents what PRD-06/REWARDS-ENGINE and PRD-06/REWARDS-TIERS produce.",
+        "S4 (Schedule 4 prescription-only medicine) catalogue items render disabled reward/discount controls with a tooltip — the visible face of the engine's invariant. Earn/redeem is also visible on the Client 360 and the client-app Rewards. Loading/empty/error states handled."
+      ],
+      "ui_spec": [
+        "Prototype: Memberships → Loyalty — Points program (Earn '1 pt / $1 on non-S4', Redeem '200 pts = $20 off non-S4'), Tiers 'Silver · Gold · Platinum', the rule note 'Points never earn or redeem on S4 medicines — enforced at checkout', and Top balances; S4 catalogue items show disabled reward/discount controls with a tooltip; earn/redeem also on Client 360 + client-app Rewards."
+      ],
+      "data_model": [
+        {
+          "entity": "(read-only over PRD-06/REWARDS-ENGINE + REWARDS-TIERS)",
+          "fields": "renders points program, tiers and top balances",
+          "notes": "No new entity; presentation only."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-06/REWARDS-ENGINE"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Loyalty screen UI (points program + tiers + top balances + S4 note)",
+          "note": "Behaviour: render the Points program (earn/redeem rules), Tiers (Silver/Gold/Platinum), Top balances and the 'Points never earn or redeem on S4 medicines — enforced at checkout' note. Requirements: S4 (Schedule 4 prescription-only medicine) catalogue items render disabled reward/discount controls with a tooltip; earn/redeem also visible on Client 360 + client-app Rewards; loading/empty/error states."
         }
       ]
     },
@@ -651,16 +1452,16 @@
     },
     {
       "key": "CHECKOUT-ASSIST",
-      "title": "Checkout assist & post-visit rebooking",
-      "context": "What this is, plainly: gentle, rules-safe prompts at the till — a quiet membership or restock nudge, a one-line rapport cue, and an offer to rebook the next visit at the right interval. Where it sits: it layers onto the POS checkout and ties out to the calendar (PRD-02) and recall (PRD-07); it sits in the Payments layer after the clinical core. Subtle membership/restock upsell + client rapport panel + post-checkout rebooking on the treatment interval (REQ-PAY-6, ADR-0022).",
+      "title": "Post-visit rebooking on the treatment interval (core)",
+      "context": "What this is, plainly: after payment, offer the next visit at the right interval — pick a slot or text the options — so the client leaves with their next appointment booked. This is the minimal end-to-end core; the subtle 'Worth mentioning' upsell panel, the client-rapport panel and the 'Pairs well with today's treatment' cross-sell are each added as their own follow-ups. Where it sits: it layers onto the POS checkout and ties out to the calendar (PRD-02) and recall (PRD-07); it sits in the Payments layer after the clinical core. Post-checkout rebooking on the treatment interval (REQ-PAY-6, ADR-0022).",
       "as_a": "front desk",
-      "i_want": "checkout to suggest relevant non-S4 upsells and prompt rebooking at the right interval",
-      "so_that": "I help clients and keep them on cadence",
+      "i_want": "checkout to prompt rebooking the next visit at the right interval",
+      "so_that": "I keep clients on cadence before they leave",
       "acceptance": [
-        "Checkout shows a subtle 'Worth mentioning' upsell (membership/restock) and a client-rapport panel derived from history.",
-        "A non-S4 'Pairs well with today's treatment' cross-sell row matches aftercare/retail to the cart, showing margin.",
-        "Post-checkout rebooking is offered on the treatment interval (slot pick or text options); booking creates the appointment (PRD-02).",
-        "No upsell or cross-sell discounts or promotes an S4 item."
+        "After payment, a rebook view offers the next visit on the treatment interval (toxin ~12 weeks): pick a slot or 'Text her the options'.",
+        "Booking a slot creates the appointment (PRD-02); the text/recall nudge ties to PRD-07.",
+        "A non-S4 restock-reminder can be toggled on; no rebooking prompt discounts or promotes an S4 item.",
+        "Slots come from the calendar availability engine (scope-aware)."
       ],
       "refs": {
         "req": [
@@ -700,35 +1501,152 @@
       ],
       "tasks": [
         {
+          "title": "Post-payment rebooking on the treatment interval",
+          "note": "Behaviour: after payment, a rebook view offers the next visit on the treatment interval (toxin ~12 weeks) — a slot grid to pick a time or 'Text her the options', plus a non-S4 restock-reminder toggle. Booking a slot creates the appointment (PRD-02); the text/recall nudge ties to PRD-07. Requirements: slots come from the calendar availability engine (scope-aware); 'Text her the options' sends via INotifier (PRD-07) honouring consent; confirming sets confirmation + reminders. No S4 (Schedule 4 prescription-only medicine) discount/promotion anywhere."
+        }
+      ]
+    },
+    {
+      "key": "CHECKOUT-UPSELL",
+      "title": "Checkout: 'Worth mentioning' upsell panel (membership / restock / rebook cue)",
+      "as_a": "front desk",
+      "i_want": "a subtle prompt panel at the till for membership, restock and rebook cues",
+      "so_that": "I can nudge relevant non-S4 offers without being pushy",
+      "context": "Plainly: a quiet 'Worth mentioning' panel at the till that surfaces a membership offer, a likely retail restock and a rebook cue — derived from what the system already knows. Where it fits: a follow-up to the post-visit rebooking core (PRD-06/CHECKOUT-ASSIST) that adds the suggestion panel beside it. Suggestions are derived (membership status + stock ageing + treatment interval), computed server-side; the copy is a quiet staff nudge ('suggest, don't push'); none of these ever discount or promote an S4 (Schedule 4 prescription-only medicine) item.",
+      "notes": "",
+      "acceptance": [
+        "A subtle 'Worth mentioning' panel shows a membership offer if the client isn't a member ('Not a member — offer Glow Club · $89/mo') with an 'Add to sale' action.",
+        "It shows a likely retail restock ('Likely low on retinol serum — bought 10 wks ago, lasts ~8') with an 'Add restock' action, and a 'Toxin due ~now' rebook cue.",
+        "Suggestions are derived (membership status + stock ageing + treatment interval), computed server-side.",
+        "None of these ever discount or promote an S4 (Schedule 4 prescription-only medicine) item."
+      ],
+      "detail": [
+        "A 'Worth mentioning' panel shows subtle, derived suggestions: a membership offer if not a member ('Not a member — offer Glow Club · $89/mo') with 'Add to sale', a likely retail restock ('Likely low on retinol serum — bought 10 wks ago, lasts ~8') with 'Add restock', and a 'Toxin due ~now' rebook cue.",
+        "Suggestions are derived (membership status + stock ageing + treatment interval), not a stored entity, computed server-side; the copy is a quiet staff nudge ('suggest, don't push'); none ever discount or promote an S4 (Schedule 4 prescription-only medicine) item. This extends the post-visit rebooking core (PRD-06/CHECKOUT-ASSIST)."
+      ],
+      "ui_spec": [
+        "Prototype: Checkout 'Worth mentioning' panel — Glow Club offer / retinol restock with 'Add restock' / 'Toxin due ~now'."
+      ],
+      "data_model": [
+        {
+          "entity": "(derived CheckoutSuggestion, extends PRD-06/CHECKOUT-ASSIST)",
+          "fields": "from membership status + stock ageing + treatment interval",
+          "notes": "Non-S4 upsell only; derived, not stored."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-06/CHECKOUT-ASSIST"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
           "title": "'Worth mentioning' upsell panel (membership / restock / rebook cue)",
-          "note": "Behaviour: a subtle 'Worth mentioning' panel surfaces derived prompts at the till — a membership offer if the client isn't a member ('Not a member — offer Glow Club · $89/mo') with an 'Add to sale' action, a likely retail restock ('Likely low on retinol serum — bought 10 wks ago, lasts ~8') with an 'Add restock' action, and a 'Toxin due ~now' rebook cue. Requirements: suggestions are derived (membership status + stock ageing + treatment interval), computed server-side; the copy is a quiet staff nudge ('suggest, don't push'); none of these ever discount or promote an S4 (Schedule 4 prescription-only medicine) item."
-        },
+          "note": "Behaviour: a subtle 'Worth mentioning' panel surfaces derived prompts at the till — a membership offer if not a member ('Not a member — offer Glow Club · $89/mo') with 'Add to sale', a likely retail restock ('Likely low on retinol serum') with 'Add restock', and a 'Toxin due ~now' rebook cue. Requirements: suggestions derived (membership status + stock ageing + treatment interval), computed server-side; quiet staff-nudge copy; none ever discount/promote an S4 (Schedule 4 prescription-only medicine) item."
+        }
+      ]
+    },
+    {
+      "key": "CHECKOUT-RAPPORT",
+      "title": "Checkout: client-rapport panel (derived from history)",
+      "as_a": "front desk",
+      "i_want": "a one-line rapport panel at the till derived from the client's history",
+      "so_that": "I can personalise the interaction without digging through records",
+      "context": "Plainly: a small read-only panel at the till that surfaces a client's preferences, recent treatments and a connection cue, to help the desk personalise. Where it fits: a follow-up to the post-visit rebooking core (PRD-06/CHECKOUT-ASSIST) that adds the rapport cue beside it. It is read-only, derived from the Client 360, with no money figures, and respects RBAC (role-based access control) — no clinical detail beyond what reception may see.",
+      "notes": "",
+      "acceptance": [
+        "A one-line rapport panel shows preferences ('Natural finish · a chamomile tea on arrival'), recent treatments and a connection cue ('Birthday in 12 days · referred by Hannah L.').",
+        "It is read-only, derived from the Client 360; no money figures.",
+        "It respects RBAC (role-based access control) — no clinical detail beyond what reception may see.",
+        "Empty/derived states are handled."
+      ],
+      "detail": [
+        "A one-line rapport panel derived from the client record — preferences ('Natural finish · a chamomile tea on arrival'), recent treatments, and a connection cue ('Birthday in 12 days · referred by Hannah L.') — helps the desk personalise.",
+        "It is read-only, derived from the Client 360; no money figures; respects RBAC (role-based access control) — no clinical detail beyond what reception may see. This extends the post-visit rebooking core (PRD-06/CHECKOUT-ASSIST)."
+      ],
+      "ui_spec": [
+        "Prototype: Checkout client-rapport panel — preferences + recent treatments + connection cue (e.g. 'Birthday in 12 days · referred by Hannah L.')."
+      ],
+      "data_model": [
+        {
+          "entity": "(derived from Client 360)",
+          "fields": "preferences + recent treatments + connection cue",
+          "notes": "No new entity; read-only; RBAC-scoped, no money figures."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-06/CHECKOUT-ASSIST"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Client-rapport panel (derived from history)",
-          "note": "Behaviour: a one-line rapport panel derived from the client record — preferences ('Natural finish · a chamomile tea on arrival'), recent treatments, and a connection cue ('Birthday in 12 days · referred by Hannah L.') — to help the desk personalise. Requirements: read-only, derived from the Client 360; no money figures; respects RBAC (no clinical detail beyond what reception may see)."
-        },
+          "note": "Behaviour: a one-line rapport panel derived from the client record — preferences, recent treatments and a connection cue — to help the desk personalise. Requirements: read-only, derived from the Client 360; no money figures; respects RBAC (role-based access control), no clinical detail beyond what reception may see."
+        }
+      ]
+    },
+    {
+      "key": "CHECKOUT-CROSSSELL",
+      "title": "Checkout: 'Pairs well with today's treatment' non-S4 cross-sell",
+      "as_a": "front desk",
+      "i_want": "a cross-sell row matching non-S4 aftercare/retail to what was treated",
+      "so_that": "I can suggest relevant add-ons that suit the visit",
+      "context": "Plainly: a row of suggested non-S4 aftercare/retail that pairs with the treatment just done — toxin pairs with a recovery serum, skin with SPF — each with an 'Add' to drop it into the cart. Where it fits: a follow-up to the post-visit rebooking core (PRD-06/CHECKOUT-ASSIST) that adds matched cross-sell. Matches are computed server-side from cart signals; S4 (Schedule 4 prescription-only medicine) items are suppressed entirely; margin is shown to the desk as a selling aid (no daily-takings exposure).",
+      "notes": "",
+      "acceptance": [
+        "A 'Pairs well with today's treatment' row matches non-S4 aftercare/retail to what was treated (toxin → arnica/recovery serum; filler → lip balm; skin → SPF/HA serum).",
+        "Each card shows price, margin (e.g. '+$21 margin') and an 'Add' action that appends the line to the cart.",
+        "Matches are computed server-side from cart signals; S4 (Schedule 4 prescription-only medicine) items are suppressed entirely.",
+        "An empty state shows when the cart already covers aftercare; margin figures are a selling aid, not daily-takings exposure."
+      ],
+      "detail": [
+        "A cross-sell row matches non-S4 aftercare/retail to what was treated (toxin → arnica/recovery serum; filler → lip balm; skin → SPF/HA serum; etc.), each card showing price, margin (e.g. '+$21 margin') and an 'Add' action that appends the line to the cart.",
+        "Matched from cart signals server-side; S4 (Schedule 4 prescription-only medicine) items are suppressed entirely; margin figures are owner-relevant but shown to the desk as a selling aid (no daily-takings exposure); an empty state shows when the cart already covers aftercare. This extends the post-visit rebooking core (PRD-06/CHECKOUT-ASSIST)."
+      ],
+      "ui_spec": [
+        "Prototype: Checkout 'Pairs well with today's treatment' cards with margin + 'Add'."
+      ],
+      "data_model": [
+        {
+          "entity": "(derived CheckoutSuggestion, extends PRD-06/CHECKOUT-ASSIST)",
+          "fields": "matched from cart signals → non-S4 aftercare/retail with margin",
+          "notes": "Non-S4 cross-sell only; S4 suppressed; derived, not stored."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-06/CHECKOUT-ASSIST"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "'Pairs well with today's treatment' non-S4 cross-sell",
-          "note": "Behaviour: a cross-sell row matches non-S4 aftercare/retail to what was treated (toxin → arnica/recovery serum; filler → lip balm; skin → SPF/HA serum; etc.), each card showing price, margin (e.g. '+$21 margin') and an 'Add' action that appends the line to the cart. Requirements: matched from cart signals server-side; S4 (Schedule 4 prescription-only medicine) items are suppressed entirely; margin figures are owner-relevant but shown to the desk as a selling aid (no daily-takings exposure); empty state when the cart already covers aftercare."
-        },
-        {
-          "title": "Post-payment rebooking on the treatment interval",
-          "note": "Behaviour: after payment, a rebook view offers the next visit on the treatment interval (toxin ~12 weeks) — a slot grid to pick a time or 'Text her the options', plus a non-S4 restock-reminder toggle. Booking a slot creates the appointment (PRD-02); the text/recall nudge ties to PRD-07. Requirements: slots come from the calendar availability engine (scope-aware); 'Text her the options' sends via INotifier (PRD-07) honouring consent; confirming sets confirmation + reminders. No S4 discount/promotion anywhere."
+          "note": "Behaviour: a cross-sell row matches non-S4 aftercare/retail to what was treated, each card showing price, margin and an 'Add'. Requirements: matched from cart signals server-side; S4 (Schedule 4 prescription-only medicine) items suppressed entirely; margin shown as a selling aid (no daily-takings exposure); empty state when the cart already covers aftercare."
         }
       ]
     },
     {
       "key": "PRICING-WHATIF",
-      "title": "Pricing & what-if planning (owner)",
-      "context": "What this is, plainly: an owner's pricing sandbox — change prices, drag a churn assumption, and watch projected revenue move, without touching live prices until you choose to. Where it sits: it reads the same reporting read-models (PRD-08) and sits in the Payments layer after the clinical core; the real ledger lives in Xero (PRD-10). An owner pricing + what-if planner over the reporting read-models (REQ-MEMB-9, ADR-0022). The Finance screen is a light pricing + reporting hub; the ledger defers to Xero.",
+      "title": "Pricing & what-if — editable plan prices + projected impact (core)",
+      "context": "What this is, plainly: an owner's pricing sandbox core — change membership plan prices and watch projected MRR/revenue/net move, without touching live prices. This is the minimal end-to-end core; the churn-sensitivity slider, editable service-pricing rows, saving a scenario + apply-via-admin handoff, and the Finance-hub framing are each added as their own follow-ups. Where it sits: it reads the same reporting read-models (PRD-08) and sits in the Payments layer after the clinical core; the real ledger lives in Xero (PRD-10). An owner pricing + what-if planner over the reporting read-models (REQ-MEMB-9, ADR-0022).",
       "as_a": "owner",
-      "i_want": "to model pricing and run what-if scenarios",
-      "so_that": "I can set prices and plan membership economics",
+      "i_want": "to edit membership plan prices and see projected impact",
+      "so_that": "I can model a price change before committing to it",
       "acceptance": [
-        "The pricing/what-if planner reads the same read-models as reporting (PRD-08) and projects MRR (monthly recurring revenue)/revenue/net under a churn-sensitivity assumption.",
-        "It proposes/projects only — it does not mutate live pricing; applying a change goes through normal admin (audited).",
-        "Scenario outputs are owner-gated.",
-        "In-app ledger/payroll/AP (accounts payable)/BAS (business activity statement) tooling is out of scope (Xero); invoices/payments still sync from checkout."
+        "The planner lists each plan with its member count and per-tier MRR (monthly recurring revenue), reading the same read-models as Reports (PRD-08).",
+        "Editing a plan price is a what-if input only — it does NOT mutate live pricing (that's PRD-06/MEMBERSHIP-PLANS-ADMIN).",
+        "A Projected-impact panel computes Membership MRR / revenue / net from the edits.",
+        "Scenario outputs are owner-gated (.fin)."
       ],
       "refs": {
         "req": [
@@ -770,23 +1688,183 @@
       "tasks": [
         {
           "title": "Editable membership plan prices + per-tier MRR (read-models)",
-          "note": "Behaviour: the planner lists each plan with its member count and per-tier MRR (monthly recurring revenue), and lets the owner edit the monthly price inline; the figures read the same PRD-08 read-models as Reports. Requirements: editing here is a what-if input only — it does NOT mutate live plan pricing (that's PRD-06/MEMBERSHIP-PLANS); owner-only (.fin); reads current member counts/MRR from the read-models, not from a separate copy."
+          "note": "Behaviour: the planner lists each plan with its member count and per-tier MRR (monthly recurring revenue), and lets the owner edit the monthly price inline; the figures read the same PRD-08 read-models as Reports. Requirements: editing here is a what-if input only — it does NOT mutate live plan pricing (that's PRD-06/MEMBERSHIP-PLANS-ADMIN); owner-only (.fin); reads current member counts/MRR from the read-models, not from a separate copy."
         },
         {
-          "title": "Churn-sensitivity slider + Projected-impact panel",
-          "note": "Behaviour: a churn-sensitivity slider (e.g. '6% leave / +$10') drives a live Projected-impact panel computing Membership MRR, Service rev/mo, Net/month and projected annual impact under that elasticity assumption (ADR-0022). Requirements: the projection is a model, clearly labelled as an assumption, not a guarantee; recomputes live as prices/slider change; a Reset returns to current actuals; owner-only."
-        },
+          "title": "Projected-impact panel (MRR / revenue / net) + basic web UI",
+          "note": "Behaviour: a Projected-impact panel computes Membership MRR (monthly recurring revenue), revenue and net from the edited plan prices, recomputing live as prices change; a basic owner-only screen wires the plan-price editor to the panel. Requirements: the projection is clearly labelled as a model/assumption, not a guarantee; a Reset returns to current actuals; read-only planner styling (proposes, doesn't apply); owner-only (.fin); loading/empty/error states. (Churn slider, service rows, save/apply and the Finance-hub framing are follow-ups.)"
+        }
+      ]
+    },
+    {
+      "key": "PRICING-CHURN-SLIDER",
+      "title": "Pricing & what-if: churn-sensitivity slider",
+      "as_a": "owner",
+      "i_want": "a churn-sensitivity slider that adjusts the projection under an elasticity assumption",
+      "so_that": "I can see how a price rise might shed members before I commit",
+      "context": "Plainly: a slider that says 'if I raise the price, this share of members leave' and re-runs the projection on that assumption. Where it fits: a follow-up to the pricing core (PRD-06/PRICING-WHATIF), which projects MRR/revenue/net from plan-price edits; this adds the churn elasticity dimension. The projection stays a clearly-labelled model, not a guarantee (ADR-0022). Owner-only (.fin).",
+      "notes": "",
+      "acceptance": [
+        "A churn-sensitivity slider (e.g. '6% leave / +$10') drives the live Projected-impact panel under that elasticity assumption (ADR-0022).",
+        "The projection recomputes live as the slider moves and is clearly labelled as a model/assumption, not a guarantee.",
+        "A Reset returns to current actuals.",
+        "Owner-only (.fin)."
+      ],
+      "detail": [
+        "A churn-sensitivity slider (e.g. '6% leave / +$10') drives the live Projected-impact panel computing Membership MRR (monthly recurring revenue) and net under that elasticity assumption (ADR-0022). It extends the pricing core (PRD-06/PRICING-WHATIF) projection with a churn dimension.",
+        "The projection is a model, clearly labelled as an assumption, not a guarantee; it recomputes live as prices/slider change; a Reset returns to current actuals. Owner-only (.fin)."
+      ],
+      "ui_spec": [
+        "Prototype: Pricing & what-if — a Churn-sensitivity slider ('6% leave / +$10') feeding the Projected-impact panel."
+      ],
+      "data_model": [
         {
-          "title": "Editable service pricing rows + projection",
-          "note": "Behaviour: editable service-pricing rows (Anti-wrinkle, Dermal filler, Skin treatment, Consultation) with per-service volume and projected monthly revenue, feeding the same Projected-impact panel. Requirements: 'per-treatment price · assumes volume holds' is stated; editing is a what-if input only; volumes read from PRD-08 read-models; owner-only."
-        },
+          "entity": "(extends PRD-06/PRICING-WHATIF projection)",
+          "fields": "+ churn assumption input → adjusted MRR/net projection",
+          "notes": "No new entity; elasticity assumption per ADR-0022; owner-only (.fin)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-06/PRICING-WHATIF"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
-          "title": "Save scenario + apply-via-admin handoff",
-          "note": "Behaviour: a PricingScenario (inputs/outputs JSON) can be saved for comparison; an 'Apply' action does NOT write live prices — it hands the proposed prices to the normal catalogue/membership admin (capability-gated, audited). Requirements: the planner proposes and projects only (read-only over the ledger, which lives in Xero); in-app ledger/payroll/AP (accounts payable)/BAS (business activity statement) tooling is explicitly out of scope; owner-only (.fin)."
-        },
+          "title": "Churn-sensitivity slider feeding the Projected-impact panel",
+          "note": "Behaviour: a churn-sensitivity slider (e.g. '6% leave / +$10') drives the Projected-impact panel under that elasticity assumption (ADR-0022). Requirements: clearly labelled as a model/assumption; recomputes live; Reset returns to actuals; owner-only (.fin)."
+        }
+      ]
+    },
+    {
+      "key": "PRICING-SERVICE-ROWS",
+      "title": "Pricing & what-if: editable service-pricing rows",
+      "as_a": "owner",
+      "i_want": "editable service-pricing rows that feed the projection",
+      "so_that": "I can model service price changes alongside membership ones",
+      "context": "Plainly: rows for the clinic's services (Anti-wrinkle, Dermal filler, Skin treatment, Consultation) with their volume and projected monthly revenue, editable as what-if inputs. Where it fits: a follow-up to the pricing core (PRD-06/PRICING-WHATIF), which handles membership plan prices; this adds the service-pricing side to the same Projected-impact panel. Editing is a what-if input only; volumes read from PRD-08 read-models. Owner-only (.fin).",
+      "notes": "",
+      "acceptance": [
+        "Editable service-pricing rows (Anti-wrinkle, Dermal filler, Skin treatment, Consultation) show per-service volume and projected monthly revenue.",
+        "Editing a service price is a what-if input only; it feeds the same Projected-impact panel.",
+        "'per-treatment price · assumes volume holds' is stated; volumes read from PRD-08 read-models.",
+        "Owner-only (.fin)."
+      ],
+      "detail": [
+        "Editable service-pricing rows (Anti-wrinkle, Dermal filler, Skin treatment, Consultation) with per-service volume and projected monthly revenue feed the same Projected-impact panel as the pricing core (PRD-06/PRICING-WHATIF).",
+        "'per-treatment price · assumes volume holds' is stated; editing is a what-if input only; volumes read from PRD-08 read-models. Owner-only (.fin)."
+      ],
+      "ui_spec": [
+        "Prototype: Pricing & what-if — editable Service pricing rows (Anti-wrinkle, Dermal filler, Skin treatment, Consultation) with volume + projected revenue."
+      ],
+      "data_model": [
         {
-          "title": "Pricing & what-if web UI + Finance hub framing (owner-only)",
-          "note": "Behaviour: the Angular Pricing & what-if screen wires the plan-price editor, churn slider, Projected-impact panel and service-pricing rows together; the surrounding Finance screen frames it as a light pricing + reporting hub ('the books live in Xero'). Requirements: read-only planner styling (proposes, doesn't apply); owner-only .fin capability gate; the Finance hub links to Pricing and Reports and states what's handled in Xero (payroll, AP, GST/BAS, reconciliation); loading/empty/error states."
+          "entity": "(extends PRD-06/PRICING-WHATIF projection)",
+          "fields": "+ service price/volume inputs → service rev/mo projection",
+          "notes": "No new entity; volumes from PRD-08 read-models; owner-only (.fin)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-06/PRICING-WHATIF"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Editable service-pricing rows + projection",
+          "note": "Behaviour: editable service-pricing rows (Anti-wrinkle, Dermal filler, Skin treatment, Consultation) with per-service volume and projected monthly revenue feed the Projected-impact panel. Requirements: 'per-treatment price · assumes volume holds' stated; what-if input only; volumes from PRD-08 read-models; owner-only (.fin)."
+        }
+      ]
+    },
+    {
+      "key": "PRICING-SAVE-APPLY",
+      "title": "Pricing & what-if: save scenario + apply-via-admin handoff",
+      "as_a": "owner",
+      "i_want": "to save a pricing scenario and hand proposed prices to the normal admin",
+      "so_that": "I can compare scenarios and apply a chosen one through the audited path",
+      "context": "Plainly: keep a what-if scenario for comparison, and let 'Apply' pass the proposed prices to the real admin — it never writes live prices itself. Where it fits: a follow-up to the pricing core (PRD-06/PRICING-WHATIF), which projects but doesn't persist or apply; this adds saving and the handoff. The planner proposes and projects only — the ledger lives in Xero (PRD-10) and live pricing changes go through PRD-06/MEMBERSHIP-PLANS-ADMIN (capability-gated, audited). Owner-only (.fin).",
+      "notes": "",
+      "acceptance": [
+        "A PricingScenario (inputs/outputs JSON) can be saved for comparison.",
+        "An 'Apply' action does NOT write live prices — it hands the proposed prices to the normal catalogue/membership admin (PRD-06/MEMBERSHIP-PLANS-ADMIN, capability-gated, audited).",
+        "The planner proposes and projects only; in-app ledger/payroll/AP (accounts payable)/BAS (business activity statement) tooling is explicitly out of scope (Xero).",
+        "Owner-only (.fin)."
+      ],
+      "detail": [
+        "A PricingScenario (inputs/outputs JSON) can be saved for comparison; an 'Apply' action does NOT write live prices — it hands the proposed prices to the normal catalogue/membership admin (PRD-06/MEMBERSHIP-PLANS-ADMIN, capability-gated, audited).",
+        "The planner proposes and projects only (read-only over the ledger, which lives in Xero, PRD-10); in-app ledger/payroll/AP (accounts payable)/BAS (business activity statement) tooling is explicitly out of scope. This extends the pricing core (PRD-06/PRICING-WHATIF). Owner-only (.fin)."
+      ],
+      "ui_spec": [
+        "Prototype: Pricing & what-if — save/compare scenarios; an 'Apply' that routes proposed prices to the admin path (does not write live prices)."
+      ],
+      "data_model": [
+        {
+          "entity": "PricingScenario",
+          "fields": "id, tenant_id, inputs(json: plan/service prices, churn assumption), outputs(json: MRR/rev/net), created_by",
+          "notes": "New entity; over PRD-08 read-models; owner-gated; no in-app ledger (ADR-0027). Apply goes via PRD-06/MEMBERSHIP-PLANS-ADMIN."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-06/PRICING-WHATIF"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Save PricingScenario + apply-via-admin handoff",
+          "note": "Behaviour: a PricingScenario (inputs/outputs JSON) is saved for comparison; 'Apply' hands proposed prices to PRD-06/MEMBERSHIP-PLANS-ADMIN (capability-gated, audited) rather than writing live prices. Requirements: planner proposes/projects only; ledger lives in Xero (PRD-10); in-app ledger/payroll/AP/BAS out of scope (ADR-0027); owner-only (.fin)."
+        }
+      ]
+    },
+    {
+      "key": "PRICING-FINANCE-HUB",
+      "title": "Pricing & what-if: Finance hub framing (defers to Xero)",
+      "as_a": "owner",
+      "i_want": "the Finance screen to frame Pricing + Reports as a light hub that defers the ledger to Xero",
+      "so_that": "it's clear what the platform does and what lives in the accounting system",
+      "context": "Plainly: wrap the pricing planner in a Finance screen that links Pricing and Reports and clearly states the books (payroll, AP, GST/BAS, reconciliation) live in Xero. Where it fits: a follow-up to the pricing core (PRD-06/PRICING-WHATIF) that adds the surrounding framing; it does not add new financial tooling. Owner-only (.fin); the ledger defers to Xero (PRD-10, ADR-0027).",
+      "notes": "",
+      "acceptance": [
+        "The Finance screen frames Pricing + Reports as a light pricing + reporting hub ('the books live in Xero').",
+        "It links to Pricing and Reports and states what's handled in Xero (the clinic's cloud accounting system): payroll, AP (accounts payable), GST/BAS (business activity statement), reconciliation.",
+        "No in-app ledger/payroll/AP/BAS tooling is introduced (ADR-0027); invoices/payments still sync from checkout (PRD-06/POS-XERO-POST).",
+        "Owner-only (.fin); loading/empty/error states handled."
+      ],
+      "detail": [
+        "The surrounding Finance screen frames the pricing planner as a light pricing + reporting hub ('the books live in Xero'). It links to Pricing and Reports and states what's handled in Xero (the clinic's cloud accounting system) — payroll, AP (accounts payable), GST/BAS (business activity statement), reconciliation.",
+        "No in-app ledger/payroll/AP/BAS tooling is introduced (ADR-0027 revised); invoices/payments still sync from checkout (PRD-06/POS-XERO-POST). This extends the pricing core (PRD-06/PRICING-WHATIF). Owner-only (.fin); loading/empty/error states handled."
+      ],
+      "ui_spec": [
+        "Prototype: Finance screen as the pricing + reporting hub — links to Pricing & what-if and Reports, with a note that payroll/AP/GST-BAS/reconciliation live in Xero."
+      ],
+      "data_model": [
+        {
+          "entity": "(framing over PRD-06/PRICING-WHATIF + PRD-08)",
+          "fields": "Finance hub linking Pricing + Reports; no ledger entity",
+          "notes": "No new entity; defers the ledger to Xero (ADR-0027)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-06/PRICING-WHATIF"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Finance hub framing (links Pricing + Reports; defers to Xero)",
+          "note": "Behaviour: the Finance screen frames Pricing + Reports as a light hub and states what lives in Xero (payroll, AP, GST/BAS, reconciliation). Requirements: no in-app ledger/payroll/AP/BAS tooling (ADR-0027); invoices/payments still sync from checkout (PRD-06/POS-XERO-POST); owner-only (.fin); loading/empty/error states."
         }
       ]
     },

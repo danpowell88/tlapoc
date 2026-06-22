@@ -1,4 +1,4 @@
-# Before/after photo gallery (image-use-gated)
+# Before/after photo gallery — basic consent-gated view
 
 > **Epic:** [PRD-02 — Booking & scheduling (+ client/CRM basics)](../epics/PRD-02.md)  ·  **Key:** `PRD-02/PHOTOS-GALLERY`  ·  **Type:** Story  ·  **Stage:** M2  ·  **Priority:** P2  ·  **Estimate:** 2 pts  ·  **Area:** —
 >
@@ -50,8 +50,4 @@ Photos themselves are captured and owned by charting (PRD-05); this story compos
 - [ ] **Consent-gated gallery query + withdrawn state**
   Behaviour: build the gallery only from photos the client has current image-use consent for. Requirements: query ImageConsent.status server-side before composing the gallery; when granted, return the photo set grouped by treatment/date; when withdrawn, return an empty/hidden state so the UI shows an 'image-use consent withdrawn' note and no thumbnails — withdrawal immediately stops display (C14).
 - [ ] **Signed-URL serving (no local storage)**
-  Behaviour: serve each thumbnail/full image through a short-lived signed URL (a temporary, expiring link). Requirements: no photo is downloaded, cached or stored on the device (ADR-0009); on a consent-withdrawn event no new signed URLs are issued; URLs expire quickly and are per-view.
-- [ ] **Before/after compare + grouping UI**
-  Behaviour: a Photos-tab grid that groups images by treatment/date and lets a clinician view before/after pairs side-by-side. Requirements: pairs are matched on kind(before|after) + treatment_ref; no download/save affordance; renders only when consent is granted.
-- [ ] **Photo-view audit events (C10/C14)**
-  Behaviour: every time a photo is viewed, record it. Requirements: write an AuditEvent (actor, client_id, photo_id, at) to the append-only stream (ADR-0010) so image access is demonstrable to a regulator; viewing while consent is withdrawn is impossible by construction (no URL issued).
+  Behaviour: serve each thumbnail/full image through a short-lived signed URL (a temporary, expiring link). Requirements: no photo is downloaded, cached or stored on the device (ADR-0009); on a consent-withdrawn event no new signed URLs are issued; URLs expire quickly and are per-view. The before/after compare grid and the photo-view audit events are follow-ups.

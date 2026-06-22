@@ -1,4 +1,4 @@
-# Separate, withdrawable image-use consent
+# Image-use consent — basic entity & grant/withdraw
 
 > **Epic:** [PRD-03 — Intake, consent & compliance gating](../epics/PRD-03.md)  ·  **Key:** `PRD-03/IMAGE-CONSENT`  ·  **Type:** Story  ·  **Stage:** M2  ·  **Priority:** P1  ·  **Estimate:** 3 pts  ·  **Area:** backend
 >
@@ -46,10 +46,4 @@ Because it is separate, the treatment gate (GATING) does NOT require image-use c
 ## Tasks (dev pickup)
 
 - [ ] **ImageConsent entity (separate, scoped) + grant/withdraw**
-  Behaviour: model ImageConsent (scope, granted_at, withdrawn_at, status) separate from ConsentSignature, with grant/withdraw endpoints. Requirements: withdraw sets withdrawn_at + status and emits a domain event (a fact emitted when something happens in the system); audited (C14); it is NOT an input to the treatment gate — declining or withdrawing never blocks treatment, only media features.
-- [ ] **Downstream media-use enforcement on withdraw**
-  Behaviour: media operations check current image-use consent before proceeding so a withdrawal immediately stops further use. Requirements: PRD-05/09 media ops (serve signed URL, capture, share) check current ImageConsent.status server-side first; on the withdraw event no new signed URLs are issued (ADR-0009: media never on personal devices, always via consent-gated signed URLs (a temporary, expiring link)); audited.
-- [ ] **Client self-manage toggle (intake + Privacy & consents)**
-  Behaviour: the client controls image-use consent — a scoped toggle in the intake 'Photos (optional)' step and in the client-app Privacy & consents screen, where it can be withdrawn any time. Requirements: withdrawing prompts a confirmation and shows a 'Consent withdrawn' toast; the toggle is clearly framed as separate from treatment consent; state persists immediately.
-- [ ] **Staff image-use header chip**
-  Behaviour: show the granted/withdrawn state to staff. Requirements: render an 'Image use ✓ / withdrawn' chip on the Client 360 + charting header; photo galleries note 'image-use consent on file' and hide when withdrawn (ties to PRD-02/PHOTOS-GALLERY).
+  Behaviour: model ImageConsent (scope, granted_at, withdrawn_at, status) separate from ConsentSignature, with grant/withdraw endpoints. Requirements: withdraw sets withdrawn_at + status and emits a domain event (a fact emitted when something happens in the system); audited (C14); it is NOT an input to the treatment gate — declining or withdrawing never blocks treatment, only media features. The downstream media enforcement, the client self-manage toggle and the staff chip are follow-ups.

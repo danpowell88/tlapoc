@@ -17,7 +17,7 @@
   "stories": [
     {
       "key": "NOTE-TEMPLATE",
-      "title": "Guided toxin treatment note & pre-treatment review",
+      "title": "Guided toxin note: pre-treatment review & gate (MVP)",
       "context": "The guided clinical note an injector fills in during a toxin treatment: it surfaces safety and prescription context first, then a templated note. Charting (the clinical record of what was actually done) is the clinical heart of the platform and sits straight after the S4 (Schedule 4 'Prescription Only Medicine') consult/prescribing moat (PRD-04) on the clinic-first build spine; this story is the entry point to the whole PRD-05 charting flow (depends on PRD-04/ADMIN-GATE; depended on by MAPPING, TREATMENT-PLANS, SKIN-ANALYSIS). Charting is a guided, treatment-type-aware flow: a pre-treatment review (safety + last-treatment + consult/prescription (Rx) surfaced) then a configurable toxin note (structured + free text + snippets) (REQ-CLIN-1/9).",
       "as_a": "injector",
       "i_want": "a guided note that first surfaces safety, last treatment and the consult/Rx, then a toxin template",
@@ -94,18 +94,115 @@
           "note": "Behaviour: the pre-treatment card surfaces the synchronous-consult + individual-prescription (Rx) chain inline. For a prescriber (NP/solo) it shows 'Record consult ✓' then 'Write prescription'; for an administering RN it instead shows 'Administering on a valid script · Dr Lena Park (NP) · today · 30u authorised · individual (this client)' with a verify-before-administer checkbox (prototype renderChartReview rx branch). Requirements: this card is the visible surface of the S4 (Schedule 4 prescription-only medicine) gate — the consult tick must be satisfied before 'Write prescription' is usable; the actual consult/Rx records and invariants live in PRD-04 (CONSULT/PRESCRIPTION)."
         },
         {
-          "title": "Treatment-type toggle (toxin / non-S4 skin)",
-          "note": "Behaviour: a toggle (Anti-wrinkle (toxin) / Skin treatment) selects which template renders and shows/hides the toxin-only map+lot steps vs the non-S4 skin note (prototype setChartType/applyChartType). Requirements: switching swaps the rendered fields and the pre-treatment chips (skin has no consult requirement); the toxin path requires product/lot and prescription, the non-S4 skin path has neither. The skin-note fields themselves are built in PRD-05/MAPPING's skin-note task."
+          "title": "Basic toxin note fields + ChartEntry/NoteValue (model & flow)",
+          "note": "Behaviour: after the pre-treatment review is confirmed, a basic toxin note renders — a fixed set of structured fields (indication, areas, technique notes, aftercare) plus a free-text area — captured against the ChartEntry. Requirements: add ChartEntry (id, tenant_id, client_id, appointment_id, consult_id, treatment_type, status(draft|final), author_id, finalised_at, locked) and NoteValue (structured json + free_text) bound to the note; tenant_id + Row-Level Security (RLS, the per-tenant database isolation). The configurable/versioned template engine and the type toggle are follow-ups (NOTE-TEMPLATE-ENGINE, NOTE-TEMPLATE-TYPE-TOGGLE) — v1 basic ships a single fixed toxin note."
+        }
+      ]
+    },
+    {
+      "key": "NOTE-TEMPLATE-TYPE-TOGGLE",
+      "title": "Charting: treatment-type toggle (toxin / non-S4 skin)",
+      "context": "Plainly: a switch at the top of charting that flips the note between an anti-wrinkle (toxin) treatment and a non-S4 (not Schedule 4 prescription-only medicine) skin treatment, showing the right fields for each. Where it fits: a follow-up to PRD-05/NOTE-TEMPLATE that adds the modality switch on top of the basic toxin note. The toxin path requires the product/lot and prescription steps; the non-S4 skin path requires neither, and its actual fields are built in PRD-05/MAPPING's skin-note task — this story owns the toggle that shows/hides each.",
+      "as_a": "injector",
+      "i_want": "a toggle that switches charting between the toxin note and the non-S4 skin note",
+      "so_that": "I chart the right kind of treatment with the right fields and gates",
+      "notes": "",
+      "acceptance": [
+        "A treatment-type toggle (Anti-wrinkle (toxin) / Skin treatment) selects which template renders and shows/hides the toxin-only map + lot steps vs the non-S4 skin note.",
+        "Switching swaps the rendered fields and the pre-treatment chips: skin has no consult/prescription requirement; the toxin path requires product/lot and prescription, the non-S4 skin path has neither.",
+        "The toggle sets ChartEntry.treatment_type accordingly.",
+        "The skin-note fields themselves are owned by PRD-05/MAPPING's skin-note task; this story owns the show/hide toggle."
+      ],
+      "detail": [
+        "This follow-up adds the modality switch on top of the basic toxin note. A treatment-type toggle (Anti-wrinkle (toxin) / Skin treatment) selects which template renders and shows or hides the toxin-only map + lot steps versus the non-S4 skin note (prototype setChartType/applyChartType).",
+        "Switching swaps the rendered fields and the pre-treatment chips: the toxin path requires product/lot and an individual prescription (the S4 gate); the non-S4 skin path has neither consult nor lot requirement, so the gate chips change accordingly.",
+        "The toggle sets ChartEntry.treatment_type (toxin | skin). The skin-note fields themselves (areas / device / settings / consumables) are built in PRD-05/MAPPING's skin-note variant task; this story owns only the toggle and the show/hide wiring."
+      ],
+      "ui_spec": [
+        "Treatment-type toggle pills: 'Anti-wrinkle (toxin)' (default) / 'Skin treatment' (setChartType/applyChartType swap the template).",
+        "Selecting 'Skin treatment' hides the toxin map + lot steps and the prescription gate chips; selecting 'Anti-wrinkle (toxin)' restores them.",
+        "The pre-treatment chips re-render to match the selected type."
+      ],
+      "data_model": [
+        {
+          "entity": "ChartEntry (referenced)",
+          "fields": "treatment_type (toxin|skin) set by the toggle",
+          "notes": "Extends the basic's ChartEntry — no new entity; the toggle drives treatment_type and the shown/hidden steps."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-05/NOTE-TEMPLATE"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Treatment-type toggle + show/hide wiring",
+          "note": "Behaviour: a toggle (Anti-wrinkle (toxin) / Skin treatment) selects which template renders and shows/hides the toxin-only map+lot steps vs the non-S4 skin note (prototype setChartType/applyChartType). Requirements: switching swaps the rendered fields and the pre-treatment chips (skin has no consult/prescription requirement) and sets ChartEntry.treatment_type; the skin-note fields themselves are built in PRD-05/MAPPING's skin-note task."
+        }
+      ]
+    },
+    {
+      "key": "NOTE-TEMPLATE-ENGINE",
+      "title": "Charting: configurable, versioned note-template engine + snippet admin",
+      "context": "Plainly: this lets the clinic design and version its own treatment-note templates — choosing the structured fields and curating reusable phrases — instead of a single fixed note. Where it fits: a follow-up to PRD-05/NOTE-TEMPLATE that generalises the basic's fixed toxin note into a configurable, versioned engine. The same generic engine is what later modalities (filler, energy, weight-loss) extend, and it ensures a finalised note always renders against the exact template version it was authored with.",
+      "as_a": "clinic admin",
+      "i_want": "to build and version note templates with structured fields and reusable snippets",
+      "so_that": "notes stay consistent and a finalised note always renders against the version it was written with",
+      "notes": "",
+      "acceptance": [
+        "The toxin note is a per-tenant NoteTemplate: structured fields (indication, areas, technique notes, aftercare), a free-text area and a curated library of reusable phrases/snippets.",
+        "A clinic-side builder/admin lets the clinic edit fields and snippets; templates are versioned.",
+        "NoteValue binds captured content to the template version used, so a finalised note always renders against the schema it was authored with.",
+        "The same generic engine is what later modalities (filler, energy, weight-loss) extend."
+      ],
+      "detail": [
+        "This follow-up generalises the basic's fixed toxin note into a configurable engine. The toxin note becomes a per-tenant NoteTemplate — structured fields (indication, areas, technique notes, aftercare), a free-text area and a curated library of reusable phrases/snippets — with a clinic-side builder/admin and template versioning.",
+        "NoteValue binds captured content to the template version used so a finalised note always renders against the schema it was authored with — a later template edit never silently re-renders an old note.",
+        "The same generic engine is what later modalities (filler, energy, weight-loss) extend, even though v1 ships only the toxin template + the non-S4 skin variant. tenant_id + Row-Level Security (RLS, the per-tenant database isolation) throughout."
+      ],
+      "ui_spec": [
+        "A clinic-side template builder/admin: add/edit/reorder structured fields and curate the reusable-phrase/snippet library, with template versioning.",
+        "The charting note renders against the active template version; a finalised note renders against the version it was authored with.",
+        "Capability-gated to a clinic-admin role."
+      ],
+      "data_model": [
+        {
+          "entity": "NoteTemplate",
+          "fields": "id, tenant_id, treatment_type, version, fields (json schema of structured fields), snippets[] (reusable phrases), active",
+          "notes": "New entity (extends the basic's fixed note). Configurable per tenant + versioned; the toxin template and the non-S4 skin variant are two instances of the same model."
         },
         {
-          "title": "Configurable, versioned NoteTemplate engine + snippet admin",
-          "note": "Behaviour: the toxin note is a per-tenant NoteTemplate — structured fields (indication, areas, technique notes, aftercare), a free-text area and a curated library of reusable phrases/snippets — with a clinic-side builder/admin and template versioning. Requirements: NoteValue binds captured content to the template version used so a finalised note always renders against the schema it was authored with; the same generic engine is what later modalities (filler, energy, weight-loss) extend, even though v1 ships only the toxin template + the non-S4 skin variant. tenant_id + Row-Level Security (RLS, the per-tenant database isolation) throughout."
+          "entity": "NoteValue (extended)",
+          "fields": "+ template_version (the version the content was authored against)",
+          "notes": "Binds captured content to the template version so a finalised note always renders against its authoring schema."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-05/NOTE-TEMPLATE"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Versioned NoteTemplate model + version-bound NoteValue",
+          "note": "Behaviour: the toxin note becomes a per-tenant NoteTemplate (structured fields + free text + curated snippets) with template versioning; NoteValue binds captured content to the template version used. Requirements: a finalised note always renders against the schema it was authored with; the same generic engine is what later modalities extend; tenant_id + Row-Level Security (RLS, the per-tenant database isolation)."
+        },
+        {
+          "title": "Template builder/admin + snippet library (UI)",
+          "note": "Behaviour: a clinic-side builder/admin to add/edit/reorder structured fields and curate the reusable-phrase/snippet library, with versioning. Requirements: capability-gated to a clinic-admin role; editing a template creates a new version rather than mutating in place."
         }
       ]
     },
     {
       "key": "MAPPING",
-      "title": "Injection-mapping canvas (per-point lot)",
+      "title": "Injection-mapping canvas: add/edit points + save draft (MVP)",
       "context": "The injection-mapping canvas: on a facial diagram or photo the injector taps to drop and drags each injection point, recording product, dose in units, depth, technique and the batch-lot drawn from. It is the clinical hero screen of PRD-05, sitting right after the S4 (Schedule 4 'Prescription Only Medicine') consult/prescribing moat (PRD-04) on the clinic-first spine, opening after the pre-treatment review (NOTE-TEMPLATE) and feeding immutable finalisation (IMMUTABILITY), which deducts charted units from stock on finalise. On a facial diagram and/or patient photo, tap-to-add and drag injection points, each capturing product, units, depth, technique and batch-lot/expiry; charted units deduct from the selected lot on finalise (REQ-CLIN-2, C8).",
       "as_a": "injector",
       "i_want": "to drop and drag injection points on a facial diagram or photo, each recording product, units, depth, technique and lot",
@@ -195,21 +292,152 @@
         },
         {
           "title": "Charting API: open draft, add/move/delete points, draft sync",
-          "note": "Behaviour: gate-checked draft open (reject unless consult+consent satisfied), then CRUD for points. Requirements: validate on every write that the selected lot is in-date, in-custody and ARTG (Australian Register of Therapeutic Goods)-checked and that the product matches the lot; coordinates accepted as 0–100 percentages; the server recomputes the live Σunits. Emit draft-changed domain events for offline sync (OFFLINE) + read models; publish the OpenAPI contract. tenant_id + Row-Level Security (RLS, the per-tenant database isolation); index InjectionPoint by lot_id for the lot→client recall lookup (C8)."
-        },
+          "note": "Behaviour: gate-checked draft open (reject unless consult+consent satisfied), then CRUD for points. Requirements: validate on every write that the selected lot is in-date, in-custody and ARTG (Australian Register of Therapeutic Goods)-checked and that the product matches the lot; coordinates accepted as 0–100 percentages; the server recomputes the live Σunits. Emit draft-changed domain events for offline sync (OFFLINE) + read models; publish the OpenAPI contract. tenant_id + Row-Level Security (RLS, the per-tenant database isolation); index InjectionPoint by lot_id for the lot→client recall lookup (C8). Finalisation + transactional stock deduction is a follow-up (PRD-05/MAPPING-FINALISE); this basic ends at a saved draft."
+        }
+      ]
+    },
+    {
+      "key": "MAPPING-FINALISE",
+      "title": "Injection map: finalise → transactional stock deduction + register link",
+      "context": "Plainly: the moment the injector commits the charted map — it locks the note and subtracts the units used from the chosen vial, writing the official record that links the batch to the client. Where it fits: a follow-up to PRD-05/MAPPING that adds the finalise/commit step on top of the saved-draft canvas. This is the administration act for the toxin path: a single transaction re-checks the S4 (Schedule 4 prescription-only medicine) gate, deducts the units from the selected lot (PRD-04/ADMIN-GATE, PRD-04/VIAL-RECON) and writes the lot→client register link for recall (PRD-04/RECALL-LOOKUP). The immutability/close-out UI lives in PRD-05/IMMUTABILITY.",
+      "as_a": "injector",
+      "i_want": "to finalise the injection map so the charted units deduct from the selected lot and the dose is recorded",
+      "so_that": "the treatment is committed as a lawful, traceable administration",
+      "notes": "",
+      "acceptance": [
+        "'Finalise & checkout' commits the administration in a single transaction: it re-validates the gate, locks the ChartEntry and deducts the charted Σunits from the selected lot via a StockLedger administration movement.",
+        "Finalise writes the lot→client register link (PRD-04) for recall + vial reconciliation.",
+        "Finalise is rejected if Σunits exceed the lot's on-hand (over-draw), with an explainable reason.",
+        "Finalise is idempotent on a finalise token so a retried/offline-queued finalise never double-deducts."
+      ],
+      "detail": [
+        "This follow-up adds the commit step on top of the saved-draft canvas (PRD-05/MAPPING). 'Finalise & checkout' commits the administration: a single DB transaction re-validates the S4 gate, locks the ChartEntry, deducts the charted Σunits from the selected lot via a StockLedger administration movement, and writes the lot→client register link (PRD-04) for recall + vial reconciliation (prototype finaliseChart).",
+        "It is rejected if Σunits exceed the lot's on-hand (over-draw), with an explainable reason, and is idempotent on a finalise token so a retried or offline-queued finalise never double-deducts (ADR-0015).",
+        "This story owns the deduction + register link only; the close-out modal, the locking semantics and the post-finalise amendment trail live in PRD-05/IMMUTABILITY, and the full administration-gate invariant lives in PRD-04/ADMIN-GATE — finalise here re-checks that gate server-side rather than re-implementing it."
+      ],
+      "ui_spec": [
+        "Right rail 'Finalise & checkout' button (locks the note, deducts units) — hidden in read-only.",
+        "Helper: 'Finalising locks the note and deducts the units used from the selected lot in Stock.'",
+        "Over-draw or any missing prerequisite blocks finalise with an explanatory banner."
+      ],
+      "data_model": [
+        {
+          "entity": "InjectionPoint → StockLedger (derived)",
+          "fields": "finalise writes one StockLedger administration movement per lot, decrements on-hand, and writes the lot→client register link (PRD-04)",
+          "notes": "Extends the basic's InjectionPoint/ChartEntry — no new entity; the transactional deduction + register link at finalise. total_units = Σ InjectionPoint.units reconciled on finalise."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-05/MAPPING"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Finalise → transactional stock deduction + register link",
-          "note": "Behaviour: 'Finalise & checkout' commits the administration — it locks the note and deducts the charted Σunits from the selected lot in Stock (prototype finaliseChart). Requirements: a single DB transaction re-validates the gate, locks the ChartEntry, deducts Σunits via a StockLedger administration movement, and writes the lot→client register link (PRD-04) for recall + vial reconciliation; reject if Σunits > on-hand (over-draw); an idempotency key so a retried/offline-queued finalise never double-deducts. Post-finalise edits route to Amendment (IMMUTABILITY); the immutability/close-out UI itself lives in IMMUTABILITY."
-        },
+          "note": "Behaviour: 'Finalise & checkout' commits the administration — it locks the note and deducts the charted Σunits from the selected lot in Stock (prototype finaliseChart). Requirements: a single DB transaction re-validates the gate, locks the ChartEntry, deducts Σunits via a StockLedger administration movement, and writes the lot→client register link (PRD-04) for recall + vial reconciliation; reject if Σunits > on-hand (over-draw); an idempotency key so a retried/offline-queued finalise never double-deducts. Post-finalise edits route to Amendment (PRD-05/IMMUTABILITY); the immutability/close-out UI itself lives in PRD-05/IMMUTABILITY."
+        }
+      ]
+    },
+    {
+      "key": "MAPPING-POINT-DEPTH",
+      "title": "Injection map: per-point depth, technique & multi-product lot",
+      "context": "Plainly: deepens each injection point so it records not just how many units but the depth and technique used, and lets a session that uses more than one product assign a different vial per point. Where it fits: a follow-up to PRD-05/MAPPING that enriches the per-point editor beyond the basic's label + units. It adds the medico-legal detail (depth, technique/needle) an inspection expects and supports multi-product sessions, extending the InjectionPoint the basic already stores.",
+      "as_a": "injector",
+      "i_want": "each injection point to record depth and technique, and to pick a per-point product/lot for multi-product sessions",
+      "so_that": "the chart captures the full clinical detail and traces each point to the right vial",
+      "notes": "",
+      "acceptance": [
+        "The per-point editor adds depth and technique/needle fields alongside label and units.",
+        "A point can carry its own product/lot for multi-product sessions, defaulting to the chart's selected lot.",
+        "Depth, technique and per-point lot persist on the InjectionPoint and survive draft sync.",
+        "Read-only roles see the per-point depth/technique detail without editors."
+      ],
+      "detail": [
+        "This follow-up enriches the per-point editor beyond the basic's label + units (the prototype captures name + units only). Each point gains depth and technique/needle fields — the medico-legal detail an Australian Health Practitioner Regulation Agency (AHPRA) inspection expects.",
+        "It also adds optional per-point product/lot for multi-product sessions: a point defaults to the chart's selected lot (PRD-05/PRODUCT-LOT-PICKER) but can be reassigned, so a session that uses more than one product traces each point to the right vial.",
+        "Depth, technique and per-point lot persist on the InjectionPoint and survive draft sync; read-only roles see the detail without editors."
+      ],
+      "ui_spec": [
+        "Per-point editor adds depth and technique/needle inputs beside label + units.",
+        "An optional per-point product/lot selector (defaults to the chart's selected lot) for multi-product sessions.",
+        "Read-only roles see per-point depth/technique/lot detail without edit controls."
+      ],
+      "data_model": [
+        {
+          "entity": "InjectionPoint (extended)",
+          "fields": "+ depth, technique, product_id?, lot_id? (per-point, defaulting to the chart's selected lot)",
+          "notes": "Extends the basic's InjectionPoint (which stores label/units/coords) with depth, technique and optional per-point product/lot for multi-product sessions."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-05/MAPPING"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Per-point depth/technique + multi-product lot",
+          "note": "Behaviour: the per-point editor adds depth and technique/needle fields and an optional per-point product/lot (defaulting to the chart's selected lot) for multi-product sessions. Requirements: persist depth, technique and per-point lot on InjectionPoint and survive draft sync; read-only roles see the detail without editors."
+        }
+      ]
+    },
+    {
+      "key": "MAPPING-SKIN-NOTE",
+      "title": "Charting: non-S4 skin-note variant fields",
+      "context": "Plainly: the fields for a non-injectable skin treatment — which areas were treated, what device was used, its settings and any consumables — with no prescription, vial or stock deduction. Where it fits: a follow-up to PRD-05/MAPPING that builds the non-S4 (not Schedule 4 prescription-only medicine) skin-note body. The treatment-type toggle that shows/hides this lives in PRD-05/NOTE-TEMPLATE-TYPE-TOGGLE; this story owns the skin-note fields themselves and persists them as a SkinNote on the ChartEntry.",
+      "as_a": "injector / dermal therapist",
+      "i_want": "a non-S4 skin-note variant capturing areas, device, settings and consumables",
+      "so_that": "skin treatments are charted without an irrelevant prescription/lot/deduction",
+      "notes": "",
+      "acceptance": [
+        "When treatment_type=skin the toxin map + lot steps are hidden and a non-S4 skin note renders.",
+        "The skin note captures 'Areas treated' (multi-select), Device/modality, Settings/depth and Consumables (non-S4).",
+        "There is no lot, no prescription and no stock deduction on finalise for a skin note.",
+        "The skin note persists as a SkinNote bound to the ChartEntry."
+      ],
+      "detail": [
+        "This follow-up builds the non-S4 skin-note body. When treatment_type=skin (set by the toggle in PRD-05/NOTE-TEMPLATE-TYPE-TOGGLE) the toxin map + lot steps are hidden and a non-S4 skin note renders: 'Areas treated' multi-select chips (Full face / Cheeks / Under-eye / Neck / Décolletage), a Device/modality select (needling / Hydrafacial / Laser-IPL / peel), a Settings/depth input and a Consumables (non-S4) input (prototype skin-only block + applyChartType).",
+        "A skin note has no lot, no prescription (Rx) and no stock deduction on finalise — it is non-S4. It persists to a SkinNote bound to the ChartEntry.",
+        "The toggle that shows/hides this variant lives in PRD-05/NOTE-TEMPLATE-TYPE-TOGGLE; this story owns the fields."
+      ],
+      "ui_spec": [
+        "Skin-treatment block: 'Areas treated' multi-select chips, a Device/modality select, a Settings/depth input and a Consumables (non-S4) input (skin-only block + applyChartType).",
+        "No product/lot card, no prescription gate and no finalise deduction for a skin note.",
+        "Read-only roles see the skin-note detail without editors."
+      ],
+      "data_model": [
+        {
+          "entity": "SkinNote (non-S4 variant)",
+          "fields": "id, chart_entry_id, areas[] (enum), device_modality, settings_text, consumables_text",
+          "notes": "New entity bound to the basic's ChartEntry. No prescription or lot; non-S4; no stock deduction on finalise."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-05/MAPPING"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Skin-note (non-S4) variant fields",
-          "note": "Behaviour: when treatment_type=skin the toxin map+lot steps are hidden and a non-S4 skin note renders — 'Areas treated' multi-select chips (Full face / Cheeks / Under-eye / Neck / Décolletage), Device/modality select (needling / Hydrafacial / Laser-IPL / peel), a Settings/depth input and a Consumables (non-S4) input (prototype skin-only block + applyChartType). Requirements: no lot, no prescription (Rx) and no stock deduction on finalise; persist to a SkinNote bound to the ChartEntry. The treatment-type toggle that shows/hides this lives in NOTE-TEMPLATE."
+          "note": "Behaviour: when treatment_type=skin the toxin map+lot steps are hidden and a non-S4 skin note renders — 'Areas treated' multi-select chips (Full face / Cheeks / Under-eye / Neck / Décolletage), Device/modality select (needling / Hydrafacial / Laser-IPL / peel), a Settings/depth input and a Consumables (non-S4) input (prototype skin-only block + applyChartType). Requirements: no lot, no prescription (Rx) and no stock deduction on finalise; persist to a SkinNote bound to the ChartEntry. The treatment-type toggle that shows/hides this lives in PRD-05/NOTE-TEMPLATE-TYPE-TOGGLE."
         }
       ]
     },
     {
       "key": "PRODUCT-LOT-PICKER",
-      "title": "Charting product & batch (lot) selector",
+      "title": "Charting product & batch (lot) selector (MVP)",
       "as_a": "injector",
       "i_want": "to choose the exact product and the in-date, in-custody, ARTG-verified lot I am drawing from before I place any injection point",
       "so_that": "every charted point is traceable to a lawfully-held vial and the units deduct from the right lot on finalise",
@@ -264,6 +492,53 @@
           "note": "Behaviour: a Product dropdown filters the Batch/lot dropdown to the selected product's selectable lots, each labelled 'lot · exp …' with an expiring warning; a lot-info line summarises on-hand · location · in-date/expiring · S4 vs non-S4; a 'no in-date stock — receive or pick another product' empty state shows when none qualify (prototype setChartProd/renderChartProduct). Requirements: the helper copy states units deduct from this lot on finalise and only in-date/in-custody/ARTG stock is selectable; read-only roles see the chosen product/lot statically."
         },
         {
+          "title": "Selected-lot persistence on the ChartEntry",
+          "note": "Behaviour: choosing a lot sets ChartEntry.selected_product_id + selected_lot_id and shows the active 'Product · lot' label on the map. Requirements: persist the selection on the draft so it survives sync; the selected_lot_id is what the finalise deduction and the lot→client register link draw against (PRD-04/ADMIN-GATE, VIAL-RECON). The hard 'lot required before any point' enforcement is a follow-up (PRD-05/PRODUCT-LOT-PICKER-GATE)."
+        }
+      ]
+    },
+    {
+      "key": "PRODUCT-LOT-PICKER-GATE",
+      "title": "Charting lot picker: lot-required-before-points gate",
+      "context": "Plainly: the rule that you cannot drop a single injection point until you have committed to a specific vial — and that the chosen vial automatically becomes the one every point deducts from. Where it fits: a follow-up to PRD-05/PRODUCT-LOT-PICKER that adds the hard gate on top of lot selection. Without it the picker merely suggests a lot; with it the medicine register can prove which lot every charted unit came from, because no point can exist without one (PRD-04/ADMIN-GATE, PRD-04/VIAL-RECON).",
+      "as_a": "injector",
+      "i_want": "point placement blocked until a valid lot is selected, with that lot wired into every point",
+      "so_that": "every charted unit is provably traceable to the vial it came from",
+      "notes": "",
+      "acceptance": [
+        "No injection point can be placed until a valid lot is selected.",
+        "Once chosen, the lot becomes the default wired into every point's deduction and updates the active 'Product · lot' label on the map.",
+        "The 'lot required before points' rule is enforced on the server, not just the UI, so a draft can't carry points without a lot.",
+        "The selected_lot_id is what the finalise deduction and the lot→client register link draw against (PRD-04/ADMIN-GATE, VIAL-RECON)."
+      ],
+      "detail": [
+        "This follow-up adds the hard gate on top of the basic's lot selection. Step 2 is deliberately a gate: the injector must commit to the exact vial before charting any point, so the medicine register can prove which lot every unit came from.",
+        "Placing a point is blocked until a valid lot is selected; once chosen, the lot becomes the default wired into every injection point's deduction and is shown as the active 'Product · lot' label on the map (e.g. 'Botox · B2245 · exp Sep 2026').",
+        "The rule is enforced on the server too (not just the UI) so a draft can't carry points without a lot; the selected_lot_id is what the finalise deduction and the lot→client register link draw against (PRD-04/ADMIN-GATE, VIAL-RECON)."
+      ],
+      "ui_spec": [
+        "Prototype screen: Charting — Step 2 'Product & batch' → Step 3 'Injection map' (charting.png).",
+        "Tapping the face is blocked (with a reason) until a valid lot is selected; selecting a lot enables point placement and sets the 'Product · lot' label.",
+        "In read-only mode the chosen product/lot renders statically with no edit controls."
+      ],
+      "data_model": [
+        {
+          "entity": "ChartEntry (referenced)",
+          "fields": "selected_lot_id required before any InjectionPoint can be created",
+          "notes": "Extends the basic's selection — no new entity; adds the server-enforced 'lot required before points' invariant."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-05/PRODUCT-LOT-PICKER"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
           "title": "Lot-selection gate on point placement + default-lot wiring",
           "note": "Behaviour: no injection point can be placed until a valid lot is selected; once chosen, the lot becomes the default wired into every point's deduction and updates the active 'Product · lot' label on the map. Requirements: enforce the 'lot required before points' rule on the server too (not just the UI) so a draft can't carry points without a lot; the selected_lot_id is what the finalise deduction and the lot→client register link draw against (PRD-04/ADMIN-GATE, VIAL-RECON)."
         }
@@ -271,7 +546,7 @@
     },
     {
       "key": "PHOTOS",
-      "title": "Standardised before/after photos + compare",
+      "title": "Clinical photo capture: signed-URL storage & consent gate (MVP)",
       "context": "Standardised before/after clinical photos captured room-side with a framing/ghosting guide, then compared across visits. A supporting capability within PRD-05 charting on the clinic-first spine after the S4 (Schedule 4 'Prescription Only Medicine') moat (PRD-04); it depends on image-use consent (PRD-03/IMAGE-CONSENT) and is depended on by outcomes tracking (OUTCOMES). Every image is Personal Health Information (PHI), stored centrally via signed URLs and never left on the device. Capture standardised before/after photos room-side (framing/ghosting guide), compare side-by-side across visits; media stored centrally via signed URLs, never on personal devices, gated by image-use consent (REQ-CLIN-3, C14/ADR-0009).",
       "as_a": "injector",
       "i_want": "to capture standardised before/after photos and compare them against prior visits",
@@ -349,12 +624,102 @@
           "note": "Server-issued short-lived signed URLs for both upload (write to private AU-resident Blob, ADR-0009) and read; no public URLs, no bytes through the API. The capture/serve endpoints check current image-use consent (PRD-03) and refuse when missing/withdrawn; a consent-withdrawal event revokes downstream access. Write an AuditEvent for capture, view and annotation. Enforce these as server-side invariants (C14) — never trust the client."
         },
         {
-          "title": "Capture + before/after compare UI",
-          "note": "Provider/web UI: camera/upload with a pose preset + ghost overlay of the matching prior photo for alignment; the drag-to-compare before/after slider; a per-pose gallery across visits; copy-based annotation that preserves the original. Gate the capture control on image-use consent with a clear blocked-action reason. Loading/empty/error states; capability-gated to clinical roles."
-        },
+          "title": "Basic capture UI (pose preset + consent-gated control)",
+          "note": "Provider/web UI: camera/upload with a pose preset for standardised framing; gate the capture control on image-use consent with a clear blocked-action reason. Loading/empty/error states; capability-gated to clinical roles. The before/after compare + per-pose gallery + annotation are a follow-up (PRD-05/PHOTOS-COMPARE); the on-device transient cache + purge is a follow-up (PRD-05/PHOTOS-OFFLINE-CACHE)."
+        }
+      ]
+    },
+    {
+      "key": "PHOTOS-COMPARE",
+      "title": "Clinical photos: before/after compare, per-pose gallery & annotation",
+      "context": "Plainly: this lets the clinician line up a new photo against an earlier one and drag a slider to see the difference, browse a client's shots grouped by camera angle, and mark up a copy without touching the original. Where it fits: a follow-up to PRD-05/PHOTOS that adds the comparison and review layer on top of capture + storage. It reads the same signed-URL stored photos (never on device) and respects image-use consent (C14), and it underpins outcomes tracking (PRD-05/OUTCOMES).",
+      "as_a": "injector",
+      "i_want": "to compare before/after photos across visits, browse them by pose, and annotate a copy",
+      "so_that": "I can track outcomes consistently without altering the original images",
+      "notes": "",
+      "acceptance": [
+        "A ghost overlay of the matching prior photo aids alignment at capture so before/afters differ only by the treatment.",
+        "A drag-to-compare before/after slider compares photos side-by-side across visits.",
+        "A per-pose gallery groups a client's photos by angle so the same angle compares cleanly.",
+        "Lightweight annotation is supported on a copy; the original capture is preserved, and any served image still uses short-lived signed URLs (C14)."
+      ],
+      "detail": [
+        "This follow-up adds the comparison and review layer on top of capture + storage. At capture, a ghost overlay of the matching prior photo (at low opacity) helps the clinician align the new shot so before/afters differ only by the treatment.",
+        "The before/after view is a drag-to-compare slider across visits (the prototype shows '12 weeks apart · stored securely, never on device'); a per-pose gallery groups a client's photos by pose so the same angle compares cleanly (initBA + PosePreset grouping).",
+        "Lightweight annotation is supported on a copy, never destroying the original. Every served image still flows through short-lived signed URLs and respects image-use consent (C14/ADR-0009) — the compare/gallery never embeds bytes or persists to the device."
+      ],
+      "ui_spec": [
+        "Charting right rail 'Before / after · drag to compare': an overlaid pair with a draggable divider (initBA), 'Before'/'After' labels, and the caption '12 weeks apart · stored securely, never on device'.",
+        "Photography & outcomes: a 'Live + ghost overlay' figure (the prior photo at low opacity to align the new shot) and a per-pose gallery across visits.",
+        "Copy-based annotation that preserves the original; any served image uses short-lived signed URLs."
+      ],
+      "data_model": [
+        {
+          "entity": "Photo (referenced)",
+          "fields": "annotated_copy_ref (the annotation copy; original preserved); grouped by pose_preset for the gallery",
+          "notes": "Extends the basic's Photo — no new entity; the compare slider + per-pose gallery + copy-based annotation read the stored photos via signed URLs."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-05/PHOTOS"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Ghost overlay + before/after compare + per-pose gallery + annotation (UI)",
+          "note": "Behaviour: a ghost overlay of the matching prior photo at capture, a drag-to-compare before/after slider across visits, a per-pose gallery grouping a client's photos by angle, and copy-based annotation that preserves the original (initBA + PosePreset grouping). Requirements: every served image uses short-lived signed URLs and respects image-use consent (C14/ADR-0009); annotation writes a copy, never the original; capability-gated to clinical roles."
+        }
+      ]
+    },
+    {
+      "key": "PHOTOS-OFFLINE-CACHE",
+      "title": "Clinical photos: on-device transient cache & post-sync purge",
+      "context": "Plainly: when a photo is taken in a room with no Wi-Fi, it is held in a locked, temporary spot on the device just long enough to upload — then wiped, so no clinical image ever lingers on a personal device. Where it fits: a follow-up to PRD-05/PHOTOS that adds the offline-capture path on top of signed-URL storage, riding the charting offline queue (PRD-05/OFFLINE). It enforces the privacy rule (C14/ADR-0009) that nothing persists on the device beyond a transient, encrypted pre-sync copy.",
+      "as_a": "injector",
+      "i_want": "photos taken offline to queue encrypted on the device and be purged after upload",
+      "so_that": "I never lose a photo mid-treatment and no clinical image lingers on the device",
+      "notes": "",
+      "acceptance": [
+        "Photos captured offline go to an encrypted on-device queue with the rest of the chart (PRD-05/OFFLINE) and upload via signed URL on reconnect.",
+        "The device cache holds nothing beyond the transient pre-sync copy and is purged after a confirmed upload.",
+        "No image is ever written to the device gallery or persisted long-term on the device (C14/ADR-0009).",
+        "A photo's pending/uploaded state is visible alongside the chart's sync state."
+      ],
+      "detail": [
+        "This follow-up adds the offline-capture path on top of signed-URL storage. Photos captured offline go to an encrypted on-device queue with the rest of the chart (PRD-05/OFFLINE) and upload via signed URL on reconnect.",
+        "The device cache holds nothing beyond the transient pre-sync copy and is purged after a confirmed upload (ADR-0009/0015) — no image is ever written to the device gallery or persisted long-term on the device. This is the privacy invariant (C14) made true on the device, not just the server.",
+        "A photo's pending/uploaded state is shown alongside the chart's sync indicator so the clinician knows the image is safe."
+      ],
+      "ui_spec": [
+        "A pending-photo affordance alongside the chart's sync/offline indicator; the photo clears 'pending' once uploaded.",
+        "No device-gallery write; nothing persists beyond the transient encrypted pre-sync copy.",
+        "Primarily a provider-app surface (PRD-09)."
+      ],
+      "data_model": [
+        {
+          "entity": "LocalQueue (device, referenced)",
+          "fields": "pending photos held encrypted at rest with the chart; purged after a confirmed signed-URL upload",
+          "notes": "Extends the basic's Photo pipeline onto the device — rides the charting offline queue (PRD-05/OFFLINE); no long-term device persistence (C14/ADR-0009)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-05/PHOTOS"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "On-device transient cache + post-sync purge",
-          "note": "Provider app: photos captured offline go to an encrypted on-device queue with the rest of the chart (see OFFLINE) and upload via signed URL on reconnect; the device cache holds nothing beyond the transient pre-sync copy and is purged after a confirmed upload (ADR-0009/0015). No image is ever written to the device gallery or persisted long-term on the device."
+          "note": "Provider app: photos captured offline go to an encrypted on-device queue with the rest of the chart (see PRD-05/OFFLINE) and upload via signed URL on reconnect; the device cache holds nothing beyond the transient pre-sync copy and is purged after a confirmed upload (ADR-0009/0015). No image is ever written to the device gallery or persisted long-term on the device."
         }
       ]
     },
@@ -528,7 +893,7 @@
     },
     {
       "key": "ADVERSE-EVENT",
-      "title": "Adverse-event capture → DAEN pathway",
+      "title": "Adverse-event capture & DAEN routing (MVP)",
       "context": "Adverse-event capture: when a treatment causes an unwanted medical occurrence, the clinician logs it against the treatment, product and batch-lot, classifies seriousness, and the system routes it to the correct Database of Adverse Event Notifications (DAEN), the Therapeutic Goods Administration's (TGA) reporting system. The safety-reporting source record within PRD-05 charting on the clinic-first spine after the S4 (Schedule 4 'Prescription Only Medicine') moat (PRD-04); it depends on immutable finalisation (IMMUTABILITY), can be raised from COMPLICATION-LIBRARY, and routes to the Governance hub (PRD-08/DAEN). Log an adverse event/complication linked to the treatment, product and lot, classify seriousness and target the correct DAEN database (REQ-CLIN-5, C12). Includes the vascular occlusion (VO)/anaphylaxis complication-response flow.",
       "as_a": "injector",
       "i_want": "to log an adverse event linked to the treatment, product and lot",
@@ -604,8 +969,51 @@
         },
         {
           "title": "AE capture UI + complication hand-off",
-          "note": "Build the structured AE capture form (description, onset, seriousness, product/lot prefilled from the chart, treatment given) reachable from the finalise close-out and from a completed complication-response flow. Show the derived DAEN target + mandatory-report flag. On save, confirm the raised jobs and the route to Governance. Capability-gated to clinical roles; clear states."
-        },
+          "note": "Build the structured AE capture form (description, onset, seriousness, product/lot prefilled from the chart, treatment given) reachable from the finalise close-out and from a completed complication-response flow. Show the derived DAEN target + mandatory-report flag. Capability-gated to clinical roles; clear states. Raising follow-up jobs + routing to the Governance worklist is a follow-up (PRD-05/ADVERSE-EVENT-JOBS)."
+        }
+      ]
+    },
+    {
+      "key": "ADVERSE-EVENT-JOBS",
+      "title": "Adverse event: follow-up jobs & route to Governance",
+      "context": "Plainly: when an adverse event is logged, this makes sure the right follow-up tasks are created and the case shows up on the governance worklist — so nothing is dropped after the event is recorded. Where it fits: a follow-up to PRD-05/ADVERSE-EVENT that adds the work-routing layer on top of capture + DAEN routing. The captured AE record is the source; this story projects the jobs and surfaces the case in Governance, while the full prefilled DAEN submission stays in PRD-08/DAEN.",
+      "as_a": "injector / lead nurse",
+      "i_want": "logging an adverse event to raise the right follow-up jobs and appear on the governance worklist",
+      "so_that": "review, mandatory-report checks and client follow-up happen and nothing is dropped",
+      "notes": "",
+      "acceptance": [
+        "On AE creation, the right follow-up Jobs are projected into the shared queue: complication follow-up / review, mandatory-report check, and client follow-up.",
+        "The AE surfaces in Governance → Adverse events & DAEN with its seriousness + DAEN target set.",
+        "An AE raised from a completed complication-response flow raises the same jobs as one raised at finalise close-out.",
+        "The full prefilled DAEN submission stays in PRD-08/DAEN; this story routes the record and the work only."
+      ],
+      "detail": [
+        "This follow-up adds the work-routing layer on top of the basic's capture + DAEN routing. On AE creation, the system projects the right Jobs (complication follow-up / review, mandatory-report check, client follow-up) into the shared worklist (ADR-0023) so the follow-through is tracked, not remembered.",
+        "The AE also surfaces in Governance → Adverse events & DAEN with its seriousness + DAEN (Database of Adverse Event Notifications) target already set, ready for the full submission. Whether the AE was raised directly at the finalise close-out or from a completed complication-response flow (PRD-05/COMPLICATION-LIBRARY), the same jobs are raised.",
+        "The full prefilled DAEN submission/export lives in the Governance hub (PRD-08/DAEN); this story just routes the record and the work."
+      ],
+      "ui_spec": [
+        "On AE creation, confirm the raised jobs and the route to Governance → Adverse events & DAEN (gov-ae).",
+        "The governance worklist shows the AE with seriousness + DAEN target set.",
+        "Jobs appear in the shared follow-up queue."
+      ],
+      "data_model": [
+        {
+          "entity": "Job (referenced, ADR-0023)",
+          "fields": "type=ae, linked client/chart, assignee, due, status",
+          "notes": "Extends the basic's AdverseEvent — no new entity; AE creation projects follow-up jobs (review / mandatory-report check / client follow-up) and surfaces the case in Governance."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-05/ADVERSE-EVENT"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Raise follow-up jobs + route to Governance",
           "note": "On AE creation, project the right Jobs (complication follow-up/review, mandatory-report check, client follow-up) into the shared queue (ADR-0023) and surface the AE in Governance → Adverse events & DAEN with seriousness + DAEN target set. Keep the full prefilled DAEN submission in PRD-08/DAEN — this task just routes the record and the work."
@@ -614,7 +1022,7 @@
     },
     {
       "key": "TREATMENT-PLANS",
-      "title": "Treatment plans & protocol templates",
+      "title": "Treatment plans & protocol templates (MVP)",
       "context": "Treatment plans: multi-session courses of care built from clinic-curated protocol templates, scheduling and tracking ongoing treatment and driving the recall worklist. A care-structuring capability under PRD-05 charting on the clinic-first spine; it depends on the guided note (NOTE-TEMPLATE), feeds the recall worklist in comms (PRD-07), and reads from skin analysis (SKIN-ANALYSIS) and outcomes (OUTCOMES). Multi-session treatment plans + applyable protocol templates feed recall and structure ongoing care (REQ-CLIN-7).",
       "as_a": "injector",
       "i_want": "to build multi-session treatment plans from protocol templates",
@@ -680,11 +1088,99 @@
         },
         {
           "title": "Plan API: apply protocol, schedule sessions, track progress",
-          "note": "Apply-protocol command instantiates a plan with sessions dated off the step intervals; support ad hoc plans. Finalising a charted ChartEntry against a session marks it done and advances the next active session. Project upcoming sessions as recall Jobs (ADR-0023) into the PRD-07 worklist. Expose plan-progress queries for the Client 360. Emit domain events; publish OpenAPI."
-        },
+          "note": "Apply-protocol command instantiates a plan with sessions dated off the step intervals; support ad hoc plans. Finalising a charted ChartEntry against a session marks it done and advances the next active session. Expose plan-progress queries. Emit domain events; publish OpenAPI. Projecting upcoming sessions as recall Jobs (PRD-05/TREATMENT-PLANS-RECALL) and the Client-360/in-room UI (PRD-05/TREATMENT-PLANS-VIEWS) are follow-ups; the basic ships the apply-in-charting flow."
+        }
+      ]
+    },
+    {
+      "key": "TREATMENT-PLANS-RECALL",
+      "title": "Treatment plans: project upcoming sessions as recall jobs",
+      "context": "Plainly: this keeps a client on cadence — each upcoming plan session automatically creates a recall task at its due date, so reception rebooks them at the right time instead of relying on memory. Where it fits: a follow-up to PRD-05/TREATMENT-PLANS that connects plans to the recall worklist in comms (PRD-07). The plan structure already schedules sessions; this story projects them into the shared follow-up queue as recall jobs.",
+      "as_a": "injector / reception",
+      "i_want": "each upcoming plan session to project a recall job at its due date",
+      "so_that": "clients are rebooked on cadence without relying on memory",
+      "notes": "",
+      "acceptance": [
+        "Each upcoming plan session projects a recall Job at its due date into the shared follow-up worklist (PRD-07).",
+        "As a session is charted (its ChartEntry is finalised), the session is marked done and the next session becomes the active recall.",
+        "A skipped or rescheduled session updates its projected recall job accordingly.",
+        "Recall jobs carry the client, plan and the service due so reception can rebook at the right cadence."
+      ],
+      "detail": [
+        "This follow-up connects plans to the recall worklist. Each upcoming PlanSession projects a recall Job at its due date (ADR-0023) into the PRD-07 worklist, so reception/comms rebook the client at the right cadence rather than relying on memory.",
+        "As sessions are charted (a ChartEntry is finalised against a plan session), the session is marked done and the next becomes the active recall; a skipped or rescheduled session updates its projected job accordingly.",
+        "The recall job carries the client, plan and the service due so the rebook lands on the right treatment at the right interval."
+      ],
+      "ui_spec": [
+        "Charting: the close-out's recall toggle (rebook ~12 wks) projects the rebook Job (closeoutGo) aligned to the plan's next session.",
+        "Upcoming plan sessions appear in the PRD-07 recall worklist at their due dates.",
+        "Charting a session advances the plan and the active recall to the next session."
+      ],
+      "data_model": [
         {
-          "title": "Plan UI: protocol builder, apply + progress + in-room list",
-          "note": "Build the Protocol template builder, the apply-to-client flow in Charting, the plan-progress view on the Client 360 (sessions done / next-due) and the charting overview / 'in-room now' list of active plans. Wire to the API with loading/empty/error states; capability-gate to clinical roles."
+          "entity": "Job (recall, referenced, ADR-0023)",
+          "fields": "type=recall, client_id, plan_id, session_id, service_id, due",
+          "notes": "Extends the basic's PlanSession — no new entity; upcoming sessions project recall Jobs into the PRD-07 worklist."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-05/TREATMENT-PLANS"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Recall-job projection from plan sessions",
+          "note": "Behaviour: each upcoming PlanSession projects a recall Job at its due date (ADR-0023) into the PRD-07 worklist; charting a session marks it done and advances the next to the active recall; a skipped/rescheduled session updates its projected job. Requirements: jobs carry client/plan/session/service-due; emit domain events so the worklist stays in sync."
+        }
+      ]
+    },
+    {
+      "key": "TREATMENT-PLANS-VIEWS",
+      "title": "Treatment plans: protocol builder, Client 360 progress & in-room list",
+      "context": "Plainly: the screens around treatment plans — a builder for the clinic to design its protocol templates, a progress tab on the client's record, and a 'who's mid-course today' list for the clinician. Where it fits: a follow-up to PRD-05/TREATMENT-PLANS that adds the management and review surfaces on top of the plan engine. The plan data and apply flow already exist; this story makes them visible and curatable.",
+      "as_a": "injector / clinic admin",
+      "i_want": "a protocol builder, a plan-progress view on the Client 360, and an in-room list of active plans",
+      "so_that": "the clinic curates its protocols and clinicians pick up clients mid-course",
+      "notes": "",
+      "acceptance": [
+        "A Protocol template builder lets the clinic create/edit named courses with ordered steps (service + recommended interval).",
+        "The Client 360 shows a treatment-plan tab with sessions done / next-due and the cadence.",
+        "A charting overview / 'in-room now' entry point lists the day's active plans so the clinician picks up mid-course.",
+        "These surfaces read the plan engine (PRD-05/TREATMENT-PLANS); capability-gated to clinical / admin roles."
+      ],
+      "detail": [
+        "This follow-up adds the management and review surfaces on top of the plan engine. A Protocol template builder lets the clinic curate named courses with ordered steps (service + recommended interval) for reuse.",
+        "Plan progress becomes visible on the Client 360 (a treatment-plan tab showing sessions done / next-due and the cadence), and a charting overview / 'in-room now' entry point lists the day's active plans so the clinician can pick up where a client is in their course.",
+        "These surfaces read the plan engine (PRD-05/TREATMENT-PLANS) and its progress queries; the skin-analysis recommendations (PRD-05/SKIN-ANALYSIS) and outcomes (PRD-05/OUTCOMES) feed into and read from plans."
+      ],
+      "ui_spec": [
+        "Protocol template builder (named course, ordered steps = service + interval).",
+        "Client 360: a treatment-plan tab showing sessions done / next-due and the cadence.",
+        "A charting overview / 'in-room now' entry point listing the day's active plans so the clinician picks up mid-course."
+      ],
+      "data_model": [
+        {
+          "entity": "Protocol / TreatmentPlan / PlanSession (referenced)",
+          "fields": "read for the builder, Client-360 progress and in-room list",
+          "notes": "Extends the basic's plan engine with management/review surfaces — no new entity."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-05/TREATMENT-PLANS"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Protocol builder + Client-360 progress + in-room list (UI)",
+          "note": "Build the Protocol template builder, the plan-progress view on the Client 360 (sessions done / next-due) and the charting overview / 'in-room now' list of active plans. Wire to the plan engine (PRD-05/TREATMENT-PLANS) with loading/empty/error states; capability-gate to clinical / admin roles."
         }
       ]
     },
@@ -808,7 +1304,7 @@
     },
     {
       "key": "SKIN-ANALYSIS",
-      "title": "Skin analysis & assessment (with AI scan, advisory)",
+      "title": "Skin analysis: structured assessment & zone scoring (MVP)",
       "context": "A structured skin assessment: concerns scored by zone and tracked over time, driving a recommended treatment plan and giving the client visible progress (manual record in v1; AI-assisted scan advisory and Phase 2+). The front door to non-injectable care under PRD-05 charting on the clinic-first spine; it depends on the guided note (NOTE-TEMPLATE) and feeds plans (TREATMENT-PLANS) and outcomes (OUTCOMES). Skin images are Personal Health Information (PHI), so image-use consent and Australian storage apply. The prototype's Clinical → Skin analysis screen captures a structured skin assessment with zone scoring, an AI scan (simulateScan) and a push-to-client summary (pushSkinToClient). Per the no-AI-in-v1 stance, AI scoring is advisory/Phase 2; the manual assessment record can be v1.",
       "as_a": "dermal therapist / injector",
       "i_want": "to record a structured skin assessment (and optionally an AI-assisted scan) and share results with the client",
@@ -867,14 +1363,107 @@
       ],
       "tasks": [
         {
-          "title": "Skin assessment record + scoring UI (manual v1; AI advisory Phase 2)",
-          "note": "EF Core: SkinAssessment + SkinZoneScore (per-concern percentile-vs-cohort score, recommended service), tenant_id + Row-Level Security (RLS, the per-tenant database isolation), indexed by client for trend. API to record/retrieve assessments and trend them across visits; below-threshold concerns surface recommended-plan chips that feed TREATMENT-PLANS; a consent-respecting push-to-client summary (C14 image-use + AU storage for image-backed assessments). UI: the concern-score bars, skin-age vs actual, trend sparkline and recommended-plan chips per the prototype. Keep AI auto-scoring advisory + human-confirmed and gated to Phase 2 (ADR-0020) - v1 records manually; mark source manual vs ai_advisory."
+          "title": "Skin assessment record + zone-score UI (manual v1; AI advisory marked)",
+          "note": "EF Core: SkinAssessment + SkinZoneScore (per-concern percentile-vs-cohort score), tenant_id + Row-Level Security (RLS, the per-tenant database isolation), indexed by client for trend. API to record/retrieve assessments and trend them across visits. UI: the concern-score bars, skin-age vs actual and the trend sparkline per the prototype. Keep AI auto-scoring advisory + human-confirmed and gated to Phase 2 (ADR-0020) - v1 records manually; mark source manual vs ai_advisory. The recommended-plan chips (PRD-05/SKIN-ANALYSIS-RECOMMEND) and the consent-respecting push-to-client (PRD-05/SKIN-ANALYSIS-PUSH) are follow-ups."
+        }
+      ]
+    },
+    {
+      "key": "SKIN-ANALYSIS-RECOMMEND",
+      "title": "Skin analysis: recommended-plan chips feeding treatment plans",
+      "context": "Plainly: this turns a skin assessment into next steps — the concerns that scored worst become tappable suggestions that jump straight to the matching treatment, so a low score becomes a booked plan. Where it fits: a follow-up to PRD-05/SKIN-ANALYSIS that adds the recommendation layer on top of the scored assessment, feeding the treatment-plan engine (PRD-05/TREATMENT-PLANS).",
+      "as_a": "dermal therapist / injector",
+      "i_want": "below-threshold concerns to surface recommended-plan chips that jump to the matching treatment",
+      "so_that": "a skin assessment turns into a structured plan rather than a number",
+      "notes": "",
+      "acceptance": [
+        "Concerns scoring below a threshold surface 'recommended plan — focus areas' chips.",
+        "Each chip maps to a recommended service and jumps to the matching treatment.",
+        "Selecting a chip can seed a treatment plan (PRD-05/TREATMENT-PLANS).",
+        "The recommendation reads the assessment's zone scores (PRD-05/SKIN-ANALYSIS)."
+      ],
+      "detail": [
+        "This follow-up adds the recommendation layer on top of the scored assessment. Concerns scoring below a threshold (the prototype's 'score < 60') drive recommended-plan chips — tappable focus areas that jump to the matching treatment.",
+        "Each chip maps a low-scoring concern to a recommended_service_id; selecting it can seed a TreatmentPlan (PRD-05/TREATMENT-PLANS), so an assessment becomes structured ongoing care rather than a one-off number.",
+        "The recommendation reads the SkinZoneScore values the basic records."
+      ],
+      "ui_spec": [
+        "'Recommended plan - focus areas (score < 60)' chips that jump to the matching treatment (feed TREATMENT-PLANS).",
+        "Each chip maps a concern to a recommended service.",
+        "Selecting a chip can seed a treatment plan."
+      ],
+      "data_model": [
+        {
+          "entity": "SkinZoneScore (extended)",
+          "fields": "+ recommended_service_id",
+          "notes": "Extends the basic's SkinZoneScore: below-threshold concerns map to a recommended service that drives the chips (TREATMENT-PLANS)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-05/SKIN-ANALYSIS"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Recommended-plan chips from below-threshold concerns",
+          "note": "Behaviour: below-threshold concerns surface 'recommended plan - focus areas' chips that map to a recommended service and jump to the matching treatment; selecting a chip can seed a TreatmentPlan (PRD-05/TREATMENT-PLANS). Requirements: read the assessment's SkinZoneScore values; the chip-to-service mapping is the recommended_service_id."
+        }
+      ]
+    },
+    {
+      "key": "SKIN-ANALYSIS-PUSH",
+      "title": "Skin analysis: consent-respecting push to client app",
+      "context": "Plainly: this lets the clinic share a client's skin-assessment summary to their app so they can see their own progress — but only when image-use consent allows and with the images kept in Australia. Where it fits: a follow-up to PRD-05/SKIN-ANALYSIS that adds the client-facing share on top of the recorded assessment. Skin images are Personal Health Information (PHI), so the same image-use consent + Australian storage rules as clinical photos apply (C14).",
+      "as_a": "dermal therapist / injector",
+      "i_want": "to push an assessment summary to the client app, respecting image-use consent and AU storage",
+      "so_that": "clients can see their skin progress without breaching privacy rules",
+      "notes": "",
+      "acceptance": [
+        "An assessment summary can be pushed to the client app.",
+        "The push is blocked unless current image-use consent is present; a withdrawn consent stops downstream use.",
+        "Any image-backed summary is stored in Australia and served via short-lived signed URLs (C14).",
+        "The push reads the recorded assessment (PRD-05/SKIN-ANALYSIS)."
+      ],
+      "detail": [
+        "This follow-up adds the client-facing share on top of the recorded assessment. The assessment summary can be pushed to the client app (pushSkinToClient), respecting consent — skin images are PHI, so image-use consent + Australian storage (C14) apply exactly as for clinical photos.",
+        "The push is gated on current image-use consent: missing or withdrawn consent blocks the share with a reason, and a withdrawal stops downstream use. Any image-backed summary is stored in Australia and served via short-lived signed URLs.",
+        "The push reads the SkinAssessment the basic records."
+      ],
+      "ui_spec": [
+        "'Send to client' action on the skin-analysis screen (pushSkinToClient).",
+        "A banner notes 'Skin images are PHI - image-use consent + AU storage apply (C14)'.",
+        "The action is blocked with a reason when image-use consent is missing/withdrawn."
+      ],
+      "data_model": [
+        {
+          "entity": "SkinAssessment (extended)",
+          "fields": "+ pushed_to_client_at, image_consent_id (if image-backed)",
+          "notes": "Extends the basic's SkinAssessment: the consent-gated push to the client app; image-backed assessments respect C14."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-05/SKIN-ANALYSIS"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Consent-respecting push-to-client summary",
+          "note": "Behaviour: push an assessment summary to the client app (pushSkinToClient). Requirements: gate on current image-use consent (block when missing/withdrawn; a withdrawal stops downstream use); any image-backed summary is stored in Australia and served via short-lived signed URLs (C14). Reads the recorded SkinAssessment (PRD-05/SKIN-ANALYSIS)."
         }
       ]
     },
     {
       "key": "BODY-CONTOURING",
-      "title": "Body contouring charting (e.g. CoolSculpting)",
+      "title": "Body contouring charting: body map & applicator/cycle capture (MVP)",
       "context": "Charting body-contouring treatments (e.g. CoolSculpting) on a body map — placing applicators on regions with per-area cycle settings, tallying cycles, chair time and the consumable cost that drives true margin. A Phase-2 modality under PRD-05 charting on the clinic-first spine; it depends on the modality placeholder (MODALITY) it extends, feeds plans (TREATMENT-PLANS) and outcomes (OUTCOMES), rides the photo rules (PHOTOS) and finalises like any record (IMMUTABILITY). It is non-S4 device-class, so there is no lot, prescription or stock deduction. The prototype's Clinical → Body contouring screen charts body treatments on a body map (bodyAdd/bodyDel/bodyCyc) with applicator/cycle settings — a distinct modality beyond the face.",
       "as_a": "therapist",
       "i_want": "to chart body-contouring treatments on a body map with per-area applicator/cycle settings",
@@ -937,14 +1526,107 @@
       ],
       "tasks": [
         {
-          "title": "Body-contouring charting: body map, applicator/cycle capture + cost roll-up",
-          "note": "EF Core: BodyChart (areas[]{region, applicator, cycles, params}, totals, consumable_cost, chair_minutes) + BodyMeasurement, linked to a ChartEntry (treatment_type=body-contouring, non-S4 device-class - no lot/Rx). tenant_id + Row-Level Security (RLS, the per-tenant database isolation). Build the body-map UI (tap regions to place applicators, -/+ cycles per area, per-area applicator/cost/time table, summary tiles) plus standardised body photos (PHOTOS rules) and circumference measurements over the course. Roll per-cycle applicator cost into True cost & margin (PRD-08); feed sessions into plans (TREATMENT-PLANS) + outcomes (OUTCOMES); finalise locks the chart (IMMUTABILITY); device-gate where a licence/patch-test applies. Extends the MODALITY model (ADR-0025)."
+          "title": "Body-contouring charting: body map + applicator/cycle capture",
+          "note": "EF Core: BodyChart (areas[]{region, applicator, cycles, params}, totals, chair_minutes) linked to a ChartEntry (treatment_type=body-contouring, non-S4 device-class - no lot/Rx). tenant_id + Row-Level Security (RLS, the per-tenant database isolation). Build the body-map UI (tap regions to place applicators, -/+ cycles per area, per-area applicator/time table, summary tiles). Finalise locks the chart (IMMUTABILITY); device-gate where a licence/patch-test applies. Extends the MODALITY model (ADR-0025). The consumable-cost roll-up into True cost & margin (PRD-05/BODY-CONTOURING-COST) and the photos+measurements over the course (PRD-05/BODY-CONTOURING-PROGRESS) are follow-ups."
+        }
+      ]
+    },
+    {
+      "key": "BODY-CONTOURING-COST",
+      "title": "Body contouring: consumable cost roll-up into true cost & margin",
+      "context": "Plainly: this captures the real cost driver of a body-contouring treatment — the single-use applicator per cycle — and feeds it into profit reporting, so body-contouring margin is real rather than a guess. Where it fits: a follow-up to PRD-05/BODY-CONTOURING that adds the cost layer on top of the body-map chart. The chart already tallies applicators and cycles; this story attaches the per-cycle consumable cost and rolls it into True cost & margin reporting (PRD-08). All dollar/margin figures are owner-only (.fin).",
+      "as_a": "owner",
+      "i_want": "the per-cycle applicator (consumable) cost captured and rolled into true cost & margin",
+      "so_that": "body-contouring profitability is measured accurately",
+      "notes": "",
+      "acceptance": [
+        "Each applicator maps to its applicator type and a per-cycle consumable cost/time.",
+        "The chart tallies the applicator (consumable) cost across cycles and areas.",
+        "The consumable cost flows into True cost & margin reporting (PRD-08).",
+        "Every dollar/margin figure is owner-only and stripped for non-owner roles (the .fin capability)."
+      ],
+      "detail": [
+        "This follow-up adds the cost layer on top of the body-map chart. Each applicator placed on the map (the basic's bodyAdd over bodyZones) is mapped to its applicator type and a per-cycle consumable cost/time (APPL); the chart tallies the applicator (consumable) cost across cycles and areas.",
+        "That cost flows into True cost & margin reporting (PRD-08) so body-contouring profit is real, not a guess. Every dollar/margin figure is owner-only and stripped for non-owner roles (the .fin capability).",
+        "It extends the basic's BodyChart with the consumable_cost field — no new entity."
+      ],
+      "ui_spec": [
+        "Per-area table adds Cost per area; summary tiles 'Applicator (consumable) cost - price - margin'.",
+        "Cost/margin tiles render only when the .fin capability is present.",
+        "Cost rolls up into True cost & margin (PRD-08)."
+      ],
+      "data_model": [
+        {
+          "entity": "BodyChart (extended)",
+          "fields": "+ consumable_cost (per-cycle applicator cost tallied across areas)",
+          "notes": "Extends the basic's BodyChart: the consumable cost feeds True cost & margin (PRD-08); owner-only (.fin)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-05/BODY-CONTOURING"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Per-cycle consumable cost + true-cost/margin roll-up",
+          "note": "Behaviour: each applicator maps to its type and a per-cycle consumable cost/time (APPL); the chart tallies the applicator cost across cycles/areas and rolls it into True cost & margin (PRD-08). Requirements: every dollar/margin figure is owner-only and stripped for non-owner roles (.fin)."
+        }
+      ]
+    },
+    {
+      "key": "BODY-CONTOURING-PROGRESS",
+      "title": "Body contouring: standardised body photos & measurements over the course",
+      "context": "Plainly: this tracks how a body-contouring course is going — standardised before/after body photos and objective measurements like waist circumference across visits — and can share that progress with the client. Where it fits: a follow-up to PRD-05/BODY-CONTOURING that adds the outcome-tracking layer on top of the body-map chart. It rides the clinical-photo storage rules (PRD-05/PHOTOS) and feeds plans (PRD-05/TREATMENT-PLANS) and outcomes (PRD-05/OUTCOMES).",
+      "as_a": "therapist",
+      "i_want": "standardised body photos and objective measurements tracked over the course, shareable with the client",
+      "so_that": "non-facial progress is evidenced and the client can see results",
+      "notes": "",
+      "acceptance": [
+        "Standardised before/after body photos ride the PHOTOS storage rules (signed URLs, never on device, image-use consent — C14).",
+        "Objective measurements (e.g. waist circumference) are recorded over the course (Baseline / +4 wks / +8 wks).",
+        "Sessions feed multi-session plans (PRD-05/TREATMENT-PLANS) and outcomes (PRD-05/OUTCOMES).",
+        "Progress photos + measurements can be pushed to the client app, consent-respecting."
+      ],
+      "detail": [
+        "This follow-up adds the outcome-tracking layer on top of the body-map chart. Standardised before/after body photos ride the PHOTOS storage rules (PRD-05/PHOTOS) — signed URLs, never on device, image-use consent (C14) — and objective measurements (e.g. waist circumference) are recorded over the course (Baseline / +4 wks / +8 wks).",
+        "Sessions feed multi-session plans (PRD-05/TREATMENT-PLANS) and outcomes (PRD-05/OUTCOMES); progress photos + measurements can be pushed to the client app (consent-respecting).",
+        "It adds the BodyMeasurement entity and pairs it with the standardised body photos."
+      ],
+      "ui_spec": [
+        "Before/after standardised body photos + a waist-circumference progress chart over the course (Baseline / +4 wks / +8 wks).",
+        "'Send progress to client' action (consent-respecting).",
+        "Measurements + photos feed plans (TREATMENT-PLANS) + outcomes (OUTCOMES)."
+      ],
+      "data_model": [
+        {
+          "entity": "BodyMeasurement",
+          "fields": "id, chart_entry_id / plan_id, kind (e.g. waist_circumference), value, taken_at",
+          "notes": "New entity (extends the basic's BodyChart). Objective progress over the course; pairs with standardised body photos (PRD-05/PHOTOS)."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-05/BODY-CONTOURING"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Body measurements + standardised body photos over the course",
+          "note": "Behaviour: standardised before/after body photos (PHOTOS rules) and objective measurements (e.g. waist circumference) over the course (Baseline / +4 wks / +8 wks); progress can be pushed to the client app (consent-respecting). Requirements: photos ride PRD-05/PHOTOS (signed URLs, never on device, image-use consent — C14); add BodyMeasurement; feed sessions into plans (PRD-05/TREATMENT-PLANS) + outcomes (PRD-05/OUTCOMES)."
         }
       ]
     },
     {
       "key": "COMPLICATION-LIBRARY",
-      "title": "Complication protocol library & response kits",
+      "title": "Complication protocol library & timestamped response (MVP)",
       "context": "A library of complication protocols (e.g. vascular occlusion, anaphylaxis) with guided, editable response steps and emergency-kit links, launched as a timestamped checklist so the clinician follows the correct documented steps in an emergency. The reference-and-response side of safety within PRD-05 charting on the clinic-first spine; it depends on adverse-event capture (ADVERSE-EVENT) — a completed response raises a pre-filled, routed adverse event — and links to the emergency-kit register (PRD-11/EMERGENCY-KIT). The prototype's Clinical → Complication protocols (openComplication/completeComplication) provides step-by-step vascular occlusion (VO)/anaphylaxis protocols and links the emergency kit — the reference side of the adverse-event response.",
       "as_a": "clinician",
       "i_want": "a library of complication protocols with guided response steps and kit links",
@@ -1017,8 +1699,51 @@
         },
         {
           "title": "Protocol cards + timestamped response checklist UI",
-          "note": "Build the protocol cards (steps, 'Edit steps', 'Start response'), the editable-steps composer, and the response modal as a timestamped checklist (tick steps, record drug/kit used, 'Complete & open AE case'). Wire completion to the AE hand-off + job creation. Capability-gated to clinical roles; clear states."
-        },
+          "note": "Build the protocol cards (steps, 'Edit steps', 'Start response'), the editable-steps composer, and the response modal as a timestamped checklist (tick steps, record drug/kit used, 'Complete & open AE case'). Wire completion to the AE hand-off + job creation. Capability-gated to clinical roles; clear states. The emergency-kit register linkage + expiry surfacing is a follow-up (PRD-05/COMPLICATION-KIT-LINK)."
+        }
+      ]
+    },
+    {
+      "key": "COMPLICATION-KIT-LINK",
+      "title": "Complication protocols: emergency-kit register linkage & expiry surfacing",
+      "context": "Plainly: this connects each emergency protocol to the actual kit it needs — high-dose hyaluronidase, adrenaline — so the clinic can see at a glance that the right items are on hand and in date, and a response can record which items it used. Where it fits: a follow-up to PRD-05/COMPLICATION-LIBRARY that links the protocols to the emergency-kit register (PRD-11/EMERGENCY-KIT). The protocol library and response checklist already exist; this story surfaces kit availability/expiry and lets a response consume kit items.",
+      "as_a": "clinician",
+      "i_want": "each protocol's required kit shown with quantity and expiry, and a response to record kit used",
+      "so_that": "the emergency kit is verified on-hand and in-date before I need it",
+      "notes": "",
+      "acceptance": [
+        "Each protocol shows its required kit items with quantity + expiry, read from the emergency-kit register (PRD-11/EMERGENCY-KIT).",
+        "Missing or expired kit is flagged so the clinic restocks.",
+        "A completed response can record which kit items were consumed.",
+        "The kit register is read, not relocated — it lives in PRD-11."
+      ],
+      "detail": [
+        "This follow-up links the protocols to the emergency-kit register. Each ComplicationProtocol's required kit items (e.g. vascular occlusion -> high-dose hyaluronidase; anaphylaxis -> adrenaline 1:1000) are shown with quantity + expiry, read from the emergency-kit register (PRD-11/EMERGENCY-KIT), so the items a protocol needs are known to be on hand with in-date expiry.",
+        "Missing or expired kit is flagged so the clinic restocks before it matters; a completed ComplicationResponse can record which kit items it consumed.",
+        "The kit register itself lives in PRD-11 — this story reads from it and does not relocate it."
+      ],
+      "ui_spec": [
+        "Emergency kit register table: Item - For - Qty - Expiry (Hyaluronidase 1500IU / Adrenaline 1:1000 / Hydrocortisone) - links protocols to the kit (PRD-11).",
+        "Each protocol card shows its required items with qty + expiry; missing/expired kit is flagged.",
+        "A response records which kit items were consumed."
+      ],
+      "data_model": [
+        {
+          "entity": "EmergencyKitItem (PRD-11, referenced)",
+          "fields": "item, for, qty, expiry",
+          "notes": "Extends the basic's ComplicationProtocol.required_kit refs — no new entity here; protocols link required kit and a response records kit consumed. Expiry/availability surfaced so the kit is ready."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-05/COMPLICATION-LIBRARY"
+      ],
+      "labels": [
+        "tla-backlog",
+        "compliance"
+      ],
+      "priority": "P2",
+      "tasks": [
         {
           "title": "Emergency-kit register linkage + expiry surfacing",
           "note": "Wire protocols to the emergency-kit register (PRD-11/EMERGENCY-KIT): show each protocol's required items with qty + expiry, flag missing/expired kit so the clinic restocks, and let a response record which kit items were consumed. Read from the kit register; don't relocate it."
@@ -1027,7 +1752,7 @@
     },
     {
       "key": "OUTCOMES",
-      "title": "Outcomes & revision tracking",
+      "title": "Outcomes & revision capture (MVP)",
       "context": "Outcomes and revision tracking: capturing how treatments turned out (a result rating, the before/after linkage) and recording any revision/touch-up against the original treatment, so quality can be measured per treatment type and practitioner. The quality-measurement capability under PRD-05 charting on the clinic-first spine; it depends on standardised photos (PHOTOS) for evidence and consent rules, and its aggregates feed reporting (PRD-08); complications tie back to adverse-event records (ADVERSE-EVENT). The prototype's Photography & outcomes view tracks before/after outcomes and a revision/touch-up signal that feeds reporting (REQ-CLIN-13).",
       "as_a": "injector / owner",
       "i_want": "to track treatment outcomes and any revisions/touch-ups",
@@ -1082,8 +1807,54 @@
       ],
       "tasks": [
         {
-          "title": "Outcome + revision capture, aggregation & UI",
-          "note": "EF Core: Outcome linked to a finalised ChartEntry (rating, optional satisfaction, before/after photo links, revision_of pointing at the original treatment), tenant_id + Row-Level Security (RLS, the per-tenant database isolation), indexed by treatment type + practitioner. API to capture outcomes/revisions and a read-model aggregating touch-up rate, % satisfied, n and complications (from AdverseEvent) per treatment type/practitioner, feeding PRD-08 reporting. UI: per-treatment outcome capture + the 'Outcomes & revisions - per treatment type' table; any photo-based outcome respects image-use consent (PHOTOS / C14). Keep money/quality figures owner-gated per the financial-gating rules."
+          "title": "Outcome + revision capture (model & flow)",
+          "note": "EF Core: Outcome linked to a finalised ChartEntry (rating, optional satisfaction, before/after photo links, revision_of pointing at the original treatment), tenant_id + Row-Level Security (RLS, the per-tenant database isolation), indexed by treatment type + practitioner. API to capture outcomes/revisions; per-treatment outcome capture UI. Any photo-based outcome respects image-use consent (PHOTOS / C14). The aggregation read-model + the 'Outcomes & revisions per treatment type' table feeding PRD-08 is a follow-up (PRD-05/OUTCOMES-REPORTING)."
+        }
+      ]
+    },
+    {
+      "key": "OUTCOMES-REPORTING",
+      "title": "Outcomes: per-treatment/practitioner aggregation & reporting feed",
+      "context": "Plainly: this rolls up the individual outcome records into the numbers that matter — touch-up rate, percent satisfied, complication rate by treatment type and by practitioner — and feeds them to reporting. Where it fits: a follow-up to PRD-05/OUTCOMES that adds the aggregation layer on top of outcome capture. The individual Outcome records already exist; this story builds the read-model and the 'Outcomes & revisions per treatment type' table, feeding quality reporting (PRD-08). Quality/money figures stay owner-gated (.fin).",
+      "as_a": "owner",
+      "i_want": "outcome and revision signals aggregated per treatment type and practitioner",
+      "so_that": "I can measure quality and feed it to reporting",
+      "notes": "",
+      "acceptance": [
+        "A read-model aggregates touch-up rate (revisions/treatments), % satisfied, n and complications (from AdverseEvent) per treatment type and practitioner.",
+        "The 'Outcomes & revisions — per treatment type' table renders the aggregates.",
+        "A revision (revision_of) is not counted as a fresh success in the touch-up rate.",
+        "Aggregates feed PRD-08 quality reporting; quality/money figures stay owner-gated (.fin)."
+      ],
+      "detail": [
+        "This follow-up adds the aggregation layer on top of outcome capture. The individual Outcome records (rating, satisfaction, revision_of) the basic captures are rolled into a read-model: touch-up rate (revisions/treatments), % satisfied, n and complications (from AdverseEvent) per treatment type and per practitioner.",
+        "The 'Outcomes & revisions — per treatment type' table renders the aggregates (the prototype's outcomeStats: Anti-wrinkle 8% touch-up / 96% satisfied, Filler 14% / 91%, Skin, Laser/IPL). A revision_of is never counted as a fresh success.",
+        "Aggregates feed PRD-08 quality reporting; quality/money figures stay owner-gated per the financial-gating rules (.fin)."
+      ],
+      "ui_spec": [
+        "'Outcomes & revisions - per treatment type' table: Treatment - Touch-up rate - Satisfied - n - Complications (Anti-wrinkle 8% / 96% / 96 / 0; Filler 14% / 91% / 34 / 1; Skin 5% / 94% / 120 / 0; Laser/IPL 5% / 94% / 60 / 0).",
+        "Sits alongside the standardised-photography card (shared with PHOTOS).",
+        "Quality/money figures owner-gated (.fin)."
+      ],
+      "data_model": [
+        {
+          "entity": "Derived / reporting (read model)",
+          "fields": "per treatment type + practitioner: touch-up rate = revisions/treatments, % satisfied, n, complications (from AdverseEvent)",
+          "notes": "Extends the basic's Outcome records — no new entity; the aggregation read-model for the table + PRD-08 quality reporting."
+        }
+      ],
+      "refs": [],
+      "depends_on": [
+        "PRD-05/OUTCOMES"
+      ],
+      "labels": [
+        "tla-backlog"
+      ],
+      "priority": "P2",
+      "tasks": [
+        {
+          "title": "Outcome aggregation read-model + per-treatment table",
+          "note": "Behaviour: a read-model aggregating touch-up rate, % satisfied, n and complications (from AdverseEvent) per treatment type/practitioner, rendered as the 'Outcomes & revisions per treatment type' table and feeding PRD-08 reporting. Requirements: a revision_of is not counted as a fresh success; quality/money figures stay owner-gated (.fin)."
         }
       ]
     }

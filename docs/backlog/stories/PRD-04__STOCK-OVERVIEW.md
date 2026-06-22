@@ -1,4 +1,4 @@
-# Stock at-a-glance: KPIs, product cards & waste-reduction nudges
+# Stock at-a-glance: KPI tiles (MVP)
 
 > **Epic:** [PRD-04 — Consult, prescribing & S4 medicines governance (the moat)](../epics/PRD-04.md)  ·  **Key:** `PRD-04/STOCK-OVERVIEW`  ·  **Type:** Story  ·  **Stage:** M3  ·  **Priority:** P1  ·  **Estimate:** 3 pts  ·  **Area:** —
 >
@@ -52,7 +52,5 @@ Two hard constraints frame the panel: S4 medicines can never be discounted or ad
 
 - [ ] **Stock KPI tiles (products, active lots, expiring soon, below par)**
   Behaviour: a KPI strip over the lots — products tracked, active lots (on-hand > 0), expiring-soon lots with the lot detail line, and the below-par reorder count (prototype kProducts/kLots/kExpLots/kReorder). Requirements: every figure is a per-product+unit projection over the StockLedger (PRD-04/VIAL-RECON), never a cross-unit roll-up (ADR-0021); below-par is on-hand < par level; expiring-soon reads the expiry alert query.
-- [ ] **Per-product cards + usage-history chart**
-  Behaviour: a card per product (on-hand, used/wasted 90d, usage sparkline, S4 badge, below-par state) plus a 'units used / week' usage-history chart with a per-product toggle (prototype prodCards/spark/usagechart). Requirements: figures come from the ProductAggregate read model; the chart trends StockLedger administer/waste movements per product. Any cost/margin overlay stays owner-only (.fin).
-- [ ] **Reduce-waste & lift-margin nudges (FEFO, non-S4, .fin)**
-  Behaviour: a panel that frames a near-expiry lot as a write-off to avoid, nudges first-expiry-first-out (FEFO) use, and links to the schedule's quiet windows that could absorb it (PRD-02/QUIET-WINDOWS); plus a non-S4 member-offer nudge and a slow-moving-retail bundle nudge. Requirements: levers use ONLY non-S4 incentives sent privately to consented clients — S4 (Schedule 4 prescription-only medicine) may never be discounted or advertised (TGA, the Therapeutic Goods Administration); every dollar/margin/write-off figure is owner-only and stripped for non-owner roles (the .fin capability).
+- [ ] **Expiry-alert query behind the tiles**
+  Behaviour: the 'expiring soon' tile reads a near-expiry-lot query that returns each lot with weeks-to-expiry and on-hand. Requirements: tenant-scoped over StockItem.expiry; this same query is reused by the FEFO waste nudges follow-up (PRD-04/STOCK-OVERVIEW-NUDGES) and the stocktake expiry surfacing.

@@ -1,4 +1,4 @@
-# Outcomes & revision tracking
+# Outcomes & revision capture (MVP)
 
 > **Epic:** [PRD-05 — Clinical charting: injection mapping & before/after](../epics/PRD-05.md)  ·  **Key:** `PRD-05/OUTCOMES`  ·  **Type:** Story  ·  **Stage:** M3  ·  **Priority:** P2  ·  **Estimate:** 1 pts  ·  **Area:** provider-app
 >
@@ -53,5 +53,5 @@ _Prototype screen: prototype.html — Clinical → Photography & outcomes._
 
 ## Tasks (dev pickup)
 
-- [ ] **Outcome + revision capture, aggregation & UI**
-  EF Core: Outcome linked to a finalised ChartEntry (rating, optional satisfaction, before/after photo links, revision_of pointing at the original treatment), tenant_id + Row-Level Security (RLS, the per-tenant database isolation), indexed by treatment type + practitioner. API to capture outcomes/revisions and a read-model aggregating touch-up rate, % satisfied, n and complications (from AdverseEvent) per treatment type/practitioner, feeding PRD-08 reporting. UI: per-treatment outcome capture + the 'Outcomes & revisions - per treatment type' table; any photo-based outcome respects image-use consent (PHOTOS / C14). Keep money/quality figures owner-gated per the financial-gating rules.
+- [ ] **Outcome + revision capture (model & flow)**
+  EF Core: Outcome linked to a finalised ChartEntry (rating, optional satisfaction, before/after photo links, revision_of pointing at the original treatment), tenant_id + Row-Level Security (RLS, the per-tenant database isolation), indexed by treatment type + practitioner. API to capture outcomes/revisions; per-treatment outcome capture UI. Any photo-based outcome respects image-use consent (PHOTOS / C14). The aggregation read-model + the 'Outcomes & revisions per treatment type' table feeding PRD-08 is a follow-up (PRD-05/OUTCOMES-REPORTING).

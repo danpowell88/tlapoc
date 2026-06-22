@@ -1,4 +1,4 @@
-# Standardised before/after photos + compare
+# Clinical photo capture: signed-URL storage & consent gate (MVP)
 
 > **Epic:** [PRD-05 — Clinical charting: injection mapping & before/after](../epics/PRD-05.md)  ·  **Key:** `PRD-05/PHOTOS`  ·  **Type:** Story  ·  **Stage:** M3  ·  **Priority:** P1  ·  **Estimate:** 3 pts  ·  **Area:** provider-app
 >
@@ -64,7 +64,5 @@ _Prototype screen: prototype.html — Charting + Clinical (Skin analysis, Body c
   EF Core: Photo (client_id, chart_entry_id, blob_ref to private storage, pose_preset, framing_meta json, taken_at, captured_by, image_consent_id FK, annotated_copy_ref) + PosePreset (tenant-scoped pose list). Every table tenant_id + Row-Level Security (RLS, the per-tenant database isolation). The clinical record stores only the blob reference + metadata — never image bytes. Index Photo by client and by pose for the compare gallery.
 - [ ] **Media pipeline: signed-URL upload/serve + consent gate**
   Server-issued short-lived signed URLs for both upload (write to private AU-resident Blob, ADR-0009) and read; no public URLs, no bytes through the API. The capture/serve endpoints check current image-use consent (PRD-03) and refuse when missing/withdrawn; a consent-withdrawal event revokes downstream access. Write an AuditEvent for capture, view and annotation. Enforce these as server-side invariants (C14) — never trust the client.
-- [ ] **Capture + before/after compare UI**
-  Provider/web UI: camera/upload with a pose preset + ghost overlay of the matching prior photo for alignment; the drag-to-compare before/after slider; a per-pose gallery across visits; copy-based annotation that preserves the original. Gate the capture control on image-use consent with a clear blocked-action reason. Loading/empty/error states; capability-gated to clinical roles.
-- [ ] **On-device transient cache + post-sync purge**
-  Provider app: photos captured offline go to an encrypted on-device queue with the rest of the chart (see OFFLINE) and upload via signed URL on reconnect; the device cache holds nothing beyond the transient pre-sync copy and is purged after a confirmed upload (ADR-0009/0015). No image is ever written to the device gallery or persisted long-term on the device.
+- [ ] **Basic capture UI (pose preset + consent-gated control)**
+  Provider/web UI: camera/upload with a pose preset for standardised framing; gate the capture control on image-use consent with a clear blocked-action reason. Loading/empty/error states; capability-gated to clinical roles. The before/after compare + per-pose gallery + annotation are a follow-up (PRD-05/PHOTOS-COMPARE); the on-device transient cache + purge is a follow-up (PRD-05/PHOTOS-OFFLINE-CACHE).

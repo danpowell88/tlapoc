@@ -1,4 +1,4 @@
-# Daily closeout & reconciliation
+# Daily closeout — card + cash rollup, count & lock (core)
 
 > **Epic:** [PRD-06 — Payments (in-person POS + autopay), memberships & non-S4 rewards](../epics/PRD-06.md)  ·  **Key:** `PRD-06/CLOSEOUT`  ·  **Type:** Story  ·  **Stage:** M4  ·  **Priority:** P1  ·  **Estimate:** 3 pts  ·  **Area:** web
 >
@@ -6,8 +6,8 @@
 
 ## Background
 
-As a owner, I want a daily closeout that balances card and cash, so that the till reconciles every day.
-What this is, plainly: the end-of-day till balance — count the cash, check the card total against Square, explain any difference, lock it. Where it sits: it reads the day's POS payments and is the bridge to Xero accounting (PRD-10); it follows the till in the Payments layer, on top of the booked/charted visit. End-of-day closeout (reconciliation of takings against recorded payments) balances card + cash (REQ-PAY-4).
+As a owner, I want a daily closeout that totals card and cash and locks the day, so that the till reconciles every day.
+What this is, plainly: the end-of-day till balance — total the card and cash takings, enter the counted cash, note it and lock it. This is the minimal end-to-end core; Square-batch variance detection, the Xero reconciliation and the back-office tablet surface are each added as their own follow-ups. Where it sits: it reads the day's POS payments and is the bridge to Xero accounting (PRD-10); it follows the till in the Payments layer, on top of the booked/charted visit. End-of-day closeout (reconciliation of takings against recorded payments) balances card + cash (REQ-PAY-4).
 
 ## How it works
 
@@ -16,14 +16,14 @@ Because it exposes daily takings, the whole closeout is behind the owner-only fi
 
 ## Requirements
 
-- A daily closeout that balances card and cash.
+- A daily closeout that totals card and cash and locks the day.
 
 ## Acceptance Criteria
 
-- [ ] Closeout summarises card and cash tenders for the day per location.
-- [ ] Variances (counted vs recorded; card vs Square batch) are surfaced and can be noted.
+- [ ] Closeout summarises card and cash tenders for the day per location (one Closeout row per location per trading day).
+- [ ] The operator enters the counted cash and the closeout records a simple counted-vs-recorded difference.
+- [ ] The operator can note and lock the closeout; a locked closeout is immutable and stamps closed_by/closed_at.
 - [ ] Closeout figures are owner-gated (not visible to Reception).
-- [ ] Closeout reconciles to the Xero posting (PRD-10).
 
 ## UI designs / screenshots
 
@@ -45,11 +45,9 @@ _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rew
 
 ## Tasks (dev pickup)
 
-- [ ] **Card + cash day-rollup per location**
-  Behaviour: at end of day the closeout summarises the day's tenders per location — card_total (from card Payments, to be reconciled to Square's batch) and cash_total (what the system recorded). One Closeout row per location per trading day. Requirements: totals aggregate from the day's Payment rows (PRD-06/POS); tenant-scoped with RLS (row-level security); the whole surface is owner-only (.fin) — Reception never sees daily takings.
-- [ ] **Variance: counted-cash entry + card-vs-Square batch**
-  Behaviour: the operator enters the counted cash; the closeout computes and highlights variance = counted − recorded, and flags card_total vs the Square (the card-payment provider) batch. Requirements: variances are surfaced prominently (not buried) so a miskeyed cash sale or missed refund is caught the same day; a variance can be annotated with an explanation before locking; figures owner-gated.
-- [ ] **Note, lock + reconcile-to-Xero**
-  Behaviour: the operator records a note and locks the closeout ('Note locked & saved'); a locked closeout is immutable and stamps closed_by/closed_at. Requirements: reconcile against the Xero (the clinic's cloud accounting system) post (PRD-10) — the day's posted invoices/payments should foot to the closeout totals, and a mismatch is flagged; once locked the day cannot be silently re-opened/edited (audit any correction).
-- [ ] **Closeout web UI (front desk + back-office tablet)**
-  Behaviour: render the closeout on the checkout/desk and on the back-office tablet (backroom) so the owner can run it away from the front desk — card vs cash totals, counted-cash entry, variance highlight, note + lock, close action. Requirements: owner-only capability gate; loading/empty/error states; the back-office tablet shares the same component/state as the desk view.
+- [ ] **Card + cash day-rollup per location + counted-cash entry**
+  Behaviour: at end of day the closeout summarises the day's tenders per location — card_total (from card Payments) and cash_total (what the system recorded) — and the operator enters the counted cash, giving a simple counted-vs-recorded difference. One Closeout row per location per trading day. Requirements: totals aggregate from the day's Payment rows (PRD-06/POS); tenant-scoped with RLS (row-level security); the whole surface is owner-only (.fin) — Reception never sees daily takings. (Square-batch variance flagging is a follow-up.)
+- [ ] **Note, lock + immutability**
+  Behaviour: the operator records a note and locks the closeout ('Note locked & saved'); a locked closeout is immutable and stamps closed_by/closed_at. Requirements: once locked the day cannot be silently re-opened/edited (audit any correction); owner-only. (Reconcile-to-Xero is a follow-up.)
+- [ ] **Closeout web UI (front desk)**
+  Behaviour: render the closeout at the checkout/desk — card vs cash totals, counted-cash entry, the counted-vs-recorded difference, note + lock, close action. Requirements: owner-only capability gate; loading/empty/error states. (The back-office tablet surface is a follow-up.)

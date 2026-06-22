@@ -1,4 +1,4 @@
-# Wastage, disposal & destruction records
+# Wastage recording (partial-vial) (MVP)
 
 > **Epic:** [PRD-04 — Consult, prescribing & S4 medicines governance (the moat)](../epics/PRD-04.md)  ·  **Key:** `PRD-04/WASTAGE-DESTRUCTION`  ·  **Type:** Story  ·  **Stage:** M3  ·  **Priority:** P1  ·  **Estimate:** 3 pts  ·  **Area:** backend
 >
@@ -49,9 +49,7 @@ Destruction records are surfaced in the back-office waste log and feed the compl
 
 ## Tasks (dev pickup)
 
-- [ ] **StockDestruction record + ledger waste movement (model & migration)**
-  Add StockDestruction: id, tenant_id, lot_id(FK), units, reason, pathway(RUM|licensed), certificate_ref, witness_id, at, actor_id; RLS by tenant; append-only (no UPDATE/DELETE). Each destruction/wastage writes a StockLedger waste movement so reconciliation stays correct (PRD-04/VIAL-RECON). Support fractional/partial-vial units. certificate_ref + witness_id are required for a destruction (vs an in-treatment wastage).
-- [ ] **Wastage/destruction API + licensed/RUM pathway**
-  Endpoints: POST /lots/{id}/wastage (units, reason) and POST /lots/{id}/destruction (units, reason, pathway, certificate_ref, witness_id). Wastage decrements on_hand via the ledger; destruction of an expiring/expired/quarantined lot zeroes the remaining on-hand and marks it Depleted. Capture the licensed/RUM pathway + certificate so disposal is provably lawful (C16). Surface in the back-office waste log + compliance dashboard.
-- [ ] **Immutability + witnessed-destruction audit**
-  Records are immutable once saved (ADR-0010); a correction is an appended, linked record, never an edit. Audit every wastage/destruction with quantity, reason, pathway, certificate and witness - the lawful-disposal evidence an inspector asks for (C16). Capability-gate the destroy action to stock-capable clinical roles.
+- [ ] **StockWastage record + ledger waste movement (model & migration)**
+  Add the wastage record: id, tenant_id, lot_id(FK), units, reason, at, actor_id; RLS by tenant; append-only (no UPDATE/DELETE). Each wastage writes a StockLedger waste movement so reconciliation stays correct (PRD-04/VIAL-RECON). Support fractional/partial-vial units. A correction is an appended, linked record, never an edit (ADR-0010).
+- [ ] **Record-wastage action + ledger decrement + audit**
+  Endpoint POST /lots/{id}/wastage (units, reason); the lot's Wasted figure increments and On hand decrements via the ledger in the reconciliation block (prototype recordWastage). Audit every wastage (quantity, reason, actor). Capability-gate to stock-capable clinical roles.

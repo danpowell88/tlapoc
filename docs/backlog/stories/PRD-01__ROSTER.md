@@ -1,4 +1,4 @@
-# Rosters & engagement type
+# Rosters & engagement type (core: roster grid + availability)
 
 > **Epic:** [PRD-01 — Foundations & tenancy (auth, RBAC, audit, data model)](../epics/PRD-01.md)  ·  **Key:** `PRD-01/ROSTER`  ·  **Type:** Story  ·  **Stage:** M1  ·  **Priority:** P1  ·  **Estimate:** 3 pts  ·  **Area:** backend
 >
@@ -54,9 +54,5 @@ Management is capability-gated: Owner/Lead manage the roster and approve leave; 
 
 - [ ] **Weekly roster grid (editable shifts, per staff + location)**
   Behaviour: the weekly roster grid (team-roster.png) — day columns × practitioner rows with shaded rostered cells, editable by Owner/Lead. Requirements: model RosterShift per staff + location (tenant_id + RLS); Reception sees the grid read-only (it needs to see who's in, not edit shifts); the ADR-0029 banner states the roster is the source of truth for booking availability; every shift change is audited.
-- [ ] **Leave list with pending/approved status + approve/decline**
-  Behaviour: the Leave list below the grid — entries with kind (annual/personal/other), dates and a status chip (Pending/Approved/Declined), with approve/decline actions for Owner/Lead. Requirements: approved leave blocks availability, pending does not yet block but is visible; approve/decline is gated to team:manage and audited; model TimeOff with the approval status.
 - [ ] **Bookable-availability derivation (the query PRD-02 consumes)**
-  Behaviour: compute bookable availability = roster shifts − approved leave, intersected with the canInject (the derived cleared-to-inject gate)/scope check for the requested service. Requirements: expose this as the exact query PRD-02 booking consumes so the diary can never offer a slot for an off or non-compliant practitioner; a practitioner is bookable for an S4 (Schedule 4 prescription-only medicine) service only when rostered AND canInject is true (ADR-0029).
-- [ ] **Engagement-type recording for downstream attribution**
-  Behaviour: record each staff member's engagement type (employee/contractor) — it already lives on StaffProfile from CREDENTIALS — for downstream commission/pay attribution and the contractor compliance banner. Requirements: the platform attributes revenue by engagement type but is explicitly NOT a payroll/super engine (ADR-0027); no payroll/commission UI here — attribution is downstream.
+  Behaviour: compute bookable availability = roster shifts − approved leave, intersected with the canInject (the derived cleared-to-inject gate)/scope check for the requested service. Requirements: expose this as the exact query PRD-02 booking consumes so the diary can never offer a slot for an off or non-compliant practitioner; a practitioner is bookable for an S4 (Schedule 4 prescription-only medicine) service only when rostered AND canInject is true (ADR-0029). (Leave is the follow-up ROSTER-LEAVE; until it lands, availability subtracts no approved leave.)

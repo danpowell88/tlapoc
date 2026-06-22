@@ -1,4 +1,4 @@
-# Duplicate detection & client merge (audited, history-preserving)
+# Client merge — basic duplicate detection & review
 
 > **Epic:** [PRD-02 — Booking & scheduling (+ client/CRM basics)](../epics/PRD-02.md)  ·  **Key:** `PRD-02/CLIENT-MERGE`  ·  **Type:** Story  ·  **Stage:** M2  ·  **Priority:** P2  ·  **Estimate:** 2 pts  ·  **Area:** —
 >
@@ -48,8 +48,4 @@ Merge never hard-deletes: the merged identity is retired but its history lives o
 ## Tasks (dev pickup)
 
 - [ ] **Duplicate detection heuristics + candidate review**
-  Behaviour: surface candidate duplicate pairs for the desk to review. Requirements: score pairs on name / date-of-birth / phone / email match heuristics; present the two records side-by-side with matching fields highlighted; a merge is always staff-confirmed, never automatic; tenant-scoped.
-- [ ] **Merge transaction: re-point all child records + MergeLog**
-  Behaviour: merging nominates a surviving primary and re-homes everything from the merged record. Requirements: in a single server-side transaction, re-point ALL child records (appointments/visits, consents, image-consent, photos, invoices, memberships, rewards, jobs) to the primary, preserving history; write a MergeLog (primary_id, merged_id, actor, at, repointed_counts per type); server-enforced and capability-gated; nothing is hard-deleted (PRD-01/RETENTION governs destruction).
-- [ ] **Merge confirmation UI + post-merge retirement**
-  Behaviour: a confirmation step before committing and a retired state after. Requirements: the confirmation names the surviving primary, lists the per-type counts that will be re-pointed, and warns the action is logged; after merge the merged identity drops from active views while its history shows under the primary; the MergeLog entry is viewable for audit/reversal reference.
+  Behaviour: surface candidate duplicate pairs for the desk to review. Requirements: score pairs on name / date-of-birth / phone / email match heuristics; present the two records side-by-side with matching fields highlighted; a merge is always staff-confirmed, never automatic; tenant-scoped. The merge transaction and the confirmation/retirement UI are follow-ups.

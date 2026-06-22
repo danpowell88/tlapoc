@@ -1,4 +1,4 @@
-# Complication protocol library & response kits
+# Complication protocol library & timestamped response (MVP)
 
 > **Epic:** [PRD-05 — Clinical charting: injection mapping & before/after](../epics/PRD-05.md)  ·  **Key:** `PRD-05/COMPLICATION-LIBRARY`  ·  **Type:** Story  ·  **Stage:** M3  ·  **Priority:** P1  ·  **Estimate:** 3 pts  ·  **Area:** provider-app
 >
@@ -60,6 +60,4 @@ _Prototype screen: prototype.html — Clinical → Complication protocols._
 - [ ] **Protocol library + response API**
   CRUD for clinic-editable protocols; a start-response command that creates a timestamped ComplicationResponse and a complete command that records timing/outcome + kit used, raises a pre-filled routed AdverseEvent (ADVERSE-EVENT) and a complication follow-up Job. Surface required-kit availability/expiry from the kit register. Audit completions (ADR-0010); publish OpenAPI.
 - [ ] **Protocol cards + timestamped response checklist UI**
-  Build the protocol cards (steps, 'Edit steps', 'Start response'), the editable-steps composer, and the response modal as a timestamped checklist (tick steps, record drug/kit used, 'Complete & open AE case'). Wire completion to the AE hand-off + job creation. Capability-gated to clinical roles; clear states.
-- [ ] **Emergency-kit register linkage + expiry surfacing**
-  Wire protocols to the emergency-kit register (PRD-11/EMERGENCY-KIT): show each protocol's required items with qty + expiry, flag missing/expired kit so the clinic restocks, and let a response record which kit items were consumed. Read from the kit register; don't relocate it.
+  Build the protocol cards (steps, 'Edit steps', 'Start response'), the editable-steps composer, and the response modal as a timestamped checklist (tick steps, record drug/kit used, 'Complete & open AE case'). Wire completion to the AE hand-off + job creation. Capability-gated to clinical roles; clear states. The emergency-kit register linkage + expiry surfacing is a follow-up (PRD-05/COMPLICATION-KIT-LINK).

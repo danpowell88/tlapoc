@@ -1,4 +1,4 @@
-# Adverse-event capture → DAEN pathway
+# Adverse-event capture & DAEN routing (MVP)
 
 > **Epic:** [PRD-05 — Clinical charting: injection mapping & before/after](../epics/PRD-05.md)  ·  **Key:** `PRD-05/ADVERSE-EVENT`  ·  **Type:** Story  ·  **Stage:** M3  ·  **Priority:** P1  ·  **Estimate:** 3 pts  ·  **Area:** provider-app
 >
@@ -62,6 +62,4 @@ _Prototype screen: prototype.html — Charting + Clinical (Skin analysis, Body c
 - [ ] **AE capture + modality-derived DAEN routing API**
   Command to log an AE from a ChartEntry or a completed complication response. Derive daen_target from the treatment modality (toxin/filler-as-medicine → DAEN-medicines; device-class filler/PDO/RF → DAEN-devices, ADR-0025/C12) and set the mandatory_report flag for the defined cases. Link the lot for the lot→client recall lookup (PRD-04). Emit events that raise follow-up Jobs and feed the PRD-08 DAEN prefill. Enforce C12 as a server-side invariant; audit (ADR-0010).
 - [ ] **AE capture UI + complication hand-off**
-  Build the structured AE capture form (description, onset, seriousness, product/lot prefilled from the chart, treatment given) reachable from the finalise close-out and from a completed complication-response flow. Show the derived DAEN target + mandatory-report flag. On save, confirm the raised jobs and the route to Governance. Capability-gated to clinical roles; clear states.
-- [ ] **Raise follow-up jobs + route to Governance**
-  On AE creation, project the right Jobs (complication follow-up/review, mandatory-report check, client follow-up) into the shared queue (ADR-0023) and surface the AE in Governance → Adverse events & DAEN with seriousness + DAEN target set. Keep the full prefilled DAEN submission in PRD-08/DAEN — this task just routes the record and the work.
+  Build the structured AE capture form (description, onset, seriousness, product/lot prefilled from the chart, treatment given) reachable from the finalise close-out and from a completed complication-response flow. Show the derived DAEN target + mandatory-report flag. Capability-gated to clinical roles; clear states. Raising follow-up jobs + routing to the Governance worklist is a follow-up (PRD-05/ADVERSE-EVENT-JOBS).

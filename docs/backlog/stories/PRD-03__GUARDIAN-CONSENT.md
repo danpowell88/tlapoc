@@ -1,4 +1,4 @@
-# Under-18 guardian consent & recorded second consultation
+# Under-18 guardian consent — basic guardian co-signature
 
 > **Epic:** [PRD-03 — Intake, consent & compliance gating](../epics/PRD-03.md)  ·  **Key:** `PRD-03/GUARDIAN-CONSENT`  ·  **Type:** Story  ·  **Stage:** M2  ·  **Priority:** P1  ·  **Estimate:** 3 pts  ·  **Area:** —
 >
@@ -48,8 +48,4 @@ The presence of a valid guardian-co-signed under-18 consent AND a recorded secon
 ## Tasks (dev pickup)
 
 - [ ] **Guardian co-signature bound to the under-18 template version**
-  Behaviour: capture a parent/guardian co-signature for an under-18, against the dedicated under-18 (+ guardian) consent template. Requirements: capture guardian_name + guardian_relationship + signature_ref, signed_at; bind to the EXACT template_version (reuses PRD-03/CONSENT versioning); required for an under-18 patient and fed to GATING; retained (C18) and audited.
-- [ ] **Recorded second consultation for minors**
-  Behaviour: record a second consultation for an under-18 before treatment. Requirements: store occurred_at + reviewed_by on a SecondConsultation linked to client + appointment; surface it on the client timeline; it pairs with the 7-day cooling-off (PRD-03/COOLING-OFF) and is one of the inputs the treatment gate checks for a minor; audited.
-- [ ] **Guardian co-sign step UI in the consent flow**
-  Behaviour: add a guardian co-sign step to the consent reader when the patient is under 18. Requirements: after the patient acknowledgement, capture guardian full name, relationship to patient and a type-to-sign signature; the step appears only for the under-18 flow; show the under-18 status on the patient header and the recorded second-consultation on the timeline.
+  Behaviour: capture a parent/guardian co-signature for an under-18, against the dedicated under-18 (+ guardian) consent template. Requirements: capture guardian_name + guardian_relationship + signature_ref, signed_at; bind to the EXACT template_version (reuses PRD-03/CONSENT versioning); required for an under-18 patient and fed to GATING; retained (C18) and audited. The recorded second consultation and the guardian co-sign step UI are follow-ups.

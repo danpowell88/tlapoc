@@ -1,4 +1,4 @@
-# Consent template authoring & versioning (mandated-content)
+# Consent templates — basic versioned per-treatment templates
 
 > **Epic:** [PRD-03 — Intake, consent & compliance gating](../epics/PRD-03.md)  ·  **Key:** `PRD-03/CONSENT-TEMPLATE-ADMIN`  ·  **Type:** Story  ·  **Stage:** M2  ·  **Priority:** P1  ·  **Estimate:** 3 pts  ·  **Area:** —
 >
@@ -46,8 +46,4 @@ Templates and all versions are retained per the retention policy (C18, PRD-01/RE
 ## Tasks (dev pickup)
 
 - [ ] **Versioned ConsentTemplate per treatment-type**
-  Behaviour: model ConsentTemplate per treatment_type with immutable, versioned content(sections). Requirements: editing creates a NEW version and supersedes the old; old versions are never mutated so bound signatures stay valid; retained per C18 (PRD-01/RETENTION); seed anti-wrinkle, dermal filler, under-18 (+ guardian) and image-use templates; tenant-scoped.
-- [ ] **Mandated-content validation gate on publish**
-  Behaviour: a version can only go live once it covers every required section. Requirements: validate the mandated_fields[] checklist (nature, risks/benefits/alternatives, practitioner qualifications, costs, realistic-outcome language, complaint mechanisms incl. AHPRA-despite-NDA) server-side; block publish until all are present (C5); the rule is enforced regardless of the UI.
-- [ ] **Template authoring UI + audit**
-  Behaviour: the Forms & consent template editor — the mandated sections as named required blocks, a '+ New template' affordance, and a publish action disabled until complete. Requirements: editing a current template warns it will publish a new version; superseded versions remain viewable for signatures bound to them; capability-gated; every change audited.
+  Behaviour: model ConsentTemplate per treatment_type with immutable, versioned content(sections). Requirements: editing creates a NEW version and supersedes the old; old versions are never mutated so bound signatures stay valid; retained per C18 (PRD-01/RETENTION); seed anti-wrinkle, dermal filler, under-18 (+ guardian) and image-use templates; tenant-scoped. The mandated-content publish gate and the authoring UI are follow-ups.

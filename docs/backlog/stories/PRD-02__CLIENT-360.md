@@ -1,4 +1,4 @@
-# Client 360° profile
+# Client 360° profile — basic aggregation & header
 
 > **Epic:** [PRD-02 — Booking & scheduling (+ client/CRM basics)](../epics/PRD-02.md)  ·  **Key:** `PRD-02/CLIENT-360`  ·  **Type:** Story  ·  **Stage:** M2  ·  **Priority:** P1  ·  **Estimate:** 3 pts  ·  **Area:** web
 >
@@ -53,10 +53,4 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 - [ ] **Client 360 read-aggregation API (RBAC + .fin + audit)**
   Behaviour: a read endpoint that composes the profile from each owning module (intake, consent, image-consent, visits, plan, membership, balance, rewards, complaints) — this story is the read aggregation, not the source of truth. Requirements: apply RBAC field filtering server-side (reception gets limited clinical info; money fields require the .fin capability — owner-only); write an AuditEvent for every clinical/PII read (C10, ADR-0010); return the header chip state (consent current, image-use, under-18 cooling-off) computed from the gates.
 - [ ] **Profile header: compliance/age chips + quick actions**
-  Behaviour: the header shows avatar, name, member/VIP tag and demographics, with chips for Consent current / Image use / Balance / Allergy / under-18 cooling-off (the mandatory wait before a cosmetic procedure can proceed), plus Open chart and Checkout quick actions. Requirements: chips are driven by the gate state and are the at-a-glance read a clinician makes before charting; Open chart is hidden unless the role has chart capability; the Balance chip honours .fin (owner-only).
-- [ ] **Overview tab (recent activity + at-a-glance)**
-  Behaviour: the default tab showing recent activity (treatments, rewards, skin) and an at-a-glance panel (visits count, last seen, referred-by). Requirements: lifetime spend / money figures in the at-a-glance are .fin-gated (owner-only); reads via the aggregation API; deep-links into the relevant record.
-- [ ] **Clinical & visit tabs (Visits / Treatment plan / Consents & forms)**
-  Behaviour: tabs rendering visit history, the treatment plan, and consents & forms. Requirements: each reads its owning module's data via the aggregation API and respects RBAC (reception sees limited clinical info, not the full clinical record); deep-links into charting / follow-ups; clinical reads are audited.
-- [ ] **Commercial tabs (Membership & rewards / Billing / Notes & comms)**
-  Behaviour: tabs for membership & rewards, billing, and notes & comms. Requirements: the Billing tab and any money figures are gated behind the .fin capability (owner-only) and stripped for non-owner roles such as Reception (who may see memberships but no money); reads via the aggregation API; deep-links into checkout.
+  Behaviour: the header shows avatar, name, member/VIP tag and demographics, with chips for Consent current / Image use / Balance / Allergy / under-18 cooling-off (the mandatory wait before a cosmetic procedure can proceed), plus Open chart and Checkout quick actions. Requirements: chips are driven by the gate state and are the at-a-glance read a clinician makes before charting; Open chart is hidden unless the role has chart capability; the Balance chip honours .fin (owner-only). The Overview, clinical and commercial tabs are follow-ups.

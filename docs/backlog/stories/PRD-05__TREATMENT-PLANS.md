@@ -1,4 +1,4 @@
-# Treatment plans & protocol templates
+# Treatment plans & protocol templates (MVP)
 
 > **Epic:** [PRD-05 — Clinical charting: injection mapping & before/after](../epics/PRD-05.md)  ·  **Key:** `PRD-05/TREATMENT-PLANS`  ·  **Type:** Story  ·  **Stage:** M3  ·  **Priority:** P2  ·  **Estimate:** 2 pts  ·  **Area:** provider-app
 >
@@ -61,6 +61,4 @@ _Prototype screen: prototype.html — Charting + Clinical (Skin analysis, Body c
 - [ ] **Data model & migrations: Protocol + TreatmentPlan + PlanSession**
   EF Core: Protocol (named template with ordered steps = service + recommended interval), TreatmentPlan (client_id, optional protocol_id, status), PlanSession (due_date, status, optional chart_entry_id link). tenant_id + Row-Level Security (RLS, the per-tenant database isolation); index plans by client and sessions by due_date for the recall projection.
 - [ ] **Plan API: apply protocol, schedule sessions, track progress**
-  Apply-protocol command instantiates a plan with sessions dated off the step intervals; support ad hoc plans. Finalising a charted ChartEntry against a session marks it done and advances the next active session. Project upcoming sessions as recall Jobs (ADR-0023) into the PRD-07 worklist. Expose plan-progress queries for the Client 360. Emit domain events; publish OpenAPI.
-- [ ] **Plan UI: protocol builder, apply + progress + in-room list**
-  Build the Protocol template builder, the apply-to-client flow in Charting, the plan-progress view on the Client 360 (sessions done / next-due) and the charting overview / 'in-room now' list of active plans. Wire to the API with loading/empty/error states; capability-gate to clinical roles.
+  Apply-protocol command instantiates a plan with sessions dated off the step intervals; support ad hoc plans. Finalising a charted ChartEntry against a session marks it done and advances the next active session. Expose plan-progress queries. Emit domain events; publish OpenAPI. Projecting upcoming sessions as recall Jobs (PRD-05/TREATMENT-PLANS-RECALL) and the Client-360/in-room UI (PRD-05/TREATMENT-PLANS-VIEWS) are follow-ups; the basic ships the apply-in-charting flow.

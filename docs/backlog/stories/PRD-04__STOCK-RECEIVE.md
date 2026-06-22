@@ -1,4 +1,4 @@
-# Stock receipt, ARTG & lawful-supply provenance
+# Stock receipt: ARTG & lawful-supply provenance per lot (MVP)
 
 > **Epic:** [PRD-04 — Consult, prescribing & S4 medicines governance (the moat)](../epics/PRD-04.md)  ·  **Key:** `PRD-04/STOCK-RECEIVE`  ·  **Type:** Story  ·  **Stage:** M3  ·  **Priority:** P0  ·  **Estimate:** 5 pts  ·  **Area:** backend
 >
@@ -52,11 +52,7 @@ The received lot then surfaces in the stock-by-lot table with on-hand / used / w
 
 ## Tasks (dev pickup)
 
-- [ ] **Receive-stock modal (lot, expiry, units, supplier, ARTG, destination)**
-  Behaviour: 'Receive stock' opens a modal capturing the lot number, expiry, units received (in the product's unit), supplier, ARTG (Australian Register of Therapeutic Goods) status and the destination location ('Receive into Fridge 1'); on save the lot appears at the top of the 'Stock by lot' table and is auto-selected for its detail (prototype openReceive/doReceive). Requirements: received_units seeds on_hand via a StockLedger receive movement (on_hand is never typed directly); receiving into a location binds the lot to that secure StockLocation and its custodian (PRD-04/CUSTODY-STORAGE).
-- [ ] **ARTG status + lawful-supply provenance per lot**
-  Behaviour: every received S4 (Schedule 4 prescription-only medicine) lot records its ARTG registration status, brand, sponsor and lawful supply source; the lot detail shows the ARTG badge ('ARTG ✓' vs 'unapproved') alongside supplier and custody. Requirements: a non-ARTG or unverified-source lot is warned or blocked per tenant config (C11) — lawful supply is a top TGA (Therapeutic Goods Administration) enforcement target; ARTG is manual entry in v1 with a hook for a future ARTG-dataset lookup. The provenance recorded here is exactly what makes a lot selectable at the administration gate (PRD-04/ADMIN-GATE).
-- [ ] **Prescriber-signer gate on S4 purchase orders**
-  Behaviour: an S4 purchase order can only be raised/received by a prescriber signer from a TGA-approved wholesaler. Requirements: enforce in domain + DB (ADR-0008) that an S4 PurchaseOrder carries prescriber_signer_id (a prescribe-S4-capable staffer) AND wholesaler_approved=true before it commits (GAP-3); RN/EN/admin attempts are rejected with an explainable reason. RNs/ENs/admin cannot buy S4.
-- [ ] **Receive-provenance audit trail**
-  Behaviour: each receive writes an immutable audit record of the full provenance — lot, ARTG status, supplier, supply source, destination, custodian and the prescriber signer. Requirements: append-only AuditEvent stream (ADR-0010); a blocked receive (non-ARTG / unverified source / non-prescriber signer) is itself audited so the refusal is explainable. This is the lawful-supply evidence an inspector asks for (C11).
+- [ ] **StockItem (lot) + receive-stock modal (lot, expiry, units, supplier, ARTG, destination)**
+  Behaviour: add the StockItem (lot) entity and a 'Receive stock' modal capturing lot number, expiry, units received (in the product's unit), supplier, ARTG (Australian Register of Therapeutic Goods) status and the destination location ('Receive into Fridge 1'); on save the lot appears at the top of the 'Stock by lot' table and is auto-selected for its detail (prototype openReceive/doReceive). Requirements: received_units seeds on_hand via a StockLedger receive movement (on_hand is never typed directly); receiving into a location binds the lot to that secure StockLocation and its custodian (PRD-04/CUSTODY-STORAGE).
+- [ ] **ARTG status + lawful-supply provenance + audit per lot**
+  Behaviour: every received S4 (Schedule 4 prescription-only medicine) lot records its ARTG registration status, brand, sponsor and lawful supply source; the lot detail shows the ARTG badge ('ARTG ✓' vs 'unapproved') alongside supplier and custody, and each receive writes an immutable audit record of the full provenance. Requirements: a non-ARTG or unverified-source lot is warned or blocked per tenant config (C11) — lawful supply is a top TGA (Therapeutic Goods Administration) enforcement target; ARTG is manual entry in v1 with a hook for a future ARTG-dataset lookup; the append-only AuditEvent stream (ADR-0010) also records a blocked receive so the refusal is explainable. The provenance recorded here is exactly what makes a lot selectable at the administration gate (PRD-04/ADMIN-GATE).

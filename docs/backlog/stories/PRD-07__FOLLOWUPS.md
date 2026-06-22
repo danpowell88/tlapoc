@@ -1,4 +1,4 @@
-# Unified follow-up / job queue
+# Unified follow-up / job queue — projected signals + lifecycle (core)
 
 > **Epic:** [PRD-07 — Communications, reminders & recall](../epics/PRD-07.md)  ·  **Key:** `PRD-07/FOLLOWUPS`  ·  **Type:** Story  ·  **Stage:** M4  ·  **Priority:** P2  ·  **Estimate:** 2 pts  ·  **Area:** web
 >
@@ -6,8 +6,8 @@
 
 ## Background
 
-As a staff member, I want one follow-up queue that merges recalls, needs-attention items and flagged messages, so that nothing falls through the cracks.
-Follow-ups used to scatter: a recall worklist here, a dashboard 'needs attention' there, unanswered inbox messages somewhere else — and anything no one replied to could quietly fall through the cracks. This story makes one queue: recall, needs-attention and unanswered-comms items all merge into a single 'what needs doing' list, staff can flag any message so it isn't lost, and inbound comms auto-categorise into jobs by rules/keyword (no AI). It is the single cross-clinic to-do list (ADR-0023).  Scattered recall / needs-attention / unanswered-comms items merge into one queue; staff can flag any message; inbound comms auto-categorise into jobs (rules/keyword, no AI) (REQ-NOTIF-7, ADR-0023).
+As a staff member, I want one follow-up queue that merges recalls, needs-attention items and unanswered comms, so that nothing falls through the cracks.
+Follow-ups used to scatter: a recall worklist here, a dashboard 'needs attention' there, unanswered inbox messages somewhere else — and anything no one replied to could quietly fall through the cracks. This story makes one queue: recall, needs-attention and unanswered-comms items all merge into a single 'what needs doing' list. This is the minimal end-to-end core — the unified Job model, existing signals projecting into it, the lifecycle actions and the queue UI; manual flagging and rules/keyword auto-categorisation are each added as their own follow-ups. It is the single cross-clinic to-do list (ADR-0023). (REQ-NOTIF-7, ADR-0023).
 
 ## How it works
 
@@ -16,14 +16,14 @@ The queue is role-scoped ('Mine') and every status change is audited. Actions: o
 
 ## Requirements
 
-- One follow-up queue that merges recalls, needs-attention items and flagged messages.
+- One follow-up queue that merges recalls, needs-attention items and unanswered comms.
 
 ## Acceptance Criteria
 
-- [ ] Recall, needs-attention and unanswered-comms items merge into a single queue.
-- [ ] Any message/client can be flagged so it isn't lost (manual -> Job).
-- [ ] Inbound comms auto-categorise into jobs by rules/keyword (no AI).
-- [ ] A no-show (PRD-02) and negative reviews (REVIEWS) raise jobs into this queue; the queue is role-scoped and audited.
+- [ ] Recall, needs-attention and unanswered-comms items merge into a single queue (existing signals project in as Jobs, not duplicate tables).
+- [ ] Each job supports the lifecycle actions (open / done / snooze / reopen / reassign / callback); every status change is audited.
+- [ ] A no-show (PRD-02) and negative reviews (REVIEWS) raise jobs into this queue; the queue is role-scoped ('Mine').
+- [ ] Manual flagging and rules/keyword auto-categorisation are added by follow-ups.
 
 ## UI designs / screenshots
 
@@ -52,9 +52,5 @@ _Prototype screen: prototype.html — Comms & growth (Inbox/Automations/Campaign
   Behaviour: one Job entity backs the whole queue — type (recall|callback|reply|review|concern|consent|stock|restock|admin), optional client/conversation/appointment links, assignee (role|person), status (open|snoozed|done), source (manual|auto|recall|system), due_at. Existing signals project INTO this one queue rather than living in separate UIs: recall due (RECALL), unanswered conversations (INBOX), negative reviews (REVIEWS), no-shows (PRD-02), stock/expiry alerts, client concern reports (PRD-09). Requirements: tenant-scoped with RLS (row-level security); projections don't create duplicate tables — they surface as Jobs; per ADR-0023.
 - [ ] **Job lifecycle actions (open / done / snooze / reopen / reassign / callback)**
   Behaviour: each job supports open (jumps to the chat/client/report), mark done, snooze, reopen, reassign (cycles the role) and callback; every status change is audited. Requirements: actions are server-authoritative; reassign cycles through the role set; snooze hides until a due time; all transitions write an AuditEvent (ADR-0010); the queue is role-scoped so 'Mine' shows only the current user's/role's jobs.
-- [ ] **Manual flag -> Job**
-  Behaviour: staff can flag any message or client and it becomes a Job so it can't get lost ('Flag a message and it can't get lost'). Requirements: a manual flag sets source=manual and an appropriate type/assignee; flagging is available from the inbox and the client record; idempotent (re-flagging an already-open item doesn't duplicate).
-- [ ] **Rules/keyword auto-categorisation (no AI)**
-  Behaviour: inbound comms auto-categorise into jobs by rules/keyword (NO AI) — e.g. a 'Complaint' conversation → a Lead-Nurse callback job; a 'Booking' enquiry → a Reception reply-&-book job; a 'Pricing' enquiry → a Reception reply job; an 'Auto-detect from inbox' action triggers a sweep. Requirements: rules/keyword only (auto-categorisation is a UX aid, not a safety control — jobs are advisory and human-actioned); idempotent (don't double-create for an already-open conversation job); the assigned role follows the category.
 - [ ] **Follow-ups web UI (filters, job rows, actions, nav badge)**
-  Behaviour: the Follow-ups screen shows filter pills (Open / Mine / Snoozed / Done) with counts and an 'Auto-detect from inbox' action; each job row has a type badge, assignee, source tag (auto-detected / flagged / recall / system), due + client link, a primary action (open chat / open client / view report), a done checkbox and Snooze / Reassign. A count badge in the nav and a dashboard 'follow-ups' list keep it visible. Requirements: role-scoped 'Mine'; loading/empty ('queue clear')/error states; the nav badge reflects the open count live.
+  Behaviour: the Follow-ups screen shows filter pills (Open / Mine / Snoozed / Done) with counts; each job row has a type badge, assignee, source tag (recall / system), due + client link, a primary action (open chat / open client / view report), a done checkbox and Snooze / Reassign. A count badge in the nav and a dashboard 'follow-ups' list keep it visible. Requirements: role-scoped 'Mine'; loading/empty ('queue clear')/error states; the nav badge reflects the open count live. (The 'Auto-detect from inbox' action ships with the auto-categorisation follow-up.)

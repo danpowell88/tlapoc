@@ -1,4 +1,4 @@
-# Stocktake, discrepancy & loss/theft reporting
+# Stocktake & discrepancy surfacing (MVP)
 
 > **Epic:** [PRD-04 — Consult, prescribing & S4 medicines governance (the moat)](../epics/PRD-04.md)  ·  **Key:** `PRD-04/STOCKTAKE`  ·  **Type:** Story  ·  **Stage:** M3  ·  **Priority:** P1  ·  **Estimate:** 3 pts  ·  **Area:** backend
 >
@@ -51,9 +51,7 @@ Stocktake results, discrepancies and loss/theft reports feed the compliance dash
 
 ## Tasks (dev pickup)
 
-- [ ] **Stocktake + LossReport model + expiry alerting (model & migration)**
-  Add Stocktake: id, tenant_id, at, actor_id, lines[]{lot_id, expected, counted, variance}; and LossReport: id, tenant_id, stocktake_id, lot_id, units, kind(loss|theft), reported_at, reported_by, note; RLS by tenant. expected is snapshotted from the StockLedger at count time. Add an expiry-alert query/threshold over StockItem.expiry to surface near-expiry lots (drives the 'Expiring soon' tile and the per-lot Expiring status).
-- [ ] **Stocktake API + discrepancy/loss-theft flow**
-  Endpoints: POST /stocktake (per-lot counted), the server computes expected from the ledger and variance per line. A non-zero variance is recorded as a discrepancy; POST /stocktake/{id}/loss-report raises a LossReport(loss|theft) from a discrepancy. Cross-reference cabinet AccessLog anomalies (PRD-04/CUSTODY-STORAGE) so an unexplained open near a count variance is easy to spot. Feed results to the compliance dashboard (PRD-08).
-- [ ] **Discrepancy/expiry surfacing + audit**
-  Surface discrepancies and near-expiry lots on the stock view and the compliance dashboard; FEFO nudge near-expiry lots before they lapse. Audit every stocktake, recorded variance and loss/theft report - periodic reconciliation + loss reporting is the C17 evidence. Capability-gate stocktake/loss-report to stock-capable clinical roles + owner.
+- [ ] **Stocktake model + expiry alerting (model & migration)**
+  Add Stocktake: id, tenant_id, at, actor_id, lines[]{lot_id, expected, counted, variance}; RLS by tenant. expected is snapshotted from the StockLedger at count time. Add an expiry-alert query/threshold over StockItem.expiry to surface near-expiry lots (drives the 'Expiring soon' tile and the per-lot Expiring status).
+- [ ] **Stocktake API + discrepancy surfacing + audit**
+  Endpoint POST /stocktake (per-lot counted); the server computes expected from the ledger and variance per line, and records a non-zero variance as a discrepancy. Surface discrepancies and near-expiry lots on the stock view and the compliance dashboard (PRD-08); FEFO nudge near-expiry lots before they lapse. Audit every stocktake and recorded variance - periodic reconciliation is the C17 evidence. Capability-gate stocktake to stock-capable clinical roles + owner.
