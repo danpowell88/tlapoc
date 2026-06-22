@@ -367,7 +367,7 @@
   },
   {
    "id": "TLA-001.05",
-   "title": "Staff identity: Entra SSO + MFA",
+   "title": "Staff identity — provider port + Entra adapter (first)",
    "status": "To Do",
    "priority": "high",
    "parent": "TLA-001",
@@ -386,7 +386,7 @@
   },
   {
    "id": "TLA-001.06",
-   "title": "Client identity: Entra External ID (social / email / OTP)",
+   "title": "Client identity — provider port + Entra External ID adapter (first)",
    "status": "To Do",
    "priority": "high",
    "parent": "TLA-001",
@@ -511,6 +511,25 @@
    "isEpic": false,
    "tier": "mvp",
    "file": "backlog/tasks/tla-001.12 - De-risk-spikes-auth-RLS-autopay-mapping-canvas-offline-sync.md",
+   "summary": "## Description"
+  },
+  {
+   "id": "TLA-001.13",
+   "title": "Pluggable provider architecture (ports & adapters)",
+   "status": "To Do",
+   "priority": "high",
+   "parent": "TLA-001",
+   "labels": [
+    "type:story",
+    "area:api",
+    "area:infra",
+    "mvp",
+    "milestone:M0"
+   ],
+   "stage": "M0",
+   "isEpic": false,
+   "tier": "mvp",
+   "file": "backlog/tasks/tla-001.13 - Pluggable-provider-architecture-ports-adapters.md",
    "summary": "## Description"
   },
   {
@@ -2417,7 +2436,7 @@
   },
   {
    "id": "TLA-013.03",
-   "title": "Adapter pattern & sub-processor residency posture",
+   "title": "Provider swappability & sub-processor residency posture",
    "status": "To Do",
    "priority": "low",
    "parent": "TLA-013",
@@ -2640,8 +2659,8 @@
  ],
  "counts": {
   "epics": 15,
-  "stories": 121,
-  "mvp": 72,
+  "stories": 122,
+  "mvp": 73,
   "later": 49
  }
 }

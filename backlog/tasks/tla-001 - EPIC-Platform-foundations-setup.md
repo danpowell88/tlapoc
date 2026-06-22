@@ -4,6 +4,7 @@ title: 'EPIC: Platform foundations & setup'
 status: To Do
 assignee: []
 created_date: '2026-06-22 10:40'
+updated_date: '2026-06-22 11:17'
 labels:
   - 'type:epic'
   - 'area:infra'
@@ -20,6 +21,8 @@ ordinal: 1000
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
 Everything that must exist before clinic features can be built safely: the repository and solution structure, CI/CD, an Australia-hosted cloud environment, the multi-tenant data baseline with row-level isolation, staff and client identity wiring, the web and app shells, a shared design system, plus observability and a security baseline.
+
+External dependencies (auth, payments, calendar, accounting, messaging) sit behind **swappable provider ports** — one adapter ships first, others slot in by per-tenant configuration with no app rewrite (TLA-001.13). The clinic is never locked to a single vendor (e.g. Entra for auth, Square for payments).
 
 This epic ships no clinical value on its own — it makes every later epic possible and safe. Stories are scoped to outcomes ("engineers can deploy to a secure AU environment") rather than prescribing the technical how. Derived from PRD-01 §infrastructure and the docs index 'de-risk spikes' note.
 
