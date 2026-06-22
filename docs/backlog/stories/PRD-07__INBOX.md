@@ -9,8 +9,8 @@ The omnichannel inbox (IG/FB/SMS/email), lead/prospect CRM and reviews/reputatio
 
 ## How it works
 
-Placeholder (Phase 2): an omnichannel inbox (IG/FB/SMS/email) with categorisation, client linking and templated/keyword suggested replies (no AI). Meta feasibility (App Review, Business Verification, 24-h window, no cold-DM) means marketing DMs are out — IG/FB/WhatsApp are reactive/service channels while proactive marketing stays on SMS/email.
-Inbound webhooks + provider Send/Conversations APIs behind an IMessagingChannel port (ADR-0018).
+Placeholder (Phase 2). An omnichannel inbox (IG/FB/SMS/email) with category tagging, client linking and templated/keyword suggested replies (no AI). Inbound arrives via provider webhooks and replies go out via the providers' Send/Conversations APIs behind an IMessagingChannel port (ADR-0018). A flagged or complaint conversation raises a Job into Follow-ups; a lead conversation feeds the Lead CRM.
+Feasibility to validate before build: Meta App Review + Business Verification, the 24-hour customer-service window, and the no-cold-DM rule — which is why marketing DMs are out of scope and these stay reactive/service channels. The data model is captured so the unified queue and lead CRM stay inbox-ready.
 
 ## Requirements
 
@@ -20,21 +20,21 @@ Inbound webhooks + provider Send/Conversations APIs behind an IMessagingChannel 
 ## Acceptance Criteria
 
 - [ ] Placeholder — Phase 2; IG/FB/WhatsApp are reactive/service channels only (no cold-DM marketing).
-- [ ] Reviews acknowledge/flag/auto-detect-follow-up and the lead CRM are captured for later.
-- [ ] Meta feasibility (App Review, Business Verification, 24-h window) flagged for validation.
+- [ ] Inbox categorisation, client linking and templated/keyword suggested replies (no AI) captured; flag -> Job, lead -> CRM.
+- [ ] Meta feasibility (App Review, Business Verification, 24-h window) flagged for validation before build.
 
 ## UI designs / screenshots
 
-- Prototype: Comms -> Inbox (marketing-inbox.png) — conversation list with channel + category, client linking, flag, templated/keyword replies (scanInbox/openConvo/sendMsg/linkConvo/flagConvo).
+- Prototype: Comms -> Inbox — conversation list with channel + category, client linking, flag, templated/keyword replies (scanInbox / openConvo / sendMsg / linkConvo / flagConvo).
 
 ![marketing-inbox — prototype screen](../screens/marketing-inbox.png)
 
 ## Suggested data model
 
-- **Conversation** — id, tenant_id, channel, client_id?, category, status, last_at
-  - _Phase 2; reactive channels only._
-- **Message** — id, conversation_id, direction, body, at
-  - _Inbound via webhooks; flag -> Job._
+- **Conversation** — id, tenant_id, channel(ig|fb|sms|email), client_id?, category, status, last_at
+  - _Phase 2; reactive channels only (Meta 24-h window)._
+- **Message** — id, conversation_id, direction(in|out), body, at
+  - _Inbound via webhooks; flag -> Job (Follow-ups)._
 
 ## Technical notes (high level)
 
@@ -47,4 +47,4 @@ Inbound webhooks + provider Send/Conversations APIs behind an IMessagingChannel 
 ## Tasks (dev pickup)
 
 - [ ] **Scope & design when pulled into a sprint**
-  Deferred placeholder — no build in v1; confirm it still fits scope/regulatory stance, then break down.
+  Deferred placeholder — no build in v1. When pulled in: validate Meta feasibility first (App Review, Business Verification, 24-h messaging window, no cold-DM) — these constrain IG/FB/WhatsApp to reactive/service channels; proactive marketing stays on SMS/email. Then design IMessagingChannel (ADR-0018) with inbound webhooks + provider Send/Conversations APIs, the rules/keyword categoriser (no AI), client linking, flag -> Job (Follow-ups) and the Lead-CRM projection. Break down accordingly.

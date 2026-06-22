@@ -9,7 +9,9 @@ Setting the per-request tenant for RLS through EF Core's connection/session life
 
 ## How it works
 
-Spike proving EF Core reliably sets the Postgres session tenant for RLS under connection pooling and async, with a safe audited elevated path for background jobs and an acceptable performance impact. De-risks the RLS baseline (ADR-0002/0003).
+A prototype demonstrates that RLS isolation holds across pooled connections and async requests: the session tenant set for request A never leaks into request B sharing the pool, and the setting follows the connection correctly through async execution. This is the exact failure mode that would silently break tenant isolation if assumed rather than proven.
+It also demonstrates a safe elevated/bypass path for background jobs — how a worker legitimately operates cross-tenant without that capability being reachable from request handling — and that the elevation is audited. And it measures the performance impact of issuing the per-request SET so the team knows the cost is acceptable before standardising on it.
+Go/no-go bar: isolation provably holds under pooling + async, the bypass path works and is audited, and the overhead is acceptable. The documented pattern (where the SET happens in the connection lifecycle, how it's cleared, how the bypass is gated) is what RLS implements; the prototype itself is discarded.
 
 ## Requirements
 
@@ -33,9 +35,18 @@ Spike proving EF Core reliably sets the Postgres session tenant for RLS under co
 
 ## Tasks (dev pickup)
 
-- [ ] **Define spike scope, questions & success criteria**
-  List the unknowns to resolve and the pass/fail bar before building; time-box it.
-- [ ] **Build a throwaway prototype**
-  Smallest end-to-end slice that answers the questions (not production code); measure the risky bits.
-- [ ] **Write up findings + go/no-go recommendation (ADR if warranted)**
-  What worked, the gotchas, the chosen approach + its impact on the dependent stories.
+- [ ] **Define the spike scope, questions and go/no-go criteria**
+  Frame the pooling/async risk precisely and what proving it requires.
+  - Questions: does the per-request session tenant leak across pooled connections; does it follow the connection through async; can a job bypass safely + audited; what's the performance cost?
+  - Go/no-go bar: isolation holds under pooling + async, the audited bypass works, overhead acceptable.
+  - Time-box and the hand-off target (SPRINT-0/RLS).
+- [ ] **Build the throwaway prototype and stress the failure modes**
+  Prove the pattern under the conditions that actually break it.
+  - Exercise concurrent requests over a shared connection pool and assert no cross-request session-tenant leak; assert the setting survives async boundaries.
+  - Demonstrate a background-job bypass path that's unreachable from request code and emits an audit event.
+  - Measure the overhead of the per-request SET. Disposable code — measuring, not productionising.
+- [ ] **Write up the verified pattern, bypass path and perf, with go/no-go**
+  Document exactly what RLS should implement.
+  - Where in the EF Core connection lifecycle the SET happens, how it's cleared on return, and how the job bypass is gated + audited.
+  - The measured performance impact and the go/no-go.
+  - ADR only if a real alternative/decision surfaced (e.g. against a particular pooling config).

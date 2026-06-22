@@ -48,30 +48,50 @@
         "PRD-01/ROSTER"
       ],
       "detail": [
-        "The calendar is the operational heart of reception: a multi-resource diary (practitioner + room/chair/device) that the whole front desk runs from. Service durations include buffer/processing/turnaround so back-to-back bookings are realistic.",
-        "Availability is derived from roster intersected with canInject (PRD-01), so only rostered, cleared practitioners are offered — injectables never offer an uncredentialed staffer. Drag-to-move rebooks; room/device conflicts are flagged."
+        "The calendar is the operational heart of reception: a multi-resource diary that books a practitioner AND a room/chair/device together, with every service carrying its real duration plus buffer/processing/turnaround so back-to-back bookings reflect the room actually being cleaned and the toxin settling, not just chair time.",
+        "Availability is never raw roster. It is the intersection of (a) the practitioner's RosterShift for the day (PRD-01/ROSTER), minus TimeOff and existing appointments, with (b) the practitioner's canInject capability for the service's schedule class, AND (c) a free room/chair/device for the whole block including buffers. An uncredentialled or unrostered staffer is simply not offered for an injectable. Drag-to-move recomputes the same intersection at the drop target and flags a clash on room/chair/device before it commits.",
+        "The week grid surfaces operational signal the front desk runs on: per-day appointment counts, per-treatment-type counts (anti-wrinkle / filler / skin / consult), chairs-booked utilisation %, idle chair-hours, and amber quiet-window cells that can be back-filled (feeds WAITLIST/REMINDERS recall)."
       ],
       "ui_spec": [
-        "Prototype: Schedule (schedule.png) — day/week/room views with practitioner columns; appointment blocks colour-coded by type/status.",
-        "Per-day and per-treatment-type counts + utilisation; quiet-window fill suggestions.",
-        "Drag an appointment to move it; conflicting room/chair/device usage is flagged inline.",
-        "Time-off and unrostered periods render as unavailable."
+        "Prototype: Schedule (schedule.png) — Day/Week toggle, week-range stepper, '+ New' opens the booking wizard. Practitioner/day columns with hourly rows; appointment blocks are colour-coded by treatment type with a legend (anti-wrinkle / filler / skin / consult) and carry the client name, type and status icons.",
+        "Summary strip above the grid: total appointments (14), chairs booked (68%), idle chair time (~12h), and per-type counts as chips.",
+        "Open cells render as bookable; quiet/amber cells are flagged 'quiet — fill'; tap an appointment to open the move/cancel modal; in move mode, valid drop targets show a dashed add-location affordance and conflicting room/chair/device usage is flagged inline.",
+        "Unrostered periods and TimeOff render as unavailable (not bookable); a 'Quiet windows to fill' panel lists open chairs per day with an 'Offer recall' / 'Fill' action."
       ],
       "data_model": [
         {
           "entity": "Appointment",
-          "fields": "id, tenant_id, location_id, client_id, service_id, practitioner_id, room_id, start, end, status, reason, source(online|desk|walkin)",
-          "notes": "Status drives the visit lifecycle (LIFECYCLE)."
+          "fields": "id, tenant_id, location_id, client_id, service_id, practitioner_id, room_id, start, end, status, reason, source(online|desk|walkin), tags[]",
+          "notes": "Status drives the visit lifecycle (LIFECYCLE); colour in the grid is derived from service.treatment_type."
         },
         {
           "entity": "Resource",
-          "fields": "id, tenant_id, type(room|chair|device), name, status",
-          "notes": "Booked alongside the practitioner; conflict-checked."
+          "fields": "id, tenant_id, location_id, type(room|chair|device), name, status(active|maintenance)",
+          "notes": "Booked alongside the practitioner and conflict-checked for the whole block incl. buffers; maps to the prototype's 'Rm 1/2/3'."
+        },
+        {
+          "entity": "Service (ref)",
+          "fields": "duration, buffer, processing_time, turnaround, schedule(S4|non-S4), eligible_roles[]",
+          "notes": "Owned by SERVICE-CATALOGUE; supplies block length + scope class."
         },
         {
           "entity": "(derived) Availability",
-          "fields": "= RosterShift - TimeOff - existing appts, intersected with canInject + resource free",
-          "notes": "Feeds the slot picker."
+          "fields": "= RosterShift − TimeOff − existing Appointments, ∩ canInject(service.schedule), ∩ free Resource for the block",
+          "notes": "The single function that feeds the slot picker, the wizard and online booking; recomputed on drag-drop."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Availability engine: roster ∩ canInject ∩ free-resource",
+          "note": "Build the server-side availability function that, for a date range + service, returns bookable (practitioner, room, start) tuples. Inputs: RosterShift (PRD-01), TimeOff, existing Appointments, the practitioner canInject capability vs service.schedule, and Resource free/busy for the block length INCLUDING buffer/processing/turnaround. Returns scope-clean slots only — an uncredentialled or unrostered practitioner never appears for an injectable. Expose a read endpoint (GET availability?serviceId&from&to[&practitionerId]) consumed by the wizard, online booking and drag-drop validation. Pure, side-effect-free, tenant-scoped (RLS)."
+        },
+        {
+          "title": "Calendar API: appointment CRUD + move + conflict check",
+          "note": "Endpoints to create/read/update/cancel an Appointment and to move it (PUT new practitioner/room/start). On create and on move, re-run the availability engine server-side and REJECT with a structured conflict (room/chair/device busy, outside roster, scope mismatch) — never trust the client. Emit appointment.created / appointment.moved domain events for reminders + read models. Persist source(online|desk|walkin) and reason. Buffers reserve the resource for the full block."
+        },
+        {
+          "title": "Week/day calendar UI: columns, colour-coded blocks, drag-to-move, utilisation strip",
+          "note": "Angular calendar: Day/Week toggle, week stepper, practitioner/day columns with hourly rows. Render Appointment blocks colour-coded by treatment type with a legend; show client/type/status. Drag-to-move calls the move endpoint and shows the dashed drop affordance + inline conflict flag on invalid targets. Summary strip: total appts, chairs-booked %, idle chair-hours, per-type count chips. Render TimeOff/unrostered as unavailable and quiet windows as amber 'fill' cells with an Offer-recall/Fill action."
         }
       ]
     },
@@ -115,23 +135,48 @@
         "PRD-01/CREDENTIALS"
       ],
       "detail": [
-        "Client-facing self-booking on the public page: service -> practitioner -> slot -> account -> intake/consent. It reuses the same scope-aware availability as the desk, so an injectable only offers cleared RN/NP and requires the consult step downstream.",
-        "Public service names are generic and S4 prices withheld by configuration (C9). Under-18 bookings are flagged so cooling-off can be enforced later (PRD-03)."
+        "Client-facing self-booking on the public page / embeddable widget: service → practitioner → slot → account → intake/consent. It reuses the EXACT same scope-aware availability engine as the desk, so an injectable (S4) service only offers cleared RN/NP and presents the consult as part of a gated flow — the public surface can never book an uncredentialled injector.",
+        "The public surface is advertising-constrained by configuration (C9, shared with PRD-07 BOOKING-PAGE): services show clinic-customised GENERIC display names (no S4 brands or 'anti-wrinkle injection' wording), S4 prices are withheld and the service is tagged 'Consultation required' / price-free. None of this is an automated linter — it is a per-tenant PublicBookingConfig setting.",
+        "On account creation the DOB is captured; a booking for a client under 18 is flagged so PRD-03 can later enforce the 7-day cooling-off and payment block. The booked Appointment is identical to a desk booking (source=online) and triggers the intake + consent send."
       ],
       "ui_spec": [
-        "Prototype: public booking page (public-booking.png) and the booking widget (booking-widget.png) — generic service list, practitioner choice, slot grid, account create, then intake/consent.",
-        "No S4 brand names or prices shown; injectables present consult+treatment as a gated flow."
+        "Prototype: public booking widget (booking-widget.png) and the embeddable/customise view (public-booking.png) — 'What can we help with?' service list with generic display names, S4 services tagged 'Consultation required' and shown price-free, 'Pricing is confirmed privately with your practitioner'.",
+        "Flow steps (progress bar): service → practitioner (RN/NP only for S4) → slot grid → your details/account → intake & consent handoff; 'Your details are kept private & used only to manage your booking'.",
+        "public-booking.png also shows the owner's 'Compliant by configuration' panel: generic names, withheld prices, S4 always price-free + 'consultation required', and 'no deposit / card on file in v1'."
       ],
       "data_model": [
         {
           "entity": "Appointment",
           "fields": "(as CALENDAR) source=online",
-          "notes": "Same entity; created via the public flow."
+          "notes": "Same entity; created via the public flow; triggers intake/consent send (PRD-03)."
         },
         {
           "entity": "PublicBookingConfig",
-          "fields": "tenant_id, generic_names(bool), withhold_s4_prices(bool)",
-          "notes": "Drives naming/pricing per C9 (shared with PRD-07 BOOKING-PAGE)."
+          "fields": "tenant_id, generic_names(bool), withhold_s4_prices(bool), display_name_overrides(map), embed_token",
+          "notes": "Drives naming/pricing per C9 (shared with PRD-07 BOOKING-PAGE); a config setting, not a linter."
+        },
+        {
+          "entity": "Client (ref)",
+          "fields": "dob, under_18(derived)",
+          "notes": "DOB captured at account create; under-18 flag feeds PRD-03 cooling-off (C6)."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Public booking API: scope-aware availability + create (source=online)",
+          "note": "Public (unauthenticated for browse, authenticated to commit) endpoints that reuse the CALENDAR availability engine — service list filtered to bookable services, then practitioners filtered to canInject for S4, then slots. Create endpoint sets source=online, runs the same server-side conflict/scope checks as the desk, and rejects an ineligible practitioner for an S4 service. Rate-limit + bot-protect the public surface."
+        },
+        {
+          "title": "PublicBookingConfig: generic names + withheld S4 prices (C9)",
+          "note": "Per-tenant config (generic_names, withhold_s4_prices, display_name_overrides) that the public service list reads. S4 services render with the generic display name, no price, and a 'Consultation required' tag; non-S4 may show price. This is a configuration policy (shared with PRD-07 BOOKING-PAGE), NOT an advertising linter. Server returns already-sanitised data so the client never receives an S4 brand/price."
+        },
+        {
+          "title": "Public booking widget UI: stepped flow + account + intake/consent handoff",
+          "note": "Embeddable/standalone widget: progress-stepped service → practitioner → slot → details/account → confirm. Generic service cards, 'Consultation required' chips on S4, 'pricing confirmed privately' copy. Account create captures DOB; under-18 sets the flag on the resulting Appointment for PRD-03. On confirm, hand off to the intake + consent send and show the 'kept private' assurance. Customise panel (brand colour/name/services) backs the embed config."
+        },
+        {
+          "title": "Under-18 flag propagation from booking",
+          "note": "On create, derive under_18 from DOB and stamp it on the Appointment so PRD-03 COOLING-OFF/GATING can enforce the 7-day cooling-off + payment block. No cooling-off logic here — only the durable flag + a domain event so downstream gates can react. Guardian/contact capture is deferred to PRD-03 consent."
         }
       ]
     },
@@ -171,18 +216,39 @@
         "PRD-02/ONLINE-BOOK"
       ],
       "detail": [
-        "The booking-side half of the moat: an injectable appointment cannot progress to charting until a synchronous Consult is linked (REQ-BOOK-5). Server-enforced, surfaced via the blocked-action banner.",
-        "This guarantees no S4 treatment can begin without the consult, complementing the consent gate (PRD-03) and the Rx gate (PRD-04)."
+        "The booking-side half of the compliance moat: a checked-in injectable (S4) appointment cannot progress to charting until a synchronous Consult is linked (REQ-BOOK-5, C1). The gate is server-enforced — the open-charting action checks Appointment.consult_id (for S4 services) before returning the charting context, so it cannot be bypassed by hitting the API directly.",
+        "On the schedule/Today board the injectable visit shows its gate status; on the Charting screen the pre-treatment review shows the gate chips (Consult / Consent / screening) and a calm blocked-action banner stating what is missing and who can resolve it (per ADR-0008 — never a dead-end). Once the prescriber records the consult (handoff to PRD-04 CONSULT), consult_id is set and the gate clears.",
+        "This complements, and is distinct from, the consent gate (PRD-03 GATING) and the Rx gate (PRD-04): consult-linked is necessary but not alone sufficient for an S4 treatment. Non-S4 (skin) services have no consult requirement and are unaffected."
       ],
       "ui_spec": [
-        "Prototype: the Charting screen (charting.png) shows the gate chips (Consult / Consent / screening) and the Consult & prescription card; a checked-in injectable with no consult cannot open charting and shows why.",
-        "On the schedule/Today board, an injectable visit shows its gate status."
+        "Prototype: Charting (charting.png) — the patient header shows 'Consult ✓ · Consent ✓ · screening clear'; the Pre-treatment review card surfaces the same chips and the Consult & prescription card. A checked-in injectable with no consult cannot open charting and shows why.",
+        "On the schedule/Today board the injectable visit shows its gate status (e.g. 'Awaiting consent/consult' style chip).",
+        "Blocked-action banner explains what's missing, links to the fix (record consult), and names who can resolve it (NP/prescriber)."
       ],
       "data_model": [
         {
           "entity": "Appointment.consult_id",
           "fields": "FK Consult (PRD-04), nullable until consult recorded",
-          "notes": "Charting open is blocked while null for S4 services."
+          "notes": "Charting open is blocked while null for S4 services; non-S4 ignores it."
+        },
+        {
+          "entity": "(derived) ConsultGate",
+          "fields": "= service.schedule==S4 ⇒ require Appointment.consult_id present",
+          "notes": "Evaluated server-side before charting context is returned (ADR-0008); audited."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Server-side consult gate on charting-open (S4 only)",
+          "note": "When the charting context for an Appointment is requested, evaluate the gate: if service.schedule==S4 and Appointment.consult_id is null, refuse to return the editable charting context and return a structured 'missing: consult' reason instead. Enforce in the domain/API layer (ADR-0008), independent of the UI. Add Appointment.consult_id (FK Consult, nullable). Clearing happens when PRD-04 records the consult and sets consult_id."
+        },
+        {
+          "title": "Gate status on Today/Schedule board + blocked-action banner",
+          "note": "Surface the per-visit gate state on the Today board and Schedule (chip: consult/consent/screening status). On the Charting screen render the calm blocked-action banner from the structured reason: what's missing, the fix link (record consult), and who can resolve it (NP/prescriber). Reuse the same banner component PRD-03 GATING uses."
+        },
+        {
+          "title": "Gate-decision audit events",
+          "note": "Every gate evaluation that BLOCKS (and the later clear) writes an AuditEvent (actor, appointment, reason, timestamp) to the append-only stream (ADR-0010) so the moat is demonstrable to a regulator. Emit a domain event when consult_id is set so the board/banner update live."
         }
       ]
     },
@@ -219,23 +285,44 @@
         "PRD-02/CALENDAR"
       ],
       "detail": [
-        "The visit lifecycle is a status state-machine: booked -> reminded -> checked-in -> in-room -> checked-out, with role hand-offs. Late and no-show flags are raised; a no-show automatically creates a follow-up call (PRD-07).",
-        "Captures new-vs-returning, reason and roster so reporting and recall work."
+        "The visit is the spine that carries the client between roles (ADR-0024). The Appointment is a state machine — booked → reminded/confirmed → checked-in → in-room (in treatment) → for-checkout → checked-out/done (→ recall) — and each state surfaces the next action for whoever is responsible now, handing off automatically (reception flags late/no-show; a clinician starts treatment; finalise sets for-checkout, lighting up reception's queue).",
+        "Reception flags late attendance and no-show; a no-show auto-creates a follow-up CALL job (PRD-07 jobs queue) so it is never lost. An 'in-room now' indicator shows who is being treated with quick links to their chart/profile. (Small clinics may skip a formal check-in — late/no-show are the flags that matter.)",
+        "Booking captures new-vs-returning (full intake vs quick re-screen), reason/notes and respects the practitioner roster — these drive recall, reporting and the intake send. Every transition is audited via VisitEvent."
       ],
       "ui_spec": [
-        "Prototype: Today (dashboard.png) — waiting / in-room / checked-out columns; an 'in-room now' indicator with quick links to chart/profile.",
-        "Check-in on arrival; late/no-show flags; status chips on each appointment."
+        "Prototype: Today (dashboard.png) — KPI tiles (appointments, checked in, awaiting consent, stock, follow-ups); 'Today's schedule' with a 'WITH YOU NOW' in-room strip (client + Open chart/Profile), and each row showing status chips + actions: Confirmed, Start, Late, No-show, Resume, Profile.",
+        "Status chips per appointment; check-in on arrival; late/no-show flags; a no-show row links into Follow-ups.",
+        "'Awaiting consent — treatment gated until done' tile ties the lifecycle to the gates."
       ],
       "data_model": [
         {
           "entity": "Appointment.status",
-          "fields": "booked|reminded|checked_in|in_room|checked_out|late|no_show|cancelled",
-          "notes": "Transitions audited; no_show raises a Job (PRD-07)."
+          "fields": "booked|reminded|checked_in|in_room|for_checkout|checked_out|late|no_show|cancelled",
+          "notes": "State machine with role hand-offs (ADR-0024); transitions validated server-side; no_show raises a Job (PRD-07)."
         },
         {
           "entity": "VisitEvent",
-          "fields": "id, appointment_id, status, at, actor_id",
-          "notes": "Audit trail of the visit's transitions."
+          "fields": "id, tenant_id, appointment_id, from_status, to_status, at, actor_id",
+          "notes": "Append-only audit trail of the visit's transitions."
+        },
+        {
+          "entity": "Appointment (booking fields)",
+          "fields": "new_or_returning, reason, practitioner_id",
+          "notes": "Captured at booking; drives intake type (full vs re-screen), recall and reporting."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Visit state-machine + transition API (server-validated)",
+          "note": "Model Appointment.status as a state machine (booked→reminded→checked_in→in_room→for_checkout→checked_out, plus late/no_show/cancelled). Transition endpoints validate legal transitions server-side and reject illegal ones; each write appends a VisitEvent (from/to/actor/at) to the audit stream. Emit domain events per transition for the Today board, reminders and read models. Capture new_or_returning/reason/practitioner at booking."
+        },
+        {
+          "title": "No-show → auto follow-up call job",
+          "note": "When status transitions to no_show, automatically create a Follow-up CALL job in the PRD-07 jobs queue (assignee=reception, source=system, due=today) so the no-show is recovered. Late is a flag only (no job). Idempotent — re-flagging doesn't duplicate the job."
+        },
+        {
+          "title": "Today board: in-room-now strip + per-row status actions",
+          "note": "Angular Today screen: KPI tiles; 'Today's schedule' list with a 'WITH YOU NOW' in-room strip (current client + Open chart / Profile). Each row shows the current status chip and the role-appropriate next action (Confirmed/Start/Resume/Late/No-show/Profile) wired to the transition API. Reflect the consult/consent gate state ('Awaiting consent — treatment gated'). Live-update from transition events."
         }
       ]
     },
@@ -273,23 +360,39 @@
         "PRD-02/LIFECYCLE"
       ],
       "detail": [
-        "Clients get reminders they can confirm/decline and can self-reschedule or cancel within policy without calling. Outside policy, the configured rule applies (no auto-charge in v1).",
-        "The reminder channel is provided by PRD-07; this story is the booking-side scheduling + self-service actions."
+        "Clients get appointment reminders they can confirm or decline, and can self-reschedule or cancel within policy without calling — keeping the diary accurate. Confirm/decline updates the Appointment status (→ reminded/confirmed); a decline or cancel frees the slot (feeds WAITLIST backfill).",
+        "Self-reschedule/cancel is allowed inside the configurable cancellation window; outside the window the configured rule applies (a message/flag) — there is NO deposit and NO auto-charge in v1 (REQ-BOOK-3). The cancellation/no-show policy (window hours, no-show rule) is a per-tenant setting.",
+        "This story owns the booking-side scheduling + self-service actions and policy; the actual SMS/app/email delivery channel is provided by PRD-07 (INotifier). Reminders are scheduled relative to the appointment (e.g. 24h prior) per template."
       ],
       "ui_spec": [
-        "Client app / email-SMS: reminder with confirm/decline + reschedule/cancel links; the desk sees confirm/decline status on the appointment (schedule.png).",
-        "Cancellation/no-show policy is configurable in settings."
+        "Client app / SMS / email: reminder with confirm/decline + reschedule/cancel links (self-service within policy).",
+        "Desk: confirm/decline status shows on the appointment in the Schedule (schedule.png) — e.g. 'Confirmed' chip on the Today board.",
+        "Settings: cancellation/no-show policy (window hours, rule) is configurable; v1 states 'no auto-charge'."
       ],
       "data_model": [
         {
           "entity": "ReminderSchedule",
-          "fields": "id, appointment_id, channel, send_at, status(sent|confirmed|declined)",
-          "notes": "Updates Appointment.status on confirm/decline."
+          "fields": "id, tenant_id, appointment_id, channel(sms|app|email), template_id, send_at, status(scheduled|sent|confirmed|declined)",
+          "notes": "Scheduled relative to the appointment; delivery via PRD-07 INotifier; confirm/decline updates Appointment.status."
         },
         {
           "entity": "CancellationPolicy",
-          "fields": "tenant_id, window_hours, no_show_rule",
-          "notes": "No deposit/auto-charge in v1."
+          "fields": "tenant_id, window_hours, no_show_rule, allow_self_reschedule(bool)",
+          "notes": "No deposit/auto-charge in v1; governs the self-service reschedule/cancel boundary."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Reminder scheduling + confirm/decline handling",
+          "note": "Create ReminderSchedule rows when an appointment is booked/moved (send_at relative to start, per template). A scheduled job dispatches due reminders via the PRD-07 INotifier (SMS/app/email). Public confirm/decline links resolve to endpoints that update Appointment.status (confirmed) or mark declined and free the slot (emit an event WAITLIST listens to). Idempotent; reschedule/cancel reschedules the reminder."
+        },
+        {
+          "title": "Self-service reschedule/cancel within policy",
+          "note": "Client-facing reschedule/cancel that enforces CancellationPolicy.window_hours server-side: inside the window → reuse the availability engine to move, or cancel and free the slot; outside the window → apply the configured rule (block/flag/message) with NO charge or deposit (v1). All actions audited; cancel emits the slot-freed event for WAITLIST."
+        },
+        {
+          "title": "Cancellation/no-show policy settings UI",
+          "note": "Per-tenant settings: window_hours, no_show_rule, allow_self_reschedule. Validate and persist; surface a plain-language 'no auto-charge in v1' note. The policy is shown to the client at confirm time (ties to BOOKING-WIZARD confirmation step) and enforced by the self-service endpoints."
         }
       ]
     },
@@ -328,17 +431,33 @@
         "PRD-02/REMINDERS"
       ],
       "detail": [
-        "A waitlist captures clients who want an earlier slot; when an appointment cancels or no-shows, the freed slot is auto-offered to the waitlist to keep the diary full and fill quiet windows.",
-        "Offered/accepted/expired states are tracked."
+        "A waitlist captures clients who want an earlier slot for a service/window. When an appointment cancels or no-shows, the freed slot is automatically offered to matching waitlist entries (FIFO/priority) to keep the diary full and fill quiet windows.",
+        "An offer has a short hold/expiry: offered → accepted (books the slot, reusing the availability engine so scope/resource rules still hold) or expired (rolls to the next entry). Quiet-window fill suggestions surface from the calendar's utilisation data (the amber cells / 'Quiet windows to fill' panel) and can trigger a recall offer.",
+        "Offered/accepted/expired states are tracked per entry so the desk can see who was offered what and when."
       ],
       "ui_spec": [
-        "Prototype: Schedule (schedule.png) — waitlist management + a backfill prompt on cancellation; quiet-window fill suggestions from utilisation."
+        "Prototype: Schedule (schedule.png) — 'Quiet windows to fill' panel (open chairs per day, 'Offer recall' / 'Fill') and a backfill prompt when an appointment cancels/no-shows.",
+        "Waitlist management: add a client to a waitlist for a service/window; see offered/accepted/expired status."
       ],
       "data_model": [
         {
           "entity": "WaitlistEntry",
-          "fields": "id, tenant_id, client_id, service_id, window, status(waiting|offered|accepted|expired), offered_at",
-          "notes": "Backfills on cancel/no-show."
+          "fields": "id, tenant_id, client_id, service_id, window(date/time range), priority, status(waiting|offered|accepted|expired), offered_at, expires_at",
+          "notes": "Backfills on cancel/no-show; offer holds the slot until expiry, then rolls on."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Waitlist entry + matching/backfill engine",
+          "note": "WaitlistEntry CRUD (client, service, desired window, priority). Subscribe to the slot-freed event (cancel/no-show from REMINDERS/LIFECYCLE); match freed slots to waiting entries (service + window + scope/resource feasible per the availability engine), create an offer with expires_at, and dispatch it (PRD-07). On accept → book via the create endpoint (full scope/conflict checks) and mark accepted; on expiry → mark expired and roll to the next entry. Idempotent, tenant-scoped."
+        },
+        {
+          "title": "Quiet-window fill suggestions from utilisation",
+          "note": "Derive open/quiet chair windows from the calendar (roster − bookings, idle resource blocks) and expose them as fill suggestions. Drive the Schedule 'Quiet windows to fill' panel (open chairs per day, ideal-for-recall hints e.g. lot expiry) with 'Offer recall' (push to waitlist/recall) and 'Fill' actions."
+        },
+        {
+          "title": "Waitlist management UI + backfill prompt",
+          "note": "UI to add/view/remove waitlist entries for a service/window and see offered/accepted/expired status. When an appointment is cancelled/no-showed, show the backfill prompt ('offer this slot to the waitlist'). Wire the Schedule quiet-window panel actions to the matching engine."
         }
       ]
     },
@@ -375,17 +494,37 @@
         "PRD-02/CALENDAR"
       ],
       "detail": [
-        "Walk-ins and same-day add-ons are supported but gate-respecting: an injectable walk-in still needs a consult first. Rooms/chairs/devices are scheduled as resources with conflict-flagging and utilisation; VIP/first-time tags supported.",
-        "Lets the clinic capture opportunistic demand without breaking the rules or double-booking."
+        "Walk-ins and same-day add-ons let the clinic capture opportunistic demand, but they are gate-respecting: an injectable walk-in still needs a synchronous consult before charting (the CONSULT-GATE applies regardless of source=walkin), and still requires consent (PRD-03). The walk-in flow attaches/creates the client, picks an available practitioner+resource and books source=walkin.",
+        "Rooms/chairs/devices are scheduled as Resources with conflict-flagging and utilisation — a same-day add-on must land on a free resource for its whole block (incl. buffers); conflicts are surfaced BEFORE confirmation. VIP and first-time appointment tags are supported and shown on the appointment.",
+        "This reuses the calendar's availability engine and the visit lifecycle; nothing about walk-ins bypasses scope or the compliance gates."
       ],
       "ui_spec": [
-        "Prototype: Schedule (schedule.png) — add walk-in / same-day add-on against an available resource; resource conflicts flagged before confirm; VIP / first-time appointment tags."
+        "Prototype: Schedule (schedule.png) — add walk-in / same-day add-on against an available resource (the grid shows a 'Walk-in NEW · Skin' block); resource conflicts flagged before confirm; VIP / first-time appointment tags on the appointment."
       ],
       "data_model": [
         {
           "entity": "Appointment",
           "fields": "(as CALENDAR) source=walkin; tags[](vip|first_time)",
-          "notes": "Injectable walk-in still requires consult_id before charting."
+          "notes": "Injectable walk-in still requires consult_id before charting (CONSULT-GATE) and consent (PRD-03)."
+        },
+        {
+          "entity": "Resource (ref)",
+          "fields": "free/busy for the block incl. buffers",
+          "notes": "Conflict-checked before a walk-in/add-on confirms; surfaces utilisation."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Walk-in / same-day add-on booking flow (gate-respecting)",
+          "note": "Quick-add flow from the Schedule that attaches an existing or new client, picks a free practitioner+resource via the availability engine, and books source=walkin. For S4 services, the resulting appointment still carries the consult gate (consult_id null ⇒ charting blocked) and requires consent — walk-ins never bypass C1/C5. Same-day add-on appends a service to an in-progress visit on a free resource."
+        },
+        {
+          "title": "Resource conflict-flagging before confirm + tags",
+          "note": "Before a walk-in/add-on confirms, check the chosen room/chair/device is free for the whole block incl. buffers and surface any conflict inline (block confirm until resolved). Support appointment tags[] (vip, first_time) set at booking and rendered on the calendar block. Feed resource utilisation."
+        },
+        {
+          "title": "Walk-in UI on the Schedule grid",
+          "note": "Render walk-in blocks distinctly (e.g. 'Walk-in NEW') and add the quick-add affordance from an open/quiet cell. Show VIP/first-time tags. Surface the conflict warning before confirmation. Reuse the move/cancel modal."
         }
       ]
     },
@@ -422,18 +561,39 @@
         "PRD-01/CLIENT-CORE"
       ],
       "detail": [
-        "A single 360-degree client profile pulls together everything any staff member needs: overview, medical/contraindications, consents, photos, visit history, memberships, balance, comms and complaints — surfacing data owned by PRD-03/04/05/06/11 via the API.",
-        "Access is RBAC-scoped (reception sees limited clinical info) and audited."
+        "A single 360° client profile pulls together everything any staff member needs in one place: overview/at-a-glance, visit history, treatment plan, photos (image-use gated), consents & forms, membership & rewards, billing and notes/comms — surfacing data OWNED by PRD-03/04/05/06/11 via the API (this story is the read aggregation + header, not the source of truth for each part).",
+        "The header carries the compliance/age chips — Consent current, Image use ✓, Balance, Allergy flags, and (when applicable) an under-18 cooling-off chip — so a clinician sees the gate state at a glance before opening the chart. Quick actions: Open chart (capability-gated) and Checkout.",
+        "Access is RBAC-scoped and audited (C10): reception sees limited clinical info (no full clinical record), money figures stay behind the .fin capability (owner-only), and every read of clinical/PII data writes an AuditEvent."
       ],
       "ui_spec": [
-        "Prototype: Client 360 (client-360.png) — header with consent/age chips (consent / image-use / under-18 cooling-off), tabbed sections for medical, consents, photos, visits, memberships, balance, comms, complaints.",
-        "Quick links into charting, checkout and follow-ups."
+        "Prototype: Client 360 (client-360.png) — header with avatar, name, VIP/member tag, demographics, and compliance chips: 'Consent current', 'Image use ✓', 'Balance $0', 'Allergy: none'. Quick actions 'Open chart' / 'Checkout'.",
+        "Tabbed sections: Overview (recent activity + at-a-glance: visits, last seen, referred-by; lifetime spend is .fin-gated), Visits, Treatment plan, Photos (image-use consent on file), Consents & forms, Membership & rewards, Billing (.fin), Notes & comms.",
+        "Reception sees limited clinical info; money tabs/figures gated behind .fin (owner-only)."
       ],
       "data_model": [
         {
-          "entity": "Client (aggregate view)",
-          "fields": "joins Client + IntakeResponse + ConsentSignature + Photo + Appointment + Membership + AccountBalance + Complaint",
-          "notes": "Read aggregation; each part owned by its module. RBAC filters fields."
+          "entity": "Client (aggregate read view)",
+          "fields": "joins Client + IntakeResponse + ConsentSignature + ImageConsent + Photo + Appointment/Visit + Membership + AccountBalance + RewardLedger + Complaint",
+          "notes": "Read aggregation; each part owned by its module; RBAC filters fields; .fin gates money."
+        },
+        {
+          "entity": "AuditEvent (ref)",
+          "fields": "actor, client_id, fields-viewed, at",
+          "notes": "Every clinical/PII read is audited (C10, ADR-0010)."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Client 360 read-aggregation API (RBAC + .fin + audit)",
+          "note": "A read endpoint that composes the profile from each owning module (intake, consent, image-consent, photos, visits, plan, membership, balance, rewards, complaints). Apply RBAC field filtering server-side (reception gets limited clinical info; money fields require the .fin capability — owner-only), and write an AuditEvent for every clinical/PII read (C10, ADR-0010). Returns the header chip state (consent current, image-use, under-18 cooling-off) computed from the gates."
+        },
+        {
+          "title": "Profile header with compliance/age chips + quick actions",
+          "note": "Angular profile header: avatar, name, member/VIP tag, demographics; chips for Consent current / Image use / Balance / Allergy / under-18 cooling-off (driven by the gate state). Quick actions Open chart (hidden unless the role has chart capability) and Checkout. Chips are the at-a-glance gate read before charting."
+        },
+        {
+          "title": "Tabbed profile sections (Overview/Visits/Plan/Photos/Consents/Membership/Billing/Notes)",
+          "note": "Tabbed body rendering each aggregated section: Overview (recent activity + at-a-glance), Visits, Treatment plan, Photos (only if image-use consent active), Consents & forms, Membership & rewards, Billing (.fin-gated), Notes & comms. Each tab reads its module's data via the aggregation API; money tabs/figures honour .fin. Deep-links into charting/checkout/follow-ups."
         }
       ]
     },
@@ -470,23 +630,38 @@
         "PRD-02/CLIENT-360"
       ],
       "detail": [
-        "A fast, searchable client directory with duplicate detection/merge (preserving history + audit) and audited soft-delete, so the client list stays accurate and findable.",
-        "Quick client search is reachable from the front-desk shell (the header search)."
+        "A fast, searchable client directory so the front desk can find anyone by name/phone/email and filter by segment (All / Members / At-risk / New). A row opens the Client 360. The global header search jumps straight to a client from anywhere in the shell.",
+        "Duplicate detection + merge keeps the record clean: candidate duplicates are surfaced, and a merge re-points all child records (appointments, consents, photos, invoices, memberships) to the surviving primary while preserving history, writing a MergeLog (audited, reversible reference).",
+        "Soft-delete sets deleted_at (audited) and excludes the client from active views without destroying history — respecting retention obligations (records can't simply be hard-deleted; PRD-01 RETENTION governs true destruction)."
       ],
       "ui_spec": [
-        "Prototype: Clients (clients.png) — searchable/filterable directory list; row -> opens Client 360; merge-duplicates and soft-delete actions.",
-        "Global header search jumps straight to a client."
+        "Prototype: Clients (clients.png) — search by name/phone/email; segment filters (All / Members / At-risk / New); table columns Client, Status, Last visit, Lifetime (.fin), Membership, Next; a row opens Client 360.",
+        "Merge-duplicates and soft-delete actions; global header search ('Search clients, appointments, invoices…') jumps straight to a client."
       ],
       "data_model": [
         {
           "entity": "Client",
-          "fields": "(as PRD-01 CLIENT-CORE) + search index",
-          "notes": "Merge re-points child records; soft-delete sets deleted_at."
+          "fields": "(as PRD-01 CLIENT-CORE) + search_index, deleted_at",
+          "notes": "Soft-delete sets deleted_at and excludes from active views; never hard-deleted (retention)."
         },
         {
           "entity": "MergeLog",
-          "fields": "id, primary_id, merged_id, at, actor_id",
-          "notes": "Audited; reversible reference."
+          "fields": "id, tenant_id, primary_id, merged_id, at, actor_id, repointed_counts(json)",
+          "notes": "Audited; merge re-points child records to the primary and preserves history."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Directory search/filter API + index",
+          "note": "Searchable, paginated directory endpoint over name/phone/email with segment filters (members/at-risk/new) and tenant RLS; back it with a search index for fast prefix/fuzzy match. Exclude soft-deleted clients from active results. Money columns (lifetime) flagged .fin so the UI can gate them. Also powers the global header search."
+        },
+        {
+          "title": "Duplicate detection + merge with re-point + MergeLog",
+          "note": "Detect candidate duplicates (name/dob/phone/email heuristics). Merge transaction re-points ALL child records (appointments, consents, image-consent, photos, invoices, memberships, rewards, jobs) from the merged client to the surviving primary, preserving history, and writes a MergeLog (primary/merged/actor/at/repointed counts) for audit + reversible reference. Server-enforced; capability-gated."
+        },
+        {
+          "title": "Soft-delete (audited) + directory/search UI",
+          "note": "Soft-delete sets deleted_at + audits; client drops from active views but history is retained (true destruction is PRD-01 RETENTION only). Build the Clients UI: search box, segment filter chips, table (Client/Status/Last visit/Lifetime[.fin]/Membership/Next), row→Client 360, and the merge/soft-delete actions. Wire the global header search to jump to a client."
         }
       ]
     },
@@ -517,13 +692,20 @@
       ],
       "priority": "P2",
       "detail": [
-        "Placeholder (Phase 2): an opt-in booking deposit / card-on-file hold to reduce no-shows. Must keep the cooling-off suppression invariant (F14) — no hold during a cooling-off period. Not in v1."
+        "Placeholder (Phase 2). An opt-in, ACL-fair booking deposit / card-on-file hold to reduce no-shows — front-desk-controlled, disclosed at booking, refundable on notice, never a pressure mechanism (ADR-0026). NOT in v1: there are no deposits or holds in v1 (REQ-BOOK-3, scoping decision).",
+        "Design constraint that must survive into Phase 2: the cooling-off suppression invariant (F14) — no deposit/hold may be placed or held during an under-18 cooling-off period (coordinates with PRD-03 COOLING-OFF). When built it sits behind the existing IPaymentProvider (ADR-0036); S4 is never priced/sold online."
       ],
       "data_model": [
         {
           "entity": "BookingHold",
-          "fields": "id, appointment_id, amount, token_ref, status",
-          "notes": "Placeholder; suppressed during cooling-off."
+          "fields": "id, tenant_id, appointment_id, amount, token_ref, status(placed|captured|released|refunded)",
+          "notes": "Placeholder; behind IPaymentProvider; SUPPRESSED during cooling-off (F14)."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Design note: ACL-fair deposits + cooling-off suppression (F14) — Phase 2",
+          "note": "Placeholder design task (no v1 build). Document the opt-in deposit / card-on-file hold model behind IPaymentProvider (ADR-0036): disclosed at booking, refundable on notice, ACL-fair, never coercive. Capture the hard invariant F14 — a BookingHold must NOT be placed or held during an under-18 cooling-off period (coordinates with PRD-03 COOLING-OFF). S4 is never priced or sold online. Produce the design only; defer implementation to Phase 2."
         }
       ]
     },
@@ -564,18 +746,43 @@
         "PRD-02/SERVICE-CATALOGUE"
       ],
       "detail": [
-        "The staff booking wizard is the desk/phone counterpart to online self-booking and the path most bookings flow through: service -> practitioner -> time slot -> client -> confirm, with the cancellation policy shown and reminders scheduled.",
-        "Scope-aware: injectable services only offer cleared RN/NP; under-18 is flagged for cooling-off."
+        "The staff booking wizard is the desk/phone counterpart to online self-booking and the path most bookings flow through: service → practitioner → time slot → client → confirm. It uses the same scope-aware availability engine as everything else, so the practitioner step for an injectable offers only cleared RN/NP (and a 'Next available' shortcut to the soonest eligible injector), and the slot grid reflects roster ∩ availability with taken slots struck through.",
+        "At the client step the desk attaches an existing (returning) client or creates one inline (new) — returning gets a quick medical re-screen, new gets full intake + medical history + BDD screen + consent; under-18 is flagged. A checkbox sends the intake + consent links now with the note 'treatment can't start until complete' (ties to PRD-03 GATING).",
+        "Confirm shows the booking summary, the cancellation policy, and schedules the reminder (e.g. 24h prior, via PRD-07). The created Appointment is source=desk — identical entity/flow to online and walk-in."
       ],
       "ui_spec": [
-        "Prototype: 'New booking' wizard (booking-wizard.png) — stepper (service, practitioner, slot, client, confirm); attach existing client or create inline; slot grid reflects roster + availability.",
-        "Confirmation shows policy + schedules reminders."
+        "Prototype: 'New booking' wizard (booking-wizard.png) — stepper (1 Service · 2 Practitioner · 3 Time · 4 Client · 5 Confirm). Step 1 service cards show duration/price/schedule (e.g. 'Anti-wrinkle · 45 min · from $11/unit · S4'); header note 'Public service names stay generic · injectables offer RN/NP only'.",
+        "Step 2: 'RN/NP only — injectable' with 'rostered today · availability respects shifts & existing bookings'; step 3 slot grid with taken slots struck through; step 4 attach Returning/New client + reason + 'Send intake + consent links now (treatment can't start until complete)'.",
+        "Step 5 confirm: summary, 'Intake + consent SMS sent', 'Reminder scheduled for 24h prior'."
       ],
       "data_model": [
         {
           "entity": "Appointment",
           "fields": "(as CALENDAR) source=desk",
-          "notes": "Created via the wizard; same entity/flow."
+          "notes": "Created via the wizard; same entity/flow as online + walk-in."
+        },
+        {
+          "entity": "Client (ref)",
+          "fields": "new|returning, dob/under_18, reason",
+          "notes": "Attach existing or create inline; under-18 flagged; drives intake type + cooling-off."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Wizard stepper UI (service→practitioner→time→client→confirm)",
+          "note": "Angular 5-step wizard with progress stepper. Step 1 service cards (duration/price/schedule, generic names). Step 2 practitioner cards filtered by scope for S4 (+ 'Next available' = soonest eligible). Step 3 slot grid from the availability engine with taken slots disabled/struck-through. Back/Continue nav; state held until confirm."
+        },
+        {
+          "title": "Client step: attach existing or create inline + under-18 flag",
+          "note": "Step 4: search/attach an existing (returning) client or create one inline (new) capturing DOB; toggle Returning/New changes the intake hint (returning=quick re-screen; new=full intake+history+BDD+consent). Derive + stamp under_18. Capture reason/notes. Checkbox 'Send intake + consent links now (treatment can't start until complete)' wires to the PRD-03 send."
+        },
+        {
+          "title": "Confirm step: policy display + create (source=desk) + reminder schedule",
+          "note": "Step 5: show the booking summary + the cancellation policy; on confirm, call the create endpoint (source=desk, full server-side scope/conflict checks), schedule the reminder (PRD-07, e.g. 24h prior) and trigger the intake/consent send if selected. Show 'Intake + consent sent · Reminder scheduled'."
+        },
+        {
+          "title": "Scope-aware practitioner/slot filtering (shared engine)",
+          "note": "Ensure steps 2–3 call the SAME server-side availability engine as CALENDAR/online so an injectable never offers an ineligible practitioner and slots honour roster ∩ canInject ∩ free-resource. No client-side scope logic — the server returns only eligible practitioners/slots."
         }
       ]
     },
@@ -616,18 +823,43 @@
         "PRD-04/PRODUCT-CATALOGUE"
       ],
       "detail": [
-        "The services / treatment menu defines every bookable service with duration/buffer, eligible roles, price and the S4/non-S4 flag. That single flag drives scope-aware booking (C4), rewards eligibility (C9) and public-page naming (PRD-07).",
-        "Linked to the medicines/products catalogue (PRD-04) where a service consumes a product."
+        "The services / treatment menu defines every bookable service with duration + buffer, eligible roles, price and the S4 / non-S4 schedule flag. That single classification (ADR-0014) is the master switch that drives scope-aware booking (C4 — only canInject roles for S4), rewards eligibility (C9/REQ-MEMB-7 — no earn/redeem/discount on S4), and public-page naming/pricing (PRD-07 — generic name + withheld price for S4).",
+        "Each service also declares what charting & compliance it drives: an S4 service requires a synchronous consult + individual script + batch-lot selection at charting and 'standard consent'; a non-S4 skin service requires neither lot nor Rx. Where a service consumes a product it links to the medicines/products catalogue (PRD-04 PRODUCT-CATALOGUE) so stock can decrement on administration.",
+        "Catalogue admin is capability-gated (prescriber/owner) and every change is audited; the S4 tag visibly marks services and disables reward/discount controls on them."
       ],
       "ui_spec": [
-        "Prototype: Clinical -> Treatment menu (clinical-menu.png) and admin Services & products — each service row shows duration, eligible roles, price, S4 flag; capability-gated admin; changes audited.",
-        "The S4 tag visibly marks services and disables reward/discount controls on them."
+        "Prototype: Clinical → Treatment menu (clinical-menu.png) — each treatment card shows category, schedule (S4/non-S4) + regulatory class, unit, performed-by roles (NP/RN/Dermal), price, duration, linked stock, AE route, and 'Charting & compliance this drives' (synchronous consult · individual S4 script · batch-lot select · standard consent · rewards-eligible vs S4 'not rewards-eligible').",
+        "Active/Archived/All filter; '+ Add treatment'; Edit/Archive/Delete per card; the S4 tag marks services and disables reward/discount controls; capability-gated admin; changes audited.",
+        "(Compounded GLP-1 blocked banner illustrates catalogue-driven enforcement.)"
       ],
       "data_model": [
         {
           "entity": "Service",
-          "fields": "id, tenant_id, name, public_name, duration, buffer, price, schedule(S4|non-S4), eligible_roles[], product_id?",
-          "notes": "schedule flag is the master classification (ADR-0014)."
+          "fields": "id, tenant_id, name, public_name, category, duration, buffer, price, schedule(S4|non-S4), reg_class(medicine|device|none), eligible_roles[], requires(consult|rx|s4_lot|standard_consent), product_id?, rewards_eligible(derived from schedule), unit",
+          "notes": "schedule flag is the master classification (ADR-0014/0021) driving scope, rewards and public naming."
+        },
+        {
+          "entity": "AuditEvent (ref)",
+          "fields": "actor, service_id, change, at",
+          "notes": "Catalogue changes audited; admin capability-gated (prescriber/owner)."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Service entity + schedule(S4|non-S4) classification",
+          "note": "Model Service with id/name/public_name/category/duration/buffer/price/schedule/reg_class/unit/eligible_roles[]/requires[]/product_id?. The schedule flag (ADR-0014/0021) is the single source of truth. Persist with tenant RLS. Derive rewards_eligible = (schedule != S4)."
+        },
+        {
+          "title": "Schedule flag wired to scope, rewards and public naming",
+          "note": "Make the schedule flag actually drive behaviour: the availability engine restricts S4 to canInject roles (C4); the rewards engine (PRD-06) is constrained to non-S4 by this flag (C9/REQ-MEMB-7); the public booking config (ONLINE-BOOK) uses generic name + withholds price for S4. Service also declares requires(consult/rx/s4_lot/standard_consent) that charting (PRD-05) and the gates read. Link product_id to PRODUCT-CATALOGUE for stock decrement."
+        },
+        {
+          "title": "Capability-gated catalogue admin + audit",
+          "note": "Admin endpoints to add/edit/archive a service, gated to prescriber/owner capability; every change writes an AuditEvent. Validate that S4 services cannot have reward/discount controls enabled. Archive (not hard-delete) to preserve history on past bookings."
+        },
+        {
+          "title": "Treatment menu admin UI",
+          "note": "Angular Treatment-menu screen: cards per service showing category, schedule + reg class, unit, performed-by roles, price, duration, linked stock, AE route and 'Charting & compliance this drives'. Active/Archived/All filter, '+ Add treatment', Edit/Archive. Visibly tag S4 and disable reward/discount controls on S4 cards. Capability-gate the admin actions."
         }
       ]
     }

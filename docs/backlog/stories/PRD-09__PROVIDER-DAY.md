@@ -11,7 +11,7 @@ The provider sees their day and opens a patient with consult+consent status veri
 
 ## How it works
 
-The provider app shows the practitioner's day and opens a patient with consult+consent status shown before charting — the consult+consent gate (PRD-03/04) is enforced before charting opens. Provider signs in via Entra SSO, tenant-scoped.
+The provider app shows the practitioner's day ('Today · Room 2') and opens a patient with consult+consent status shown before charting. Provider signs in via Entra ID SSO, tenant-scoped; a self-checked-in client is highlighted as ready ('Start visit'). The consult+consent gate (PRD-03/04) is enforced server-side before charting opens — if unmet, the app shows what's outstanding and blocks charting.
 Room-side starting point with the right context and gates.
 
 ## Requirements
@@ -29,15 +29,17 @@ Room-side starting point with the right context and gates.
 
 _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.html._
 
-- Prototype: provider app (treatment-room.png) — 'Today · Room 2' schedule; open a patient -> 'Consent & prescriber authorisation' status; quick links to map/photos/finalise.
-- Bottom tabs: Schedule / Patient / Medicines / Tasks.
+- Prototype: treatment-room — 'Today · Room 2' day list (arrival times; self-checked-in client highlighted with 'Start visit', others 'Open').
+- Open a patient → 'Consent & prescriber authorisation' status; quick links to map/photos/finalise. Bottom tabs: Schedule / Patient / Medicines / Tasks.
 
 ![treatment-room — prototype screen](../screens/treatment-room.png)
 
 ## Suggested data model
 
-- **(reuses)** — Appointment (PRD-02) + gate (PRD-03/04)
-  - _Provider app surface; Entra SSO._
+- **(reuses) Appointment** — PRD-02 — practitioner's day; checked-in status drives the highlight
+  - _Provider app surface; Entra ID SSO._
+- **(reuses) Consent/PrescriberAuthorisation gate** — PRD-03/04 — verified before charting opens
+  - _Block + show outstanding if unmet._
 
 ## Technical notes (high level)
 
@@ -49,8 +51,5 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 
 ## Tasks (dev pickup)
 
-- [ ] **Provider app UI (Flutter)**
-  Build on the Flutter provider app: the treatment-room per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: provider app (treatment-room.png) — 'Today · Room 2' schedule; open a patient -> 'Consent & prescriber authorisation' status; quick links to map/photos/finalise.
-  - Bottom tabs: Schedule / Patient / Medicines / Tasks.
+- [ ] **Provider app: day schedule + open-patient consult/consent gate**
+  Provider Flutter flavour with Entra ID workforce SSO (tenant-scoped). Build the 'Today · Room X' schedule from PRD-02 (arrival times, highlight a self-checked-in client with 'Start visit', others 'Open'). On opening a patient, render the 'Consent & prescriber authorisation' status block and evaluate the PRD-03/04 gate server-side: disable the charting entry points and show outstanding items until it passes; then expose quick links to injection map / photos / finalise. Bottom tabs Schedule / Patient / Medicines / Tasks.

@@ -11,8 +11,9 @@ Dashboards read from dedicated read-models/materialized views fed by domain even
 
 ## How it works
 
-Dashboards read from dedicated read-models / materialized views fed by domain events + the audit stream (ADR-0013), not the transactional DB. Eventual consistency is acceptable; views are built incrementally per module and support backfill/rebuild.
-Keeps dashboards fast and avoids hammering OLTP — the foundation every report sits on.
+Every dashboard and register in the platform reads from a dedicated read schema — a set of materialised views and projection tables — never from the transactional (OLTP) tables directly (ADR-0013). Projections are fed two ways: from domain events emitted on the write side (Sprint-0 DOMAIN-EVENTS) as modules finalise appointments, administrations, payments, memberships and credentials; and from the append-only AuditEvent stream (ADR-0010), which carries the read/write trail the compliance metrics are computed over.
+Eventual consistency is the explicit trade: a projection may lag the write by seconds, which is acceptable for reporting and removes read load and lock contention from the booking/charting/checkout paths. Each view is owned by the module that produces its source events and is built incrementally as that module lands — there is no big-bang reporting layer.
+Every projection is rebuildable: a backfill replays the source events/audit rows from a checkpoint to reconstruct a view from cold, so a new metric, a bug fix, or a schema change never requires touching live OLTP data. Projections record their last-processed event offset so an incremental catch-up and a full rebuild use the same code path. Money-bearing views (revenue, MRR, margin) carry the owner-financial capability tag so the gating layer can suppress them for non-owner roles.
 
 ## Requirements
 
@@ -20,20 +21,24 @@ Keeps dashboards fast and avoids hammering OLTP — the foundation every report 
 
 ## Acceptance Criteria
 
-- [ ] Read-models are populated from domain events + the audit stream.
-- [ ] Dashboards read from materialized views, not OLTP, and load within target on clinic data volumes.
-- [ ] Read-models are built incrementally per module.
-- [ ] Backfill/rebuild of a read-model is supported.
+- [ ] Projections are populated from domain events + the AuditEvent stream; each records its last-processed offset.
+- [ ] Dashboards and registers query the read schema (materialised views / projection tables), never OLTP, and load within target at clinic data volumes.
+- [ ] Views are built incrementally per module as its events land; eventual-consistency lag is bounded and observable.
+- [ ] A projection can be rebuilt/backfilled from cold via event replay using the same code path as incremental catch-up.
+- [ ] Money-bearing projections carry the owner-financial capability tag for downstream gating.
 
 ## UI designs / screenshots
 
-- No screen — backend projections feeding all of Reports + Governance.
-- A sample event flows from a write to a read-model projection (Sprint-0 DOMAIN-EVENTS).
+- No screen of its own — this is the projection layer behind every Reports tab and the Governance hub.
+- Validated end-to-end by a sample event: a write (e.g. an Administration finalised) flows through the domain-event bus (Sprint-0 DOMAIN-EVENTS) into its projection and surfaces on a dashboard within the eventual-consistency window.
+- Operability: a small internal view of projection lag + last-processed offset per read-model (for ops, not clinic users).
 
 ## Suggested data model
 
-- **ReportingView** — materialized views per metric (revenue, retention, utilisation, MRR, compliance)
-  - _Fed by domain events + AuditEvent; rebuildable._
+- **ReportingView** — name, source_events[], last_offset, refreshed_at, rebuildable(bool), owner_financial(bool)
+  - _One per metric family (revenue, retention, utilisation, MRR, compliance); materialised view or projection table._
+- **ProjectionCheckpoint** — view_name, last_event_id, last_audit_id, updated_at
+  - _Drives incremental catch-up and full rebuild from the same replay path._
 
 ## Technical notes (high level)
 
@@ -45,16 +50,7 @@ Keeps dashboards fast and avoids hammering OLTP — the foundation every report 
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - ReportingView — materialized views per metric (revenue, retention, utilisation, MRR, compliance) (Fed by domain events + AuditEvent; rebuildable.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Read-models are populated from domain events + the audit stream.
-  - Rule: Dashboards read from materialized views, not OLTP, and load within target on clinic data volumes.
-  - Rule: Read-models are built incrementally per module.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-01/AUDIT.
+- [ ] **Read-model / projection layer & event subscriptions**
+  Stand up the read schema (separate from OLTP) and the projection runtime that subscribes to the domain-event bus (Sprint-0 DOMAIN-EVENTS) and the AuditEvent stream (ADR-0010). Define a projection contract: handle(event) -> upsert into a materialised view/projection table, advance the ProjectionCheckpoint offset. One projection per metric family so modules can add views as they land. Tag money-bearing views with the owner-financial capability for downstream gating. Keep eventual-consistency lag bounded and expose lag + last-offset per view for ops.
+- [ ] **Backfill / rebuild via event replay + scheduled refresh**
+  Implement the rebuild path: replay source events/audit rows from a checkpoint (or from zero) to reconstruct any view from cold, reusing the incremental handler so there is one code path. Schedule periodic refresh for views derived from time-windowed aggregates. Make a single view independently rebuildable without touching OLTP or other views. Cover idempotency (replaying an event must not double-count) and out-of-order/duplicate event handling.

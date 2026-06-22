@@ -9,8 +9,12 @@ A typed, multi-unit catalogue (toxin/filler/skin/retail) with the S4 flag — th
 
 ## How it works
 
-A typed, multi-unit catalogue (toxin/filler/skin/retail) where each product has its own unit (units vs syringes), par level and expiry tracking, plus regClass/ARTG/compounded metadata. The capability-gated product admin sets the S4 flag — the single classification that drives rewards eligibility (PRD-06) and public-page naming (PRD-07).
-regClass/compounded enable blocking prohibited compounded GLP-1 and routing adverse events to the correct DAEN dataset (medicine vs device).
+The catalogue is the single source of truth for product classification. Per ADR-0021/0014 each product is typed (toxin/filler/skin/retail) with its own unit (toxin 'units' vs filler 'syringes/mL'), a par level, expiry tracking and an S4 flag. The S4 flag is the master classification that drives rewards eligibility (PRD-06, non-S4 only — C9) and public-booking-page naming (PRD-07) everywhere.
+Rev-4 extends the catalogue to filler-as-medicine and weight-loss GLP-1 programs: products carry regClass / ARTG / compounded metadata so the platform can block prohibited compounded GLP-1 (banned 1 Oct 2024) and route adverse events to the correct DAEN dataset (medicine vs device).
+A capability-gated catalogue admin (prescriber/owner) adds/removes products and sets the S4 flag, type, unit and par. On-hand / usage / wastage / expiry aggregate per product + unit, never across units — a single 'units on hand' across a toxin and a filler is meaningless (ADR-0021).
+Lots (StockItem) belong to a product; the product's unit governs all lot quantities. Toggling the S4 flag re-classifies the product everywhere at once: the rewards engine immediately excludes it, and the public booking page applies the generic-naming/withheld-price policy.
+regClass + compounded enable two rules: block receiving/holding prohibited compounded GLP-1, and tag the product so a downstream adverse event is routed to DAEN-medicines (toxin) vs DAEN-medical-devices (device-class filler) in PRD-08.
+Retail (non-S4) SKUs live in the same catalogue alongside medicines so the same classification and stock machinery serves both.
 
 ## Requirements
 
@@ -25,15 +29,20 @@ regClass/compounded enable blocking prohibited compounded GLP-1 and routing adve
 
 ## UI designs / screenshots
 
-- Prototype: Stock & medicines -> Products (stock.png, 'Products' button opens the catalogue) — typed products with unit, par, ARTG status, S4 flag toggle; capability-gated admin.
-- Retail (non-S4) SKUs sit alongside medicines.
+- Prototype screen: Stock & medicines — Products catalogue (stock.png, 'Products' button).
+- 'Products' opens the catalogue modal: rows of typed products with name, type, unit, par, an S4 toggle pill ('S4 ✓' / 'non-S4'), per-product on-hand, and a Remove action.
+- Toggling S4 re-renders the stock view and the lot-detail S4 badge live — one classification point.
+- Product cards on the main screen show on-hand, used/wasted (90d), a usage sparkline and a 'below par' state per product (e.g. 'reorder 2').
+- Add-product form: name, type, unit, par, S4 checkbox — capability-gated to prescriber/owner.
 
 ![stock — prototype screen](../screens/stock.png)
 
 ## Suggested data model
 
-- **Product** — id, tenant_id, name, type(toxin|filler|skin|retail), unit(units|syringes|each), schedule(S4|non-S4), reg_class, artg_no, sponsor, compounded(bool), par_level
-  - _schedule flag is the master classification (ADR-0014/0021)._
+- **Product** — id, tenant_id, name, type(toxin|filler|skin|retail), unit(units|syringes|each), schedule(S4|non-S4), reg_class, artg_no, sponsor, compounded(bool), par_level, color
+  - _schedule flag is the master classification (ADR-0014/0021): drives rewards (non-S4 only, C9) + public naming. Prototype mapping: the products[] catalogue + toggleS4()/addProduct()._
+- **ProductAggregate (read model)** — product_id, unit, on_hand, used_90d, wasted_90d, below_par(bool)
+  - _Computed per product+unit, never across units (ADR-0021). Mapping: prodAgg() in the prototype._
 
 ## Technical notes (high level)
 
@@ -45,21 +54,9 @@ regClass/compounded enable blocking prohibited compounded GLP-1 and routing adve
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - Product — id, tenant_id, name, type(toxin|filler|skin|retail), unit(units|syringes|each), schedule(S4|non-S4), reg_class, artg_no, sponsor, compounded(bool), par_level (schedule flag is the master classification (ADR-0014/0021).)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Typed products each with their own unit (units vs syringes), par, expiry tracking.
-  - Rule: Capability-gated product admin sets the S4 flag (drives PRD-06 rewards + PRD-07 naming).
-  - Rule: Products carry regClass/artg/compounded; prohibited compounded GLP-1 is blocked.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-- [ ] **Enforce compliance gate + audit events**
-  Enforce the relevant criteria as a server-side invariant that cannot be bypassed via the API:
-  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
-  - Write an immutable AuditEvent for the attempt and its outcome.
-  - Capability-gated product admin sets the S4 flag (drives PRD-06 rewards + PRD-07 naming).
-  - Products carry regClass/artg/compounded; prohibited compounded GLP-1 is blocked.
+- [ ] **Product catalogue model: type, unit, schedule, ARTG/reg metadata (model & migration)**
+  Add Product: id, tenant_id, name, type(toxin|filler|skin|retail), unit, schedule(S4|non-S4), reg_class, artg_no, sponsor, compounded(bool), par_level, color; RLS by tenant. StockItem.product_id FK. Per-product+unit aggregation only — no cross-unit roll-up. Build the ProductAggregate read model (on_hand, used_90d, wasted_90d, below_par) over StockLedger (ADR-0013). schedule is the single column the rewards engine (PRD-06) and public-naming policy (PRD-07) read.
+- [ ] **Catalogue admin API + S4/GLP-1 rules**
+  Endpoints (capability-gated to prescriber/owner): POST/PATCH/DELETE /products, PATCH /products/{id}/schedule (the S4 toggle). Setting schedule re-classifies everywhere — rewards eligibility and public naming key off it (ADR-0014). On create/receive, if compounded=true AND reg_class indicates GLP-1, block (prohibited compounded GLP-1, 1 Oct 2024). Persist reg_class so adverse-event DAEN routing (PRD-08) can pick medicine vs device.
+- [ ] **Capability gate + audit on classification changes**
+  Gate catalogue admin on the catalogue-admin capability (PRD-01/ADR-0017); non-owner stock roles may view but not change the S4 flag. Audit every product add/remove and every schedule toggle to the append-only stream — the S4 classification is compliance-load-bearing (rewards exclusion C9, public naming), so changes must be explainable. Any margin/cost fields stay .fin-gated (owner-only).

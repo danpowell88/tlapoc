@@ -11,8 +11,9 @@ Consent coverage, consult-before-script adherence (C1), S4 register export (C8),
 
 ## How it works
 
-Compliance dashboards + register exports: consent coverage, consult-before-script adherence (shows 100% by construction; exceptions impossible to create), the S4 register export, lot->clients recall, cooling-off adherence, registration-expiry watch, records-retention-due, S4 stock discrepancies, and the breach + complaints registers.
-Turns the moat's data into audit-ready evidence (the Governance hub overview).
+The compliance side of the Governance hub overview: the moat's data turned into audit-ready evidence. Metrics are queries over the reporting read-models + the AuditEvent stream (ADR-0013/0010): consent coverage, consult-before-script adherence (C1), cooling-off adherence (C6), registration-expiry watch (C19), records-retention/destruction due (C18) and S4 stock discrepancies (C17). Consult-before-script reads 100% by construction because the PRD-04 domain invariant makes a script without a linked synchronous consult impossible to record; the dashboard surfaces that and flags any cross-check exception rather than computing a soft percentage.
+Alongside the metrics sit immutable register exports: the S4 medicines register (C8) exports a complete record of administrations (lot + expiry per administration), and a lot→clients recall lookup (C8, reusing PRD-04 RECALL-LOOKUP) returns every client treated from a given lot. The breach register (C22, notifiable data breaches) and complaints register (C24, including the right to complain to AHPRA) are viewable and exportable. Exports are generated as point-in-time evidence artefacts recorded against the audit trail.
+The registration-expiry watch and records-due-for-destruction lists each render with their basis — the AHPRA expiry date / the retention rule (adults ≥7yr from last contact; minors to 25; indefinite where a complaint/adverse outcome exists) — so an inspector sees not just a number but why each item is on the list. Surfaced on the Governance Overview tile band (Inspection-ready / Open AE / Unsigned policies / Active recalls) and the Needs-attention list. No money figures appear here.
 
 ## Requirements
 
@@ -21,26 +22,32 @@ Turns the moat's data into audit-ready evidence (the Governance hub overview).
 
 ## Acceptance Criteria
 
-- [ ] Consult-before-script adherence shows 100% by construction; any exception is flagged.
-- [ ] The S4 register exports a complete immutable record; a lot lookup returns all affected clients.
-- [ ] Registration-expiry watch and records-due-for-destruction lists render with their basis.
-- [ ] Breach and complaints registers are viewable/exportable.
+- [ ] Consult-before-script adherence reads 100% by construction (PRD-04 invariant); any cross-check exception is flagged, not silently averaged.
+- [ ] Consent coverage, cooling-off adherence and S4 stock-discrepancy metrics render from the read-models + audit stream.
+- [ ] The S4 register exports a complete, immutable record of administrations (lot + expiry); a lot lookup returns all affected clients.
+- [ ] Registration-expiry watch and records-due-for-destruction lists render with their basis (expiry date / retention rule).
+- [ ] Breach (C22) and complaints (C24) registers are viewable and exportable; each export is recorded against the audit trail.
 
 ## UI designs / screenshots
 
 _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack)._
 
-- Prototype: Governance -> Overview (gov-overview.png) — compliance metrics + register links; exports for the S4 register, lot-recall and the breach/complaints registers.
-- Registration-expiry watch + records-due lists with their basis.
+- Prototype: Governance → Overview (gov-overview.png). Intro: 'your compliance command centre … most rules enforced quietly inside everyday work'.
+- Status tiles: Inspection-ready (Review/Ready), Open AE cases, Unsigned policies, Active recalls — live counts.
+- 'Needs attention' column (open items linking to source) and 'Quietly handled for you' column (Registrations & indemnity current, Cold-chain logged twice daily in range, Last stocktake reconciled, Client privacy self-served).
+- Register exports: S4 register, lot-recall lookup, breach register, complaints register (download/export actions).
+- Registration-expiry watch + records-due lists each show their basis (AHPRA expiry / retention rule); 'Key terms' expander explains the acronyms.
 
 ![gov-overview — prototype screen](../screens/gov-overview.png)
 
 ## Suggested data model
 
-- **ComplianceMetric** — key(consent_coverage|consult_adherence|cooling_off|reg_expiry|retention_due|stock_discrepancy), value, exceptions[]
-  - _From read-models + AuditEvent._
-- **RegisterExport** — type(s4_register|lot_recall|breach|complaints), generated_at, ref
-  - _Exportable evidence (C8/C22/C24)._
+- **ComplianceMetric** — key(consent_coverage|consult_adherence|cooling_off|reg_expiry|retention_due|stock_discrepancy), value, basis, exceptions[], computed_at
+  - _Query over read-models + AuditEvent; consult_adherence is 100% by construction with exceptions flagged._
+- **RegisterExport** — id, tenant_id, type(s4_register|lot_recall|breach|complaints), params(lot?, date_range?), generated_at, actor_id, artifact_ref
+  - _Immutable point-in-time evidence; recorded against the audit trail (C8/C22/C24)._
+- **(read) ExpiryWatch / RetentionDue** — subject_ref, basis(ahpra_expiry|retention_rule), due_date, status
+  - _Renders with its basis (C18/C19)._
 
 ## Other
 
@@ -48,27 +55,11 @@ _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Po
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - ComplianceMetric — key(consent_coverage|consult_adherence|cooling_off|reg_expiry|retention_due|stock_discrepancy), value, exceptions[] (From read-models + AuditEvent.)
-  - RegisterExport — type(s4_register|lot_recall|breach|complaints), generated_at, ref (Exportable evidence (C8/C22/C24).)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Consult-before-script adherence shows 100% by construction; any exception is flagged.
-  - Rule: The S4 register exports a complete immutable record; a lot lookup returns all affected clients.
-  - Rule: Registration-expiry watch and records-due-for-destruction lists render with their basis.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-08/READ-MODELS, PRD-04/RECALL-LOOKUP.
-- [ ] **Enforce compliance gate + audit events**
-  Enforce C1, C8, C18, C19, C22, C24 as a server-side invariant that cannot be bypassed via the API:
-  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
-  - Write an immutable AuditEvent for the attempt and its outcome.
-  - The S4 register exports a complete immutable record; a lot lookup returns all affected clients.
-- [ ] **Web UI**
-  Build on the Angular web app: the gov-overview per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: Governance -> Overview (gov-overview.png) — compliance metrics + register links; exports for the S4 register, lot-recall and the breach/complaints registers.
-  - Registration-expiry watch + records-due lists with their basis.
+- [ ] **Read-model / projection: compliance metrics + expiry/retention watch**
+  Project ComplianceMetric values (consent coverage, cooling-off adherence, stock-discrepancy from PRD-04 reconciliation, reg-expiry from credentials) over the read-models + AuditEvent. Compute consult-before-script as 100%-by-construction: read it from the absence of unlinked-script audit events and flag any cross-check exception explicitly rather than averaging. Build ExpiryWatch/RetentionDue lists that carry their basis (AHPRA expiry date / the C18 retention rule). Eventual consistency acceptable.
+- [ ] **Register exports (S4 register, breach, complaints) as immutable evidence**
+  Build the export queries that produce a complete S4 administration register (lot+expiry per administration, ordered, tamper-evident), the breach register (C22) and complaints register (C24). Each export is a point-in-time artefact recorded as a RegisterExport row + an AuditEvent (who/when/params). No mutation of source data; exports are reproducible from the read-models.
+- [ ] **Lot → clients recall lookup**
+  Reuse PRD-04 RECALL-LOOKUP: given a lot number, return every client treated from that lot (via the administration register projection), with treatment date and contactability, as the input both to the recall campaign (gov-recalls) and the register export. Must be instant at clinic volumes (indexed projection, not an OLTP scan).
+- [ ] **Web UI: Governance Overview + register-export actions**
+  Build the Governance Overview (gov-overview.png): status tile band (Inspection-ready/Open AE/Unsigned policies/Active recalls), 'Needs attention' list with deep links to source, 'Quietly handled for you' assurances, and the Key-terms expander. Wire the export/download actions for S4 register, lot-recall, breach and complaints. Render expiry-watch and retention-due lists with their basis. Capability-gate to the compliance concern; no money figures.

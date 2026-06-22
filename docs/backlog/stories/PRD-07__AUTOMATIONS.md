@@ -11,8 +11,8 @@ The prototype's Comms → Automations screen (toggleAuto) configures the reminde
 
 ## How it works
 
-The management UI over the sequence engine: configure automations that map a trigger (booking, visit, interval) to a timed sequence of messages, each enable/disable-able and editable per treatment type. Marketing automations respect opt-in/unsubscribe; transactional ones always send.
-Drives the same engine as REMINDERS-CARE and RECALL.
+An Automation is a thin, toggleable wrapper over a Sequence: trigger + treatment_type + sequence_id + enabled. The screen lists the clinic's automations as cards (Recall — anti-wrinkle ~12 wks, Aftercare sequence, Win-back lapsed 90d, Birthday offer, No-show follow-up, Review request) each showing its channel, audience and live stats ('42 sent · 18 booked'), with an on/off toggle and per-treatment editing.
+The compliance split is explicit and shown on-screen — 'Flows run automatically on the right trigger. All respect opt-in & unsubscribe (Spam Act).' Marketing automations (recall nudge, win-back, birthday, review request) gate on consent + suppression (C23); transactional ones (reminders, aftercare) always send. Toggling an automation off stops the underlying sequence from triggering. This is UI + orchestration only — it doesn't reimplement the engine, it configures REMINDERS-CARE / RECALL.
 
 ## Requirements
 
@@ -24,20 +24,20 @@ Drives the same engine as REMINDERS-CARE and RECALL.
 - [ ] Automations map a trigger (booking, visit, interval) to a timed sequence of messages.
 - [ ] Each automation can be enabled/disabled and edited per treatment type.
 - [ ] Marketing automations respect opt-in/unsubscribe (C23); transactional ones always send.
-- [ ] Drives the same sequence engine as PRD-07/REMINDERS-CARE and PRD-07/RECALL.
+- [ ] Automations drive the same sequence engine as REMINDERS-CARE and RECALL.
 
 ## UI designs / screenshots
 
 _Prototype screen: prototype.html — Comms & growth (Inbox/Automations/Campaigns), Growth (Leads/Reviews), Follow-ups, Settings → Public booking page; booking-widget.html._
 
-- Prototype: Comms -> Automations (marketing-auto.png) — a list of automations with trigger -> timed steps, on/off toggles (toggleAuto), per-treatment editing.
+- Prototype: Comms -> Automations — 'Flows run automatically on the right trigger. All respect opt-in & unsubscribe (Spam Act)'; automation cards (Recall ~12 wks, Aftercare, Win-back lapsed 90d, Birthday offer, No-show follow-up, Review request) with channel + audience + live stats + an on/off toggle (toggleAuto), per-treatment editing; Review request shown off by default.
 
 ![marketing-auto — prototype screen](../screens/marketing-auto.png)
 
 ## Suggested data model
 
-- **Automation** — id, tenant_id, trigger, treatment_type, sequence_id, enabled(bool)
-  - _UI over Sequence; respects consent for marketing._
+- **Automation** — id, tenant_id, trigger(booking|visit|interval), treatment_type, sequence_id, kind(transactional|marketing), enabled(bool)
+  - _UI over Sequence; marketing kind respects consent (C23)._
 
 ## Other
 
@@ -45,20 +45,16 @@ _Prototype screen: prototype.html — Comms & growth (Inbox/Automations/Campaign
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - Automation — id, tenant_id, trigger, treatment_type, sequence_id, enabled(bool) (UI over Sequence; respects consent for marketing.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Automations map a trigger (booking, visit, interval) to a timed sequence of messages.
-  - Rule: Each automation can be enabled/disabled and edited per treatment type.
-  - Rule: Marketing automations respect opt-in/unsubscribe (C23); transactional ones always send.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-07/REMINDERS-CARE.
-- [ ] **Web UI**
-  Build on the Angular web app: the marketing-auto per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: Comms -> Automations (marketing-auto.png) — a list of automations with trigger -> timed steps, on/off toggles (toggleAuto), per-treatment editing.
+- [ ] **Automation model over Sequence (migrations)**
+  Model Automation (tenant_id + RLS): trigger, treatment_type, sequence_id, kind (transactional|marketing), enabled.
+  - A thin wrapper over Sequence (REMINDERS-CARE) — does not duplicate the engine.
+  - kind carries through to the consent gate.
+- [ ] **Automation toggle/edit API + engine wiring**
+  Server-side.
+  - Endpoints to list/enable/disable/edit automations per treatment type; toggling enabled gates whether the linked Sequence triggers.
+  - Marketing-kind automations gate on consent + suppression (C23); transactional always send.
+  - Stats (sent/booked/returned) read from NotificationLog + outcomes.
+- [ ] **Automations web UI (cards + toggles)**
+  Angular per the screenshot.
+  - Automation cards with channel + audience + live stats and an on/off toggle (toggleAuto); per-treatment editing; the 'all respect opt-in & unsubscribe' note.
+  - Owner/front-desk gated; loading/empty/error states.

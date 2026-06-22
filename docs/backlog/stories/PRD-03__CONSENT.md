@@ -11,8 +11,9 @@ Consent must be versioned, e-signed, plain-language and contain mandated content
 
 ## How it works
 
-Consent must be versioned, e-signed, plain-language, and contain the mandated content: procedure nature, risks/benefits/alternatives, the practitioner's qualifications, costs, realistic-outcome language and complaint mechanisms (including the right to AHPRA despite any NDA).
-Treatment is blocked until a current, version-matched consent is signed; changing a template creates a new version and previously signed consents stay bound to the version they were signed against. Versions are retained per the retention policy.
+Treatment consent must be versioned, e-signed, plain-language and contain the AHPRA-mandated content: the nature of the procedure, risks/benefits/alternatives, the practitioner's qualifications, costs, realistic-outcome language (no minimising/overstating), and complaint mechanisms — including the explicit right to complain to AHPRA despite any NDA. The prototype consent text models exactly this for anti-wrinkle treatment.
+Each ConsentTemplate is per-treatment-type and versioned. Changing a template creates a NEW version; previously signed consents stay bound to the version they were signed against (a ConsentSignature references template_version, not the live template). Treatment is blocked until a current, version-matched consent is e-signed for the treatment type; the block states exactly what is missing (GATING).
+Capture is verbal + written: the client reads the plain-language reader and e-signs (types their full name); a verbal_confirmed flag records the practitioner's confirmation. Signed consents and templates are retained per the retention policy (C18, PRD-01 RETENTION).
 
 ## Requirements
 
@@ -28,17 +29,18 @@ Treatment is blocked until a current, version-matched consent is signed; changin
 
 ## UI designs / screenshots
 
-- Client app: plain-language consent reader + e-signature (client-app.png); staff see consent status in Forms & consent (forms-consent.png) and as a chip on the charting/patient header (charting.png).
+- Client app: plain-language consent reader + e-signature within the intake wizard (client-app.png) — risk/benefit/alternative/cost text, 'I've read and understood…', and 'Type your full name to sign'; includes the AHPRA-despite-NDA complaint line.
+- Staff: Forms & consent (forms-consent.png) lists consent templates with version + status (e.g. 'Anti-wrinkle consent v3.2 · Current'; 'Under-18 consent (+ guardian) v1.0 · 7-day cool-off'); the patient header / charting (charting.png) shows a 'Consent ✓' chip.
 - Mandated-content sections are explicit; the block states exactly what is missing.
 
 ![forms-consent — prototype screen](../screens/forms-consent.png)
 
 ## Suggested data model
 
-- **ConsentTemplate** — id, tenant_id, treatment_type, version, content(sections), mandated_fields[]
-  - _New version on change; old signatures stay bound._
-- **ConsentSignature** — id, client_id, appointment_id, template_version, signed_at, signature_ref, verbal_confirmed
-  - _Retained (C18); drives the treatment gate._
+- **ConsentTemplate** — id, tenant_id, treatment_type, version, content(sections), mandated_fields[], status(current|superseded)
+  - _New version on change; old signatures stay bound to their version (immutable content per version)._
+- **ConsentSignature** — id, tenant_id, client_id, appointment_id, template_id, template_version, signed_at, signature_ref, verbal_confirmed
+  - _References the version signed; retained (C18); drives the treatment gate (GATING)._
 
 ## Other
 
@@ -46,24 +48,9 @@ Treatment is blocked until a current, version-matched consent is signed; changin
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - ConsentTemplate — id, tenant_id, treatment_type, version, content(sections), mandated_fields[] (New version on change; old signatures stay bound.)
-  - ConsentSignature — id, client_id, appointment_id, template_version, signed_at, signature_ref, verbal_confirmed (Retained (C18); drives the treatment gate.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Consent is versioned, e-signed and contains all mandated content.
-  - Rule: Treatment is blocked until a current, version-matched consent is signed; the block states what's missing.
-  - Rule: Changing a template creates a new version; previously signed consents stay bound to their version.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-03/INTAKE.
-- [ ] **Enforce compliance gate + audit events**
-  Enforce C5, C18 as a server-side invariant that cannot be bypassed via the API:
-  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
-  - Write an immutable AuditEvent for the attempt and its outcome.
-  - Consent is versioned, e-signed and contains all mandated content.
-  - Treatment is blocked until a current, version-matched consent is signed; the block states what's missing.
-  - Changing a template creates a new version; previously signed consents stay bound to their version.
+- [ ] **Versioned ConsentTemplate with mandated-content sections**
+  Model ConsentTemplate per treatment_type with an immutable, versioned content (sections) and a mandated_fields[] checklist (nature, risks/benefits/alternatives, practitioner qualifications, costs, realistic-outcome language, complaint mechanisms incl. AHPRA-despite-NDA). Editing creates a NEW version and supersedes the old; old versions are never mutated. Validate that a publishable version covers all mandated sections. Seed anti-wrinkle (and the under-18 + image-use templates).
+- [ ] **E-signature capture bound to template_version (+ verbal)**
+  Endpoint to e-sign: create a ConsentSignature referencing the EXACT template_version read, with signature_ref (typed full name / signature), signed_at, and a verbal_confirmed flag (practitioner confirmation). A later template change does NOT invalidate or rebind an existing signature. Retain per C18 (PRD-01 RETENTION). Audited; feeds the GATING evaluation (current, version-matched).
+- [ ] **Consent reader/e-sign UI + staff status**
+  Client-app/kiosk plain-language consent reader (scrollable mandated content) + 'I've read & understood' + type-to-sign. Staff Forms & consent: templates with version/status and a '+ New template' (creates a new version). Render the 'Consent ✓' / version-mismatch chip on the patient/charting header; the blocked-action banner names the missing/expired consent.

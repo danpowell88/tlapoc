@@ -11,8 +11,10 @@ Staff profiles hold AHPRA reg #, type, status/expiry, conditions, ≥1yr-experie
 
 ## How it works
 
-Each clinician profile holds the regulatory facts that decide whether they may treat: AHPRA registration no/type/status/expiry/conditions, the >=1yr-experience flag, CPD hours, and professional indemnity insurance that must explicitly cover cosmetic procedures.
-These derive a single canInject signal: a practitioner whose PII excludes cosmetic, or whose registration has lapsed, is auto-flagged not-cleared and removed from bookable availability (PRD-02) — the 'cleared to treat' guarantee.
+Each clinician profile holds the regulatory facts that decide whether they may lawfully treat (ADR-0028, C4/C19, s129 National Law + NMBA cosmetic guidelines): AHPRA registration number/type/status/expiry and any conditions, the >=1-year-cosmetic-experience flag, CPD hours done vs required (RN/EN 20h, NP 30h), and professional-indemnity insurance whose cover must explicitly include cosmetic procedures (standard nursing PII frequently excludes it).
+These derive a single boolean canInject, computed exactly as the prototype does: scope is inject AND registration is current (not lapsed) AND insurance covers cosmetic AND insurance is in date. The prototype's staffStatus() shows the human-readable states this drives: 'Current' (emerald), 'Renews in Nd' (amber early warning), 'CPD behind X/Yh' (amber), 'PII excludes cosmetic — blocked' (rose), and 'Not compliant' (rose). Chloe Adams in the seed data is the worked example — registered, but insurance EXCLUDES cosmetic, so canInject is false and she is not bookable for S4.
+canInject is the contract other modules consume: booking availability (PRD-02) removes a not-cleared practitioner from offered slots, the charting/administration gate blocks an S4 administration by an uncleared clinician (PRD-04/05), and the owner exceptions digest + Follow-ups queue raise expiry tasks. The signal is necessary on top of the RBAC inject capability — holding the capability is not enough without current credentials.
+The designated RN prescriber arrangement (rev-2/rev-4 PRD note) is supported: an RN may administer under a recorded partnered/remote prescriber rather than holding the prescribe capability themselves; the profile records the endorsement and the partnered prescriber. AHPRA register auto-verification via the Practitioner Information Exchange (PIE) is supported where approved, degrading to a first-class manual-verify action that stores a 'verified-on' date (PIE is approval-gated SOAP — treat as best-effort with manual fallback always present).
 
 ## Requirements
 
@@ -28,19 +30,20 @@ These derive a single canInject signal: a practitioner whose PII excludes cosmet
 
 ## UI designs / screenshots
 
-- Prototype: Team -> People & credentials (team-people.png) — staff cards with reg #, type, status, expiry, CPD, PII cover, engagement type and a derived 'cleared to treat' badge.
-- AHPRA register auto-verification (PIE) shown as a verify action with a first-class manual-verify fallback.
+- Prototype: Team -> People & credentials (team-people.png) — one card per staff member with avatar, name, role, engagement type (Contractor/Employee) and a derived status chip ('Current', 'Renews in 25d', 'PII excludes cosmetic — blocked').
+- A credential detail/edit view (per person) captures AHPRA reg #/type/status/expiry/conditions, the >=1yr-experience flag, CPD done/required, and PII insurer/expiry/cosmetic-cover boolean, with a verify action (PIE auto-verify or manual-verify with verified-on date).
+- The derived canInject ('cleared to treat' / 'Blocked') is shown read-only — it is computed, never set by hand.
 
 ![team-people — prototype screen](../screens/team-people.png)
 
 ## Suggested data model
 
-- **StaffProfile** — id, tenant_id, user_id, role_id, ahpra_no, ahpra_type, ahpra_status, ahpra_expiry, conditions, experience_1yr, engagement_type(employee|contractor)
-  - _Derives canInject._
-- **Credential** — id, staff_id, kind(registration|insurance|cpd|training), reference, status, expiry, evidence_ref, cosmetic_cover(bool)
-  - _Insurance must flag cosmetic_cover for canInject._
-- **(derived) canInject** — = registration current AND cosmetic PII AND in-scope role
-  - _Consumed by booking + treatment gates._
+- **StaffProfile (extends TENANT)** — + ahpra_no, ahpra_type(RN|EN|NP|non-AHPRA), ahpra_status, ahpra_expiry, conditions, experience_1yr(bool), engagement_type(employee|contractor), scope(inject|nonS4|none), prescriber_mode(self|partnered), partnered_prescriber_id
+  - _Holds the regulatory facts; scope mirrors the prototype (inject/nonS4/none)._
+- **Credential** — id, tenant_id, staff_id, kind(registration|insurance|cpd|training), reference, status, expiry, evidence_ref, cosmetic_cover(bool), verified_method(pie|manual), verified_on
+  - _Insurance must flag cosmetic_cover for canInject; CPD tracks done vs required; evidence_ref points at signed-URL document storage (AU-resident)._
+- **(derived) canInject** — = scope==inject AND registration current AND cosmetic_cover AND insurance in date
+  - _Single signal consumed by booking (PRD-02), administration gates (PRD-04/05), the exceptions digest and Follow-ups. Computed server-side; never stored as editable._
 
 ## Technical notes (high level)
 
@@ -52,22 +55,9 @@ These derive a single canInject signal: a practitioner whose PII excludes cosmet
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - StaffProfile — id, tenant_id, user_id, role_id, ahpra_no, ahpra_type, ahpra_status, ahpra_expiry, conditions, experience_1yr, engagement_type(employee|contractor) (Derives canInject.)
-  - Credential — id, staff_id, kind(registration|insurance|cpd|training), reference, status, expiry, evidence_ref, cosmetic_cover(bool) (Insurance must flag cosmetic_cover for canInject.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Profiles capture AHPRA reg/type/status/expiry/conditions, ≥1yr-experience flag, CPD and cosmetic-cover PII.
-  - Rule: A practitioner whose PII excludes cosmetic, or whose registration has lapsed, is flagged not-cleared.
-  - Rule: The designated RN prescriber role is supported (endorsement + recorded partnered prescriber).
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-01/RBAC.
-- [ ] **Enforce compliance gate + audit events**
-  Enforce C4, C19 as a server-side invariant that cannot be bypassed via the API:
-  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
-  - Write an immutable AuditEvent for the attempt and its outcome.
-  - canInject is a single derived signal consumed by booking (PRD-02) and treatment gates.
+- [ ] **Credential data model & canInject derivation**
+  Extend StaffProfile with the AHPRA/experience/engagement/scope fields and model Credential (registration|insurance|cpd|training) with expiry, cosmetic_cover and verified-on. Compute canInject server-side exactly per the prototype rule (scope==inject AND registration current AND cosmetic_cover AND insurance in date) and expose it as a read-only derived signal; recompute on any credential change. Support the designated/partnered prescriber arrangement (prescriber_mode + partnered_prescriber_id). Store credential evidence behind signed URLs in AU-resident storage.
+- [ ] **Credential management API + AHPRA PIE / manual verification**
+  CRUD for credentials gated to owner/lead (team:manage). Provide a verify action that attempts AHPRA PIE auto-verification where approved and always falls back to a first-class manual-verify that records verified_method + verified_on. Publish the derived canInject and the human-readable status (Current / Renews in Nd / CPD behind / PII excludes cosmetic / Not compliant) so booking, charting gates, the exceptions digest and Follow-ups consume one source of truth. Block S4-relevant booking/administration when canInject is false.
+- [ ] **People & credentials UI (Team workspace)**
+  Build the Team -> People & credentials cards (team-people.png): staff card with avatar/name/role/engagement and the derived status chip, plus a per-person credential editor for AHPRA reg/type/status/expiry/conditions, experience flag, CPD done/required and PII insurer/expiry/cosmetic-cover, with the verify control. Show canInject read-only. Capability-gate the whole surface to team:manage; non-managers don't see it.

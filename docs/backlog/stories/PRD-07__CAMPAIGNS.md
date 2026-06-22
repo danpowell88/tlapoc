@@ -9,8 +9,7 @@ The prototype shows a Comms → Campaigns screen, but advertising/campaign tooli
 
 ## How it works
 
-Placeholder: advertising/campaign tooling was withdrawn from scope (ADR-0034 withdrawn) — email campaigns and social belong in the clinic's external tools (Mailchimp, Meta Business Suite). The platform may expose consented audience segments for export. Any in-app campaign must honour TGA/AHPRA rules and the no-public-S4-pricing rule (C9).
-Tracked to reconcile the prototype's Campaigns screen with the scope cut.
+Placeholder. The advertising linter, newsletter builder and social scheduler are all out of scope — advertising compliance (C9) is clinic-owned in its external tools. The platform may, where appropriate, expose a consented audience segment for export to those tools (consent + suppression honoured, C23). If a campaign capability were ever built in-app, it would have to honour TGA/AHPRA advertising rules and the no-public-S4-pricing rule (C9).
 
 ## Requirements
 
@@ -21,19 +20,19 @@ Tracked to reconcile the prototype's Campaigns screen with the scope cut.
 ## Acceptance Criteria
 
 - [ ] Placeholder — advertising/campaign content is produced in external tools, not the platform.
-- [ ] The platform exposes consented audience export / segments for those tools where appropriate (C23).
+- [ ] The platform may expose consented audience segments for export where appropriate (C23).
 - [ ] If ever built in-app, it must honour TGA/AHPRA advertising rules and the no-public-S4-pricing rule (C9).
 
 ## UI designs / screenshots
 
-- Prototype: Comms -> Campaigns (marketing-camp.png) exists as a concept; real campaigns run in external tools.
+- Prototype: Comms -> Campaigns exists as a concept; real campaigns run in external tools (Mailchimp, Meta Business Suite).
 
 ![marketing-camp — prototype screen](../screens/marketing-camp.png)
 
 ## Suggested data model
 
-- **AudienceSegment (export)** — consented clients matching filters
-  - _Export to external tools; no in-app advertising engine._
+- **AudienceSegment (export)** — tenant_id, filter, consented clients matching
+  - _Export to external tools only; no in-app advertising engine (ADR-0034 withdrawn)._
 
 ## Technical notes (high level)
 
@@ -46,4 +45,4 @@ Tracked to reconcile the prototype's Campaigns screen with the scope cut.
 ## Tasks (dev pickup)
 
 - [ ] **Scope & design when pulled into a sprint**
-  Deferred placeholder — no build in v1; confirm it still fits scope/regulatory stance, then break down.
+  Deferred placeholder — no build in v1; advertising tooling is withdrawn (ADR-0034). If revisited: the only in-scope capability is a consented audience-segment export (consent + suppression honoured, C23) to the clinic's external tools (Mailchimp, Meta Business Suite). Any in-app campaign would have to honour TGA/AHPRA advertising rules and the no-public-S4-pricing rule (C9). Confirm scope/regulatory stance before any breakdown.

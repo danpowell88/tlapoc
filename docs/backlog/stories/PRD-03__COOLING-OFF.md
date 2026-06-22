@@ -11,8 +11,9 @@ Under-18s require ≥7 days between consent and procedure plus a payment block (
 
 ## How it works
 
-For under-18s the system enforces >=7 days between consent and procedure and blocks payment (except the consult) until it elapses, and records a second-consultation offer. An optional adult cooling-off is configurable (default per legal read).
-The payment block coordinates with PRD-06; the booking deposit/hold is suppressed during cooling-off (F14 invariant).
+For under-18s the system enforces a mandatory ≥7-day cooling-off between consent and procedure and blocks payment (except the initial consult) until it elapses, and records a second-consultation offer (C6, AHPRA 2 Sept 2025). A CoolingOffTimer is created from the under-18 flag (set at booking) + the consent timestamp: eligible_at = consent_at + 7 days; payment_blocked stays true until eligible_at passes.
+The patient header shows an 'under-18 cooling-off' chip with the elapse date; checkout is blocked (except the consult) until then. The payment block coordinates with PRD-06 (the block is enforced where money is taken) and the booking deposit/hold is suppressed during cooling-off (F14 invariant, DEPOSITS placeholder).
+For ADULTS there is NO mandatory cooling-off (a 2025 regulatory correction); an optional adult cool-off / second-consult is a configurable clinic-policy setting (default per legal read), not a compliance gate. The second-consultation offer is recorded on the client timeline for all patients where applicable.
 
 ## Requirements
 
@@ -28,15 +29,16 @@ The payment block coordinates with PRD-06; the booking deposit/hold is suppresse
 
 ## UI designs / screenshots
 
-- Patient header shows an 'under-18 cooling-off' chip with the elapse date; checkout is blocked (except consult) until then.
-- A recorded second-consultation offer appears on the client timeline.
+- Patient header shows an 'under-18 cooling-off' chip with the elapse date; checkout is blocked (except consult) until then (mirrors Forms & consent 'Under-18 consent (+ guardian) · 7-day cool-off' status).
+- A recorded second-consultation offer appears on the client timeline; the intake/consent done screen notes 'If under 18, a mandatory 7-day cooling-off applies before any treatment' (client-app.png / forms-consent.png).
+- Adult cool-off is a configurable clinic-policy setting (default off per legal read).
 
 ![forms-consent — prototype screen](../screens/forms-consent.png)
 
 ## Suggested data model
 
-- **CoolingOffTimer** — id, client_id, appointment_id, consent_at, eligible_at, payment_blocked(bool), second_consult_offered_at
-  - _Under-18 mandatory 7d; adult optional/config._
+- **CoolingOffTimer** — id, tenant_id, client_id, appointment_id, consent_at, eligible_at, payment_blocked(bool), second_consult_offered_at, basis(under18_mandatory|adult_policy)
+  - _Under-18: mandatory 7d (eligible_at=consent_at+7d). Adult: optional/config. Suppresses deposits during the window (F14)._
 
 ## Other
 
@@ -44,22 +46,9 @@ The payment block coordinates with PRD-06; the booking deposit/hold is suppresse
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - CoolingOffTimer — id, client_id, appointment_id, consent_at, eligible_at, payment_blocked(bool), second_consult_offered_at (Under-18 mandatory 7d; adult optional/config.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: For under-18: ≥7 days enforced between consent and procedure; payment blocked except the consult until elapsed.
-  - Rule: A second-consultation offer is recorded.
-  - Rule: Optional adult cooling-off is configurable (default per legal read).
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-01/CLIENT-CORE, PRD-03/CONSENT.
-- [ ] **Enforce compliance gate + audit events**
-  Enforce C6 as a server-side invariant that cannot be bypassed via the API:
-  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
-  - Write an immutable AuditEvent for the attempt and its outcome.
-  - For under-18: ≥7 days enforced between consent and procedure; payment blocked except the consult until elapsed.
-  - Payment block coordinates with PRD-06.
+- [ ] **CoolingOffTimer: under-18 7-day enforcement**
+  On consent for an under-18 (under_18 flag from booking + ConsentSignature.signed_at), create a CoolingOffTimer with eligible_at = consent_at + 7 days and payment_blocked = true. Server-side, the procedure cannot be charted/finalised and checkout (except the consult line) cannot complete until eligible_at passes. Enforce as a domain invariant (ADR-0008), not UI. Audited.
+- [ ] **Payment-block coordination (PRD-06) + deposit suppression (F14)**
+  Expose the cooling-off/payment-blocked state so PRD-06 checkout blocks all non-consult charges until eligible_at, and so the (Phase-2) DEPOSITS hold is suppressed during the window (F14 invariant). Record the second_consultation offer (second_consult_offered_at) on the client timeline. Clears automatically when eligible_at passes.
+- [ ] **Adult cooling-off config + header chip UI**
+  Configurable adult cool-off / second-consult clinic-policy setting (default off per legal read) producing an optional adult CoolingOffTimer (basis=adult_policy) — NOT a compliance gate. UI: 'under-18 cooling-off' chip with elapse date on the patient/charting header; checkout-blocked indicator (except consult); second-consult offer on the timeline; the client done-screen note.

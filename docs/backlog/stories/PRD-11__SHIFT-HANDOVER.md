@@ -11,8 +11,8 @@ The prototype's back-office tablet includes a shift-handover panel so the team p
 
 ## How it works
 
-Shift-handover notes so the team passes on what the next shift needs to know; notes are timestamped, attributed, tenant/location-scoped, and shown alongside outstanding follow-ups/jobs. Accessible from the back-office tablet.
-Smooth, safe shift transitions.
+Shift-handover notes so the team passes on what the next shift needs to know: add/read notes, timestamped and attributed, tenant/location-scoped, shown alongside outstanding follow-ups/jobs (PRD-07). The back-office hub shows the last handover note with the morning's attention items. Accessible from the back-office tablet (PRD-09/BACKOFFICE-TABLET).
+Smooth, safe shift transitions (a lightweight append-style log).
 
 ## Requirements
 
@@ -29,7 +29,8 @@ Smooth, safe shift transitions.
 
 _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge log, Temperature monitors, Rooms & devices, Equipment, Call log); backroom.html._
 
-- Prototype: back-office tablet -> Shift handover (backroom.png) — add/read handover notes; outstanding jobs surfaced alongside.
+- Prototype: back-office tablet → Shift handover (backroom) — add/read handover notes; last handover note on the hub; outstanding jobs/follow-ups surfaced alongside.
+- Entries timestamped and attributed.
 
 ![backroom — prototype screen](../screens/backroom.png)
 
@@ -44,20 +45,9 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - ShiftHandover — id, tenant_id, location_id, note, created_by, at (Shown with outstanding Jobs (PRD-07).)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Handover notes can be added and are visible to the next shift, tenant/location-scoped.
-  - Rule: Outstanding follow-ups/jobs are surfaced alongside the handover.
-  - Rule: Handover entries are timestamped and attributed.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-07/FOLLOWUPS.
-- [ ] **Web UI**
-  Build on the Angular web app: the backroom per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: back-office tablet -> Shift handover (backroom.png) — add/read handover notes; outstanding jobs surfaced alongside.
+- [ ] **ShiftHandover entity + add/read notes**
+  Model ShiftHandover (tenant_id, location_id, note, created_by, at) as an append-style log under RLS. Add/read notes, timestamped and attributed, tenant/location-scoped.
+- [ ] **Shift-handover panel on the back-office tablet**
+  Handover panel on the back-office tablet (BACKOFFICE-TABLET): list recent entries; show the last handover note on the hub alongside the morning's attention items.
+- [ ] **Surface outstanding jobs/follow-ups alongside**
+  Show outstanding follow-ups/jobs (PRD-07) next to the handover so the incoming shift sees notes and open work together.

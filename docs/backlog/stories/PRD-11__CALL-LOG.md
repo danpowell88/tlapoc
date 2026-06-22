@@ -11,8 +11,8 @@ The prototype's Operations → Call log records inbound/outbound phone interacti
 
 ## How it works
 
-Log inbound/outbound phone calls against a client (direction, summary, outcome) and raise a follow-up job if needed; calls appear in the client's comms history and a missed-call/callback can be tracked to resolution. The phone is still a primary clinic channel.
-Captures phone interactions so nothing is lost.
+Log inbound/outbound phone calls against a client (direction, number, summary, outcome) and raise a follow-up job if needed; calls appear in the client's comms history and a missed-call/callback can be tracked to resolution ('Log callback'). Missed calls auto-text-back and become callback jobs; walk-ins and waitlist offers route through the same follow-up queue. Tenant-scoped and audited.
+Captures phone interactions so nothing is lost (the phone is still a primary clinic channel).
 
 ## Requirements
 
@@ -30,14 +30,15 @@ Captures phone interactions so nothing is lost.
 
 _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge log, Temperature monitors, Rooms & devices, Equipment, Call log); backroom.html._
 
-- Prototype: Operations -> Call log (ops-phone.png) — log a call against a client; raise a follow-up; appears in comms history.
+- Prototype: Operations → Call log (ops-phone) — Time · Number · Who · Note (missed → text-back sent; 'Asked to move Fri appt'); 'Log callback'; Walk-in / Offer from waitlist route through the same queue.
+- Log a call against a client; raise a follow-up; appears in comms history.
 
 ![ops-phone — prototype screen](../screens/ops-phone.png)
 
 ## Suggested data model
 
-- **CallLog** — id, tenant_id, client_id, direction(in|out), summary, outcome, at, actor_id
-  - _Can raise a Job (PRD-07); in comms history._
+- **CallLog** — id, tenant_id, client_id?, direction(in|out), number, summary, outcome, at, actor_id
+  - _Can raise a Job (PRD-07); appears in comms history; audited._
 
 ## Other
 
@@ -45,20 +46,9 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - CallLog — id, tenant_id, client_id, direction(in|out), summary, outcome, at, actor_id (Can raise a Job (PRD-07); in comms history.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Calls can be logged (direction, client link, summary, outcome).
-  - Rule: A call can raise a follow-up job (PRD-07) and appears in the client's comms history.
-  - Rule: Logs are tenant-scoped and audited.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-07/FOLLOWUPS.
-- [ ] **Web UI**
-  Build on the Angular web app: the ops-phone per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: Operations -> Call log (ops-phone.png) — log a call against a client; raise a follow-up; appears in comms history.
+- [ ] **CallLog entity + log a call**
+  Model CallLog (tenant_id, client_id?, direction[in|out], number, summary, outcome, at, actor_id) under RLS, audited. Call log UI (Time · Number · Who · Note) to log inbound/outbound calls against a client.
+- [ ] **Call → follow-up job + comms history**
+  A call can raise a follow-up Job (PRD-07); a linked call appears in the client's comms history. Missed calls auto-text-back and become callback jobs; track a missed-call/callback to resolution ('Log callback').
+- [ ] **Shared follow-up queue (walk-ins / waitlist offers)**
+  Route walk-ins and waitlist offers through the same follow-up queue as call callbacks, so the front desk works one queue.

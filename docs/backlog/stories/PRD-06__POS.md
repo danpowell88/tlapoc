@@ -11,8 +11,9 @@ Front desk takes payment in person via Square card-present or recorded cash, wit
 
 ## How it works
 
-Front desk takes payment in person via Square card-present or recorded cash, with receipts, partial/split payments, tips and surcharge config. Both card and cash appear in the daily closeout. Online one-off checkout is deferred; financial figures respect the owner-only capability.
-The everyday till for the clinic.
+A sale is an Invoice of lines (service / retail / package / membership), each carrying its catalog schedule flag, GST computed per line (services and retail are both taxable — no flat total/11), and a running total. Payment is taken via the IPaymentProvider port: Square card-present, or cash recorded as an internal tender, or a gift card drawn down. Partial and split tenders are supported (e.g. $200 on card + remainder on a gift card), as are tips and a configurable card surcharge.
+S4 lines are visibly inert for incentives: the Anti-wrinkle line shows an 'S4 · no rewards' tag and carries no reward, discount or points control — the engine refuses them (C9). Non-S4 lines can attract the member reward (10% off non-S4) and store credit, which appear as their own deduction lines.
+On completion the sale posts to the daily Closeout and syncs to Xero (PRD-10). The screen states this plainly: 'Membership autopay runs automatically on the card on file. Invoice posts to Xero on completion.' Reception sees the sale total but not owner-only money read-models (daily takings, margins).
 
 ## Requirements
 
@@ -20,26 +21,29 @@ The everyday till for the clinic.
 
 ## Acceptance Criteria
 
-- [ ] A sale completes by Square card or recorded cash; both appear in the daily closeout.
-- [ ] Receipts, partial/split payments, tips and surcharge config supported.
-- [ ] Money figures respect the owner-only financial capability (reception sees no money totals beyond the sale).
+- [ ] A sale completes in person by Square card or by recording cash; both appear in the daily Closeout.
+- [ ] Receipts, partial/split tenders, tips and a configurable card surcharge are supported.
+- [ ] GST is computed per line (services and retail both taxable); the invoice posts to Xero on completion (PRD-10).
+- [ ] S4 lines carry no reward/discount/points control; non-S4 member reward and store credit show as deduction lines.
+- [ ] Money figures respect the owner-only financial capability — Reception sees the sale but not daily-takings/margin read-models.
 - [ ] Online one-off checkout is not exposed (deferred).
 
 ## UI designs / screenshots
 
 _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rewards/Account._
 
-- Prototype: Checkout (checkout.png) — line items (service/retail/package), tender selection (Square card / cash / gift card), receipt, partial/split, tips; S4 items show no reward/discount controls (C9).
-- Reception sees the sale but not owner-only money totals.
+- Prototype: Checkout — client header (name, VIP/Glow Club badge, prefs, recent treatments, birthday/connection); line list with per-line schedule tag (S4 · no rewards / non-S4 / membership); 'Member reward — 10% off non-S4' and 'Store credit applied' deduction lines; Subtotal / GST incl. / Total.
+- 'Take payment (in person)' panel: Square card, Record cash, Gift card; note 'Membership autopay runs automatically on the card on file. Invoice posts to Xero on completion.'
+- Square-terminal modal (Processing -> Approved) then the post-checkout rebook view (CHECKOUT-ASSIST).
 
 ![checkout — prototype screen](../screens/checkout.png)
 
 ## Suggested data model
 
-- **Invoice** — id, tenant_id, client_id, lines[]{type, ref, qty, price, gst}, total, status
-  - _Lines carry the service/product schedule flag._
-- **Payment** — id, invoice_id, tender(card|cash|giftcard), amount, token_ref?, tip, surcharge, at
-  - _Appears in Closeout; posts to Xero (PRD-10)._
+- **Invoice** — id, tenant_id, client_id, lines[]{type(service|retail|package|membership), ref, qty, price, schedule(S4|nonS4), tax_code, gst}, subtotal, deductions[]{reward|credit}, total, status
+  - _Per-line schedule + GST; deductions only on non-S4 lines._
+- **Payment** — id, invoice_id, tender(card|cash|giftcard), amount, token_ref?, tip, surcharge, provider_txn_id?, at
+  - _Split/partial = multiple Payments per Invoice; appears in Closeout; posts to Xero (PRD-10)._
 
 ## Other
 
@@ -47,22 +51,18 @@ _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rew
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - Invoice — id, tenant_id, client_id, lines[]{type, ref, qty, price, gst}, total, status (Lines carry the service/product schedule flag.)
-  - Payment — id, invoice_id, tender(card|cash|giftcard), amount, token_ref?, tip, surcharge, at (Appears in Closeout; posts to Xero (PRD-10).)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: A sale completes by Square card or recorded cash; both appear in the daily closeout.
-  - Rule: Receipts, partial/split payments, tips and surcharge config supported.
-  - Rule: Money figures respect the owner-only financial capability (reception sees no money totals beyond the sale).
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-06/PAYMENT-PROVIDER.
-- [ ] **Web UI**
-  Build on the Angular web app: the checkout per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: Checkout (checkout.png) — line items (service/retail/package), tender selection (Square card / cash / gift card), receipt, partial/split, tips; S4 items show no reward/discount controls (C9).
-  - Reception sees the sale but not owner-only money totals.
+- [ ] **Invoice/Payment model + per-line GST & schedule flag (migrations)**
+  Model Invoice, InvoiceLine and Payment (every table tenant_id + RLS).
+  - InvoiceLine carries type, ref, qty, price, the catalog schedule flag (S4|non-S4) and a tax_code; GST computed PER LINE (services + retail both taxable) — not a flat total/11.
+  - Payment supports split/partial (many Payments per Invoice), tip and surcharge, with tender(card|cash|giftcard) and an optional provider_txn_id/token_ref.
+  - Deduction lines (member reward, store credit) attach only to non-S4 lines.
+- [ ] **Checkout API: sale, tenders, split/partial, receipt, Closeout+Xero post**
+  Server-authoritative checkout commands/queries.
+  - Endpoints: create/append invoice line, apply member reward/credit (non-S4 only — reject if a line is S4), take payment (card via IPaymentProvider authorize+capture; cash recorded; gift-card redeem), split/partial across tenders, void/refund.
+  - On completion: write to the day's Closeout and enqueue the Xero post (PRD-10) with per-line account/GST mapping.
+  - Owner-only gate on takings/margin read-models; Reception can complete a sale and see its total only. Never trust the client for schedule/eligibility — re-check server-side.
+- [ ] **Checkout web UI: lines, tenders, S4-inert controls, terminal modal**
+  Angular checkout per the screenshot.
+  - Line list with per-line schedule tag; S4 lines render reward/discount/points controls disabled with a tooltip (engine refuses them).
+  - Tender panel (Square card / Record cash / Gift card), split/partial entry, tip + surcharge; Subtotal / GST incl. / Total with member-reward + store-credit deduction lines.
+  - Square-terminal modal: Processing -> Approved; loading/empty/error states; capability-gate owner-only money figures.

@@ -11,8 +11,9 @@ Carry over anomaly checks: active-but-unseen, completed-not-checked-in, duplicat
 
 ## How it works
 
-Anomaly checks carried over from the prototype: active-but-unseen, completed-not-checked-in, duplicates, missing contacts, implausible dates. Findings are listed, actionable, run on a schedule, and feed the needs-attention digest.
-Keeps the data clean and trustworthy.
+Scheduled anomaly checks that keep the records trustworthy, carried over from the prototype's logic: clients marked active but not seen in N months (active-but-unseen), appointments completed without a check-in/lifecycle transition (completed-not-checked-in), likely duplicate client records, records missing required contact details, and implausible dates (e.g. DOB in the future, treatment before registration). Checks run on a schedule over the reporting read-models (READ-MODELS), so they never load the transactional path, and produce DataQualityFinding rows.
+Findings are listed and actionable — each carries an entity reference and a jump-to-fix into the relevant module (client record, appointment, etc.) — and unresolved findings feed the owner needs-attention digest (ATTENTION-DIGEST). A finding is closed when its underlying condition no longer holds (resolved_at stamped) on the next run, so the list self-cleans rather than requiring manual dismissal.
+This is operational data hygiene, not compliance evidence and not financial — no money figures, no role-gating beyond the owner/manager view.
 
 ## Requirements
 
@@ -20,23 +21,25 @@ Keeps the data clean and trustworthy.
 
 ## Acceptance Criteria
 
-- [ ] Checks flag active-but-unseen, completed-not-checked-in, duplicates, missing contacts and implausible dates.
-- [ ] Findings are listed and actionable.
-- [ ] Checks run on a schedule.
-- [ ] Findings feed the needs-attention digest.
+- [ ] Checks flag active-but-unseen, completed-not-checked-in, likely duplicates, missing contacts and implausible dates.
+- [ ] Findings are listed with an entity reference and a jump-to-fix into the source module.
+- [ ] Checks run on a schedule over the read-models (not OLTP).
+- [ ] Unresolved findings feed the needs-attention digest; a finding auto-resolves when its condition no longer holds.
 
 ## UI designs / screenshots
 
 _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack)._
 
-- Prototype: Reports -> data-quality findings (reports.png) — a list of anomalies with a jump-to-fix; feeds the owner digest.
+- Prototype: Reports → data-quality findings (reports.png context) — a list of anomalies grouped by check type.
+- Each finding: check type, the affected client/appointment, a short detail, and a jump-to-fix link to the source record.
+- Findings feed the owner needs-attention digest (dashboard.png); resolved findings drop off on the next run.
 
 ![reports — prototype screen](../screens/reports.png)
 
 ## Suggested data model
 
-- **DataQualityFinding** — id, tenant_id, check, entity_ref, detail, detected_at, resolved_at
-  - _Scheduled checks; feeds ATTENTION-DIGEST._
+- **DataQualityFinding** — id, tenant_id, check(active_unseen|not_checked_in|duplicate|missing_contact|implausible_date), entity_ref, detail, detected_at, resolved_at?
+  - _Scheduled checks over the read-models; feeds ATTENTION-DIGEST; auto-resolves._
 
 ## Other
 
@@ -44,20 +47,9 @@ _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Po
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - DataQualityFinding — id, tenant_id, check, entity_ref, detail, detected_at, resolved_at (Scheduled checks; feeds ATTENTION-DIGEST.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Checks flag active-but-unseen, completed-not-checked-in, duplicates, missing contacts and implausible dates.
-  - Rule: Findings are listed and actionable.
-  - Rule: Checks run on a schedule.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-08/READ-MODELS.
-- [ ] **Web UI**
-  Build on the Angular web app: the reports per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: Reports -> data-quality findings (reports.png) — a list of anomalies with a jump-to-fix; feeds the owner digest.
+- [ ] **Read-model / projection support for data-quality checks**
+  Ensure the read-models expose the fields each check needs (last-seen date per client, appointment lifecycle state, normalised contact fields, key dates) so checks query the read schema, not OLTP. Add any supporting projection (e.g. last-contact per client) the checks depend on.
+- [ ] **Scheduled data-quality checks + findings store**
+  Implement the five checks (active-but-unseen, completed-not-checked-in, duplicate detection, missing-contact, implausible-date) as scheduled jobs (Sprint-0 JOBS-SCHEDULER) that upsert DataQualityFinding rows and auto-resolve findings whose condition no longer holds (stamp resolved_at). Duplicate detection is advisory (name/DOB/contact match) and never auto-merges. Findings carry an entity_ref for the jump-to-fix and feed ATTENTION-DIGEST.
+- [ ] **Web UI: data-quality findings list**
+  Build the findings list under Reports: grouped by check type, each row showing the affected record, a short detail and a jump-to-fix deep link into the source module. Resolved findings fall off on the next run. Owner/manager view; no money figures.

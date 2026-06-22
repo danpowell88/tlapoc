@@ -9,8 +9,8 @@ Online checkout & deposits (S4 never priced/sold online), e-prescribing (eRx/ETP
 
 ## How it works
 
-Placeholder (Phase 2/3): online checkout & deposits (S4 never priced/sold online), e-prescribing (eRx/ETP, needs validation), public API/webhooks (Phase 3), and Medicare/HICAPS (recorded as non-applicable to cosmetic). Each sits behind its existing port (IPaymentProvider, IPrescribingProvider).
-Captured so the architecture stays extension-ready (ADR-0035/0036).
+Placeholder (Phase 2/3) for the growth/integration roadmap shown as concept cards on Settings → Integrations: online checkout & deposits (behind the existing IPaymentProvider — and S4 is never priced or sold online, ADR-0014/0036), e-prescribing for private S4 scripts (behind IPrescribingProvider, eRx/ETP — needs feasibility validation, ADR-0035), public API / webhooks / event bus (Phase 3, ADR-0036), and Medicare/HICAPS (recorded as non-applicable to cosmetic — claimable only for therapeutic exceptions).
+Each future integration sits behind an existing port so the architecture stays extension-ready with no rework: payment-class integrations on IPaymentProvider, prescribing on IPrescribingProvider, accounting on IAccountingExport, calendar on ICalendarProvider. The invariants carry forward into any future build — S4 never online, e-prescribing bound to the synchronous consult + S4 register + prescriber identity. No build in v1; design-only when scheduled.
 
 ## Requirements
 
@@ -19,21 +19,22 @@ Captured so the architecture stays extension-ready (ADR-0035/0036).
 
 ## Acceptance Criteria
 
-- [ ] Placeholder — Phase 2/3; each behind its existing port (IPaymentProvider, IPrescribingProvider).
-- [ ] S4 is never priced or sold online (invariant carried forward).
+- [ ] Placeholder — Phase 2/3; each future integration sits behind its existing port (IPaymentProvider, IPrescribingProvider, IAccountingExport, ICalendarProvider).
+- [ ] S4 is never priced or sold online (invariant carried forward into online checkout/deposits).
 - [ ] Medicare/HICAPS recorded as non-applicable to cosmetic.
-- [ ] e-prescribing flagged for feasibility validation.
+- [ ] E-prescribing (eRx/ETP) flagged for feasibility validation, bound to consult + S4 register + prescriber identity when built.
 
 ## UI designs / screenshots
 
-- Prototype: Settings -> Integrations (settings-integrations.png) shows these as concept cards (mostly disabled).
+- Prototype: Settings → Integrations (settings-integrations.png) — concept cards, mostly disabled: 'Online checkout & deposits' (Off · roadmap), 'e-Prescribing (eRx / ETP)' (Off · research), 'Medicare / HICAPS' (Not applicable), 'Webhooks & public API' (Off · phase 3).
+- Cards show the intent + status badge; Connect actions are inert until the feature is built.
 
 ![settings-integrations — prototype screen](../screens/settings-integrations.png)
 
 ## Suggested data model
 
 - **(future)** — OnlineOrder / EPrescription / Webhook / ApiKey
-  - _Behind existing ports; S4 never online._
+  - _Behind existing ports; S4 never online; e-prescribing bound to consult + S4 register (ADR-0035/0036)._
 
 ## Technical notes (high level)
 
@@ -46,4 +47,4 @@ Captured so the architecture stays extension-ready (ADR-0035/0036).
 ## Tasks (dev pickup)
 
 - [ ] **Scope & design when pulled into a sprint**
-  Deferred placeholder — no build in v1; confirm it still fits scope/regulatory stance, then break down.
+  Deferred placeholder — no build in v1. When scheduled, confirm each still fits scope and the carried-forward invariants (S4 never priced/sold online; e-prescribing bound to the synchronous consult + S4 register + prescriber identity; Medicare/HICAPS out as non-applicable), then break down behind the existing port (IPaymentProvider / IPrescribingProvider / IAccountingExport / ICalendarProvider). E-prescribing and any inbound webhooks/public API need a feasibility spike (ADR-0035/0036) before commit.

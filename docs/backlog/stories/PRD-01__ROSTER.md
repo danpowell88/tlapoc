@@ -11,8 +11,10 @@ A roster (plus employee/contractor engagement type) drives booking availability 
 
 ## How it works
 
-The roster records who is working when (and time-off) per staff and location. Booking availability is derived from roster intersected with canInject, so the diary only offers slots with a rostered, cleared practitioner.
-Engagement type (employee/contractor) is recorded for downstream commission/pay attribution.
+The roster records who is working when, per staff member and location, plus time-off/leave. It is the source of truth for booking availability (ADR-0029): a practitioner is bookable for a service if and only if they are rostered at that location that day AND they are scope/credential-compliant for the service (canInject from CREDENTIALS for S4). The prototype encodes this as a weekly grid (rosterMap) plus a leave list, with the banner 'only practitioners rostered & compliant appear as bookable'.
+Availability is therefore roster shifts, minus approved time-off, intersected with canInject — the diary (PRD-02) only ever offers slots backed by a rostered, cleared practitioner, so it can't double-book or schedule a non-compliant or off injector.
+Engagement type (employee/contractor) is recorded per staff member (it already lives on StaffProfile from CREDENTIALS) for downstream commission/pay attribution and the contractor compliance banner (ADR-0027) — the platform attributes revenue by engagement type but is explicitly not a payroll/super engine.
+Management is capability-gated: Owner/Lead manage the roster and approve leave; Reception is read-only (it needs to see who's in, not edit shifts). All roster and leave changes are audited.
 
 ## Requirements
 
@@ -27,16 +29,18 @@ Engagement type (employee/contractor) is recorded for downstream commission/pay 
 
 ## UI designs / screenshots
 
-- Prototype: Team -> Roster & leave (team-roster.png) — a weekly roster grid per practitioner with shifts and leave; drives availability in Schedule.
+- Prototype: Team -> Roster & leave (team-roster.png) — a weekly grid (Mon-Fri columns x practitioner rows) with shaded rostered cells, and a Leave list below (e.g. 'Dr Lena Park · Annual leave · Thu 26 – Fri 27 Jun · Pending', 'Chloe Adams · Personal · Mon 23 Jun · Approved') with status chips.
+- Banner states the rule: the roster is the source of truth for booking availability; only rostered & compliant practitioners appear as bookable (ADR-0029).
+- Owner/Lead can edit shifts and approve/decline leave; Reception sees it read-only.
 
 ![team-roster — prototype screen](../screens/team-roster.png)
 
 ## Suggested data model
 
 - **RosterShift** — id, tenant_id, staff_id, location_id, start, end, role
-  - _Availability = shifts - time-off, intersected with canInject._
-- **TimeOff** — id, staff_id, start, end, type, status
-  - _Blocks availability._
+  - _Availability = shifts - approved time-off, intersected with canInject for the service scope._
+- **TimeOff** — id, tenant_id, staff_id, kind(annual|personal|other), start, end, status(pending|approved|declined), approved_by
+  - _Approved leave blocks availability; pending does not yet block but is visible._
 
 ## Technical notes (high level)
 
@@ -48,17 +52,7 @@ Engagement type (employee/contractor) is recorded for downstream commission/pay 
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - RosterShift — id, tenant_id, staff_id, location_id, start, end, role (Availability = shifts - time-off, intersected with canInject.)
-  - TimeOff — id, staff_id, start, end, type, status (Blocks availability.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Rosters and time-off are recorded per staff member and location.
-  - Rule: Booking availability is derived from roster ∩ canInject (consumed by PRD-02).
-  - Rule: Engagement type (employee/contractor) is recorded per staff member.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-01/CREDENTIALS.
+- [ ] **Roster & leave model + availability derivation**
+  Model RosterShift (per staff + location) and TimeOff with an approval status, all tenant_id + RLS. Compute bookable availability as shifts minus approved leave, intersected with the canInject/scope check for the requested service — and expose it as the query PRD-02 booking consumes so it cannot offer a slot for an off or non-compliant practitioner. Record engagement type usage for downstream attribution (it lives on StaffProfile). Audit every roster/leave change and leave approval.
+- [ ] **Roster & leave UI (Team workspace)**
+  Build Team -> Roster & leave (team-roster.png): the weekly grid (day columns x practitioner rows) with editable rostered cells and the Leave list with pending/approved status chips and approve/decline actions. Show the ADR-0029 availability banner. Owner/Lead edit; Reception read-only (capability-gate to team:manage for edits, read for frontdesk). No payroll/commission UI here — attribution is downstream (ADR-0027).

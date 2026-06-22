@@ -11,8 +11,10 @@ The prototype shows the current persona, role + a scope-of-practice tooltip, and
 
 ## How it works
 
-The header shows the signed-in user, active role and a scope-of-practice summary; a user holding multiple roles can switch active role and capabilities update accordingly (consumes PRD-01 RBAC + MULTI-ROLE). The active role is recorded on actions and in the audit trail; scope is sourced from RBAC, not hard-coded per screen.
-Makes 'who am I acting as and what can I do' explicit, and explains blocks.
+The header makes 'who am I acting as, and what can I do' explicit. It shows the signed-in user, the active role, and a scope-of-practice summary — the prototype renders this as the header user chip with a hover scope tooltip (scopeNote, e.g. for the NP: 'Full clinical scope · prescribes & holds S4 stock · no business financials') and a 'Switch user' control.
+For users who hold more than one role (MULTI-ROLE — an NP who is also owner, a Lead covering reception), a switch-active-role control lets them choose which role they're acting under; capabilities (and therefore visible nav, available actions and the scope summary) update accordingly. Scope is sourced from PRD-01 RBAC — the role's capabilities/concerns — not hard-coded per screen, so the tooltip and the enforcement always agree.
+The active role is recorded on actions and in the audit trail (MULTI-ROLE stamps active_role_id; the role_switch event is audited). When an action is blocked, the scope context is what explains why — the blocked-action banner references the active role and the rule that fired.
+Edge cases: a single-role user sees the role/scope but no switch control; switching role re-derives nav + scope immediately (APP-NAV/TODAY re-tailor); financials stay hidden after switching into a clinical role unless the user also holds the finance capability (FIN-GATING invariant from MULTI-ROLE).
 
 ## Requirements
 
@@ -30,14 +32,15 @@ Makes 'who am I acting as and what can I do' explicit, and explains blocks.
 
 _Prototype screen: prototype.html — sidebar/app shell, Today dashboard, header (global search, clinic switcher, switch-user, scope tooltip)._
 
-- Prototype: header user chip + scope tooltip + 'Switch user' (dashboard.png) — active role + scope summary; switch-active-role for multi-role users.
+- Prototype: header user chip + scope tooltip + 'Switch user' (dashboard.png) — shows the signed-in user, active role and a scope-of-practice summary (the persona note); a switch-active-role control for multi-role users.
+- Switching role updates capabilities, visible nav and the scope summary immediately; scope sourced from RBAC, not per-screen.
 
 ![dashboard — prototype screen](../screens/dashboard.png)
 
 ## Suggested data model
 
-- **(session) ActiveRole** — session.active_role_id (from StaffRole)
-  - _Stamped on actions + audit; scope from Role.capabilities._
+- **(session) ActiveRole** — session.active_role_id (from StaffRole) -> scope summary from Role.capabilities/concerns
+  - _Stamped on actions + audit (MULTI-ROLE); the scope tooltip + enforcement read the same RBAC source so they always agree._
 
 ## Technical notes (high level)
 
@@ -49,11 +52,7 @@ _Prototype screen: prototype.html — sidebar/app shell, Today dashboard, header
 
 ## Tasks (dev pickup)
 
-- [ ] **Enforce compliance gate + audit events**
-  Enforce C4 as a server-side invariant that cannot be bypassed via the API:
-  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
-  - Write an immutable AuditEvent for the attempt and its outcome.
-- [ ] **Web UI**
-  Build on the Angular web app: the dashboard per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: header user chip + scope tooltip + 'Switch user' (dashboard.png) — active role + scope summary; switch-active-role for multi-role users.
+- [ ] **Active-role + scope context surface (header chip, tooltip, switcher)**
+  Build the header user chip showing signed-in user + active role + a scope-of-practice summary sourced from the RBAC session context (the role's capabilities/concerns — not hard-coded), with the hover scope tooltip. For multi-role users (MULTI-ROLE) add a switch-active-role control; single-role users see no switcher. Render from the same source the server enforces so the tooltip and gates always agree.
+- [ ] **Apply active-role switch across the app + audit**
+  On switching active role, re-fetch the session context and re-derive visible nav (APP-NAV), Today tailoring (TODAY) and available actions immediately; capabilities update accordingly. The switch is an audited role_switch event and subsequent actions are stamped with the active role (MULTI-ROLE). Keep financials hidden after switching into a clinical role unless the user also holds finance capability (FIN-GATING).

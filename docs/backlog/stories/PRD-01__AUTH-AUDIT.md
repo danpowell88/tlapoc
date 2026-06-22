@@ -11,8 +11,10 @@ Beyond data-access audit, security needs a record of authentication and authoris
 
 ## How it works
 
-Beyond data-access audit, security needs a record of authentication/authorisation events: sign-in success/failure, lockouts, MFA/step-up, role switches and every scope-block (a blocked out-of-scope or lapsed-registration attempt, with the reason).
-Queryable/exportable alongside the data-access audit; can seed the breach workflow on suspicious patterns.
+Beyond the data-access audit (AUDIT), security needs a record of authentication and authorisation events (REQ-SEC-3, C10/C4/C19): sign-in success/failure, account lockout, MFA and step-up, role switches, and — critically — every scope-block: a blocked out-of-scope action (C4) or a lapsed-registration/uncleared action (C19, via canInject), each with the reason that fired.
+Capturing scope-blocks is what lets the clinic prove the gates work, not just claim they do: an inspector asks 'show me that an uncleared injector can't administer S4', and the answer is a queryable record of every such attempt and its block. AUTH-AUDIT is the peer of the data-access AuditEvent and shares the same append-only immutability (ADR-0010).
+These events are queryable and exportable alongside the data-access trail through the same Governance audit viewer (AUDIT), filtered to auth/authorisation kinds. Suspicious patterns — a burst of sign-in failures, anomalous access, a run of scope-blocks — can seed a breach case (BREACH).
+AC mapping: covers AC1 (the block is recorded with its reason) and AC4 (the events are immutable and exportable). It's wired from RBAC's scope-block path, SIGNIN-UI's session events and MFA-STEPUP's assurance events — this story is the unified event type + viewer/feed they all write to.
 
 ## Requirements
 
@@ -28,12 +30,12 @@ Queryable/exportable alongside the data-access audit; can seed the breach workfl
 
 ## UI designs / screenshots
 
-- Surfaces in the admin audit viewer / Governance audit pack filtered to auth + authorisation events.
+- Surfaces in the admin audit viewer / Governance audit pack (gov-audit.png) filtered to auth + authorisation events (sign-in, lockout, MFA/step-up, role-switch, scope-block), with the same filter + export controls as the data-access trail.
 
 ## Suggested data model
 
-- **AuthEvent** — id, tenant_id, actor_id, kind(signin_ok|signin_fail|lockout|mfa|stepup|role_switch|scope_block), reason, at
-  - _Peer of AuditEvent; scope_block records the blocked capability._
+- **AuthEvent** — id, tenant_id, actor_id, kind(signin_ok|signin_fail|lockout|mfa|stepup|role_switch|scope_block), reason, active_role_id, at, context(json)
+  - _Peer of AuditEvent; append-only (ADR-0010). scope_block records the blocked capability + rule; queryable/exportable with the data-access trail; can seed BREACH._
 
 ## Technical notes (high level)
 
@@ -45,21 +47,9 @@ Queryable/exportable alongside the data-access audit; can seed the breach workfl
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - AuthEvent — id, tenant_id, actor_id, kind(signin_ok|signin_fail|lockout|mfa|stepup|role_switch|scope_block), reason, at (Peer of AuditEvent; scope_block records the blocked capability.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Sign-in success/failure, lockout, MFA/step-up and role-switch events are recorded.
-  - Rule: Every blocked out-of-scope or lapsed-registration action writes an audit event with the reason.
-  - Rule: These events are queryable/exportable alongside the data-access audit.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-01/AUDIT, PRD-01/RBAC.
-- [ ] **Enforce compliance gate + audit events**
-  Enforce C10, C4, C19 as a server-side invariant that cannot be bypassed via the API:
-  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
-  - Write an immutable AuditEvent for the attempt and its outcome.
-  - Every blocked out-of-scope or lapsed-registration action writes an audit event with the reason.
+- [ ] **AuthEvent type (append-only, immutable) covering auth + authorisation**
+  Model AuthEvent as a peer of AuditEvent — append-only, tenant_id + RLS, no edit/delete path (ADR-0010) — covering signin_ok/fail, lockout, mfa, stepup, role_switch and scope_block, each with a reason and the active role. Index for the viewer filters.
+- [ ] **Wire emitters across RBAC / sign-in / MFA**
+  Emit AuthEvents from the RBAC scope-block path (every out-of-scope or lapsed-registration/uncleared attempt, with the rule that fired — AC1), SIGNIN-UI session events (sign-in ok/fail, lockout, sign-out), MFA-STEPUP (mfa/stepup) and MULTI-ROLE (role_switch). One unified stream so 'prove the gate fired' is a single query.
+- [ ] **Surface in the audit viewer + breach seeding**
+  Make AuthEvents queryable/exportable through the same Governance audit viewer (AUDIT) filtered to auth/authorisation kinds (AC4). Detect suspicious patterns (burst of sign-in failures, anomalous access, a run of scope-blocks) and let them seed a candidate breach case (BREACH).

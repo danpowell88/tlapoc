@@ -11,8 +11,10 @@ Every read/write of clinical, medicines and PII data must produce an immutable A
 
 ## How it works
 
-Every read and write of clinical, medicines and PII data writes an immutable, append-only AuditEvent (who, what, when, tenant) on the Sprint-0 audit infrastructure. The log cannot be edited or deleted; a compliance officer can filter and export it.
-This is the evidentiary spine for AHPRA/QLD Health inspections and underpins the breach workflow.
+Every read AND write of clinical, medicines and PII data writes an immutable, append-only AuditEvent (who, what, when, tenant, entity, action) on the Sprint-0 audit infrastructure (ADR-0010, C10, REQ-SEC-3). Capturing reads — not just writes — is the point: an inspector asks 'who viewed this patient's record', and the answer must exist.
+The log has no update or delete path at the data layer — corrections to clinical records are appended and linked, never edited (the same immutability ADR-0010 applies to finalised ChartEntry and medicine-register rows). This makes the trail tamper-evident and defensible in an AHPRA / QLD Health / Privacy audit.
+Writing the event is part of the same logical operation as the access it records (so an access can't succeed unaudited), but the audit store is append-only and isolated so audit volume never blocks the transactional path. The capability/scope pipeline (RBAC) emits its own authorisation events (AUTH-AUDIT) as peers of these data-access events; together they are the evidentiary spine the breach workflow (BREACH) and retention/destruction register (RETENTION) build on.
+A compliance officer can filter the trail (by actor, entity type/id, date range, action) and export it. Edge cases: a denied read still records the attempt (via the scope_block path); bulk/report reads over the read-models record an aggregate access event rather than one per row, to stay meaningful.
 
 ## Requirements
 
@@ -28,12 +30,13 @@ This is the evidentiary spine for AHPRA/QLD Health inspections and underpins the
 
 ## UI designs / screenshots
 
-- Surfaces in Governance -> Audit pack (gov-audit.png) and an admin audit-log viewer with filters (who/entity/date) and export.
+- Surfaces in Governance -> Audit pack (gov-audit.png) and an admin audit-log viewer: filters for who / entity / date / action, a results table, and an export action. (Non-UI core; the viewer is the human window onto it.)
+- No edit/delete affordances anywhere — the log is read + filter + export only.
 
 ## Suggested data model
 
-- **AuditEvent** — id, tenant_id, actor_id, action(read|create|update|delete), entity_type, entity_id, at, context(json)
-  - _Append-only; no update/delete path at the data layer (ADR-0010)._
+- **AuditEvent** — id, tenant_id, actor_id, action(read|create|update|delete|export), entity_type, entity_id, at, context(json)
+  - _Append-only; no update/delete path at the data layer (ADR-0010). tenant_id + RLS; indexed on (entity_type, entity_id), actor_id and at for the viewer filters._
 
 ## Technical notes (high level)
 
@@ -45,22 +48,9 @@ This is the evidentiary spine for AHPRA/QLD Health inspections and underpins the
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - AuditEvent — id, tenant_id, actor_id, action(read|create|update|delete), entity_type, entity_id, at, context(json) (Append-only; no update/delete path at the data layer (ADR-0010).)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Every read/write of clinical/medicines/PII produces an immutable AuditEvent (who/what/when/tenant).
-  - Rule: The log cannot be edited or deleted.
-  - Rule: A compliance officer can filter and export the trail.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-01/TENANT.
-- [ ] **Enforce compliance gate + audit events**
-  Enforce C10 as a server-side invariant that cannot be bypassed via the API:
-  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
-  - Write an immutable AuditEvent for the attempt and its outcome.
-  - Every read/write of clinical/medicines/PII produces an immutable AuditEvent (who/what/when/tenant).
-  - The log cannot be edited or deleted.
+- [ ] **Append-only AuditEvent store (immutable, RLS, no update/delete path)**
+  Build the AuditEvent store on the Sprint-0 audit infra: append-only, with no update/delete code path or grant at the data layer (ADR-0010), tenant_id + RLS, and indexes on entity (type+id), actor and timestamp for the viewer. Define the context(json) shape so each event is self-describing. Ensure audit writes are part of the recorded operation (no unaudited access) but isolated so they never block or fail the transactional path.
+- [ ] **Capture clinical/medicines/PII reads + writes across modules**
+  Provide the cross-cutting hook that every clinical/medicines/PII read and write goes through, capturing actor/action/entity/tenant/context — reads included (AC4 explicitly requires sensitive-data reads). Use an aggregate access event for bulk/report reads over the read-models so the log stays meaningful. This is the single mechanism other PRDs (clients, charting, Rx, stock) attach to rather than each rolling its own.
+- [ ] **Audit viewer with filters + export**
+  Build the admin/Governance audit viewer (gov-audit.png): filter by actor, entity type/id, date range and action; paginated results table; and an export (CSV/file) for a compliance officer. Read + filter + export only — no edit/delete affordances. Capability-gate to compliance/owner. Exports themselves write an export audit event.

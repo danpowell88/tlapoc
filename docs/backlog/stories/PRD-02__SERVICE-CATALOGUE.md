@@ -11,8 +11,9 @@ The prototype's clinical Treatment menu + admin services list defines bookable s
 
 ## How it works
 
-The services / treatment menu defines every bookable service with duration/buffer, eligible roles, price and the S4/non-S4 flag. That single flag drives scope-aware booking (C4), rewards eligibility (C9) and public-page naming (PRD-07).
-Linked to the medicines/products catalogue (PRD-04) where a service consumes a product.
+The services / treatment menu defines every bookable service with duration + buffer, eligible roles, price and the S4 / non-S4 schedule flag. That single classification (ADR-0014) is the master switch that drives scope-aware booking (C4 — only canInject roles for S4), rewards eligibility (C9/REQ-MEMB-7 — no earn/redeem/discount on S4), and public-page naming/pricing (PRD-07 — generic name + withheld price for S4).
+Each service also declares what charting & compliance it drives: an S4 service requires a synchronous consult + individual script + batch-lot selection at charting and 'standard consent'; a non-S4 skin service requires neither lot nor Rx. Where a service consumes a product it links to the medicines/products catalogue (PRD-04 PRODUCT-CATALOGUE) so stock can decrement on administration.
+Catalogue admin is capability-gated (prescriber/owner) and every change is audited; the S4 tag visibly marks services and disables reward/discount controls on them.
 
 ## Requirements
 
@@ -30,15 +31,18 @@ Linked to the medicines/products catalogue (PRD-04) where a service consumes a p
 
 _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients directory & 360._
 
-- Prototype: Clinical -> Treatment menu (clinical-menu.png) and admin Services & products — each service row shows duration, eligible roles, price, S4 flag; capability-gated admin; changes audited.
-- The S4 tag visibly marks services and disables reward/discount controls on them.
+- Prototype: Clinical → Treatment menu (clinical-menu.png) — each treatment card shows category, schedule (S4/non-S4) + regulatory class, unit, performed-by roles (NP/RN/Dermal), price, duration, linked stock, AE route, and 'Charting & compliance this drives' (synchronous consult · individual S4 script · batch-lot select · standard consent · rewards-eligible vs S4 'not rewards-eligible').
+- Active/Archived/All filter; '+ Add treatment'; Edit/Archive/Delete per card; the S4 tag marks services and disables reward/discount controls; capability-gated admin; changes audited.
+- (Compounded GLP-1 blocked banner illustrates catalogue-driven enforcement.)
 
 ![clinical-menu — prototype screen](../screens/clinical-menu.png)
 
 ## Suggested data model
 
-- **Service** — id, tenant_id, name, public_name, duration, buffer, price, schedule(S4|non-S4), eligible_roles[], product_id?
-  - _schedule flag is the master classification (ADR-0014)._
+- **Service** — id, tenant_id, name, public_name, category, duration, buffer, price, schedule(S4|non-S4), reg_class(medicine|device|none), eligible_roles[], requires(consult|rx|s4_lot|standard_consent), product_id?, rewards_eligible(derived from schedule), unit
+  - _schedule flag is the master classification (ADR-0014/0021) driving scope, rewards and public naming._
+- **AuditEvent (ref)** — actor, service_id, change, at
+  - _Catalogue changes audited; admin capability-gated (prescriber/owner)._
 
 ## Technical notes (high level)
 
@@ -50,26 +54,11 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - Service — id, tenant_id, name, public_name, duration, buffer, price, schedule(S4|non-S4), eligible_roles[], product_id? (schedule flag is the master classification (ADR-0014).)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Services carry duration/buffer, eligible roles, price and the S4/non-S4 flag.
-  - Rule: The S4 flag drives scope-aware booking (C4), rewards eligibility (C9) and public naming (PRD-07).
-  - Rule: Capability-gated admin; changes are audited.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-04/PRODUCT-CATALOGUE.
-- [ ] **Enforce compliance gate + audit events**
-  Enforce C4, C9 as a server-side invariant that cannot be bypassed via the API:
-  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
-  - Write an immutable AuditEvent for the attempt and its outcome.
-  - Capability-gated admin; changes are audited.
-- [ ] **Web UI**
-  Build on the Angular web app: the clinical-menu per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: Clinical -> Treatment menu (clinical-menu.png) and admin Services & products — each service row shows duration, eligible roles, price, S4 flag; capability-gated admin; changes audited.
-  - The S4 tag visibly marks services and disables reward/discount controls on them.
+- [ ] **Service entity + schedule(S4|non-S4) classification**
+  Model Service with id/name/public_name/category/duration/buffer/price/schedule/reg_class/unit/eligible_roles[]/requires[]/product_id?. The schedule flag (ADR-0014/0021) is the single source of truth. Persist with tenant RLS. Derive rewards_eligible = (schedule != S4).
+- [ ] **Schedule flag wired to scope, rewards and public naming**
+  Make the schedule flag actually drive behaviour: the availability engine restricts S4 to canInject roles (C4); the rewards engine (PRD-06) is constrained to non-S4 by this flag (C9/REQ-MEMB-7); the public booking config (ONLINE-BOOK) uses generic name + withholds price for S4. Service also declares requires(consult/rx/s4_lot/standard_consent) that charting (PRD-05) and the gates read. Link product_id to PRODUCT-CATALOGUE for stock decrement.
+- [ ] **Capability-gated catalogue admin + audit**
+  Admin endpoints to add/edit/archive a service, gated to prescriber/owner capability; every change writes an AuditEvent. Validate that S4 services cannot have reward/discount controls enabled. Archive (not hard-delete) to preserve history on past bookings.
+- [ ] **Treatment menu admin UI**
+  Angular Treatment-menu screen: cards per service showing category, schedule + reg class, unit, performed-by roles, price, duration, linked stock, AE route and 'Charting & compliance this drives'. Active/Archived/All filter, '+ Add treatment', Edit/Archive. Visibly tag S4 and disable reward/discount controls on S4 cards. Capability-gate the admin actions.

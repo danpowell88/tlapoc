@@ -9,7 +9,9 @@ Treatment rooms drop Wi-Fi; the provider app must queue notes/photos encrypted a
 
 ## How it works
 
-Spike proving an encrypted local queue for drafts/photos that syncs with no data loss and last-write-wins drafts, with server-side finalisation and photos never persisted on device beyond a transient cache (C14/ADR-0009/0015). De-risks offline-tolerant charting (PRD-05/09).
+A Flutter prototype queues draft chart edits plus a photo offline in an encrypted local store, then syncs cleanly on reconnect with no data loss. It demonstrates conflict handling — last-write-wins for drafts — and that finalisation is server-side (a draft becomes an immutable finalised record only on the server, ADR-0010), so the device never holds the authoritative final record.
+Critically, it proves photos never persist on device beyond a transient, encrypted sync cache that is purged once synced (C14/ADR-0009) — the known competitor failure mode of lost/retained photos is exactly what this guards against. The interplay with MEDIA-STORAGE's signed-URL upload is part of what's validated.
+Go/no-go bar: drafts + a photo queue offline encrypted and sync with no loss; last-write-wins drafts and server-side finalisation work; photos leave no device residue after sync. It's a spike — document the approach for PRD-05/09 and discard the prototype.
 
 ## Requirements
 
@@ -38,9 +40,18 @@ Non-UI / platform scaffolding — no prototype screen.
 
 ## Tasks (dev pickup)
 
-- [ ] **Define spike scope, questions & success criteria**
-  List the unknowns to resolve and the pass/fail bar before building; time-box it.
-- [ ] **Build a throwaway prototype**
-  Smallest end-to-end slice that answers the questions (not production code); measure the risky bits.
-- [ ] **Write up findings + go/no-go recommendation (ADR if warranted)**
-  What worked, the gotchas, the chosen approach + its impact on the dependent stories.
+- [ ] **Define the spike scope, questions and go/no-go criteria**
+  Frame the offline-integrity risk and the bar charting needs cleared.
+  - Questions: can an encrypted local queue hold drafts + a photo offline and sync with NO loss; does last-write-wins for drafts + server-side finalisation work; do photos leave NO device residue after sync (C14/ADR-0009)?
+  - Go/no-go bar: all hold, including verified no-loss sync and purge-after-sync for photos.
+  - Time-box and the hand-off (PRD-05 OFFLINE / PRD-09).
+- [ ] **Build the throwaway offline-queue prototype**
+  Prove encrypted queue, lossless sync and photo non-retention.
+  - Queue draft chart edits + a photo offline in an encrypted local store; sync cleanly on reconnect with no loss.
+  - Demonstrate last-write-wins drafts and that finalisation happens server-side (device never holds the authoritative final record).
+  - Prove photos persist only in a transient encrypted cache purged after sync; validate the hand-off to MEDIA-STORAGE signed-URL upload. Disposable code.
+- [ ] **Document the proven offline/sync approach**
+  Capture what PRD-05/OFFLINE and PRD-09 should build on.
+  - The encrypted-queue + sync design, the conflict (last-write-wins) and server-side finalisation model, and the photo no-retention guarantee.
+  - The go/no-go and any caveats.
+  - ADR only if a real decision emerged.

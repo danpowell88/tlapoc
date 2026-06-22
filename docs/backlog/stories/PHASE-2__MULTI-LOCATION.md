@@ -9,7 +9,7 @@ Switching between locations/clinics in one tenant. The data model is location-aw
 
 ## How it works
 
-Placeholder (Phase 2+): switching between locations/clinics in one tenant. The data model is already location-aware (Location on every relevant entity), so this is the switching UX + cross-location reporting — built on PLATFORM/CLINIC-SWITCH.
+Placeholder (Phase 2+): switching between locations/clinics in one tenant. The data model is already location-aware (Location on every relevant entity), so this is the switching UX + cross-location reporting rollups — built on PLATFORM/CLINIC-SWITCH. Captured so reporting/booking stay location-aware.
 
 ## Requirements
 
@@ -36,5 +36,5 @@ Future — not built in the prototype (some shown as concept cards in Settings �
 
 ## Tasks (dev pickup)
 
-- [ ] **Scope & design when pulled into a sprint**
-  Deferred placeholder — no build in v1; confirm it still fits scope/regulatory stance, then break down.
+- [ ] **Placeholder: location switching UX + cross-location rollups (Phase 2+)**
+  Deferred. Switching UX + cross-location reporting rollups on the already location-aware model; built on PLATFORM/CLINIC-SWITCH. Not built in v1.

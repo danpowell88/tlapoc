@@ -18,8 +18,8 @@ The engine that keeps the book full and clients coming back at the right cadence
 | `FOLLOWUPS` | [Unified follow-up / job queue](../stories/PRD-07__FOLLOWUPS.md) | Story | P2 | 2 | 3 |
 | `INBOX` | [Omnichannel inbox + lead/reviews (placeholder)](../stories/PRD-07__INBOX.md) | Story | P2 | 1 | 1 |
 | `AUTOMATIONS` | [Automation builder (triggers → timed messages)](../stories/PRD-07__AUTOMATIONS.md) | Story | P2 | 2 | 3 |
-| `REVIEWS` | [Reviews & reputation (request, acknowledge, flag, auto-follow-up)](../stories/PRD-07__REVIEWS.md) | Story | P2 | 1 | 1 |
-| `LEADS-CRM` | [Lead / prospect CRM](../stories/PRD-07__LEADS-CRM.md) | Story | P2 | 1 | 1 |
+| `REVIEWS` | [Reviews & reputation (request, acknowledge, flag, auto-follow-up)](../stories/PRD-07__REVIEWS.md) | Story | P2 | 1 | 2 |
+| `LEADS-CRM` | [Lead / prospect CRM](../stories/PRD-07__LEADS-CRM.md) | Story | P2 | 1 | 3 |
 | `CAMPAIGNS` | [Campaigns (external-tool handoff) (placeholder)](../stories/PRD-07__CAMPAIGNS.md) | Story | P2 | 1 | 1 |
 
-_Totals: 11 stories · 24 tasks._
+_Totals: 11 stories · 27 tasks._

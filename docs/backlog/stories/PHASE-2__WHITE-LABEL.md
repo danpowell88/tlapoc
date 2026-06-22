@@ -9,7 +9,7 @@ Per-tenant branding/theming of web and apps (PRD-01 non-goal).
 
 ## How it works
 
-Placeholder (Phase 2+): per-tenant branding/theming of web and apps. The design system is token-driven, so theming is a matter of per-tenant token sets.
+Placeholder (Phase 2+): per-tenant branding/theming of web and apps. The design system is token-driven, so theming is a matter of per-tenant token sets (colours, logo, type) applied to web + Flutter apps — a per-tenant theme store + application layer, no component redesign. Captured so the design system stays token-driven.
 
 ## Requirements
 
@@ -36,5 +36,5 @@ Future — not built in the prototype (some shown as concept cards in Settings �
 
 ## Tasks (dev pickup)
 
-- [ ] **Scope & design when pulled into a sprint**
-  Deferred placeholder — no build in v1; confirm it still fits scope/regulatory stance, then break down.
+- [ ] **Placeholder: per-tenant white-label theming (Phase 2+)**
+  Deferred. Per-tenant token sets (colours, logo, type) applied to web + Flutter apps via a TenantTheme store + application layer; the design system is already token-driven. Not built in v1.

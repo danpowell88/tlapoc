@@ -11,8 +11,9 @@ Classify seriousness, route medicine vs device, produce a prefilled DAEN export/
 
 ## How it works
 
-Generate a prefilled DAEN adverse-event report with seriousness set, targeting the correct database (medicine vs device), and flag mandatory-reporting cases (C12, ADR-0031). Recall execution + acknowledgement tracking lives in the hub.
-Makes reporting an adverse event fast and correct; submission is export/file (electronic channel an open option).
+Turns an adverse-event record (from PRD-05 ADVERSE-EVENT) into a prefilled TGA report. The hub classifies seriousness and routes to the correct database by the product's modality classification (ADR-0025/0031): a toxin/medicine event routes to DAEN-medicines; a device-class filler (PDO threads, RF, dermal filler treated as device for AE) routes to DAEN-medical devices. The system prefills the report from the AE + administration + product data, then opens the official portal and records submission status + reference back on the audit trail — there is no direct TGA API in v1 (ADR-0031); v1 is prefill + mark-submitted, with electronic submit as a clean upgrade path.
+Reporting is voluntary but strongly encouraged for injectors in most cosmetic settings; the hub flags the defined mandatory cases (unapproved goods supplied under authority; serious device events at hospital/day-hospital facilities from 21 Mar 2026 under ASDER) rather than asserting the obligation universally — most room-based clinics fall outside the mandatory device rule. Recall execution and acknowledgement tracking also live in the hub: a lot safety notice turns into a client recall campaign with an acknowledgement trail (9 of 14 acknowledged …) that is exactly the evidence an inspector asks for.
+Each case shows route, product/lot, severity and status (Submit due / Open / Submitted). Submitting marks the case Submitted, stamps a reported date and writes an AuditEvent. This is clinical-governance work, not financial — no money figures appear.
 
 ## Requirements
 
@@ -21,23 +22,32 @@ Makes reporting an adverse event fast and correct; submission is export/file (el
 
 ## Acceptance Criteria
 
-- [ ] An adverse event produces a prefilled DAEN report with seriousness set, targeting the correct database (medicine vs device).
-- [ ] Mandatory-reporting cases are flagged.
-- [ ] Recall execution + acknowledgement tracking lives in the hub.
-- [ ] Submission is export/file (electronic channel is an open option).
+- [ ] An adverse event produces a prefilled DAEN report with seriousness set, routed to the correct database (medicine vs device) by product modality.
+- [ ] Mandatory-reporting cases are flagged (unapproved-goods-under-authority; serious device events at hospital/day-hospital facilities from 21 Mar 2026) without asserting the obligation universally.
+- [ ] Submission is prefill + portal hand-off + mark-submitted (no direct API in v1); status + reference recorded on the audit trail.
+- [ ] Recall execution + acknowledgement tracking lives in the hub (lot → client recall campaign with an acknowledgement trail).
+- [ ] Each case shows route, product/lot, severity and status; submitting stamps a reported date and audit event.
 
 ## UI designs / screenshots
 
 _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack)._
 
-- Prototype: Governance -> Adverse events & DAEN (gov-ae.png) — AE list, open a case, prefilled DAEN form routed medicine/device, mandatory-trigger flag, submit/export (openDaen/submitDaen).
+- Prototype: Governance → Adverse events & DAEN (gov-ae.png). Intro explains DAEN + 'we pre-fill the right portal (Medicines for toxins/filler-as-medicine, Devices for device-class filler/PDO/RF)'.
+- AE table: Case (AE-204), Product / lot (Botulinum toxin · B2245), Route (DAEN · Medicines / DAEN · Devices, colour-coded), Severity (Non-serious / Serious), Status (Submit due / Open), Report action.
+- Open a case → DAEN modal (openDaen): prefilled summary (Route, Product/lot, Severity, description) + 'Voluntary but strongly encouraged. The report is prefilled for the <portal> portal.' + Submit/export.
+- Submit (submitDaen): status → Submitted, reported date stamped, toast 'DAEN report marked submitted · audit-logged'; Overview AE count updates.
+- Recalls tab (gov-recalls.png): recall card with lot, sponsor field-safety notice, acknowledgement progress (9 of 14 acknowledged · 64%), 'Run recall' (runRecall) → SMS+call + acknowledgement tracking.
 
 ![gov-ae — prototype screen](../screens/gov-ae.png)
 
 ## Suggested data model
 
-- **DaenReport** — id, adverse_event_id, target(medicine|device), seriousness, mandatory(bool), prefilled(json), submitted_at
-  - _From AdverseEvent (PRD-05); export/file._
+- **DaenReport** — id, adverse_event_id, target(medicine|device), seriousness(serious|non_serious), mandatory(bool), mandatory_basis?, prefilled(json), portal_ref?, status(submit_due|open|submitted), reported_at
+  - _Derived from AdverseEvent (PRD-05) + administration/product; prefill + portal hand-off (ADR-0031), no direct API in v1._
+- **RecallCampaign** — id, lot_ref, source(sponsor_notice|tga|internal), affected_clients[], notified_at, channel(sms|call), status
+  - _Built from the lot→clients lookup; execution lives in the hub._
+- **RecallAcknowledgement** — id, recall_campaign_id, client_id, acknowledged_at, channel
+  - _The acknowledgement trail an inspector asks for._
 
 ## Technical notes (high level)
 
@@ -49,24 +59,11 @@ _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Po
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - DaenReport — id, adverse_event_id, target(medicine|device), seriousness, mandatory(bool), prefilled(json), submitted_at (From AdverseEvent (PRD-05); export/file.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: An adverse event produces a prefilled DAEN report with seriousness set, targeting the correct database (medicine vs device).
-  - Rule: Mandatory-reporting cases are flagged.
-  - Rule: Recall execution + acknowledgement tracking lives in the hub.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-05/ADVERSE-EVENT.
+- [ ] **Backend: AE → DAEN classification, routing & prefill**
+  From an AdverseEvent (PRD-05), build a DaenReport: set seriousness, route to medicine vs device by the product's modality/regClass (ADR-0025), and prefill the report fields from AE + administration + product/lot data. Flag mandatory cases by rule (unapproved-goods-under-authority; serious device event at a hospital/day-hospital facility from 21 Mar 2026 — ASDER) with the basis recorded, defaulting to voluntary otherwise. Status machine: submit_due/open → submitted. No direct TGA API (ADR-0031).
+- [ ] **Recall execution + acknowledgement tracking**
+  Turn a lot safety notice into a RecallCampaign over the affected-clients set (lot→clients lookup), dispatch SMS+call via the notifier (PRD-07), and track per-client RecallAcknowledgement to produce the acknowledgement trail (e.g. 9 of 14 acknowledged) shown as an inspector-ready evidence artefact. Recall messaging is a safety message and overrides marketing opt-out.
 - [ ] **Enforce compliance gate + audit events**
-  Enforce C12 as a server-side invariant that cannot be bypassed via the API:
-  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
-  - Write an immutable AuditEvent for the attempt and its outcome.
-- [ ] **Web UI**
-  Build on the Angular web app: the gov-ae per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: Governance -> Adverse events & DAEN (gov-ae.png) — AE list, open a case, prefilled DAEN form routed medicine/device, mandatory-trigger flag, submit/export (openDaen/submitDaen).
+  All DAEN and recall actions are append-only audited (ADR-0010): generating the prefill, marking submitted (with portal reference + reported date), launching a recall, and each acknowledgement. Capability-gate to the compliance concern. The audit entries are what surface in the inspection pack and the Overview counts.
+- [ ] **Web UI: AE list, DAEN modal, recalls**
+  Build gov-ae (AE table with Case/Product-lot/Route/Severity/Status/Report and the colour-coded route chips) and the prefilled DAEN modal (route/product/lot/severity summary, voluntary-encouraged note, Submit/export → status Submitted + reported date + toast). Build gov-recalls (recall cards with lot, sponsor notice, acknowledgement progress bar, Run recall). Update the Overview AE/recall counts on action.

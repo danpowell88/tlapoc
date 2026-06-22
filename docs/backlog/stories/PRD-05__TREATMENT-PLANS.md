@@ -11,8 +11,11 @@ Multi-session treatment plans + applyable protocol templates feed recall and str
 
 ## How it works
 
-Multi-session treatment plans built from applyable protocol templates structure ongoing care and feed the recall worklist (PRD-07). Plan progress shows on the Client 360; a charting overview / 'in-room now' entry lists active plans.
-Lets the clinic plan courses (e.g. a skin program) and keep clients on cadence.
+As an injector, I want to build multi-session treatment plans from protocol templates, so that ongoing care is structured and drives recall.
+Much aesthetic care is a course, not a one-off: a needling program, an anti-ageing maintenance cadence, a skin protocol over several visits. Treatment plans turn that into structured, trackable care — a clinician applies a protocol template and the platform schedules the sessions, tracks progress and keeps the client on cadence via recall.
+A Protocol is a reusable, clinic-curated template: a named course with ordered steps (service + recommended interval). Applying a protocol to a client instantiates a TreatmentPlan whose sessions inherit the steps, each with its own due date and status (planned / done / skipped). Plans can also be built ad hoc without a template.
+Plans feed the recall worklist (PRD-07): each upcoming session projects a recall Job at its due date, so reception/comms can rebook the client at the right cadence rather than relying on memory. As sessions are charted (a ChartEntry is finalised against a plan session), the session is marked done and the next becomes the active recall.
+Plan progress is visible on the Client 360 (a treatment-plan tab showing sessions done/next-due), and a charting overview / 'in-room now' entry point lists the day's active plans so the clinician can pick up where a client is in their course. The skin-analysis recommendations (SKIN-ANALYSIS) and outcomes (OUTCOMES) feed into and read from plans.
 
 ## Requirements
 
@@ -20,26 +23,30 @@ Lets the clinic plan courses (e.g. a skin program) and keep clients on cadence.
 
 ## Acceptance Criteria
 
-- [ ] Protocol templates can be applied to create a multi-session plan.
-- [ ] Plans feed the recall worklist (PRD-07).
-- [ ] Plan progress is visible on the client 360.
-- [ ] A charting overview / 'in-room now' entry point lists active plans.
+- [ ] A protocol template (ordered steps: service + interval) can be applied to a client to create a multi-session plan; ad hoc plans are also supported.
+- [ ] Each plan session has a due date and status; finalising a charted session marks it done and advances the next.
+- [ ] Plans feed the recall worklist (PRD-07) — upcoming sessions project recall Jobs at their due dates.
+- [ ] Plan progress is visible on the Client 360, and a charting overview / 'in-room now' entry lists active plans.
 
 ## UI designs / screenshots
 
 _Prototype screen: prototype.html — Charting + Clinical (Skin analysis, Body contouring, Complication protocols, Photography & outcomes); treatment-room.html._
 
-- Prototype: Charting (charting.png) — apply a protocol to create a multi-session plan; plan progress on Client 360 (client-360.png).
-- Active plans listed on the charting overview / in-room entry.
+- Charting: apply a protocol template to create a multi-session plan for the client; the close-out's recall toggle already projects the rebook Job (closeoutGo).
+- Client 360: a treatment-plan tab showing sessions done / next-due and the cadence.
+- A charting overview / 'in-room now' entry point listing the day's active plans so the clinician picks up mid-course.
+- New vs the prototype (build these): the Protocol template builder, the plan instantiation + session scheduling, and the recall projection per upcoming session.
 
 ![charting — prototype screen](../screens/charting.png)
 
 ## Suggested data model
 
-- **TreatmentPlan** — id, tenant_id, client_id, protocol_id, sessions[]{service, interval, status}, created_at
-  - _Feeds recall; progress on Client 360._
-- **Protocol** — id, tenant_id, name, steps[]
-  - _Applyable template._
+- **Protocol** — id, tenant_id, name, steps[]{service_id, recommended_interval, order}, active
+  - _Reusable, clinic-curated template (e.g. anti-ageing maintenance, needling course)._
+- **TreatmentPlan** — id, tenant_id, client_id, protocol_id (nullable for ad hoc), created_at, status
+  - _Instantiated from a protocol or built ad hoc; progress shown on Client 360._
+- **PlanSession** — id, plan_id (FK), service_id, due_date, status (planned|done|skipped), chart_entry_id (nullable)
+  - _Finalising the linked ChartEntry marks done + advances the next; upcoming sessions project recall Jobs (PRD-07)._
 
 ## Technical notes (high level)
 
@@ -51,22 +58,9 @@ _Prototype screen: prototype.html — Charting + Clinical (Skin analysis, Body c
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - TreatmentPlan — id, tenant_id, client_id, protocol_id, sessions[]{service, interval, status}, created_at (Feeds recall; progress on Client 360.)
-  - Protocol — id, tenant_id, name, steps[] (Applyable template.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Protocol templates can be applied to create a multi-session plan.
-  - Rule: Plans feed the recall worklist (PRD-07).
-  - Rule: Plan progress is visible on the client 360.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-05/NOTE-TEMPLATE.
-- [ ] **Provider app UI (Flutter)**
-  Build on the Flutter provider app: the charting per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: Charting (charting.png) — apply a protocol to create a multi-session plan; plan progress on Client 360 (client-360.png).
-  - Active plans listed on the charting overview / in-room entry.
+- [ ] **Data model & migrations: Protocol + TreatmentPlan + PlanSession**
+  EF Core: Protocol (named template with ordered steps = service + recommended interval), TreatmentPlan (client_id, optional protocol_id, status), PlanSession (due_date, status, optional chart_entry_id link). tenant_id + RLS; index plans by client and sessions by due_date for the recall projection.
+- [ ] **Plan API: apply protocol, schedule sessions, track progress**
+  Apply-protocol command instantiates a plan with sessions dated off the step intervals; support ad hoc plans. Finalising a charted ChartEntry against a session marks it done and advances the next active session. Project upcoming sessions as recall Jobs (ADR-0023) into the PRD-07 worklist. Expose plan-progress queries for the Client 360. Emit domain events; publish OpenAPI.
+- [ ] **Plan UI: protocol builder, apply + progress + in-room list**
+  Build the Protocol template builder, the apply-to-client flow in Charting, the plan-progress view on the Client 360 (sessions done / next-due) and the charting overview / 'in-room now' list of active plans. Wire to the API with loading/empty/error states; capability-gate to clinical roles.

@@ -11,7 +11,7 @@ The prototype's Operations → Rooms & devices manages the bookable rooms/chairs
 
 ## How it works
 
-Manage the clinic's rooms, chairs and devices as bookable resources the calendar schedules against (conflict-flagging in PRD-02). Out-of-service status removes a resource from availability; device records link to equipment maintenance.
+Manage the clinic's rooms, chairs and devices as bookable resources the calendar schedules against (conflict-flagging in PRD-02 — a device can't be in two rooms at once). Create/edit with attributes (type, location, status); prototype shows Room 1/2/3 and devices (Candela GentleLase · Class 4 laser · QLD laser licence, Lumecca IPL · TAS IPL only) with utilisation. Out-of-service status removes a resource from availability; device records link to equipment maintenance (PRD-11/EQUIPMENT).
 Keeps scheduling honest about real capacity.
 
 ## Requirements
@@ -29,13 +29,14 @@ Keeps scheduling honest about real capacity.
 
 _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge log, Temperature monitors, Rooms & devices, Equipment, Call log); backroom.html._
 
-- Prototype: Operations -> Rooms & devices (ops-resources.png) — create/edit rooms/chairs/devices (type, location, status); out-of-service toggles availability.
+- Prototype: Operations → Rooms & devices (ops-resources) — cards for rooms (Treatment/Skin) and devices (utilisation bars, licence notes); create/edit (type, location, status); out-of-service toggles availability.
+- Calendar flags conflicts (a device can't be in two rooms).
 
 ![ops-resources — prototype screen](../screens/ops-resources.png)
 
 ## Suggested data model
 
-- **Resource** — (shared with PRD-02) id, type(room|chair|device), name, location_id, status
+- **Resource** — (shared with PRD-02) id, tenant_id, type(room|chair|device), name, location_id, status, licence_note?
   - _Out-of-service removes from availability; device links to Equipment._
 
 ## Technical notes (high level)
@@ -48,20 +49,9 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - Resource — (shared with PRD-02) id, type(room|chair|device), name, location_id, status (Out-of-service removes from availability; device links to Equipment.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Rooms/chairs/devices can be created/edited with attributes (type, location, status).
-  - Rule: Resources are available to the calendar for booking + conflict-flagging (PRD-02/WALKINS).
-  - Rule: Out-of-service status removes a resource from availability.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-02/CALENDAR.
-- [ ] **Web UI**
-  Build on the Angular web app: the ops-resources per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: Operations -> Rooms & devices (ops-resources.png) — create/edit rooms/chairs/devices (type, location, status); out-of-service toggles availability.
+- [ ] **Resource register: rooms/chairs/devices CRUD**
+  Manage the shared Resource entity (type[room|chair|device], name, location_id, status, optional licence_note). CRUD on Operations → Rooms & devices; show utilisation. Same entity the PRD-02 calendar books against.
+- [ ] **Expose resources to calendar + conflict-flagging**
+  Make resources available to the PRD-02 calendar for booking and conflict-flagging (PRD-02/WALKINS): a device resource can't be assigned to two concurrent appointments / two rooms at once.
+- [ ] **Out-of-service status + link to equipment maintenance**
+  Out-of-service status removes a resource from availability (can't be scheduled while down). A device Resource carries an optional link to its Equipment maintenance record (PRD-11/EQUIPMENT) — same physical device.

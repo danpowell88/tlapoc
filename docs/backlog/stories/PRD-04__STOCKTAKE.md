@@ -11,8 +11,10 @@ Stocktakes and discrepancy handling, with loss/theft reporting, close the medici
 
 ## How it works
 
-Stocktakes compare expected vs counted stock per lot; discrepancies are recorded and a discrepancy can trigger a loss/theft report. Near-expiry lots surface via expiry alerts. Results feed the compliance dashboard (C17).
-Keeps stock integrity provable and losses reported.
+Periodic S4 reconciliation (C17) proves stock integrity: a stocktake compares expected (the ledger sum) against a physical count per lot, records variances, and gives a path to report loss/theft. Near-expiry lots surface via expiry alerts. Results feed the compliance dashboard (PRD-08), and an unexplained count variance near a cabinet-access anomaly (PRD-04/CUSTODY-STORAGE) is the signal for a loss/theft report.
+A Stocktake captures, per lot, the expected on-hand (from the StockLedger) and the counted quantity; variance = counted - expected. A non-zero variance is recorded as a discrepancy; the stocktaker can trigger a LossReport (loss|theft) from a discrepancy.
+Expiry alerts surface near-expiry lots (the prototype's 'Expiring soon' tile and the per-lot 'Expiring' status) so they can be used FEFO or destroyed before they lapse.
+Stocktake results, discrepancies and loss/theft reports feed the compliance dashboard and audit pack - keeping stock integrity provable and losses reported.
 
 ## Requirements
 
@@ -28,16 +30,20 @@ Keeps stock integrity provable and losses reported.
 
 ## UI designs / screenshots
 
-- Prototype: Stock & medicines (stock.png) — a stocktake action comparing counted vs expected per lot; discrepancies highlighted with a loss/theft report path; expiry alerts on near-expiry lots.
+- Prototype screen: Stock & medicines (stock.png).
+- KPI tiles include 'Expiring soon - 1 lot (Botox B2188 - 40U)' and 'Below par - 2 reorder'; the stock-by-lot table flags an 'Expiring' status per lot.
+- A stocktake action compares counted vs expected per lot; a variance is highlighted as a discrepancy with a loss/theft report path.
+- The 'Reduce waste & lift margin' panel nudges FEFO use of near-expiry lots (e.g. 'Lot B2188 expiring (~6 wks - 40u)').
+- Stocktake results feed the governance/compliance dashboard.
 
 ![stock — prototype screen](../screens/stock.png)
 
 ## Suggested data model
 
 - **Stocktake** — id, tenant_id, at, actor_id, lines[]{lot_id, expected, counted, variance}
-  - _Variance -> discrepancy._
-- **LossReport** — id, stocktake_id, lot_id, units, kind(loss|theft), reported_at
-  - _Triggerable from a discrepancy (C17)._
+  - _expected from the StockLedger; variance -> discrepancy (C17)._
+- **LossReport** — id, tenant_id, stocktake_id, lot_id, units, kind(loss|theft), reported_at, reported_by, note
+  - _Triggerable from a discrepancy (C17); cross-referenced with cabinet AccessLog anomalies._
 
 ## Other
 
@@ -45,21 +51,9 @@ Keeps stock integrity provable and losses reported.
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - Stocktake — id, tenant_id, at, actor_id, lines[]{lot_id, expected, counted, variance} (Variance -> discrepancy.)
-  - LossReport — id, stocktake_id, lot_id, units, kind(loss|theft), reported_at (Triggerable from a discrepancy (C17).)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: A stocktake compares expected vs counted stock per lot.
-  - Rule: Discrepancies are recorded; a discrepancy can trigger a loss/theft report.
-  - Rule: Expiry alerts surface near-expiry lots.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-04/CUSTODY-STORAGE.
-- [ ] **Enforce compliance gate + audit events**
-  Enforce C17 as a server-side invariant that cannot be bypassed via the API:
-  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
-  - Write an immutable AuditEvent for the attempt and its outcome.
+- [ ] **Stocktake + LossReport model + expiry alerting (model & migration)**
+  Add Stocktake: id, tenant_id, at, actor_id, lines[]{lot_id, expected, counted, variance}; and LossReport: id, tenant_id, stocktake_id, lot_id, units, kind(loss|theft), reported_at, reported_by, note; RLS by tenant. expected is snapshotted from the StockLedger at count time. Add an expiry-alert query/threshold over StockItem.expiry to surface near-expiry lots (drives the 'Expiring soon' tile and the per-lot Expiring status).
+- [ ] **Stocktake API + discrepancy/loss-theft flow**
+  Endpoints: POST /stocktake (per-lot counted), the server computes expected from the ledger and variance per line. A non-zero variance is recorded as a discrepancy; POST /stocktake/{id}/loss-report raises a LossReport(loss|theft) from a discrepancy. Cross-reference cabinet AccessLog anomalies (PRD-04/CUSTODY-STORAGE) so an unexplained open near a count variance is easy to spot. Feed results to the compliance dashboard (PRD-08).
+- [ ] **Discrepancy/expiry surfacing + audit**
+  Surface discrepancies and near-expiry lots on the stock view and the compliance dashboard; FEFO nudge near-expiry lots before they lapse. Audit every stocktake, recorded variance and loss/theft report - periodic reconciliation + loss reporting is the C17 evidence. Capability-gate stocktake/loss-report to stock-capable clinical roles + owner.

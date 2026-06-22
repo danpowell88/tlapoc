@@ -11,8 +11,9 @@ Clients self-book service → practitioner → slot online; injectable services 
 
 ## How it works
 
-Client-facing self-booking on the public page: service -> practitioner -> slot -> account -> intake/consent. It reuses the same scope-aware availability as the desk, so an injectable only offers cleared RN/NP and requires the consult step downstream.
-Public service names are generic and S4 prices withheld by configuration (C9). Under-18 bookings are flagged so cooling-off can be enforced later (PRD-03).
+Client-facing self-booking on the public page / embeddable widget: service → practitioner → slot → account → intake/consent. It reuses the EXACT same scope-aware availability engine as the desk, so an injectable (S4) service only offers cleared RN/NP and presents the consult as part of a gated flow — the public surface can never book an uncredentialled injector.
+The public surface is advertising-constrained by configuration (C9, shared with PRD-07 BOOKING-PAGE): services show clinic-customised GENERIC display names (no S4 brands or 'anti-wrinkle injection' wording), S4 prices are withheld and the service is tagged 'Consultation required' / price-free. None of this is an automated linter — it is a per-tenant PublicBookingConfig setting.
+On account creation the DOB is captured; a booking for a client under 18 is flagged so PRD-03 can later enforce the 7-day cooling-off and payment block. The booked Appointment is identical to a desk booking (source=online) and triggers the intake + consent send.
 
 ## Requirements
 
@@ -30,17 +31,20 @@ Public service names are generic and S4 prices withheld by configuration (C9). U
 
 _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients directory & 360._
 
-- Prototype: public booking page (public-booking.png) and the booking widget (booking-widget.png) — generic service list, practitioner choice, slot grid, account create, then intake/consent.
-- No S4 brand names or prices shown; injectables present consult+treatment as a gated flow.
+- Prototype: public booking widget (booking-widget.png) and the embeddable/customise view (public-booking.png) — 'What can we help with?' service list with generic display names, S4 services tagged 'Consultation required' and shown price-free, 'Pricing is confirmed privately with your practitioner'.
+- Flow steps (progress bar): service → practitioner (RN/NP only for S4) → slot grid → your details/account → intake & consent handoff; 'Your details are kept private & used only to manage your booking'.
+- public-booking.png also shows the owner's 'Compliant by configuration' panel: generic names, withheld prices, S4 always price-free + 'consultation required', and 'no deposit / card on file in v1'.
 
 ![public-booking — prototype screen](../screens/public-booking.png)
 
 ## Suggested data model
 
 - **Appointment** — (as CALENDAR) source=online
-  - _Same entity; created via the public flow._
-- **PublicBookingConfig** — tenant_id, generic_names(bool), withhold_s4_prices(bool)
-  - _Drives naming/pricing per C9 (shared with PRD-07 BOOKING-PAGE)._
+  - _Same entity; created via the public flow; triggers intake/consent send (PRD-03)._
+- **PublicBookingConfig** — tenant_id, generic_names(bool), withhold_s4_prices(bool), display_name_overrides(map), embed_token
+  - _Drives naming/pricing per C9 (shared with PRD-07 BOOKING-PAGE); a config setting, not a linter._
+- **Client (ref)** — dob, under_18(derived)
+  - _DOB captured at account create; under-18 flag feeds PRD-03 cooling-off (C6)._
 
 ## Other
 
@@ -48,27 +52,11 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - Appointment — (as CALENDAR) source=online (Same entity; created via the public flow.)
-  - PublicBookingConfig — tenant_id, generic_names(bool), withhold_s4_prices(bool) (Drives naming/pricing per C9 (shared with PRD-07 BOOKING-PAGE).)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Booking wizard: service → practitioner → time → client → confirm.
-  - Rule: Injectable services offer only cleared RN/NP (scope-aware, per C4); others never appear bookable for it.
-  - Rule: Public service names are generic and S4 prices withheld by configuration (C9, see PRD-07).
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-02/CALENDAR, PRD-01/CREDENTIALS.
-- [ ] **Enforce compliance gate + audit events**
-  Enforce C4, C6, C9 as a server-side invariant that cannot be bypassed via the API:
-  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
-  - Write an immutable AuditEvent for the attempt and its outcome.
-  - Injectable services offer only cleared RN/NP (scope-aware, per C4); others never appear bookable for it.
-- [ ] **Web UI**
-  Build on the Angular web app: the public-booking per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: public booking page (public-booking.png) and the booking widget (booking-widget.png) — generic service list, practitioner choice, slot grid, account create, then intake/consent.
-  - No S4 brand names or prices shown; injectables present consult+treatment as a gated flow.
+- [ ] **Public booking API: scope-aware availability + create (source=online)**
+  Public (unauthenticated for browse, authenticated to commit) endpoints that reuse the CALENDAR availability engine — service list filtered to bookable services, then practitioners filtered to canInject for S4, then slots. Create endpoint sets source=online, runs the same server-side conflict/scope checks as the desk, and rejects an ineligible practitioner for an S4 service. Rate-limit + bot-protect the public surface.
+- [ ] **PublicBookingConfig: generic names + withheld S4 prices (C9)**
+  Per-tenant config (generic_names, withhold_s4_prices, display_name_overrides) that the public service list reads. S4 services render with the generic display name, no price, and a 'Consultation required' tag; non-S4 may show price. This is a configuration policy (shared with PRD-07 BOOKING-PAGE), NOT an advertising linter. Server returns already-sanitised data so the client never receives an S4 brand/price.
+- [ ] **Public booking widget UI: stepped flow + account + intake/consent handoff**
+  Embeddable/standalone widget: progress-stepped service → practitioner → slot → details/account → confirm. Generic service cards, 'Consultation required' chips on S4, 'pricing confirmed privately' copy. Account create captures DOB; under-18 sets the flag on the resulting Appointment for PRD-03. On confirm, hand off to the intake + consent send and show the 'kept private' assurance. Customise panel (brand colour/name/services) backs the embed config.
+- [ ] **Under-18 flag propagation from booking**
+  On create, derive under_18 from DOB and stamp it on the Appointment so PRD-03 COOLING-OFF/GATING can enforce the 7-day cooling-off + payment block. No cooling-off logic here — only the durable flag + a domain event so downstream gates can react. Guardian/contact capture is deferred to PRD-03 consent.

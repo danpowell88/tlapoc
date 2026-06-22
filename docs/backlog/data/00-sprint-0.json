@@ -41,7 +41,23 @@
       ],
       "priority": "P0",
       "detail": [
-        "A single, well-structured workspace for the .NET API, Angular web, two Flutter apps and shared packages (design system + API client), with consistent formatter/linter/editorconfig from day one. Keeps versioning, CI and code-sharing sane and gives shared code an obvious home (ADR-0005/0006)."
+        "A single workspace holds all four deployables plus the shared packages, with formatter, linter and editorconfig enforced locally from the first commit. The agreed top-level layout is api/ (the .NET solution and its bounded modules), web/ (the Angular workspace), apps/ (the Flutter workspace with client and provider flavours), packages/ (the shared design-system and generated API-client libraries), infra/ (IaC, owned by IAC) and scripts/ (dev/seed tooling).",
+        "The .NET solution is organised as the modular monolith from ADR-0005: a host/API project plus bounded-module class libraries (Tenancy, Clients, Booking, Clinical, Consent, Rx, Medicines, Payments, Memberships, Notifications, Reporting, Integrations, Facility) and shared kernel projects, so module seams exist before any feature is written. The Angular workspace is set up to consume a library project; the Flutter workspace uses one package with two app entrypoints (flavours) and shared packages for auth, the API client and the design system.",
+        "Shared packages start as empty-but-buildable libraries so dependents can reference them immediately — DESIGN fills the design-system package and OPENAPI fills the API-client package later. Consistent editorconfig + formatter + analyzer/lint rules are committed and run on save / pre-commit, so style is settled before the team scales and before CICD makes the same checks blocking."
+      ],
+      "tasks": [
+        {
+          "title": "Scaffold the workspace, solution & shared-package skeleton",
+          "note": "Create the top-level layout (api/, web/, apps/, packages/, infra/, scripts/) and a root README documenting it.\n- .NET solution: an API host project plus class-library projects for each bounded module of the modular monolith (Tenancy, Clients, Booking, Clinical, Consent, Rx, Medicines, Payments, Memberships, Notifications, Reporting, Integrations, Facility) and a shared-kernel/common project; solution builds clean.\n- Angular workspace under web/ that serves, plus a buildable library project ready to be the home of the design system.\n- Flutter workspace under apps/ with two flavours (client, provider) launching empty shells on a simulator, and placeholder shared packages (auth, api-client, design-system).\n- packages/ holds the design-system and API-client libraries as empty-but-buildable stubs that web and Flutter already reference, so DESIGN and OPENAPI just fill them in."
+        },
+        {
+          "title": "Commit editorconfig, formatter & analyzer/lint configs and enforce locally",
+          "note": "Establish one code-style baseline across all three languages, run on save and pre-commit, so style never becomes a review argument and CICD can later make the same checks blocking.\n- Root .editorconfig covering C#, TypeScript and Dart (indentation, line endings, trailing whitespace, final newline).\n- .NET analyzers + format settings; Angular ESLint + Prettier; Dart analyzer/format — each wired to a single 'format + lint' entrypoint per surface.\n- A lightweight pre-commit hook (documented, opt-in) that runs format-check and lint; the same commands are the ones CICD will gate on, so local and CI behaviour match."
+        },
+        {
+          "title": "Document repo layout, build commands & contribution conventions",
+          "note": "Author the top-level README and a short CONTRIBUTING note so a new dev can build every surface and knows where new code goes.\n- One-line-per-surface build/serve/run instructions (API, web, both Flutter flavours), and how to build the shared packages.\n- Folder-ownership map: which module/folder a given feature's API code, web screen, app screen and shared component belong in.\n- Branch-naming and commit conventions (the detail of protection rules is GOV's job; this is the human-facing summary)."
+        }
       ]
     },
     {
@@ -68,7 +84,23 @@
         "SPRINT-0/REPO"
       ],
       "detail": [
-        "Pipelines build + test the API/web/apps on every PR (blocking merge on failure) and auto-deploy to dev on merge; mobile builds produce installable artifacts. This makes the compliance posture (tests, scans) enforceable rather than aspirational and is the backbone for repeatable releases."
+        "GitHub Actions (the repo already deploys the POC via Actions) runs two pipeline shapes. The PR pipeline builds and tests all surfaces in parallel jobs — .NET (restore/build/unit + integration), Angular (build + unit), and both Flutter flavours (build + widget tests) — and is a required status check that blocks merge on any failure. The merge-to-main pipeline builds release artifacts and deploys API + web to the dev environment automatically.",
+        "Stages flow lint -> build -> unit -> integration -> package -> deploy(dev) -> (manual gate) -> deploy(staging/prod). Integration tests run against an ephemeral Postgres service container so RLS/auth invariants are exercised in CI, not just locally. SEC-BASE inserts dependency, secret and SAST scan stages; TEST inserts the coverage threshold; both gate the pipeline.",
+        "Mobile builds produce installable artifacts for internal distribution (the wiring of distribution channels is APP-DISTRIBUTION later; here we just produce signed-able artifacts). Deploys read configuration and secrets per environment from Key Vault (SECRETS) and target Australia-East infrastructure provisioned by IAC. Environments dev/staging/prod map to GitHub Environments so GOV can attach approval gates."
+      ],
+      "tasks": [
+        {
+          "title": "Build the PR pipeline: parallel build + test for all surfaces, blocking merge",
+          "note": "Author the PR workflow that fans out per surface and is the required gate before merge.\n- Parallel jobs: .NET (restore, build, unit + integration tests against a Postgres service container), Angular (build + unit), Flutter client and provider (build + widget tests).\n- Lint/format-check runs first and fails fast (reusing REPO's commands).\n- Caching for package restores to keep PR feedback fast; matrix where it helps.\n- Pipeline result published as a status check GOV will mark required; any job failure blocks merge.\n- Leaves clearly-marked insertion points where SEC-BASE adds scan stages and TEST adds the coverage gate."
+        },
+        {
+          "title": "Build the deploy pipeline to dev/staging/prod with per-environment config",
+          "note": "Author the merge/deploy workflow targeting the AU-East environments from IAC, reading config/secrets per environment from Key Vault (SECRETS).\n- Merge to main: build release artifacts, then auto-deploy API + web to dev.\n- staging/prod are separate jobs/targets gated by a manual approval (GitHub Environments) so GOV can require an approver for prod.\n- Mobile flavours build installable artifacts for internal distribution (signing/store wiring deferred to APP-DISTRIBUTION).\n- Migrations apply on deploy (DB owns the migration runner); deploy is idempotent and re-runnable.\n- Each environment selects its own connection strings/identities so a deploy can never cross environments."
+        },
+        {
+          "title": "Document the pipeline: stages, gates, environments & how to add a check",
+          "note": "Write the pipeline reference so the team understands what runs, when it blocks, and how to extend it.\n- The stage diagram (lint -> build -> unit -> integration -> package -> deploy(dev) -> gate -> staging/prod) and which stages are blocking.\n- How required checks tie to branch protection (cross-reference GOV) and where approval gates live.\n- The convention for adding a new blocking check (so SEC-BASE/TEST additions are consistent) and how to read a failed run."
+        }
       ]
     },
     {
@@ -102,13 +134,29 @@
       ],
       "priority": "P0",
       "detail": [
-        "dev/staging/prod provisioned as code, all pinned to Australia East so data residency (C21/ADR-0016) is provable and reproducible. A non-AU region for any PII/PHI resource fails the IaC policy check; environments are isolated and a non-prod env can be torn down/recreated with one command."
+        "Azure resources (ADR-0001) are declared as code — compute (Container Apps / App Service for the API + web), Azure Database for PostgreSQL Flexible Server (ADR-0002), Blob storage, Key Vault, networking and the observability workspace — parameterised per environment so dev/staging/prod are the same definition with different inputs. Every PII/PHI-bearing resource is pinned to Australia East.",
+        "A residency policy check is part of the pipeline: a resource declaring any non-AU region for a data-bearing service fails the IaC plan/validation step before anything is created (Azure Policy / a deny rule plus a plan-time assertion). This is the mechanism that makes ADR-0016 enforceable rather than a comment in a doc.",
+        "Environments are fully isolated — separate data stores, separate Key Vault, separate managed identities and separate networking per environment — so a credential or query in one environment can never reach another. Non-prod environments are disposable: a single command tears down and recreates dev or staging from the same definitions, which keeps them cheap and keeps drift out."
       ],
       "data_model": [
         {
           "entity": "(infra) Environment",
-          "fields": "region=AustraliaEast, isolated data store/secrets/identity per env",
-          "notes": "Residency policy enforced in IaC."
+          "fields": "name(dev|staging|prod), region=AustraliaEast, isolated dataStore/keyVault/identity/network",
+          "notes": "Same IaC definition per environment, different parameters; residency pinned and policy-enforced."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Author the IaC modules for the AU-East environment stack",
+          "note": "Declare the full per-environment Azure stack as parameterised, reusable modules so dev/staging/prod differ only by inputs.\n- Modules: compute (API + web hosting), Postgres Flexible Server, Blob storage, Key Vault, networking, observability workspace.\n- Every data-bearing resource pinned to Australia East; region is a guarded parameter, not a free string.\n- Isolation by construction: each environment gets its own data store, vault, managed identities and network — no shared resources across environments.\n- Outputs (connection endpoints, identity ids, vault uri) are consumed by DB, SECRETS, MEDIA-STORAGE and CICD rather than hand-copied."
+        },
+        {
+          "title": "Enforce the AU residency policy and make non-prod disposable",
+          "note": "Make residency a hard gate and make tearing down non-prod a one-liner.\n- A plan/validation-time assertion plus an Azure Policy deny rule: any PII/PHI resource declaring a non-AU region fails before provisioning (the test that proves ADR-0016).\n- A single command provisions, and a single command tears down + recreates, a non-prod environment from the same definitions.\n- State management and naming conventions so environments never collide; document the residency exception process (there is none for v1 — it simply fails)."
+        },
+        {
+          "title": "Wire provisioning into CI/CD and document environment topology",
+          "note": "Make environment changes go through the pipeline, and document the topology so on-call and PRD-01/RESIDENCY can audit it.\n- Plan-on-PR / apply-on-merge for infra changes, with the residency check as a blocking step (ties into CICD).\n- A diagram of the three environments, their isolated resources and the AU-East pinning.\n- How to read the policy-check output and what 'provable residency' means for the RESIDENCY register later."
         }
       ]
     },
@@ -141,13 +189,29 @@
         "SPRINT-0/IAC"
       ],
       "detail": [
-        "Postgres + EF Core with a migrations-first pipeline and a base-entity convention (tenant_id + created/updated audit columns) that every module inherits. Migrations apply automatically per environment; local dev uses a containerised Postgres seeded by SEED (ADR-0002)."
+        "EF Core connects to the Azure Postgres Flexible Server provisioned by IAC. Migrations are the single source of schema truth — generated in the codebase, reviewed in PRs, and applied automatically on deploy (the runner CICD invokes), never by hand-editing a database. Local dev runs a containerised Postgres seeded by SEED, so the same migrations produce the same schema everywhere.",
+        "A base-entity convention is inherited by every tenant-scoped table: a primary key, tenant_id (the column RLS will key on), and created/updated audit columns (created_at/by, updated_at/by) populated centrally via an EF Core SaveChanges interceptor so modules don't repeat the plumbing. This convention is configured once in the DbContext model-building so new entities pick it up by inheriting the base type.",
+        "A sample entity round-trips through a repository + migration in an integration test against a real Postgres, proving the convention, the migration pipeline and connectivity end-to-end before feature modules rely on it. The base-entity columns deliberately set up what RLS (tenant_id) and the audit interceptor (audit columns) need next."
       ],
       "data_model": [
         {
           "entity": "BaseEntity",
           "fields": "id, tenant_id, created_at, created_by, updated_at, updated_by",
-          "notes": "Convention inherited by all tenant-scoped tables."
+          "notes": "Inherited by every tenant-scoped table; audit columns set by a SaveChanges interceptor; tenant_id is the RLS key."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Stand up EF Core + the base-entity convention and migration pipeline",
+          "note": "Establish the DbContext, the base-entity convention and the migrations-first workflow against the IAC-provisioned Postgres.\n- A BaseEntity (id, tenant_id, created/updated audit columns) applied via model-building conventions so every tenant-scoped entity inherits it.\n- A SaveChanges interceptor that stamps audit columns (and tenant_id from the request context once RLS lands) so modules never hand-set them.\n- Migration generation in the codebase as the only way schema changes; naming/folder convention for module migrations.\n- Connection comes from per-environment config/secret (SECRETS), never hard-coded."
+        },
+        {
+          "title": "Automate migrations on deploy and a containerised local Postgres",
+          "note": "Make migrations apply automatically per environment and give every dev an identical local database.\n- A migration runner CICD invokes on deploy (idempotent, re-runnable, ordered) so each environment converges to the migrated schema.\n- A containerised Postgres for local dev that SEED populates; same migrations, same result as the cloud environments.\n- A sample entity that round-trips through a repository + migration in an integration test against a real Postgres, proving connectivity + convention before modules depend on it."
+        },
+        {
+          "title": "Document the data conventions and how modules add schema",
+          "note": "Write the data-layer guide so every module adds tables consistently.\n- The base-entity convention, what the audit interceptor sets, and the rule that all tenant-scoped tables carry tenant_id (the RLS hook).\n- How to author + review a migration, and how it gets applied per environment.\n- How local containerised Postgres + SEED fit together for development and tests."
         }
       ]
     },
@@ -185,13 +249,29 @@
         "SPRINT-0/SPIKE-RLS"
       ],
       "detail": [
-        "Postgres row-level-security policies keyed on tenant_id, with EF Core setting the session tenant on every request (ADR-0003), so a query can never return another tenant's rows — proven by an integration test (Tenant A cannot read Tenant B; cross-tenant id -> not-found). Background jobs use an explicit, audited elevated path. The single most important data-layer safety property."
+        "Every tenant-scoped table gets an RLS policy of the shape USING (tenant_id = current_setting('app.tenant_id')::uuid) for reads and a matching WITH CHECK for writes, with policies created in migrations alongside the tables. RLS is forced (not just enabled) so even the table owner is subject to it, closing the 'superuser bypass' hole.",
+        "The API sets the session tenant on every request: middleware resolves the authenticated principal's tenant claim, and an EF Core connection interceptor issues SET app.tenant_id (per the pattern SPIKE-RLS proved safe under connection pooling and async) before any query runs, then clears it on return so a pooled connection never leaks context. The application-layer tenant check stays as belt-and-braces.",
+        "Background jobs and migrations that legitimately need cross-tenant access use one explicit, audited elevated path — a dedicated bypass role/setting that is never reachable from request handling, and every use of it emits an AuditEvent (AUDIT-INFRA). The invariant is proven by an integration test: signed in as Tenant A, a query for Tenant B's rows returns nothing and a cross-tenant id resolves to not-found, never another tenant's record."
       ],
       "data_model": [
         {
           "entity": "RLS policy",
-          "fields": "USING (tenant_id = current_setting('app.tenant'))",
-          "notes": "Session tenant set per request; elevated path audited."
+          "fields": "USING (tenant_id = current_setting('app.tenant_id')::uuid); matching WITH CHECK; FORCE ROW LEVEL SECURITY",
+          "notes": "Applied per tenant-scoped table in migrations; session tenant set per request; one audited elevated bypass for jobs."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Author the RLS policies and the per-request session-tenant wiring",
+          "note": "Implement the database isolation and the request-side context that drives it, using the SPIKE-RLS-proven pattern.\n- Per tenant-scoped table: enable + FORCE row level security and a USING/WITH CHECK policy keyed on current_setting('app.tenant_id'); created in migrations next to the table.\n- Middleware resolves the tenant from the authenticated principal; an EF Core connection interceptor SETs app.tenant_id before queries and clears it on connection return so pooled connections never leak context.\n- Keep the application-layer tenant check as defense-in-depth (ADR-0003)."
+        },
+        {
+          "title": "Implement the audited elevated/bypass path for jobs & migrations",
+          "note": "Provide exactly one sanctioned way to operate cross-tenant, and make every use of it visible.\n- A dedicated bypass role/setting usable only by background workers and migrations, never reachable from request handlers.\n- Each elevation emits an AuditEvent (who/why/scope) via AUDIT-INFRA, so an auditor can see every cross-tenant operation.\n- Document when elevation is allowed (JOBS-SCHEDULER consumes this) and the guard that prevents accidental use in request code."
+        },
+        {
+          "title": "Prove and document the isolation invariant",
+          "note": "Codify the cross-tenant test as a compliance invariant and document the model.\n- An integration test against real Postgres: as Tenant A, reads of Tenant B data return empty and a cross-tenant id is not-found (never leaks a row); writes can't set a foreign tenant_id.\n- Flag this test under the TEST 'compliance invariant' convention so the gate must block on regression.\n- Document the policy shape, the session-context lifecycle and the bypass rule for future module authors."
         }
       ]
     },
@@ -227,7 +307,19 @@
         "SPRINT-0/SPIKE-AUTH"
       ],
       "detail": [
-        "Staff sign in with the clinic's existing Microsoft 365 accounts via Entra ID SSO + MFA (ADR-0004); tokens carry tenant + a stable user id usable by the API, and sessions are scoped to one tenant. The plumbing the RBAC/scope rules (PRD-01) build on; de-risked by SPIKE-AUTH."
+        "An Entra ID app registration is configured for the web SPA and the Flutter provider app (auth-code + PKCE, appropriate redirect URIs/scopes). Both surfaces complete interactive SSO + MFA against the clinic's tenant. The flow yields access tokens the API can validate and a stable, immutable user id (the Entra object id, not email) the API uses as the actor identity.",
+        "Tokens carry the tenant and that stable user id so the API's auth middleware can resolve tenant context for RLS and identify the actor for audit. Sessions are scoped to a single tenant — a token is only ever valid for one clinic — which keeps the multi-tenant boundary intact end to end. Token refresh and sign-out work consistently across web and app (silent refresh on web, secure refresh on device).",
+        "For the SaaS path, ADR-0004 anticipates each clinic federating its own Entra tenant for staff; v1 wires the single clinic but keeps tenant resolution claim-driven so federation is additive. Scope-of-practice and registration-currency checks (C4/C19) are explicitly out of scope here — they live in CREDENTIALS/RBAC — but this story ensures the claims they need are present."
+      ],
+      "tasks": [
+        {
+          "title": "Configure Entra ID app registration and complete staff SSO + MFA on web and provider app",
+          "note": "Stand up workforce sign-in for staff on both staff-facing surfaces, yielding API-usable tokens.\n- App registration(s) for the Angular web app and the Flutter provider app: auth-code + PKCE, redirect URIs, required scopes/audience, MFA enforced.\n- Both surfaces complete interactive SSO + MFA against the clinic's Entra tenant.\n- Tokens carry the tenant and a stable user id (Entra object id) the API validates and RLS reads for tenant context; sessions are scoped to one tenant.\n- Token refresh and sign-out work across web (silent refresh) and app (secure refresh); keep tenant resolution claim-driven so per-tenant Entra federation is additive later."
+        },
+        {
+          "title": "Document the staff auth setup, claims contract & SaaS-federation path",
+          "note": "Write the staff-identity reference so API, RBAC and the SaaS roadmap can rely on it.\n- The exact claims the token carries (tenant, stable user id, anything RBAC/credentials will need) and how the API consumes them.\n- App-registration configuration and redirect/scope setup per environment.\n- How per-tenant Entra federation slots in for SaaS, and the explicit note that scope/registration gating (C4/C19) is CREDENTIALS' job, not this story's."
+        }
       ]
     },
     {
@@ -262,7 +354,19 @@
         "SPRINT-0/SPIKE-AUTH"
       ],
       "detail": [
-        "Clients create accounts and sign in via Entra External ID (CIAM) with Google/Apple, email+password, or email/SMS OTP, plus account recovery (ADR-0004). Client identities are tenant-scoped and distinct from staff; de-risked by SPIKE-AUTH."
+        "An Entra External ID (CIAM) tenant is configured with three user flows: social (Google/Apple), local (email + password) and OTP (email/SMS one-time code), each with its sign-up and sign-in experience and account recovery (password reset, OTP resend). The client Flutter app and the public web complete each of the three methods.",
+        "Client tokens carry a tenant scope and a stable client identity that is separate from the staff identity namespace, so a client can never be mistaken for staff and vice versa; the API's auth middleware validates client tokens and resolves the same tenant context RLS uses. Account recovery flows are first-class because clients self-serve.",
+        "Because handles and contact details are personal data (C21), the identities created here feed the consent/retention model later; this story just establishes the authentication, keeping client and staff audiences cleanly separated for the SaaS-ready design (ADR-0003/0004)."
+      ],
+      "tasks": [
+        {
+          "title": "Configure Entra External ID user flows (social / email+password / OTP) and complete them on client app + public web",
+          "note": "Stand up CIAM sign-up/sign-in for clients across all three methods, tenant-scoped and distinct from staff.\n- External ID tenant with three user flows: social (Google/Apple), local (email+password), and email/SMS OTP, each with sign-up, sign-in and account recovery (reset / OTP resend).\n- Client Flutter app and public web complete each method.\n- Client tokens carry tenant scope and a stable client identity in a namespace separate from staff; the API validates them and resolves tenant context for RLS.\n- Social/OTP redirect + provider credentials sourced per environment from config/secrets (SECRETS)."
+        },
+        {
+          "title": "Document client auth flows, recovery and the client-vs-staff identity separation",
+          "note": "Write the client-identity reference covering the separation that matters for safety and SaaS.\n- Each of the three flows and the recovery paths, plus the token's claims (tenant, stable client id).\n- Why and how client identities are distinct from staff identities (separate audiences/namespaces) and how the API tells them apart.\n- Note that captured handles/contact data are personal data (C21) feeding the consent/retention model — out of scope here but anticipated."
+        }
       ]
     },
     {
@@ -295,7 +399,19 @@
         "SPRINT-0/AUTH-STAFF"
       ],
       "detail": [
-        ".NET API skeleton with auth middleware (validates Entra staff + client tokens, resolves tenant context for RLS), a standard problem-details error model, consistent pagination/filtering, health/readiness endpoints and structured request logging — a vertical-slice sample proves the full pattern. Every feature module plugs in the same way (ADR-0005)."
+        "The API host is a modular monolith: a thin host wires up the bounded-module libraries from REPO, each module owning its endpoints and domain. A single request pipeline handles auth, tenant-context resolution, correlation/logging and error mapping, so a feature module only writes its handler and gets the cross-cutting behaviour for free.",
+        "Auth middleware validates both staff (Entra ID) and client (External ID) tokens, resolves the tenant claim into the per-request tenant context RLS consumes, and exposes the actor identity for audit. Errors are returned as RFC 7807 problem-details with a consistent shape and codes; list endpoints share one pagination/filtering/sorting convention so clients (web, Flutter) handle them uniformly. Health and readiness endpoints support deploy/orchestration, and structured request logging carries the correlation id OBS stitches traces with.",
+        "A vertical-slice sample endpoint demonstrates the full pattern end to end — authenticated, tenant-scoped (RLS-enforced), problem-details errors, paginated, logged — and is the thing OPENAPI generates a client for and WEB-SHELL/FLUTTER call to prove the stack."
+      ],
+      "tasks": [
+        {
+          "title": "Build the request pipeline: auth, tenant context, problem-details, pagination, health & logging",
+          "note": "Implement the modular-monolith host and the cross-cutting pipeline every module reuses.\n- Host wires the bounded-module libraries from REPO; each module contributes endpoints/domain.\n- Auth middleware validates staff (Entra ID) + client (External ID) tokens, resolves the tenant claim into per-request tenant context for RLS, and surfaces the actor for audit.\n- RFC 7807 problem-details error model with consistent codes; one shared pagination/filtering/sorting convention for list endpoints.\n- Health + readiness endpoints; structured request logging emitting the correlation id OBS will use."
+        },
+        {
+          "title": "Ship the vertical-slice sample endpoint and document the module pattern",
+          "note": "Prove the whole pattern end-to-end and document it so feature modules are added identically.\n- A sample endpoint exercising auth + tenant scoping (RLS-enforced) + problem-details + pagination + logging end to end.\n- This endpoint is what OPENAPI generates a typed client for and what WEB-SHELL/FLUTTER call to validate the stack.\n- Document how to add a module/endpoint: where it lives, how it gets tenant context, error/pagination conventions, and the health/logging it inherits."
+        }
       ]
     },
     {
@@ -331,13 +447,29 @@
         "SPRINT-0/DB"
       ],
       "detail": [
-        "The append-only AuditEvent store + a reusable interceptor/helper so any module records create/update/read with who/what/when/tenant, and tampering (update/delete) is rejected at the data layer (C10/ADR-0010). Makes auditability a built-in default, not a per-feature afterthought; PRD-01/AUDIT builds the export UI on top."
+        "An AuditEvent table records who/what/when/tenant — actor id, action (read/create/update), entity type + id, timestamp, tenant_id, and a JSON context for extra detail. It is append-only by construction: no update or delete path exists in the data layer, and the database rejects update/delete attempts (revoked privileges plus a trigger), so the trail is tamper-evident, not merely tamper-discouraged.",
+        "A reusable interceptor/helper lets modules record events with one call or by annotation: an EF Core SaveChanges interceptor captures create/update for audited entity types, and a small helper records reads (which aren't captured by SaveChanges) at the point clinical/PII data is served. Events carry the actor and tenant from the API's request context (API/RLS), so modules don't re-plumb identity.",
+        "Events are queryable and exportable here at the data level; the full register UI with filtering and export-for-regulator is PRD-01/AUDIT and PRD-08 reporting, which read this stream. Read-auditing scope (clinical, medicines, PII) is deliberate so the volume stays meaningful for an auditor."
       ],
       "data_model": [
         {
           "entity": "AuditEvent",
-          "fields": "id, tenant_id, actor_id, action, entity_type, entity_id, at, context(json)",
-          "notes": "Append-only; no update/delete path."
+          "fields": "id, tenant_id, actor_id, action(read|create|update), entity_type, entity_id, at, context(jsonb)",
+          "notes": "Append-only — no update/delete path; DB rejects mutation (revoked privileges + trigger); reads of clinical/medicines/PII are audited too."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Create the append-only AuditEvent store with tamper rejection",
+          "note": "Build the immutable event table and make mutation impossible at the data layer.\n- AuditEvent table (who/what/when/tenant + jsonb context) created via migration; tenant-scoped under RLS.\n- No application update/delete path; the database itself rejects update/delete (revoked privileges + a trigger that raises), so attempts fail — the C10 'tamper-evident' guarantee.\n- An integration test asserting that an update/delete on AuditEvent is rejected (flag it as a compliance invariant for TEST)."
+        },
+        {
+          "title": "Provide the reusable record-event interceptor/helper for writes and reads",
+          "note": "Give modules one easy, consistent way to emit audit events so it's the default, not an afterthought.\n- A SaveChanges interceptor that records create/update for annotated/audited entity types automatically.\n- A helper to record reads (not caught by SaveChanges) at the point clinical/medicines/PII data is served.\n- Actor + tenant taken from the API request context (API/RLS); the RLS elevated path also emits events through this helper."
+        },
+        {
+          "title": "Expose queryable/exportable events and document the audit contract",
+          "note": "Make the stream usable downstream and document how modules opt in.\n- Query access (tenant-scoped) so PRD-01/AUDIT and PRD-08 can build the register UI and exports on top — full UI is out of scope here.\n- Document which entities/endpoints must be audited (clinical, medicines, PII reads + writes), how to annotate them, and the append-only rule for future authors."
         }
       ]
     },
@@ -370,7 +502,19 @@
         "SPRINT-0/API"
       ],
       "detail": [
-        "The API publishes a versioned OpenAPI document and CI generates typed clients for Angular + Flutter into the shared packages, failing on a breaking contract change without a version bump (ADR-0006). Keeps the three surfaces in lock-step and removes hand-written DTO drift."
+        "The API publishes a versioned OpenAPI document generated from its endpoints and models, with the version bumped deliberately on contract changes. CI runs the client generators (one for Angular/TypeScript, one for Flutter/Dart) and publishes the results into the shared packages from REPO, so front-ends import a typed client rather than writing DTOs.",
+        "Client generation runs in the pipeline (CICD) and is a gate: a breaking contract change without a version bump fails the build, which is what keeps web and Flutter from silently diverging from the API. The generated artefacts are reproducible from the spec, so a regenerate is deterministic.",
+        "The vertical-slice sample endpoint from API is consumed via the generated client in both web and Flutter, proving the round-trip (spec -> generated client -> real call) before feature work depends on it. Versioning strategy and the breaking-change definition are documented so module authors know when a bump is required."
+      ],
+      "tasks": [
+        {
+          "title": "Publish a versioned OpenAPI doc and generate typed clients into the shared packages",
+          "note": "Make the API contract the single source and generate clients from it for both front-ends.\n- API serves a versioned OpenAPI document generated from its endpoints/models.\n- Generators produce an Angular/TypeScript client and a Flutter/Dart client, published into the shared API-client package(s) from REPO.\n- Generation runs in CI and fails the build on a breaking contract change without a version bump (the lock-step guarantee).\n- The API sample endpoint is consumed via the generated client in both web and Flutter to prove the round-trip."
+        },
+        {
+          "title": "Document the contract/versioning workflow",
+          "note": "Write the contract guide so module authors keep the surfaces in sync.\n- How to regenerate clients locally and how CI enforces it.\n- The versioning scheme and the definition of a breaking change that requires a bump.\n- Where generated clients live and how web/Flutter import them."
+        }
       ]
     },
     {
@@ -403,10 +547,22 @@
         "SPRINT-0/DESIGN"
       ],
       "detail": [
-        "Angular shell with the Entra auth guard, top-level routing, a role-aware navigation frame and the design-system theme applied, so feature screens drop into a consistent authenticated layout. Foundation for PLATFORM/APP-NAV (ADR-0005)."
+        "The Angular shell guards every route with the Entra auth guard from AUTH-STAFF: unauthenticated users are redirected to Entra sign-in and authenticated users land in the shell. Top-level routing and a navigation frame are in place, with navigation driven by capability/role flags — a placeholder model until PRD-01 RBAC (ADR-0017's capabilities) lands, but structured so the real capability checks slot in without re-laying-out the shell.",
+        "The design-system theme and tokens from DESIGN are applied globally so the shell already looks like the product, and the cross-cutting UX patterns (banners, chips) are available to feature screens. A sample feature route renders inside the shell using the OPENAPI-generated API client, proving auth + routing + theme + API call together.",
+        "This is intentionally a shell, not features: APP-NAV builds the real left-nav/role-aware structure and TODAY the landing dashboard (see dashboard.png for where it's heading). WEB-SHELL just guarantees the authenticated, themed container exists."
       ],
       "ui_spec": [
         "The authenticated app frame (later filled by PLATFORM/APP-NAV; see dashboard.png) — sign-in redirect, shell layout, themed."
+      ],
+      "tasks": [
+        {
+          "title": "Build the Angular shell: auth guard, routing, capability-driven nav frame, themed, with a sample route",
+          "note": "Stand up the authenticated, themed container feature screens drop into.\n- Entra auth guard (AUTH-STAFF): unauthenticated -> sign-in redirect; authenticated -> shell.\n- Top-level routing and a navigation frame whose items are driven by capability/role flags — a placeholder model now, structured so PRD-01 RBAC capabilities slot in without re-layout.\n- Design-system theme + tokens (DESIGN) applied globally; cross-cutting patterns available to screens.\n- A sample feature route rendering inside the shell via the OPENAPI-generated client, proving auth + routing + theme + API together."
+        },
+        {
+          "title": "Document the shell structure and how feature screens plug in",
+          "note": "Write the front-end shell guide so feature work is consistent and APP-NAV can extend it.\n- How routes register, how the auth guard applies, and how the capability/role nav placeholder works (and where real RBAC replaces it).\n- How a feature screen consumes the generated API client and the design system inside the shell.\n- The boundary between this shell and PLATFORM/APP-NAV + TODAY."
+        }
       ]
     },
     {
@@ -435,10 +591,22 @@
       ],
       "priority": "P1",
       "detail": [
-        "A shared design system (tokens + core components) consumed by web and both Flutter apps, including the cross-cutting UX patterns (blocked-action banner, consent/age chips, S4 guardrail tag, offline indicator) with accessibility basics verified. Delivers the 'fast, modern, thumb-first' UX and avoids re-styling per surface (ADR-0006)."
+        "Design tokens — colour, typography, spacing, radius, elevation — are defined once in the shared package and consumed by both web (Angular) and Flutter, so a brand change is one edit, not three. Core components cover the everyday set (buttons, inputs, banners, chips, tables) plus the cross-cutting UX patterns the platform leans on: the blocked-action banner (the visible face of a server-side block, ADR-0008), consent/age chips, the S4 guardrail tag, and the offline indicator (for the provider app, ADR-0015).",
+        "Components are documented in a simple gallery/storybook so designers and developers see the catalogue and use the canonical version rather than re-implementing. The cross-surface reality (web tokens + Flutter widgets from one token source) is the point — the gallery shows the same component on both.",
+        "Accessibility basics are verified for the core components: colour contrast, visible focus, and minimum hit-target size, so the thumb-first promise is real on small screens. These patterns then appear across the prototype screens (chips on charting.png, banners, the S4 guardrail), but DESIGN ships the reusable primitives, not the screens."
       ],
       "ui_spec": [
         "A component gallery/storybook; the patterns appear across every prototype screen (e.g. chips on charting.png, banners, the S4 guardrail)."
+      ],
+      "tasks": [
+        {
+          "title": "Define tokens + core components (incl. the cross-cutting compliance patterns) and verify accessibility",
+          "note": "Build the shared visual foundation consumed by web and both Flutter apps.\n- Tokens (colour, type, spacing, radius, elevation) defined once and consumed by Angular and Flutter from one source.\n- Core components: buttons, inputs, banners, chips, tables, PLUS the cross-cutting patterns — blocked-action banner (the UI face of ADR-0008 server-side blocks), consent/age chips, S4 guardrail tag, offline indicator (ADR-0015).\n- Accessibility basics verified for core components: contrast, visible focus, minimum hit-target size (thumb-first)."
+        },
+        {
+          "title": "Publish the component gallery/storybook and usage docs",
+          "note": "Make the system discoverable so surfaces use canonical components, not re-implementations.\n- A simple gallery/storybook showing each token and component, ideally the same component on web and Flutter.\n- Usage guidance for the compliance patterns (when to show the blocked-action banner, S4 tag, consent/age chips, offline indicator).\n- How web and Flutter import the package (ties to REPO's shared-package layout)."
+        }
       ]
     },
     {
@@ -474,10 +642,22 @@
         "SPRINT-0/DESIGN"
       ],
       "detail": [
-        "Client + provider app shells (bottom-tab nav) from one Flutter codebase, sharing auth (Entra staff / External ID clients), the generated API client and the design system, with secure token storage; CI produces internal builds (ADR-0004/0006). The base PRD-09 builds on."
+        "One Flutter codebase produces two flavours. The client app shell has bottom-tab navigation Home / Book / My care / Membership / Account (matching client-app.png), and the provider app shell has Schedule / Patient / Medicines / Tasks (the room-side flow in treatment-room.png) — empty screens at this stage, just the navigable frame and theme.",
+        "Both apps authenticate through the shared auth package: the provider flavour signs in with Entra ID (staff) and the client flavour with External ID, and both call the sample API endpoint via the OPENAPI-generated client to prove the round-trip. Auth tokens are kept in platform secure storage (keychain/keystore), never plain storage, and the design-system theme/tokens are applied so both apps look like the product from day one.",
+        "CI builds installable artifacts for internal distribution for both flavours (signing/store channels are APP-DISTRIBUTION's job). This shell is the base the offline-tolerant charting (PRD-05/09) and the injection-mapping canvas build on — de-risked separately by SPIKE-OFFLINE and SPIKE-CANVAS."
       ],
       "ui_spec": [
         "Client tabs Home/Book/My care/Membership/Account and provider tabs Schedule/Patient/Medicines/Tasks (empty shells) — see client-app.png / treatment-room.png."
+      ],
+      "tasks": [
+        {
+          "title": "Build both app shells: tab nav, shared auth/API/design packages, secure token storage, themed",
+          "note": "Stand up the client and provider flavours from one codebase with shared plumbing.\n- Client shell tabs Home/Book/My care/Membership/Account; provider shell tabs Schedule/Patient/Medicines/Tasks (empty screens, navigable frame).\n- Shared auth package: provider signs in with Entra (AUTH-STAFF), client with External ID (AUTH-CLIENT); both call the sample endpoint via the OPENAPI-generated client.\n- Tokens stored in platform secure storage (keychain/keystore); design-system theme/tokens (DESIGN) applied.\n- CI builds installable artifacts per flavour for internal distribution (channels deferred to APP-DISTRIBUTION)."
+        },
+        {
+          "title": "Document the Flutter flavour/package structure and build/run/distribution basics",
+          "note": "Write the mobile-base guide so SPIKE-CANVAS/SPIKE-OFFLINE and PRD-09 build consistently.\n- Flavour configuration (client vs provider) and the shared packages (auth, api-client, design-system) layout.\n- How each flavour authenticates (different audiences) and where secure token storage lives.\n- How CI produces artifacts and the hand-off to APP-DISTRIBUTION for real distribution."
+        }
       ]
     },
     {
@@ -504,7 +684,23 @@
         "SPRINT-0/IAC"
       ],
       "detail": [
-        "A managed secret store (Key Vault) wired into each environment with typed, environment-specific config that fails fast on missing required values; a secret-scanning check fails the build on a committed secret. No secret ever in source control; rotation needs no code change."
+        "Each environment has its own Azure Key Vault (provisioned by IAC). The API and pipelines read secrets from the vault at runtime/deploy via managed identity — no secret is in source control, ever. A secret-scanning check in CI fails the build if a secret is committed, so the rule is enforced, not trusted.",
+        "Configuration is environment-specific and strongly typed: the API binds config to typed options and validates required values at startup, so a missing or malformed required setting fails fast (the app refuses to start) rather than failing mysteriously at first use. Non-secret config lives in environment settings; secrets are referenced by vault key.",
+        "Rotation requires no code change: rotating a secret in the vault is picked up by the running services (cached with a bounded refresh), so a leaked or expiring key is swapped operationally. The split — typed config for shape, vault for secret values, scanning to keep them out of git — is documented so module authors add new secrets the same way."
+      ],
+      "tasks": [
+        {
+          "title": "Wire per-environment Key Vault into the API and provide typed, fail-fast config",
+          "note": "Make the vault the only home for secrets and make config validate at startup.\n- API + pipelines read secrets from the per-environment Key Vault (IAC) via managed identity; nothing secret in source control.\n- Config bound to typed options with required-value validation at startup — a missing/invalid required setting fails fast (app won't start).\n- Non-secret config in environment settings; secret values referenced by vault key; rotation in the vault needs no code change (bounded cache refresh)."
+        },
+        {
+          "title": "Add the secret-scanning gate and per-environment config to CI/CD",
+          "note": "Enforce 'no committed secrets' and select the right config/secrets per deploy.\n- A secret-scanning check in CI that fails the build on a committed secret (coordinated with SEC-BASE's scan suite).\n- Deploy jobs select per-environment config and vault references so a deploy never crosses environments (ties to CICD/IAC).\n- Vault access via least-privilege managed identities (no shared admin credentials)."
+        },
+        {
+          "title": "Document the secrets & configuration model and how to add a new secret",
+          "note": "Write the config/secrets guide so the pattern is followed consistently.\n- The split: typed config for shape, vault for secret values, scanning to keep them out of git.\n- How to add a new secret (vault key naming, typed-option binding, required-value validation) and how rotation works without code change.\n- The list of secret categories (DB connection, Entra/External ID provider creds, Square/SMS/Xero keys, signing secrets) and where each lives."
+        }
       ]
     },
     {
@@ -531,7 +727,23 @@
         "SPRINT-0/API"
       ],
       "detail": [
-        "Structured logging, distributed tracing (correlation ids across web/app/API), key metrics dashboards and alerting from the first deploy, with audit/security-relevant signals distinguishable so they can seed the breach workflow (PRD-01). You can't run a compliance-critical platform blind."
+        "Structured logs and distributed traces flow to a central store (Azure Monitor / Application Insights) with a correlation id propagated across web/app/API, so one user action can be followed end to end. The API's request logging (API) and the front-ends emit the same correlation id, and traces span service boundaries.",
+        "Dashboards cover the golden signals — request rate, latency, error rate — plus key resource health (database, queue/jobs, storage). Alerts fire on error-rate and availability thresholds so on-call is paged before users notice, with sensible thresholds and routing.",
+        "Audit/security-relevant signals are kept distinguishable from ordinary operational logs — tagged so they can seed the data-breach detection/assessment workflow in PRD-01 (REQ-SEC-7, C22) rather than being lost in noise. This is the hook BREACH builds on; OBS just makes the signal separable and observable."
+      ],
+      "tasks": [
+        {
+          "title": "Wire structured logging, distributed tracing and correlation ids across API and apps",
+          "note": "Make every request followable end to end through a central store.\n- Logs + traces to a central store (the IAC observability workspace) with a correlation id propagated web/app/API.\n- API request logging emits the correlation id; front-ends propagate it; traces span service boundaries.\n- Security/audit-relevant signals tagged distinctly so they can seed the PRD-01 breach workflow (don't drown them in operational noise)."
+        },
+        {
+          "title": "Build dashboards and alerting for golden signals and resource health",
+          "note": "Give the team eyes and a pager from the first deploy.\n- Dashboards: request rate, latency, error rate, plus resource health (database, jobs/queue, storage).\n- Alerts on error-rate and availability thresholds with routing to on-call; thresholds documented and tunable.\n- Wire alert definitions per environment (ties to IAC/CICD)."
+        },
+        {
+          "title": "Document the observability stack and the breach-signal contract",
+          "note": "Write the ops guide and the hand-off to the breach workflow.\n- What's logged/traced, how correlation ids flow, and how to read the dashboards.\n- The alerting catalogue and escalation.\n- How security/audit signals are tagged and consumed by BREACH (PRD-01) so that story can build on a defined stream."
+        }
       ]
     },
     {
@@ -568,7 +780,23 @@
         "SPRINT-0/CICD"
       ],
       "detail": [
-        "The baseline security posture: TLS everywhere, encryption at rest, hardened HTTP headers (CSP/HSTS), locked-down CORS, least-privilege service identities, and dependency/secret/SAST scanning in CI gating merges on high-severity findings (C10/C21/ADR-0016)."
+        "All traffic is TLS end to end and data stores are encrypted at rest (Postgres, Blob, Key Vault — much of this is platform-default but is asserted and verified here). The web app sends hardened HTTP security headers (CSP, HSTS, X-Content-Type-Options, frame-ancestors), and CORS is locked down to known origins rather than wildcarded.",
+        "CI runs three scan classes and gates merges on high-severity findings: dependency scanning (vulnerable packages), secret scanning (coordinated with SECRETS — no committed secrets), and SAST (static analysis of the code). High-severity findings block the PR, making the security gate enforceable through CICD/GOV rather than advisory.",
+        "Service identities follow least-privilege — each service/pipeline uses a scoped managed identity, with no shared admin credentials — so a compromised component has minimal blast radius. The posture (what's encrypted, which headers, which scans, the identity model) is documented as the security baseline the platform builds on."
+      ],
+      "tasks": [
+        {
+          "title": "Enforce TLS + encryption at rest, harden HTTP headers and lock down CORS",
+          "note": "Assert and verify the transport/storage/edge security baseline.\n- TLS on all traffic; encryption at rest verified on Postgres, Blob and Key Vault (coordinate with IAC defaults).\n- Security headers on web: CSP, HSTS, X-Content-Type-Options, frame-ancestors, referrer policy.\n- CORS restricted to known origins (no wildcard); document the allowed-origin list per environment."
+        },
+        {
+          "title": "Add dependency, secret and SAST scanning to CI and gate merges on high-severity findings",
+          "note": "Make the security scans blocking through the pipeline.\n- Dependency scanning (vulnerable packages), secret scanning (coordinated with SECRETS), and SAST stages in CI.\n- High-severity findings fail the PR (GOV marks these required); documented triage/suppression process for false positives.\n- Runs across all surfaces (.NET, Angular, Flutter)."
+        },
+        {
+          "title": "Apply least-privilege service identities and document the security baseline",
+          "note": "Minimise blast radius and write down the posture.\n- Each service/pipeline uses a scoped managed identity; no shared admin credentials anywhere (ties to SECRETS/IAC).\n- Document the baseline: what's encrypted, which headers, the scan suite + gates, the identity model — the reference the platform's security posture is measured against (C10/C21/ADR-0016)."
+        }
       ]
     },
     {
@@ -596,7 +824,19 @@
         "SPRINT-0/RLS"
       ],
       "detail": [
-        "Test harnesses for API (unit + integration against a real Postgres with RLS), web and apps, plus an e2e smoke (sign-in + sample flow) and coverage gates in CI — with a documented convention for 'compliance invariant' tests (a gate MUST block). Protects the moat's invariants and catches regressions automatically."
+        "Test harnesses exist per surface: API unit tests plus integration tests that run against a real Postgres with RLS (so tenant isolation, auth and audit behaviour are exercised as they'll run in production, using the ephemeral Postgres from CICD); web and Flutter unit/widget test setups; and an end-to-end smoke suite covering sign-in plus the sample flow across the stack.",
+        "A coverage threshold is enforced in CI so coverage can't silently rot. More importantly, a documented convention exists for writing 'compliance invariant' tests — the ones that encode a regulatory rule (RLS isolation, audit append-only, consent gates) and whose failure MUST block merge — so these aren't treated as ordinary tests that can be skipped under deadline.",
+        "The harness deliberately runs integration tests against real Postgres rather than an in-memory fake, because the invariants that matter (RLS, constraints, triggers) only exist in the real engine. This is what makes the tests trustworthy as the moat's guardrails."
+      ],
+      "tasks": [
+        {
+          "title": "Stand up the test harnesses (API unit + real-Postgres integration, web/Flutter, e2e smoke) and the coverage gate",
+          "note": "Build the multi-surface test foundation and wire the gates into CI.\n- API unit test project + integration tests against a real Postgres with RLS (reuse the CICD Postgres service container), exercising tenancy/auth/audit as in production.\n- Web and Flutter unit/widget test setups; an e2e smoke covering sign-in + the sample flow end to end.\n- Coverage threshold enforced in CI so coverage can't rot."
+        },
+        {
+          "title": "Define and document the 'compliance invariant' test convention",
+          "note": "Make regulatory tests a distinct, must-block category.\n- A documented convention (naming/tagging) for tests that encode a compliance rule — RLS isolation, audit append-only, consent/cooling-off gates — whose failure MUST block merge and can't be skipped under deadline.\n- Wire it so RLS, AUDIT-INFRA and later compliance stories tag their invariant tests consistently, and CI treats the tag as non-negotiable."
+        }
       ]
     },
     {
@@ -623,7 +863,23 @@
         "SPRINT-0/DB"
       ],
       "detail": [
-        "A one-command local environment seeded with a synthetic tenant: staff roles/credentials, clients (incl. an under-18), services flagged S4/non-S4, and stock lots — all clearly synthetic (project rule), reproducible, and reused by integration/e2e tests. Lets any module be developed/demoed without real PII."
+        "A single command spins up the local stack — containerised Postgres + API + web — and seeds a synthetic tenant. The seed is broad enough to exercise the real compliance paths: staff with roles and credentials (so RBAC/scope works), clients including at least one under-18 (so the cooling-off and payment-block paths from C6 are testable), services flagged S4 and non-S4 (so the rewards/public-naming classification from ADR-0014 has data), and stock lots (so custody/expiry/recall flows have something to track).",
+        "All seed data is clearly synthetic and obviously fake — names, contacts and business details are invented — honouring the project's hard rule. The seed is reproducible (same command, same data) so it's safe to reset and is the fixture the integration and e2e tests build on, keeping tests and local dev in sync.",
+        "Because the seed reflects the compliance-relevant edge cases (under-18, S4 vs non-S4, lots) rather than just happy-path rows, it lets developers and demos hit the guardrails (ADR-0008) the product is actually built around."
+      ],
+      "tasks": [
+        {
+          "title": "Build the one-command local environment and synthetic-tenant seeding",
+          "note": "Make 'clone and run' produce a full, synthetic, demo-able stack.\n- One command brings up containerised Postgres + API + web and seeds a synthetic tenant (builds on DB's local Postgres).\n- Reproducible: same command, same data; safe to reset.\n- All data clearly synthetic — invented names/contacts/business details — honouring the no-real-data rule absolutely."
+        },
+        {
+          "title": "Seed the compliance-relevant edge cases (roles/credentials, under-18, S4/non-S4, lots)",
+          "note": "Make the seed exercise the guardrails, not just happy paths.\n- Staff with roles + credentials so RBAC/scope has data; clients including an under-18 so cooling-off + payment-block (C6) are testable.\n- Services/products flagged S4 and non-S4 so rewards/public-naming classification (ADR-0014) has data; stock lots for custody/expiry/recall flows.\n- Coverage chosen so demos and dev can hit the real compliance blocks (ADR-0008)."
+        },
+        {
+          "title": "Make the seed reusable by tests and document it",
+          "note": "Share the fixture with the test suites and write the how-to.\n- The integration/e2e tests (TEST) build on the same seed so tests and local dev stay in sync.\n- Document the command, the seeded entities and the synthetic-only rule for anyone adding to the seed."
+        }
       ]
     },
     {
@@ -650,7 +906,23 @@
         "SPRINT-0/CICD"
       ],
       "detail": [
-        "Repo governance: protected main requiring passing checks + a review before merge, PR/issue templates (PR references the backlog item), protected production deploys, and CODEOWNERS routing reviews for sensitive areas (auth, medicines, compliance). Keeps main deployable and changes traceable."
+        "main is protected: merging requires the CICD pipeline status to pass and at least one approving review, so broken or unreviewed code can't reach the deployable branch. The PR and issue templates are committed, and the PR template references the backlog item (the SCRUM key), keeping changes traceable back to the story they implement.",
+        "Production deploys sit behind an approval gate (GitHub Environments) so a human approves before prod, while dev stays automatic for fast feedback. CODEOWNERS routes reviews for sensitive areas — auth, medicines, compliance code — to the right reviewers, so changes touching the moat get the right eyes by construction.",
+        "Together these make the gates from SEC-BASE (scans) and TEST (coverage + compliance invariants) actually required rather than advisory: the branch protection lists them as mandatory checks. The rules are documented so contributors know what's enforced and why."
+      ],
+      "tasks": [
+        {
+          "title": "Protect main with required checks + review and commit PR/issue templates",
+          "note": "Make merging to main impossible without passing gates and a review.\n- Branch protection on main: require the CICD pipeline status + the SEC-BASE/TEST gates + at least one approving review.\n- PR and issue templates committed; the PR template references the backlog item (SCRUM key) for traceability.\n- No direct pushes / force-pushes to main."
+        },
+        {
+          "title": "Add production approval gates and CODEOWNERS for sensitive areas",
+          "note": "Gate prod and route sensitive reviews automatically.\n- Production deploys require an approval gate (GitHub Environments), dev stays automatic (ties to CICD).\n- CODEOWNERS routes reviews for auth, medicines and compliance code to the right reviewers so moat changes get the right eyes.\n- Verify the required checks listed in protection match the gates SEC-BASE/TEST produce."
+        },
+        {
+          "title": "Document the governance rules",
+          "note": "Write the contributor-facing governance guide.\n- What's required to merge, which checks are mandatory and why, and how the PR template ties to backlog items.\n- The prod approval flow and the CODEOWNERS map for sensitive areas."
+        }
       ]
     },
     {
@@ -680,7 +952,23 @@
       ],
       "priority": "P0",
       "detail": [
-        "Time-boxed spike proving end-to-end auth: staff (Entra) + client (External ID) sign-in from Flutter and web through to an authorised .NET call carrying tenant + role claims usable for RLS/RBAC. De-risks the highest-uncertainty plumbing before the AUTH wiring stories; output is findings + an ADR if needed."
+        "A throwaway prototype completes staff sign-in (Entra ID) and client sign-in (External ID) from both Flutter and web, and makes an authorised call into a minimal .NET endpoint that reads tenant + role claims usable for RLS/RBAC. The point is to surface the real gotchas — redirect/PKCE handling on device, token refresh, claim mapping, and the maturity of the Flutter auth libraries for both audiences.",
+        "Go/no-go bar: both audiences sign in from both surfaces, the .NET endpoint receives a token carrying a usable tenant id and role claim, and refresh/sign-out behave. If a library or flow proves unworkable, the spike names the alternative (or escalates to an ADR) rather than letting AUTH-STAFF/AUTH-CLIENT discover it mid-build.",
+        "This is a spike: produce findings and a recommendation, not production code. The throwaway prototype is discarded; what carries forward is the proven pattern, the chosen libraries and the documented claim contract."
+      ],
+      "tasks": [
+        {
+          "title": "Define the spike scope, questions and go/no-go criteria",
+          "note": "Frame exactly what must be proven and what 'pass' means before building.\n- Questions: can Flutter + web complete Entra (staff) AND External ID (client) sign-in; does an authorised .NET call receive usable tenant + role claims; do refresh/sign-out work; which auth libraries are viable?\n- Go/no-go bar: both audiences sign in from both surfaces and the .NET endpoint reads a tenant id + role claim usable for RLS/RBAC, with working refresh/sign-out.\n- Time-box and the explicit hand-off targets (AUTH-STAFF, AUTH-CLIENT)."
+        },
+        {
+          "title": "Build the throwaway end-to-end prototype",
+          "note": "Prove the full path with disposable code.\n- Staff (Entra) + client (External ID) sign-in from Flutter and web.\n- An authorised call into a minimal .NET endpoint that surfaces tenant + role claims for RLS/RBAC.\n- Exercise the sharp edges: device redirect/PKCE, token refresh, claim mapping, sign-out. This is throwaway — measure feasibility, don't productionise."
+        },
+        {
+          "title": "Write up findings, library choices and a go/no-go (ADR if warranted)",
+          "note": "Capture the decision so the wiring stories proceed on a proven approach.\n- Findings, chosen libraries, the documented claim contract (what tokens must carry for RLS/RBAC), and gotchas.\n- A clear go/no-go; raise an ADR if a real decision/alternative emerged.\n- Explicitly state how AUTH-STAFF and AUTH-CLIENT should build on the result."
+        }
       ]
     },
     {
@@ -711,7 +999,23 @@
       ],
       "priority": "P0",
       "detail": [
-        "Spike proving EF Core reliably sets the Postgres session tenant for RLS under connection pooling and async, with a safe audited elevated path for background jobs and an acceptable performance impact. De-risks the RLS baseline (ADR-0002/0003)."
+        "A prototype demonstrates that RLS isolation holds across pooled connections and async requests: the session tenant set for request A never leaks into request B sharing the pool, and the setting follows the connection correctly through async execution. This is the exact failure mode that would silently break tenant isolation if assumed rather than proven.",
+        "It also demonstrates a safe elevated/bypass path for background jobs — how a worker legitimately operates cross-tenant without that capability being reachable from request handling — and that the elevation is audited. And it measures the performance impact of issuing the per-request SET so the team knows the cost is acceptable before standardising on it.",
+        "Go/no-go bar: isolation provably holds under pooling + async, the bypass path works and is audited, and the overhead is acceptable. The documented pattern (where the SET happens in the connection lifecycle, how it's cleared, how the bypass is gated) is what RLS implements; the prototype itself is discarded."
+      ],
+      "tasks": [
+        {
+          "title": "Define the spike scope, questions and go/no-go criteria",
+          "note": "Frame the pooling/async risk precisely and what proving it requires.\n- Questions: does the per-request session tenant leak across pooled connections; does it follow the connection through async; can a job bypass safely + audited; what's the performance cost?\n- Go/no-go bar: isolation holds under pooling + async, the audited bypass works, overhead acceptable.\n- Time-box and the hand-off target (SPRINT-0/RLS)."
+        },
+        {
+          "title": "Build the throwaway prototype and stress the failure modes",
+          "note": "Prove the pattern under the conditions that actually break it.\n- Exercise concurrent requests over a shared connection pool and assert no cross-request session-tenant leak; assert the setting survives async boundaries.\n- Demonstrate a background-job bypass path that's unreachable from request code and emits an audit event.\n- Measure the overhead of the per-request SET. Disposable code — measuring, not productionising."
+        },
+        {
+          "title": "Write up the verified pattern, bypass path and perf, with go/no-go",
+          "note": "Document exactly what RLS should implement.\n- Where in the EF Core connection lifecycle the SET happens, how it's cleared on return, and how the job bypass is gated + audited.\n- The measured performance impact and the go/no-go.\n- ADR only if a real alternative/decision surfaced (e.g. against a particular pooling config)."
+        }
       ]
     },
     {
@@ -741,7 +1045,23 @@
       ],
       "priority": "P1",
       "detail": [
-        "Spike confirming Square AU can tokenise a card and run recurring charges with failure/dunning handling in sandbox, PCI-safe (no PAN, tokens only, ADR-0007). Membership autopay (PRD-06) depends on this; flagged 🔬 — produces a go/no-go."
+        "A prototype tokenises a test card and runs a scheduled recurring charge in the Square AU sandbox, then observes failed-charge / retry behaviour so a dunning approach (retry cadence, member notification, suspension) can be outlined for MEMBERSHIP. It confirms the PCI posture from ADR-0007: no PAN ever stored, only provider tokens, keeping PCI scope minimal.",
+        "Go/no-go bar: Square AU sandbox tokenises a card and successfully runs a scheduled recurring charge, failure/retry behaviour is observable and a dunning approach is sketched, and the no-PAN/tokens-only posture is verified. If Square AU can't do recurring card-on-file the way memberships need, the spike says so and points at the alternative (the IPaymentProvider abstraction means an adapter swap, ADR-0007).",
+        "It's a spike against a sandbox — findings and a recommendation, not production payment code. What carries forward is the confirmed (or rejected) viability and the dunning outline that MEMBERSHIP builds on."
+      ],
+      "tasks": [
+        {
+          "title": "Define the spike scope, questions and go/no-go criteria",
+          "note": "Frame the autopay-feasibility question and the bar for proceeding with Square.\n- Questions: can Square AU sandbox tokenise a card and run a scheduled recurring charge; what is the failed-charge/retry behaviour; is the no-PAN/tokens-only PCI posture (ADR-0007) achievable?\n- Go/no-go bar: recurring card-on-file works in sandbox, failure/retry observable + a dunning approach outlined, PCI posture confirmed.\n- Time-box and the hand-off (PRD-06 PAYMENT-PROVIDER / MEMBERSHIP)."
+        },
+        {
+          "title": "Build the throwaway sandbox prototype",
+          "note": "Prove (or disprove) recurring autopay against the Square AU sandbox.\n- Tokenise a test card; schedule and run a recurring charge.\n- Trigger and observe a failed charge + retry behaviour; sketch dunning (retry cadence, notify, suspend).\n- Confirm no PAN is stored anywhere — only Square tokens. Disposable code against sandbox only."
+        },
+        {
+          "title": "Record go/no-go and findings (incl. PCI posture and the dunning outline)",
+          "note": "Capture the decision and what MEMBERSHIP should build on.\n- Go/no-go on Square AU recurring autopay; if no-go, point at the IPaymentProvider adapter alternative.\n- The dunning approach outline and the confirmed PCI posture.\n- ADR only if a real provider/architecture decision results."
+        }
       ]
     },
     {
@@ -771,7 +1091,23 @@
       ],
       "priority": "P1",
       "detail": [
-        "Spike of the Flutter injection-mapping canvas: tap-to-add + drag points over a facial diagram and a photo, each holding metadata, performing smoothly with many points, with a coordinate model that survives image scaling/rotation. De-risks the hero clinical screen (PRD-05/MAPPING)."
+        "A Flutter prototype supports tap-to-add, drag-to-move and per-point metadata over both a facial diagram and a real image. The hard parts to prove are interaction performance with many points on a mid-range device, and a coordinate model that is anchored to the image (normalised coordinates) so points stay correct when the image is scaled, rotated or displayed at different sizes — and can be persisted and re-rendered identically later.",
+        "Go/no-go bar: smooth tap-to-add/drag with per-point metadata over diagram and image, acceptable performance with many points on a mid-range device, and a coordinate model that survives scaling/rotation and round-trips through persistence. If the naive approach stutters, the spike identifies the rendering technique that works (custom painter, layering) and notes it.",
+        "It's a spike — prove the canvas and the coordinate model, document the approach, then discard the prototype. PRD-05/MAPPING implements the real screen on the proven pattern."
+      ],
+      "tasks": [
+        {
+          "title": "Define the spike scope, questions and go/no-go criteria",
+          "note": "Frame the canvas risk and the bar PRD-05 needs cleared.\n- Questions: can Flutter do smooth tap-to-add + drag points with per-point metadata over a diagram AND a photo; does it stay performant with many points on a mid-range device; can the coordinate model survive image scale/rotation and persist?\n- Go/no-go bar: all of the above hold, with a coordinate model that round-trips through persistence and re-renders identically.\n- Time-box and the hand-off (PRD-05 MAPPING)."
+        },
+        {
+          "title": "Build the throwaway canvas prototype",
+          "note": "Prove interaction + performance + the coordinate model.\n- Tap-to-add, drag-to-move and per-point metadata over both a facial diagram and a real image.\n- Stress with many points on a mid-range device; if naive rendering stutters, find the technique that doesn't (custom painter/layering).\n- Use normalised, image-anchored coordinates; verify they survive scaling/rotation and persist/re-render. Disposable code."
+        },
+        {
+          "title": "Document the proven canvas approach and coordinate model",
+          "note": "Capture what PRD-05/MAPPING should build on.\n- The rendering/interaction approach that performed, and the persistable, scale/rotation-safe coordinate model.\n- The go/no-go and any device-performance caveats.\n- ADR only if a notable technical decision emerged."
+        }
       ]
     },
     {
@@ -806,7 +1142,23 @@
       ],
       "priority": "P1",
       "detail": [
-        "Spike proving an encrypted local queue for drafts/photos that syncs with no data loss and last-write-wins drafts, with server-side finalisation and photos never persisted on device beyond a transient cache (C14/ADR-0009/0015). De-risks offline-tolerant charting (PRD-05/09)."
+        "A Flutter prototype queues draft chart edits plus a photo offline in an encrypted local store, then syncs cleanly on reconnect with no data loss. It demonstrates conflict handling — last-write-wins for drafts — and that finalisation is server-side (a draft becomes an immutable finalised record only on the server, ADR-0010), so the device never holds the authoritative final record.",
+        "Critically, it proves photos never persist on device beyond a transient, encrypted sync cache that is purged once synced (C14/ADR-0009) — the known competitor failure mode of lost/retained photos is exactly what this guards against. The interplay with MEDIA-STORAGE's signed-URL upload is part of what's validated.",
+        "Go/no-go bar: drafts + a photo queue offline encrypted and sync with no loss; last-write-wins drafts and server-side finalisation work; photos leave no device residue after sync. It's a spike — document the approach for PRD-05/09 and discard the prototype."
+      ],
+      "tasks": [
+        {
+          "title": "Define the spike scope, questions and go/no-go criteria",
+          "note": "Frame the offline-integrity risk and the bar charting needs cleared.\n- Questions: can an encrypted local queue hold drafts + a photo offline and sync with NO loss; does last-write-wins for drafts + server-side finalisation work; do photos leave NO device residue after sync (C14/ADR-0009)?\n- Go/no-go bar: all hold, including verified no-loss sync and purge-after-sync for photos.\n- Time-box and the hand-off (PRD-05 OFFLINE / PRD-09)."
+        },
+        {
+          "title": "Build the throwaway offline-queue prototype",
+          "note": "Prove encrypted queue, lossless sync and photo non-retention.\n- Queue draft chart edits + a photo offline in an encrypted local store; sync cleanly on reconnect with no loss.\n- Demonstrate last-write-wins drafts and that finalisation happens server-side (device never holds the authoritative final record).\n- Prove photos persist only in a transient encrypted cache purged after sync; validate the hand-off to MEDIA-STORAGE signed-URL upload. Disposable code."
+        },
+        {
+          "title": "Document the proven offline/sync approach",
+          "note": "Capture what PRD-05/OFFLINE and PRD-09 should build on.\n- The encrypted-queue + sync design, the conflict (last-write-wins) and server-side finalisation model, and the photo no-retention guarantee.\n- The go/no-go and any caveats.\n- ADR only if a real decision emerged."
+        }
       ]
     },
     {
@@ -835,13 +1187,29 @@
         "SPRINT-0/RLS"
       ],
       "detail": [
-        "A background-job framework (scheduler + queue) with retry, back-off, idempotency and dead-lettering — the engine behind every time-driven feature: reminder/recall sends, membership autopay + dunning, retention timers, temperature polling, expiry alerts and read-model projections. Jobs are tenant-aware and run under an audited elevated context (the RLS bypass path), and runs are observable."
+        "A worker host runs both scheduled jobs (cron-like recurring work) and queued jobs (work enqueued by request handlers or domain events). Each job execution has retry with back-off, idempotency (a job that runs twice produces one effect) and dead-lettering (a job that keeps failing is parked for inspection rather than retried forever), so time-driven work runs reliably without manual babysitting.",
+        "Jobs are tenant-aware: a job carries its tenant_id and runs under the audited elevated context from RLS (the only sanctioned cross-tenant path), so a recall scan or projection touches the right tenant's data and every elevation is recorded in the audit stream. Job runs are observable through the OBS stack — metrics, logs and alerts on failures and dead-letters.",
+        "A sample recurring job (e.g. an expiry scan) and a sample queued job are demonstrated end to end to prove scheduling, retry, idempotency, tenancy and observability before features rely on the framework. The JobRun record tracks type, payload, schedule, attempts and status."
       ],
       "data_model": [
         {
           "entity": "JobRun",
-          "fields": "id, type, payload, scheduled_for, attempts, status(queued|running|done|dead), tenant_id",
-          "notes": "Retry/back-off; dead-letter; audited elevated context."
+          "fields": "id, tenant_id, type, payload(jsonb), scheduled_for, attempts, status(queued|running|done|dead), last_error",
+          "notes": "Retry with back-off; idempotent; dead-letter on repeated failure; runs under the RLS audited elevated context."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Build the worker host with scheduling, retry/back-off, idempotency and dead-lettering",
+          "note": "Stand up the reliable engine for time-driven and async work.\n- A worker host running scheduled (recurring) and queued jobs.\n- Per-execution retry with back-off, idempotency (run-twice = one effect), and dead-lettering for repeatedly-failing jobs.\n- JobRun record (type, payload, schedule, attempts, status) tracking lifecycle."
+        },
+        {
+          "title": "Make jobs tenant-aware under the audited elevated context",
+          "note": "Ensure jobs touch the right tenant and every cross-tenant run is recorded.\n- Jobs carry tenant_id and run under the RLS audited elevated/bypass path (the only sanctioned cross-tenant route) so isolation holds and elevations are audited (AUDIT-INFRA).\n- A sample recurring job (e.g. expiry scan) and a sample queued job demonstrated end to end (schedule, retry, idempotency, tenancy)."
+        },
+        {
+          "title": "Wire job observability and document the framework",
+          "note": "Make runs visible and document how features add jobs.\n- Metrics/logs/alerts for job runs, failures and dead-letters via OBS.\n- Document how to define a scheduled vs queued job, the idempotency contract, and the tenant/elevation rules — so REMINDERS, MEMBERSHIP autopay, RETENTION, TEMP-MONITORS, recall/expiry scans and DOMAIN-EVENTS projections build on it consistently."
         }
       ]
     },
@@ -882,13 +1250,29 @@
         "SPRINT-0/API"
       ],
       "detail": [
-        "A media service: AU-resident, encrypted blob storage served only via short-lived signed URLs, with consent- and capability-checked, audited access and no public/unsigned path (C14/C21/ADR-0009/0016). Underpins PRD-05 photos and PRD-09 capture — media is never persisted on personal devices."
+        "Blob storage is AU-resident and encrypted at rest (IAC), and there is no public or unsigned access path — every read and write goes through a short-lived signed URL minted by the service. Clients (web and Flutter) request a signed URL, upload directly to Blob (so large media doesn't stream through the API), and download the same way; the URL expires quickly so a leaked link is short-lived.",
+        "Minting a signed URL is consent- and capability-checked and audited: the service verifies the caller has the capability and that image-use consent permits the access (ADR-0009, C14) before issuing the URL, and records an AuditEvent (who accessed which media, when) so media access is part of the trail. A MediaObject row holds the metadata (owner ref, content type, blob path) — access is always via signed URL, never a stored public link.",
+        "Upload and download are demonstrated from both web and Flutter to prove the round-trip. The device-side guarantee (no persistence beyond a transient encrypted cache, ADR-0009) is the provider app's responsibility (SPIKE-OFFLINE proved the pattern); this service guarantees the central, residency-correct, signed-only, audited storage."
       ],
       "data_model": [
         {
           "entity": "MediaObject",
-          "fields": "id, tenant_id, owner_ref, blob_path(AU), content_type, created_at; access via signed URL only",
-          "notes": "No public access; consent/capability-checked."
+          "fields": "id, tenant_id, owner_ref, blob_path(AU), content_type, created_at; consent_ref",
+          "notes": "Access via short-lived signed URL only; no public/unsigned path; mint is consent/capability-checked and audited (ADR-0009/C14)."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Build the signed-URL upload/download service over AU-resident encrypted Blob",
+          "note": "Provide secure, residency-correct media handling with no public access.\n- AU-resident, encrypted-at-rest Blob (IAC); every read/write via a short-lived signed URL minted by the service — no public/unsigned path.\n- Direct-to-Blob upload/download (large media doesn't stream through the API); URLs expire quickly.\n- A MediaObject row holds metadata; access is always via signed URL, never a stored public link."
+        },
+        {
+          "title": "Gate signed-URL minting on consent + capability and audit every access",
+          "note": "Make media access governed and traceable.\n- Before issuing a URL, verify the caller's capability AND that image-use consent permits the access (ADR-0009, C14).\n- Record an AuditEvent (who/what media/when) on access via AUDIT-INFRA so media reads are in the trail.\n- Demonstrate upload + download from both web and Flutter."
+        },
+        {
+          "title": "Document the media service and the device non-retention contract",
+          "note": "Write the guide PRD-05/09 build on.\n- How to request signed URLs, the consent/capability/audit gating, and the no-public-access rule.\n- The device-side guarantee (no persistence beyond a transient encrypted cache, purge after sync) that the provider app must honour — proven by SPIKE-OFFLINE — and how it uploads through this service."
         }
       ]
     },
@@ -923,13 +1307,29 @@
         "SPRINT-0/AUDIT-INFRA"
       ],
       "detail": [
-        "A domain-event backbone (transactional outbox + at-least-once dispatch) modules publish to and subscribe from, so read-models (PRD-08), the follow-up job queue (PRD-07), notifications and cross-module reactions stay decoupled. Events carry tenant context, are consumed idempotently, and are observable (ADR-0013/0010)."
+        "Modules publish domain events transactionally using a transactional outbox: the event row is written in the same database transaction as the state change, so an event is never lost if the transaction commits and never emitted if it rolls back. A dispatcher then delivers events at-least-once to subscribers, which is the realistic guarantee for distributed delivery.",
+        "Because delivery is at-least-once, subscribers (read-model projections, the Jobs queue, notifications) consume idempotently — processing the same event twice produces one effect (an idempotency key / dedupe on the consumer side). Events carry tenant context (so a projection updates the right tenant's read model under the RLS-aware path) and are observable through OBS (dispatch lag, failures).",
+        "A sample event flows end to end from a write to a read-model projection to prove the outbox -> dispatch -> idempotent-consume path before modules depend on it. The OutboxEvent record holds type, payload, occurred_at and dispatched_at."
       ],
       "data_model": [
         {
           "entity": "OutboxEvent",
-          "fields": "id, tenant_id, type, payload, occurred_at, dispatched_at",
-          "notes": "Transactional outbox; idempotent consumers."
+          "fields": "id, tenant_id, type, payload(jsonb), occurred_at, dispatched_at, attempts",
+          "notes": "Written in the same transaction as the state change; at-least-once dispatch; consumers idempotent; tenant-scoped."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Implement the transactional outbox and at-least-once dispatch",
+          "note": "Let modules publish events that can't be lost or phantom-emitted.\n- OutboxEvent written in the SAME transaction as the state change (committed -> guaranteed; rolled back -> never emitted).\n- A dispatcher delivering events at-least-once to subscribers, running on JOBS-SCHEDULER (retry/back-off applies).\n- Events carry tenant context so projections update the right tenant under the RLS-aware path."
+        },
+        {
+          "title": "Provide idempotent subscription and a sample write-to-read-model flow",
+          "note": "Make consumers safe under at-least-once delivery and prove the path.\n- A subscription mechanism where consumers (read-models, Jobs queue, notifications) process idempotently (idempotency key/dedupe) — run-twice = one effect.\n- A sample event flowing from a write to a read-model projection end to end (outbox -> dispatch -> idempotent consume)."
+        },
+        {
+          "title": "Wire event observability and document the backbone",
+          "note": "Make events visible and document how modules publish/subscribe.\n- Observability via OBS: dispatch lag, failures, dead-letters (reusing JOBS-SCHEDULER's handling).\n- Document how to publish a domain event transactionally and how to write an idempotent subscriber, so READ-MODELS, FOLLOWUPS and notifications build on it consistently (ADR-0013/0010)."
         }
       ]
     },
@@ -957,18 +1357,30 @@
         "SPRINT-0/API"
       ],
       "detail": [
-        "Feature flags + a typed per-tenant configuration store so features ship dark and toggle per clinic, and behaviour is tailored (cooling-off N days, S4 naming, telehealth path risk, modality availability, deferred features). Reads are cached and observable; flag/config changes are audited."
+        "Feature flags can be toggled globally and overridden per tenant, so a feature can ship dark (off everywhere), be enabled for a pilot tenant, then rolled out — without a deploy. Per-tenant configuration is typed and validated (not free-form strings): cooling-off N days, S4 naming policy, modality availability and similar are bound to typed options with validation, so an invalid value is rejected rather than silently misbehaving.",
+        "Flag and config reads are cached (with bounded refresh) so the hot path isn't hitting the store on every request, and reads/changes are observable via OBS. Every change to a flag or config value is audited (AUDIT-INFRA) — who changed which clinic's setting, when — because these settings drive compliance-relevant behaviour (e.g. cooling-off duration).",
+        "The two records are a FeatureFlag (key, scope global|tenant, enabled, optional tenant_id) and a typed TenantConfig (tenant_id, key, typed value). Later stories read these rather than hard-coding policy, which is what makes the platform tailorable per clinic and lets the staged build hide unfinished work."
       ],
       "data_model": [
         {
           "entity": "FeatureFlag",
           "fields": "key, scope(global|tenant), enabled, tenant_id?",
-          "notes": "Ship dark; per-tenant override."
+          "notes": "Ship dark globally; per-tenant override; toggled without deploy; changes audited."
         },
         {
           "entity": "TenantConfig",
           "fields": "tenant_id, key, value(typed)",
-          "notes": "e.g. cooling_off_days, s4_naming, modalities."
+          "notes": "Typed + validated (e.g. cooling_off_days, s4_naming, modality availability); read by COOLING-OFF, booking page, MODALITY etc."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Build feature flags (global + per-tenant) and a typed, validated per-tenant config store",
+          "note": "Provide toggles and tailorable settings the staged build and per-clinic behaviour rely on.\n- Feature flags toggleable globally and overridable per tenant — ship dark, pilot, roll out, all without a deploy.\n- TenantConfig bound to TYPED options with validation (cooling_off_days, s4_naming, modality availability, telehealth path risk, deferred-feature switches) — invalid values rejected, not silently mishandled.\n- Flag/config reads cached with bounded refresh so the hot path stays fast; reads observable via OBS."
+        },
+        {
+          "title": "Audit flag/config changes and document the model",
+          "note": "Make compliance-relevant settings traceable and the mechanism reusable.\n- Every flag/config change emits an AuditEvent (who/which tenant/which key/old->new) via AUDIT-INFRA — these settings drive compliance behaviour (e.g. cooling-off duration), so changes must be on the trail.\n- Document how a feature ships dark, how to add a typed tenant-config key, and which later stories read which keys (COOLING-OFF, booking page S4 naming, MODALITY availability)."
         }
       ]
     }

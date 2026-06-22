@@ -11,7 +11,7 @@ Store distribution + code-push (e.g. Shorebird) where the compliance posture all
 
 ## How it works
 
-Store distribution + (where the compliance posture allows) code-push (e.g. Shorebird) for both Flutter apps from CI, with versioning + minimum-supported-version handling and crash/usage telemetry into observability (ADR-0006).
+Store/internal distribution from CI for both Flutter flavours, with versioning + minimum-supported-version handling and an in-app 'update required' gate (enforced server-side too). Code-push (e.g. Shorebird) viability is assessed and documented against the compliance posture (open question — likely OK for the client app, constrained for the clinical provider app). Crash/usage telemetry feeds observability (ADR-0006).
 Lets the clinic ship and responsibly patch the apps.
 
 ## Requirements
@@ -29,12 +29,12 @@ Lets the clinic ship and responsibly patch the apps.
 
 _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.html._
 
-- No in-app screen — release pipeline + an in-app 'update required' gate for unsupported versions.
+- No in-app feature screen — release pipeline + an in-app 'update required' gate for unsupported versions.
 
 ## Suggested data model
 
 - **AppRelease** — platform, version, min_supported, channel, code_push_ref?
-  - _Code-push viability assessed for compliance._
+  - _Code-push viability assessed for the compliance posture._
 
 ## Technical notes (high level)
 
@@ -46,24 +46,11 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - AppRelease — platform, version, min_supported, channel, code_push_ref? (Code-push viability assessed for compliance.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Both apps distribute via internal/store channels from CI.
-  - Rule: Code-push viability for the compliance posture is assessed and documented.
-  - Rule: Versioning + minimum-supported-version handling in place.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: SPRINT-0/FLUTTER.
-- [ ] **Client app UI (Flutter)**
-  Build on the Flutter client app: the screen per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - No in-app screen — release pipeline + an in-app 'update required' gate for unsupported versions.
-- [ ] **Provider app UI (Flutter)**
-  Build on the Flutter provider app: the screen per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - No in-app screen — release pipeline + an in-app 'update required' gate for unsupported versions.
+- [ ] **CI distribution pipeline for both app flavours**
+  Build + sign both Flutter flavours in CI and distribute to internal then store channels (TestFlight / Play internal → store). Per-store signing and secrets handling.
+- [ ] **Versioning + minimum-supported-version + 'update required' gate**
+  Stamp each release with a version and a minimum-supported-version. In-app 'update required' gate blocks unsupported builds; enforce the floor server-side too (API rejects unsupported clients) so the gate can't be skipped.
+- [ ] **Assess + document code-push (Shorebird) compliance viability**
+  Assess Shorebird/code-push against the compliance posture and document the decision per flavour: likely acceptable for the client app, constrained for the clinical provider app (OTA Dart changes to a clinical record surface). Record the outcome (open question in the PRD), don't assume it.
+- [ ] **Crash + usage telemetry into observability**
+  Wire crash and usage telemetry from both apps into the platform observability stack so regressions and adoption are visible. Respect the privacy posture (no PHI in telemetry).

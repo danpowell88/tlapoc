@@ -11,8 +11,8 @@ The prototype's Operations → Open/close & fridge log (openFridge/saveFridge) i
 
 ## How it works
 
-A twice-daily routine: a configurable open/close checklist plus a fridge-temperature log. Checklists are completed and recorded with who/when; an out-of-range fridge reading triggers the breach pathway (quarantine lot + job). Logs are audited and feed the inspection pack; ties into automated monitors (TEMP-MONITORS) and PRD-04 cold-chain.
-The daily safe open/close discipline.
+A twice-daily routine: a configurable open and close checklist (items attributed to a role — e.g. 'Fridge 1 AM temp logged' · Reception, 'Autoclave run & cycle logged' · Lead Nurse) completed and recorded with who/when, plus a manual fridge-temperature log per fridge (AM/PM). An out-of-range reading triggers the breach pathway: quarantine the affected lot (PRD-04) + raise a job (PRD-07) automatically; openFridge/saveFridge drive the entry, with 'in range' / 'warm spike — recovered' states.
+Logs are audited and feed the inspection pack (PRD-08); the manual log is the fallback alongside automated monitors (TEMP-MONITORS) and reconciles into one cold-chain record (C13). The daily safe open/close discipline.
 
 ## Requirements
 
@@ -30,16 +30,17 @@ The daily safe open/close discipline.
 
 _Prototype screen: prototype.html — Operations → Open/close & fridge log; backroom.html._
 
-- Prototype: Operations -> Open / close & fridge log (ops-openclose.png); also on the back-office tablet (backroom.png) — checklist items + a fridge temp entry with breach handling (openFridge/saveFridge).
+- Prototype: Operations → Open / close & fridge log (ops-openclose); also on the back-office tablet (backroom).
+- Checklist items with done-state + role; per-fridge AM/PM 'Manual log' temp entry; 'in range' / 'warm spike — recovered'; breach → quarantine lot + job (openFridge/saveFridge).
 
 ![ops-openclose — prototype screen](../screens/ops-openclose.png)
 
 ## Suggested data model
 
-- **OpenCloseChecklist** — id, tenant_id, location_id, type(open|close), items[]{label, done}, completed_by, at
-  - _Configurable checklist._
-- **FridgeLog** — id, location_id, temp, at, actor_id, breach(bool)
-  - _Out-of-range -> quarantine lot + Job (PRD-04/PRD-07)._
+- **OpenCloseChecklist** — id, tenant_id, location_id, type(open|close), items[]{label, done, role}, completed_by, at
+  - _Configurable checklist; audited._
+- **FridgeLog** — id, tenant_id, location_id, fridge_id, period(am|pm), temp, at, actor_id, breach(bool)
+  - _Out-of-range → quarantine lot + Job (PRD-04/PRD-07)._
 
 ## Technical notes (high level)
 
@@ -51,25 +52,11 @@ _Prototype screen: prototype.html — Operations → Open/close & fridge log; ba
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - OpenCloseChecklist — id, tenant_id, location_id, type(open|close), items[]{label, done}, completed_by, at (Configurable checklist.)
-  - FridgeLog — id, location_id, temp, at, actor_id, breach(bool) (Out-of-range -> quarantine lot + Job (PRD-04/PRD-07).)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Configurable open and close checklists are completed and recorded with who/when.
-  - Rule: A twice-daily fridge log captures temperature; an out-of-range reading triggers the breach pathway (quarantine lot + job).
-  - Rule: Logs are audited and feed the inspection pack (PRD-08).
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-04/COLD-CHAIN.
-- [ ] **Enforce compliance gate + audit events**
-  Enforce C13, C20 as a server-side invariant that cannot be bypassed via the API:
-  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
-  - Write an immutable AuditEvent for the attempt and its outcome.
-- [ ] **Web UI**
-  Build on the Angular web app: the ops-openclose per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: Operations -> Open / close & fridge log (ops-openclose.png); also on the back-office tablet (backroom.png) — checklist items + a fridge temp entry with breach handling (openFridge/saveFridge).
+- [ ] **OpenCloseChecklist: configurable templates + daily instances**
+  Model OpenCloseChecklist (type[open|close], items[]{label, done, role}, completed_by, at). Configurable per-clinic checklist templates instantiated per day/type; each item carries a responsible role (Reception/Nurse/Lead Nurse). Audited.
+- [ ] **Open/close checklist UI**
+  Today's open/close checklist view (ops-openclose + back-office tablet): tick items, attributed to who/when, with the role label per item; show completion state.
+- [ ] **FridgeLog: twice-daily manual temp entry (openFridge/saveFridge)**
+  Per-fridge AM/PM manual temperature entry (openFridge → modal → saveFridge). Record temp, period, actor, at; show 'in range' / 'warm spike — recovered' states. Fallback alongside the live monitor feed (TEMP-MONITORS).
+- [ ] **Fridge breach pathway (quarantine lot + job) + inspection feed**
+  A reading outside the safe band (toxin 2–8°C) sets breach=true, quarantines the affected lot (PRD-04 cold-chain) and raises a job (PRD-07) automatically. Reconcile manual + device readings into one cold-chain record (C13); feed logs to the PRD-08 inspection pack.

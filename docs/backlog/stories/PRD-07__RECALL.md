@@ -11,8 +11,8 @@ Recare at the treatment interval (toxin ~12 weeks) + unbooked-rebook prompts, wi
 
 ## How it works
 
-Recare at the treatment interval (toxin ~12 weeks) + unbooked-rebook prompts, with a recall/rebook worklist for front desk. A toxin client with no future booking enters the worklist at the configured interval and receives the nudge.
-Integrates with treatment plans (PRD-05) and rebooking (PRD-06); keeps the book full and clients on cadence.
+A scheduled job creates a RecallTask when a client passes the treatment interval with no future booking (reason: interval), or when a treatment plan has an unbooked recommended session (reason: unbooked_plan). The task carries due_at, status and last_nudge_at. The client receives an automatic recall nudge over the channels (SMS + email per the 'Recall — anti-wrinkle (~12 wks)' automation) with a rebook link — gated on consent for the marketing-style nudge — and the task lands in the front-desk worklist.
+Recall tasks merge into the unified Follow-ups queue as 'Recall' jobs (e.g. 'Rebook Olivia Brown — toxin 14 wks overdue · due this week'), so staff work recalls alongside replies, callbacks and stock. Booking the next visit (CHECKOUT-ASSIST / PRD-06 rebooking, PRD-02 calendar) resolves the task. Unbooked recommended sessions prompt a rebook the same way.
 
 ## Requirements
 
@@ -21,21 +21,21 @@ Integrates with treatment plans (PRD-05) and rebooking (PRD-06); keeps the book 
 ## Acceptance Criteria
 
 - [ ] A toxin client with no future booking enters the recall worklist at the configured interval and receives the nudge.
-- [ ] Unbooked recommended sessions prompt a rebook.
-- [ ] Front desk can work the recall/rebook worklist.
-- [ ] Recall integrates with treatment plans (PRD-05) and rebooking (PRD-06).
+- [ ] An unbooked recommended session (treatment plan, PRD-05) prompts a rebook.
+- [ ] Front desk can work the recall/rebook worklist (recall tasks appear in the Follow-ups queue).
+- [ ] Recall integrates with treatment plans (PRD-05) and rebooking (PRD-06/PRD-02).
 
 ## UI designs / screenshots
 
-- Prototype: Follow-ups (followups.png) includes the recall/rebook worklist of clients due; automatic recall nudges via the channels.
+- Prototype: Follow-ups — recall/rebook worklist of clients due (e.g. 'Rebook Olivia Brown — toxin 14 wks overdue', 'Win-back Mia Chen — lapsed 5 mo'), shown as 'Recall' jobs with assignee + due; automatic recall nudges via the channels.
 - Unbooked recommended sessions prompt a rebook.
 
 ![followups — prototype screen](../screens/followups.png)
 
 ## Suggested data model
 
-- **RecallTask** — id, tenant_id, client_id, due_at, reason(interval|unbooked_plan), status, last_nudge_at
-  - _Generated at interval by a scheduled job; works the worklist._
+- **RecallTask** — id, tenant_id, client_id, due_at, reason(interval|unbooked_plan), status(open|done), last_nudge_at
+  - _Generated at the interval by a scheduled job; projects into the Follow-ups queue as a Recall Job._
 
 ## Other
 
@@ -43,16 +43,12 @@ Integrates with treatment plans (PRD-05) and rebooking (PRD-06); keeps the book 
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - RecallTask — id, tenant_id, client_id, due_at, reason(interval|unbooked_plan), status, last_nudge_at (Generated at interval by a scheduled job; works the worklist.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: A toxin client with no future booking enters the recall worklist at the configured interval and receives the nudge.
-  - Rule: Unbooked recommended sessions prompt a rebook.
-  - Rule: Front desk can work the recall/rebook worklist.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-07/CHANNELS.
+- [ ] **RecallTask model + interval/unbooked-plan generation (migrations)**
+  Model RecallTask (tenant_id + RLS): client_id, due_at, reason (interval|unbooked_plan), status, last_nudge_at.
+  - Configurable interval per treatment type (toxin ~12 wks default).
+  - A RecallTask projects into the Job queue (FOLLOWUPS) as a 'recall' Job.
+- [ ] **Recall scheduler + nudge + worklist API**
+  Server-side.
+  - Scheduled job: find toxin clients past the interval with no future booking -> create a RecallTask + recall Job; find treatment plans (PRD-05) with unbooked recommended sessions -> create RecallTask (unbooked_plan).
+  - Send the recall nudge via INotifier (marketing-style — consent + suppression gated) with a rebook link; stamp last_nudge_at; avoid re-nudging.
+  - Resolve the task when a future booking exists (PRD-02/PRD-06). Worklist query feeds the Follow-ups recall jobs.

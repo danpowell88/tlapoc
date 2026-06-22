@@ -9,7 +9,9 @@ The injection-mapping canvas is the hero clinical screen and the highest app ris
 
 ## How it works
 
-Spike of the Flutter injection-mapping canvas: tap-to-add + drag points over a facial diagram and a photo, each holding metadata, performing smoothly with many points, with a coordinate model that survives image scaling/rotation. De-risks the hero clinical screen (PRD-05/MAPPING).
+A Flutter prototype supports tap-to-add, drag-to-move and per-point metadata over both a facial diagram and a real image. The hard parts to prove are interaction performance with many points on a mid-range device, and a coordinate model that is anchored to the image (normalised coordinates) so points stay correct when the image is scaled, rotated or displayed at different sizes — and can be persisted and re-rendered identically later.
+Go/no-go bar: smooth tap-to-add/drag with per-point metadata over diagram and image, acceptable performance with many points on a mid-range device, and a coordinate model that survives scaling/rotation and round-trips through persistence. If the naive approach stutters, the spike identifies the rendering technique that works (custom painter, layering) and notes it.
+It's a spike — prove the canvas and the coordinate model, document the approach, then discard the prototype. PRD-05/MAPPING implements the real screen on the proven pattern.
 
 ## Requirements
 
@@ -37,9 +39,18 @@ Non-UI / platform scaffolding — no prototype screen.
 
 ## Tasks (dev pickup)
 
-- [ ] **Define spike scope, questions & success criteria**
-  List the unknowns to resolve and the pass/fail bar before building; time-box it.
-- [ ] **Build a throwaway prototype**
-  Smallest end-to-end slice that answers the questions (not production code); measure the risky bits.
-- [ ] **Write up findings + go/no-go recommendation (ADR if warranted)**
-  What worked, the gotchas, the chosen approach + its impact on the dependent stories.
+- [ ] **Define the spike scope, questions and go/no-go criteria**
+  Frame the canvas risk and the bar PRD-05 needs cleared.
+  - Questions: can Flutter do smooth tap-to-add + drag points with per-point metadata over a diagram AND a photo; does it stay performant with many points on a mid-range device; can the coordinate model survive image scale/rotation and persist?
+  - Go/no-go bar: all of the above hold, with a coordinate model that round-trips through persistence and re-renders identically.
+  - Time-box and the hand-off (PRD-05 MAPPING).
+- [ ] **Build the throwaway canvas prototype**
+  Prove interaction + performance + the coordinate model.
+  - Tap-to-add, drag-to-move and per-point metadata over both a facial diagram and a real image.
+  - Stress with many points on a mid-range device; if naive rendering stutters, find the technique that doesn't (custom painter/layering).
+  - Use normalised, image-anchored coordinates; verify they survive scaling/rotation and persist/re-render. Disposable code.
+- [ ] **Document the proven canvas approach and coordinate model**
+  Capture what PRD-05/MAPPING should build on.
+  - The rendering/interaction approach that performed, and the persistable, scale/rotation-safe coordinate model.
+  - The go/no-go and any device-performance caveats.
+  - ADR only if a notable technical decision emerged.

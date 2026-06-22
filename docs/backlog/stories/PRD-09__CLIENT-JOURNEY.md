@@ -11,8 +11,8 @@ A client can complete the full pre-visit journey entirely in-app (REQ-APP-1).
 
 ## How it works
 
-The client completes the full pre-visit journey entirely in-app: book -> intake -> e-sign consent (incl. image-use), then receives reminders/recall. Surfaces PRD-02 booking and PRD-03 intake/consent through the Flutter client app; sign-in via social/email/OTP, tenant-scoped.
-Removes paperwork and gets clients ready before they arrive.
+The client completes the full pre-visit journey entirely in-app: sign in (social/email/OTP, tenant-scoped via Entra External ID) → book over PRD-02 → complete PRD-03 intake (medical history/BDD) → e-sign per-treatment consent incl. separate image-use consent, ending on 'All set'. The app is a surface over those modules; the treatment gate is enforced server-side.
+Home surfaces the next appointment and an amber 'Finish your pre-visit forms' nudge; reminders/recall (PRD-07) arrive as push + in-app notifications. Removes paperwork and gets clients ready before they arrive.
 
 ## Requirements
 
@@ -29,15 +29,20 @@ Removes paperwork and gets clients ready before they arrive.
 
 _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.html._
 
-- Prototype: client app (client-app.png) bottom-tabs — Home/For you, Book, then the intake + consent flow ('You're booked!', 'All set — thank you').
-- Reminders/recall received in-app.
+- Prototype: client-app — Home/'For you' (greeting, NEXT APPOINTMENT card with treatment/time/injector/room, 'View details', amber 'Finish your pre-visit forms' prompt).
+- Quick actions: Book · Messages · Photos · Rewards. Bottom tabs: Home · Book · My care · Rewards · Account.
+- Booking ends 'You're booked!'; intake + consent end 'All set — thank you'.
 
 ![client-app — prototype screen](../screens/client-app.png)
 
 ## Suggested data model
 
-- **(reuses)** — Appointment (PRD-02) + IntakeResponse/ConsentSignature (PRD-03) via the API
-  - _Client app is a surface over those modules._
+- **(reuses) Appointment** — PRD-02 via the API (book/reschedule endpoints)
+  - _Client app is a surface; no app-local appointment store._
+- **(reuses) IntakeResponse/ConsentSignature** — PRD-03 — medical history, per-treatment + image-use consent, e-signed
+  - _Server holds records; signatures posted from device._
+- **(reuses) Notification** — PRD-07 push token + in-app inbox
+  - _Drives the pre-visit nudge._
 
 ## Technical notes (high level)
 
@@ -49,8 +54,5 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 
 ## Tasks (dev pickup)
 
-- [ ] **Client app UI (Flutter)**
-  Build on the Flutter client app: the client-app per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: client app (client-app.png) bottom-tabs — Home/For you, Book, then the intake + consent flow ('You're booked!', 'All set — thank you').
-  - Reminders/recall received in-app.
+- [ ] **Client app: sign-in + book→intake→consent journey**
+  Client Flutter flavour: Entra External ID sign-in (social/email/OTP) writing a tenant-pinned session into secure storage. Home screen with the NEXT APPOINTMENT card and the 'Finish your pre-visit forms' nudge. Wire Book to the PRD-02 booking endpoints and the intake/consent screens to PRD-03 (medical history/BDD, per-treatment consent + separate image-use consent, on-device e-signature posted to the API). End-states 'You're booked!' / 'All set'. Register a push token and render reminders/recall (PRD-07) in an in-app inbox. No app-local clinical store; the treatment gate stays server-side.

@@ -11,8 +11,9 @@ The prototype's Reports → Capacity view reports chair/room/practitioner utilis
 
 ## How it works
 
-Capacity & utilisation reporting by practitioner, room/chair and device over a date range, with a trend view; quiet windows highlighted to feed waitlist/recall fill. Matches the prototype's capacity metrics.
-Helps fill quiet windows and right-size rosters.
+Capacity & utilisation reporting so the owner can fill quiet windows and right-size rosters. Computes utilisation — booked vs available time — by practitioner, by room/chair and by device, over a date range, with an overview and a trend view (goRep('capacity'), overview/trends sub-views). Reads from the reporting read-models (READ-MODELS) over appointment, roster (PRD-01 ROSTER) and resource (PRD-11 ROOMS-DEVICES) data.
+Quiet windows — recurring low-utilisation slots — are highlighted so they can feed the waitlist/recall fill loop (PRD-02 WAITLIST, PRD-07 RECALL): the same data that says 'Wednesday afternoons run at 41%' is what a flash promo or waitlist offer targets. The Insights strip already surfaces this ('Wed runs at just 63% utilisation — your best slot for waitlist offers or a flash promo').
+Utilisation is an operational metric, not financial — no money figures here (revenue-per-chair-hour lives on the scorecard); visible to owner/manager.
 
 ## Requirements
 
@@ -20,23 +21,25 @@ Helps fill quiet windows and right-size rosters.
 
 ## Acceptance Criteria
 
-- [ ] Utilisation by practitioner, room/chair and device over a date range, with trend view.
-- [ ] Quiet windows are highlighted (feeds waitlist/recall fill).
-- [ ] Reads from the reporting read-models.
-- [ ] Matches the prototype's capacity metrics.
+- [ ] Utilisation by practitioner, room/chair and device over a date range, with an overview and a trend view.
+- [ ] Quiet windows (recurring low-utilisation slots) are highlighted to feed waitlist/recall fill.
+- [ ] Reads from the reporting read-models over appointment/roster/resource data.
+- [ ] Matches the prototype's capacity metrics; operational only (no money figures).
 
 ## UI designs / screenshots
 
 _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack)._
 
-- Prototype: Reports -> Capacity (reports.png, goRep('capacity'), overview/trends) — utilisation by resource with quiet-window highlights.
+- Prototype: Reports → Capacity (reports.png, goRep('capacity'), overview/trends via goRepSub) — utilisation by resource with quiet-window highlights.
+- Overview: utilisation tiles/bars by practitioner, room/chair, device; Trends: utilisation over time.
+- Quiet-window highlight with a hand-off into waitlist/recall fill.
 
 ![reports — prototype screen](../screens/reports.png)
 
 ## Suggested data model
 
-- **(read) CapacityMetrics** — utilisation by practitioner/room/device, quiet_windows, by date
-  - _Feeds waitlist/recall fill._
+- **(read) CapacityMetrics** — period, practitioner_id?/room_id?/device_id?, booked_minutes, available_minutes, utilisation, quiet_windows[]
+  - _Projection over appointments + roster (PRD-01) + resources (PRD-11); feeds waitlist/recall fill; operational._
 
 ## Other
 
@@ -44,12 +47,7 @@ _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Po
 
 ## Tasks (dev pickup)
 
-- [ ] **Read-model / projection**
-  Build a materialised read-model/projection (don't query OLTP directly):
-  - Shape: utilisation by practitioner/room/device, quiet_windows, by date.
-  - Populate from domain events + the audit stream; eventual consistency is fine; support rebuild/backfill.
-  - Expose a query API with this story's date/role filters; respect owner-only .fin gating.
-- [ ] **Web UI**
-  Build on the Angular web app: the reports per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: Reports -> Capacity (reports.png, goRep('capacity'), overview/trends) — utilisation by resource with quiet-window highlights.
+- [ ] **Read-model / projection: capacity & utilisation**
+  Project CapacityMetrics = booked vs available minutes by practitioner, room/chair and device over a window, computing utilisation and detecting quiet windows (recurring low-utilisation slots). Available time comes from the roster (PRD-01 ROSTER) and resource definitions (PRD-11 ROOMS-DEVICES); booked time from appointments. Support overview + trend (time-series) queries over the read schema.
+- [ ] **Web UI: capacity report (overview + trends) with quiet-window fill**
+  Build the Capacity tab with overview/trends sub-views (goRepSub): utilisation by resource as tiles/bars (overview) and over time (trends), with quiet windows highlighted and a hand-off action into waitlist/recall fill (PRD-02/PRD-07). Operational metric only — no money figures.

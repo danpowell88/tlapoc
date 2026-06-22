@@ -11,8 +11,11 @@ Given a lot, the system must instantly list every client/administration for that
 
 ## How it works
 
-Given a lot number, the system instantly lists every client/administration for that lot, and exports an audit-ready medicine register. Recall execution + acknowledgement tracking lives in the Governance hub.
-This is the payoff of recording per-point lot in charting — a recall that would take days on paper takes minutes (C8).
+This is the payoff of recording per-point batch-lot at every administration (C8). When a sponsor or the TGA issues a field-safety notice for a specific lot, the clinic must instantly identify and contact everyone treated from that lot. A recall that takes days on paper takes minutes here.
+It is also where the audit-ready medicine register is produced: a complete, immutable record of every administration (batch-lot, qty, prescriber, administrator, client, datetime), queryable and exportable for QLD Health / AHPRA scrutiny. Recall execution + acknowledgement tracking lives in the Governance hub (full hub in PRD-08/11).
+The recall query takes a lot number and returns every Administration for that lot - client, datetime, units, administrator - built directly on the immutable Administration + StockItem data (no separate denormalised copy that could drift). An index on Administration(lot_id) makes it instant.
+Starting a recall creates a Recall record (lot, reason, started_at) and tracks per-client acknowledgement. Safety messages go out even to clients who opted out of marketing (a safety comm, not a promotional one); the acknowledgement trail (X of N acknowledged) is exactly what an inspector asks for.
+The medicine register is the same immutable Administration data, queryable by date, product, prescriber and administrator, and exportable - the audit-ready S4 register (C8).
 
 ## Requirements
 
@@ -28,17 +31,22 @@ This is the payoff of recording per-point lot in charting — a recall that woul
 
 ## UI designs / screenshots
 
-- Prototype: Governance -> Recalls (gov-recalls.png) — enter a lot -> list of affected clients/administrations; start a recall with acknowledgement tracking.
-- The medicine register is queryable by date, product, prescriber, administrator and exportable.
+- Prototype screen: Governance - Recalls (gov-recalls.png).
+- Governance > Recalls explains the play: 'turn the lot number into the exact client list instantly, send an SMS + call, and track who has acknowledged.'
+- An active recall card: 'RC-12 - Lot B2188 (Botulinum toxin) - Sponsor field-safety notice' with a progress bar '9 of 14 acknowledged - 64%' and a 'Run recall' action.
+- Run recall resolves the lot to its affected clients/administrations and starts acknowledgement tracking; safety messages reach clients even if they opted out of marketing.
+- The medicine register is queryable by date, product, prescriber, administrator and exportable (audit pack).
 
 ![gov-recalls — prototype screen](../screens/gov-recalls.png)
 
 ## Suggested data model
 
-- **(query) LotRecall** — lot -> [Administration{client, at, units, administrator}]
-  - _Built on Administration + StockItem; powers recall + register export._
-- **Recall** — id, tenant_id, lot, reason, started_at, acknowledgements[]
-  - _Tracks per-client acknowledgement._
+- **LotRecall (query)** — lot -> [Administration{client, at, units, administrator, prescriber}]
+  - _Built on Administration + StockItem; index on Administration(lot_id). Powers recall + register export (C8). Mapping: recallsData[] {id, lot, product, reason, clients, acked, status}._
+- **Recall** — id, tenant_id, lot, reason, started_at, status, acknowledgements[]{client_id, at, via}
+  - _Tracks per-client acknowledgement; safety comms bypass marketing opt-out. The ack trail is the inspector-facing evidence._
+- **MedicineRegister (read model)** — queryable view over immutable Administration: date, product, prescriber, administrator, client, lot, units
+  - _Audit-ready export (C8); immutable source (ADR-0010)._
 
 ## Other
 
@@ -46,21 +54,9 @@ This is the payoff of recording per-point lot in charting — a recall that woul
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - Recall — id, tenant_id, lot, reason, started_at, acknowledgements[] (Tracks per-client acknowledgement.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: A lot lookup returns all clients/administrations for that lot.
-  - Rule: The S4 register exports a complete, immutable record of administrations.
-  - Rule: Recall execution + acknowledgement tracking is available (full hub in PRD-08/11).
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-04/ADMIN-GATE.
-- [ ] **Enforce compliance gate + audit events**
-  Enforce C8 as a server-side invariant that cannot be bypassed via the API:
-  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
-  - Write an immutable AuditEvent for the attempt and its outcome.
-  - The S4 register exports a complete, immutable record of administrations.
+- [ ] **Recall entity + lot index over Administration (model & migration)**
+  Add Recall: id, tenant_id, lot, reason, started_at, status, acknowledgements[]{client_id, at, via}; RLS by tenant. Add the index on Administration(lot_id) (and (lot_id, client_id)) that makes the lot->clients lookup instant. Build the MedicineRegister read model as a queryable view over the immutable Administration stream (date, product, prescriber, administrator, client, lot, units) - no denormalised copy that could drift (ADR-0013).
+- [ ] **Recall lookup + register query/export API**
+  Endpoints: GET /recall/lookup?lot=... returns every Administration for the lot (client, at, units, administrator, prescriber); POST /recall starts a Recall (lot, reason) and seeds acknowledgement tracking; PATCH /recall/{id}/ack records a client acknowledgement (via sms|call|app). GET /register queryable by date/product/prescriber/administrator with an export (audit pack). Recall safety comms are sent even to marketing-opt-out clients (safety, not promotion).
+- [ ] **Immutability guarantee + acknowledgement trail audit**
+  The register/recall read strictly from the append-only Administration stream (ADR-0010) so the exported register is provably complete and tamper-evident. Audit recall start, each acknowledgement and each register export - the X-of-N acknowledged trail and the export log are the inspector-facing evidence (C8). Full recall execution + DAEN routing detail hand off to the Governance hub (PRD-08/11).

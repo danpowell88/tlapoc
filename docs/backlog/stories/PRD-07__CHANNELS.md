@@ -9,8 +9,8 @@ An INotifier port over an AU SMS provider + email + app push, with per-tenant te
 
 ## How it works
 
-An INotifier abstraction over an AU SMS provider + email + app push, with per-tenant templates (ADR-0012). All sends log to the client's comms history; the provider is swappable behind the port.
-The shared delivery layer every reminder/aftercare/recall/marketing message goes through.
+INotifier exposes send(channel, recipient, templateKey, variables) across three channels: SMS via an AU provider (MessageMedia/ClickSend/Twilio — chosen in the spike), transactional email, and app push (Flutter). Each tenant owns its MessageTemplate set: a body with named variables ({{first_name}}, {{appt_time}}, {{rebook_link}}), rendered per send. Adapters sit behind the port (ADR-0012), so swapping an SMS provider is one new adapter, not a checkout-of changes across features.
+Every send writes a NotificationLog row (channel, template_key, status, sent_at) that surfaces on the Client 360 comms history — including delivery/failure callbacks from the provider. The port itself is channel-and-provider agnostic; the consent gate (marketing vs transactional) and the suppression list live in MARKETING-CONSENT and are applied by the callers, not baked into the transport.
 
 ## Requirements
 
@@ -18,22 +18,22 @@ The shared delivery layer every reminder/aftercare/recall/marketing message goes
 
 ## Acceptance Criteria
 
-- [ ] INotifier supports SMS (AU provider), email and app push.
-- [ ] Per-tenant message templates supported.
-- [ ] Provider is swappable behind the port.
-- [ ] All sends log to the client's comms history.
+- [ ] INotifier supports SMS (AU provider), email and app push behind one port.
+- [ ] Per-tenant MessageTemplates render with named variables per send.
+- [ ] The provider is swappable behind the port (ADR-0012) — one new adapter, no caller changes.
+- [ ] Every send (and its delivery/failure callback) logs to the client's comms history.
 
 ## UI designs / screenshots
 
-- No dedicated screen — surfaces through templates + the comms history on the Client 360; admin sets the SMS/email/push providers in Settings.
-- Per-tenant message templates.
+- No dedicated screen — surfaces through templates and the comms history on the Client 360; admin sets the SMS/email/push providers in Settings -> Integrations.
+- Per-tenant message templates with named variables.
 
 ## Suggested data model
 
 - **MessageTemplate** — id, tenant_id, channel(sms|email|push), key, body, variables[]
   - _Per-tenant; rendered per send._
-- **NotificationLog** — id, tenant_id, client_id, channel, template_key, status, sent_at
-  - _Comms history; swappable provider behind INotifier._
+- **NotificationLog** — id, tenant_id, client_id, channel, template_key, status(queued|sent|delivered|failed), provider_ref, sent_at
+  - _Client-360 comms history; swappable provider behind INotifier (ADR-0012)._
 
 ## Technical notes (high level)
 
@@ -45,22 +45,19 @@ The shared delivery layer every reminder/aftercare/recall/marketing message goes
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - MessageTemplate — id, tenant_id, channel(sms|email|push), key, body, variables[] (Per-tenant; rendered per send.)
-  - NotificationLog — id, tenant_id, client_id, channel, template_key, status, sent_at (Comms history; swappable provider behind INotifier.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: INotifier supports SMS (AU provider), email and app push.
-  - Rule: Per-tenant message templates supported.
-  - Rule: Provider is swappable behind the port.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-- [ ] **Integration adapter, sync & config**
-  Implement the provider behind its swappable port:
-  - Connection/config (OAuth tokens stored encrypted) + the field mapping this story needs.
-  - Trigger on the relevant event; idempotent sync with retries, back-off and a visible reconciliation/status.
-  - Handle partial failures + replays; surface errors to the user.
-  - Residency: AU-resident or APP-8-assessed + consented before any PII leaves (C21).
+- [ ] **INotifier port + MessageTemplate/NotificationLog model (migrations)**
+  Define the INotifier port and model MessageTemplate + NotificationLog (tenant_id + RLS).
+  - Port: send(channel, recipient, templateKey, variables) returning a queued NotificationLog with a provider_ref.
+  - MessageTemplate per tenant per channel with named variables; render step substitutes variables safely.
+  - NotificationLog status lifecycle queued -> sent -> delivered|failed, updated by provider callbacks; joined to the client for the comms history.
+  - The port is consent-agnostic; callers apply the consent/suppression gate (MARKETING-CONSENT).
+- [ ] **Notification API: render, send, comms-history query**
+  Server-side.
+  - Endpoints: CRUD per-tenant templates; send via INotifier; query a client's comms history (NotificationLog).
+  - Render templates with variables; queue + dispatch through the channel adapter; record the log.
+  - Email/SMS/push share the same send contract.
+- [ ] **Channel adapters (AU SMS / email / push) + delivery callbacks**
+  Adapters behind the port (ADR-0012).
+  - AU SMS adapter (provider chosen in spike) with sender-ID; email adapter; app-push adapter (Flutter tokens).
+  - Provider credentials stored encrypted in Settings -> Integrations config.
+  - Handle inbound delivery/failure webhooks/callbacks and update NotificationLog idempotently; retries with back-off on transient failures.

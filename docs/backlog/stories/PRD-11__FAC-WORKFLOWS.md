@@ -9,7 +9,7 @@ Open/close checklist, sterilisation & equipment maintenance register (autoclave 
 
 ## How it works
 
-Placeholder (Phase 2): fuller facility workflows — deep incident & mandatory-reporting case management beyond the registers (the open/close, equipment, IPC and complication-response pieces are now their own v1 stories). The facility model already anticipates them (ADR-0026/0030).
+Placeholder (Phase 2): deep incident & mandatory-reporting case management beyond the registers (the open/close, equipment, IPC and complication-response pieces are now their own v1 stories — OPENCLOSE, EQUIPMENT, IPC-LOGS, EMERGENCY-KIT). The facility model already anticipates an IncidentCase workflow (ADR-0026/0030).
 Captured so operations can be fully systematised later.
 
 ## Requirements
@@ -24,7 +24,9 @@ Captured so operations can be fully systematised later.
 
 ## UI designs / screenshots
 
-prototype.html — Front desk/Operations (Open/close & fridge log, Temperature monitors, Rooms & devices, Equipment, Call log); backroom.html.
+_Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge log, Temperature monitors, Rooms & devices, Equipment, Call log); backroom.html._
+
+- Deferred — no v1 screen.
 
 ![ops-equipment — prototype screen](../screens/ops-equipment.png)
 
@@ -43,5 +45,5 @@ prototype.html — Front desk/Operations (Open/close & fridge log, Temperature m
 
 ## Tasks (dev pickup)
 
-- [ ] **Scope & design when pulled into a sprint**
-  Deferred placeholder — no build in v1; confirm it still fits scope/regulatory stance, then break down.
+- [ ] **Placeholder: deep incident & mandatory-reporting case management (Phase 2)**
+  Deferred. IncidentCase workflow (type, mandatory_reportable, steps[], status) for deep incident & mandatory-reporting case management beyond the v1 registers. The facility model anticipates it; not built in v1.

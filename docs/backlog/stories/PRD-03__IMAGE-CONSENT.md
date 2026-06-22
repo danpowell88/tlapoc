@@ -11,8 +11,9 @@ Photo use requires its own scoped consent, withdrawable at any time, which immed
 
 ## How it works
 
-Photo use needs its own scoped consent, separate from treatment consent and withdrawable at any time. Withdrawing it immediately stops downstream use (PRD-05/09 media checks) and is audited.
-Granted/withdrawn state shows as a chip on the patient header.
+Photo use needs its OWN scoped consent, separate from treatment consent (a client can consent to treatment but decline photos), and withdrawable at any time. Withdrawing it sets withdrawn_at and IMMEDIATELY blocks downstream media use — PRD-05 (photos/charting) and PRD-09 media features check ImageConsent before serving or capturing, and the withdrawal is audited (C14).
+Scope records what the photos may be used for (clinical record vs broader use); v1's default is the clinical record only ('stored securely, never on personal devices, never shared without permission' — ADR-0009). The granted/withdrawn state shows as a chip on the patient header (Client 360 / charting) and the client can self-manage it in the client app privacy screen.
+Because it is separate, the treatment gate (GATING) does NOT require image-use consent — declining photos never blocks treatment; it only governs whether photo features are available.
 
 ## Requirements
 
@@ -28,14 +29,15 @@ Granted/withdrawn state shows as a chip on the patient header.
 
 ## UI designs / screenshots
 
-- Client app: a separate image-use consent toggle with scope + a withdraw control (client-app.png); staff see the image-use chip on the Client 360 / charting header (charting.png).
+- Client app: a separate image-use consent toggle with scope + a withdraw control (client-app.png) — intake step 'Photos (optional)… separate from treatment consent. Withdraw any time'; Privacy & consents screen lists consents with toggles ('Consent withdrawn' toast on withdraw).
+- Staff: the image-use chip on the Client 360 / charting header ('Image use ✓') (charting.png); photo galleries note 'image-use consent on file'.
 
 ![forms-consent — prototype screen](../screens/forms-consent.png)
 
 ## Suggested data model
 
-- **ImageConsent** — id, client_id, scope, granted_at, withdrawn_at, status
-  - _Withdrawn_at immediately blocks media use; audited (C14)._
+- **ImageConsent** — id, tenant_id, client_id, scope, granted_at, withdrawn_at, status(granted|withdrawn)
+  - _withdrawn_at IMMEDIATELY blocks media use (PRD-05/09 checks); audited (C14); separate from treatment consent (never blocks treatment)._
 
 ## Other
 
@@ -43,22 +45,9 @@ Granted/withdrawn state shows as a chip on the patient header.
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - ImageConsent — id, client_id, scope, granted_at, withdrawn_at, status (Withdrawn_at immediately blocks media use; audited (C14).)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Image-use consent is separate from treatment consent and scoped.
-  - Rule: Withdrawing it immediately stops further use and is audited.
-  - Rule: Downstream media features (PRD-05/09) check this consent.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-03/CONSENT.
-- [ ] **Enforce compliance gate + audit events**
-  Enforce C14 as a server-side invariant that cannot be bypassed via the API:
-  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
-  - Write an immutable AuditEvent for the attempt and its outcome.
-  - Image-use consent is separate from treatment consent and scoped.
-  - Downstream media features (PRD-05/09) check this consent.
+- [ ] **ImageConsent entity (separate, scoped) + grant/withdraw**
+  Model ImageConsent (scope, granted_at, withdrawn_at, status) separate from ConsentSignature. Grant/withdraw endpoints; withdraw sets withdrawn_at + status and emits a domain event. Audited (C14). It is NOT an input to the treatment gate — declining/withdrawing never blocks treatment, only media features.
+- [ ] **Downstream media-use enforcement on withdraw**
+  PRD-05/09 media operations (serve signed URL, capture, share) must check current ImageConsent.status server-side before proceeding, so withdrawal IMMEDIATELY stops further use (ADR-0009: media never on personal devices, always via consent-gated signed URLs). On the withdraw event, ensure no new signed URLs are issued. Audited.
+- [ ] **Client self-manage toggle + staff header chip UI**
+  Client app: image-use toggle with scope in the intake 'Photos (optional)' step and in Privacy & consents (withdraw with confirmation/toast). Staff: 'Image use ✓ / withdrawn' chip on the Client 360 + charting header; photo galleries show 'image-use consent on file' and hide when withdrawn.

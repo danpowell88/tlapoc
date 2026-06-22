@@ -11,8 +11,9 @@ Appointments sync both ways with Outlook/Google; external busy events block avai
 
 ## How it works
 
-Two-way sync of appointments with Outlook (MS Graph) and Google Calendar behind an ICalendarProvider port: creating/moving/cancelling reflects both ways, and external busy events block availability in booking (PRD-02). Per-staff opt-in and conflict-resolution rules (open question).
-Gives practitioners one source of truth for their time.
+Two-way sync of appointments with staff calendars — Microsoft 365 (MS Graph) and Google Calendar — behind an ICalendarProvider port (ADR-0012, promoted to bidirectional under ADR-0036). Creating, moving or cancelling a clinic appointment reflects in the practitioner's linked calendar; and external busy events created in their personal calendar flow back and block their availability in booking (PRD-02 CALENDAR), so a practitioner has one source of truth for their time and the clinic never double-books over a dentist appointment.
+Sync is per-staff opt-in: each practitioner connects their own M365/Google account (OAuth), choosing the calendar and a two-way mode; nothing syncs for staff who haven't connected. Outbound pushes are driven by appointment lifecycle events; inbound busy-time is pulled (polling or change-notifications) and projected as availability blocks. Conflict-resolution rules — what wins when an external event and a clinic booking overlap — are an open question; the safe default treats external busy-time as blocking-only (it never deletes or moves a clinic appointment).
+Each sync action is logged (direction, appointment, result) for troubleshooting. Because it sits behind ICalendarProvider, M365 and Google are interchangeable adapters and a new provider needs no core change. No clinical detail leaks into the external calendar beyond what the clinic configures (privacy-safe event titles); calendar providers are sub-processors subject to the AU/APP-8 posture (SUBPROCESSOR-POSTURE).
 
 ## Requirements
 
@@ -20,23 +21,27 @@ Gives practitioners one source of truth for their time.
 
 ## Acceptance Criteria
 
-- [ ] Creating/moving/cancelling an appointment reflects in the linked Outlook/Google calendar and vice-versa.
-- [ ] External busy events block availability in booking (PRD-02).
-- [ ] Per-staff opt-in and conflict-resolution rules (open question) supported.
-- [ ] Implemented behind ICalendarProvider (swappable).
+- [ ] Creating/moving/cancelling a clinic appointment reflects in the linked Outlook/Google calendar, and external busy events block availability in booking (PRD-02).
+- [ ] Sync is per-staff opt-in (each practitioner connects their own M365/Google account; nothing syncs until connected).
+- [ ] Conflict-resolution rules are supported (open question); the default treats external busy-time as blocking-only — it never mutates a clinic appointment.
+- [ ] Implemented behind ICalendarProvider (M365/Google swappable); each sync action is logged.
+- [ ] External event titles are privacy-safe per clinic config; calendar providers honour the AU/APP-8 posture.
 
 ## UI designs / screenshots
 
-- Prototype: Settings -> Integrations (settings-integrations.png) — per-staff calendar connect (M365/Google) + two-way sync toggle; external busy time shows as unavailable in Schedule.
+- Prototype: Settings → Integrations (settings-integrations.png) — 'Calendar sync (M365 / Google)' card, 'Two-way — external events block availability.', currently 'Outbound only', Connect →.
+- Per-staff connect (M365/Google OAuth) + two-way sync toggle + calendar picker.
+- Schedule (schedule.png, PRD-02): external busy time shows as unavailable; clinic appointments appear in the staff's external calendar.
+- Sync log / status per staff link (last sync, errors).
 
 ![settings-integrations — prototype screen](../screens/settings-integrations.png)
 
 ## Suggested data model
 
-- **CalendarLink** — id, staff_id, provider(m365|google), tokens, sync_mode(two_way), status
-  - _Per-staff opt-in._
-- **SyncLog** — id, calendar_link_id, appointment_id, direction, at, result
-  - _Busy events block availability._
+- **CalendarLink** — id, staff_id, provider(m365|google), oauth_tokens, calendar_id, sync_mode(two_way|outbound), status, region
+  - _Per-staff opt-in; AU/APP-8 posture (SUBPROCESSOR-POSTURE)._
+- **SyncLog** — id, calendar_link_id, appointment_id?, external_event_id?, direction(out|in), at, result(ok|error), detail?
+  - _Inbound busy events project as availability blocks; outbound on appointment lifecycle._
 
 ## Technical notes (high level)
 
@@ -48,14 +53,7 @@ Gives practitioners one source of truth for their time.
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - CalendarLink — id, staff_id, provider(m365|google), tokens, sync_mode(two_way), status (Per-staff opt-in.)
-  - SyncLog — id, calendar_link_id, appointment_id, direction, at, result (Busy events block availability.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Integration adapter, sync & config**
-  Implement the provider behind its swappable port:
-  - Connection/config (OAuth tokens stored encrypted) + the field mapping this story needs.
-  - Trigger on the relevant event; idempotent sync with retries, back-off and a visible reconciliation/status.
-  - Handle partial failures + replays; surface errors to the user.
-  - Residency: AU-resident or APP-8-assessed + consented before any PII leaves (C21).
+- [ ] **Calendar adapter: two-way sync + availability blocking (ICalendarProvider)**
+  Implement M365 (MS Graph) and Google Calendar adapters behind ICalendarProvider (ADR-0012/0036): outbound — on appointment create/move/cancel lifecycle events, upsert/delete the external event (privacy-safe title) and store the external id; inbound — pull external busy events (polling or change-notifications) and project them as availability blocks consumed by PRD-02 booking. Per-staff OAuth + token refresh. Default conflict rule = external busy-time is blocking-only (never mutate a clinic appointment); log each sync (SyncLog). Providers interchangeable via the port.
+- [ ] **Web UI: per-staff calendar connect + two-way toggle**
+  Build the Settings → Integrations calendar card and the per-staff connect flow (M365/Google OAuth, calendar picker, two-way toggle, status + last-sync/error). Nothing syncs until a staff member opts in. Surface external busy-time as unavailable in the Schedule (PRD-02). Show the AU/APP-8 posture (SUBPROCESSOR-POSTURE).

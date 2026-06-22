@@ -11,8 +11,8 @@ Opt-in for commercial electronic messages, sender identification and a functiona
 
 ## How it works
 
-Opt-in for commercial electronic messages, sender identification, and a functional unsubscribe that suppresses immediately on withdrawal (Spam Act, C23). Marketing sends only to opted-in clients; suppression is honoured across channels (and by PRD-06 reward comms).
-Transactional reminders/aftercare are exempt and always send.
+MarketingConsent records opt-in per client per channel. A SuppressionList holds withdrawn/unsubscribed contacts tenant-wide. Before any marketing send, the caller checks consent AND that the contact isn't suppressed; a non-consented or suppressed recipient is dropped. Every marketing message includes sender identification and a working unsubscribe (STOP for SMS, an unsubscribe link for email); acting on it writes to the suppression list immediately, so the next marketing send is suppressed.
+The line between transactional and marketing is enforced here: reminders, confirmations and aftercare (transactional) are exempt — they always send and carry no unsubscribe-gating — while recall nudges, win-back, birthday offers and reward/incentive comms (PRD-06) are marketing and must pass the consent + suppression gate. Staff see consent state on the Client 360; the client toggles opt-in in the app/profile. The suppression list is the shared safety net all consented sends honour.
 
 ## Requirements
 
@@ -21,24 +21,24 @@ Transactional reminders/aftercare are exempt and always send.
 
 ## Acceptance Criteria
 
-- [ ] Marketing sends only to opted-in clients and always include a working unsubscribe.
-- [ ] Unsubscribing suppresses future marketing immediately.
-- [ ] Sender identification is included.
-- [ ] Suppression list is honoured across channels (and by PRD-06 reward comms).
+- [ ] Marketing sends only to opted-in clients and always include sender identification + a working unsubscribe.
+- [ ] Unsubscribing (STOP / link) suppresses future marketing immediately.
+- [ ] The suppression list is honoured across all channels and by PRD-06 reward/incentive comms.
+- [ ] Transactional reminders/aftercare are exempt and always send.
 
 ## UI designs / screenshots
 
-- Client app/profile: marketing opt-in toggle + unsubscribe in every marketing message; staff see consent state on the Client 360.
+- Client app/profile: marketing opt-in toggle (per channel); unsubscribe in every marketing message; staff see consent state on the Client 360.
 - Admin: suppression list.
 
 ![settings-booking — prototype screen](../screens/settings-booking.png)
 
 ## Suggested data model
 
-- **MarketingConsent** — id, client_id, channel, opted_in(bool), updated_at
-  - _Required for marketing (C23)._
-- **SuppressionList** — tenant_id, contact, reason, at
-  - _Honoured across all marketing/reward comms._
+- **MarketingConsent** — id, client_id, channel(sms|email|push), opted_in(bool), updated_at
+  - _Required for marketing (C23); per channel._
+- **SuppressionList** — id, tenant_id, contact, reason(unsubscribe|bounce|complaint), at
+  - _Honoured across all marketing/reward comms; immediate on withdrawal._
 
 ## Other
 
@@ -46,22 +46,17 @@ Transactional reminders/aftercare are exempt and always send.
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - MarketingConsent — id, client_id, channel, opted_in(bool), updated_at (Required for marketing (C23).)
-  - SuppressionList — tenant_id, contact, reason, at (Honoured across all marketing/reward comms.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Marketing sends only to opted-in clients and always include a working unsubscribe.
-  - Rule: Unsubscribing suppresses future marketing immediately.
-  - Rule: Sender identification is included.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-07/CHANNELS.
-- [ ] **Enforce compliance gate + audit events**
-  Enforce C23 as a server-side invariant that cannot be bypassed via the API:
-  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
-  - Write an immutable AuditEvent for the attempt and its outcome.
-  - Marketing sends only to opted-in clients and always include a working unsubscribe.
+- [ ] **MarketingConsent + SuppressionList model (migrations)**
+  Model MarketingConsent (per client per channel) + SuppressionList (tenant-wide contacts) — tenant_id + RLS.
+  - Consent carries opted_in + updated_at; suppression carries contact + reason + at.
+  - These are the shared gate every marketing caller (incl. PRD-06 reward comms) consults.
+- [ ] **Consent gate + functional unsubscribe + sender-ID**
+  Server-side.
+  - A send-gate helper: marketing send proceeds only if opted_in AND contact not suppressed; transactional sends bypass the gate.
+  - Inject sender identification + unsubscribe (STOP keyword handler for SMS; unsubscribe link/endpoint for email) into every marketing message.
+  - Acting on unsubscribe writes to SuppressionList immediately; subsequent marketing sends are suppressed. Endpoints: get/set consent, list/append suppression.
+- [ ] **Enforce consent/suppression as a server-side invariant + audit**
+  C23 invariant that cannot be bypassed via the API.
+  - Block any marketing send to a non-consented/suppressed contact at the send boundary — return a clear suppressed reason (not a silent drop) for logs/UI.
+  - Ensure PRD-06 reward comms route through the same gate.
+  - Audit suppressed sends and consent changes (ADR-0010).

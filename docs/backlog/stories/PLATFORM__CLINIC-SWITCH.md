@@ -11,8 +11,10 @@ The prototype's sidebar switches between clinics/locations (Brisbane, Gold Coast
 
 ## How it works
 
-A switcher lists the locations/clinics the user can access and sets the active clinic/location context; data shown is scoped to it (RLS tenant + location), and the active location is reflected in audit and reporting. Builds on PHASE-2/MULTI-LOCATION for deeper multi-site features.
-Lets multi-site owners/staff work in the right location's data.
+A switcher lets multi-site owners/staff choose the active clinic/location they're working in. The prototype puts it at the top of the sidebar (setClinic) listing The Lounge — Brisbane, The Lounge — Gold Coast and Skin & Co (locum); selecting one sets the active location (updating the clinic name/location/badge in the shell).
+It lists only the locations the user can access, and sets an active-location context on the session. Data shown is then scoped to the active location within the tenant (RLS tenant_id + location_id) — the diary, clients, stock and reports reflect that one location — and the active location is reflected in audit and reporting so 'where did this happen' is recorded.
+This is the in-product switcher demonstrated by the prototype; deeper multi-site data depth (cross-location reporting, locum roster, per-location config) builds on PHASE-2/MULTI-LOCATION. v1 is: pick a location, work in its data, have audit/reporting know which one.
+Edge cases: a single-location user sees the location label but no real switching; switching location re-scopes the current views (and closes any location-specific in-progress context cleanly); a user without access to a location never sees it in the list.
 
 ## Requirements
 
@@ -29,14 +31,15 @@ Lets multi-site owners/staff work in the right location's data.
 
 _Prototype screen: prototype.html — sidebar clinic switcher._
 
-- Prototype: the sidebar clinic switcher (dashboard.png) — lists clinics (Brisbane, Gold Coast, locum site); selecting one sets the active location.
+- Prototype: the sidebar clinic switcher (dashboard.png) — clinic context at the top of the sidebar listing the accessible clinics (Brisbane, Gold Coast, locum site); selecting one sets the active location and updates the shell's clinic name/location/badge.
+- Lists only locations the user can access; data + audit + reporting follow the active location.
 
 ![dashboard — prototype screen](../screens/dashboard.png)
 
 ## Suggested data model
 
 - **(session) ActiveLocation** — session.location_id within tenant
-  - _Scopes data + audit + reporting._
+  - _Scopes data (RLS tenant + location) + audit + reporting; lists only accessible Locations (TENANT). Deeper multi-site = PHASE-2/MULTI-LOCATION._
 
 ## Other
 
@@ -44,7 +47,5 @@ _Prototype screen: prototype.html — sidebar clinic switcher._
 
 ## Tasks (dev pickup)
 
-- [ ] **Web UI**
-  Build on the Angular web app: the dashboard per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: the sidebar clinic switcher (dashboard.png) — lists clinics (Brisbane, Gold Coast, locum site); selecting one sets the active location.
+- [ ] **Active-location context + scoped switcher**
+  Build the sidebar clinic/location switcher (dashboard.png) listing only the Locations the user can access (TENANT) and setting an active location_id on the session. Scope data to the active location within the tenant (RLS tenant + location) so diary/clients/stock/reports reflect it, and stamp the active location on audit + reporting. Switching re-scopes current views cleanly; single-location users see the label without a real switch. Deeper multi-site features build on PHASE-2/MULTI-LOCATION.

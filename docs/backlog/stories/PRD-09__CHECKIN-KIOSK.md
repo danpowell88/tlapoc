@@ -11,8 +11,8 @@ The prototype's checkin surface is a reception-desk tablet where clients check t
 
 ## How it works
 
-A reception-desk tablet where clients self-check-in: verify identity/appointment and complete any outstanding intake/consent, updating the visit lifecycle / Today board (PRD-02). The surface is locked-down (no access to other clients' data) and times out between clients.
-Speeds arrivals and captures missing pre-visit items.
+A locked-down reception-tablet surface where clients self-check-in: from an idle 'Welcome in' attract screen, find their booking, confirm details, and complete any outstanding intake (medical history/health check) or consent (PRD-03). Check-in moves the appointment to checked_in (PRD-02 lifecycle), updating the reception arrivals board and the provider's day list. Steps: Find booking · Confirm appointment · Check details · Health check · Sign consent · Checked in.
+Single-client session with no access to other clients' data, auto-timing-out to the attract screen between clients (C10). Re-uses the same modules as the client app. Speeds arrivals and captures missing pre-visit items.
 
 ## Requirements
 
@@ -30,14 +30,17 @@ Speeds arrivals and captures missing pre-visit items.
 
 _Prototype screen: checkin.html._
 
-- Prototype: check-in tablet (checkin.png) — 'Welcome in' self-check-in; verify appointment, complete outstanding intake/consent; returns to a neutral state between clients.
+- Prototype: checkin — idle 'Welcome in' attract screen ('Tap to check in'); steps Find booking · Confirm appointment · Check details · Health check · Sign consent · Checked in; 'Reception arrivals board'.
+- Returns to a neutral state between clients (auto-timeout).
 
 ![checkin — prototype screen](../screens/checkin.png)
 
 ## Suggested data model
 
-- **(reuses)** — Appointment.status -> checked_in (PRD-02); IntakeResponse/ConsentSignature (PRD-03)
+- **(reuses) Appointment.status → checked_in** — PRD-02 — advances lifecycle, updates arrivals board / Today
   - _Kiosk session is single-client + auto-timeout._
+- **(reuses) IntakeResponse/ConsentSignature** — PRD-03 — outstanding intake/consent completed at the desk
+  - _Same modules as the client app; no parallel store._
 
 ## Other
 
@@ -45,7 +48,5 @@ _Prototype screen: checkin.html._
 
 ## Tasks (dev pickup)
 
-- [ ] **Web UI**
-  Build on the Angular web app: the checkin per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: check-in tablet (checkin.png) — 'Welcome in' self-check-in; verify appointment, complete outstanding intake/consent; returns to a neutral state between clients.
+- [ ] **Reception self-check-in tablet surface**
+  Locked-down web/PWA kiosk surface re-using the PRD-02/03 modules. Idle 'Welcome in' attract screen → 'Tap to check in' → booking lookup + light detail confirmation (not a staff login) → prompt/complete outstanding intake (medical history/health check) and consent (PRD-03) → advance Appointment to checked_in (PRD-02), updating the arrivals board and the provider day list. Single-client session with no cross-client data access; auto-timeout back to the attract screen between clients (C10).

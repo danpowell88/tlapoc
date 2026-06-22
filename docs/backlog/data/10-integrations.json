@@ -23,10 +23,11 @@
       "i_want": "completed sales/payments to post to Xero with the right account and GST",
       "so_that": "my books reconcile without re-keying",
       "acceptance": [
-        "A completed sale creates the corresponding Xero invoice + payment with correct account + GST.",
-        "Failures retry and show a reconciliation status.",
-        "Services vs retail vs memberships map to the right accounts (defaults are an open question).",
-        "Implemented behind IAccountingExport (swappable)."
+        "A completed sale creates the corresponding Xero invoice + payment (and payout where applicable) with the correct account + GST.",
+        "GST is computed per line from the catalogue tax code (not a flat total/11); services vs retail vs memberships map to the right accounts.",
+        "Each post is a SyncJob that retries on transient failure (backoff, rate-limit-aware, idempotent — no double-post) and shows a reconciliation status (pending/synced/failed).",
+        "Implemented behind IAccountingExport (provider swappable without touching checkout); the AccountMapping is tenant-configurable.",
+        "AU/APP-8 sub-processor posture applies to the Xero connection (ties to SUBPROCESSOR-POSTURE)."
       ],
       "refs": {
         "req": [
@@ -51,27 +52,40 @@
         "PRD-06/POS"
       ],
       "detail": [
-        "On checkout, create/sync the invoice + payment (and payouts) in Xero with correct account + GST mapping, retries and a reconciliation status — behind an IAccountingExport port. Services vs retail vs memberships map to the right accounts (defaults an open question).",
-        "Removes double-entry so the books reconcile without re-keying; the app keeps pricing/reporting while the ledger lives in Xero (ADR-0027)."
+        "On checkout completion (PRD-06 POS), the platform posts the sale to Xero with no re-keying: it creates/syncs the corresponding invoice + payment (and, where applicable, the processor payout) behind an IAccountingExport port (ADR-0012). The app is not the ledger — pricing, reporting and the clinical/commercial decisions stay in the app; the books live in Xero (ADR-0027). This removes the double-entry that the clinic does today between the PMS and the accountant.",
+        "Posting is driven by an AccountMapping: each line is coded by item type — services vs retail vs memberships map to the right Xero account — and GST is computed per line from the catalogue tax code (not the prototype's flat total/11), producing a correct invoice and BAS-relevant figures. The default account/GST mapping for services vs retail vs memberships is an open question to settle with the bookkeeper.",
+        "Sync is asynchronous and resilient: each post is a SyncJob that retries on transient failure (with backoff, honouring Xero rate limits and idempotency so a retry never double-posts) and carries a reconciliation status (pending / synced / failed) surfaced on the Integrations Xero card. Because it sits behind IAccountingExport, the accounting provider is swappable without touching checkout. All money handling here is owner/bookkeeper-gated."
       ],
       "ui_spec": [
-        "Prototype: Settings -> Integrations (settings-integrations.png) — Xero connection card + account/GST mapping + sync/reconciliation status; per-sale posting is automatic from Checkout."
+        "Prototype: Settings → Integrations (settings-integrations.png) — Xero card 'Connected', 'Push invoices & payments on checkout.', Configure → (account/GST mapping + sync/reconciliation status).",
+        "Finance (finance.png): 'Xero connected. Invoices, payments, bills & BAS sync automatically. Manage integrations.' banner — per-sale posting is automatic from Checkout (no manual step).",
+        "Configure: OAuth connect, AccountMapping editor (service/retail/membership → Xero account + GST code), reconciliation status list (pending/synced/failed with retry)."
       ],
       "data_model": [
         {
           "entity": "IntegrationConnection",
-          "fields": "id, tenant_id, provider(xero), tokens, status",
-          "notes": "OAuth connection; AU/APP-8 posture."
+          "fields": "id, tenant_id, provider(xero), oauth_tokens, status, region",
+          "notes": "OAuth connection; AU/APP-8 posture (SUBPROCESSOR-POSTURE)."
         },
         {
           "entity": "AccountMapping",
-          "fields": "tenant_id, item_type(service|retail|membership), xero_account, gst_code",
-          "notes": "Drives the posting."
+          "fields": "tenant_id, item_type(service|retail|membership), xero_account_code, gst_code",
+          "notes": "Drives per-line account coding + GST; tenant-configurable; defaults open question."
         },
         {
           "entity": "SyncJob",
-          "fields": "id, provider, ref(invoice/payment), status, retries, reconciled(bool)",
-          "notes": "Retry + reconciliation status."
+          "fields": "id, tenant_id, provider, ref(invoice|payment|payout), external_id?, status(pending|synced|failed), retries, last_error?, reconciled(bool), idempotency_key",
+          "notes": "Retry + reconciliation status; idempotent so a retry never double-posts."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Xero adapter: invoice/payment sync, mapping, retries & reconciliation (IAccountingExport)",
+          "note": "Implement the Xero adapter behind IAccountingExport (ADR-0012): on the checkout-completed domain event, build the invoice from the sale lines, coding each line via AccountMapping (service/retail/membership → account) with per-line GST from the catalogue tax code, create invoice + payment (+payout) in Xero, store the external id. Drive it as an idempotent SyncJob with backoff retry (rate-limit aware) and a reconciliation status (pending/synced/failed). OAuth token lifecycle/refresh. Keep checkout decoupled — provider swappable via the port."
+        },
+        {
+          "title": "Web UI: Xero connection card + account/GST mapping + reconciliation status",
+          "note": "Build the Settings → Integrations Xero card: OAuth connect/disconnect + status, the AccountMapping editor (service/retail/membership → Xero account + GST code), and the reconciliation status list (pending/synced/failed) with a manual retry. Mirror the 'Xero connected' assurance on Finance. Owner/bookkeeper-gated; surface the AU/APP-8 posture on the card (SUBPROCESSOR-POSTURE)."
         }
       ]
     },
@@ -83,10 +97,11 @@
       "i_want": "my appointments to appear in Outlook/Google and external busy-time to block my availability",
       "so_that": "I have one source of truth for my time",
       "acceptance": [
-        "Creating/moving/cancelling an appointment reflects in the linked Outlook/Google calendar and vice-versa.",
-        "External busy events block availability in booking (PRD-02).",
-        "Per-staff opt-in and conflict-resolution rules (open question) supported.",
-        "Implemented behind ICalendarProvider (swappable)."
+        "Creating/moving/cancelling a clinic appointment reflects in the linked Outlook/Google calendar, and external busy events block availability in booking (PRD-02).",
+        "Sync is per-staff opt-in (each practitioner connects their own M365/Google account; nothing syncs until connected).",
+        "Conflict-resolution rules are supported (open question); the default treats external busy-time as blocking-only — it never mutates a clinic appointment.",
+        "Implemented behind ICalendarProvider (M365/Google swappable); each sync action is logged.",
+        "External event titles are privacy-safe per clinic config; calendar providers honour the AU/APP-8 posture."
       ],
       "refs": {
         "req": [
@@ -111,22 +126,36 @@
         "PRD-02/CALENDAR"
       ],
       "detail": [
-        "Two-way sync of appointments with Outlook (MS Graph) and Google Calendar behind an ICalendarProvider port: creating/moving/cancelling reflects both ways, and external busy events block availability in booking (PRD-02). Per-staff opt-in and conflict-resolution rules (open question).",
-        "Gives practitioners one source of truth for their time."
+        "Two-way sync of appointments with staff calendars — Microsoft 365 (MS Graph) and Google Calendar — behind an ICalendarProvider port (ADR-0012, promoted to bidirectional under ADR-0036). Creating, moving or cancelling a clinic appointment reflects in the practitioner's linked calendar; and external busy events created in their personal calendar flow back and block their availability in booking (PRD-02 CALENDAR), so a practitioner has one source of truth for their time and the clinic never double-books over a dentist appointment.",
+        "Sync is per-staff opt-in: each practitioner connects their own M365/Google account (OAuth), choosing the calendar and a two-way mode; nothing syncs for staff who haven't connected. Outbound pushes are driven by appointment lifecycle events; inbound busy-time is pulled (polling or change-notifications) and projected as availability blocks. Conflict-resolution rules — what wins when an external event and a clinic booking overlap — are an open question; the safe default treats external busy-time as blocking-only (it never deletes or moves a clinic appointment).",
+        "Each sync action is logged (direction, appointment, result) for troubleshooting. Because it sits behind ICalendarProvider, M365 and Google are interchangeable adapters and a new provider needs no core change. No clinical detail leaks into the external calendar beyond what the clinic configures (privacy-safe event titles); calendar providers are sub-processors subject to the AU/APP-8 posture (SUBPROCESSOR-POSTURE)."
       ],
       "ui_spec": [
-        "Prototype: Settings -> Integrations (settings-integrations.png) — per-staff calendar connect (M365/Google) + two-way sync toggle; external busy time shows as unavailable in Schedule."
+        "Prototype: Settings → Integrations (settings-integrations.png) — 'Calendar sync (M365 / Google)' card, 'Two-way — external events block availability.', currently 'Outbound only', Connect →.",
+        "Per-staff connect (M365/Google OAuth) + two-way sync toggle + calendar picker.",
+        "Schedule (schedule.png, PRD-02): external busy time shows as unavailable; clinic appointments appear in the staff's external calendar.",
+        "Sync log / status per staff link (last sync, errors)."
       ],
       "data_model": [
         {
           "entity": "CalendarLink",
-          "fields": "id, staff_id, provider(m365|google), tokens, sync_mode(two_way), status",
-          "notes": "Per-staff opt-in."
+          "fields": "id, staff_id, provider(m365|google), oauth_tokens, calendar_id, sync_mode(two_way|outbound), status, region",
+          "notes": "Per-staff opt-in; AU/APP-8 posture (SUBPROCESSOR-POSTURE)."
         },
         {
           "entity": "SyncLog",
-          "fields": "id, calendar_link_id, appointment_id, direction, at, result",
-          "notes": "Busy events block availability."
+          "fields": "id, calendar_link_id, appointment_id?, external_event_id?, direction(out|in), at, result(ok|error), detail?",
+          "notes": "Inbound busy events project as availability blocks; outbound on appointment lifecycle."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Calendar adapter: two-way sync + availability blocking (ICalendarProvider)",
+          "note": "Implement M365 (MS Graph) and Google Calendar adapters behind ICalendarProvider (ADR-0012/0036): outbound — on appointment create/move/cancel lifecycle events, upsert/delete the external event (privacy-safe title) and store the external id; inbound — pull external busy events (polling or change-notifications) and project them as availability blocks consumed by PRD-02 booking. Per-staff OAuth + token refresh. Default conflict rule = external busy-time is blocking-only (never mutate a clinic appointment); log each sync (SyncLog). Providers interchangeable via the port."
+        },
+        {
+          "title": "Web UI: per-staff calendar connect + two-way toggle",
+          "note": "Build the Settings → Integrations calendar card and the per-staff connect flow (M365/Google OAuth, calendar picker, two-way toggle, status + last-sync/error). Nothing syncs until a staff member opts in. Surface external busy-time as unavailable in the Schedule (PRD-02). Show the AU/APP-8 posture (SUBPROCESSOR-POSTURE)."
         }
       ]
     },
@@ -138,10 +167,11 @@
       "i_want": "assurance that any data leaving the platform goes only to AU-resident or APP-8-assessed sub-processors",
       "so_that": "integrations don't breach cross-border rules",
       "acceptance": [
-        "No integration sends PII to a non-AU sub-processor unless an APP-8 assessment + consent record exists.",
-        "Sub-processor data flows are registered.",
-        "All integrations are outbound and swappable.",
-        "Ties into PRD-01/RESIDENCY enforcement."
+        "No integration dispatches PII to a non-AU sub-processor unless an APP-8 assessment + consent record exists (fail-closed otherwise).",
+        "Every sub-processor data flow is registered (provider, region, APP-8 assessment ref, consent ref).",
+        "A residency check evaluates the sub-processor region before dispatch and blocks non-compliant flows.",
+        "All integrations are outbound and swappable; ties into PRD-01/RESIDENCY enforcement.",
+        "Each integration card shows its residency posture; an admin register lists flows + APP-8 status."
       ],
       "refs": {
         "req": [
@@ -169,17 +199,39 @@
         "PRD-01/RESIDENCY"
       ],
       "detail": [
-        "No integration sends PII to a non-AU sub-processor unless an APP-8 assessment + consent record exists; flows are registered, and all integrations are outbound and swappable (ADR-0012/0016). Ties into PRD-01/RESIDENCY enforcement.",
-        "Keeps integrations inside cross-border privacy rules (C21)."
+        "The cross-border privacy gate over every integration: no integration sends PII to a sub-processor outside Australia unless a documented APP-8 cross-border assessment and a client consent record exist (C21, ADR-0016). It ties into PRD-01 RESIDENCY enforcement — all PII/PHI is pinned to Australia East — and extends that guarantee to the outbound edge where data leaves the platform (Xero, calendar, SMS).",
+        "Every sub-processor data flow is registered: a SubProcessor record (shared with PRD-01) capturing the provider, the region it processes in, the APP-8 assessment reference and the consent reference. Before an integration dispatches PII, a residency check evaluates the sub-processor's region; an AU-resident provider passes, a non-AU provider passes only if the APP-8 assessment + consent are present, otherwise the flow is blocked (fail-closed). All integrations are outbound and swappable (ADR-0012), which keeps the set of sub-processors small and enumerable.",
+        "Surfaced on the Integrations screen: each integration card shows its data-residency posture, and an admin sub-processor register lists the flows with their APP-8 status. This is a compliance control, not a financial feature."
       ],
       "ui_spec": [
-        "Prototype: Settings -> Integrations (settings-integrations.png) — each integration shows its data-residency posture; an admin sub-processor register lists flows + APP-8 status."
+        "Prototype: Settings → Integrations (settings-integrations.png) — each integration card shows its data-residency posture.",
+        "Admin sub-processor register: provider, region (AU / non-AU), APP-8 assessment status, consent reference, linked flows.",
+        "A non-compliant flow is visibly blocked / flagged (not silently dropped)."
       ],
       "data_model": [
         {
           "entity": "SubProcessor",
-          "fields": "(shared with PRD-01) id, name, region, app8_assessment_ref, consent_ref",
-          "notes": "Non-AU blocked unless assessed + consented."
+          "fields": "(shared with PRD-01) id, name, provider, region, app8_assessment_ref?, consent_ref?, flows[]",
+          "notes": "Non-AU blocked unless app8_assessment_ref + consent_ref present (C21/ADR-0016)."
+        },
+        {
+          "entity": "(check) ResidencyCheck",
+          "fields": "evaluates sub_processor.region before PII dispatch -> allow|block",
+          "notes": "Fail-closed; ties to PRD-01 RESIDENCY."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Sub-processor register + residency check (fail-closed)",
+          "note": "Model the SubProcessor register (shared with PRD-01: provider, region, APP-8 assessment ref, consent ref, linked flows). Implement the pre-dispatch residency check used by every integration adapter (Xero, calendar, SMS): AU region → allow; non-AU → allow only if APP-8 assessment + consent present; else block (fail-closed) and flag. Ties into PRD-01 RESIDENCY (all PII/PHI AU-pinned)."
+        },
+        {
+          "title": "Enforce posture across the integration ports + audit",
+          "note": "Wire the residency check into the IAccountingExport / ICalendarProvider / INotifier dispatch paths so no adapter can send PII without passing the gate. Audit registration changes and any blocked flow (ADR-0010). All integrations stay outbound + swappable (ADR-0012). Compliance concern, capability-gated."
+        },
+        {
+          "title": "Web UI: residency posture on cards + admin register",
+          "note": "Show each integration card's data-residency posture on Settings → Integrations, and build the admin sub-processor register (provider, region, APP-8 status, consent ref, linked flows) with non-compliant flows visibly flagged/blocked. Admin/compliance-gated; no money figures."
         }
       ]
     },
@@ -191,10 +243,10 @@
       "i_want": "future integrations: online checkout/deposits, e-prescribing and a public API",
       "so_that": "the platform extends as we scale",
       "acceptance": [
-        "Placeholder — Phase 2/3; each behind its existing port (IPaymentProvider, IPrescribingProvider).",
-        "S4 is never priced or sold online (invariant carried forward).",
+        "Placeholder — Phase 2/3; each future integration sits behind its existing port (IPaymentProvider, IPrescribingProvider, IAccountingExport, ICalendarProvider).",
+        "S4 is never priced or sold online (invariant carried forward into online checkout/deposits).",
         "Medicare/HICAPS recorded as non-applicable to cosmetic.",
-        "e-prescribing flagged for feasibility validation."
+        "E-prescribing (eRx/ETP) flagged for feasibility validation, bound to consult + S4 register + prescriber identity when built."
       ],
       "refs": {
         "req": [
@@ -216,17 +268,24 @@
       ],
       "priority": "P2",
       "detail": [
-        "Placeholder (Phase 2/3): online checkout & deposits (S4 never priced/sold online), e-prescribing (eRx/ETP, needs validation), public API/webhooks (Phase 3), and Medicare/HICAPS (recorded as non-applicable to cosmetic). Each sits behind its existing port (IPaymentProvider, IPrescribingProvider).",
-        "Captured so the architecture stays extension-ready (ADR-0035/0036)."
+        "Placeholder (Phase 2/3) for the growth/integration roadmap shown as concept cards on Settings → Integrations: online checkout & deposits (behind the existing IPaymentProvider — and S4 is never priced or sold online, ADR-0014/0036), e-prescribing for private S4 scripts (behind IPrescribingProvider, eRx/ETP — needs feasibility validation, ADR-0035), public API / webhooks / event bus (Phase 3, ADR-0036), and Medicare/HICAPS (recorded as non-applicable to cosmetic — claimable only for therapeutic exceptions).",
+        "Each future integration sits behind an existing port so the architecture stays extension-ready with no rework: payment-class integrations on IPaymentProvider, prescribing on IPrescribingProvider, accounting on IAccountingExport, calendar on ICalendarProvider. The invariants carry forward into any future build — S4 never online, e-prescribing bound to the synchronous consult + S4 register + prescriber identity. No build in v1; design-only when scheduled."
       ],
       "ui_spec": [
-        "Prototype: Settings -> Integrations (settings-integrations.png) shows these as concept cards (mostly disabled)."
+        "Prototype: Settings → Integrations (settings-integrations.png) — concept cards, mostly disabled: 'Online checkout & deposits' (Off · roadmap), 'e-Prescribing (eRx / ETP)' (Off · research), 'Medicare / HICAPS' (Not applicable), 'Webhooks & public API' (Off · phase 3).",
+        "Cards show the intent + status badge; Connect actions are inert until the feature is built."
       ],
       "data_model": [
         {
           "entity": "(future)",
           "fields": "OnlineOrder / EPrescription / Webhook / ApiKey",
-          "notes": "Behind existing ports; S4 never online."
+          "notes": "Behind existing ports; S4 never online; e-prescribing bound to consult + S4 register (ADR-0035/0036)."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Scope & design when pulled into a sprint",
+          "note": "Deferred placeholder — no build in v1. When scheduled, confirm each still fits scope and the carried-forward invariants (S4 never priced/sold online; e-prescribing bound to the synchronous consult + S4 register + prescriber identity; Medicare/HICAPS out as non-applicable), then break down behind the existing port (IPaymentProvider / IPrescribingProvider / IAccountingExport / ICalendarProvider). E-prescribing and any inbound webhooks/public API need a feasibility spike (ADR-0035/0036) before commit."
         }
       ]
     }

@@ -11,8 +11,9 @@ A searchable client directory with duplicate merge and audited soft-delete keeps
 
 ## How it works
 
-A fast, searchable client directory with duplicate detection/merge (preserving history + audit) and audited soft-delete, so the client list stays accurate and findable.
-Quick client search is reachable from the front-desk shell (the header search).
+A fast, searchable client directory so the front desk can find anyone by name/phone/email and filter by segment (All / Members / At-risk / New). A row opens the Client 360. The global header search jumps straight to a client from anywhere in the shell.
+Duplicate detection + merge keeps the record clean: candidate duplicates are surfaced, and a merge re-points all child records (appointments, consents, photos, invoices, memberships) to the surviving primary while preserving history, writing a MergeLog (audited, reversible reference).
+Soft-delete sets deleted_at (audited) and excludes the client from active views without destroying history — respecting retention obligations (records can't simply be hard-deleted; PRD-01 RETENTION governs true destruction).
 
 ## Requirements
 
@@ -30,17 +31,17 @@ Quick client search is reachable from the front-desk shell (the header search).
 
 _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients directory & 360._
 
-- Prototype: Clients (clients.png) — searchable/filterable directory list; row -> opens Client 360; merge-duplicates and soft-delete actions.
-- Global header search jumps straight to a client.
+- Prototype: Clients (clients.png) — search by name/phone/email; segment filters (All / Members / At-risk / New); table columns Client, Status, Last visit, Lifetime (.fin), Membership, Next; a row opens Client 360.
+- Merge-duplicates and soft-delete actions; global header search ('Search clients, appointments, invoices…') jumps straight to a client.
 
 ![clients — prototype screen](../screens/clients.png)
 
 ## Suggested data model
 
-- **Client** — (as PRD-01 CLIENT-CORE) + search index
-  - _Merge re-points child records; soft-delete sets deleted_at._
-- **MergeLog** — id, primary_id, merged_id, at, actor_id
-  - _Audited; reversible reference._
+- **Client** — (as PRD-01 CLIENT-CORE) + search_index, deleted_at
+  - _Soft-delete sets deleted_at and excludes from active views; never hard-deleted (retention)._
+- **MergeLog** — id, tenant_id, primary_id, merged_id, at, actor_id, repointed_counts(json)
+  - _Audited; merge re-points child records to the primary and preserves history._
 
 ## Other
 
@@ -48,22 +49,9 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - Client — (as PRD-01 CLIENT-CORE) + search index (Merge re-points child records; soft-delete sets deleted_at.)
-  - MergeLog — id, primary_id, merged_id, at, actor_id (Audited; reversible reference.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Fast search/filter across the directory.
-  - Rule: Duplicate detection + merge that preserves history and audit.
-  - Rule: Soft-delete with audit; deleted clients excluded from active views.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-02/CLIENT-360.
-- [ ] **Web UI**
-  Build on the Angular web app: the clients per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: Clients (clients.png) — searchable/filterable directory list; row -> opens Client 360; merge-duplicates and soft-delete actions.
-  - Global header search jumps straight to a client.
+- [ ] **Directory search/filter API + index**
+  Searchable, paginated directory endpoint over name/phone/email with segment filters (members/at-risk/new) and tenant RLS; back it with a search index for fast prefix/fuzzy match. Exclude soft-deleted clients from active results. Money columns (lifetime) flagged .fin so the UI can gate them. Also powers the global header search.
+- [ ] **Duplicate detection + merge with re-point + MergeLog**
+  Detect candidate duplicates (name/dob/phone/email heuristics). Merge transaction re-points ALL child records (appointments, consents, image-consent, photos, invoices, memberships, rewards, jobs) from the merged client to the surviving primary, preserving history, and writes a MergeLog (primary/merged/actor/at/repointed counts) for audit + reversible reference. Server-enforced; capability-gated.
+- [ ] **Soft-delete (audited) + directory/search UI**
+  Soft-delete sets deleted_at + audits; client drops from active views but history is retained (true destruction is PRD-01 RETENTION only). Build the Clients UI: search box, segment filter chips, table (Client/Status/Last visit/Lifetime[.fin]/Membership/Next), row→Client 360, and the merge/soft-delete actions. Wire the global header search to jump to a client.

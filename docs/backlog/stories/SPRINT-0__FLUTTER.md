@@ -11,7 +11,9 @@ One Flutter codebase, two flavours (client, provider), sharing auth, the API cli
 
 ## How it works
 
-Client + provider app shells (bottom-tab nav) from one Flutter codebase, sharing auth (Entra staff / External ID clients), the generated API client and the design system, with secure token storage; CI produces internal builds (ADR-0004/0006). The base PRD-09 builds on.
+One Flutter codebase produces two flavours. The client app shell has bottom-tab navigation Home / Book / My care / Membership / Account (matching client-app.png), and the provider app shell has Schedule / Patient / Medicines / Tasks (the room-side flow in treatment-room.png) — empty screens at this stage, just the navigable frame and theme.
+Both apps authenticate through the shared auth package: the provider flavour signs in with Entra ID (staff) and the client flavour with External ID, and both call the sample API endpoint via the OPENAPI-generated client to prove the round-trip. Auth tokens are kept in platform secure storage (keychain/keystore), never plain storage, and the design-system theme/tokens are applied so both apps look like the product from day one.
+CI builds installable artifacts for internal distribution for both flavours (signing/store channels are APP-DISTRIBUTION's job). This shell is the base the offline-tolerant charting (PRD-05/09) and the injection-mapping canvas build on — de-risked separately by SPIKE-OFFLINE and SPIKE-CANVAS.
 
 ## Requirements
 
@@ -40,11 +42,14 @@ _Prototype screen: Non-UI / platform scaffolding — no prototype screen._
 
 ## Tasks (dev pickup)
 
-- [ ] **Implement: Flutter app shells (client + provider) + shared packages**
-  Deliver per the acceptance criteria:
-  - Client app shell has the Home/Book/My care/Membership/Account tabs; provider app shell has Schedule/Patient/Medicines/Tasks tabs (empty screens).
-  - Both apps sign in (client = External ID, provider = Entra) and call the sample endpoint.
-  - Auth tokens stored in secure storage; design-system theme applied.
-  - Builds are produced by CI for internal distribution.
-- [ ] **Document setup & usage**
-  How to run/operate it; runbook notes for the team.
+- [ ] **Build both app shells: tab nav, shared auth/API/design packages, secure token storage, themed**
+  Stand up the client and provider flavours from one codebase with shared plumbing.
+  - Client shell tabs Home/Book/My care/Membership/Account; provider shell tabs Schedule/Patient/Medicines/Tasks (empty screens, navigable frame).
+  - Shared auth package: provider signs in with Entra (AUTH-STAFF), client with External ID (AUTH-CLIENT); both call the sample endpoint via the OPENAPI-generated client.
+  - Tokens stored in platform secure storage (keychain/keystore); design-system theme/tokens (DESIGN) applied.
+  - CI builds installable artifacts per flavour for internal distribution (channels deferred to APP-DISTRIBUTION).
+- [ ] **Document the Flutter flavour/package structure and build/run/distribution basics**
+  Write the mobile-base guide so SPIKE-CANVAS/SPIKE-OFFLINE and PRD-09 build consistently.
+  - Flavour configuration (client vs provider) and the shared packages (auth, api-client, design-system) layout.
+  - How each flavour authenticates (different audiences) and where secure token storage lives.
+  - How CI produces artifacts and the hand-off to APP-DISTRIBUTION for real distribution.

@@ -9,8 +9,8 @@ Sterilisation/single-use, sharps & clinical-waste disposal logs, all audited (RE
 
 ## How it works
 
-Infection-control logs: sterilisation/single-use and sharps/clinical-waste disposal, all audited and retrievable for inspection. A twice-daily cold-chain log with a breach pathway is supported (links PRD-04 cold-chain); waste manifests + a sterilisation register are captured for v2 expansion.
-Day-to-day evidence of safe practice (C20).
+Infection-control logs: sterilisation/single-use and sharps/clinical-waste disposals, each with detail, timestamp and actor, tenant/location-scoped and audited, retrievable as an inspection trail (feeds the PRD-08 pack). The cold-chain dimension (twice-daily fridge log + breach pathway, links PRD-04) lives in the OPENCLOSE/TEMP-MONITORS stories and reconciles into one cold-chain record.
+Waste manifests (NSW CA+TC / QLD WTC) and a sterilisation register are captured at the model level for v2 expansion. Day-to-day evidence of safe practice (C20).
 
 ## Requirements
 
@@ -28,7 +28,8 @@ Day-to-day evidence of safe practice (C20).
 
 _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge log, Temperature monitors, Rooms & devices, Equipment, Call log); backroom.html._
 
-- Prototype: Operations -> Open/close & fridge log (ops-openclose.png) + the back-office waste log (backroom.png) — sterilisation/single-use, sharps & clinical-waste entries.
+- Prototype: Operations → Open/close & fridge log (ops-openclose) + back-office waste log (backroom) — sterilisation/single-use, sharps & clinical-waste entries (detail, time, actor).
+- Logs retrievable as an inspection trail.
 
 ![ops-openclose — prototype screen](../screens/ops-openclose.png)
 
@@ -45,24 +46,11 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - InfectionControlLog — id, tenant_id, location_id, kind(sterilisation|single_use|sharps|clinical_waste), detail, at, actor_id (Audited; feeds inspection pack.)
-  - WasteManifest — id, tenant_id, stream(clinical|sharps), carrier, certificate_ref, at (NSW CA+TC / QLD WTC (v2 expansion).)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Sterilisation/single-use and sharps/clinical-waste disposals can be logged and are audited.
-  - Rule: Logs are retrievable for inspection (feeds PRD-08 pack).
-  - Rule: A twice-daily cold-chain log with a breach pathway is supported (links PRD-04 cold-chain).
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-- [ ] **Enforce compliance gate + audit events**
-  Enforce C20 as a server-side invariant that cannot be bypassed via the API:
-  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
-  - Write an immutable AuditEvent for the attempt and its outcome.
-- [ ] **Web UI**
-  Build on the Angular web app: the ops-openclose per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: Operations -> Open/close & fridge log (ops-openclose.png) + the back-office waste log (backroom.png) — sterilisation/single-use, sharps & clinical-waste entries.
+- [ ] **InfectionControlLog entity (append-only, audited)**
+  Model InfectionControlLog (tenant_id, location_id, kind[sterilisation|single_use|sharps|clinical_waste], detail, at, actor_id) as an append-only, audited log under RLS.
+- [ ] **IPC log entry UI (sterilisation/single-use + sharps/clinical-waste)**
+  Quick-entry surface on Operations / back-office waste log to record sterilisation/single-use cycles and sharps/clinical-waste disposals (detail, auto time + actor).
+- [ ] **IPC log retrieval / inspection trail**
+  Retrieve and filter IPC logs (by kind, date, location) as an inspection trail; expose them to the PRD-08 inspection-readiness pack.
+- [ ] **WasteManifest model stub for v2**
+  Define WasteManifest (stream[clinical|sharps], carrier, certificate_ref, at) at the model level so the data model anticipates the v2 manifest workflow (NSW CA+TC / QLD WTC); v1 surface only captures disposals, no full carrier/certificate workflow.

@@ -9,7 +9,7 @@ A complaints/adverse-outcome register linked to client/treatment that surfaces c
 
 ## How it works
 
-A complaints/adverse-outcome register linked to client/treatment that surfaces complaint mechanisms including AHPRA (noting an NDA doesn't remove that right). A complaint flag drives indefinite retention of the related record (C18, PRD-01) and feeds reporting (PRD-08). A complaint can be raised from a conversation (PRD-07).
+A complaints / adverse-outcome register linked to client/treatment that surfaces complaint mechanisms including AHPRA (explicitly noting an NDA doesn't remove that right). Logging a complaint sets an indefinite-retention flag on the related record (C18, PRD-01) — exempting it from the normal destruction schedule for as long as the complaint exists — and feeds reporting (PRD-08) and Governance. A complaint can be raised directly from a conversation (PRD-07 inbox).
 Handles complaints correctly and retains them (C24).
 
 ## Requirements
@@ -28,14 +28,15 @@ Handles complaints correctly and retains them (C24).
 
 _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge log, Temperature monitors, Rooms & devices, Equipment, Call log); backroom.html._
 
-- Prototype: Governance -> Overview (gov-overview.png) complaints register; raise a complaint linked to client/treatment with the AHPRA pathway surfaced.
+- Prototype: Governance → Overview (gov-overview) complaints register; raise a complaint linked to client/treatment with the AHPRA pathway surfaced.
+- Surfaces in Governance ('Open AE cases', 'Needs attention'); can be raised from a conversation (PRD-07).
 
 ![gov-overview — prototype screen](../screens/gov-overview.png)
 
 ## Suggested data model
 
 - **Complaint** — id, tenant_id, client_id, treatment_ref, status, pathway(ahpra|internal), opened_at, resolution
-  - _Sets indefinite retention flag (C18); feeds reporting._
+  - _Sets indefinite-retention flag (C18); feeds reporting._
 
 ## Other
 
@@ -43,23 +44,11 @@ _Prototype screen: prototype.html — Front desk/Operations (Open/close & fridge
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - Complaint — id, tenant_id, client_id, treatment_ref, status, pathway(ahpra|internal), opened_at, resolution (Sets indefinite retention flag (C18); feeds reporting.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: A complaint links to the client/treatment and surfaces complaint mechanisms incl. AHPRA (noting NDA doesn't remove the right).
-  - Rule: A complaint flag drives indefinite retention of the related record (C18, PRD-01).
-  - Rule: Complaints feed the register/reporting (PRD-08).
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-- [ ] **Enforce compliance gate + audit events**
-  Enforce C24, C18 as a server-side invariant that cannot be bypassed via the API:
-  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
-  - Write an immutable AuditEvent for the attempt and its outcome.
-- [ ] **Web UI**
-  Build on the Angular web app: the gov-overview per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: Governance -> Overview (gov-overview.png) complaints register; raise a complaint linked to client/treatment with the AHPRA pathway surfaced.
+- [ ] **Complaint entity + complaints register**
+  Model Complaint (tenant_id, client_id, treatment_ref, status, pathway[ahpra|internal], opened_at, resolution) under RLS. Complaints register in Governance: log, view, update status/resolution, link to client + treatment.
+- [ ] **Surface AHPRA pathway at log time**
+  When a complaint is logged, surface the complaint mechanisms including the right to complain to AHPRA notwithstanding any NDA (C24) as guidance copy on the form.
+- [ ] **Complaint → indefinite retention flag**
+  Logging a complaint sets an indefinite-retention flag on the related record; the PRD-01 retention engine reads it and exempts that record from the normal destruction schedule while the complaint exists (C18).
+- [ ] **Feed reporting + raise-from-conversation**
+  Feed complaints into the register/reporting (PRD-08) and the Governance command centre. Allow a complaint to be raised directly from a PRD-07 inbox conversation, linking the thread to the new complaint.

@@ -11,8 +11,9 @@ Clients can join a waitlist; cancellations/no-shows auto-offer the freed slot to
 
 ## How it works
 
-A waitlist captures clients who want an earlier slot; when an appointment cancels or no-shows, the freed slot is auto-offered to the waitlist to keep the diary full and fill quiet windows.
-Offered/accepted/expired states are tracked.
+A waitlist captures clients who want an earlier slot for a service/window. When an appointment cancels or no-shows, the freed slot is automatically offered to matching waitlist entries (FIFO/priority) to keep the diary full and fill quiet windows.
+An offer has a short hold/expiry: offered → accepted (books the slot, reusing the availability engine so scope/resource rules still hold) or expired (rolls to the next entry). Quiet-window fill suggestions surface from the calendar's utilisation data (the amber cells / 'Quiet windows to fill' panel) and can trigger a recall offer.
+Offered/accepted/expired states are tracked per entry so the desk can see who was offered what and when.
 
 ## Requirements
 
@@ -29,14 +30,15 @@ Offered/accepted/expired states are tracked.
 
 _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients directory & 360._
 
-- Prototype: Schedule (schedule.png) — waitlist management + a backfill prompt on cancellation; quiet-window fill suggestions from utilisation.
+- Prototype: Schedule (schedule.png) — 'Quiet windows to fill' panel (open chairs per day, 'Offer recall' / 'Fill') and a backfill prompt when an appointment cancels/no-shows.
+- Waitlist management: add a client to a waitlist for a service/window; see offered/accepted/expired status.
 
 ![schedule — prototype screen](../screens/schedule.png)
 
 ## Suggested data model
 
-- **WaitlistEntry** — id, tenant_id, client_id, service_id, window, status(waiting|offered|accepted|expired), offered_at
-  - _Backfills on cancel/no-show._
+- **WaitlistEntry** — id, tenant_id, client_id, service_id, window(date/time range), priority, status(waiting|offered|accepted|expired), offered_at, expires_at
+  - _Backfills on cancel/no-show; offer holds the slot until expiry, then rolls on._
 
 ## Technical notes (high level)
 
@@ -48,20 +50,9 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - WaitlistEntry — id, tenant_id, client_id, service_id, window, status(waiting|offered|accepted|expired), offered_at (Backfills on cancel/no-show.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Clients can be added to a waitlist for a service/window.
-  - Rule: Cancelling/no-showing a slot offers it to the waitlist.
-  - Rule: Quiet-window fill suggestions surface from utilisation data.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-02/REMINDERS.
-- [ ] **Web UI**
-  Build on the Angular web app: the schedule per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: Schedule (schedule.png) — waitlist management + a backfill prompt on cancellation; quiet-window fill suggestions from utilisation.
+- [ ] **Waitlist entry + matching/backfill engine**
+  WaitlistEntry CRUD (client, service, desired window, priority). Subscribe to the slot-freed event (cancel/no-show from REMINDERS/LIFECYCLE); match freed slots to waiting entries (service + window + scope/resource feasible per the availability engine), create an offer with expires_at, and dispatch it (PRD-07). On accept → book via the create endpoint (full scope/conflict checks) and mark accepted; on expiry → mark expired and roll to the next entry. Idempotent, tenant-scoped.
+- [ ] **Quiet-window fill suggestions from utilisation**
+  Derive open/quiet chair windows from the calendar (roster − bookings, idle resource blocks) and expose them as fill suggestions. Drive the Schedule 'Quiet windows to fill' panel (open chairs per day, ideal-for-recall hints e.g. lot expiry) with 'Offer recall' (push to waitlist/recall) and 'Fill' actions.
+- [ ] **Waitlist management UI + backfill prompt**
+  UI to add/view/remove waitlist entries for a service/window and see offered/accepted/expired status. When an appointment is cancelled/no-showed, show the backfill prompt ('offer this slot to the waitlist'). Wire the Schedule quiet-window panel actions to the matching engine.

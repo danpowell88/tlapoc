@@ -38,13 +38,19 @@
       ],
       "priority": "P2",
       "detail": [
-        "Placeholder (Phase 2+): switching between locations/clinics in one tenant. The data model is already location-aware (Location on every relevant entity), so this is the switching UX + cross-location reporting — built on PLATFORM/CLINIC-SWITCH."
+        "Placeholder (Phase 2+): switching between locations/clinics in one tenant. The data model is already location-aware (Location on every relevant entity), so this is the switching UX + cross-location reporting rollups — built on PLATFORM/CLINIC-SWITCH. Captured so reporting/booking stay location-aware."
       ],
       "data_model": [
         {
           "entity": "(reuses) Location",
           "fields": "already on tenant-scoped entities",
           "notes": "Switching UX + cross-location rollups deferred."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Placeholder: location switching UX + cross-location rollups (Phase 2+)",
+          "note": "Deferred. Switching UX + cross-location reporting rollups on the already location-aware model; built on PLATFORM/CLINIC-SWITCH. Not built in v1."
         }
       ]
     },
@@ -73,13 +79,19 @@
       ],
       "priority": "P2",
       "detail": [
-        "Placeholder (Phase 3): self-service tenant sign-up, subscription billing and per-tenant Entra federation to sell the platform as SaaS. v1 provisions tenants manually; tenancy/identity are already SaaS-ready."
+        "Placeholder (Phase 3): self-service tenant sign-up, subscription billing and per-tenant Entra federation to sell the platform as SaaS. v1 provisions tenants manually; tenancy/identity are already SaaS-ready (RLS isolation, Entra auth). Captured so tenancy/identity stay SaaS-ready."
       ],
       "data_model": [
         {
           "entity": "(future) Subscription",
           "fields": "tenant_id, plan, billing_status",
           "notes": "Phase 3."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Placeholder: self-service onboarding + subscription billing (Phase 3)",
+          "note": "Deferred. Self-service tenant sign-up, subscription billing and per-tenant Entra federation on top of the already SaaS-ready tenancy/identity. Not built in v1."
         }
       ]
     },
@@ -107,13 +119,19 @@
       ],
       "priority": "P2",
       "detail": [
-        "Placeholder (Phase 2+): per-tenant branding/theming of web and apps. The design system is token-driven, so theming is a matter of per-tenant token sets."
+        "Placeholder (Phase 2+): per-tenant branding/theming of web and apps. The design system is token-driven, so theming is a matter of per-tenant token sets (colours, logo, type) applied to web + Flutter apps — a per-tenant theme store + application layer, no component redesign. Captured so the design system stays token-driven."
       ],
       "data_model": [
         {
           "entity": "(future) TenantTheme",
           "fields": "tenant_id, tokens(json)",
           "notes": "Design system already token-driven."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Placeholder: per-tenant white-label theming (Phase 2+)",
+          "note": "Deferred. Per-tenant token sets (colours, logo, type) applied to web + Flutter apps via a TenantTheme store + application layer; the design system is already token-driven. Not built in v1."
         }
       ]
     },
@@ -141,13 +159,19 @@
       ],
       "priority": "P2",
       "detail": [
-        "Placeholder (Phase 3): an outbound/inbound public API + webhooks for third parties. The internal API is already OpenAPI-described and contract-first, so this is auth/rate-limit/versioning + webhook delivery on top."
+        "Placeholder (Phase 3): an outbound/inbound public API + webhooks for third parties. The internal API is already OpenAPI-described and contract-first, so this is auth (API keys/scopes), rate-limiting and versioning on a public surface + reliable webhook delivery (signed payloads, retries) on top. Captured so the API stays contract-first."
       ],
       "data_model": [
         {
           "entity": "(future) ApiKey / Webhook",
           "fields": "tenant_id, scopes, secret / url, events[]",
           "notes": "Phase 3."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Placeholder: public API + webhooks (Phase 3)",
+          "note": "Deferred. Public-surface auth (API keys/scopes), rate-limiting and versioning + webhook delivery (signed payloads, retries) on the already contract-first OpenAPI internal API. Not built in v1."
         }
       ]
     },
@@ -176,13 +200,19 @@
       ],
       "priority": "P2",
       "detail": [
-        "Placeholder (Phase 2+): native POS hardware integration and a tablet kiosk check-in mode. v1 uses Square card-present + the in-app/web flows; checkout and check-in are designed to stay hardware-friendly."
+        "Placeholder (Phase 2+): native POS hardware integration and a tablet kiosk check-in mode. v1 uses Square card-present + the in-app/web flows (the CHECKIN-KIOSK reception self-check-in surface already covers self-service check-in as a locked-down web surface); checkout and check-in are designed to stay hardware-friendly. Captured so checkout/check-in stay hardware-friendly."
       ],
       "data_model": [
         {
           "entity": "(future) PosDevice / KioskSession",
           "fields": "tenant_id, device, mode",
           "notes": "Phase 2+."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Placeholder: native POS hardware + native kiosk mode (Phase 2+)",
+          "note": "Deferred. Dedicated POS hardware integration + a hardened native kiosk mode beyond v1's Square card-present and the web self-check-in surface (CHECKIN-KIOSK). Not built in v1."
         }
       ]
     }

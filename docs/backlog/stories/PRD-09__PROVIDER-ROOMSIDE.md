@@ -11,8 +11,8 @@ Map injections, capture photos via signed URLs (never on device), record consult
 
 ## How it works
 
-Room-side charting on the provider app: map injections, capture photos via signed URLs (never on device), record consult/link script and finalise — surfacing PRD-04/05. Thumb-first, gloves-on usability; finalisation is server-side and the entry becomes read-only once final.
-The hero clinical workflow at the chair.
+Room-side charting on the provider app: tap-to-place injection mapping (drag to adjust, product/units per point), link script, native-camera before/after photos, and consult/Rx/administration — surfacing PRD-05 and PRD-04. Photos upload to central storage via short-lived signed URLs (ADR-0009); none persist on device after sync (C14) and capture requires image-use consent.
+Finalisation is server-side and the entry becomes read-only once sealed (AC6). Thumb-first, gloves-on usability (UX §1). The hero clinical workflow at the chair.
 
 ## Requirements
 
@@ -30,15 +30,20 @@ The hero clinical workflow at the chair.
 
 _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.html._
 
-- Prototype: provider app (treatment-room.png) — 'Treatment record', 'Treatment settings', the injection map + camera; finalise locks the note.
-- Photos capture to central storage; none persist on device after sync (C14).
+- Prototype: treatment-room — steps Today · Pre-flight · Consent & script · Injection map · Photos · Complete.
+- 'Treatment record' / 'Treatment settings'; tap-to-place injection map (drag to adjust), product/units per point, link script, native-camera before/after.
+- Finalise locks the note; none persist on device after sync (C14).
 
 ![treatment-room — prototype screen](../screens/treatment-room.png)
 
 ## Suggested data model
 
-- **(reuses)** — ChartEntry/InjectionPoint/Photo (PRD-05), Administration (PRD-04)
+- **(reuses) ChartEntry/InjectionPoint** — PRD-05 — note + mapped points (site, product, units)
   - _Same entities; provider-app surface._
+- **(reuses) Photo** — PRD-05 — before/after via signed URLs; consent-gated; no device retention (C14)
+  - _Transient capture cache only._
+- **(reuses) Administration** — PRD-04 — product/units administered, linked script
+  - _Surfaced room-side._
 
 ## Technical notes (high level)
 
@@ -50,13 +55,7 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 
 ## Tasks (dev pickup)
 
-- [ ] **Enforce compliance gate + audit events**
-  Enforce C14 as a server-side invariant that cannot be bypassed via the API:
-  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
-  - Write an immutable AuditEvent for the attempt and its outcome.
-  - Finalisation is server-side; once finalised the entry is read-only.
-- [ ] **Provider app UI (Flutter)**
-  Build on the Flutter provider app: the treatment-room per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: provider app (treatment-room.png) — 'Treatment record', 'Treatment settings', the injection map + camera; finalise locks the note.
-  - Photos capture to central storage; none persist on device after sync (C14).
+- [ ] **Provider app: injection-mapping canvas + product/units + script link**
+  Build the tap-to-place injection-mapping canvas on a face/body image (drag to adjust, accurate hit-testing — highest app risk, SPIKE-CANVAS). Per point capture product/units; link the individual script and surface PRD-04 consult/Rx/administration. Thumb-first targets sized for gloved hands (UX §1). Writes to the PRD-05 ChartEntry/InjectionPoint entities via the API.
+- [ ] **Provider app: camera capture (signed-URL upload) + server-side finalise**
+  Native-camera before/after capture gated on image-use consent: request a per-image signed upload URL (ADR-0009), stream the image to central storage and discard the local file once sync confirms — no photo persists on device after sync (C14), only a transient capture cache. Finalise calls the server seal; re-fetch the sealed, read-only entry so the app shows it immutable (AC6).

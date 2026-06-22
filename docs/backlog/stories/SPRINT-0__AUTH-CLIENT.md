@@ -11,7 +11,9 @@ Clients create accounts with Google/Apple, email+password, or email/SMS OTP via 
 
 ## How it works
 
-Clients create accounts and sign in via Entra External ID (CIAM) with Google/Apple, email+password, or email/SMS OTP, plus account recovery (ADR-0004). Client identities are tenant-scoped and distinct from staff; de-risked by SPIKE-AUTH.
+An Entra External ID (CIAM) tenant is configured with three user flows: social (Google/Apple), local (email + password) and OTP (email/SMS one-time code), each with its sign-up and sign-in experience and account recovery (password reset, OTP resend). The client Flutter app and the public web complete each of the three methods.
+Client tokens carry a tenant scope and a stable client identity that is separate from the staff identity namespace, so a client can never be mistaken for staff and vice versa; the API's auth middleware validates client tokens and resolves the same tenant context RLS uses. Account recovery flows are first-class because clients self-serve.
+Because handles and contact details are personal data (C21), the identities created here feed the consent/retention model later; this story just establishes the authentication, keeping client and staff audiences cleanly separated for the SaaS-ready design (ADR-0003/0004).
 
 ## Requirements
 
@@ -34,11 +36,14 @@ Clients create accounts and sign in via Entra External ID (CIAM) with Google/App
 
 ## Tasks (dev pickup)
 
-- [ ] **Implement: Client identity: Entra External ID (social / email / OTP) wiring**
-  Deliver per the acceptance criteria:
-  - Entra External ID configured for social, local (email+password) and OTP flows.
-  - Client app and public web complete each of the three sign-in methods.
-  - Client identities are tenant-scoped and distinct from staff identities.
-  - Account recovery (password reset / OTP resend) works.
-- [ ] **Document setup & usage**
-  How to run/operate it; runbook notes for the team.
+- [ ] **Configure Entra External ID user flows (social / email+password / OTP) and complete them on client app + public web**
+  Stand up CIAM sign-up/sign-in for clients across all three methods, tenant-scoped and distinct from staff.
+  - External ID tenant with three user flows: social (Google/Apple), local (email+password), and email/SMS OTP, each with sign-up, sign-in and account recovery (reset / OTP resend).
+  - Client Flutter app and public web complete each method.
+  - Client tokens carry tenant scope and a stable client identity in a namespace separate from staff; the API validates them and resolves tenant context for RLS.
+  - Social/OTP redirect + provider credentials sourced per environment from config/secrets (SECRETS).
+- [ ] **Document client auth flows, recovery and the client-vs-staff identity separation**
+  Write the client-identity reference covering the separation that matters for safety and SaaS.
+  - Each of the three flows and the recovery paths, plus the token's claims (tenant, stable client id).
+  - Why and how client identities are distinct from staff identities (separate audiences/namespaces) and how the API tells them apart.
+  - Note that captured handles/contact data are personal data (C21) feeding the consent/retention model — out of scope here but anticipated.

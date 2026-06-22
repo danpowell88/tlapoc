@@ -11,8 +11,9 @@ Walk-ins and same-day add-ons are supported but gate-respecting (an injectable w
 
 ## How it works
 
-Walk-ins and same-day add-ons are supported but gate-respecting: an injectable walk-in still needs a consult first. Rooms/chairs/devices are scheduled as resources with conflict-flagging and utilisation; VIP/first-time tags supported.
-Lets the clinic capture opportunistic demand without breaking the rules or double-booking.
+Walk-ins and same-day add-ons let the clinic capture opportunistic demand, but they are gate-respecting: an injectable walk-in still needs a synchronous consult before charting (the CONSULT-GATE applies regardless of source=walkin), and still requires consent (PRD-03). The walk-in flow attaches/creates the client, picks an available practitioner+resource and books source=walkin.
+Rooms/chairs/devices are scheduled as Resources with conflict-flagging and utilisation — a same-day add-on must land on a free resource for its whole block (incl. buffers); conflicts are surfaced BEFORE confirmation. VIP and first-time appointment tags are supported and shown on the appointment.
+This reuses the calendar's availability engine and the visit lifecycle; nothing about walk-ins bypasses scope or the compliance gates.
 
 ## Requirements
 
@@ -29,14 +30,16 @@ Lets the clinic capture opportunistic demand without breaking the rules or doubl
 
 _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients directory & 360._
 
-- Prototype: Schedule (schedule.png) — add walk-in / same-day add-on against an available resource; resource conflicts flagged before confirm; VIP / first-time appointment tags.
+- Prototype: Schedule (schedule.png) — add walk-in / same-day add-on against an available resource (the grid shows a 'Walk-in NEW · Skin' block); resource conflicts flagged before confirm; VIP / first-time appointment tags on the appointment.
 
 ![schedule — prototype screen](../screens/schedule.png)
 
 ## Suggested data model
 
 - **Appointment** — (as CALENDAR) source=walkin; tags[](vip|first_time)
-  - _Injectable walk-in still requires consult_id before charting._
+  - _Injectable walk-in still requires consult_id before charting (CONSULT-GATE) and consent (PRD-03)._
+- **Resource (ref)** — free/busy for the block incl. buffers
+  - _Conflict-checked before a walk-in/add-on confirms; surfaces utilisation._
 
 ## Technical notes (high level)
 
@@ -48,20 +51,9 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - Appointment — (as CALENDAR) source=walkin; tags[](vip|first_time) (Injectable walk-in still requires consult_id before charting.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Walk-in and same-day add-on flows exist; an injectable walk-in still requires a consult first.
-  - Rule: Room/chair/device resources are bookable with conflict-flagging and utilisation.
-  - Rule: VIP / first-time appointment tags supported.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-02/CALENDAR.
-- [ ] **Web UI**
-  Build on the Angular web app: the schedule per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: Schedule (schedule.png) — add walk-in / same-day add-on against an available resource; resource conflicts flagged before confirm; VIP / first-time appointment tags.
+- [ ] **Walk-in / same-day add-on booking flow (gate-respecting)**
+  Quick-add flow from the Schedule that attaches an existing or new client, picks a free practitioner+resource via the availability engine, and books source=walkin. For S4 services, the resulting appointment still carries the consult gate (consult_id null ⇒ charting blocked) and requires consent — walk-ins never bypass C1/C5. Same-day add-on appends a service to an in-progress visit on a free resource.
+- [ ] **Resource conflict-flagging before confirm + tags**
+  Before a walk-in/add-on confirms, check the chosen room/chair/device is free for the whole block incl. buffers and surface any conflict inline (block confirm until resolved). Support appointment tags[] (vip, first_time) set at booking and rendered on the calendar block. Feed resource utilisation.
+- [ ] **Walk-in UI on the Schedule grid**
+  Render walk-in blocks distinctly (e.g. 'Walk-in NEW') and add the quick-add affordance from an open/quiet cell. Show VIP/first-time tags. Surface the conflict warning before confirmation. Reuse the move/cancel modal.

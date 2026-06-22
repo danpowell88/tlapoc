@@ -9,7 +9,7 @@ Native POS hardware integration and a tablet kiosk mode (PRD-06/09 non-goals).
 
 ## How it works
 
-Placeholder (Phase 2+): native POS hardware integration and a tablet kiosk check-in mode. v1 uses Square card-present + the in-app/web flows; checkout and check-in are designed to stay hardware-friendly.
+Placeholder (Phase 2+): native POS hardware integration and a tablet kiosk check-in mode. v1 uses Square card-present + the in-app/web flows (the CHECKIN-KIOSK reception self-check-in surface already covers self-service check-in as a locked-down web surface); checkout and check-in are designed to stay hardware-friendly. Captured so checkout/check-in stay hardware-friendly.
 
 ## Requirements
 
@@ -36,5 +36,5 @@ Future — not built in the prototype (some shown as concept cards in Settings �
 
 ## Tasks (dev pickup)
 
-- [ ] **Scope & design when pulled into a sprint**
-  Deferred placeholder — no build in v1; confirm it still fits scope/regulatory stance, then break down.
+- [ ] **Placeholder: native POS hardware + native kiosk mode (Phase 2+)**
+  Deferred. Dedicated POS hardware integration + a hardened native kiosk mode beyond v1's Square card-present and the web self-check-in surface (CHECKIN-KIOSK). Not built in v1.

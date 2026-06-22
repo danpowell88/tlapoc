@@ -11,8 +11,9 @@ Revenue, retention/churn, no-shows, cancellations, conversion, at-risk, big spen
 
 ## How it works
 
-The owner BI the clinic already relies on: revenue, retention/churn, no-shows, cancellations, conversion, at-risk, big spenders, membership MRR/churn and per-practitioner mix — date-filterable. Reward-cost vs retention surfaces (from PRD-06). All money figures are gated behind the owner financial capability.
-Rebuilds the prototype's analytics on live data and fixes the Mindbody reporting gap.
+The owner business-intelligence surface, rebuilt on live data from the reporting read-models (READ-MODELS) — the analytics the clinic relied on in Mindbody but never got cleanly. It carries the prototype's structure: an Insights strip of plain-language callouts (Opportunity / Watch / On-track), then three metric bands — GROWTH (MRR, active members, net member change, new members MTD), PERFORMANCE (conversion, retention, rebooking, no-show) and FINANCE (revenue last month + MoM, prepaid liability, to-reactivate value, autopay success) — each tile showing value, target and variance.
+Every figure is computed against a comparison window (prior period or an owner-set target) and is date-filterable via presets (7d / 30d / 90d) plus a custom range, with a per-practitioner breakdown. Owner-set Targets (MRR target, active-member target, conversion %, retention %, rebooking %, no-show ceiling) drive the variance colouring and the Insights callouts; targets are saved per clinic. Reward-cost vs retention surfaces from the rewards engine (PRD-06) so the owner can see whether loyalty spend is buying retention.
+All money figures — revenue, MRR, prepaid liability, ARPU, reward cost — are gated behind the owner financial capability (the .fin capability / applyFin() in the prototype). Non-owner roles such as Reception may see membership counts and operational metrics (no-show, rebooking) but never dollar figures.
 
 ## Requirements
 
@@ -20,24 +21,33 @@ Rebuilds the prototype's analytics on live data and fixes the Mindbody reporting
 
 ## Acceptance Criteria
 
-- [ ] Core dashboards match the prototype's metrics on the same date range.
-- [ ] Date-range presets + custom filtering; per-practitioner views.
-- [ ] Reward-cost vs retention surfaces (from PRD-06).
-- [ ] All money figures are gated behind the owner financial capability.
+- [ ] Core dashboards reproduce the prototype's metrics (GROWTH, PERFORMANCE, FINANCE bands) on the same date range.
+- [ ] Date-range presets (7d/30d/90d) + custom range, with per-practitioner breakdown.
+- [ ] Owner Targets drive variance colouring and the Insights callouts; targets persist per clinic.
+- [ ] Reward-cost vs retention surfaces (from PRD-06 rewards).
+- [ ] All money figures are gated behind the owner financial capability; non-owner roles see counts/ops metrics but no dollars.
 
 ## UI designs / screenshots
 
 _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack)._
 
-- Prototype: Reports (reports.png) — revenue trend, treatment mix, top treatments, new-vs-returning, retention, membership MRR; date-range presets + custom; per-practitioner.
-- Money figures hidden for non-owner roles (.fin gating).
+- Prototype: Reports (reports.png). Pill tabs Scorecard | Revenue | Retention & rebooking | Memberships | Capacity; the business view spans the Revenue/Retention/Memberships tabs.
+- Header date presets (7d / 30d / 90d) + custom range; sub-header 'last 30 days · figures synthetic'.
+- Insights strip: Opportunity / Watch / On-track cards in plain language (e.g. 'Conversion is 38% vs your 40% target — closing that gap is about 1 more member a month').
+- Metric bands — GROWTH: MRR, Active members, Net member change, New members MTD · PERFORMANCE: Conversion, Retention, Rebooking, No-show · FINANCE: Revenue last month (+MoM), Prepaid liability, To reactivate, Autopay success. Each tile: value, target, variance.
+- Targets editor row (MRR target, Active members, Conversion %, Retention %, Rebooking %, No-show max) with Apply targets / Reset.
+- Money tiles hidden for non-owner roles (.fin gating).
 
 ![reports — prototype screen](../screens/reports.png)
 
 ## Suggested data model
 
-- **(read) BusinessMetrics** — revenue, retention, churn, no_shows, cancellations, conversion, at_risk, big_spenders, mrr by date/practitioner
-  - _From read-models; owner-gated._
+- **(read) BusinessMetrics** — period, practitioner_id?, revenue, mrr, active_members, net_member_change, conversion, retention, rebooking, no_show_rate, prepaid_liability, reactivation_value, autopay_success
+  - _Projection over payments/memberships/appointments events; money fields owner-gated._
+- **(read) RewardCostVsRetention** — period, reward_cost, retained_clients, cost_per_retained
+  - _Joins PRD-06 reward ledger to retention; owner-gated._
+- **ClinicTarget** — tenant_id, mrr_target, active_member_target, conversion_target, retention_target, rebooking_target, no_show_ceiling
+  - _Owner-set; drives variance + Insights._
 
 ## Other
 
@@ -45,13 +55,7 @@ _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Po
 
 ## Tasks (dev pickup)
 
-- [ ] **Read-model / projection**
-  Build a materialised read-model/projection (don't query OLTP directly):
-  - Shape: revenue, retention, churn, no_shows, cancellations, conversion, at_risk, big_spenders, mrr by date/practitioner.
-  - Populate from domain events + the audit stream; eventual consistency is fine; support rebuild/backfill.
-  - Expose a query API with this story's date/role filters; respect owner-only .fin gating.
-- [ ] **Web UI**
-  Build on the Angular web app: the reports per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: Reports (reports.png) — revenue trend, treatment mix, top treatments, new-vs-returning, retention, membership MRR; date-range presets + custom; per-practitioner.
-  - Money figures hidden for non-owner roles (.fin gating).
+- [ ] **Read-model / projection: business metrics + targets**
+  Project GROWTH/PERFORMANCE/FINANCE metrics from the payments, membership, appointment and lifecycle events into BusinessMetrics keyed by period (+optional practitioner), plus the RewardCostVsRetention join over the PRD-06 reward ledger. Persist ClinicTarget per tenant and compute variance vs target/prior-period server-side. Tag money fields owner-financial. Support the 7d/30d/90d/custom windows and per-practitioner slicing as query parameters over the projection, not OLTP scans.
+- [ ] **Web UI: business dashboards (Revenue / Retention / Memberships)**
+  Build the Reports tabs in Angular: date presets + custom range, the Insights strip (Opportunity/Watch/On-track generated from target variance), the three metric bands as value/target/variance tiles, and the Targets editor (Apply/Reset, persisted per clinic). Wire .fin gating so money tiles are suppressed for non-owner roles while counts/ops metrics remain. Per-practitioner switch re-queries the read-model. Match the prototype's metric set and copy tone.

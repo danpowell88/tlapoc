@@ -11,8 +11,9 @@ An IPaymentProvider port (authorize/capture, refund, void, tokenize, recurring, 
 
 ## How it works
 
-A payment-provider abstraction (IPaymentProvider) exposes authorize/capture, refund, void, tokenize, recurring and gift-card, with a Square adapter first and cash as an internal tender. No PAN is ever stored — only provider tokens (ADR-0007, PCI-safe).
-Built on the SPIKE-SQUARE findings; keeps the platform provider-swappable.
+IPaymentProvider exposes a small, deliberate surface: authorize/capture (card-present at the Square terminal), refund, void, tokenize (store a card-on-file as a provider token), recurringCharge (charge a stored token off-session for membership autopay) and gift-card issue/redeem. Cash is modelled as an internal tender with no processor round-trip — it is recorded, not authorised — so card and cash reconcile in one ledger.
+Strictly tokens, never PAN: the platform stores only the provider's token reference plus the display crumbs (brand, last4, exp). No primary account number, CVV or magnetic data ever lands in our database, which keeps PCI scope to SAQ-A-style minimums (ADR-0007).
+Built on the SPIKE-SQUARE findings (the card-on-file recurring de-risk). The adapter is a thin translation layer: it maps our domain calls to Square's Payments/Cards/Refunds APIs and maps Square's responses and webhook events back onto our ProviderTxn states, so swapping processors later means writing one new adapter, not touching checkout.
 
 ## Requirements
 
@@ -20,23 +21,24 @@ Built on the SPIKE-SQUARE findings; keeps the platform provider-swappable.
 
 ## Acceptance Criteria
 
-- [ ] IPaymentProvider exposes authorize/capture, refund, void, tokenize, recurring and gift-card.
-- [ ] Square adapter implemented; cash is an internal tender.
-- [ ] No PAN is ever stored — only provider tokens.
-- [ ] Built on SPIKE-SQUARE findings.
+- [ ] IPaymentProvider exposes authorize/capture, refund, void, tokenize, recurringCharge and gift-card issue/redeem.
+- [ ] A SquareAdapter implements the port (card-present + card-on-file); cash is recorded as an internal tender with no processor call.
+- [ ] No PAN, CVV or track data is ever persisted — only a provider token plus brand/last4/exp.
+- [ ] Provider responses and webhooks map onto ProviderTxn states; the port is swappable without touching checkout.
+- [ ] Built on the SPIKE-SQUARE recurring/card-on-file findings.
 
 ## UI designs / screenshots
 
-- No dedicated screen — surfaces through Checkout (checkout.png) and membership card-on-file capture; this story is the backend port + Square adapter.
+- No dedicated screen — this is the backend port + Square adapter. It surfaces through the Checkout tenders (Square card / Record cash / Gift card) and through membership card-on-file capture; see those stories for UI.
 
 ![checkout — prototype screen](../screens/checkout.png)
 
 ## Suggested data model
 
 - **PaymentMethodToken** — id, tenant_id, client_id, provider(square), token_ref, brand, last4, exp
-  - _Token only; no PAN (ADR-0007)._
-- **ProviderTxn** — id, payment_id, provider_ref, type(auth|capture|refund|void), amount, status
-  - _Adapter-mapped provider transactions._
+  - _Token only — never a PAN (ADR-0007). Used by membership autopay._
+- **ProviderTxn** — id, payment_id, provider_ref, type(auth|capture|refund|void), amount, status, raw_event_ref
+  - _Adapter-mapped processor transactions; reconciled against webhook callbacks._
 
 ## Technical notes (high level)
 
@@ -48,23 +50,20 @@ Built on the SPIKE-SQUARE findings; keeps the platform provider-swappable.
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - PaymentMethodToken — id, tenant_id, client_id, provider(square), token_ref, brand, last4, exp (Token only; no PAN (ADR-0007).)
-  - ProviderTxn — id, payment_id, provider_ref, type(auth|capture|refund|void), amount, status (Adapter-mapped provider transactions.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: IPaymentProvider exposes authorize/capture, refund, void, tokenize, recurring and gift-card.
-  - Rule: Square adapter implemented; cash is an internal tender.
-  - Rule: No PAN is ever stored — only provider tokens.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: SPRINT-0/SPIKE-SQUARE.
-- [ ] **Integration adapter, sync & config**
-  Implement the provider behind its swappable port:
-  - Connection/config (OAuth tokens stored encrypted) + the field mapping this story needs.
-  - Trigger on the relevant event; idempotent sync with retries, back-off and a visible reconciliation/status.
-  - Handle partial failures + replays; surface errors to the user.
-  - Residency: AU-resident or APP-8-assessed + consented before any PII leaves (C21).
+- [ ] **Define IPaymentProvider port + ProviderTxn state model**
+  Define the IPaymentProvider port and the ProviderTxn lifecycle, decoupled from any processor.
+  - Port methods: authorize, capture (or combined authorize+capture for card-present), refund, void, tokenize (card-on-file -> token), recurringCharge (off-session charge of a stored token), giftIssue, giftRedeem.
+  - ProviderTxn states: created -> pending -> succeeded | failed | voided | refunded; carry provider_ref + amount + raw_event_ref.
+  - Cash is an internal tender: recorded straight to succeeded with no port call (reconciled in the same ledger).
+  - Tokens-only invariant lives here: the port signature accepts/returns token refs, brand/last4/exp — never PAN/CVV/track data.
+- [ ] **SquareAdapter: card-present, card-on-file tokenise, recurring charge**
+  Implement the Square adapter behind the port, built on SPIKE-SQUARE.
+  - Map domain calls to Square Payments/Cards/Refunds APIs; card-present via terminal, card-on-file via Cards API.
+  - recurringCharge does an off-session charge of a stored card token (the autopay path the membership story consumes).
+  - Idempotency keys on every charge; map Square error/decline codes to a normalised result the dunning logic can branch on.
+  - OAuth/app credentials stored encrypted in config; tenant -> Square location mapping.
+- [ ] **Webhook intake + ProviderTxn reconciliation; tokens-only enforcement**
+  Close the loop between async processor events and our ledger.
+  - Subscribe to Square webhooks (payment updated, refund updated, dispute created); verify signatures; update the matching ProviderTxn idempotently.
+  - A dispute event raises a Job (PRD-07 Follow-ups) and is surfaced to the owner-only finance view.
+  - Enforce the tokens-only invariant at the persistence boundary: reject/strip any PAN/CVV; assert only token_ref + brand/last4/exp are stored (PCI, ADR-0007).

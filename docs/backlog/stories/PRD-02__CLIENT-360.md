@@ -11,8 +11,9 @@ Any staff member can open a client's full profile: history, contacts, medical fl
 
 ## How it works
 
-A single 360-degree client profile pulls together everything any staff member needs: overview, medical/contraindications, consents, photos, visit history, memberships, balance, comms and complaints — surfacing data owned by PRD-03/04/05/06/11 via the API.
-Access is RBAC-scoped (reception sees limited clinical info) and audited.
+A single 360° client profile pulls together everything any staff member needs in one place: overview/at-a-glance, visit history, treatment plan, photos (image-use gated), consents & forms, membership & rewards, billing and notes/comms — surfacing data OWNED by PRD-03/04/05/06/11 via the API (this story is the read aggregation + header, not the source of truth for each part).
+The header carries the compliance/age chips — Consent current, Image use ✓, Balance, Allergy flags, and (when applicable) an under-18 cooling-off chip — so a clinician sees the gate state at a glance before opening the chart. Quick actions: Open chart (capability-gated) and Checkout.
+Access is RBAC-scoped and audited (C10): reception sees limited clinical info (no full clinical record), money figures stay behind the .fin capability (owner-only), and every read of clinical/PII data writes an AuditEvent.
 
 ## Requirements
 
@@ -30,15 +31,18 @@ Access is RBAC-scoped (reception sees limited clinical info) and audited.
 
 _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients directory & 360._
 
-- Prototype: Client 360 (client-360.png) — header with consent/age chips (consent / image-use / under-18 cooling-off), tabbed sections for medical, consents, photos, visits, memberships, balance, comms, complaints.
-- Quick links into charting, checkout and follow-ups.
+- Prototype: Client 360 (client-360.png) — header with avatar, name, VIP/member tag, demographics, and compliance chips: 'Consent current', 'Image use ✓', 'Balance $0', 'Allergy: none'. Quick actions 'Open chart' / 'Checkout'.
+- Tabbed sections: Overview (recent activity + at-a-glance: visits, last seen, referred-by; lifetime spend is .fin-gated), Visits, Treatment plan, Photos (image-use consent on file), Consents & forms, Membership & rewards, Billing (.fin), Notes & comms.
+- Reception sees limited clinical info; money tabs/figures gated behind .fin (owner-only).
 
 ![client-360 — prototype screen](../screens/client-360.png)
 
 ## Suggested data model
 
-- **Client (aggregate view)** — joins Client + IntakeResponse + ConsentSignature + Photo + Appointment + Membership + AccountBalance + Complaint
-  - _Read aggregation; each part owned by its module. RBAC filters fields._
+- **Client (aggregate read view)** — joins Client + IntakeResponse + ConsentSignature + ImageConsent + Photo + Appointment/Visit + Membership + AccountBalance + RewardLedger + Complaint
+  - _Read aggregation; each part owned by its module; RBAC filters fields; .fin gates money._
+- **AuditEvent (ref)** — actor, client_id, fields-viewed, at
+  - _Every clinical/PII read is audited (C10, ADR-0010)._
 
 ## Other
 
@@ -46,21 +50,9 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - Client (aggregate view) — joins Client + IntakeResponse + ConsentSignature + Photo + Appointment + Membership + AccountBalance + Complaint (Read aggregation; each part owned by its module. RBAC filters fields.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Profile aggregates overview, medical/contraindications, consents, photos, visits, memberships, balance, comms, complaints.
-  - Rule: Consent/age chips render on the header (consent ✓ / image-use ✓ / under-18 cooling-off).
-  - Rule: Access is RBAC-scoped (reception sees limited clinical info) and audited.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-01/CLIENT-CORE.
-- [ ] **Web UI**
-  Build on the Angular web app: the client-360 per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: Client 360 (client-360.png) — header with consent/age chips (consent / image-use / under-18 cooling-off), tabbed sections for medical, consents, photos, visits, memberships, balance, comms, complaints.
-  - Quick links into charting, checkout and follow-ups.
+- [ ] **Client 360 read-aggregation API (RBAC + .fin + audit)**
+  A read endpoint that composes the profile from each owning module (intake, consent, image-consent, photos, visits, plan, membership, balance, rewards, complaints). Apply RBAC field filtering server-side (reception gets limited clinical info; money fields require the .fin capability — owner-only), and write an AuditEvent for every clinical/PII read (C10, ADR-0010). Returns the header chip state (consent current, image-use, under-18 cooling-off) computed from the gates.
+- [ ] **Profile header with compliance/age chips + quick actions**
+  Angular profile header: avatar, name, member/VIP tag, demographics; chips for Consent current / Image use / Balance / Allergy / under-18 cooling-off (driven by the gate state). Quick actions Open chart (hidden unless the role has chart capability) and Checkout. Chips are the at-a-glance gate read before charting.
+- [ ] **Tabbed profile sections (Overview/Visits/Plan/Photos/Consents/Membership/Billing/Notes)**
+  Tabbed body rendering each aggregated section: Overview (recent activity + at-a-glance), Visits, Treatment plan, Photos (only if image-use consent active), Consents & forms, Membership & rewards, Billing (.fin-gated), Notes & comms. Each tab reads its module's data via the aggregation API; money tabs/figures honour .fin. Deep-links into charting/checkout/follow-ups.

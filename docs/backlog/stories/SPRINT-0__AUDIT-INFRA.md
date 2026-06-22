@@ -11,7 +11,9 @@ C10/ADR-0010 require an immutable record of who read/changed clinical, medicines
 
 ## How it works
 
-The append-only AuditEvent store + a reusable interceptor/helper so any module records create/update/read with who/what/when/tenant, and tampering (update/delete) is rejected at the data layer (C10/ADR-0010). Makes auditability a built-in default, not a per-feature afterthought; PRD-01/AUDIT builds the export UI on top.
+An AuditEvent table records who/what/when/tenant — actor id, action (read/create/update), entity type + id, timestamp, tenant_id, and a JSON context for extra detail. It is append-only by construction: no update or delete path exists in the data layer, and the database rejects update/delete attempts (revoked privileges plus a trigger), so the trail is tamper-evident, not merely tamper-discouraged.
+A reusable interceptor/helper lets modules record events with one call or by annotation: an EF Core SaveChanges interceptor captures create/update for audited entity types, and a small helper records reads (which aren't captured by SaveChanges) at the point clinical/PII data is served. Events carry the actor and tenant from the API's request context (API/RLS), so modules don't re-plumb identity.
+Events are queryable and exportable here at the data level; the full register UI with filtering and export-for-regulator is PRD-01/AUDIT and PRD-08 reporting, which read this stream. Read-auditing scope (clinical, medicines, PII) is deliberate so the volume stays meaningful for an auditor.
 
 ## Requirements
 
@@ -27,8 +29,8 @@ The append-only AuditEvent store + a reusable interceptor/helper so any module r
 
 ## Suggested data model
 
-- **AuditEvent** — id, tenant_id, actor_id, action, entity_type, entity_id, at, context(json)
-  - _Append-only; no update/delete path._
+- **AuditEvent** — id, tenant_id, actor_id, action(read|create|update), entity_type, entity_id, at, context(jsonb)
+  - _Append-only — no update/delete path; DB rejects mutation (revoked privileges + trigger); reads of clinical/medicines/PII are audited too._
 
 ## Technical notes (high level)
 
@@ -40,13 +42,17 @@ The append-only AuditEvent store + a reusable interceptor/helper so any module r
 
 ## Tasks (dev pickup)
 
-- [ ] **Implement: Append-only audit infrastructure baseline**
-  Deliver per the acceptance criteria:
-  - AuditEvent table is append-only (no update/delete path) and carries who/what/when/tenant.
-  - A reusable interceptor/helper records create/update/read for annotated entities or endpoints.
-  - Events are queryable and exportable (full register UI is PRD-01/PRD-08).
-  - Tampering attempts (update/delete) are rejected at the data layer.
-- [ ] **Apply via migrations; verify RLS/tenancy**
-  Migration runs per environment; prove tenant isolation holds.
-- [ ] **Document setup & usage**
-  How to run/operate it; runbook notes for the team.
+- [ ] **Create the append-only AuditEvent store with tamper rejection**
+  Build the immutable event table and make mutation impossible at the data layer.
+  - AuditEvent table (who/what/when/tenant + jsonb context) created via migration; tenant-scoped under RLS.
+  - No application update/delete path; the database itself rejects update/delete (revoked privileges + a trigger that raises), so attempts fail — the C10 'tamper-evident' guarantee.
+  - An integration test asserting that an update/delete on AuditEvent is rejected (flag it as a compliance invariant for TEST).
+- [ ] **Provide the reusable record-event interceptor/helper for writes and reads**
+  Give modules one easy, consistent way to emit audit events so it's the default, not an afterthought.
+  - A SaveChanges interceptor that records create/update for annotated/audited entity types automatically.
+  - A helper to record reads (not caught by SaveChanges) at the point clinical/medicines/PII data is served.
+  - Actor + tenant taken from the API request context (API/RLS); the RLS elevated path also emits events through this helper.
+- [ ] **Expose queryable/exportable events and document the audit contract**
+  Make the stream usable downstream and document how modules opt in.
+  - Query access (tenant-scoped) so PRD-01/AUDIT and PRD-08 can build the register UI and exports on top — full UI is out of scope here.
+  - Document which entities/endpoints must be audited (clinical, medicines, PII reads + writes), how to annotate them, and the append-only rule for future authors.

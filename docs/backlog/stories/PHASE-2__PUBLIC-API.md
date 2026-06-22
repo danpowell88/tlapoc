@@ -9,7 +9,7 @@ Outbound/inbound public API + webhooks for third parties (PRD-10 deferred; Phase
 
 ## How it works
 
-Placeholder (Phase 3): an outbound/inbound public API + webhooks for third parties. The internal API is already OpenAPI-described and contract-first, so this is auth/rate-limit/versioning + webhook delivery on top.
+Placeholder (Phase 3): an outbound/inbound public API + webhooks for third parties. The internal API is already OpenAPI-described and contract-first, so this is auth (API keys/scopes), rate-limiting and versioning on a public surface + reliable webhook delivery (signed payloads, retries) on top. Captured so the API stays contract-first.
 
 ## Requirements
 
@@ -32,5 +32,5 @@ Placeholder (Phase 3): an outbound/inbound public API + webhooks for third parti
 
 ## Tasks (dev pickup)
 
-- [ ] **Scope & design when pulled into a sprint**
-  Deferred placeholder — no build in v1; confirm it still fits scope/regulatory stance, then break down.
+- [ ] **Placeholder: public API + webhooks (Phase 3)**
+  Deferred. Public-surface auth (API keys/scopes), rate-limiting and versioning + webhook delivery (signed payloads, retries) on the already contract-first OpenAPI internal API. Not built in v1.

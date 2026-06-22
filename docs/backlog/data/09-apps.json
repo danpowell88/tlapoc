@@ -52,18 +52,35 @@
         "PRD-03/CONSENT"
       ],
       "detail": [
-        "The client completes the full pre-visit journey entirely in-app: book -> intake -> e-sign consent (incl. image-use), then receives reminders/recall. Surfaces PRD-02 booking and PRD-03 intake/consent through the Flutter client app; sign-in via social/email/OTP, tenant-scoped.",
-        "Removes paperwork and gets clients ready before they arrive."
+        "The client completes the full pre-visit journey entirely in-app: sign in (social/email/OTP, tenant-scoped via Entra External ID) → book over PRD-02 → complete PRD-03 intake (medical history/BDD) → e-sign per-treatment consent incl. separate image-use consent, ending on 'All set'. The app is a surface over those modules; the treatment gate is enforced server-side.",
+        "Home surfaces the next appointment and an amber 'Finish your pre-visit forms' nudge; reminders/recall (PRD-07) arrive as push + in-app notifications. Removes paperwork and gets clients ready before they arrive."
       ],
       "ui_spec": [
-        "Prototype: client app (client-app.png) bottom-tabs — Home/For you, Book, then the intake + consent flow ('You're booked!', 'All set — thank you').",
-        "Reminders/recall received in-app."
+        "Prototype: client-app — Home/'For you' (greeting, NEXT APPOINTMENT card with treatment/time/injector/room, 'View details', amber 'Finish your pre-visit forms' prompt).",
+        "Quick actions: Book · Messages · Photos · Rewards. Bottom tabs: Home · Book · My care · Rewards · Account.",
+        "Booking ends 'You're booked!'; intake + consent end 'All set — thank you'."
       ],
       "data_model": [
         {
-          "entity": "(reuses)",
-          "fields": "Appointment (PRD-02) + IntakeResponse/ConsentSignature (PRD-03) via the API",
-          "notes": "Client app is a surface over those modules."
+          "entity": "(reuses) Appointment",
+          "fields": "PRD-02 via the API (book/reschedule endpoints)",
+          "notes": "Client app is a surface; no app-local appointment store."
+        },
+        {
+          "entity": "(reuses) IntakeResponse/ConsentSignature",
+          "fields": "PRD-03 — medical history, per-treatment + image-use consent, e-signed",
+          "notes": "Server holds records; signatures posted from device."
+        },
+        {
+          "entity": "(reuses) Notification",
+          "fields": "PRD-07 push token + in-app inbox",
+          "notes": "Drives the pre-visit nudge."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Client app: sign-in + book→intake→consent journey",
+          "note": "Client Flutter flavour: Entra External ID sign-in (social/email/OTP) writing a tenant-pinned session into secure storage. Home screen with the NEXT APPOINTMENT card and the 'Finish your pre-visit forms' nudge. Wire Book to the PRD-02 booking endpoints and the intake/consent screens to PRD-03 (medical history/BDD, per-treatment consent + separate image-use consent, on-device e-signature posted to the API). End-states 'You're booked!' / 'All set'. Register a push token and render reminders/recall (PRD-07) in an in-app inbox. No app-local clinical store; the treatment gate stays server-side."
         }
       ]
     },
@@ -103,18 +120,34 @@
         "PRD-05/PHOTOS"
       ],
       "detail": [
-        "In the app the client views consented before/after photos, memberships, rewards/perks and balances, and adds a card-on-file for autopay (feeds PRD-06). No one-off online checkout is exposed.",
-        "Self-service for care history and payments."
+        "My care/Rewards/Account tabs: visit history + consent-gated before/after photos (served via short-lived signed URLs, ADR-0009, never on device); points/perks/gift cards over PRD-06; profile, memberships, the client's own balance, and add/replace a tokenised card-on-file (Square) that feeds PRD-06 autopay.",
+        "No one-off online checkout (v1 payments are in-person). Self-service for care history and payments."
       ],
       "ui_spec": [
-        "Prototype: client app (client-app.png) tabs — My care (visit history, photos with consent), Rewards (redeem points, gift cards), Account (update card on file).",
-        "Photo viewing is image-use-consent-gated."
+        "Prototype: client-app — My care (visit history, photos gated by image-use consent), Rewards (redeem points, perks, gift cards), Account (profile, memberships, balance, 'Update card on file').",
+        "Photo viewing is image-use-consent-gated and served via signed URLs."
       ],
       "data_model": [
         {
-          "entity": "(reuses)",
-          "fields": "Photo (PRD-05), Membership/RewardLedger/AccountBalance (PRD-06), PaymentMethodToken",
-          "notes": "Card-on-file feeds PRD-06 autopay; no one-off checkout."
+          "entity": "(reuses) Photo",
+          "fields": "PRD-05 — signed-URL view (ADR-0009), image-use-consent-gated",
+          "notes": "Never bundled/persisted in the app."
+        },
+        {
+          "entity": "(reuses) Membership/RewardLedger/AccountBalance",
+          "fields": "PRD-06 — membership, points/perks, client balance",
+          "notes": "Client sees own figures only."
+        },
+        {
+          "entity": "(reuses) PaymentMethodToken",
+          "fields": "PRD-06 — provider-tokenised card-on-file (Square)",
+          "notes": "Feeds autopay; no one-off checkout."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Client app: My care / Rewards / Account + card-on-file",
+          "note": "My care tab: visit history list and a before/after gallery whose tiles each fetch a per-view signed URL (ADR-0009) and cache transiently; gate the gallery on image-use consent re-checked server-side so a withdrawal hides it immediately. Rewards tab over PRD-06 (points balance, perks, gift-card redeem). Account tab: profile, memberships, the client's own balance, and 'Update card on file' using the Square SDK to tokenise — store no PAN; post the token to PRD-06 for membership autopay. Do not expose any one-off online checkout."
         }
       ]
     },
@@ -151,17 +184,32 @@
         "PRD-01/PRIVACY-RIGHTS"
       ],
       "detail": [
-        "The Account area exposes profile, balances, card-on-file and a 'Your data & privacy' surface: the residency note ('your data stays in Australia'), request a copy, request correction, and request account deletion — tracked to resolution and audited (APP 12/13, PRD-01).",
-        "Puts the client in control of their information."
+        "The Account tab exposes profile, the client's own balances and card-on-file, and a 'Your data & privacy' surface: a residency trust note ('your data stays in Australia', APP 8) plus self-service request-a-copy (access), request-correction and request-deletion. Each raises a PRD-01 PrivacyRequest with a ≤30-day DSAR clock, tracked to resolution and audited; staff resolve via Governance.",
+        "Puts the client in control of their information (C21, APP 12/13)."
       ],
       "ui_spec": [
-        "Prototype: client app Account (client-app.png) — 'Edit profile', 'Update card on file', 'Request account deletion', privacy/access-correction; residency trust note."
+        "Prototype: client-app Account — 'Edit profile', 'Update card on file', 'Request account deletion', and 'Your data & privacy' (residency note + request-a-copy / request-correction)."
       ],
       "data_model": [
         {
-          "entity": "(reuses)",
-          "fields": "PrivacyRequest (PRD-01) — access/correction/deletion with DSAR clock",
+          "entity": "(reuses) PrivacyRequest",
+          "fields": "PRD-01 — kind(access|correction|deletion), status, DSAR clock, resolution",
           "notes": "Self-service entry point; staff resolve via Governance."
+        },
+        {
+          "entity": "(reuses) AuditEvent",
+          "fields": "PRD-01 — actor, time, outcome of each privacy action",
+          "notes": "Evidences APP 12/13."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Client app: Account tab (profile, balances, card-on-file)",
+          "note": "Account screen surfacing profile (Edit profile), the client's own balance and the card-on-file (Update card on file → Square tokenisation). Read-only money: the client sees only their own balances/perks, never clinic revenue. Lay out the 'Your data & privacy' entry point beneath the account actions."
+        },
+        {
+          "title": "Client app: 'Your data & privacy' — access/correction/deletion + residency note",
+          "note": "Build the privacy surface: static residency trust note ('your data stays in Australia', backed by the APP 8 AU-residency posture) plus three actions that each POST a PRD-01 PrivacyRequest (access/correction/deletion) with the ≤30-day DSAR clock. Show request status tracked to resolution; deliver any export through the secure channel, not client-built. Audit every action (actor/time/outcome). Staff resolve via the Governance DSAR workflow."
         }
       ]
     },
@@ -200,18 +248,29 @@
         "PRD-05/NOTE-TEMPLATE"
       ],
       "detail": [
-        "The provider app shows the practitioner's day and opens a patient with consult+consent status shown before charting — the consult+consent gate (PRD-03/04) is enforced before charting opens. Provider signs in via Entra SSO, tenant-scoped.",
+        "The provider app shows the practitioner's day ('Today · Room 2') and opens a patient with consult+consent status shown before charting. Provider signs in via Entra ID SSO, tenant-scoped; a self-checked-in client is highlighted as ready ('Start visit'). The consult+consent gate (PRD-03/04) is enforced server-side before charting opens — if unmet, the app shows what's outstanding and blocks charting.",
         "Room-side starting point with the right context and gates."
       ],
       "ui_spec": [
-        "Prototype: provider app (treatment-room.png) — 'Today · Room 2' schedule; open a patient -> 'Consent & prescriber authorisation' status; quick links to map/photos/finalise.",
-        "Bottom tabs: Schedule / Patient / Medicines / Tasks."
+        "Prototype: treatment-room — 'Today · Room 2' day list (arrival times; self-checked-in client highlighted with 'Start visit', others 'Open').",
+        "Open a patient → 'Consent & prescriber authorisation' status; quick links to map/photos/finalise. Bottom tabs: Schedule / Patient / Medicines / Tasks."
       ],
       "data_model": [
         {
-          "entity": "(reuses)",
-          "fields": "Appointment (PRD-02) + gate (PRD-03/04)",
-          "notes": "Provider app surface; Entra SSO."
+          "entity": "(reuses) Appointment",
+          "fields": "PRD-02 — practitioner's day; checked-in status drives the highlight",
+          "notes": "Provider app surface; Entra ID SSO."
+        },
+        {
+          "entity": "(reuses) Consent/PrescriberAuthorisation gate",
+          "fields": "PRD-03/04 — verified before charting opens",
+          "notes": "Block + show outstanding if unmet."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Provider app: day schedule + open-patient consult/consent gate",
+          "note": "Provider Flutter flavour with Entra ID workforce SSO (tenant-scoped). Build the 'Today · Room X' schedule from PRD-02 (arrival times, highlight a self-checked-in client with 'Start visit', others 'Open'). On opening a patient, render the 'Consent & prescriber authorisation' status block and evaluate the PRD-03/04 gate server-side: disable the charting entry points and show outstanding items until it passes; then expose quick links to injection map / photos / finalise. Bottom tabs Schedule / Patient / Medicines / Tasks."
         }
       ]
     },
@@ -256,18 +315,39 @@
         "PRD-05/PHOTOS"
       ],
       "detail": [
-        "Room-side charting on the provider app: map injections, capture photos via signed URLs (never on device), record consult/link script and finalise — surfacing PRD-04/05. Thumb-first, gloves-on usability; finalisation is server-side and the entry becomes read-only once final.",
-        "The hero clinical workflow at the chair."
+        "Room-side charting on the provider app: tap-to-place injection mapping (drag to adjust, product/units per point), link script, native-camera before/after photos, and consult/Rx/administration — surfacing PRD-05 and PRD-04. Photos upload to central storage via short-lived signed URLs (ADR-0009); none persist on device after sync (C14) and capture requires image-use consent.",
+        "Finalisation is server-side and the entry becomes read-only once sealed (AC6). Thumb-first, gloves-on usability (UX §1). The hero clinical workflow at the chair."
       ],
       "ui_spec": [
-        "Prototype: provider app (treatment-room.png) — 'Treatment record', 'Treatment settings', the injection map + camera; finalise locks the note.",
-        "Photos capture to central storage; none persist on device after sync (C14)."
+        "Prototype: treatment-room — steps Today · Pre-flight · Consent & script · Injection map · Photos · Complete.",
+        "'Treatment record' / 'Treatment settings'; tap-to-place injection map (drag to adjust), product/units per point, link script, native-camera before/after.",
+        "Finalise locks the note; none persist on device after sync (C14)."
       ],
       "data_model": [
         {
-          "entity": "(reuses)",
-          "fields": "ChartEntry/InjectionPoint/Photo (PRD-05), Administration (PRD-04)",
+          "entity": "(reuses) ChartEntry/InjectionPoint",
+          "fields": "PRD-05 — note + mapped points (site, product, units)",
           "notes": "Same entities; provider-app surface."
+        },
+        {
+          "entity": "(reuses) Photo",
+          "fields": "PRD-05 — before/after via signed URLs; consent-gated; no device retention (C14)",
+          "notes": "Transient capture cache only."
+        },
+        {
+          "entity": "(reuses) Administration",
+          "fields": "PRD-04 — product/units administered, linked script",
+          "notes": "Surfaced room-side."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Provider app: injection-mapping canvas + product/units + script link",
+          "note": "Build the tap-to-place injection-mapping canvas on a face/body image (drag to adjust, accurate hit-testing — highest app risk, SPIKE-CANVAS). Per point capture product/units; link the individual script and surface PRD-04 consult/Rx/administration. Thumb-first targets sized for gloved hands (UX §1). Writes to the PRD-05 ChartEntry/InjectionPoint entities via the API."
+        },
+        {
+          "title": "Provider app: camera capture (signed-URL upload) + server-side finalise",
+          "note": "Native-camera before/after capture gated on image-use consent: request a per-image signed upload URL (ADR-0009), stream the image to central storage and discard the local file once sync confirms — no photo persists on device after sync (C14), only a transient capture cache. Finalise calls the server seal; re-fetch the sealed, read-only entry so the app shows it immutable (AC6)."
         }
       ]
     },
@@ -306,17 +386,33 @@
         "PRD-05/OFFLINE"
       ],
       "detail": [
-        "The provider app keeps working offline: charting/photos queue locally (encrypted) and sync on reconnect with no loss; a persistent indicator shows queued count + last-sync, and finalise is disabled until synced (ADR-0015, built on SPIKE-OFFLINE + PRD-05/OFFLINE).",
+        "The provider app keeps working offline: charting edits and captured photos queue to an encrypted on-device store and sync on reconnect with no loss (ADR-0015, built on SPIKE-OFFLINE + PRD-05/OFFLINE). Drafts reconcile last-write-wins; photos upload via signed URLs on reconnect (bytes held encrypted locally meanwhile, consistent with C14). A persistent indicator shows queued count + last-sync; finalise is disabled until everything has synced.",
         "Treatment-room Wi-Fi drops never cost the clinician data."
       ],
       "ui_spec": [
-        "Prototype: provider app (treatment-room.png) — a persistent sync/offline indicator; queued-items count + last-sync; finalise disabled until synced."
+        "Prototype: treatment-room — 'Connected to the treatment room' banner (flips to offline/queued in the real app).",
+        "Persistent indicator: queued-items count + last-sync time; finalise disabled until synced."
       ],
       "data_model": [
         {
-          "entity": "(reuses)",
-          "fields": "LocalQueue (PRD-05/OFFLINE) on-device",
+          "entity": "(reuses) LocalQueue",
+          "fields": "PRD-05/OFFLINE — encrypted on-device queue of draft edits + pending photo bytes",
           "notes": "Encrypted; last-write-wins drafts; server-side finalise."
+        },
+        {
+          "entity": "(reuses) ChartEntry/Photo",
+          "fields": "PRD-05 — records the queue syncs to",
+          "notes": "Photos upload via signed URLs on reconnect."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Provider app: encrypted offline queue + sync engine",
+          "note": "Encrypted on-device store (encrypted box / SQLCipher, ADR-0015/SPIKE-OFFLINE) holding draft chart edits and pending photo bytes while offline. Sync engine drains the queue on reconnect with no data loss; drafts reconcile last-write-wins; pending photos upload via signed URLs once connectivity returns (bytes held encrypted locally meanwhile, consistent with C14 — never left as plain device media)."
+        },
+        {
+          "title": "Provider app: persistent sync/offline indicator + finalise gating",
+          "note": "Always-visible indicator subscribing to queue depth and last-sync time (prototype's 'Connected to the treatment room' banner flips to an offline/queued state with counts). Disable finalise whenever the queue is non-empty so a chart can't be sealed with edits/photos still pending — protecting the server-side immutability guarantee."
         }
       ]
     },
@@ -354,17 +450,35 @@
         "SPRINT-0/FLUTTER"
       ],
       "detail": [
-        "Store distribution + (where the compliance posture allows) code-push (e.g. Shorebird) for both Flutter apps from CI, with versioning + minimum-supported-version handling and crash/usage telemetry into observability (ADR-0006).",
+        "Store/internal distribution from CI for both Flutter flavours, with versioning + minimum-supported-version handling and an in-app 'update required' gate (enforced server-side too). Code-push (e.g. Shorebird) viability is assessed and documented against the compliance posture (open question — likely OK for the client app, constrained for the clinical provider app). Crash/usage telemetry feeds observability (ADR-0006).",
         "Lets the clinic ship and responsibly patch the apps."
       ],
       "ui_spec": [
-        "No in-app screen — release pipeline + an in-app 'update required' gate for unsupported versions."
+        "No in-app feature screen — release pipeline + an in-app 'update required' gate for unsupported versions."
       ],
       "data_model": [
         {
           "entity": "AppRelease",
           "fields": "platform, version, min_supported, channel, code_push_ref?",
-          "notes": "Code-push viability assessed for compliance."
+          "notes": "Code-push viability assessed for the compliance posture."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "CI distribution pipeline for both app flavours",
+          "note": "Build + sign both Flutter flavours in CI and distribute to internal then store channels (TestFlight / Play internal → store). Per-store signing and secrets handling."
+        },
+        {
+          "title": "Versioning + minimum-supported-version + 'update required' gate",
+          "note": "Stamp each release with a version and a minimum-supported-version. In-app 'update required' gate blocks unsupported builds; enforce the floor server-side too (API rejects unsupported clients) so the gate can't be skipped."
+        },
+        {
+          "title": "Assess + document code-push (Shorebird) compliance viability",
+          "note": "Assess Shorebird/code-push against the compliance posture and document the decision per flavour: likely acceptable for the client app, constrained for the clinical provider app (OTA Dart changes to a clinical record surface). Record the outcome (open question in the PRD), don't assume it."
+        },
+        {
+          "title": "Crash + usage telemetry into observability",
+          "note": "Wire crash and usage telemetry from both apps into the platform observability stack so regressions and adoption are visible. Respect the privacy posture (no PHI in telemetry)."
         }
       ]
     },
@@ -401,17 +515,29 @@
         "PRD-03/GATING"
       ],
       "detail": [
-        "A reception-desk tablet where clients self-check-in: verify identity/appointment and complete any outstanding intake/consent, updating the visit lifecycle / Today board (PRD-02). The surface is locked-down (no access to other clients' data) and times out between clients.",
-        "Speeds arrivals and captures missing pre-visit items."
+        "A locked-down reception-tablet surface where clients self-check-in: from an idle 'Welcome in' attract screen, find their booking, confirm details, and complete any outstanding intake (medical history/health check) or consent (PRD-03). Check-in moves the appointment to checked_in (PRD-02 lifecycle), updating the reception arrivals board and the provider's day list. Steps: Find booking · Confirm appointment · Check details · Health check · Sign consent · Checked in.",
+        "Single-client session with no access to other clients' data, auto-timing-out to the attract screen between clients (C10). Re-uses the same modules as the client app. Speeds arrivals and captures missing pre-visit items."
       ],
       "ui_spec": [
-        "Prototype: check-in tablet (checkin.png) — 'Welcome in' self-check-in; verify appointment, complete outstanding intake/consent; returns to a neutral state between clients."
+        "Prototype: checkin — idle 'Welcome in' attract screen ('Tap to check in'); steps Find booking · Confirm appointment · Check details · Health check · Sign consent · Checked in; 'Reception arrivals board'.",
+        "Returns to a neutral state between clients (auto-timeout)."
       ],
       "data_model": [
         {
-          "entity": "(reuses)",
-          "fields": "Appointment.status -> checked_in (PRD-02); IntakeResponse/ConsentSignature (PRD-03)",
+          "entity": "(reuses) Appointment.status → checked_in",
+          "fields": "PRD-02 — advances lifecycle, updates arrivals board / Today",
           "notes": "Kiosk session is single-client + auto-timeout."
+        },
+        {
+          "entity": "(reuses) IntakeResponse/ConsentSignature",
+          "fields": "PRD-03 — outstanding intake/consent completed at the desk",
+          "notes": "Same modules as the client app; no parallel store."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Reception self-check-in tablet surface",
+          "note": "Locked-down web/PWA kiosk surface re-using the PRD-02/03 modules. Idle 'Welcome in' attract screen → 'Tap to check in' → booking lookup + light detail confirmation (not a staff login) → prompt/complete outstanding intake (medical history/health check) and consent (PRD-03) → advance Appointment to checked_in (PRD-02), updating the arrivals board and the provider day list. Single-client session with no cross-client data access; auto-timeout back to the attract screen between clients (C10)."
         }
       ]
     },
@@ -450,18 +576,34 @@
         "PRD-07/FOLLOWUPS"
       ],
       "detail": [
-        "A bench tablet for behind-the-scenes work: open/close checklist, cold-chain log, stock on hand, S4 drug register, waste/disposal log, tasks and shift handover — each panel reusing the underlying modules (PRD-04 medicines, PRD-11 operations, PRD-07 jobs). Role/financial gating applies; actions audited.",
-        "A focused operations view for the back room."
+        "A bench tablet for behind-the-scenes work, opening on a 'Good morning' hub that shows the morning's attention items (open/close progress, cold-chain, expiring stock, last handover). Panels: open/close checklist, cold-chain (fridge) log, stock on hand, Schedule 4 drug register, waste & disposal log, tasks and shift handover — each re-using the underlying module (PRD-04 medicines, PRD-11 operations, PRD-07 jobs, PRD-11 handover) rather than duplicating data.",
+        "Role/financial gating applies (owner-only money stays gated via .fin); actions are audited; shared-device session handling attributes actions to the acting staff member. A focused operations view for the back room."
       ],
       "ui_spec": [
-        "Prototype: back-office tablet (backroom.png) — 'Good morning', Open & close, Cold chain, Stock on hand, Schedule 4 drug register, Waste & disposal log, Tasks, Shift handover.",
-        "Shared-device session handling."
+        "Prototype: backroom — 'Good morning, Tessa' hub with morning attention items; tabs Today · Open & close · Cold chain · Stock · S4 register · Waste log · Tasks & handover.",
+        "Shared-device session handling; financial figures stay owner-only (gated)."
       ],
       "data_model": [
         {
-          "entity": "(reuses)",
-          "fields": "OpenCloseChecklist/TempLog/StockItem/StockLedger/StockDestruction/Job/ShiftHandover",
-          "notes": "Aggregates operations + medicines + jobs."
+          "entity": "(reuses) OpenCloseChecklist/FridgeLog",
+          "fields": "PRD-11 — open/close + cold-chain panels",
+          "notes": "Aggregates operations."
+        },
+        {
+          "entity": "(reuses) StockItem/StockLedger/S4 register/StockDestruction",
+          "fields": "PRD-04 — stock on hand, S4 register, waste/disposal",
+          "notes": "Aggregates medicines."
+        },
+        {
+          "entity": "(reuses) Job/ShiftHandover",
+          "fields": "PRD-07 jobs + PRD-11 handover — tasks + handover panels",
+          "notes": "Aggregates jobs + handover."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Back-office bench-tablet operations surface",
+          "note": "Back-office web/tablet surface composing existing module views (not re-implementing them): a 'Good morning' hub with morning attention items, then panels for open/close checklist + cold-chain log (PRD-11), stock on hand + S4 register + waste/disposal (PRD-04), tasks (PRD-07) and shift handover (PRD-11). Apply role gating with the .fin capability so non-owner roles see no money figures; audit every action; shared-device session handling attributes actions to the acting staff member."
         }
       ]
     },
@@ -501,17 +643,41 @@
         "PRD-05/ADVERSE-EVENT"
       ],
       "detail": [
-        "A safety-critical client->clinic channel: the client reports a post-treatment concern (with optional photo, consent-respecting) from the app, raising a follow-up job for staff with the client/treatment linked. Staff can call back, resolve, or escalate to an adverse event (PRD-05) / complaint (PRD-11). The client sees acknowledgement; the exchange is recorded and audited.",
-        "Bridges the client app to staff follow-ups (the concern bridge, localStorage in the proto)."
+        "A safety-critical client→clinic channel: the client reports a post-treatment concern from the app (description, urgency, optional photo handled like clinical media — signed URLs, no plain device retention, consent-respecting) and immediately sees an acknowledgement. Submitting raises a follow-up Job (PRD-07) with the client and treatment linked; in staff Follow-ups it appears as a job (prototype openConcern / concernCall) where staff view it, call back, resolve, or escalate to an adverse event (PRD-05) / complaint (PRD-11).",
+        "The exchange is recorded and audited; a complaint escalation pulls in the C24 AHPRA pathway + indefinite retention. Bridges the client app to staff follow-ups (the concern bridge — tla_client_reports localStorage in the proto)."
       ],
       "ui_spec": [
-        "Prototype: client app 'Report a concern' (client-app.png) -> appears in staff Follow-ups (followups.png) as a job (openConcern/concernCall)."
+        "Prototype: client-app 'Report a concern' (description, urgency, optional photo; acknowledgement on submit) → staff Follow-ups job ('View report' → openConcern; 'client called back' → concernCall).",
+        "Escalation paths to adverse event (PRD-05) and complaint (PRD-11)."
       ],
       "data_model": [
         {
           "entity": "Concern",
-          "fields": "id, tenant_id, client_id, treatment_ref, body, photo_ref?, status, raised_at",
-          "notes": "Raises a Job (PRD-07); escalate -> AdverseEvent/Complaint."
+          "fields": "id, tenant_id, client_id, treatment_ref, body, urgency, photo_ref?, status, raised_at",
+          "notes": "Raises a Job (PRD-07); escalate → AdverseEvent/Complaint."
+        },
+        {
+          "entity": "(reuses) Job",
+          "fields": "PRD-07 — follow-up the concern raises, linking client + treatment",
+          "notes": "Staff call back / resolve / escalate."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Client app: 'Report a concern' submission + acknowledgement",
+          "note": "Client-app 'Report a concern' flow: description + urgency + optional photo (handled like clinical media — request a signed upload URL, no plain device retention, consent-respecting). POST a Concern (client_id, treatment_ref, body, urgency, photo_ref?, raised_at). Show the client an immediate acknowledgement that the clinic has it."
+        },
+        {
+          "title": "Concern → follow-up Job bridge (replaces tla_client_reports)",
+          "note": "Server-side: a submitted Concern raises a follow-up Job (PRD-07) linking the client and treatment, replacing the prototype's tla_client_reports localStorage bridge (ingestClientReports). The job lands in staff Follow-ups."
+        },
+        {
+          "title": "Staff Follow-ups: view / call back / resolve a concern",
+          "note": "In staff Follow-ups, render the concern job (prototype openConcern 'View report'); let staff call the client back and resolve it (concernCall → 'Marked as actioned — client called back', job → done). Surface urgency."
+        },
+        {
+          "title": "Escalate a concern to adverse event / complaint",
+          "note": "From the concern, allow escalation to an adverse event (PRD-05) or a complaint (PRD-11). A complaint escalation pulls in the C24 AHPRA pathway and indefinite retention (C18). Record + audit the whole exchange end-to-end."
         }
       ]
     }

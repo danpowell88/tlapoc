@@ -11,8 +11,9 @@ The prototype adds true-cost reporting — cost of goods (units/vial cost, consu
 
 ## How it works
 
-True-cost / margin (COGS) reporting: cost of goods (product units/vial cost, consumables) attributed per treatment/service, so margin = revenue - COGS is visible per service and practitioner. Feeds pricing & what-if (PRD-06); figures owner-gated. Detailed accounting still defers to Xero.
-Shows real profitability, not just revenue.
+True-cost / margin (COGS) reporting so the owner prices and plans on real profitability, not just top-line revenue. It attributes cost of goods per treatment/service — product units/vial cost (from the per-product, per-unit stock model and vial reconciliation, PRD-04 VIAL-RECON) plus consumables — so margin = revenue − COGS surfaces per service and per practitioner. The Finance screen is the home: a light pricing + reporting hub, deliberately not a ledger.
+This is attribution, not accounting (ADR-0027, revised): detailed accounting — payroll, super, commission/pay-splits, supplier POs/AP, refund/dispute management, GST/BAS lodgement — lives in Xero (PRD-10 XERO) and with the bookkeeper. The app keeps the clinical/commercial decisions: the margin numbers feed the pricing & what-if planner (PRD-06 PRICING-WHATIF / ADR-0022) so a price change can be modelled against real cost.
+Every figure here is money and is gated behind the owner financial capability — the Finance area is owner-only; the 'Handled in Xero, not here' footnote makes the boundary explicit.
 
 ## Requirements
 
@@ -20,23 +21,27 @@ Shows real profitability, not just revenue.
 
 ## Acceptance Criteria
 
-- [ ] Cost of goods (product units/vial cost, consumables) is attributed per treatment/service.
+- [ ] Cost of goods (product units/vial cost + consumables) is attributed per treatment/service using the per-product/per-unit stock model.
 - [ ] Margin = revenue − COGS surfaces per service and per practitioner.
-- [ ] Feeds pricing & what-if (PRD-06/PRICING-WHATIF); figures are owner-gated.
-- [ ] Detailed accounting still defers to Xero (attribution, not a ledger).
+- [ ] Margin feeds the pricing & what-if planner (PRD-06).
+- [ ] Attribution only — detailed accounting (payroll/PO/AP/dispute/BAS) defers to Xero (ADR-0027); all figures owner-gated.
 
 ## UI designs / screenshots
 
 _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack)._
 
-- Prototype: Finance (finance.png) — true-cost/margin per treatment using vial/consumable cost; owner-only.
+- Prototype: Finance (finance.png) — 'The books live in Xero … in the app you keep pricing and high-level reporting'.
+- Xero-connected banner; tiles: Revenue today, This month, Avg / visit, Membership MRR (all owner-gated).
+- Cards: 'Pricing & what-if' (Open pricing →) and 'Reporting' (Open reports →); true-cost/margin per treatment sits in the reporting view.
+- Footnote: 'Handled in Xero / integrations, not here: payroll & super, commission / pay-splits, supplier POs & AP, refund reconciliation, GST/BAS lodgement.'
+- Entire Finance area is owner-only (.fin).
 
 ![finance — prototype screen](../screens/finance.png)
 
 ## Suggested data model
 
-- **(read) MarginByService** — service_id, revenue, cogs(vial+consumables), margin by date
-  - _Uses VIAL-RECON (PRD-04); attribution not a ledger (ADR-0027)._
+- **(read) MarginByService** — service_id, practitioner_id?, period, revenue, cogs_product(vial/units), cogs_consumables, margin
+  - _Uses VIAL-RECON (PRD-04) for vial/unit cost; attribution not a ledger (ADR-0027); owner-gated; feeds PRD-06 PRICING-WHATIF._
 
 ## Technical notes (high level)
 
@@ -48,12 +53,7 @@ _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Po
 
 ## Tasks (dev pickup)
 
-- [ ] **Read-model / projection**
-  Build a materialised read-model/projection (don't query OLTP directly):
-  - Shape: service_id, revenue, cogs(vial+consumables), margin by date.
-  - Populate from domain events + the audit stream; eventual consistency is fine; support rebuild/backfill.
-  - Expose a query API with this story's date/role filters; respect owner-only .fin gating.
-- [ ] **Web UI**
-  Build on the Angular web app: the finance per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: Finance (finance.png) — true-cost/margin per treatment using vial/consumable cost; owner-only.
+- [ ] **Read-model / projection: true-cost / margin (COGS)**
+  Project MarginByService = revenue − COGS per service (and per practitioner) over a window, where COGS = product/vial cost (from the per-product/per-unit stock model + VIAL-RECON, PRD-04) + consumables. Tag all fields owner-financial. Expose the margin figures to the PRD-06 PRICING-WHATIF planner. This is attribution over the read schema, not a ledger — no payroll/PO/AP/BAS computation (ADR-0027).
+- [ ] **Web UI: Finance true-cost / margin (owner-only)**
+  Build the Finance hub (finance.png): Xero-connected banner, the owner-gated tiles (Revenue today, This month, Avg/visit, Membership MRR), the Pricing & what-if and Reporting cards, the true-cost/margin-per-treatment view, and the explicit 'Handled in Xero, not here' footnote drawing the attribution/accounting boundary. Gate the entire area behind .fin.

@@ -11,8 +11,11 @@ S4 stock is received from a TGA-approved wholesaler with ARTG status, brand, spo
 
 ## How it works
 
-S4 stock is received from a TGA-approved wholesaler with ARTG status, brand, sponsor and lawful supply source recorded per lot. Receiving non-ARTG or unverified-source stock is warned/blocked per config (C11). S4 purchase orders require a prescriber signer.
-Ensures the clinic only holds lawfully-supplied, approved medicine, with provenance for every lot.
+Lawful supply is a top TGA enforcement target (penalties to $1.65M/breach for individuals): importing or using unapproved/counterfeit injectables is exactly what C11 guards against. Every S4 lot received must record its ARTG registration/approval status, brand, sponsor and the lawful supply source (ordered by an authorised prescriber from a TGA-approved wholesaler).
+S4 purchase orders require a prescriber signer - RNs/ENs/admin cannot buy S4 (GAP-3). The receive flow is where provenance enters the system and where non-ARTG / unverified-source stock is warned or blocked per tenant config.
+Receiving creates a StockItem (lot) under a product: lot number, expiry, units received (in the product's unit), supplier, ARTG status, supply source, the storage location and the custodian. On-hand starts at received and is decremented by administrations/wastage via the StockLedger.
+The server validates lawful supply: ARTG status is recorded (manual entry in v1; dataset lookup is an open option), and non-ARTG or unverified-source stock is warned or blocked per tenant config. An S4 PO must carry a prescriber signer and a TGA-approved wholesaler.
+The received lot then surfaces in the stock-by-lot table with on-hand / used / wasted / status, and in lot detail with expiry, supplier, storage+temp, custody, the ARTG badge and vial reconciliation. The provenance recorded here is what makes the lot selectable at administration.
 
 ## Requirements
 
@@ -28,17 +31,20 @@ Ensures the clinic only holds lawfully-supplied, approved medicine, with provena
 
 ## UI designs / screenshots
 
-- Prototype: Stock & medicines -> 'Receive stock' (stock.png) — a modal capturing lot, expiry, units received, supplier, ARTG; the lot then appears in the stock table with on-hand/expiry/temp/status.
-- ARTG validation supports manual entry (dataset lookup is an open option).
+- Prototype screen: Stock & medicines - 'Receive stock' (stock.png).
+- 'Receive stock' opens a modal capturing lot, expiry, units received, supplier, ARTG status, and the destination location ('Receive into Fridge 1').
+- The received lot appears in the 'Stock by lot' table: product, lot, expiry, on-hand, used, wasted, status (OK/Expiring/Depleted/Expired).
+- Lot detail shows the ARTG badge ('ARTG' verified vs 'unapproved'), supplier (e.g. 'Allergan AU'), storage ('Fridge 1 - 4.2C') and custody ('Dr Lee NP').
+- ARTG validation is manual entry in v1; a dataset lookup is flagged as an open option.
 
 ![stock — prototype screen](../screens/stock.png)
 
 ## Suggested data model
 
-- **StockItem** — id, tenant_id, product_id, lot, expiry, received_units, on_hand, supplier, artg_verified(bool), supply_source, location_id, custodian_id, status
-  - _Provenance per lot (C11); on_hand decremented by administrations._
-- **PurchaseOrder** — id, tenant_id, supplier, lines[], prescriber_signer_id, status
-  - _S4 POs require a prescriber signer + approved wholesaler._
+- **StockItem** — id, tenant_id, product_id, lot, expiry, received_units, on_hand, wasted, supplier, artg_verified(bool), supply_source, location_id, custodian_id, status(OK|Expiring|Depleted|Expired)
+  - _Provenance per lot (C11); on_hand decremented by administrations via StockLedger. Mapping: the stock[] lot objects + doReceive()._
+- **PurchaseOrder** — id, tenant_id, supplier, wholesaler_approved(bool), lines[]{product_id,qty}, prescriber_signer_id, status
+  - _S4 POs require a prescriber signer + TGA-approved wholesaler (GAP-3). RNs/ENs/admin cannot sign an S4 PO._
 
 ## Other
 
@@ -46,23 +52,9 @@ Ensures the clinic only holds lawfully-supplied, approved medicine, with provena
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - StockItem — id, tenant_id, product_id, lot, expiry, received_units, on_hand, supplier, artg_verified(bool), supply_source, location_id, custodian_id, status (Provenance per lot (C11); on_hand decremented by administrations.)
-  - PurchaseOrder — id, tenant_id, supplier, lines[], prescriber_signer_id, status (S4 POs require a prescriber signer + approved wholesaler.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Receiving records ARTG status, brand, sponsor and supply source per lot.
-  - Rule: Receiving non-ARTG or unverified-source stock is warned/blocked per config.
-  - Rule: S4 purchase orders require a prescriber signer + TGA-approved wholesaler.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-04/PRODUCT-CATALOGUE.
-- [ ] **Enforce compliance gate + audit events**
-  Enforce C11 as a server-side invariant that cannot be bypassed via the API:
-  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
-  - Write an immutable AuditEvent for the attempt and its outcome.
-  - Receiving non-ARTG or unverified-source stock is warned/blocked per config.
-  - ARTG validation supports manual entry (lookup against an ARTG dataset is an open option).
+- [ ] **StockItem (lot) + PurchaseOrder model with provenance (model & migration)**
+  Add StockItem: id, tenant_id, product_id(FK), lot, expiry, received_units, on_hand, wasted, supplier, artg_verified(bool), supply_source, location_id(FK StockLocation), custodian_id, status; RLS by tenant. Add PurchaseOrder: id, tenant_id, supplier, wholesaler_approved, lines[], prescriber_signer_id, status. Index (product_id, expiry) for expiry alerts and (lot) for recall. on_hand is maintained only via StockLedger movements, never edited directly.
+- [ ] **Receive-stock API + ARTG/lawful-supply validation**
+  Endpoint POST /stock/receive: lot, expiry, received_units (product unit), supplier, artg status, supply_source, location_id, custodian_id. Writes a StockLedger receive movement and creates the StockItem. Validate lawful supply: warn or block non-ARTG / unverified-source per tenant config (C11). ARTG = manual entry in v1 with a hook for a future ARTG dataset lookup. Receiving into a location binds custody (PRD-04/CUSTODY-STORAGE).
+- [ ] **Prescriber-signer gate on S4 POs + audit**
+  Enforce that an S4 PurchaseOrder requires prescriber_signer_id (a prescribe-S4-capable staffer) and wholesaler_approved=true before it can be raised/received (GAP-3, ADR-0008); RN/EN/admin attempts are rejected. Audit every receive with full provenance (lot, ARTG, supplier, source, signer) - this is the lawful-supply evidence an inspector asks for (C11).

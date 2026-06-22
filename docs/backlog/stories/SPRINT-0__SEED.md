@@ -11,7 +11,9 @@ Realistic synthetic data (clinic, staff with credentials, clients, services incl
 
 ## How it works
 
-A one-command local environment seeded with a synthetic tenant: staff roles/credentials, clients (incl. an under-18), services flagged S4/non-S4, and stock lots — all clearly synthetic (project rule), reproducible, and reused by integration/e2e tests. Lets any module be developed/demoed without real PII.
+A single command spins up the local stack — containerised Postgres + API + web — and seeds a synthetic tenant. The seed is broad enough to exercise the real compliance paths: staff with roles and credentials (so RBAC/scope works), clients including at least one under-18 (so the cooling-off and payment-block paths from C6 are testable), services flagged S4 and non-S4 (so the rewards/public-naming classification from ADR-0014 has data), and stock lots (so custody/expiry/recall flows have something to track).
+All seed data is clearly synthetic and obviously fake — names, contacts and business details are invented — honouring the project's hard rule. The seed is reproducible (same command, same data) so it's safe to reset and is the fixture the integration and e2e tests build on, keeping tests and local dev in sync.
+Because the seed reflects the compliance-relevant edge cases (under-18, S4 vs non-S4, lots) rather than just happy-path rows, it lets developers and demos hit the guardrails (ADR-0008) the product is actually built around.
 
 ## Requirements
 
@@ -30,13 +32,17 @@ A one-command local environment seeded with a synthetic tenant: staff roles/cred
 
 ## Tasks (dev pickup)
 
-- [ ] **Implement: Synthetic seed data & local dev environment**
-  Deliver per the acceptance criteria:
-  - A script spins up Postgres + API + web locally and seeds a synthetic tenant.
-  - Seed covers staff roles/credentials, clients (incl. an under-18), services flagged S4/non-S4, and stock lots.
-  - All seed data is clearly synthetic; no real client/staff/business info.
-  - Seed is reproducible and used by integration/e2e tests.
-- [ ] **Apply via migrations; verify RLS/tenancy**
-  Migration runs per environment; prove tenant isolation holds.
-- [ ] **Document setup & usage**
-  How to run/operate it; runbook notes for the team.
+- [ ] **Build the one-command local environment and synthetic-tenant seeding**
+  Make 'clone and run' produce a full, synthetic, demo-able stack.
+  - One command brings up containerised Postgres + API + web and seeds a synthetic tenant (builds on DB's local Postgres).
+  - Reproducible: same command, same data; safe to reset.
+  - All data clearly synthetic — invented names/contacts/business details — honouring the no-real-data rule absolutely.
+- [ ] **Seed the compliance-relevant edge cases (roles/credentials, under-18, S4/non-S4, lots)**
+  Make the seed exercise the guardrails, not just happy paths.
+  - Staff with roles + credentials so RBAC/scope has data; clients including an under-18 so cooling-off + payment-block (C6) are testable.
+  - Services/products flagged S4 and non-S4 so rewards/public-naming classification (ADR-0014) has data; stock lots for custody/expiry/recall flows.
+  - Coverage chosen so demos and dev can hit the real compliance blocks (ADR-0008).
+- [ ] **Make the seed reusable by tests and document it**
+  Share the fixture with the test suites and write the how-to.
+  - The integration/e2e tests (TEST) build on the same seed so tests and local dev stay in sync.
+  - Document the command, the seeded entities and the synthetic-only rule for anyone adding to the seed.

@@ -11,8 +11,10 @@ The prototype demos a login/persona screen; the real product needs proper sign-i
 
 ## How it works
 
-The real sign-in sits on the Sprint-0 Entra wiring: staff sign in via Microsoft 365 SSO; clients via social / email+password / OTP with account recovery. Sign-out clears the session everywhere; idle-timeout + absolute limits apply and expiry returns to sign-in without losing in-progress work.
-Every sign-in, sign-out and failed attempt is an auth audit event.
+The real sign-in sits on the Sprint-0 Entra wiring (ADR-0004, REQ-TEN-2, AC3). Staff sign in via Microsoft 365 / Entra ID SSO (no local password — they're bound to the tenant via TENANT's invite flow). Clients sign in/up via Entra External ID: Google/Apple social, email+password, or email/SMS OTP, with account recovery. The prototype's persona picker ('Switch user') stands in for this in the POC.
+Session lifecycle is the substance of this story: sign-out clears the session everywhere (revokes the server session + clears client tokens); token refresh is seamless so an active user isn't bounced mid-task; an idle-timeout and an absolute session limit both apply; and when a session expires the user is returned to sign-in without losing in-progress work (unsaved drafts preserved where possible — e.g. a half-written chart note or booking).
+Every sign-in, sign-out and failed attempt is recorded as an auth audit event (AUTH-AUDIT) — this is where C10 auth-trail capture begins. Failed attempts feed lockout (MFA-STEPUP / Entra policy).
+Edge cases: a session that expires during a long charting session restores the draft on re-auth; sign-out on one device doesn't silently keep another device signed in (sign-out is per-session, revocation is explicit); a client OTP that times out re-issues rather than failing hard.
 
 ## Requirements
 
@@ -30,13 +32,14 @@ Every sign-in, sign-out and failed attempt is an auth audit event.
 
 _Prototype screen: prototype.html — header 'Switch user' (sign-in/persona), Team → People & credentials / Compliance board, Settings._
 
-- Staff: an Entra SSO sign-in screen; clients: social/email/OTP sign-in + sign-up + recovery (the prototype persona picker stands in for this).
-- Session-expiry returns to sign-in, preserving unsaved drafts where possible.
+- Staff: an Entra SSO sign-in screen (redirect to Microsoft, return to the tenant-scoped app). Clients: a sign-in/up screen offering social / email+password / OTP plus account recovery.
+- Session-expiry returns to sign-in preserving unsaved drafts where possible; a clear sign-out control in the header user menu.
+- The prototype persona picker (showLogin / 'Switch user') is the POC stand-in for these real screens.
 
 ## Suggested data model
 
-- **Session** — id, user_id, tenant_id, started_at, last_seen, expires_at, device
-  - _Idle + absolute limits; revoked on sign-out._
+- **Session** — id, tenant_id, user_id, kind(staff|client), started_at, last_seen, idle_expires_at, absolute_expires_at, device, revoked_at
+  - _Idle + absolute limits; revoked on sign-out; one row per device/session so per-session sign-out is precise._
 
 ## Technical notes (high level)
 
@@ -48,25 +51,11 @@ _Prototype screen: prototype.html — header 'Switch user' (sign-in/persona), Te
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - Session — id, user_id, tenant_id, started_at, last_seen, expires_at, device (Idle + absolute limits; revoked on sign-out.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Staff sign-in via Entra SSO; client sign-in/up via social, email+password and OTP, with account recovery.
-  - Rule: Sign-out clears the session everywhere; token refresh is seamless.
-  - Rule: Idle-timeout and absolute session limits apply; expiry returns to sign-in without data loss.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: SPRINT-0/AUTH-STAFF, SPRINT-0/AUTH-CLIENT.
-- [ ] **Enforce compliance gate + audit events**
-  Enforce C10 as a server-side invariant that cannot be bypassed via the API:
-  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
-  - Write an immutable AuditEvent for the attempt and its outcome.
-- [ ] **Web UI**
-  Build on the Angular web app: the screen per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Staff: an Entra SSO sign-in screen; clients: social/email/OTP sign-in + sign-up + recovery (the prototype persona picker stands in for this).
-  - Session-expiry returns to sign-in, preserving unsaved drafts where possible.
+- [ ] **Staff Entra SSO sign-in/out screens**
+  Build the staff sign-in (redirect to Microsoft Entra ID SSO, return to the tenant-scoped app on success — bound via TENANT) and a clear sign-out in the header user menu. No local staff password. Write a sign-in/sign-out/failed-attempt auth event for each (AUTH-AUDIT).
+- [ ] **Client sign-in/up (social / email+password / OTP) + recovery**
+  Build client sign-in and sign-up via Entra External ID covering each of social (Google/Apple), email+password, and email/SMS OTP, plus account recovery (AC3 requires all three methods work). Handle OTP timeout by re-issuing rather than hard-failing. Auth events recorded.
+- [ ] **Session lifecycle: idle/absolute limits, seamless refresh, sign-out-everywhere**
+  Model Session with idle + absolute expiry and per-device rows. Implement seamless token refresh for active users, an idle-timeout and absolute limit, and sign-out that revokes the server session and clears client tokens for that session (per-session precision; another device isn't silently kept in). Record sign-out and expiry.
+- [ ] **Expiry UX: return to sign-in preserving unsaved drafts**
+  On session expiry, route the user back to sign-in and, where possible, preserve in-progress work (unsaved chart note / booking draft) so re-auth restores it rather than losing it. Coordinate with the offline/draft behaviour where relevant; finalisation still happens server-side post-auth.

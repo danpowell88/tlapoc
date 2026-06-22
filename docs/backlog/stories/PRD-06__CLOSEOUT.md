@@ -11,8 +11,8 @@ End-of-day closeout balances card + cash (REQ-PAY-4).
 
 ## How it works
 
-An end-of-day closeout balances card + cash for the day and surfaces variances. Figures are owner-gated and reconcile to the Xero posting (PRD-10).
-The daily till-reconciliation routine.
+A Closeout summarises the day's tenders per location: card_total (reconciled to Square's batch), cash_total (counted vs recorded), and the resulting variance, with the operator who closed it. Variances are highlighted so they can be noted and explained rather than buried. The closeout reconciles to the Xero posting (PRD-10): the day's invoices/payments that posted to Xero should foot to the closeout totals.
+Because it exposes daily takings, the whole closeout is behind the owner-only financial capability; Reception never sees it. The closeout also appears on the back-office tablet so the owner can run it away from the front desk.
 
 ## Requirements
 
@@ -20,24 +20,24 @@ The daily till-reconciliation routine.
 
 ## Acceptance Criteria
 
-- [ ] Closeout summarises card + cash tenders for the day.
-- [ ] Variances are surfaced.
-- [ ] Closeout figures are owner-gated.
+- [ ] Closeout summarises card and cash tenders for the day per location.
+- [ ] Variances (counted vs recorded; card vs Square batch) are surfaced and can be noted.
+- [ ] Closeout figures are owner-gated (not visible to Reception).
 - [ ] Closeout reconciles to the Xero posting (PRD-10).
 
 ## UI designs / screenshots
 
 _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rewards/Account._
 
-- Prototype: Checkout -> daily closeout (checkout.png) — card vs cash totals for the day, variance highlight; owner-only figures.
-- Also surfaced on the back-office tablet (backroom.png).
+- Prototype: Checkout -> daily closeout — card total vs cash total for the day, variance highlight, a notes/lock step ('Note locked & saved'), close-out action; owner-only figures.
+- Also surfaced on the back-office tablet (backroom).
 
 ![checkout — prototype screen](../screens/checkout.png)
 
 ## Suggested data model
 
-- **Closeout** — id, tenant_id, location_id, date, card_total, cash_total, variance, closed_by
-  - _Reconciles to Xero (PRD-10)._
+- **Closeout** — id, tenant_id, location_id, date, card_total, cash_total, counted_cash, variance, note, closed_by, closed_at
+  - _Reconciles to Xero (PRD-10); owner-gated._
 
 ## Other
 
@@ -45,21 +45,17 @@ _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rew
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - Closeout — id, tenant_id, location_id, date, card_total, cash_total, variance, closed_by (Reconciles to Xero (PRD-10).)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Closeout summarises card + cash tenders for the day.
-  - Rule: Variances are surfaced.
-  - Rule: Closeout figures are owner-gated.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-06/POS.
-- [ ] **Web UI**
-  Build on the Angular web app: the checkout per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: Checkout -> daily closeout (checkout.png) — card vs cash totals for the day, variance highlight; owner-only figures.
-  - Also surfaced on the back-office tablet (backroom.png).
+- [ ] **Closeout model + day-rollup (migrations)**
+  Model Closeout (tenant_id + RLS). One row per location per trading day.
+  - card_total / cash_total aggregated from the day's Payments; counted_cash entered by the operator; variance = counted - recorded (and card vs Square batch).
+  - Capture note + closed_by/closed_at; immutable once locked.
+- [ ] **Closeout API: rollup, variance, reconcile-to-Xero**
+  Server-side.
+  - Endpoint to open/compute the day's rollup, accept the counted-cash figure, compute + persist variance, and lock the closeout.
+  - Reconcile against the Xero post (PRD-10): the day's posted invoices/payments should foot to closeout totals; flag a mismatch.
+  - Entire surface owner-only (financial capability).
+- [ ] **Closeout web UI (desk + back-office tablet)**
+  Angular per the screenshot.
+  - Card vs cash totals, counted-cash entry, variance highlight, note + lock ('Note locked & saved'), close action.
+  - Render on the back-office tablet too.
+  - Owner-only capability gate; loading/empty/error states.

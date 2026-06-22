@@ -11,8 +11,8 @@ Sell/redeem packages (visits remaining) and gift cards, track client balances/cr
 
 ## How it works
 
-Sell/redeem packages/series ('visits remaining') and gift cards, and track client balances/credit + AR ageing. Redemptions appear in the closeout and post to Xero.
-Lets clients pre-pay courses and carry credit.
+A Package is a pre-paid course: total_visits and remaining, decremented each time a session is redeemed at checkout; the Client 360 shows 'visits remaining'. A GiftCard has a code, an initial value and a running balance; it can be sold (issued), tracked and partially redeemed against any future sale — the gift-card screen shows each card's balance 'of' its initial, and whether it's assigned to a client, redeemed, or unassigned. AccountBalance holds client store-credit and AR ageing for owner/manager visibility.
+Redemptions appear in the daily Closeout and post to Xero like any other tender (deferred revenue on sale, recognised on redemption — the accounting treatment lives in Xero/PRD-10). Gift cards remain non-S4-neutral: a gift card buys whatever the client likes, but the rewards engine still won't earn/redeem points against an S4 line at checkout.
 
 ## Requirements
 
@@ -20,28 +20,28 @@ Lets clients pre-pay courses and carry credit.
 
 ## Acceptance Criteria
 
-- [ ] Package/series sale + redemption with 'visits remaining'.
-- [ ] Gift cards can be sold, balance-tracked and redeemed.
-- [ ] Client balance/credit and AR ageing tracked.
-- [ ] Redemptions appear in the closeout and post to Xero (PRD-10).
+- [ ] A package/series can be sold and redeemed, decrementing 'visits remaining'; the count shows on the Client 360.
+- [ ] A gift card can be issued, balance-tracked and partially redeemed at checkout; balances sync to checkout.
+- [ ] Client store-credit and AR ageing are tracked and visible to owner/manager.
+- [ ] Package/gift redemptions appear in the Closeout and post to Xero (PRD-10).
 
 ## UI designs / screenshots
 
 _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rewards/Account._
 
-- Prototype: Checkout (checkout.png) for sale/redeem; Memberships -> Gift cards (memb-gifts.png) for issuing/tracking gift-card balances; package 'visits remaining' on the Client 360.
-- Balance/credit + AR ageing visible to owner/manager.
+- Prototype: Memberships -> Gift cards — 'Sell, track & redeem gift cards. Balances sync to checkout.'; 'Issue gift card' button; card tiles showing code, balance 'of' initial, and assignment (e.g. 'GC-4471 H. Lawson $120 of $150', 'GC-3320 redeemed $0 of $100', 'GC-2207 gift — unassigned $200 of $200').
+- Package 'visits remaining' shows on the Client 360; sale/redeem happen in Checkout.
 
 ![memb-gifts — prototype screen](../screens/memb-gifts.png)
 
 ## Suggested data model
 
 - **Package** — id, tenant_id, client_id, service_id, total_visits, remaining, purchased_at
-  - _Redeemed over time._
-- **GiftCard** — id, tenant_id, code, initial, balance, status
-  - _Sell/redeem/track._
+  - _Decremented on redemption; 'visits remaining' on Client 360._
+- **GiftCard** — id, tenant_id, code, initial, balance, status(active|redeemed|void), assigned_client_id?
+  - _Sell/track/redeem; balances sync to checkout._
 - **AccountBalance** — client_id, credit, ar_ageing
-  - _Client credit + receivables ageing._
+  - _Client store credit + receivables ageing (owner/manager visibility)._
 
 ## Other
 
@@ -49,23 +49,19 @@ _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rew
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - Package — id, tenant_id, client_id, service_id, total_visits, remaining, purchased_at (Redeemed over time.)
-  - GiftCard — id, tenant_id, code, initial, balance, status (Sell/redeem/track.)
-  - AccountBalance — client_id, credit, ar_ageing (Client credit + receivables ageing.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Package/series sale + redemption with 'visits remaining'.
-  - Rule: Gift cards can be sold, balance-tracked and redeemed.
-  - Rule: Client balance/credit and AR ageing tracked.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-06/POS.
-- [ ] **Web UI**
-  Build on the Angular web app: the memb-gifts per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: Checkout (checkout.png) for sale/redeem; Memberships -> Gift cards (memb-gifts.png) for issuing/tracking gift-card balances; package 'visits remaining' on the Client 360.
-  - Balance/credit + AR ageing visible to owner/manager.
+- [ ] **Package/GiftCard/AccountBalance model (migrations)**
+  Model Package, GiftCard and AccountBalance (tenant_id + RLS).
+  - Package: total_visits/remaining decremented on redemption.
+  - GiftCard: code, initial, running balance, status, optional assigned client; partial redemption supported.
+  - AccountBalance: client store-credit + AR ageing buckets.
+  - Deferred-revenue treatment is recognised in Xero (PRD-10), not re-implemented here.
+- [ ] **Sell/redeem API: package decrement, gift balance draw-down, credit/AR**
+  Server-side commands/queries.
+  - Sell package / issue gift card / apply store credit; redeem a package visit (decrement remaining, guard against 0) and draw down a gift-card balance at checkout (partial allowed).
+  - Redemptions write to the Closeout and the Xero post.
+  - Expose client credit + AR-ageing read queries (owner/manager gated). Gift cards stay schedule-neutral; the rewards engine still blocks S4 earn/redeem at checkout.
+- [ ] **Gift-cards web UI + Client-360 'visits remaining'**
+  Angular per the screenshot.
+  - Gift-cards screen: tile list (code, balance of initial, assignment status), 'Issue gift card' action, search; balances reflect checkout redemptions live.
+  - Client 360: package 'visits remaining' chip and redemption history.
+  - Loading/empty/error states; owner/manager gate on credit/AR figures.

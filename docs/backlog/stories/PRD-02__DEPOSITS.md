@@ -9,7 +9,8 @@ An opt-in, ACL-fair booking deposit / card-on-file hold, suppressed during cooli
 
 ## How it works
 
-Placeholder (Phase 2): an opt-in booking deposit / card-on-file hold to reduce no-shows. Must keep the cooling-off suppression invariant (F14) — no hold during a cooling-off period. Not in v1.
+Placeholder (Phase 2). An opt-in, ACL-fair booking deposit / card-on-file hold to reduce no-shows — front-desk-controlled, disclosed at booking, refundable on notice, never a pressure mechanism (ADR-0026). NOT in v1: there are no deposits or holds in v1 (REQ-BOOK-3, scoping decision).
+Design constraint that must survive into Phase 2: the cooling-off suppression invariant (F14) — no deposit/hold may be placed or held during an under-18 cooling-off period (coordinates with PRD-03 COOLING-OFF). When built it sits behind the existing IPaymentProvider (ADR-0036); S4 is never priced/sold online.
 
 ## Requirements
 
@@ -23,8 +24,8 @@ Placeholder (Phase 2): an opt-in booking deposit / card-on-file hold to reduce n
 
 ## Suggested data model
 
-- **BookingHold** — id, appointment_id, amount, token_ref, status
-  - _Placeholder; suppressed during cooling-off._
+- **BookingHold** — id, tenant_id, appointment_id, amount, token_ref, status(placed|captured|released|refunded)
+  - _Placeholder; behind IPaymentProvider; SUPPRESSED during cooling-off (F14)._
 
 ## Technical notes (high level)
 
@@ -36,5 +37,5 @@ Placeholder (Phase 2): an opt-in booking deposit / card-on-file hold to reduce n
 
 ## Tasks (dev pickup)
 
-- [ ] **Scope & design when pulled into a sprint**
-  Deferred placeholder — no build in v1; confirm it still fits scope/regulatory stance, then break down.
+- [ ] **Design note: ACL-fair deposits + cooling-off suppression (F14) — Phase 2**
+  Placeholder design task (no v1 build). Document the opt-in deposit / card-on-file hold model behind IPaymentProvider (ADR-0036): disclosed at booking, refundable on notice, ACL-fair, never coercive. Capture the hard invariant F14 — a BookingHold must NOT be placed or held during an under-18 cooling-off period (coordinates with PRD-03 COOLING-OFF). S4 is never priced or sold online. Produce the design only; defer implementation to Phase 2.

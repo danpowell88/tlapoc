@@ -11,8 +11,10 @@ The client record captures DOB and derives an under-18 flag that feeds cooling-o
 
 ## How it works
 
-The core client record captures DOB and derives an under-18 flag that downstream rules consume: cooling-off (PRD-03/C6) and S4 pricing/advertising (C9). It supports soft-delete with audit and duplicate handling.
-Under-18 status appears as an age chip on the patient header so staff always see it.
+The core client record captures DOB and derives an under-18 flag (and current age) that downstream rules consume (REQ-CLI-3, C6): the under-18 cooling-off requirement (PRD-03/C6) and the S4 advertising/pricing rules (C9). Deriving age once, server-side, means every consumer reads the same answer instead of re-implementing date maths.
+The flag is computed, not stored as a static field, so it updates correctly across a birthday — a client who is 17 today is automatically 18 (and no longer under-18-gated) on their birthday with no batch job needed. It is exposed to PRD-03/06/07 and shown as the age chip on the patient header (the Client 360 header age, e.g. '34 · Brisbane').
+This story is the underlying record + age derivation + lifecycle plumbing only — the full client directory, search and 360 profile are PRD-02. It supports soft-delete with audit (a deleted client is excluded from active views but the row and its history remain for retention/audit, never hard-deleted here — destruction is RETENTION's job) and duplicate handling (merge candidates surfaced, not auto-merged, to avoid a false merge of two real people).
+Edge cases: an unknown/estimated DOB still derives a defensible age band; a soft-deleted client cannot be booked or appear in active search; merge is a reviewed action that re-points history and writes an audit event.
 
 ## Requirements
 
@@ -28,15 +30,15 @@ Under-18 status appears as an age chip on the patient header so staff always see
 
 ## UI designs / screenshots
 
-- Prototype: the Client 360 header (client-360.png) shows the age/under-18 chip alongside consent chips; DOB on the profile.
-- Directory + profile are PRD-02; this story is the underlying record + age derivation.
+- Prototype: the Client 360 header (client-360.png) shows the age (e.g. '34') alongside consent chips ('Consent current', 'Image use', 'Allergy: none') and VIP/member tag; DOB sits on the profile.
+- The under-18/age chip is consumed by the UX age chip on the patient header (the visible signal staff always see); the directory + full profile are PRD-02.
 
 ![client-360 — prototype screen](../screens/client-360.png)
 
 ## Suggested data model
 
-- **Client** — id, tenant_id, name, dob, contacts, flags(json), under18(derived), deleted_at
-  - _under18 recomputed across birthdays; soft-delete excluded from active views._
+- **Client** — id, tenant_id, name, dob, contacts, flags(json), under18(derived), age(derived), deleted_at
+  - _under18/age recomputed across birthdays (not stored static); soft-delete excluded from active views; FK target for clinical/booking records (full CRM in PRD-02)._
 
 ## Other
 
@@ -44,16 +46,7 @@ Under-18 status appears as an age chip on the patient header so staff always see
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - Client — id, tenant_id, name, dob, contacts, flags(json), under18(derived), deleted_at (under18 recomputed across birthdays; soft-delete excluded from active views.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: DOB captured; under-18 flag derived and exposed to PRD-03/PRD-06/PRD-07.
-  - Rule: The flag updates correctly across a birthday.
-  - Rule: Soft-delete with audit and duplicate handling supported (full CRM in PRD-02).
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-01/TENANT.
+- [ ] **Client core record, DOB capture & age derivation**
+  Model the Client core (tenant_id + RLS) with DOB and derive under18 + current age server-side at read time so they stay correct across a birthday with no batch job. Expose the derived flag/age to PRD-03/06/07 (cooling-off, pricing) and to the patient-header age chip. Support soft-delete (deleted_at; excluded from active/bookable/search views; row + history retained for RETENTION/AUDIT — never hard-deleted here).
+- [ ] **Duplicate detection & reviewed merge**
+  Surface duplicate/merge candidates (matching name + DOB + contact) as suggestions, never auto-merging two real people. Merge is a reviewed action that re-points history to the surviving record and writes an audit event. Soft-deleted and merged-away records stay out of active views.

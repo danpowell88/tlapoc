@@ -9,7 +9,7 @@ Self-service tenant sign-up, subscription billing and per-tenant Entra federatio
 
 ## How it works
 
-Placeholder (Phase 3): self-service tenant sign-up, subscription billing and per-tenant Entra federation to sell the platform as SaaS. v1 provisions tenants manually; tenancy/identity are already SaaS-ready.
+Placeholder (Phase 3): self-service tenant sign-up, subscription billing and per-tenant Entra federation to sell the platform as SaaS. v1 provisions tenants manually; tenancy/identity are already SaaS-ready (RLS isolation, Entra auth). Captured so tenancy/identity stay SaaS-ready.
 
 ## Requirements
 
@@ -32,5 +32,5 @@ Placeholder (Phase 3): self-service tenant sign-up, subscription billing and per
 
 ## Tasks (dev pickup)
 
-- [ ] **Scope & design when pulled into a sprint**
-  Deferred placeholder — no build in v1; confirm it still fits scope/regulatory stance, then break down.
+- [ ] **Placeholder: self-service onboarding + subscription billing (Phase 3)**
+  Deferred. Self-service tenant sign-up, subscription billing and per-tenant Entra federation on top of the already SaaS-ready tenancy/identity. Not built in v1.

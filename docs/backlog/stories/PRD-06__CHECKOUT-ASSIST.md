@@ -11,8 +11,8 @@ Subtle membership/restock upsell + client rapport panel + post-checkout rebookin
 
 ## How it works
 
-At checkout, a subtle membership/restock upsell + a client-rapport panel, and a post-checkout rebooking prompt on the treatment interval. Upsell suggestions never include S4 discounting.
-Helps the desk add value and keep clients on cadence; integrates with the calendar (PRD-02) and recall (PRD-07).
+A 'Worth mentioning' panel shows subtle, derived suggestions: membership offer if not a member ('Not a member — offer Glow Club · $89/mo'), a likely retail restock ('Likely low on retinol serum — bought 10 wks ago, lasts ~8') with an 'Add restock' action, and a 'Toxin due ~now' rebook cue. A 'Pairs well with today's treatment' cross-sell row matches non-S4 aftercare/retail to what was treated, each showing its margin ('+$21 margin'). None of these ever discount or promote an S4 item.
+After payment, the post-checkout rebooking view offers the next visit on the treatment interval (toxin ~12 weeks): pick a slot or 'Text her the options'; a non-S4 restock reminder can be toggled on. Booking a slot creates the appointment (PRD-02); the recall nudge ties to PRD-07. Suggestions are derived (rewards eligibility + stock ageing + treatment interval), not a stored entity.
 
 ## Requirements
 
@@ -20,23 +20,23 @@ Helps the desk add value and keep clients on cadence; integrates with the calend
 
 ## Acceptance Criteria
 
-- [ ] Checkout shows a subtle membership/restock upsell and a client rapport panel.
-- [ ] Post-checkout rebooking is offered on the treatment interval.
-- [ ] Upsell suggestions never include S4 discounting.
-- [ ] Rebooking integrates with the calendar (PRD-02) and recall (PRD-07).
+- [ ] Checkout shows a subtle 'Worth mentioning' upsell (membership/restock) and a client-rapport panel derived from history.
+- [ ] A non-S4 'Pairs well with today's treatment' cross-sell row matches aftercare/retail to the cart, showing margin.
+- [ ] Post-checkout rebooking is offered on the treatment interval (slot pick or text options); booking creates the appointment (PRD-02).
+- [ ] No upsell or cross-sell discounts or promotes an S4 item.
 
 ## UI designs / screenshots
 
 _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rewards/Account._
 
-- Prototype: Checkout (checkout.png) — a subtle upsell card (e.g. 'Slow-moving retail: bundle SPF with facials'), a client-rapport panel, and a rebook prompt at the interval after payment.
+- Prototype: Checkout 'Worth mentioning' panel (Glow Club offer / retinol restock with 'Add restock' / 'Toxin due ~now'); 'Pairs well with today's treatment' cards with margin + 'Add'; post-payment rebook view (slot grid, 'Text her the options', restock reminder toggle).
 
 ![checkout — prototype screen](../screens/checkout.png)
 
 ## Suggested data model
 
-- **(derived) CheckoutSuggestion** — from RewardRule + stock aging + treatment interval
-  - _Non-S4 upsell only; rebook -> Appointment (PRD-02)._
+- **(derived) CheckoutSuggestion** — from RewardRule eligibility + stock ageing + treatment interval + membership status
+  - _Non-S4 upsell/cross-sell only; rebook -> Appointment (PRD-02), recall -> PRD-07._
 
 ## Technical notes (high level)
 
@@ -48,7 +48,9 @@ _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rew
 
 ## Tasks (dev pickup)
 
-- [ ] **Web UI**
-  Build on the Angular web app: the checkout per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: Checkout (checkout.png) — a subtle upsell card (e.g. 'Slow-moving retail: bundle SPF with facials'), a client-rapport panel, and a rebook prompt at the interval after payment.
+- [ ] **Checkout-assist web UI: upsell, rapport, cross-sell, post-pay rebook**
+  Angular, layered onto the checkout (no new core entity).
+  - 'Worth mentioning' panel: membership offer (if non-member), retail restock (stock-ageing derived) with Add action, rebook cue.
+  - 'Pairs well with today's treatment' cross-sell: match non-S4 aftercare/retail to cart signals (toxin/filler/skin/energy/contour); show price + margin + Add; suppress S4 entirely.
+  - Post-payment rebook view: slot grid on the treatment interval, 'Text her the options' (PRD-07), restock-reminder toggle; confirm -> create Appointment (PRD-02).
+  - Suggestions read rewards eligibility + stock ageing + interval server-side; loading/empty/error states; no S4 discount/promotion anywhere.

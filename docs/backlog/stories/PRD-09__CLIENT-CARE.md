@@ -11,8 +11,8 @@ Clients view consented before/after photos, memberships, rewards/perks and balan
 
 ## How it works
 
-In the app the client views consented before/after photos, memberships, rewards/perks and balances, and adds a card-on-file for autopay (feeds PRD-06). No one-off online checkout is exposed.
-Self-service for care history and payments.
+My care/Rewards/Account tabs: visit history + consent-gated before/after photos (served via short-lived signed URLs, ADR-0009, never on device); points/perks/gift cards over PRD-06; profile, memberships, the client's own balance, and add/replace a tokenised card-on-file (Square) that feeds PRD-06 autopay.
+No one-off online checkout (v1 payments are in-person). Self-service for care history and payments.
 
 ## Requirements
 
@@ -30,15 +30,19 @@ Self-service for care history and payments.
 
 _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.html._
 
-- Prototype: client app (client-app.png) tabs — My care (visit history, photos with consent), Rewards (redeem points, gift cards), Account (update card on file).
-- Photo viewing is image-use-consent-gated.
+- Prototype: client-app — My care (visit history, photos gated by image-use consent), Rewards (redeem points, perks, gift cards), Account (profile, memberships, balance, 'Update card on file').
+- Photo viewing is image-use-consent-gated and served via signed URLs.
 
 ![client-app — prototype screen](../screens/client-app.png)
 
 ## Suggested data model
 
-- **(reuses)** — Photo (PRD-05), Membership/RewardLedger/AccountBalance (PRD-06), PaymentMethodToken
-  - _Card-on-file feeds PRD-06 autopay; no one-off checkout._
+- **(reuses) Photo** — PRD-05 — signed-URL view (ADR-0009), image-use-consent-gated
+  - _Never bundled/persisted in the app._
+- **(reuses) Membership/RewardLedger/AccountBalance** — PRD-06 — membership, points/perks, client balance
+  - _Client sees own figures only._
+- **(reuses) PaymentMethodToken** — PRD-06 — provider-tokenised card-on-file (Square)
+  - _Feeds autopay; no one-off checkout._
 
 ## Other
 
@@ -46,8 +50,5 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 
 ## Tasks (dev pickup)
 
-- [ ] **Client app UI (Flutter)**
-  Build on the Flutter client app: the client-app per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: client app (client-app.png) tabs — My care (visit history, photos with consent), Rewards (redeem points, gift cards), Account (update card on file).
-  - Photo viewing is image-use-consent-gated.
+- [ ] **Client app: My care / Rewards / Account + card-on-file**
+  My care tab: visit history list and a before/after gallery whose tiles each fetch a per-view signed URL (ADR-0009) and cache transiently; gate the gallery on image-use consent re-checked server-side so a withdrawal hides it immediately. Rewards tab over PRD-06 (points balance, perks, gift-card redeem). Account tab: profile, memberships, the client's own balance, and 'Update card on file' using the Square SDK to tokenise — store no PAN; post the token to PRD-06 for membership autopay. Do not expose any one-off online checkout.

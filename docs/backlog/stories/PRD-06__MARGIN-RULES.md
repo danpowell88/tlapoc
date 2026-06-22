@@ -11,8 +11,8 @@ Owners set value caps and eligible items; reporting shows reward-cost vs retenti
 
 ## How it works
 
-Owners set margin-aware reward rules (value caps, eligible items) and see reward-cost vs retention in reporting. Reward communications go only to consented, logged-in clients (no public S4 price promotion) (C9/C23).
-Keeps loyalty profitable and compliant; rule config is owner-gated.
+RewardRule gains a value_cap (the most a reward can be worth) and an eligible_items list the owner curates toward profitable non-S4 lines. Reporting (PRD-08) surfaces reward-cost vs retention so the owner can tell whether a rule is buying loyalty or just giving margin away.
+Communications guardrail: reward/incentive comms ride the PRD-07 channels but are constrained to clients who have opted in (C23) and are delivered in-context to logged-in clients — there is no public broadcast of an S4 price or incentive (C9). This reuses the marketing-consent suppression list and the same non-S4 invariant as the rewards engine. The owner-only Pricing & what-if surface is where caps/eligibility tie into projected economics.
 
 ## Requirements
 
@@ -21,21 +21,23 @@ Keeps loyalty profitable and compliant; rule config is owner-gated.
 
 ## Acceptance Criteria
 
-- [ ] Reward rules enforce value caps and eligible-item lists.
+- [ ] Reward rules enforce a value cap and an eligible-item list (owner curates toward high-margin non-S4 items).
 - [ ] Reward-cost vs retention surfaces in reporting (PRD-08).
-- [ ] Reward communications go only to consented, logged-in clients (no public S4 price promotion).
-- [ ] Rule config is owner-gated.
+- [ ] Reward/incentive communications go only to consented, logged-in clients — no public S4 price promotion.
+- [ ] Reward-rule configuration is owner-gated.
 
 ## UI designs / screenshots
 
-- Prototype: Memberships -> Pricing & what-if (memb-pricing.png, owner-only .fin) — caps + eligible items; reward-cost vs retention surfaces in Reports (PRD-08).
+- Prototype: Memberships -> Pricing & what-if (owner-only .fin) — caps + eligible-item selection live alongside the pricing model; reward-cost vs retention surfaces in Reports (PRD-08).
 
 ![memb-pricing — prototype screen](../screens/memb-pricing.png)
 
 ## Suggested data model
 
-- **RewardRule.value_cap / eligible_items** — + reporting: reward_cost vs retention
-  - _Owner-gated; reward comms consented-only._
+- **RewardRule (extended)** — + value_cap, eligible_items(non-S4), comms_consent_required(true)
+  - _Owner-gated; comms consented-only (C23); no public S4 promotion (C9)._
+- **(report) RewardEconomics** — rule_id -> reward_cost, retention_delta
+  - _Read-model over PRD-08; owner-gated._
 
 ## Other
 
@@ -43,22 +45,16 @@ Keeps loyalty profitable and compliant; rule config is owner-gated.
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - RewardRule.value_cap / eligible_items — + reporting: reward_cost vs retention (Owner-gated; reward comms consented-only.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Reward rules enforce value caps and eligible-item lists.
-  - Rule: Reward-cost vs retention surfaces in reporting (PRD-08).
-  - Rule: Reward communications go only to consented, logged-in clients (no public S4 price promotion).
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-06/REWARDS-ENGINE.
-- [ ] **Enforce compliance gate + audit events**
-  Enforce C9, C23 as a server-side invariant that cannot be bypassed via the API:
-  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
-  - Write an immutable AuditEvent for the attempt and its outcome.
-  - Reward communications go only to consented, logged-in clients (no public S4 price promotion).
-  - Rule config is owner-gated.
+- [ ] **Reward-rule caps + eligible-item curation (migrations)**
+  Extend RewardRule with value_cap and a curated eligible_items set (non-S4 only; reuse the S4-block constraint).
+  - Add the reward-economics read-model inputs (cost per redemption, attributed retention) for PRD-08.
+  - All owner-gated.
+- [ ] **Cap enforcement + reward-cost vs retention reporting API**
+  Server-side.
+  - Enforce value_cap at redemption (clamp/refuse beyond cap); rule config owner-only.
+  - Expose reward-cost vs retention read queries to PRD-08 reporting.
+  - Reward-comms send path checks marketing consent (C23) + suppression before sending and never emits a public S4 price/incentive.
+- [ ] **Enforce comms-consent + no-public-S4 invariant + audit**
+  C9/C23 server-side invariants.
+  - Block a reward-comms send to a non-consented/suppressed contact; block any attempt to surface an S4 price/incentive on a public channel — clear blocked-action reason for the UI.
+  - Audit blocked sends and cap clamps (ADR-0010).

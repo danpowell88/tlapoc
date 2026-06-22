@@ -11,8 +11,9 @@ Visit-based + membership rewards that the engine blocks from ever applying to S4
 
 ## How it works
 
-Visit-based rewards (milestones/every-Nth-visit) + membership perks that the engine blocks from ever applying to S4 items; configuring an S4 reward is blocked (C9/ADR-0014). Rewards apply to non-S4 items, add-ons, or account/gift credit — never the toxin itself.
-Drives repeat visits without eroding margin or breaching advertising law. The catalog schedule flag (PRD-04) drives eligibility.
+Two reward bases: visit-based (milestones / every-Nth-visit) and membership/frequency perks. Earning and redemption produce a RewardLedger entry per client (earned / redeemed / balance). The catalog schedule flag (PRD-04, ADR-0014) is the single source of truth for eligibility: a RewardRule's eligible_items are constrained to non-S4, and at checkout the engine recomputes eligibility server-side against the live line's schedule — an S4 line is inert (its reward/points control is disabled with a tooltip).
+The S4 block is a server-side invariant, not a UI nicety: attempting to configure a reward whose eligible items include an S4 service is rejected with a clear reason; attempting to earn/redeem/discount against an S4 line at checkout is refused. The loyalty screen states it plainly — 'Points never earn or redeem on S4 medicines — enforced at checkout.'
+Defaults match the prototype: earn 1 pt / $1 on non-S4; redeem 200 pts = $20 off non-S4; tiers Silver / Gold / Platinum; top point balances are visible to staff.
 
 ## Requirements
 
@@ -21,24 +22,24 @@ Drives repeat visits without eroding margin or breaching advertising law. The ca
 
 ## Acceptance Criteria
 
-- [ ] Visit-based rewards (milestones/every-Nth-visit) + membership perks on non-S4 items, add-ons or account/gift credit.
-- [ ] The engine refuses to earn, redeem or discount against any S4-flagged item.
-- [ ] Attempting to configure an S4 reward is blocked.
-- [ ] Catalog schedule flag (from PRD-04) drives eligibility.
+- [ ] Visit-based rewards (milestones / every-Nth-visit) and membership perks apply to non-S4 items, add-ons or account/gift credit.
+- [ ] The engine refuses to earn, redeem or discount against any S4-flagged item (server-side invariant, re-checked at checkout).
+- [ ] Attempting to configure a reward whose eligible items include an S4 item is blocked with a clear reason.
+- [ ] The catalog schedule flag (PRD-04/ADR-0014) drives eligibility; earn/redeem land in the RewardLedger.
 
 ## UI designs / screenshots
 
-- Prototype: Memberships -> Loyalty (memb-loyalty.png) — reward rules + ledger; S4 items in the catalog show disabled reward/discount controls with a tooltip (the S4 guardrail).
-- Earn/redeem visible on the Client 360 + client app rewards.
+- Prototype: Memberships -> Loyalty — Points program (Earn '1 pt / $1 on non-S4', Redeem '200 pts = $20 off non-S4'), Tiers 'Silver · Gold · Platinum', the rule note 'Points never earn or redeem on S4 medicines — enforced at checkout', and Top balances.
+- S4 catalog items show disabled reward/discount controls with a tooltip; earn/redeem also visible on Client 360 + client-app Rewards.
 
 ![memb-loyalty — prototype screen](../screens/memb-loyalty.png)
 
 ## Suggested data model
 
-- **RewardRule** — id, tenant_id, basis(milestone|nth_visit|membership), eligible_items(non-S4), value_cap
-  - _S4 eligibility blocked (C9)._
-- **RewardLedger** — id, client_id, earned, redeemed, balance, ref
-  - _Non-S4 redemptions only._
+- **RewardRule** — id, tenant_id, basis(milestone|nth_visit|membership), eligible_items(non-S4 only), value_cap, reward_kind(discount|addon|credit)
+  - _S4 eligibility blocked at config time (C9/ADR-0014)._
+- **RewardLedger** — id, client_id, earned, redeemed, balance, ref(invoice|visit)
+  - _Non-S4 redemptions only; feeds Client 360 + client-app Rewards._
 
 ## Technical notes (high level)
 
@@ -50,22 +51,17 @@ Drives repeat visits without eroding margin or breaching advertising law. The ca
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - RewardRule — id, tenant_id, basis(milestone|nth_visit|membership), eligible_items(non-S4), value_cap (S4 eligibility blocked (C9).)
-  - RewardLedger — id, client_id, earned, redeemed, balance, ref (Non-S4 redemptions only.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Visit-based rewards (milestones/every-Nth-visit) + membership perks on non-S4 items, add-ons or account/gift credit.
-  - Rule: The engine refuses to earn, redeem or discount against any S4-flagged item.
-  - Rule: Attempting to configure an S4 reward is blocked.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-04/PRODUCT-CATALOGUE.
-- [ ] **Enforce compliance gate + audit events**
-  Enforce C9 as a server-side invariant that cannot be bypassed via the API:
-  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
-  - Write an immutable AuditEvent for the attempt and its outcome.
-  - Attempting to configure an S4 reward is blocked.
+- [ ] **RewardRule/RewardLedger model + non-S4 eligibility constraint (migrations)**
+  Model RewardRule and RewardLedger (tenant_id + RLS).
+  - RewardRule.eligible_items reference catalog items; a DB/domain constraint forbids any S4-scheduled item being added to a rule's eligible set.
+  - RewardLedger records earned/redeemed/balance per client with a ref to the originating invoice/visit.
+- [ ] **Rewards engine: earn/redeem with live schedule re-check**
+  Server-side earn/redeem logic.
+  - Earn on completed non-S4 spend (1 pt/$1 default) and visit milestones; redeem (200 pts = $20 off non-S4) only against non-S4 lines.
+  - At checkout, recompute eligibility against the live line's schedule flag — never trust a cached/UI value; an S4 line is inert.
+  - Endpoints to define/list reward rules and query a client's ledger/balance.
+- [ ] **Enforce the S4 reward block as a server-side invariant + audit**
+  C9 invariant that cannot be bypassed via the API.
+  - Reject any rule-config call whose eligible_items include an S4 item — return a clear blocked-action reason (what's blocked / which item / why) for the UI banner and disabled controls.
+  - Reject any earn/redeem/discount targeting an S4 line at checkout.
+  - Audit both the block events and successful non-S4 redemptions (ADR-0010 audit trail).

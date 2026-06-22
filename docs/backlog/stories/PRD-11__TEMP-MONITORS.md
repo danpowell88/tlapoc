@@ -11,8 +11,8 @@ The prototype's Operations → Temperature monitors (openMonitor/monitorJob) man
 
 ## How it works
 
-Manage wireless cold-chain sensors (the ESP32 design): register/provision monitors per fridge/location authenticating to the per-clinic API, chart readings over time, and raise breach jobs; detect missing heartbeats (dead monitor). Manual fridge log (OPENCLOSE) and monitors reconcile into one cold-chain record (C13).
-Continuous, evidenced cold-chain without manual logging.
+Manage wireless cold-chain sensors (the ESP32 design): one monitor per fridge streams readings to this clinic's private API endpoint over WiFi, giving continuous data, instant excursion alerts and a tamper-evident trail. Register/provision monitors per fridge/location (each with a per-device API key); the view shows per-monitor status (online/offline), charted temp, last-seen/signal/firmware/power and summary tiles. Readings chart over time; an excursion raises a breach job and flags affected stock; missing heartbeats surface under Needs attention with 'Raise job' (monitorJob → Lead Nurse).
+The automated feed and the manual fridge log (OPENCLOSE) reconcile into one cold-chain record (C13). Continuous, evidenced cold-chain without manual logging.
 
 ## Requirements
 
@@ -30,16 +30,17 @@ Continuous, evidenced cold-chain without manual logging.
 
 _Prototype screen: prototype.html — Operations → Temperature monitors._
 
-- Prototype: Operations -> Temperature monitors (ops-monitors.png) — monitor list per fridge, live/charted temps, breach alerts, dead-monitor detection (openMonitor/monitorJob).
+- Prototype: Operations → Temperature monitors (ops-monitors) — tiles Monitors/Online/Last sync/Needs attention; per-monitor cards (name·TM-id·fridge, online/offline, charted temp, Last seen/Signal/Firmware/Power, 'healthy' or 'Raise job', 'Details →').
+- Dead-monitor/offline detection ('no recent data'); breach raises a job to Lead Nurse + flags stock (openMonitor/monitorJob).
 
 ![ops-monitors — prototype screen](../screens/ops-monitors.png)
 
 ## Suggested data model
 
-- **Monitor** — id, tenant_id, location_id, fridge, api_key_ref, last_heartbeat, status
-  - _ESP32; missing heartbeat -> alert._
-- **(reuses) TempLog/Excursion** — (PRD-04 COLD-CHAIN)
-  - _Manual + device readings reconcile._
+- **Monitor** — id, tenant_id, location_id, fridge_id, label, api_key_ref, last_heartbeat, signal, firmware, power, status
+  - _ESP32; missing heartbeat → offline + alert._
+- **(reuses) TempLog/Excursion** — PRD-04 COLD-CHAIN — device readings + excursions
+  - _Manual + device readings reconcile into one record._
 
 ## Technical notes (high level)
 
@@ -51,21 +52,11 @@ _Prototype screen: prototype.html — Operations → Temperature monitors._
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - Monitor — id, tenant_id, location_id, fridge, api_key_ref, last_heartbeat, status (ESP32; missing heartbeat -> alert.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Enforce compliance gate + audit events**
-  Enforce C13 as a server-side invariant that cannot be bypassed via the API:
-  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
-  - Write an immutable AuditEvent for the attempt and its outcome.
-- [ ] **Integration adapter, sync & config**
-  Implement the provider behind its swappable port:
-  - Connection/config (OAuth tokens stored encrypted) + the field mapping this story needs.
-  - Trigger on the relevant event; idempotent sync with retries, back-off and a visible reconciliation/status.
-  - Handle partial failures + replays; surface errors to the user.
-  - Residency: AU-resident or APP-8-assessed + consented before any PII leaves (C21).
-- [ ] **Web UI**
-  Build on the Angular web app: the ops-monitors per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: Operations -> Temperature monitors (ops-monitors.png) — monitor list per fridge, live/charted temps, breach alerts, dead-monitor detection (openMonitor/monitorJob).
+- [ ] **Monitor entity + per-fridge provisioning + device auth**
+  Model Monitor (tenant_id, location_id, fridge_id, label, api_key_ref, last_heartbeat, signal, firmware, power, status). Register/provision one monitor per fridge; issue a per-device API key (api_key_ref) so the ESP32 sensor authenticates to this clinic's private endpoint. See the hardware design doc for the ESP32 build.
+- [ ] **Ingest readings + chart over time**
+  Ingest streamed readings into PRD-04 COLD-CHAIN TempLog; chart per-monitor temperature over time. Monitors view with summary tiles (Monitors / Online / Last sync / Needs attention) and per-monitor cards (online/offline, charted temp, last-seen/signal/firmware/power).
+- [ ] **Excursion + dead-monitor (heartbeat) detection → breach job**
+  Heartbeat watchdog flags monitors with no recent data as offline ('no recent data', '3h 12m ago') under Needs attention. An excursion (or offline/battery-low/firmware condition) raises a job (monitorJob → Lead Nurse with the reason) and flags the affected stock; 'Raise job' / 'Details →' (openMonitor).
+- [ ] **Reconcile device + manual readings into one cold-chain record**
+  Merge device readings with the manual FridgeLog entries (OPENCLOSE) into a single evidenced cold-chain record per fridge (C13), so there's one history regardless of source.

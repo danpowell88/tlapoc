@@ -48,18 +48,27 @@
         "PRD-01/RBAC"
       ],
       "detail": [
-        "The app shell groups screens into workspaces (Clinical, Front desk, Comms & growth, Memberships, Business, Team, Governance, Settings) plus top-level Today/Schedule/Clients/Follow-ups/Checkout, with collapsible sections and a mobile drawer. Every nav entry is capability-gated (data-allow) so a role only sees what it can use.",
-        "The frame every feature screen drops into; badges show outstanding Follow-ups + Governance counts."
+        "The app shell is the frame every feature screen drops into. The prototype sidebar groups screens into collapsible workspaces — Clinical (Charting, Stock & medicines, Forms & consent, Treatment menu, Skin/Body/Complication/Imaging sub-screens), Front desk/Operations (Open-close & fridge log, Temperature monitors, Rooms & devices, Equipment, Call log), Comms & growth (Inbox, Automations, Campaigns, Leads, Reviews), Memberships, Business (Reports, Finance), Team (Roster, People & credentials, Compliance board), Governance (Overview, AE & DAEN, Recalls, Policies, Audit pack) and Settings — plus the top-level items Today, Schedule, Clients, Follow-ups and Checkout.",
+        "Every nav entry is capability-gated: the prototype tags each with data-allow and setPersona() shows/hides it from the active role's capabilities + concerns, then hides any workspace section whose children are all hidden. So a role only ever sees what it can use (an RN doesn't see Finance or Settings; Reception doesn't see Charting) — gating is sourced from RBAC, not hard-coded per item. This is presentation; the server-side capability check (RBAC) is the actual control.",
+        "Active screen + section open/closed state persist (user prefs); on mobile the sidebar becomes a drawer with an overlay (toggleNav). The Follow-ups item and the Governance item carry live count badges (the prototype shows the red Governance count and a Follow-ups job count) so outstanding work is visible from anywhere.",
+        "Edge cases: a role with no children in a section never sees the empty section header; switching active role (MULTI-ROLE/ROLE-CONTEXT) re-derives the visible nav immediately; deep-linking to a screen the role can't access falls back gracefully (the server still blocks the data)."
       ],
       "ui_spec": [
-        "Prototype: the left sidebar (dashboard.png) — top-level items + collapsible 'Workspaces'; active screen/section persist; mobile uses a drawer + overlay.",
-        "Follow-ups and Governance show count badges; entries outside the role are hidden."
+        "Prototype: the left sidebar (dashboard.png) — clinic context at top, top-level items (Today, Schedule, Clients, Follow-ups with job badge, Checkout) and collapsible Workspaces sections; the active item is highlighted and section state persists; mobile uses a drawer + overlay.",
+        "Each entry is capability-gated (data-allow); entries/sections outside the role are hidden entirely.",
+        "Follow-ups and Governance show live count badges of outstanding items."
       ],
       "data_model": [
         {
           "entity": "(derived) NavModel",
-          "fields": "from Role.capabilities -> visible nav entries + badge counts",
-          "notes": "Capability-gated; no separate persistence beyond user prefs."
+          "fields": "from Role.capabilities + concerns -> visible nav entries + section visibility + badge counts (Follow-ups, Governance)",
+          "notes": "Capability-gated; derived from the RBAC session context, not separately persisted. Only user prefs (active screen, section open/closed) persist."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Capability-gated app shell, collapsible workspaces & badges",
+          "note": "Build the shell on the Sprint-0 web shell: top-level items (Today/Schedule/Clients/Follow-ups/Checkout) + collapsible workspace sections per the IA, with the active item highlighted and section open/closed + active screen persisted as user prefs. Derive each entry's visibility from the caller's capabilities/concerns (from the RBAC session context — not hard-coded), and hide any section whose children are all hidden. Render live count badges on Follow-ups and Governance. Mobile: drawer + overlay. Re-derive nav on active-role switch (ROLE-CONTEXT)."
         }
       ]
     },
@@ -95,18 +104,31 @@
         "PLATFORM/APP-NAV"
       ],
       "detail": [
-        "The Today landing shows the live state of the clinic — waiting / in-room / checked-out and the day's schedule — tailored to the signed-in role's concerns (ADR-0017), plus the follow-up/needs-attention digest and key alerts (expiries, failed payments). Quick links jump to chart/profile/checkout for in-flight visits.",
-        "Each role starts the day knowing exactly what to do."
+        "Today is the landing page — the live state of the clinic at a glance, tailored to the signed-in role's concerns (ADR-0017). The prototype shows it as a greeting ('Good morning, Lena'), a date/at-a-glance line ('14 appointments · 3 checked in'), a row of stat cards (Appointments 14 / Checked in 3 · 1 waiting / Awaiting consent 2 'treatment gated until done' / Stock on hand), Today's schedule (each appointment with its lifecycle state pills — Late, Start, No-show, Confirmed, In treatment, Resume — per ADR-0024 visit lifecycle), and a Follow-ups panel previewing the queue.",
+        "Role-tailoring is by concern, not by separate dashboards: each widget is tagged with a concern (the prototype's data-concern) and shown only if the active role carries it. Reception sees front-desk widgets (waiting/checked-in, recall), an NP sees clinical (awaiting-consent, in-room, stock alerts), the owner sees the business digest. Money cards are additionally .fin-gated (FIN-GATING) so non-owner roles never see revenue on Today.",
+        "The 'waiting / in-room / checked-out' live state and the day's schedule come from the appointment/visit state machine (ADR-0024); the needs-attention digest aggregates exceptions (overdue recalls, unbilled visits, expiries from REG-WATCH, failed payments) and the Follow-ups preview reads the Jobs queue (ADR-0023). Quick links jump straight into the in-flight visit: Open chart, Profile, Resume, Checkout.",
+        "It's a read aggregation (no new write model) — so each role starts the day knowing exactly what to do, with one click to the next action."
       ],
       "ui_spec": [
-        "Prototype: Today (dashboard.png) — waiting/in-room/checked-out columns, the day at a glance, role-tailored widgets, and the exceptions digest.",
+        "Prototype: Today (dashboard.png) — greeting + at-a-glance line, stat cards (Appointments / Checked in · waiting / Awaiting consent / Stock on hand), Today's schedule with per-appointment lifecycle pills (Late / Start / No-show / Confirmed / In treatment / Resume) and Open-chart/Profile quick links, and a Follow-ups preview panel.",
+        "Widgets are concern-tagged (data-concern) and shown per active role; money cards are .fin-gated (owner only).",
         "Reception sees front-desk tasks; NP sees clinical; owner sees the business digest."
       ],
       "data_model": [
         {
           "entity": "(read) TodayBoard",
-          "fields": "from Appointment.status + Job + AttentionDigest, filtered by role concern",
-          "notes": "Role-tailored; read aggregation."
+          "fields": "from Appointment/Visit.status (waiting|in-room|checked-out) + Job queue + AttentionDigest, filtered by the active role's concerns and .fin gating",
+          "notes": "Role-tailored read aggregation; no separate persistence. Money figures stripped server-side for non-owner roles."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Today read aggregation (live clinic state + digest), role + .fin filtered",
+          "note": "Build the read aggregation that powers Today: the live visit state (waiting / in-room / checked-out) and the day's schedule from the appointment/visit state machine (ADR-0024), the needs-attention digest (overdue recalls, unbilled visits, credential expiries from REG-WATCH, failed payments) and a Follow-ups preview from the Jobs queue (ADR-0023). Filter widget data by the active role's concerns and strip money figures server-side for non-owner roles (FIN-GATING)."
+        },
+        {
+          "title": "Today dashboard UI (concern-tailored widgets + quick links)",
+          "note": "Build Today (dashboard.png): greeting + at-a-glance line, the stat cards, Today's schedule with per-appointment lifecycle pills (Late/Start/No-show/Confirmed/In treatment/Resume) and Open-chart/Profile/Resume/Checkout quick links into the in-flight visit, and the Follow-ups preview. Show/hide each widget by the active role's concern (data-concern) and .fin-gate the money cards so only the owner sees revenue. Loading/empty/error states."
         }
       ]
     },
@@ -142,17 +164,26 @@
         "PLATFORM/APP-NAV"
       ],
       "detail": [
-        "One global search across clients, appointments and invoices, grouped by type, returning tenant-scoped results that respect role/financial gating (no money to non-owner). Selecting a result deep-links to the relevant screen; keyboard-accessible and fast.",
-        "The front-desk speed feature — jump to anything in a couple of keystrokes."
+        "One global search across clients, appointments and invoices — the front-desk speed feature (the prototype header box reads 'Search clients, appointments, invoices…'). Results are grouped by type, and selecting one deep-links to the relevant screen (client 360, the appointment in Schedule, the invoice in checkout/finance) so staff jump to anything in a couple of keystrokes.",
+        "Results are tenant-scoped (RLS) and respect role/financial gating: a non-owner never sees money in results — an invoice result shows the client/date/status but not the amount for a role without finance.read (FIN-GATING), and gating is enforced server-side so the API never returns a figure the role can't see, not merely hidden in the UI. Results also respect capability scope (a role that can't see clinical context doesn't get clinical fields in a client result).",
+        "It's keyboard-accessible (focus the box, arrow through grouped results, Enter to open) and fast on real clinic data volumes — backed by a tenant-scoped search projection rather than scanning OLTP tables, kept current from domain events.",
+        "Edge cases: an empty query shows recent/contextual suggestions, not everything; a deep-link to a record the role can't fully access opens the parts it can; no result leaks a money figure to a non-owner."
       ],
       "ui_spec": [
-        "Prototype: the header search box (dashboard.png, 'Search clients, appointments, invoices…') — grouped results; select -> deep link."
+        "Prototype: the header search box (dashboard.png, placeholder 'Search clients, appointments, invoices…') — typing returns results grouped by type (Clients / Appointments / Invoices); selecting one deep-links to its screen.",
+        "Keyboard-accessible; tenant-scoped; money figures in invoice results are .fin-gated (owner only)."
       ],
       "data_model": [
         {
           "entity": "(index) SearchIndex",
-          "fields": "client/appointment/invoice projections, tenant-scoped",
-          "notes": "Role/financial-filtered results."
+          "fields": "client / appointment / invoice projections, tenant-scoped, kept current from domain events",
+          "notes": "Role/financial-filtered at query time — money fields stripped server-side for non-owner roles; capability scope applied to fields."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Tenant-scoped global search (projection, role + .fin filtered, deep-linking)",
+          "note": "Build a tenant-scoped search projection over clients, appointments and invoices kept current from domain events (not OLTP scans) and the header search UI: grouped results by type, keyboard navigation, and deep-links to client 360 / Schedule / checkout-finance. Enforce role/financial gating server-side so the API never returns a money figure (or a clinical field) the active role can't see — strip, don't hide (FIN-GATING). Empty query shows recent/contextual suggestions."
         }
       ]
     },
@@ -186,17 +217,34 @@
         "PRD-07/CHANNELS"
       ],
       "detail": [
-        "An in-app notification centre surfacing role-relevant events (new bookings, failed payments, expiries, AE/recall, job assignment) with read/unread state + a badge count per user; each notification deep-links to its source. In-app is one delivery target of INotifier (PRD-07).",
-        "So time-sensitive things aren't missed."
+        "The header bell + badge implies an in-app notification centre (prototype header notifications icon with the rose dot). It surfaces role-relevant events so time-sensitive things aren't missed: new bookings, failed payments, credential/stock expiries (REG-WATCH), adverse-event/recall actions, and job assignments (ADR-0023).",
+        "In-app is one delivery target of the INotifier port (ADR-0012, PRD-07) — the same event that goes out as SMS/email can also drop an in-app notification; channels stay consistent rather than this being a separate bespoke pipe. Each notification carries read/unread state and a per-user badge count, and deep-links to its source (the booking, the failed invoice, the credential, the assigned job).",
+        "Targeting is per-user and role-relevant (concern-driven, ADR-0017) — a payment-failure notification goes to roles that handle money/front-desk, a credential expiry to Lead/owner, not to everyone. Read state is per-user (two people seeing the same clinic event each track their own read/unread).",
+        "Edge cases: clearing/marking-read updates the badge immediately; a notification whose source the role can no longer access (e.g. after a role switch) degrades gracefully; high-volume events are coalesced rather than flooding the bell."
       ],
       "ui_spec": [
-        "Prototype: the header bell + badge (dashboard.png) -> a notification list; each item deep-links to its source."
+        "Prototype: the header bell + badge (dashboard.png) -> a notification list panel; each item shows the event, time and read/unread state and deep-links to its source.",
+        "Per-user read/unread + badge count; role-relevant targeting; consistent with PRD-07 channels (in-app is one INotifier target)."
       ],
       "data_model": [
         {
           "entity": "Notification",
-          "fields": "id, tenant_id, user_id, kind, source_ref, read(bool), at",
-          "notes": "Per-user; in-app channel of INotifier."
+          "fields": "id, tenant_id, user_id, kind(booking|payment_failed|expiry|ae_recall|job_assigned), source_ref, read(bool), at",
+          "notes": "Per-user; in-app channel of INotifier (PRD-07); deep-links via source_ref; read state per user."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Notification model + in-app channel of INotifier",
+          "note": "Model Notification (per-user, tenant_id + RLS) with kind, source_ref, read state and timestamp. Implement the in-app delivery target of the INotifier port (ADR-0012/PRD-07) so domain events (new booking, failed payment, expiry from REG-WATCH, AE/recall, job assignment from ADR-0023) fan out to in-app consistently with SMS/email. Target per-user by role relevance (concern-driven); coalesce high-volume events."
+        },
+        {
+          "title": "Read/unread + badge count API",
+          "note": "Maintain per-user read/unread state and an unread badge count, with mark-read / mark-all-read that updates the count immediately. Two users seeing the same clinic event each track their own state."
+        },
+        {
+          "title": "Notification centre UI (header bell + list, deep-linking)",
+          "note": "Build the header bell + badge and the notification list panel (dashboard.png): each item shows event/time/read-state and deep-links to its source (booking, invoice, credential, assigned job). A source the active role can no longer access degrades gracefully. Loading/empty states."
         }
       ]
     },
@@ -238,17 +286,30 @@
         "PRD-01/MULTI-ROLE"
       ],
       "detail": [
-        "The header shows the signed-in user, active role and a scope-of-practice summary; a user holding multiple roles can switch active role and capabilities update accordingly (consumes PRD-01 RBAC + MULTI-ROLE). The active role is recorded on actions and in the audit trail; scope is sourced from RBAC, not hard-coded per screen.",
-        "Makes 'who am I acting as and what can I do' explicit, and explains blocks."
+        "The header makes 'who am I acting as, and what can I do' explicit. It shows the signed-in user, the active role, and a scope-of-practice summary — the prototype renders this as the header user chip with a hover scope tooltip (scopeNote, e.g. for the NP: 'Full clinical scope · prescribes & holds S4 stock · no business financials') and a 'Switch user' control.",
+        "For users who hold more than one role (MULTI-ROLE — an NP who is also owner, a Lead covering reception), a switch-active-role control lets them choose which role they're acting under; capabilities (and therefore visible nav, available actions and the scope summary) update accordingly. Scope is sourced from PRD-01 RBAC — the role's capabilities/concerns — not hard-coded per screen, so the tooltip and the enforcement always agree.",
+        "The active role is recorded on actions and in the audit trail (MULTI-ROLE stamps active_role_id; the role_switch event is audited). When an action is blocked, the scope context is what explains why — the blocked-action banner references the active role and the rule that fired.",
+        "Edge cases: a single-role user sees the role/scope but no switch control; switching role re-derives nav + scope immediately (APP-NAV/TODAY re-tailor); financials stay hidden after switching into a clinical role unless the user also holds the finance capability (FIN-GATING invariant from MULTI-ROLE)."
       ],
       "ui_spec": [
-        "Prototype: header user chip + scope tooltip + 'Switch user' (dashboard.png) — active role + scope summary; switch-active-role for multi-role users."
+        "Prototype: header user chip + scope tooltip + 'Switch user' (dashboard.png) — shows the signed-in user, active role and a scope-of-practice summary (the persona note); a switch-active-role control for multi-role users.",
+        "Switching role updates capabilities, visible nav and the scope summary immediately; scope sourced from RBAC, not per-screen."
       ],
       "data_model": [
         {
           "entity": "(session) ActiveRole",
-          "fields": "session.active_role_id (from StaffRole)",
-          "notes": "Stamped on actions + audit; scope from Role.capabilities."
+          "fields": "session.active_role_id (from StaffRole) -> scope summary from Role.capabilities/concerns",
+          "notes": "Stamped on actions + audit (MULTI-ROLE); the scope tooltip + enforcement read the same RBAC source so they always agree."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Active-role + scope context surface (header chip, tooltip, switcher)",
+          "note": "Build the header user chip showing signed-in user + active role + a scope-of-practice summary sourced from the RBAC session context (the role's capabilities/concerns — not hard-coded), with the hover scope tooltip. For multi-role users (MULTI-ROLE) add a switch-active-role control; single-role users see no switcher. Render from the same source the server enforces so the tooltip and gates always agree."
+        },
+        {
+          "title": "Apply active-role switch across the app + audit",
+          "note": "On switching active role, re-fetch the session context and re-derive visible nav (APP-NAV), Today tailoring (TODAY) and available actions immediately; capabilities update accordingly. The switch is an audited role_switch event and subsequent actions are stamped with the active role (MULTI-ROLE). Keep financials hidden after switching into a clinical role unless the user also holds finance capability (FIN-GATING)."
         }
       ]
     },
@@ -289,18 +350,34 @@
         "PRD-01/RBAC"
       ],
       "detail": [
-        "All revenue/MRR/pricing figures are hidden from non-owner roles across the app AND the API — enforced server-side (the API never returns gated figures to unauthorised roles), not just hidden in the UI. Non-owner roles see operational data (e.g. membership status) but no money; attempted access is denied and audited.",
-        "The project's owner-only financials rule, made structural (the .fin capability)."
+        "The project's owner-only-financials rule made structural: all revenue, MRR and pricing figures are gated behind the owner financial capability (finance.read — the prototype's .fin class), hidden from non-owner roles across the app AND the API. The prototype's applyFin() shows/hides every .fin element based on the active persona's caps.financials; this story makes that a server-side guarantee, not a CSS toggle.",
+        "Enforced server-side (ADR-0008): the API never returns a gated figure to an unauthorised role — money fields are stripped/denied at the query/serialisation layer, so a non-owner can't see revenue by reading the network response or hitting the endpoint directly. The UI .fin hiding is then just presentation over an already-safe payload. Attempted direct access to a gated figure is denied and audited (scope_block via AUTH-AUDIT).",
+        "The split is operational-vs-financial: non-owner roles see operational data (membership status, who's a member, appointment counts, stock levels) but never the money (MRR, plan pricing, revenue, avg-per-visit). The prototype Finance screen (finance.png) is owner-only and shows exactly the gated cards — Revenue today $4,820, This month $128k, Avg/visit $271, Membership MRR $74.3k — while Reception sees memberships without those figures, and the Memberships 'Pricing & what-if' sub-nav is itself .fin-gated.",
+        "Coverage: dashboards/Today (money cards), checkout (totals visible to whoever takes payment but revenue aggregates owner-only), Finance, Memberships (pricing/MRR), Reports, and global search invoice results. The gate is one capability applied everywhere money appears, so there's no per-screen leak to maintain."
       ],
       "ui_spec": [
-        "Prototype: money figures tagged .fin are hidden for reception/clinical roles across dashboards, checkout totals, finance, memberships and reports; visible only to the owner.",
-        "A non-owner never sees revenue/MRR/pricing."
+        "Prototype: money figures tagged .fin are shown only when the active persona has caps.financials (applyFin) — Finance screen (finance.png) cards (Revenue today / This month / Avg per visit / Membership MRR), the Memberships 'Pricing & what-if' sub-nav, Reports, and dashboard money cards.",
+        "Non-owner roles (Reception, RN, NP) see operational data (membership status, counts, stock) but no revenue/MRR/pricing anywhere; the owner sees all."
       ],
       "data_model": [
         {
-          "entity": "Capability finance.read",
-          "fields": "gates money fields server-side",
-          "notes": "API strips/denies gated figures; access attempts audited."
+          "entity": "Capability finance.read (.fin)",
+          "fields": "gates money fields (revenue, MRR, plan pricing, avg-per-visit, cost) server-side across dashboards, checkout, finance, memberships, reports, search",
+          "notes": "API strips/denies gated figures for roles lacking the capability; attempted access denied + audited (AUTH-AUDIT). Independent of clinical roles (MULTI-ROLE)."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Server-side financial gate (strip/deny money fields by capability)",
+          "note": "Make finance.read (.fin) the single capability that gates money fields, and enforce it at the query/serialisation layer so the API never returns revenue/MRR/pricing/avg-per-visit/cost to a role lacking it — strip the fields, don't merely hide them. Apply it uniformly across the money-bearing read models (dashboards/Today, checkout aggregates, Finance, Memberships pricing/MRR, Reports, search invoice results) so there's no per-endpoint leak. Deny + audit (AUTH-AUDIT scope_block) any direct attempt to read a gated figure. Keep it independent of clinical roles (an NP isn't owner — MULTI-ROLE)."
+        },
+        {
+          "title": "Apply .fin presentation gating across the web app",
+          "note": "Render the .fin presentation layer over the already-safe payloads: hide money figures (the prototype's .fin elements + applyFin behaviour) for non-owner roles across Today, checkout, Finance (finance.png), Memberships (incl. the Pricing & what-if sub-nav), Reports and search. Non-owner roles still see operational data (membership status, counts, stock) — only money disappears."
+        },
+        {
+          "title": "Verify no money leaks to non-owner roles end-to-end",
+          "note": "Confirm the gate holds across every money-bearing surface and the direct API: a non-owner role (Reception/RN/NP) sees operational data but no revenue/MRR/pricing in dashboards, checkout, finance, memberships, reports or search responses, and a denied direct read is audited. (Verification slice for the owner-only-financials rule — design-level, not a separate test task.)"
         }
       ]
     },
@@ -333,17 +410,26 @@
         "PRD-01/TENANT"
       ],
       "detail": [
-        "A switcher lists the locations/clinics the user can access and sets the active clinic/location context; data shown is scoped to it (RLS tenant + location), and the active location is reflected in audit and reporting. Builds on PHASE-2/MULTI-LOCATION for deeper multi-site features.",
-        "Lets multi-site owners/staff work in the right location's data."
+        "A switcher lets multi-site owners/staff choose the active clinic/location they're working in. The prototype puts it at the top of the sidebar (setClinic) listing The Lounge — Brisbane, The Lounge — Gold Coast and Skin & Co (locum); selecting one sets the active location (updating the clinic name/location/badge in the shell).",
+        "It lists only the locations the user can access, and sets an active-location context on the session. Data shown is then scoped to the active location within the tenant (RLS tenant_id + location_id) — the diary, clients, stock and reports reflect that one location — and the active location is reflected in audit and reporting so 'where did this happen' is recorded.",
+        "This is the in-product switcher demonstrated by the prototype; deeper multi-site data depth (cross-location reporting, locum roster, per-location config) builds on PHASE-2/MULTI-LOCATION. v1 is: pick a location, work in its data, have audit/reporting know which one.",
+        "Edge cases: a single-location user sees the location label but no real switching; switching location re-scopes the current views (and closes any location-specific in-progress context cleanly); a user without access to a location never sees it in the list."
       ],
       "ui_spec": [
-        "Prototype: the sidebar clinic switcher (dashboard.png) — lists clinics (Brisbane, Gold Coast, locum site); selecting one sets the active location."
+        "Prototype: the sidebar clinic switcher (dashboard.png) — clinic context at the top of the sidebar listing the accessible clinics (Brisbane, Gold Coast, locum site); selecting one sets the active location and updates the shell's clinic name/location/badge.",
+        "Lists only locations the user can access; data + audit + reporting follow the active location."
       ],
       "data_model": [
         {
           "entity": "(session) ActiveLocation",
           "fields": "session.location_id within tenant",
-          "notes": "Scopes data + audit + reporting."
+          "notes": "Scopes data (RLS tenant + location) + audit + reporting; lists only accessible Locations (TENANT). Deeper multi-site = PHASE-2/MULTI-LOCATION."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Active-location context + scoped switcher",
+          "note": "Build the sidebar clinic/location switcher (dashboard.png) listing only the Locations the user can access (TENANT) and setting an active location_id on the session. Scope data to the active location within the tenant (RLS tenant + location) so diary/clients/stock/reports reflect it, and stamp the active location on audit + reporting. Switching re-scopes current views cleanly; single-location users see the label without a real switch. Deeper multi-site features build on PHASE-2/MULTI-LOCATION."
         }
       ]
     }

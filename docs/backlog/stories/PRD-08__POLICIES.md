@@ -11,8 +11,9 @@ The prototype's Governance → Policies screen (signPolicy) tracks staff acknowl
 
 ## How it works
 
-Policies & procedures sign-off: versioned policies published to relevant roles, with staff sign-off recorded per version + date; outstanding sign-offs surface and a policy change requires re-acknowledgement. Sign-off status is included in the inspection pack.
-Evidences that the team has read current procedures (part of the Governance hub).
+Policies & procedures sign-off: the clinic's written rules — infection prevention & control, consent & cooling-off, emergency & complication (incl. hyaluronidase), privacy & data-breach response — published to the relevant roles, with per-staff acknowledgement tracked so the clinic can evidence that the team has read the current procedures. Part of the Governance hub (ADR-0030); the data is sign-off evidence for the inspection pack.
+Policies are versioned. Publishing a new version resets everyone's sign-off for that policy and raises a sign-off task per relevant staff member (a Job, ADR-0023) — so a changed policy requires re-acknowledgement and outstanding sign-offs surface rather than silently going stale. Each policy shows its version, last-updated date and a signed count (e.g. 5/6 signed); 6/6 reads 'complete'. Sign-off (signPolicy) records the staff member against that policy version with a timestamp and is append-only audited.
+The Overview 'Unsigned policies' tile is a live count of policies not fully signed, and policy sign-off status is one of the inspection-pack categories (INSPECTION-PACK). Governance/compliance work, no money figures.
 
 ## Requirements
 
@@ -21,25 +22,28 @@ Evidences that the team has read current procedures (part of the Governance hub)
 
 ## Acceptance Criteria
 
-- [ ] Policies are versioned and published to relevant roles.
-- [ ] Staff sign-off is recorded per policy version with date; outstanding sign-offs surface.
-- [ ] Sign-off status is included in the inspection-readiness pack.
-- [ ] Changes to a policy require re-acknowledgement.
+- [ ] Policies are versioned and published to the relevant roles.
+- [ ] Staff sign-off is recorded per policy version with a timestamp; outstanding sign-offs surface (signed count, e.g. 5/6).
+- [ ] Publishing a new version resets sign-off and raises a re-acknowledgement task per relevant staff member.
+- [ ] Sign-off status is included in the inspection-readiness pack and the Overview 'Unsigned policies' count; all sign-offs audited.
 
 ## UI designs / screenshots
 
 _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack)._
 
-- Prototype: Governance -> Policies (gov-policies.png) — policy list with versions + per-staff sign-off status (signPolicy); outstanding highlighted.
+- Prototype: Governance → Policies (gov-policies.png). Intro: 'Every staff member must read and sign the current version … 5/6 signed means one person still needs to acknowledge it — hit Sign'.
+- Policy table: Policy (Infection prevention & control / Consent & cooling-off / Emergency & complication incl. hyaluronidase / Privacy & data breach response), Version (v2.1, v3.0…), Updated (date), Signed (5/6 signed, 6/6 complete), action (Sign / complete).
+- Sign (signPolicy) increments the signed count + toast 'Acknowledged <version> — <policy>'; Overview 'Unsigned policies' count updates.
+- Publishing a new version resets sign-off and raises a per-staff task.
 
 ![gov-policies — prototype screen](../screens/gov-policies.png)
 
 ## Suggested data model
 
-- **Policy** — id, tenant_id, name, version, body, roles[]
-  - _Re-ack required on change._
-- **PolicySignoff** — id, policy_version, staff_id, signed_at
-  - _Feeds inspection pack._
+- **Policy** — id, tenant_id, name, version, body, roles[], updated_at
+  - _Versioned; new version requires re-acknowledgement._
+- **PolicySignoff** — id, policy_id, policy_version, staff_id, signed_at
+  - _Per version + staff; append-only audited; feeds inspection pack + Overview count._
 
 ## Technical notes (high level)
 
@@ -51,25 +55,11 @@ _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Po
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - Policy — id, tenant_id, name, version, body, roles[] (Re-ack required on change.)
-  - PolicySignoff — id, policy_version, staff_id, signed_at (Feeds inspection pack.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Policies are versioned and published to relevant roles.
-  - Rule: Staff sign-off is recorded per policy version with date; outstanding sign-offs surface.
-  - Rule: Sign-off status is included in the inspection-readiness pack.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-08/INSPECTION-PACK.
-- [ ] **Enforce compliance gate + audit events**
-  Enforce C10, C20 as a server-side invariant that cannot be bypassed via the API:
-  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
-  - Write an immutable AuditEvent for the attempt and its outcome.
-- [ ] **Web UI**
-  Build on the Angular web app: the gov-policies per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: Governance -> Policies (gov-policies.png) — policy list with versions + per-staff sign-off status (signPolicy); outstanding highlighted.
+- [ ] **Data model & migrations: Policy + PolicySignoff**
+  Add Policy (versioned, body, target roles, updated_at) and PolicySignoff (per policy_version + staff_id + signed_at). Migrations + RLS/tenancy. Publishing a new version is a new Policy version row that supersedes the prior and invalidates prior sign-offs for the unsigned-count computation.
+- [ ] **Backend: versioning, publish-resets-signoff, outstanding tracking**
+  Implement publish (new version) → reset sign-off for that policy and raise a re-acknowledgement Job per relevant staff member (ADR-0023). Compute the signed-count (e.g. 5/6) and the unsigned-policies count for the Overview tile. signPolicy records the acting staff against the current version with a timestamp. Capability-gate to the compliance concern.
+- [ ] **Enforce audit on sign-off**
+  Every sign-off and every policy publish is append-only audited (ADR-0010) — the audit trail is the evidence the inspection pack (INSPECTION-PACK) and an inspector rely on. Surface sign-off status into the inspection-pack 'Policies & procedures sign-off' category.
+- [ ] **Web UI: policies list + sign-off**
+  Build gov-policies: the policy table (Policy/Version/Updated/Signed/action), Sign action (increments signed count, toast 'Acknowledged <version> — <policy>', complete state at full count), and the per-staff outstanding view. Update the Overview 'Unsigned policies' count on action. Governance area; no money figures.

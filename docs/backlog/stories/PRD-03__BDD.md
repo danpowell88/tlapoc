@@ -11,8 +11,9 @@ Cosmetic guidelines require BDD screening; a positive result must be surfaced to
 
 ## How it works
 
-Cosmetic guidelines require screening for Body Dysmorphic Disorder. A validated BDD/psychological instrument is embedded in intake; a completed screen authored/reviewed by an RN/NP must be present before treatment, and a positive flag is surfaced to the prescriber.
-Which validated instrument to embed is an open question to confirm clinically.
+Cosmetic guidelines require screening for Body Dysmorphic Disorder / psychological wellbeing before non-surgical cosmetic procedures (C3, AHPRA 2 Sept 2025). A validated BDD/psychological instrument is embedded inside the intake wizard as a short set of wellbeing questions (how often the client thinks about the concern, whether it affects daily life/relationships, whether expectations are realistic).
+The result is scored and stored as a ScreeningResult; a positive flag is surfaced to the prescriber and recorded. A completed screen authored/reviewed by an RN or NP must be present before treatment — it is one of the inputs the server-enforced gate (GATING) checks for an S4 treatment.
+Which validated instrument to embed is an open clinical question (the prototype uses placeholder wellbeing questions) — the instrument is configurable so the clinically-chosen tool can be slotted in without rework.
 
 ## Requirements
 
@@ -28,15 +29,16 @@ Which validated instrument to embed is an open question to confirm clinically.
 
 ## UI designs / screenshots
 
-- Client app: the BDD/wellbeing screen within the intake wizard (client-app.png).
-- Charting pre-treatment review (charting.png) shows a 'BDD screen: clear' / flagged chip to the prescriber.
+- Client app: the BDD/wellbeing screen within the intake wizard (client-app.png) — 'A few wellbeing questions', radio options (Rarely/Sometimes/A lot · No/A little/A lot · Realistic/Unsure).
+- Staff: Charting pre-treatment review (charting.png) shows a 'BDD screen: clear' chip (or a flagged state) to the prescriber; Forms & consent (forms-consent.png) shows the screening within the 'Medical history & screening' template.
+- Instrument is configurable (open question to confirm clinically).
 
 ![forms-consent — prototype screen](../screens/forms-consent.png)
 
 ## Suggested data model
 
-- **ScreeningResult** — id, tenant_id, client_id, instrument, answers(json), score, flag(bool), reviewed_by, reviewed_at
-  - _Positive flag surfaced to prescriber; required before treatment (C3)._
+- **ScreeningResult** — id, tenant_id, client_id, appointment_id, instrument, instrument_version, answers(json), score, flag(bool), reviewed_by, reviewed_at
+  - _Positive flag surfaced to prescriber; an RN/NP-reviewed result required before treatment (C3)._
 
 ## Other
 
@@ -44,21 +46,9 @@ Which validated instrument to embed is an open question to confirm clinically.
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - ScreeningResult — id, tenant_id, client_id, instrument, answers(json), score, flag(bool), reviewed_by, reviewed_at (Positive flag surfaced to prescriber; required before treatment (C3).)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: A validated BDD/psychological screening instrument is embedded in intake.
-  - Rule: A completed screen authored/reviewed by an RN/NP is present before treatment.
-  - Rule: A positive flag is surfaced to the prescriber and recorded.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-03/INTAKE.
-- [ ] **Enforce compliance gate + audit events**
-  Enforce C3 as a server-side invariant that cannot be bypassed via the API:
-  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
-  - Write an immutable AuditEvent for the attempt and its outcome.
-  - A validated BDD/psychological screening instrument is embedded in intake.
+- [ ] **Configurable BDD/psychological instrument + scoring**
+  Embed a validated screening instrument in intake as a configurable, versioned question set with a scoring rule that produces a score + boolean flag. Make the instrument swappable (instrument + instrument_version) so the clinically-chosen tool slots in without rework — v1 uses the prototype's placeholder wellbeing questions. Store the answers + score as a ScreeningResult linked to client + appointment.
+- [ ] **Positive-flag surfacing + RN/NP review requirement**
+  On a positive score, raise the flag and surface it to the prescriber (chip on the charting pre-treatment review + a follow-up signal). Record reviewed_by/reviewed_at when an RN/NP reviews the result; the GATING evaluation requires an RN/NP-reviewed ScreeningResult to exist before an S4 treatment (C3). Audited.
+- [ ] **BDD screen in the intake wizard + prescriber chip UI**
+  Render the wellbeing questions inside the client-app/kiosk intake wizard step. On the staff side, render the 'BDD screen: clear' / flagged chip on the Charting pre-treatment review and the screening status within the Forms & consent 'Medical history & screening' template.

@@ -11,8 +11,9 @@ The prototype's Reports → Scorecard view shows per-practitioner performance (r
 
 ## How it works
 
-A per-practitioner scorecard: revenue, retention/rebooking, utilisation and outcome/revision signals — date-filterable, drilling into the underlying clients/appointments. Financial figures owner-gated.
-Lets the owner coach the team and see who drives retention.
+A per-practitioner scorecard so the owner can coach the team and see who actually drives retention, not just who bills the most. Reads from the reporting read-models (BUSINESS-DASH metrics sliced by practitioner): revenue, retention and rebooking rate, chair/room utilisation, and outcome/revision signals (e.g. complication or revision rate from the clinical record). Date-filterable on the same presets as the business dashboards.
+Each metric drills into the underlying clients/appointments so a number is never a dead end — the owner can go from 'this injector's rebooking is low' to the actual list of clients who didn't rebook. The Insights strip on the Reports landing already calls out scorecard-level patterns ('Filler earns the most per chair-hour …'); the scorecard is the per-practitioner detail behind those callouts.
+Financial figures (revenue, revenue-per-chair-hour) are gated behind the owner financial capability; the non-financial signals (retention, rebooking, utilisation, outcomes) remain visible to managers without the money.
 
 ## Requirements
 
@@ -21,22 +22,24 @@ Lets the owner coach the team and see who drives retention.
 ## Acceptance Criteria
 
 - [ ] Scorecard shows per-practitioner revenue, retention/rebooking, utilisation and outcome/revision signals.
-- [ ] Date-filterable; financial figures are owner-gated.
-- [ ] Drills into the underlying clients/appointments.
-- [ ] Reads from the reporting read-models (PRD-08/READ-MODELS).
+- [ ] Date-filterable on the same presets as the business dashboards.
+- [ ] Each metric drills into the underlying clients/appointments.
+- [ ] Reads from the reporting read-models; financial figures are owner-gated (non-money signals visible to managers).
 
 ## UI designs / screenshots
 
 _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Policies/Audit pack)._
 
-- Prototype: Reports -> Scorecard (reports.png, goRep('scorecard')) — per-practitioner metrics with drill-down.
+- Prototype: Reports → Scorecard (reports.png, goRep('scorecard')) — the default Reports tab.
+- Insights strip with per-practitioner callouts; per-practitioner rows/cards: revenue (owner-gated), retention, rebooking, utilisation, outcome/revision.
+- Drill-down from any metric into the underlying client/appointment list; date presets shared with the business view.
 
 ![reports — prototype screen](../screens/reports.png)
 
 ## Suggested data model
 
-- **(read) PractitionerScorecard** — practitioner_id, revenue, retention, rebooking, utilisation, outcomes by date
-  - _From read-models; owner-gated._
+- **(read) PractitionerScorecard** — practitioner_id, period, revenue, revenue_per_chair_hour, retention, rebooking, utilisation, revision_rate
+  - _Projection over BUSINESS-DASH metrics + clinical outcomes, sliced by practitioner; money fields owner-gated._
 
 ## Other
 
@@ -44,12 +47,7 @@ _Prototype screen: prototype.html — Reports, Governance (Overview/AE & DAEN/Po
 
 ## Tasks (dev pickup)
 
-- [ ] **Read-model / projection**
-  Build a materialised read-model/projection (don't query OLTP directly):
-  - Shape: practitioner_id, revenue, retention, rebooking, utilisation, outcomes by date.
-  - Populate from domain events + the audit stream; eventual consistency is fine; support rebuild/backfill.
-  - Expose a query API with this story's date/role filters; respect owner-only .fin gating.
-- [ ] **Web UI**
-  Build on the Angular web app: the reports per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: Reports -> Scorecard (reports.png, goRep('scorecard')) — per-practitioner metrics with drill-down.
+- [ ] **Read-model / projection: per-practitioner scorecard**
+  Slice the business metrics by practitioner and join the clinical outcome/revision signal (from PRD-05) into PractitionerScorecard keyed by practitioner+period: revenue, revenue-per-chair-hour, retention, rebooking, utilisation, revision rate. Tag money fields owner-financial. Support drill-down by exposing the underlying client/appointment ids per metric.
+- [ ] **Web UI: practitioner scorecard + drill-down**
+  Build the Scorecard tab (default Reports tab): the Insights strip plus per-practitioner rows/cards, with .fin gating on money metrics (non-money signals stay visible to managers). Each metric drills into the underlying client/appointment list. Share the date presets with the business view.

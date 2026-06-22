@@ -9,7 +9,8 @@ An alternative dispensing model where a pharmacy partner holds/dispenses stock. 
 
 ## How it works
 
-Placeholder (Phase 2): a pharmacy-dispensing model where a pharmacy partner holds/dispenses stock, for clinics without on-site custody. v1 is Mode A only; the tenant mode switch already anticipates Mode B (DispensedItem entity reserved).
+Mode B is an alternative dispensing model (REQ-MED-3, deferred) where a pharmacy partner holds and dispenses per-patient stock for clinics without on-site prescriber custody - an RN holds/administers only dispensed items, never bulk stock. There is no pharmacy partner yet, so v1 is Mode A only; this story keeps the medicines model mode-aware.
+A tenant MedicineMode switch (A_onsite | B_pharmacy) already anticipates Mode B; v1 = A only. The DispensedItem entity is reserved so the per-patient dispensing model can be added later without a schema rework. WATCH-1 (single-product telehealth prescribing under national review) could elevate the on-site-NP and designated-RN-prescriber models and change Mode-B economics.
 
 ## Requirements
 
@@ -22,12 +23,16 @@ Placeholder (Phase 2): a pharmacy-dispensing model where a pharmacy partner hold
 - [ ] Placeholder — v1 is Mode A only; tenant mode switch already anticipates Mode B.
 - [ ] Captured so the medicines model stays mode-aware.
 
+## UI designs / screenshots
+
+- No dedicated screen in v1; the Mode-A custody header ('On-site stock') is the visible mode today. Mode B would add a per-patient dispensed-item surface in a later phase.
+
 ## Suggested data model
 
 - **MedicineMode** — tenant_id, mode(A_onsite|B_pharmacy)
-  - _v1 = A only._
-- **DispensedItem** — (reserved for Mode B)
-  - _Placeholder._
+  - _v1 = A only; the mode-aware switch._
+- **DispensedItem** — (reserved for Mode B) client_id, pharmacy_ref, product, lot, dispensed_at
+  - _Placeholder - per-patient dispensed items tied to the client; RN holds/administers dispensed-only, never bulk (REQ-MED-3)._
 
 ## Other
 
@@ -35,5 +40,5 @@ Placeholder (Phase 2): a pharmacy-dispensing model where a pharmacy partner hold
 
 ## Tasks (dev pickup)
 
-- [ ] **Scope & design when pulled into a sprint**
-  Deferred placeholder — no build in v1; confirm it still fits scope/regulatory stance, then break down.
+- [ ] **Scope & design Mode B when pulled into a sprint**
+  Placeholder (Phase 2+). When a pharmacy partner exists, design the per-patient dispensing model: MedicineMode=B_pharmacy, the reserved DispensedItem entity (client-tied dispensed items from the pharmacy), and the rule that an RN holds/administers dispensed-only and never bulk S4 (REQ-MED-3, C7). Re-check against WATCH-1 (telehealth prescribing national review). v1 ships Mode A only; this task is intentionally not built now.

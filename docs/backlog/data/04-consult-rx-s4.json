@@ -56,18 +56,44 @@
         "PRD-03/GATING"
       ],
       "detail": [
-        "A synchronous Consult is the legal precondition for any S4 prescription. It records modality (in-person or external-telehealth), prescriber, timestamp, an external reference (for telehealth) and notes, and must exist before a script can be written (C1).",
-        "The remote-prescriber path links an externally-conducted consult to the resulting script — the consult happens in the clinic's existing telehealth tool; this system records its details (ADR-0011)."
+        "A synchronous Consult is the first link in the moat chain and the legal precondition for any S4 prescription (C1). Botulinum toxin is a Schedule 4 medicine: AHPRA's cosmetic-procedures guidelines (eff. 2 Sept 2025) prohibit prescribing without a real-time assessment — no async (text/email/online-only) prescribing is lawful.",
+        "The clinic runs two consult modalities: in-person (NP/designated-RN-prescriber at the clinic) and external-telehealth (a remote doctor/NP using the clinic's existing telehealth app). Per ADR-0011 the platform does NOT build video; it records the consult metadata that proves a synchronous assessment happened and binds it to the resulting script.",
+        "A Consult records modality (in_person | telehealth_ext), the prescriber identity, an exact timestamp, an external reference (the telehealth session id/notes for the remote path) and assessment notes. It is scoped to the client and the appointment.",
+        "The Consult must exist and be recent at script time: the Prescription write (PRD-04/PRESCRIPTION) fails its server-side invariant if there is no linked Consult for the same client created at or just-before the script. The 'just-before' window is a configurable staleness bound, not a UI hint.",
+        "For the remote-prescriber path the consult is conducted externally; the prescriber records that it occurred (with the external_ref) and the resulting individual script links back to this Consult — so the chain holds even though the video never touched the platform (ADR-0011).",
+        "Consult creation, edit and link are written to the append-only AuditEvent stream (ADR-0010) — who recorded the assessment, when, and from which modality is part of the audit-ready record."
       ],
       "ui_spec": [
-        "Prototype: Charting pre-treatment review (charting.png) — the 'Consult & prescription' card with a 'Record consult' action and status tick; consult must be ticked before 'Write prescription' is usable.",
-        "Modality toggle (in-person / telehealth-external) with an external-reference field for telehealth."
+        "Prototype screen: Charting — pre-treatment review (charting.png).",
+        "Charting opens on the 'Pre-treatment review' step; the 'Consult & prescription' card carries a 'Record consult ✓' action and a 'Write prescription' action.",
+        "The consult tick must be satisfied before 'Write prescription' becomes usable — the card is the visible surface of the C1 gate.",
+        "Modality toggle (in-person / telehealth-external) with an external-reference field shown for the telehealth path; assessment notes captured inline.",
+        "When the current user is an administering RN (not a prescriber) the card instead shows 'Administering on a valid script · Dr Lena Park (NP) · today · 30u authorised · individual (this client)' with a verify-before-administer checkbox."
       ],
       "data_model": [
         {
           "entity": "Consult",
-          "fields": "id, tenant_id, client_id, appointment_id, prescriber_id, modality(in_person|telehealth_ext), at, external_ref, notes",
-          "notes": "Required before any Prescription (C1); audited."
+          "fields": "id, tenant_id, client_id, appointment_id, prescriber_id, modality(in_person|telehealth_ext), at, external_ref, notes, created_by, created_at",
+          "notes": "Required before any Prescription (C1). modality + external_ref carry the telehealth path (ADR-0011). Prototype mapping: the 'Record consult ✓' chip on the charting pre-treatment card."
+        },
+        {
+          "entity": "AuditEvent",
+          "fields": "id, tenant_id, actor_id, at, entity('consult'), entity_id, action(create|edit|link)",
+          "notes": "Append-only (ADR-0010); the consult half of the consult->script linkage evidence."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Consult entity + consult->script link (model & migration)",
+          "note": "Add the Consult table: id, tenant_id, client_id, appointment_id, prescriber_id, modality(in_person|telehealth_ext), at, external_ref, notes, created_by, created_at; tenant_id RLS-scoped. FK from Prescription.consult_id -> Consult(id). Index (client_id, at desc) so the script-write gate can find the most-recent consult for a client fast. external_ref is nullable but required when modality=telehealth_ext (CHECK constraint). No edit-in-place semantics beyond notes; audit captures changes."
+        },
+        {
+          "title": "Consult API + telehealth-external path",
+          "note": "Endpoints: POST /clients/{id}/consults (create), PATCH /consults/{id} (notes/external_ref only), GET /clients/{id}/consults?recent. Server sets at server-side (don't trust client clock). The remote path accepts modality=telehealth_ext + external_ref (the external telehealth session reference) — the platform stores metadata only, never video (ADR-0011). Prescriber identity must resolve to a credential-gated prescriber (NP / remote / designated-RN-prescriber); reject otherwise. Keep modality + prescriber model configurable to absorb the WATCH-1 telehealth national review."
+        },
+        {
+          "title": "C1 consult-gate invariant + audit",
+          "note": "Enforce in the domain + DB (ADR-0008), not the UI: a Prescription INSERT must reference a Consult for the SAME client whose at is within the configurable 'synchronous' staleness window of the script time; otherwise reject with an explainable reason. Write an AuditEvent on consult create/edit/link to the append-only stream (ADR-0010). A blocked script attempt is itself audited so the refusal is explainable to a regulator."
         }
       ]
     },
@@ -111,18 +137,44 @@
         "PRD-01/CREDENTIALS"
       ],
       "detail": [
-        "An individual prescription is written per client per consult — never a batch/standing-order, never async (text/email/online-only) (C2). The prescriber may be an NP, a remote prescriber, or a designated RN prescriber (QLD endorsement, recorded with a partnered prescriber).",
-        "Off-label is flagged on the script and requires consent that covers off-label use. The script is the authority an RN administers against."
+        "An individual prescription per client per consult is the second link in the moat (C2). QLD's Medicines and Poisons (Medicines) Regulation 2021 and AHPRA forbid standing-order / batch scripts and async-only prescribing for S4 cosmetic injectables: a standing order cannot authorise an RN to administer toxin. The script is the legal authority an administering RN acts against.",
+        "Three prescriber identities are valid (rev 5 re-review): an NP/on-site prescriber, a remote telehealth prescriber, and — new from QLD Sept 2025 — a designated RN prescriber, who may prescribe S2–S4 in partnership with an authorised prescriber. The last is gated on a verified AHPRA endorsement AND a recorded partnered prescriber (GAP-1).",
+        "After a synchronous Consult (PRD-04/CONSULT), the prescriber writes one Prescription for one client tied to that one consult: product, dose/units, quantity, off-label flag. The (client, consult, single-Rx) shape is enforced — there is no data path to attach one script to many clients or to create a standing-order/batch script.",
+        "The prescriber identity is resolved through the PRD-01 credential gate: NP and remote prescriber carry the prescribe-S4 capability directly; the designated-RN-prescriber preset only unlocks it when both a verified endorsement and a partnered_prescriber_id are present, else it behaves as a plain administer-only RN.",
+        "Off-label use is flagged on the script; the linked consent (PRD-03) must cover off-label use before an administration against this script can proceed (C5, AC8). The prescriber assumes TGA-equivalent responsibility for off-label safety/efficacy and informed consent.",
+        "The Prescription has a lifecycle status (active -> consumed | expired). 'Consumed' is set when an administration draws against it; the administration gate (PRD-04/ADMIN-GATE) only accepts a valid, unexpired, UNCONSUMED script for the same client."
       ],
       "ui_spec": [
-        "Prototype: Charting -> 'Write prescription' (charting.png) — product, dose/units, off-label flag; tied to the just-recorded consult and this single client.",
-        "Attempting a batch/standing-order or applying one script to multiple clients is rejected with a reason."
+        "Prototype screen: Charting — 'Write prescription' (charting.png).",
+        "'Write prescription' on the 'Consult & prescription' card opens the script: product, dose/units, quantity, off-label flag — tied to the just-recorded consult and this single client.",
+        "When the user is an administering RN the card shows the script they administer against: prescriber (Dr Lena Park NP), date, '30u authorised', 'individual (this client)' — never a batch.",
+        "Attempting a batch/standing-order, or applying one script to multiple clients, is rejected with an explanatory reason.",
+        "Designated-RN-prescriber: the 'Write prescription' action only appears when the endorsement + partnered prescriber are present; otherwise the RN sees the administer-on-script view only."
       ],
       "data_model": [
         {
           "entity": "Prescription",
-          "fields": "id, tenant_id, client_id, consult_id, prescriber_id, product_id, dose_units, off_label(bool), status(active|consumed|expired), created_at",
-          "notes": "One per client per consult; no batch/async (C2). Designated RN prescriber records partnered_prescriber_id."
+          "fields": "id, tenant_id, client_id, consult_id, prescriber_id, partnered_prescriber_id?, product_id, dose_units, quantity, off_label(bool), status(active|consumed|expired), created_at, expires_at",
+          "notes": "One per client per consult (C2). consult_id FK is mandatory. partnered_prescriber_id required when the prescriber is a designated RN prescriber (GAP-1). off_label gates against ImageConsent/Consent off-label coverage (C5)."
+        },
+        {
+          "entity": "Prescriber (StaffProfile capability)",
+          "fields": "staff_id, capability(prescribe-S4), ahpra_endorsement?, partnered_prescriber_id?",
+          "notes": "prescribe-S4 unlocked for NP/remote directly; for a designated RN prescriber only with a verified endorsement + partnered prescriber (PRD-01 credential gate)."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Prescription entity, lifecycle status & off-label flag (model & migration)",
+          "note": "Add Prescription: id, tenant_id, client_id, consult_id(FK, NOT NULL), prescriber_id, partnered_prescriber_id (nullable), product_id, dose_units, quantity, off_label(bool), status(active|consumed|expired), created_at, expires_at; RLS by tenant_id. There is intentionally NO 'client_ids' / batch column — the schema makes a batch script unrepresentable. Unique-ish shape: one active Rx per (client_id, consult_id, product_id). Index (client_id, status, expires_at) for the admin-gate lookup of a valid unconsumed script."
+        },
+        {
+          "title": "Prescribing API + 3 prescriber identities",
+          "note": "Endpoints: POST /clients/{id}/consults/{cid}/prescriptions (create individual script), GET /clients/{id}/prescriptions?status=active. Resolve prescriber via the PRD-01 capability gate: NP / remote carry prescribe-S4; a designated RN prescriber only passes when ahpra_endorsement is verified AND partnered_prescriber_id is set, else 403 behaving as a plain RN (GAP-1). Reject any payload that would target more than one client or omit consult_id. off_label=true requires the linked Consent to cover off-label use (C5) — return an explainable reason if not."
+        },
+        {
+          "title": "C2 individual-only invariant + status transitions + audit",
+          "note": "Enforce in domain + DB (ADR-0008): no standing-order / batch / async-only path can create a script; applying one script to multiple clients is rejected. Status transitions: active -> consumed (set by an administration draw, PRD-04/ADMIN-GATE) | active -> expired (by expires_at). A consumed/expired script is not selectable for administration. Audit every script create + status change to the append-only stream."
         }
       ]
     },
@@ -160,18 +212,44 @@
       ],
       "priority": "P0",
       "detail": [
-        "A typed, multi-unit catalogue (toxin/filler/skin/retail) where each product has its own unit (units vs syringes), par level and expiry tracking, plus regClass/ARTG/compounded metadata. The capability-gated product admin sets the S4 flag — the single classification that drives rewards eligibility (PRD-06) and public-page naming (PRD-07).",
-        "regClass/compounded enable blocking prohibited compounded GLP-1 and routing adverse events to the correct DAEN dataset (medicine vs device)."
+        "The catalogue is the single source of truth for product classification. Per ADR-0021/0014 each product is typed (toxin/filler/skin/retail) with its own unit (toxin 'units' vs filler 'syringes/mL'), a par level, expiry tracking and an S4 flag. The S4 flag is the master classification that drives rewards eligibility (PRD-06, non-S4 only — C9) and public-booking-page naming (PRD-07) everywhere.",
+        "Rev-4 extends the catalogue to filler-as-medicine and weight-loss GLP-1 programs: products carry regClass / ARTG / compounded metadata so the platform can block prohibited compounded GLP-1 (banned 1 Oct 2024) and route adverse events to the correct DAEN dataset (medicine vs device).",
+        "A capability-gated catalogue admin (prescriber/owner) adds/removes products and sets the S4 flag, type, unit and par. On-hand / usage / wastage / expiry aggregate per product + unit, never across units — a single 'units on hand' across a toxin and a filler is meaningless (ADR-0021).",
+        "Lots (StockItem) belong to a product; the product's unit governs all lot quantities. Toggling the S4 flag re-classifies the product everywhere at once: the rewards engine immediately excludes it, and the public booking page applies the generic-naming/withheld-price policy.",
+        "regClass + compounded enable two rules: block receiving/holding prohibited compounded GLP-1, and tag the product so a downstream adverse event is routed to DAEN-medicines (toxin) vs DAEN-medical-devices (device-class filler) in PRD-08.",
+        "Retail (non-S4) SKUs live in the same catalogue alongside medicines so the same classification and stock machinery serves both."
       ],
       "ui_spec": [
-        "Prototype: Stock & medicines -> Products (stock.png, 'Products' button opens the catalogue) — typed products with unit, par, ARTG status, S4 flag toggle; capability-gated admin.",
-        "Retail (non-S4) SKUs sit alongside medicines."
+        "Prototype screen: Stock & medicines — Products catalogue (stock.png, 'Products' button).",
+        "'Products' opens the catalogue modal: rows of typed products with name, type, unit, par, an S4 toggle pill ('S4 ✓' / 'non-S4'), per-product on-hand, and a Remove action.",
+        "Toggling S4 re-renders the stock view and the lot-detail S4 badge live — one classification point.",
+        "Product cards on the main screen show on-hand, used/wasted (90d), a usage sparkline and a 'below par' state per product (e.g. 'reorder 2').",
+        "Add-product form: name, type, unit, par, S4 checkbox — capability-gated to prescriber/owner."
       ],
       "data_model": [
         {
           "entity": "Product",
-          "fields": "id, tenant_id, name, type(toxin|filler|skin|retail), unit(units|syringes|each), schedule(S4|non-S4), reg_class, artg_no, sponsor, compounded(bool), par_level",
-          "notes": "schedule flag is the master classification (ADR-0014/0021)."
+          "fields": "id, tenant_id, name, type(toxin|filler|skin|retail), unit(units|syringes|each), schedule(S4|non-S4), reg_class, artg_no, sponsor, compounded(bool), par_level, color",
+          "notes": "schedule flag is the master classification (ADR-0014/0021): drives rewards (non-S4 only, C9) + public naming. Prototype mapping: the products[] catalogue + toggleS4()/addProduct()."
+        },
+        {
+          "entity": "ProductAggregate (read model)",
+          "fields": "product_id, unit, on_hand, used_90d, wasted_90d, below_par(bool)",
+          "notes": "Computed per product+unit, never across units (ADR-0021). Mapping: prodAgg() in the prototype."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Product catalogue model: type, unit, schedule, ARTG/reg metadata (model & migration)",
+          "note": "Add Product: id, tenant_id, name, type(toxin|filler|skin|retail), unit, schedule(S4|non-S4), reg_class, artg_no, sponsor, compounded(bool), par_level, color; RLS by tenant. StockItem.product_id FK. Per-product+unit aggregation only — no cross-unit roll-up. Build the ProductAggregate read model (on_hand, used_90d, wasted_90d, below_par) over StockLedger (ADR-0013). schedule is the single column the rewards engine (PRD-06) and public-naming policy (PRD-07) read."
+        },
+        {
+          "title": "Catalogue admin API + S4/GLP-1 rules",
+          "note": "Endpoints (capability-gated to prescriber/owner): POST/PATCH/DELETE /products, PATCH /products/{id}/schedule (the S4 toggle). Setting schedule re-classifies everywhere — rewards eligibility and public naming key off it (ADR-0014). On create/receive, if compounded=true AND reg_class indicates GLP-1, block (prohibited compounded GLP-1, 1 Oct 2024). Persist reg_class so adverse-event DAEN routing (PRD-08) can pick medicine vs device."
+        },
+        {
+          "title": "Capability gate + audit on classification changes",
+          "note": "Gate catalogue admin on the catalogue-admin capability (PRD-01/ADR-0017); non-owner stock roles may view but not change the S4 flag. Audit every product add/remove and every schedule toggle to the append-only stream — the S4 classification is compliance-load-bearing (rewards exclusion C9, public naming), so changes must be explainable. Any margin/cost fields stay .fin-gated (owner-only)."
         }
       ]
     },
@@ -216,18 +294,44 @@
         "PRD-04/STOCK-RECEIVE"
       ],
       "detail": [
-        "An RN may only administer S4 against a valid, unconsumed prescription for that same client, with current consent and a selected in-date lot; the administration record is immutable once saved (C8). A blocked attempt shows the reason and writes an audit event.",
-        "This is the central invariant of the moat — every dose is provably lawful and traceable. It appears in the medicine register and links lot->client for recall."
+        "Administration gating is the central invariant of the moat (C8). An RN may only administer S4 when every prior link holds: a valid, unconsumed Prescription for the SAME client, current consent (incl. off-label coverage if flagged), and a selected lot that is in-date, in-custody and ARTG-verified. The resulting Administration record is immutable once saved (ADR-0010).",
+        "This is the chain end-to-end: consult -> individual Rx -> administration against a valid unconsumed script + current consent + in-date in-custody ARTG lot -> immutable register entry -> lot<->client recall link + vial reconciliation. The gate is what makes every dose provably lawful and traceable.",
+        "In the prototype, administration IS the act of finalising the injection map against the selected lot. Each charted point records product + units + depth + site + the batch-lot/expiry; finalising deducts the charted units from that lot and writes the Administration(s).",
+        "The server re-checks every precondition at finalise time (never trusting the client): the gate chips (consult, consent, screening) must be satisfied; the selected lot must be in-date, in the correct custody location and ARTG-verified; and the units drawn must not over-draw the lot's on-hand. A failed check blocks finalise with an explanatory banner and writes an audit event.",
+        "On success the Administration row is appended (immutable, ADR-0010) and the linked Prescription transitions to consumed. The record carries client, prescription, product, lot, units, site, depth, administrator, timestamp - exactly the fields the medicine register and the lot->clients recall need (C8).",
+        "Corrections never edit a saved Administration; an appended, linked correction is the only path (ADR-0010) - tamper-evident by construction."
       ],
       "ui_spec": [
-        "Prototype: Charting (charting.png) — administration is the act of finalising the injection map against the selected lot; the gate chips (consult/consent) and lot selection must be satisfied first.",
-        "Over-draw or missing prerequisites block finalise with an explanatory banner."
+        "Prototype screen: Charting - finalise against the selected lot (charting.png).",
+        "Step 2 'Product & batch' confirms the vial: product selector + lot selector showing 'B2245 - exp Sep 2026', 'on hand 176U - Fridge 1 - in date'; note 'Units charted below deduct from this lot on finalise - only in-date, in-custody stock is selectable (ARTG-checked).'",
+        "Step 3 'Injection map': per-point Units + 'Lot B2245 - exp Sep 2026'; a running 'Total units' (e.g. 28u) reconciled against the lot.",
+        "'Finalise & checkout' commits the administration: 'Finalising locks the note and deducts the units used from the selected lot in Stock.'",
+        "Over-draw or any missing prerequisite (consult/consent/lot) blocks finalise with an explanatory banner; the administering-RN view carries a 'verified the consult & script' checkbox."
       ],
       "data_model": [
         {
           "entity": "Administration",
-          "fields": "id, tenant_id, client_id, prescription_id, product_id, lot_id, units, site, depth, administrator_id, at",
-          "notes": "Immutable (ADR-0010); requires valid unconsumed Rx (same client) + current consent + in-date lot; appears in register."
+          "fields": "id, tenant_id, client_id, prescription_id, product_id, lot_id, units, site, depth, technique, administrator_id, at, correction_of?",
+          "notes": "Immutable (ADR-0010); requires valid unconsumed Rx (same client) + current consent + in-date in-custody ARTG lot (C8). correction_of links an appended correction. Appears in the register; powers lot->clients recall. Mapping: a charted InjectionPoint row at finaliseChart()."
+        },
+        {
+          "entity": "ChartEntry / InjectionPoint",
+          "fields": "chart_id, point_id, name(site), units, depth, product_id, lot_id",
+          "notes": "Finalised chart entries are immutable; each point becomes an administration draw against the lot."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Immutable Administration record + correction-by-append (model & migration)",
+          "note": "Add Administration: id, tenant_id, client_id, prescription_id(FK), product_id, lot_id(FK), units, site, depth, technique, administrator_id, at, correction_of(self-FK, nullable); RLS by tenant. Make it append-only: REVOKE UPDATE/DELETE; a correction is a new row with correction_of set (ADR-0010). Index (lot_id) for the recall lookup and (client_id, at) for the register. The medicine-register row is this table - no separate mutable copy."
+        },
+        {
+          "title": "Finalise-administration endpoint + stock deduction",
+          "note": "Endpoint POST /charts/{id}/finalise creates the Administration(s) from the charted points and decrements the selected lot's on-hand via the StockLedger (movement=administer, ref=administration_id) in one transaction (PRD-04/VIAL-RECON). Server recomputes totals; reject if units drawn exceed lot on-hand (over-draw). On success, transition the Prescription to consumed. Idempotent on the finalise token so an offline-queued retry can't double-administer (ADR-0015)."
+        },
+        {
+          "title": "C8 administration gate invariant + blocked-attempt audit",
+          "note": "Enforce the full gate in domain + DB (ADR-0008) at finalise: valid unconsumed Prescription for the SAME client; current Consent (and off-label coverage if Rx.off_label); lot in-date AND in-custody (StockLocation/custodian) AND artg_verified AND not quarantined (cold-chain breach). Any failure blocks with a specific explainable reason and writes an AuditEvent for the refusal. Successful administration also audited. This is the moat's keystone - UI checks are advisory only."
         }
       ]
     },
@@ -268,23 +372,43 @@
         "PRD-04/PRODUCT-CATALOGUE"
       ],
       "detail": [
-        "S4 stock is received from a TGA-approved wholesaler with ARTG status, brand, sponsor and lawful supply source recorded per lot. Receiving non-ARTG or unverified-source stock is warned/blocked per config (C11). S4 purchase orders require a prescriber signer.",
-        "Ensures the clinic only holds lawfully-supplied, approved medicine, with provenance for every lot."
+        "Lawful supply is a top TGA enforcement target (penalties to $1.65M/breach for individuals): importing or using unapproved/counterfeit injectables is exactly what C11 guards against. Every S4 lot received must record its ARTG registration/approval status, brand, sponsor and the lawful supply source (ordered by an authorised prescriber from a TGA-approved wholesaler).",
+        "S4 purchase orders require a prescriber signer - RNs/ENs/admin cannot buy S4 (GAP-3). The receive flow is where provenance enters the system and where non-ARTG / unverified-source stock is warned or blocked per tenant config.",
+        "Receiving creates a StockItem (lot) under a product: lot number, expiry, units received (in the product's unit), supplier, ARTG status, supply source, the storage location and the custodian. On-hand starts at received and is decremented by administrations/wastage via the StockLedger.",
+        "The server validates lawful supply: ARTG status is recorded (manual entry in v1; dataset lookup is an open option), and non-ARTG or unverified-source stock is warned or blocked per tenant config. An S4 PO must carry a prescriber signer and a TGA-approved wholesaler.",
+        "The received lot then surfaces in the stock-by-lot table with on-hand / used / wasted / status, and in lot detail with expiry, supplier, storage+temp, custody, the ARTG badge and vial reconciliation. The provenance recorded here is what makes the lot selectable at administration."
       ],
       "ui_spec": [
-        "Prototype: Stock & medicines -> 'Receive stock' (stock.png) — a modal capturing lot, expiry, units received, supplier, ARTG; the lot then appears in the stock table with on-hand/expiry/temp/status.",
-        "ARTG validation supports manual entry (dataset lookup is an open option)."
+        "Prototype screen: Stock & medicines - 'Receive stock' (stock.png).",
+        "'Receive stock' opens a modal capturing lot, expiry, units received, supplier, ARTG status, and the destination location ('Receive into Fridge 1').",
+        "The received lot appears in the 'Stock by lot' table: product, lot, expiry, on-hand, used, wasted, status (OK/Expiring/Depleted/Expired).",
+        "Lot detail shows the ARTG badge ('ARTG' verified vs 'unapproved'), supplier (e.g. 'Allergan AU'), storage ('Fridge 1 - 4.2C') and custody ('Dr Lee NP').",
+        "ARTG validation is manual entry in v1; a dataset lookup is flagged as an open option."
       ],
       "data_model": [
         {
           "entity": "StockItem",
-          "fields": "id, tenant_id, product_id, lot, expiry, received_units, on_hand, supplier, artg_verified(bool), supply_source, location_id, custodian_id, status",
-          "notes": "Provenance per lot (C11); on_hand decremented by administrations."
+          "fields": "id, tenant_id, product_id, lot, expiry, received_units, on_hand, wasted, supplier, artg_verified(bool), supply_source, location_id, custodian_id, status(OK|Expiring|Depleted|Expired)",
+          "notes": "Provenance per lot (C11); on_hand decremented by administrations via StockLedger. Mapping: the stock[] lot objects + doReceive()."
         },
         {
           "entity": "PurchaseOrder",
-          "fields": "id, tenant_id, supplier, lines[], prescriber_signer_id, status",
-          "notes": "S4 POs require a prescriber signer + approved wholesaler."
+          "fields": "id, tenant_id, supplier, wholesaler_approved(bool), lines[]{product_id,qty}, prescriber_signer_id, status",
+          "notes": "S4 POs require a prescriber signer + TGA-approved wholesaler (GAP-3). RNs/ENs/admin cannot sign an S4 PO."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "StockItem (lot) + PurchaseOrder model with provenance (model & migration)",
+          "note": "Add StockItem: id, tenant_id, product_id(FK), lot, expiry, received_units, on_hand, wasted, supplier, artg_verified(bool), supply_source, location_id(FK StockLocation), custodian_id, status; RLS by tenant. Add PurchaseOrder: id, tenant_id, supplier, wholesaler_approved, lines[], prescriber_signer_id, status. Index (product_id, expiry) for expiry alerts and (lot) for recall. on_hand is maintained only via StockLedger movements, never edited directly."
+        },
+        {
+          "title": "Receive-stock API + ARTG/lawful-supply validation",
+          "note": "Endpoint POST /stock/receive: lot, expiry, received_units (product unit), supplier, artg status, supply_source, location_id, custodian_id. Writes a StockLedger receive movement and creates the StockItem. Validate lawful supply: warn or block non-ARTG / unverified-source per tenant config (C11). ARTG = manual entry in v1 with a hook for a future ARTG dataset lookup. Receiving into a location binds custody (PRD-04/CUSTODY-STORAGE)."
+        },
+        {
+          "title": "Prescriber-signer gate on S4 POs + audit",
+          "note": "Enforce that an S4 PurchaseOrder requires prescriber_signer_id (a prescribe-S4-capable staffer) and wholesaler_approved=true before it can be raised/received (GAP-3, ADR-0008); RN/EN/admin attempts are rejected. Audit every receive with full provenance (lot, ARTG, supplier, source, signer) - this is the lawful-supply evidence an inspector asks for (C11)."
         }
       ]
     },
@@ -326,23 +450,44 @@
         "PRD-04/STOCK-RECEIVE"
       ],
       "detail": [
-        "Only NP/prescriber roles may take custody; stock is bound to a secure, access-logged location. The Mode-A custodian must physically work at the clinic and hold exclusive custody — a remote prescriber consigning stock is flagged non-compliant (C7/C15).",
-        "A custodian + exclusive-custody attestation + designated medicine-store contact are recorded."
+        "QLD's exclusive-custody rule (GAP-3, C7) is sharp: a Mode-A custodian must be a prescriber who physically works at the clinic and holds EXCLUSIVE custody and control of the S4 stock. A remote prescriber consigning stock to a nurse-held clinic is non-compliant - this breaks the legacy 'remote telehealth doctor + nurse-held stock' model. RNs may only POSSESS S4 to administer it.",
+        "Secure storage (C15) requires a locked cabinet/room with access restricted to authorised personnel and access events logged. The optional ESP32 cabinet monitor (CM-01) turns the paper 'who had the keys' trust model into a logged, alarmed audit trail.",
+        "Stock is bound to a StockLocation (e.g. 'locked fridge') with a named custodian. Only NP/prescriber roles can take custody; a custody change is capability-gated and audited. The location carries an exclusive-custody attestation and a designated medicine-store/management contact (GAP-3).",
+        "A remote prescriber recorded as consigning stock to a clinic where they lack exclusive custody is flagged non-compliant - the system surfaces it rather than silently allowing it.",
+        "Access is logged: the AccessLog records open/close/tamper events per location. The CM-01 cabinet monitor POSTs signed door + tamper events to a per-clinic+cabinet endpoint; the server attributes an open to a staff badge tap and raises a facility job on an unattributed open, after-hours open, door-left-ajar, tamper, seq-gap or missed heartbeat (the same job pathway the fridge monitor uses). Silence is itself an alarm.",
+        "The header surface ('custody Dr Lee NP - locked fridge') and the per-lot custody field make the custodian + secure-location binding visible everywhere stock is shown."
       ],
       "ui_spec": [
-        "Prototype: Stock & medicines header (stock.png) shows 'custody Dr Lee NP · locked fridge'; the custodian + secure-location binding is visible; access is logged.",
-        "Custody-change is capability-gated and audited."
+        "Prototype screens: Stock & medicines header (stock.png) + the CM-01 cabinet monitor.",
+        "The Medicines & stock header reads 'On-site stock - custody Dr Lee NP - locked fridge' - the custodian + secure-location binding is visible at a glance.",
+        "Lot detail shows 'Custody: Dr Lee NP' and 'Storage: Fridge 1 - 4.2C' per lot.",
+        "Cabinet access (CM-01): an access log of who/when/duration per cabinet, with facility jobs for unattributed/after-hours/ajar/tamper opens - the 'restrict + log access' half of C15/REQ-MED-8.",
+        "Custody change is capability-gated to prescriber/owner and audited."
       ],
       "data_model": [
         {
           "entity": "StockLocation",
-          "fields": "id, tenant_id, name(locked cabinet/fridge), custodian_id, exclusive_custody_attested(bool), store_contact",
-          "notes": "Custody limited to on-site prescriber (C7); access logged."
+          "fields": "id, tenant_id, name(locked cabinet/fridge), custodian_id, exclusive_custody_attested(bool), store_contact, cabinet_monitor_id?",
+          "notes": "Custody limited to on-site prescriber (C7); exclusive-custody attestation + designated store contact recorded (GAP-3). Optional CM-01 binding for logged access."
         },
         {
           "entity": "AccessLog",
-          "fields": "id, location_id, actor_id, at, event(open|close|tamper)",
-          "notes": "Feeds the optional ESP32 cabinet sensor + audit."
+          "fields": "id, tenant_id, location_id, actor_id?, badge_id?, at, event(open|close|tamper_motion|tamper_mask|tamper_lid|sensor_disagreement|heartbeat), attributed(bool), seq",
+          "notes": "Feeds the CM-01 cabinet sensor + audit (C15). Server decides policy (unattributed/after-hours/ajar/tamper -> facility job); monotonic seq detects gaps/resets."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "StockLocation + AccessLog model (exclusive custody, attestation) (model & migration)",
+          "note": "Add StockLocation: id, tenant_id, name, custodian_id, exclusive_custody_attested(bool), store_contact, cabinet_monitor_id (nullable); RLS by tenant. Add AccessLog: id, tenant_id, location_id, actor_id/badge_id (nullable), at, event(open|close|tamper_*|sensor_disagreement|heartbeat), attributed(bool), seq(monotonic). StockItem.location_id + custodian_id FK to the location. AccessLog is append-only."
+        },
+        {
+          "title": "Custody/storage API + exclusive-custody rule",
+          "note": "Endpoints: POST/PATCH /locations (custodian, attestation, store_contact), POST /locations/{id}/custody (take/transfer custody - capability-gated to NP/prescriber). Enforce: only a prescribe-S4 staffer can be custodian (C7); record exclusive_custody_attested + store_contact (GAP-3). Flag a remote prescriber consigning stock to a clinic without their exclusive on-site custody as non-compliant (surface it, don't silently allow). RNs may possess-to-administer only."
+        },
+        {
+          "title": "Cabinet-monitor ingest + access-log policy + audit",
+          "note": "Endpoint POST /clinics/{slug}/cabinets/{id}/events: verify the per-cabinet bearer token + HMAC X-Signature, dedupe on Idempotency-Key, check monotonic seq (gap/reset = tamper). Server decides policy from raw signals: raise a facility job on unattributed open (no recent badge tap), after-hours, door-left-ajar (no close), any tamper_*/sensor_disagreement, missed heartbeat (>2 intervals) or seq gap. Write every access event to AccessLog + audit (C15)."
         }
       ]
     },
@@ -383,23 +528,53 @@
         "PRD-04/CUSTODY-STORAGE"
       ],
       "detail": [
-        "Toxin must stay 2-8C. Temperature can be logged manually and via the device API (ESP32 monitor); an excursion raises an alert and flags affected stock for quarantine, and the breach pathway can quarantine a lot and raise a job (links PRD-11).",
-        "Excursion history is retained and visible — evidence that cold-chain held for every lot used (C13)."
+        "Botulinum toxin must be stored at 2-8C (C13, TGA Product Information). A cold-chain breach can silently denature stock; the evidence that every administered lot held cold-chain is part of the audit-ready record. Manual twice-daily logs leave an overnight gap - which is exactly what the ESP32 TempGuard (TM-01) closes with continuous readings and instant breach alerts.",
+        "The platform stores a temperature series per storage location, charts it, and runs a single server-side 2-8C rule over every reading regardless of source - manual entry, the DIY ESP32, or a validated commercial logger (Testo/Dickson/LogTag) via a per-vendor adapter. The device reports raw; the server decides policy.",
+        "Readings arrive as TempLog rows (location, monitor, temp, at, source=manual|device). The ESP32 POSTs every ~5 min over TLS to a per-clinic+fridge endpoint with an Idempotency-Key; commercial loggers reach the same ingest via webhook-in or poll-out adapters that normalise unit/timestamp/fridge to the canonical shape.",
+        "On each reading the server applies the 2-8C rule. An out-of-range reading opens (or extends) an Excursion for that location, flags the affected lots and quarantines them ('Do not use'), and raises a breach/facility job to the Lead Nurse (links PRD-11). A quarantined lot is not selectable at administration (PRD-04/ADMIN-GATE).",
+        "The server also treats absence of data as a signal: no reading for >2 intervals = monitor offline; firmware-behind / battery-low / mains-loss all raise facility jobs so a monitor gets fixed before it matters. Silence is itself an alert.",
+        "Excursion history (start/end, min/max, affected lots, action) is retained and visible - the evidence that cold-chain held for every lot used, alongside the manual twice-daily min/max log that stays as an audit fallback."
       ],
       "ui_spec": [
-        "Prototype: Front desk/Operations -> Temperature monitors (ops-monitors.png) — live/charted fridge temps per location, breach alerts; the stock table shows a per-lot temp (e.g. '4.2C').",
-        "An excursion visibly quarantines the lot and raises a follow-up job."
+        "Prototype screen: Front desk / Operations - Temperature monitors (ops-monitors.png).",
+        "Fleet view: KPI tiles 'Monitors 3 / Online 2of3 / Last sync just now / Needs attention 1'; per-monitor cards (TempGuard A1 TM-01 / A2 TM-02 / B1 TM-03) with a live sparkline, last-seen, signal (e.g. -58 dBm strong), firmware, power (USB-C) and an online/offline pill.",
+        "An offline monitor (TM-03, 'no recent data', firmware update due) shows a 'Raise job' action; healthy monitors link to 'Details'.",
+        "On the fridge cards (Open/close & fridge): live current temp + 12h sparkline + min/max + AM/PM manual-log chips; status pills 'in range' / 'warm spike - recovered' / 'excursion (12h)' / 'BREACH - lot quarantined'.",
+        "An excursion visibly quarantines the lot and raises a follow-up job; the per-lot temp (e.g. '4.2C') is also shown in the stock lot detail."
       ],
       "data_model": [
         {
           "entity": "TempLog",
-          "fields": "id, tenant_id, location_id, monitor_id, temp, at, source(manual|device)",
-          "notes": "2-8C range; out-of-range -> Excursion."
+          "fields": "id, tenant_id, location_id, monitor_id, temp, at, source(manual|device), unit, rssi?, fw?, idempotency_key",
+          "notes": "2-8C range; out-of-range -> Excursion (C13). Mapping: fridges[].series + the TM-0x monitors[]; ingest is the same internal call for ESP32 and adapter sources."
         },
         {
           "entity": "Excursion",
-          "fields": "id, location_id, started_at, ended_at, min, max, affected_lots[], action(quarantine)",
-          "notes": "Raises alert + job; flags stock (C13)."
+          "fields": "id, tenant_id, location_id, started_at, ended_at?, min, max, affected_lots[], action(quarantine), job_id?",
+          "notes": "Raises alert + breach job; flags + quarantines stock (C13). A quarantined lot is not selectable at administration."
+        },
+        {
+          "entity": "Monitor (device)",
+          "fields": "id, tenant_id, location_id, kind(esp32|testo|dickson|logtag|manual), status(online|offline), last_seen, fw, power, interval",
+          "notes": "Heartbeat: no reading >2 intervals = offline job. The device reports raw; the server owns the 2-8C policy."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "TempLog + Excursion + Monitor model (model & migration)",
+          "note": "Add TempLog: id, tenant_id, location_id, monitor_id, temp, at, source(manual|device), unit, rssi/fw (nullable), idempotency_key (unique); RLS by tenant. Add Excursion: id, tenant_id, location_id, started_at, ended_at, min, max, affected_lots[], action(quarantine), job_id. Add Monitor: id, location_id, kind, status, last_seen, fw, power, interval. Add StockItem.quarantined(bool). Index (location_id, at) for charting and (idempotency_key) for dedupe."
+        },
+        {
+          "title": "Temperature ingest + 2-8C rule + excursion/quarantine",
+          "note": "Single internal ingestReading(): manual log endpoint POST /locations/{id}/temp and device endpoint POST /clinics/{slug}/fridges/{fid}/readings (bearer token scoped per fridge, Idempotency-Key dedupe). On every reading apply the 2-8C rule server-side: out-of-range opens/extends an Excursion, sets StockItem.quarantined on affected lots, and raises a breach job (PRD-11). Return in_range + alert. Heartbeat watcher: no reading >2 intervals -> monitor offline job; battery-low/mains-loss/fw-behind -> facility jobs."
+        },
+        {
+          "title": "Excursion-quarantine gate + retained history + audit",
+          "note": "A quarantined lot ('Do not use') is not selectable at administration (feeds PRD-04/ADMIN-GATE). Retain full Excursion history (start/end, min/max, affected lots, action, resolving actor) visibly - the evidence cold-chain held for every administered lot (C13). Keep the manual twice-daily min/max log as an audit fallback. Audit excursions, quarantines and un-quarantine decisions."
+        },
+        {
+          "title": "Commercial-logger adapters (Testo / Dickson / LogTag) - integration",
+          "note": "Per-vendor adapter normalising each payload into the canonical reading shape (their device -> our fridgeId, unit -> C, timestamp -> ISO-8601), converging on the same ingestReading()/2-8C rule/breach pathway. Webhook-in (vendor pushes; Testo, Disruptive) verifying the vendor signature; poll-out (we pull on a timer; DicksonONE has no webhook and stores F -> convert). Config per fridge: which source is the instrument-of-record vs early-warning (ADR-0036)."
         }
       ]
     },
@@ -436,18 +611,43 @@
         "PRD-04/ADMIN-GATE"
       ],
       "detail": [
-        "Vial/unit reconciliation tracks units drawn vs vial size plus wastage, so stock, billing and the medicine register always agree. Each administration decrements the selected lot; discrepancies are surfaced and feed reporting (PRD-08).",
-        "Partial-vial handling is supported (one vial may treat several patients)."
+        "Vial/unit reconciliation makes stock, billing and the medicine register agree (C8). One toxin vial treats several patients, so partial-vial handling is the norm: units drawn per patient vs vial size plus wastage must reconcile. This also supports the named-patient / no-aliquoting rules emerging in some states (REQ-MED-5).",
+        "Reconciliation is derived, not stored: every movement on a lot (receive, administer, waste, adjust) is a StockLedger entry, and on-hand is the sum. When the sum doesn't match a count, the discrepancy is surfaced.",
+        "Each administration decrements the selected lot via a StockLedger movement(administer) keyed to the administration_id; wastage and adjustments are their own movements. on_hand = received - used - wasted +/- adjustments, computed from the ledger - never edited directly.",
+        "Lot detail shows the reconciliation block: Received / Used / Wasted / On hand in the product's unit (vials for toxin, syringes for filler). The 'Used by' list attributes each draw to a client + units + date, so a partial vial's distribution across patients is visible.",
+        "Discrepancies (ledger sum vs a stocktake count, or an administration that would over-draw) are surfaced rather than silently absorbed, and feed reporting (PRD-08)."
       ],
       "ui_spec": [
-        "Prototype: Stock & medicines (stock.png) — per-lot on-hand vs received vs wasted columns; usage history; reconciliation surfaced when draws don't match.",
-        "Charting finalise deducts charted units from the lot (see charting.png)."
+        "Prototype screen: Stock & medicines - lot detail reconciliation (stock.png).",
+        "Lot detail 'Vial reconciliation' block: Received 300U / Used 120U / Wasted 4U / On hand 176U (filler shows 'Syringe reconciliation' in syr).",
+        "Stock-by-lot table columns: On hand / Used / Wasted per lot, with status; usage history chart per product.",
+        "'Used by' list attributes draws to clients (Sarah Mitchell 24U - 12 Mar, Amelia Ross 20U - 11 Mar, ...) - the partial-vial distribution.",
+        "Charting finalise deducts charted units from the selected lot (see charting.png), the source of the administer movements."
       ],
       "data_model": [
         {
           "entity": "StockLedger",
-          "fields": "id, lot_id, movement(receive|administer|waste|adjust), units, ref(administration_id?), at, actor_id",
-          "notes": "Sum reconciles on_hand; partial-vial waste recorded; discrepancies flagged (C8)."
+          "fields": "id, tenant_id, lot_id, movement(receive|administer|waste|adjust), units, ref(administration_id?), at, actor_id, note",
+          "notes": "Sum reconciles on_hand; partial-vial waste recorded; discrepancies flagged (C8). Mapping: rec/onhand/wasted on stock[] + the uses[] 'Used by' list."
+        },
+        {
+          "entity": "ReconciliationView (read model)",
+          "fields": "lot_id, received, used, wasted, on_hand, expected, variance",
+          "notes": "Derived from StockLedger; variance vs a stocktake count surfaces a discrepancy (feeds PRD-08)."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "StockLedger as the single source of on-hand (model & migration)",
+          "note": "Add StockLedger: id, tenant_id, lot_id(FK), movement(receive|administer|waste|adjust), units, ref(administration_id nullable), at, actor_id, note; RLS by tenant; append-only. Make StockItem.on_hand a derived/maintained value: on_hand = sum(receive) - sum(administer) - sum(waste) +/- adjust. Build the ReconciliationView read model (received/used/wasted/on_hand/expected/variance) per lot. Support partial-vial fractional units where a product's unit requires it."
+        },
+        {
+          "title": "Reconciliation API + discrepancy surfacing",
+          "note": "Endpoints: GET /lots/{id}/reconciliation (received/used/wasted/on_hand + the per-client 'used-by' attribution), GET /lots/{id}/ledger. Every administration writes an administer movement (from PRD-04/ADMIN-GATE) in the same transaction as the Administration; wastage writes a waste movement. Surface a discrepancy when the ledger sum disagrees with a stocktake count or an administration would over-draw the lot. Feed the reconciliation read model to reporting (PRD-08)."
+        },
+        {
+          "title": "Over-draw guard + reconciliation audit",
+          "note": "Guard in domain + DB (ADR-0008): no movement may drive on_hand negative; an administration that would over-draw is blocked (reconciles with PRD-04/ADMIN-GATE). adjust movements (corrections) are capability-gated and require a note; never silently rewrite history - the ledger is append-only and audited so stock, billing units and the register always agree (C8)."
         }
       ]
     },
@@ -487,23 +687,48 @@
         "PRD-04/ADMIN-GATE"
       ],
       "detail": [
-        "Given a lot number, the system instantly lists every client/administration for that lot, and exports an audit-ready medicine register. Recall execution + acknowledgement tracking lives in the Governance hub.",
-        "This is the payoff of recording per-point lot in charting — a recall that would take days on paper takes minutes (C8)."
+        "This is the payoff of recording per-point batch-lot at every administration (C8). When a sponsor or the TGA issues a field-safety notice for a specific lot, the clinic must instantly identify and contact everyone treated from that lot. A recall that takes days on paper takes minutes here.",
+        "It is also where the audit-ready medicine register is produced: a complete, immutable record of every administration (batch-lot, qty, prescriber, administrator, client, datetime), queryable and exportable for QLD Health / AHPRA scrutiny. Recall execution + acknowledgement tracking lives in the Governance hub (full hub in PRD-08/11).",
+        "The recall query takes a lot number and returns every Administration for that lot - client, datetime, units, administrator - built directly on the immutable Administration + StockItem data (no separate denormalised copy that could drift). An index on Administration(lot_id) makes it instant.",
+        "Starting a recall creates a Recall record (lot, reason, started_at) and tracks per-client acknowledgement. Safety messages go out even to clients who opted out of marketing (a safety comm, not a promotional one); the acknowledgement trail (X of N acknowledged) is exactly what an inspector asks for.",
+        "The medicine register is the same immutable Administration data, queryable by date, product, prescriber and administrator, and exportable - the audit-ready S4 register (C8)."
       ],
       "ui_spec": [
-        "Prototype: Governance -> Recalls (gov-recalls.png) — enter a lot -> list of affected clients/administrations; start a recall with acknowledgement tracking.",
-        "The medicine register is queryable by date, product, prescriber, administrator and exportable."
+        "Prototype screen: Governance - Recalls (gov-recalls.png).",
+        "Governance > Recalls explains the play: 'turn the lot number into the exact client list instantly, send an SMS + call, and track who has acknowledged.'",
+        "An active recall card: 'RC-12 - Lot B2188 (Botulinum toxin) - Sponsor field-safety notice' with a progress bar '9 of 14 acknowledged - 64%' and a 'Run recall' action.",
+        "Run recall resolves the lot to its affected clients/administrations and starts acknowledgement tracking; safety messages reach clients even if they opted out of marketing.",
+        "The medicine register is queryable by date, product, prescriber, administrator and exportable (audit pack)."
       ],
       "data_model": [
         {
-          "entity": "(query) LotRecall",
-          "fields": "lot -> [Administration{client, at, units, administrator}]",
-          "notes": "Built on Administration + StockItem; powers recall + register export."
+          "entity": "LotRecall (query)",
+          "fields": "lot -> [Administration{client, at, units, administrator, prescriber}]",
+          "notes": "Built on Administration + StockItem; index on Administration(lot_id). Powers recall + register export (C8). Mapping: recallsData[] {id, lot, product, reason, clients, acked, status}."
         },
         {
           "entity": "Recall",
-          "fields": "id, tenant_id, lot, reason, started_at, acknowledgements[]",
-          "notes": "Tracks per-client acknowledgement."
+          "fields": "id, tenant_id, lot, reason, started_at, status, acknowledgements[]{client_id, at, via}",
+          "notes": "Tracks per-client acknowledgement; safety comms bypass marketing opt-out. The ack trail is the inspector-facing evidence."
+        },
+        {
+          "entity": "MedicineRegister (read model)",
+          "fields": "queryable view over immutable Administration: date, product, prescriber, administrator, client, lot, units",
+          "notes": "Audit-ready export (C8); immutable source (ADR-0010)."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Recall entity + lot index over Administration (model & migration)",
+          "note": "Add Recall: id, tenant_id, lot, reason, started_at, status, acknowledgements[]{client_id, at, via}; RLS by tenant. Add the index on Administration(lot_id) (and (lot_id, client_id)) that makes the lot->clients lookup instant. Build the MedicineRegister read model as a queryable view over the immutable Administration stream (date, product, prescriber, administrator, client, lot, units) - no denormalised copy that could drift (ADR-0013)."
+        },
+        {
+          "title": "Recall lookup + register query/export API",
+          "note": "Endpoints: GET /recall/lookup?lot=... returns every Administration for the lot (client, at, units, administrator, prescriber); POST /recall starts a Recall (lot, reason) and seeds acknowledgement tracking; PATCH /recall/{id}/ack records a client acknowledgement (via sms|call|app). GET /register queryable by date/product/prescriber/administrator with an export (audit pack). Recall safety comms are sent even to marketing-opt-out clients (safety, not promotion)."
+        },
+        {
+          "title": "Immutability guarantee + acknowledgement trail audit",
+          "note": "The register/recall read strictly from the append-only Administration stream (ADR-0010) so the exported register is provably complete and tamper-evident. Audit recall start, each acknowledgement and each register export - the X-of-N acknowledged trail and the export log are the inspector-facing evidence (C8). Full recall execution + DAEN routing detail hand off to the Governance hub (PRD-08/11)."
         }
       ]
     },
@@ -543,17 +768,37 @@
         "PRD-04/CUSTODY-STORAGE"
       ],
       "detail": [
-        "Wastage and destruction (including partial vials) are recorded via a licensed/RUM pathway with certificate references (C16). Records capture quantity, reason, pathway and certificate, are immutable and audited.",
-        "Closes the medicines loop alongside reconciliation and stocktake."
+        "C16 requires witnessed destruction/wastage of S4 to be logged - including partial vials/ampoules - disposed via a licensed / Return-Unwanted-Medicines (RUM) pathway, with retained certificates of destruction. This closes the medicines loop alongside reconciliation and stocktake: every unit received is accounted for as administered, wasted or destroyed.",
+        "Wastage (a partial-vial remainder discarded after a treatment) and destruction (expired or breached stock) are recorded against a lot: quantity, reason, pathway (RUM|licensed), certificate reference, witness and timestamp. Each writes a waste movement to the StockLedger so the lot's on-hand and reconciliation stay correct (PRD-04/VIAL-RECON).",
+        "In the prototype, lot detail offers 'Record wastage' (units + reason) and, for expiring/expired lots with on-hand, a 'Destroy' action that zeroes on-hand to 'Depleted'. The real flow captures the licensed/RUM pathway + certificate ref and is immutable once saved (ADR-0010).",
+        "Destruction records are surfaced in the back-office waste log and feed the compliance dashboard and audit pack."
       ],
       "ui_spec": [
-        "Prototype: Stock & medicines -> record wastage/destruction (stock.png) — quantity, reason, pathway, certificate ref; also surfaced in the back-office waste log (backroom.png)."
+        "Prototype screens: Stock & medicines lot detail (stock.png) + back-office waste log.",
+        "Lot detail has a wastage row: a units input + 'Record wastage' button; for an Expiring/Expired lot with on-hand, a 'Destroy' action appears.",
+        "Recording wastage increments the lot's Wasted figure and decrements On hand in the reconciliation block; 'Destroy' zeroes on-hand and marks the lot Depleted.",
+        "The real destruction flow additionally captures reason, pathway (RUM/licensed), certificate ref and witness - immutable once saved.",
+        "Destruction also surfaces in the back-office waste log (backroom)."
       ],
       "data_model": [
         {
           "entity": "StockDestruction",
-          "fields": "id, lot_id, units, reason, pathway(RUM|licensed), certificate_ref, at, actor_id",
-          "notes": "Partial-vial supported; immutable + audited (C16)."
+          "fields": "id, tenant_id, lot_id, units, reason, pathway(RUM|licensed), certificate_ref, witness_id, at, actor_id",
+          "notes": "Partial-vial supported; immutable + audited (C16). Writes a StockLedger waste movement. Mapping: recordWastage()/destroyLot() in the prototype lot detail."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "StockDestruction record + ledger waste movement (model & migration)",
+          "note": "Add StockDestruction: id, tenant_id, lot_id(FK), units, reason, pathway(RUM|licensed), certificate_ref, witness_id, at, actor_id; RLS by tenant; append-only (no UPDATE/DELETE). Each destruction/wastage writes a StockLedger waste movement so reconciliation stays correct (PRD-04/VIAL-RECON). Support fractional/partial-vial units. certificate_ref + witness_id are required for a destruction (vs an in-treatment wastage)."
+        },
+        {
+          "title": "Wastage/destruction API + licensed/RUM pathway",
+          "note": "Endpoints: POST /lots/{id}/wastage (units, reason) and POST /lots/{id}/destruction (units, reason, pathway, certificate_ref, witness_id). Wastage decrements on_hand via the ledger; destruction of an expiring/expired/quarantined lot zeroes the remaining on-hand and marks it Depleted. Capture the licensed/RUM pathway + certificate so disposal is provably lawful (C16). Surface in the back-office waste log + compliance dashboard."
+        },
+        {
+          "title": "Immutability + witnessed-destruction audit",
+          "note": "Records are immutable once saved (ADR-0010); a correction is an appended, linked record, never an edit. Audit every wastage/destruction with quantity, reason, pathway, certificate and witness - the lawful-disposal evidence an inspector asks for (C16). Capability-gate the destroy action to stock-capable clinical roles."
         }
       ]
     },
@@ -593,22 +838,42 @@
         "PRD-04/CUSTODY-STORAGE"
       ],
       "detail": [
-        "Stocktakes compare expected vs counted stock per lot; discrepancies are recorded and a discrepancy can trigger a loss/theft report. Near-expiry lots surface via expiry alerts. Results feed the compliance dashboard (C17).",
-        "Keeps stock integrity provable and losses reported."
+        "Periodic S4 reconciliation (C17) proves stock integrity: a stocktake compares expected (the ledger sum) against a physical count per lot, records variances, and gives a path to report loss/theft. Near-expiry lots surface via expiry alerts. Results feed the compliance dashboard (PRD-08), and an unexplained count variance near a cabinet-access anomaly (PRD-04/CUSTODY-STORAGE) is the signal for a loss/theft report.",
+        "A Stocktake captures, per lot, the expected on-hand (from the StockLedger) and the counted quantity; variance = counted - expected. A non-zero variance is recorded as a discrepancy; the stocktaker can trigger a LossReport (loss|theft) from a discrepancy.",
+        "Expiry alerts surface near-expiry lots (the prototype's 'Expiring soon' tile and the per-lot 'Expiring' status) so they can be used FEFO or destroyed before they lapse.",
+        "Stocktake results, discrepancies and loss/theft reports feed the compliance dashboard and audit pack - keeping stock integrity provable and losses reported."
       ],
       "ui_spec": [
-        "Prototype: Stock & medicines (stock.png) — a stocktake action comparing counted vs expected per lot; discrepancies highlighted with a loss/theft report path; expiry alerts on near-expiry lots."
+        "Prototype screen: Stock & medicines (stock.png).",
+        "KPI tiles include 'Expiring soon - 1 lot (Botox B2188 - 40U)' and 'Below par - 2 reorder'; the stock-by-lot table flags an 'Expiring' status per lot.",
+        "A stocktake action compares counted vs expected per lot; a variance is highlighted as a discrepancy with a loss/theft report path.",
+        "The 'Reduce waste & lift margin' panel nudges FEFO use of near-expiry lots (e.g. 'Lot B2188 expiring (~6 wks - 40u)').",
+        "Stocktake results feed the governance/compliance dashboard."
       ],
       "data_model": [
         {
           "entity": "Stocktake",
           "fields": "id, tenant_id, at, actor_id, lines[]{lot_id, expected, counted, variance}",
-          "notes": "Variance -> discrepancy."
+          "notes": "expected from the StockLedger; variance -> discrepancy (C17)."
         },
         {
           "entity": "LossReport",
-          "fields": "id, stocktake_id, lot_id, units, kind(loss|theft), reported_at",
-          "notes": "Triggerable from a discrepancy (C17)."
+          "fields": "id, tenant_id, stocktake_id, lot_id, units, kind(loss|theft), reported_at, reported_by, note",
+          "notes": "Triggerable from a discrepancy (C17); cross-referenced with cabinet AccessLog anomalies."
+        }
+      ],
+      "tasks": [
+        {
+          "title": "Stocktake + LossReport model + expiry alerting (model & migration)",
+          "note": "Add Stocktake: id, tenant_id, at, actor_id, lines[]{lot_id, expected, counted, variance}; and LossReport: id, tenant_id, stocktake_id, lot_id, units, kind(loss|theft), reported_at, reported_by, note; RLS by tenant. expected is snapshotted from the StockLedger at count time. Add an expiry-alert query/threshold over StockItem.expiry to surface near-expiry lots (drives the 'Expiring soon' tile and the per-lot Expiring status)."
+        },
+        {
+          "title": "Stocktake API + discrepancy/loss-theft flow",
+          "note": "Endpoints: POST /stocktake (per-lot counted), the server computes expected from the ledger and variance per line. A non-zero variance is recorded as a discrepancy; POST /stocktake/{id}/loss-report raises a LossReport(loss|theft) from a discrepancy. Cross-reference cabinet AccessLog anomalies (PRD-04/CUSTODY-STORAGE) so an unexplained open near a count variance is easy to spot. Feed results to the compliance dashboard (PRD-08)."
+        },
+        {
+          "title": "Discrepancy/expiry surfacing + audit",
+          "note": "Surface discrepancies and near-expiry lots on the stock view and the compliance dashboard; FEFO nudge near-expiry lots before they lapse. Audit every stocktake, recorded variance and loss/theft report - periodic reconciliation + loss reporting is the C17 evidence. Capability-gate stocktake/loss-report to stock-capable clinical roles + owner."
         }
       ]
     },
@@ -639,18 +904,28 @@
       ],
       "priority": "P2",
       "detail": [
-        "Placeholder (Phase 2): a pharmacy-dispensing model where a pharmacy partner holds/dispenses stock, for clinics without on-site custody. v1 is Mode A only; the tenant mode switch already anticipates Mode B (DispensedItem entity reserved)."
+        "Mode B is an alternative dispensing model (REQ-MED-3, deferred) where a pharmacy partner holds and dispenses per-patient stock for clinics without on-site prescriber custody - an RN holds/administers only dispensed items, never bulk stock. There is no pharmacy partner yet, so v1 is Mode A only; this story keeps the medicines model mode-aware.",
+        "A tenant MedicineMode switch (A_onsite | B_pharmacy) already anticipates Mode B; v1 = A only. The DispensedItem entity is reserved so the per-patient dispensing model can be added later without a schema rework. WATCH-1 (single-product telehealth prescribing under national review) could elevate the on-site-NP and designated-RN-prescriber models and change Mode-B economics."
       ],
       "data_model": [
         {
           "entity": "MedicineMode",
           "fields": "tenant_id, mode(A_onsite|B_pharmacy)",
-          "notes": "v1 = A only."
+          "notes": "v1 = A only; the mode-aware switch."
         },
         {
           "entity": "DispensedItem",
-          "fields": "(reserved for Mode B)",
-          "notes": "Placeholder."
+          "fields": "(reserved for Mode B) client_id, pharmacy_ref, product, lot, dispensed_at",
+          "notes": "Placeholder - per-patient dispensed items tied to the client; RN holds/administers dispensed-only, never bulk (REQ-MED-3)."
+        }
+      ],
+      "ui_spec": [
+        "No dedicated screen in v1; the Mode-A custody header ('On-site stock') is the visible mode today. Mode B would add a per-patient dispensed-item surface in a later phase."
+      ],
+      "tasks": [
+        {
+          "title": "Scope & design Mode B when pulled into a sprint",
+          "note": "Placeholder (Phase 2+). When a pharmacy partner exists, design the per-patient dispensing model: MedicineMode=B_pharmacy, the reserved DispensedItem entity (client-tied dispensed items from the pharmacy), and the rule that an RN holds/administers dispensed-only and never bulk S4 (REQ-MED-3, C7). Re-check against WATCH-1 (telehealth prescribing national review). v1 ships Mode A only; this task is intentionally not built now."
         }
       ]
     }

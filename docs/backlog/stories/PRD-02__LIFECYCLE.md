@@ -11,8 +11,9 @@ Bookings move through booked → reminded → checked-in → in-room → checked
 
 ## How it works
 
-The visit lifecycle is a status state-machine: booked -> reminded -> checked-in -> in-room -> checked-out, with role hand-offs. Late and no-show flags are raised; a no-show automatically creates a follow-up call (PRD-07).
-Captures new-vs-returning, reason and roster so reporting and recall work.
+The visit is the spine that carries the client between roles (ADR-0024). The Appointment is a state machine — booked → reminded/confirmed → checked-in → in-room (in treatment) → for-checkout → checked-out/done (→ recall) — and each state surfaces the next action for whoever is responsible now, handing off automatically (reception flags late/no-show; a clinician starts treatment; finalise sets for-checkout, lighting up reception's queue).
+Reception flags late attendance and no-show; a no-show auto-creates a follow-up CALL job (PRD-07 jobs queue) so it is never lost. An 'in-room now' indicator shows who is being treated with quick links to their chart/profile. (Small clinics may skip a formal check-in — late/no-show are the flags that matter.)
+Booking captures new-vs-returning (full intake vs quick re-screen), reason/notes and respects the practitioner roster — these drive recall, reporting and the intake send. Every transition is audited via VisitEvent.
 
 ## Requirements
 
@@ -29,17 +30,20 @@ Captures new-vs-returning, reason and roster so reporting and recall work.
 
 _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients directory & 360._
 
-- Prototype: Today (dashboard.png) — waiting / in-room / checked-out columns; an 'in-room now' indicator with quick links to chart/profile.
-- Check-in on arrival; late/no-show flags; status chips on each appointment.
+- Prototype: Today (dashboard.png) — KPI tiles (appointments, checked in, awaiting consent, stock, follow-ups); 'Today's schedule' with a 'WITH YOU NOW' in-room strip (client + Open chart/Profile), and each row showing status chips + actions: Confirmed, Start, Late, No-show, Resume, Profile.
+- Status chips per appointment; check-in on arrival; late/no-show flags; a no-show row links into Follow-ups.
+- 'Awaiting consent — treatment gated until done' tile ties the lifecycle to the gates.
 
 ![dashboard — prototype screen](../screens/dashboard.png)
 
 ## Suggested data model
 
-- **Appointment.status** — booked|reminded|checked_in|in_room|checked_out|late|no_show|cancelled
-  - _Transitions audited; no_show raises a Job (PRD-07)._
-- **VisitEvent** — id, appointment_id, status, at, actor_id
-  - _Audit trail of the visit's transitions._
+- **Appointment.status** — booked|reminded|checked_in|in_room|for_checkout|checked_out|late|no_show|cancelled
+  - _State machine with role hand-offs (ADR-0024); transitions validated server-side; no_show raises a Job (PRD-07)._
+- **VisitEvent** — id, tenant_id, appointment_id, from_status, to_status, at, actor_id
+  - _Append-only audit trail of the visit's transitions._
+- **Appointment (booking fields)** — new_or_returning, reason, practitioner_id
+  - _Captured at booking; drives intake type (full vs re-screen), recall and reporting._
 
 ## Technical notes (high level)
 
@@ -51,22 +55,9 @@ _Prototype screen: prototype.html — Schedule, 'New booking' wizard, Clients di
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - Appointment.status — booked|reminded|checked_in|in_room|checked_out|late|no_show|cancelled (Transitions audited; no_show raises a Job (PRD-07).)
-  - VisitEvent — id, appointment_id, status, at, actor_id (Audit trail of the visit's transitions.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Status state-machine with role hand-offs; check-in on arrival.
-  - Rule: An 'in-room now' indicator with quick links to chart/profile.
-  - Rule: Late and no-show flags; a no-show raises a follow-up call (feeds PRD-07 jobs).
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-02/CALENDAR.
-- [ ] **Web UI**
-  Build on the Angular web app: the dashboard per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: Today (dashboard.png) — waiting / in-room / checked-out columns; an 'in-room now' indicator with quick links to chart/profile.
-  - Check-in on arrival; late/no-show flags; status chips on each appointment.
+- [ ] **Visit state-machine + transition API (server-validated)**
+  Model Appointment.status as a state machine (booked→reminded→checked_in→in_room→for_checkout→checked_out, plus late/no_show/cancelled). Transition endpoints validate legal transitions server-side and reject illegal ones; each write appends a VisitEvent (from/to/actor/at) to the audit stream. Emit domain events per transition for the Today board, reminders and read models. Capture new_or_returning/reason/practitioner at booking.
+- [ ] **No-show → auto follow-up call job**
+  When status transitions to no_show, automatically create a Follow-up CALL job in the PRD-07 jobs queue (assignee=reception, source=system, due=today) so the no-show is recovered. Late is a flag only (no job). Idempotent — re-flagging doesn't duplicate the job.
+- [ ] **Today board: in-room-now strip + per-row status actions**
+  Angular Today screen: KPI tiles; 'Today's schedule' list with a 'WITH YOU NOW' in-room strip (current client + Open chart / Profile). Each row shows the current status chip and the role-appropriate next action (Confirmed/Start/Resume/Late/No-show/Profile) wired to the transition API. Reflect the consult/consent gate state ('Awaiting consent — treatment gated'). Live-update from transition events.

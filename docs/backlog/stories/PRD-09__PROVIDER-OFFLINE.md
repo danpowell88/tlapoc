@@ -11,7 +11,7 @@ Charting/photos queue locally encrypted and sync on reconnect with no loss; a pe
 
 ## How it works
 
-The provider app keeps working offline: charting/photos queue locally (encrypted) and sync on reconnect with no loss; a persistent indicator shows queued count + last-sync, and finalise is disabled until synced (ADR-0015, built on SPIKE-OFFLINE + PRD-05/OFFLINE).
+The provider app keeps working offline: charting edits and captured photos queue to an encrypted on-device store and sync on reconnect with no loss (ADR-0015, built on SPIKE-OFFLINE + PRD-05/OFFLINE). Drafts reconcile last-write-wins; photos upload via signed URLs on reconnect (bytes held encrypted locally meanwhile, consistent with C14). A persistent indicator shows queued count + last-sync; finalise is disabled until everything has synced.
 Treatment-room Wi-Fi drops never cost the clinician data.
 
 ## Requirements
@@ -29,14 +29,17 @@ Treatment-room Wi-Fi drops never cost the clinician data.
 
 _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.html._
 
-- Prototype: provider app (treatment-room.png) — a persistent sync/offline indicator; queued-items count + last-sync; finalise disabled until synced.
+- Prototype: treatment-room — 'Connected to the treatment room' banner (flips to offline/queued in the real app).
+- Persistent indicator: queued-items count + last-sync time; finalise disabled until synced.
 
 ![treatment-room — prototype screen](../screens/treatment-room.png)
 
 ## Suggested data model
 
-- **(reuses)** — LocalQueue (PRD-05/OFFLINE) on-device
+- **(reuses) LocalQueue** — PRD-05/OFFLINE — encrypted on-device queue of draft edits + pending photo bytes
   - _Encrypted; last-write-wins drafts; server-side finalise._
+- **(reuses) ChartEntry/Photo** — PRD-05 — records the queue syncs to
+  - _Photos upload via signed URLs on reconnect._
 
 ## Technical notes (high level)
 
@@ -48,12 +51,7 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 
 ## Tasks (dev pickup)
 
-- [ ] **Provider app UI (Flutter)**
-  Build on the Flutter provider app: the treatment-room per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: provider app (treatment-room.png) — a persistent sync/offline indicator; queued-items count + last-sync; finalise disabled until synced.
-- [ ] **Offline queue + sync handling**
-  Offline-tolerant capture (provider app):
-  - Encrypted on-device queue for drafts + pending media; last-write-wins for drafts.
-  - Sync on reconnect with no data loss; finalisation happens server-side.
-  - Persistent sync indicator (queued count + last-sync); finalise disabled until synced.
+- [ ] **Provider app: encrypted offline queue + sync engine**
+  Encrypted on-device store (encrypted box / SQLCipher, ADR-0015/SPIKE-OFFLINE) holding draft chart edits and pending photo bytes while offline. Sync engine drains the queue on reconnect with no data loss; drafts reconcile last-write-wins; pending photos upload via signed URLs once connectivity returns (bytes held encrypted locally meanwhile, consistent with C14 — never left as plain device media).
+- [ ] **Provider app: persistent sync/offline indicator + finalise gating**
+  Always-visible indicator subscribing to queue depth and last-sync time (prototype's 'Connected to the treatment room' banner flips to an offline/queued state with counts). Disable finalise whenever the queue is non-empty so a chart can't be sealed with edits/photos still pending — protecting the server-side immutability guarantee.

@@ -11,8 +11,10 @@ An eligible data breach (NDB scheme) must be assessed and, if eligible, notified
 
 ## How it works
 
-When a potential data breach is flagged, a guided workflow assesses eligibility under the Notifiable Data Breaches scheme; if eligible it produces OAIC + individual notification drafts and a register entry. Observability/security signals (Sprint-0 OBS) can seed a case.
-There is a legal clock, so the workflow tracks assessment and notification dates.
+When a potential data breach is flagged, a guided workflow walks the admin/compliance officer through assessment under the Notifiable Data Breaches scheme (C22, REQ-SEC-7): is there unauthorised access/disclosure or loss of personal information, and is serious harm likely. There is a legal clock, so the case tracks detection, assessment and notification dates throughout.
+If assessed eligible, the workflow produces OAIC notification + affected-individual notification drafts and creates a breach-register entry that is retained (AC7). If not eligible, the assessment and its reasoning are still recorded — the register is the evidence the clinic assessed every flagged incident, eligible or not.
+A case can be opened manually or seeded from security/observability signals (Sprint-0 OBS) and from the auth/authorisation audit (AUTH-AUDIT) — e.g. anomalous access patterns or a run of scope-blocks can raise a candidate breach case rather than sitting unnoticed in a log. The data-access and auth audit trails (AUDIT/AUTH-AUDIT) are the evidence the assessment draws on.
+Workflow states: Detected -> Assessing -> (Eligible | Not eligible) -> Notifying (OAIC + individuals) -> Closed, each with timestamps against the 30-day assessment expectation. Surfaced in Governance (ADR-0030).
 
 ## Requirements
 
@@ -28,11 +30,15 @@ There is a legal clock, so the workflow tracks assessment and notification dates
 
 ## UI designs / screenshots
 
-- Surfaces in Governance: a breach register + a case workflow (assess -> notify -> close) with status and dates.
+- Surfaces in Governance: a breach register (list of cases with status + key dates) and a case workflow (assess -> notify -> close) showing the legal clock, the assessment questions, generated OAIC + individual notification drafts, and a close-out.
+- A 'flag a breach' entry point, plus auto-seeded candidate cases from OBS / auth-audit signals.
 
 ## Suggested data model
 
-- **DataBreach** — id, tenant_id, detected_at, description, assessment(json), eligible(bool), oaic_notified_at, individuals_notified_at, status
+- **DataBreach** — id, tenant_id, detected_at, source(manual|obs|auth_audit), description, assessment(json), eligible(bool), oaic_notified_at, individuals_notified_at, status(detected|assessing|eligible|not_eligible|notifying|closed)
+  - _Tracks the legal clock; retained as register evidence whether or not eligible._
+- **BreachNotification** — id, breach_id, audience(oaic|individual), draft_ref, sent_at
+  - _Generated drafts for OAIC + affected individuals._
 
 ## Other
 
@@ -40,20 +46,9 @@ There is a legal clock, so the workflow tracks assessment and notification dates
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - DataBreach — id, tenant_id, detected_at, description, assessment(json), eligible(bool), oaic_notified_at, individuals_notified_at, status
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Flagging a breach starts an assessment workflow.
-  - Rule: If assessed eligible, it produces OAIC + individual notification drafts.
-  - Rule: A breach-register entry is created and retained.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-01/AUDIT.
-- [ ] **Enforce compliance gate + audit events**
-  Enforce C22 as a server-side invariant that cannot be bypassed via the API:
-  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
-  - Write an immutable AuditEvent for the attempt and its outcome.
+- [ ] **Breach case model & assessment workflow (with the legal clock)**
+  Model DataBreach as a state machine (detected -> assessing -> eligible|not_eligible -> notifying -> closed) capturing detection/assessment/notification timestamps against the 30-day expectation. Build the guided NDB assessment (unauthorised access/disclosure or loss; serious-harm likelihood) that records the reasoning whether or not eligible. Append-only audited (ADR-0010); retained as register evidence.
+- [ ] **OAIC + individual notification generation & breach register**
+  On an eligible assessment, generate OAIC and affected-individual notification drafts (BreachNotification) from the case data and create the retained breach-register entry (AC7). Track sent dates against the clock. Provide the register list/query for the compliance officer.
+- [ ] **Seed cases from OBS / auth-audit signals + Governance UI**
+  Let security/observability signals (Sprint-0 OBS) and auth-audit anomalies (AUTH-AUDIT — e.g. a run of scope-blocks or anomalous access) raise candidate breach cases automatically, plus a manual 'flag a breach' entry. Build the Governance breach register + case workflow UI (assess -> notify -> close) showing the clock, assessment questions, generated drafts and close-out. Capability-gate to compliance/owner.

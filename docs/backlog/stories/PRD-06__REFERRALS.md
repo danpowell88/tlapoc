@@ -9,8 +9,7 @@ The prototype's Memberships → Referrals screen shows referral/affiliate credit
 
 ## How it works
 
-Placeholder (Phase 2): referrals/affiliate credit, non-S4 only — reusing the rewards-engine guardrail (no S4 incentive, C9). Core membership/rewards mechanics ship first.
-Captured so the rewards model stays referral-ready.
+Placeholder (Phase 2). Referral/affiliate credit reuses the rewards-engine guardrail: credit is non-S4 only — no S4 incentive (C9). Core membership/rewards mechanics ship first; this is captured so the data model and the non-S4 invariant already accommodate referrals when it's built.
 
 ## Requirements
 
@@ -21,21 +20,21 @@ Captured so the rewards model stays referral-ready.
 ## Acceptance Criteria
 
 - [ ] Placeholder — Phase 2; core membership/rewards mechanics ship first.
-- [ ] Referral/affiliate credit is non-S4 only (no S4 incentive), reusing the rewards engine guardrail (C9).
+- [ ] Referral/affiliate credit is non-S4 only (no S4 incentive), reusing the rewards-engine guardrail (C9).
 - [ ] Captured so the rewards model stays referral-ready.
 
 ## UI designs / screenshots
 
 _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rewards/Account._
 
-- Prototype: Memberships -> Referrals (memb-referrals.png) — referral/affiliate credit concept.
+- Prototype: Memberships -> Referrals — referral/affiliate credit concept (Phase 2).
 
 ![memb-referrals — prototype screen](../screens/memb-referrals.png)
 
 ## Suggested data model
 
-- **Referral** — id, referrer_id, referee_id, credit(non-S4), status
-  - _Phase 2; non-S4 credit only._
+- **Referral** — id, tenant_id, referrer_id, referee_id, credit(non-S4), status
+  - _Phase 2; non-S4 credit only — reuses the rewards engine guardrail._
 
 ## Technical notes (high level)
 
@@ -48,4 +47,4 @@ _Prototype screen: prototype.html — Checkout, Memberships; client-app.html Rew
 ## Tasks (dev pickup)
 
 - [ ] **Scope & design when pulled into a sprint**
-  Deferred placeholder — no build in v1; confirm it still fits scope/regulatory stance, then break down.
+  Deferred placeholder — no build in v1. When pulled in: confirm it still fits scope and the non-S4 regulatory stance (referral/affiliate credit must be non-S4 only, reusing the rewards-engine guardrail, C9), then break down. Referral credit posts to the same RewardLedger; no S4 incentive ever.

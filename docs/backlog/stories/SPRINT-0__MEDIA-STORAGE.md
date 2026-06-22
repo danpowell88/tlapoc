@@ -11,7 +11,9 @@ Clinical photos and documents must be stored centrally in AU, served via short-l
 
 ## How it works
 
-A media service: AU-resident, encrypted blob storage served only via short-lived signed URLs, with consent- and capability-checked, audited access and no public/unsigned path (C14/C21/ADR-0009/0016). Underpins PRD-05 photos and PRD-09 capture — media is never persisted on personal devices.
+Blob storage is AU-resident and encrypted at rest (IAC), and there is no public or unsigned access path — every read and write goes through a short-lived signed URL minted by the service. Clients (web and Flutter) request a signed URL, upload directly to Blob (so large media doesn't stream through the API), and download the same way; the URL expires quickly so a leaked link is short-lived.
+Minting a signed URL is consent- and capability-checked and audited: the service verifies the caller has the capability and that image-use consent permits the access (ADR-0009, C14) before issuing the URL, and records an AuditEvent (who accessed which media, when) so media access is part of the trail. A MediaObject row holds the metadata (owner ref, content type, blob path) — access is always via signed URL, never a stored public link.
+Upload and download are demonstrated from both web and Flutter to prove the round-trip. The device-side guarantee (no persistence beyond a transient encrypted cache, ADR-0009) is the provider app's responsibility (SPIKE-OFFLINE proved the pattern); this service guarantees the central, residency-correct, signed-only, audited storage.
 
 ## Requirements
 
@@ -27,8 +29,8 @@ A media service: AU-resident, encrypted blob storage served only via short-lived
 
 ## Suggested data model
 
-- **MediaObject** — id, tenant_id, owner_ref, blob_path(AU), content_type, created_at; access via signed URL only
-  - _No public access; consent/capability-checked._
+- **MediaObject** — id, tenant_id, owner_ref, blob_path(AU), content_type, created_at; consent_ref
+  - _Access via short-lived signed URL only; no public/unsigned path; mint is consent/capability-checked and audited (ADR-0009/C14)._
 
 ## Technical notes (high level)
 
@@ -40,13 +42,17 @@ A media service: AU-resident, encrypted blob storage served only via short-lived
 
 ## Tasks (dev pickup)
 
-- [ ] **Implement: Media storage & signed-URL service**
-  Deliver per the acceptance criteria:
-  - Blob storage is AU-resident and encrypted at rest; access is via short-lived signed URLs only.
-  - Upload + download flows are demonstrated from web and Flutter.
-  - Media access is consent- and capability-checked and audited.
-  - No public/unsigned access to media is possible.
-- [ ] **Wire into CI/CD + per-environment config**
-  Build/test/deploy steps + env-specific config & secrets; required for merge.
-- [ ] **Document setup & usage**
-  How to run/operate it; runbook notes for the team.
+- [ ] **Build the signed-URL upload/download service over AU-resident encrypted Blob**
+  Provide secure, residency-correct media handling with no public access.
+  - AU-resident, encrypted-at-rest Blob (IAC); every read/write via a short-lived signed URL minted by the service — no public/unsigned path.
+  - Direct-to-Blob upload/download (large media doesn't stream through the API); URLs expire quickly.
+  - A MediaObject row holds metadata; access is always via signed URL, never a stored public link.
+- [ ] **Gate signed-URL minting on consent + capability and audit every access**
+  Make media access governed and traceable.
+  - Before issuing a URL, verify the caller's capability AND that image-use consent permits the access (ADR-0009, C14).
+  - Record an AuditEvent (who/what media/when) on access via AUDIT-INFRA so media reads are in the trail.
+  - Demonstrate upload + download from both web and Flutter.
+- [ ] **Document the media service and the device non-retention contract**
+  Write the guide PRD-05/09 build on.
+  - How to request signed URLs, the consent/capability/audit gating, and the no-public-access rule.
+  - The device-side guarantee (no persistence beyond a transient encrypted cache, purge after sync) that the provider app must honour — proven by SPIKE-OFFLINE — and how it uploads through this service.

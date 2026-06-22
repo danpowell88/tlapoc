@@ -11,8 +11,9 @@ Membership plans/tiers with automatic recurring billing from a tokenised card-on
 
 ## How it works
 
-Membership plans/tiers with automatic recurring billing from a tokenised card-on-file (added online/in-app or at the desk) and failed-payment dunning. Lifecycle (join/pause/cancel/win-back) is tracked and feeds MRR/churn reporting; benefits/credits auto-apply at checkout.
-The recurring-revenue engine; autopay built on the Square recurring spike.
+A MembershipPlan defines name/tier, price, billing period and benefits. A Membership ties a client to a plan with a tokenised card-on-file (a PaymentMethodToken from PAYMENT-PROVIDER), a schedule and a next_charge_at. A scheduled job charges due memberships off-session via IPaymentProvider.recurringCharge.
+Dunning: a failed charge doesn't lapse the member immediately — it opens a DunningAttempt sequence (retry on a back-off schedule, notify the client to update their card, and raise a follow-up Job / 'Payment failed · Retry' state) before any cancellation. The members screen shows each member's plan, the card-on-file (last4), next charge date and dunning state, with a manual Retry.
+Lifecycle — join / pause / cancel / win-back — is tracked and feeds MRR and churn reporting (PRD-08). Benefits and credits (e.g. member pricing, 10% off non-S4, periodic complimentary add-on) auto-apply at checkout; all money figures stay owner-gated.
 
 ## Requirements
 
@@ -21,24 +22,25 @@ The recurring-revenue engine; autopay built on the Square recurring spike.
 ## Acceptance Criteria
 
 - [ ] A membership auto-charges on schedule from a stored token (card added online/in-app or in person).
-- [ ] A failed charge triggers dunning/recovery.
-- [ ] Lifecycle (join/pause/cancel/win-back) tracked → MRR/churn reporting (PRD-08).
-- [ ] Benefits/credits auto-apply at checkout.
+- [ ] A failed charge triggers a dunning/recovery sequence (retry + client notice + follow-up) before lapse, with a manual Retry.
+- [ ] Lifecycle (join/pause/cancel/win-back) is tracked and feeds MRR/churn reporting (PRD-08).
+- [ ] Benefits/credits auto-apply at checkout; all money figures are owner-gated.
 
 ## UI designs / screenshots
 
-- Prototype: Memberships -> Members & billing (memb-members.png) — member list, plan, card-on-file status, next charge, dunning state; Plans & packages (memb-plans.png) to define tiers.
-- Client app: join + add card-on-file (client-app.png).
+- Prototype: Memberships -> Members & billing — member list with Plan, Since, Autopay (card last4), Next charge, Status (Active / 'Payment failed · Retry'); Plans & packages defines tiers; '+ New plan'.
+- Client app: join + add/update card-on-file (Visa ···· 4242 'Used for membership autopay'); 'Glow Club renews 1 Jul · autopay is on'.
 
 ![memb-members — prototype screen](../screens/memb-members.png)
 
 ## Suggested data model
 
 - **MembershipPlan** — id, tenant_id, name, tier, price, period, benefits[]
-- **Membership** — id, client_id, plan_id, token_ref, schedule, status(active|paused|cancelled), next_charge_at
-  - _Autopay; dunning on failure -> MRR/churn (PRD-08)._
-- **DunningAttempt** — id, membership_id, attempt, at, result
-  - _Retry/recover on failed charge._
+  - _Owner-defined tiers._
+- **Membership** — id, client_id, plan_id, token_ref, schedule, status(active|paused|cancelled|dunning), next_charge_at, since
+  - _Autopay via IPaymentProvider.recurringCharge; lifecycle -> MRR/churn (PRD-08)._
+- **DunningAttempt** — id, membership_id, attempt_no, at, result(success|failed), next_retry_at
+  - _Back-off retry + client notice + Job on failed charge._
 
 ## Other
 
@@ -46,18 +48,14 @@ The recurring-revenue engine; autopay built on the Square recurring spike.
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - MembershipPlan — id, tenant_id, name, tier, price, period, benefits[]
-  - Membership — id, client_id, plan_id, token_ref, schedule, status(active|paused|cancelled), next_charge_at (Autopay; dunning on failure -> MRR/churn (PRD-08).)
-  - DunningAttempt — id, membership_id, attempt, at, result (Retry/recover on failed charge.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: A membership auto-charges on schedule from a stored token (card added online/in-app or in person).
-  - Rule: A failed charge triggers dunning/recovery.
-  - Rule: Lifecycle (join/pause/cancel/win-back) tracked → MRR/churn reporting (PRD-08).
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
-  - Depends on: PRD-06/PAYMENT-PROVIDER.
+- [ ] **Plan/Membership/Dunning model (migrations)**
+  Model MembershipPlan, Membership and DunningAttempt (tenant_id + RLS).
+  - Membership references a PaymentMethodToken (card-on-file), a schedule and next_charge_at; status includes a dunning state.
+  - DunningAttempt records the retry sequence (attempt_no, result, next_retry_at).
+  - Lifecycle transitions (join/pause/cancel/win-back) emit events for MRR/churn read-models (PRD-08).
+- [ ] **Autopay scheduler + dunning state machine + benefit auto-apply**
+  The recurring-billing engine.
+  - A scheduled job picks up memberships where next_charge_at <= now and charges off-session via IPaymentProvider.recurringCharge (idempotent per period).
+  - On failure: open a DunningAttempt sequence — back-off retries, notify the client to update the card (INotifier/PRD-07), raise a 'Payment failed' Job (Follow-ups), and only lapse after the sequence exhausts; expose a manual Retry.
+  - Benefits/credits auto-apply at checkout (member pricing, 10% non-S4, complimentary add-on) — non-S4 only; money figures owner-gated.
+  - Endpoints for join (token from online/in-app/desk), pause, cancel, win-back.

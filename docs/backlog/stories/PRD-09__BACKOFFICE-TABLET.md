@@ -11,8 +11,8 @@ The prototype's backroom surface is a bench tablet for behind-the-scenes work: o
 
 ## How it works
 
-A bench tablet for behind-the-scenes work: open/close checklist, cold-chain log, stock on hand, S4 drug register, waste/disposal log, tasks and shift handover — each panel reusing the underlying modules (PRD-04 medicines, PRD-11 operations, PRD-07 jobs). Role/financial gating applies; actions audited.
-A focused operations view for the back room.
+A bench tablet for behind-the-scenes work, opening on a 'Good morning' hub that shows the morning's attention items (open/close progress, cold-chain, expiring stock, last handover). Panels: open/close checklist, cold-chain (fridge) log, stock on hand, Schedule 4 drug register, waste & disposal log, tasks and shift handover — each re-using the underlying module (PRD-04 medicines, PRD-11 operations, PRD-07 jobs, PRD-11 handover) rather than duplicating data.
+Role/financial gating applies (owner-only money stays gated via .fin); actions are audited; shared-device session handling attributes actions to the acting staff member. A focused operations view for the back room.
 
 ## Requirements
 
@@ -30,15 +30,19 @@ A focused operations view for the back room.
 
 _Prototype screen: backroom.html._
 
-- Prototype: back-office tablet (backroom.png) — 'Good morning', Open & close, Cold chain, Stock on hand, Schedule 4 drug register, Waste & disposal log, Tasks, Shift handover.
-- Shared-device session handling.
+- Prototype: backroom — 'Good morning, Tessa' hub with morning attention items; tabs Today · Open & close · Cold chain · Stock · S4 register · Waste log · Tasks & handover.
+- Shared-device session handling; financial figures stay owner-only (gated).
 
 ![backroom — prototype screen](../screens/backroom.png)
 
 ## Suggested data model
 
-- **(reuses)** — OpenCloseChecklist/TempLog/StockItem/StockLedger/StockDestruction/Job/ShiftHandover
-  - _Aggregates operations + medicines + jobs._
+- **(reuses) OpenCloseChecklist/FridgeLog** — PRD-11 — open/close + cold-chain panels
+  - _Aggregates operations._
+- **(reuses) StockItem/StockLedger/S4 register/StockDestruction** — PRD-04 — stock on hand, S4 register, waste/disposal
+  - _Aggregates medicines._
+- **(reuses) Job/ShiftHandover** — PRD-07 jobs + PRD-11 handover — tasks + handover panels
+  - _Aggregates jobs + handover._
 
 ## Other
 
@@ -46,8 +50,5 @@ _Prototype screen: backroom.html._
 
 ## Tasks (dev pickup)
 
-- [ ] **Web UI**
-  Build on the Angular web app: the backroom per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: back-office tablet (backroom.png) — 'Good morning', Open & close, Cold chain, Stock on hand, Schedule 4 drug register, Waste & disposal log, Tasks, Shift handover.
-  - Shared-device session handling.
+- [ ] **Back-office bench-tablet operations surface**
+  Back-office web/tablet surface composing existing module views (not re-implementing them): a 'Good morning' hub with morning attention items, then panels for open/close checklist + cold-chain log (PRD-11), stock on hand + S4 register + waste/disposal (PRD-04), tasks (PRD-07) and shift handover (PRD-11). Apply role gating with the .fin capability so non-owner roles see no money figures; audit every action; shared-device session handling attributes actions to the acting staff member.

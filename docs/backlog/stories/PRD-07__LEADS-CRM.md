@@ -11,8 +11,8 @@ The prototype's Growth → Leads (CRM) screen tracks enquiries who haven't booke
 
 ## How it works
 
-A lead/prospect CRM (Phase 2) over the inbox: track enquiries who haven't booked yet, with source, status and next action; convert to a client/booking preserving history. Lead follow-ups surface in the Follow-ups queue; marketing to leads respects Spam-Act consent.
-Stops enquiries getting lost and improves conversion (ADR-0033).
+A Lead is a thin pipeline layer over the inbox (ADR-0033): name, contact, source (Instagram DM / Website widget / Facebook / Referral / Google), interest, stage (new / consult / won / lost), next_action, an optional linked conversation and converted_client_id, plus consent state. Stage transitions feed conversion read-models (KPIs: open leads, consults booked, conversion %, avg days). Converting a lead creates/links the client and preserves the enquiry history.
+The advertising line is respected: 1:1 service replies are fine (not public advertising), but any outbound nudge to a lead gates on marketing consent (C23) — the board shows a consent dot per lead. Lead follow-ups surface in the unified Follow-ups queue ('Reply & book — Friday consult'). Advertising compliance (C9) for campaigns/social stays clinic-owned in external tools.
 
 ## Requirements
 
@@ -22,23 +22,23 @@ Stops enquiries getting lost and improves conversion (ADR-0033).
 
 ## Acceptance Criteria
 
-- [ ] Leads are captured with source, status and next action.
-- [ ] A lead can convert to a client/booking, preserving history.
+- [ ] Leads are captured with source, stage and next action (over the inbox).
+- [ ] A lead can convert to a client/booking, preserving the enquiry history.
 - [ ] Lead follow-ups surface in the Follow-ups queue.
-- [ ] Marketing to leads respects Spam-Act consent (C23).
+- [ ] Outbound marketing to leads respects Spam-Act consent (C23); 1:1 service replies are exempt.
 
 ## UI designs / screenshots
 
 _Prototype screen: prototype.html — Comms & growth (Inbox/Automations/Campaigns), Growth (Leads/Reviews), Follow-ups, Settings → Public booking page; booking-widget.html._
 
-- Prototype: Growth -> Leads (CRM) (growth-leads.png) — lead list with source/status/next-action; convert-to-client/booking action.
+- Prototype: Growth -> Leads (CRM) — KPI cards (Open leads, Consults booked, Conversion %, Avg days); kanban columns New enquiry / Consult booked / Converted / Lost; lead cards with source + a consent dot; 'Enquiries from the inbox become pipeline cards. Pricing questions stay private (1:1 replies aren't public advertising); outbound nudges need opt-in consent.'
 
 ![growth-leads — prototype screen](../screens/growth-leads.png)
 
 ## Suggested data model
 
-- **Lead** — id, tenant_id, name, contact, source, status(new|nurturing|won|lost), next_action, converted_client_id?
-  - _Convert preserves history; consent for marketing (C23)._
+- **Lead** — id, tenant_id, name, contact, source, interest, stage(new|consult|won|lost), next_action, conversation_id?, converted_client_id?, consent(bool)
+  - _Projection over conversations (ADR-0033); convert preserves history; outbound nudges gate on consent (C23)._
 
 ## Technical notes (high level)
 
@@ -50,5 +50,15 @@ _Prototype screen: prototype.html — Comms & growth (Inbox/Automations/Campaign
 
 ## Tasks (dev pickup)
 
-- [ ] **Scope & design when pulled into a sprint**
-  Deferred placeholder — no build in v1; confirm it still fits scope/regulatory stance, then break down.
+- [ ] **Lead model as a projection over conversations (migrations)**
+  Model Lead (tenant_id + RLS) per ADR-0033: name, contact, source, interest, stage, next_action, optional conversation_id + converted_client_id, consent.
+  - A thin pipeline layer over the inbox; stage transitions feed conversion read-models.
+- [ ] **Leads API: pipeline stages, convert-to-client, consent-gated nudges, Follow-ups**
+  Server-side.
+  - CRUD leads; move stage (new/consult/won/lost); convert -> create/link a client + (optional) booking, preserving enquiry history.
+  - Outbound nudges gate on marketing consent (C23); 1:1 service replies exempt.
+  - Lead follow-ups raise Jobs into Follow-ups; conversion KPI read-model (open, consults, conversion %, avg days).
+- [ ] **Leads (CRM) web UI: kanban + KPIs + convert**
+  Angular per the screenshot.
+  - Kanban columns (New enquiry / Consult booked / Converted / Lost) with lead cards (source + consent dot); KPI cards; convert-to-client/booking action; the 1:1-vs-public-advertising note.
+  - Front-desk/owner gated; loading/empty/error states.

@@ -11,8 +11,10 @@ The prototype's sidebar groups screens into workspaces (Clinical, Front desk, Co
 
 ## How it works
 
-The app shell groups screens into workspaces (Clinical, Front desk, Comms & growth, Memberships, Business, Team, Governance, Settings) plus top-level Today/Schedule/Clients/Follow-ups/Checkout, with collapsible sections and a mobile drawer. Every nav entry is capability-gated (data-allow) so a role only sees what it can use.
-The frame every feature screen drops into; badges show outstanding Follow-ups + Governance counts.
+The app shell is the frame every feature screen drops into. The prototype sidebar groups screens into collapsible workspaces — Clinical (Charting, Stock & medicines, Forms & consent, Treatment menu, Skin/Body/Complication/Imaging sub-screens), Front desk/Operations (Open-close & fridge log, Temperature monitors, Rooms & devices, Equipment, Call log), Comms & growth (Inbox, Automations, Campaigns, Leads, Reviews), Memberships, Business (Reports, Finance), Team (Roster, People & credentials, Compliance board), Governance (Overview, AE & DAEN, Recalls, Policies, Audit pack) and Settings — plus the top-level items Today, Schedule, Clients, Follow-ups and Checkout.
+Every nav entry is capability-gated: the prototype tags each with data-allow and setPersona() shows/hides it from the active role's capabilities + concerns, then hides any workspace section whose children are all hidden. So a role only ever sees what it can use (an RN doesn't see Finance or Settings; Reception doesn't see Charting) — gating is sourced from RBAC, not hard-coded per item. This is presentation; the server-side capability check (RBAC) is the actual control.
+Active screen + section open/closed state persist (user prefs); on mobile the sidebar becomes a drawer with an overlay (toggleNav). The Follow-ups item and the Governance item carry live count badges (the prototype shows the red Governance count and a Follow-ups job count) so outstanding work is visible from anywhere.
+Edge cases: a role with no children in a section never sees the empty section header; switching active role (MULTI-ROLE/ROLE-CONTEXT) re-derives the visible nav immediately; deep-linking to a screen the role can't access falls back gracefully (the server still blocks the data).
 
 ## Requirements
 
@@ -29,15 +31,16 @@ The frame every feature screen drops into; badges show outstanding Follow-ups + 
 
 _Prototype screen: prototype.html — sidebar/app shell, Today dashboard, header (global search, clinic switcher, switch-user, scope tooltip)._
 
-- Prototype: the left sidebar (dashboard.png) — top-level items + collapsible 'Workspaces'; active screen/section persist; mobile uses a drawer + overlay.
-- Follow-ups and Governance show count badges; entries outside the role are hidden.
+- Prototype: the left sidebar (dashboard.png) — clinic context at top, top-level items (Today, Schedule, Clients, Follow-ups with job badge, Checkout) and collapsible Workspaces sections; the active item is highlighted and section state persists; mobile uses a drawer + overlay.
+- Each entry is capability-gated (data-allow); entries/sections outside the role are hidden entirely.
+- Follow-ups and Governance show live count badges of outstanding items.
 
 ![dashboard — prototype screen](../screens/dashboard.png)
 
 ## Suggested data model
 
-- **(derived) NavModel** — from Role.capabilities -> visible nav entries + badge counts
-  - _Capability-gated; no separate persistence beyond user prefs._
+- **(derived) NavModel** — from Role.capabilities + concerns -> visible nav entries + section visibility + badge counts (Follow-ups, Governance)
+  - _Capability-gated; derived from the RBAC session context, not separately persisted. Only user prefs (active screen, section open/closed) persist._
 
 ## Technical notes (high level)
 
@@ -49,8 +52,5 @@ _Prototype screen: prototype.html — sidebar/app shell, Today dashboard, header
 
 ## Tasks (dev pickup)
 
-- [ ] **Web UI**
-  Build on the Angular web app: the dashboard per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: the left sidebar (dashboard.png) — top-level items + collapsible 'Workspaces'; active screen/section persist; mobile uses a drawer + overlay.
-  - Follow-ups and Governance show count badges; entries outside the role are hidden.
+- [ ] **Capability-gated app shell, collapsible workspaces & badges**
+  Build the shell on the Sprint-0 web shell: top-level items (Today/Schedule/Clients/Follow-ups/Checkout) + collapsible workspace sections per the IA, with the active item highlighted and section open/closed + active screen persisted as user prefs. Derive each entry's visibility from the caller's capabilities/concerns (from the RBAC session context — not hard-coded), and hide any section whose children are all hidden. Render live count badges on Follow-ups and Governance. Mobile: drawer + overlay. Re-derive nav on active-role switch (ROLE-CONTEXT).

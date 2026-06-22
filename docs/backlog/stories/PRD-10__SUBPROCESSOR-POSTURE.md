@@ -11,8 +11,9 @@ No integration sends PII to a non-AU sub-processor unless an APP-8 assessment + 
 
 ## How it works
 
-No integration sends PII to a non-AU sub-processor unless an APP-8 assessment + consent record exists; flows are registered, and all integrations are outbound and swappable (ADR-0012/0016). Ties into PRD-01/RESIDENCY enforcement.
-Keeps integrations inside cross-border privacy rules (C21).
+The cross-border privacy gate over every integration: no integration sends PII to a sub-processor outside Australia unless a documented APP-8 cross-border assessment and a client consent record exist (C21, ADR-0016). It ties into PRD-01 RESIDENCY enforcement — all PII/PHI is pinned to Australia East — and extends that guarantee to the outbound edge where data leaves the platform (Xero, calendar, SMS).
+Every sub-processor data flow is registered: a SubProcessor record (shared with PRD-01) capturing the provider, the region it processes in, the APP-8 assessment reference and the consent reference. Before an integration dispatches PII, a residency check evaluates the sub-processor's region; an AU-resident provider passes, a non-AU provider passes only if the APP-8 assessment + consent are present, otherwise the flow is blocked (fail-closed). All integrations are outbound and swappable (ADR-0012), which keeps the set of sub-processors small and enumerable.
+Surfaced on the Integrations screen: each integration card shows its data-residency posture, and an admin sub-processor register lists the flows with their APP-8 status. This is a compliance control, not a financial feature.
 
 ## Requirements
 
@@ -21,21 +22,26 @@ Keeps integrations inside cross-border privacy rules (C21).
 
 ## Acceptance Criteria
 
-- [ ] No integration sends PII to a non-AU sub-processor unless an APP-8 assessment + consent record exists.
-- [ ] Sub-processor data flows are registered.
-- [ ] All integrations are outbound and swappable.
-- [ ] Ties into PRD-01/RESIDENCY enforcement.
+- [ ] No integration dispatches PII to a non-AU sub-processor unless an APP-8 assessment + consent record exists (fail-closed otherwise).
+- [ ] Every sub-processor data flow is registered (provider, region, APP-8 assessment ref, consent ref).
+- [ ] A residency check evaluates the sub-processor region before dispatch and blocks non-compliant flows.
+- [ ] All integrations are outbound and swappable; ties into PRD-01/RESIDENCY enforcement.
+- [ ] Each integration card shows its residency posture; an admin register lists flows + APP-8 status.
 
 ## UI designs / screenshots
 
-- Prototype: Settings -> Integrations (settings-integrations.png) — each integration shows its data-residency posture; an admin sub-processor register lists flows + APP-8 status.
+- Prototype: Settings → Integrations (settings-integrations.png) — each integration card shows its data-residency posture.
+- Admin sub-processor register: provider, region (AU / non-AU), APP-8 assessment status, consent reference, linked flows.
+- A non-compliant flow is visibly blocked / flagged (not silently dropped).
 
 ![settings-integrations — prototype screen](../screens/settings-integrations.png)
 
 ## Suggested data model
 
-- **SubProcessor** — (shared with PRD-01) id, name, region, app8_assessment_ref, consent_ref
-  - _Non-AU blocked unless assessed + consented._
+- **SubProcessor** — (shared with PRD-01) id, name, provider, region, app8_assessment_ref?, consent_ref?, flows[]
+  - _Non-AU blocked unless app8_assessment_ref + consent_ref present (C21/ADR-0016)._
+- **(check) ResidencyCheck** — evaluates sub_processor.region before PII dispatch -> allow|block
+  - _Fail-closed; ties to PRD-01 RESIDENCY._
 
 ## Technical notes (high level)
 
@@ -47,18 +53,9 @@ Keeps integrations inside cross-border privacy rules (C21).
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - SubProcessor — (shared with PRD-01) id, name, region, app8_assessment_ref, consent_ref (Non-AU blocked unless assessed + consented.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Enforce compliance gate + audit events**
-  Enforce C21 as a server-side invariant that cannot be bypassed via the API:
-  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
-  - Write an immutable AuditEvent for the attempt and its outcome.
-  - No integration sends PII to a non-AU sub-processor unless an APP-8 assessment + consent record exists.
-- [ ] **Integration adapter, sync & config**
-  Implement the provider behind its swappable port:
-  - Connection/config (OAuth tokens stored encrypted) + the field mapping this story needs.
-  - Trigger on the relevant event; idempotent sync with retries, back-off and a visible reconciliation/status.
-  - Handle partial failures + replays; surface errors to the user.
-  - Residency: AU-resident or APP-8-assessed + consented before any PII leaves (C21).
+- [ ] **Sub-processor register + residency check (fail-closed)**
+  Model the SubProcessor register (shared with PRD-01: provider, region, APP-8 assessment ref, consent ref, linked flows). Implement the pre-dispatch residency check used by every integration adapter (Xero, calendar, SMS): AU region → allow; non-AU → allow only if APP-8 assessment + consent present; else block (fail-closed) and flag. Ties into PRD-01 RESIDENCY (all PII/PHI AU-pinned).
+- [ ] **Enforce posture across the integration ports + audit**
+  Wire the residency check into the IAccountingExport / ICalendarProvider / INotifier dispatch paths so no adapter can send PII without passing the gate. Audit registration changes and any blocked flow (ADR-0010). All integrations stay outbound + swappable (ADR-0012). Compliance concern, capability-gated.
+- [ ] **Web UI: residency posture on cards + admin register**
+  Show each integration card's data-residency posture on Settings → Integrations, and build the admin sub-processor register (provider, region, APP-8 status, consent ref, linked flows) with non-compliant flows visibly flagged/blocked. Admin/compliance-gated; no money figures.

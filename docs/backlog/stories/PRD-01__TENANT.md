@@ -9,8 +9,10 @@ An owner provisions their clinic (tenant) and invites staff to sign in with exis
 
 ## How it works
 
-Tenancy is the foundation every other record hangs off: one clinic = one tenant, with one or more locations. Provisioning creates the tenant, its first location and the owner account, then invites staff who sign in with the clinic's existing Microsoft 365 accounts.
-Every row carries tenant_id and is isolated by Postgres row-level security (ADR-0003), so a query can never cross tenants even on a developer mistake — the single most important safety property of the data layer.
+Tenancy is the root every other record hangs off: one clinic = one Tenant, with one or more Locations (the prototype clinic switcher offers Brisbane, Gold Coast and a locum site). Provisioning is a one-time owner setup that creates the Tenant row, its first Location, and the owner StaffProfile, then opens the staff-invitation flow.
+Staff join by invitation: the owner enters a work email, the platform sends an invite, and the invitee completes Microsoft Entra ID SSO (ADR-0004). On first successful SSO the invite is consumed and an Entra object id is bound to a tenant-scoped StaffProfile — there is no local password for staff. Re-inviting a pending member resends; deactivating revokes access immediately and ends live sessions, but keeps the (immutable, audited) history of what they did.
+The single most important safety property lives here: every row carries tenant_id and Postgres row-level security (ADR-0003) filters on a per-request session setting (SET app.tenant_id) so a query physically cannot return another clinic's rows — even on a developer mistake. AC2: a user in Tenant A querying any record gets only Tenant-A rows, and a cross-tenant id returns not-found, never a leak. The API also sets and asserts tenant context as defence-in-depth.
+Edge cases: an invite to an email that is not a valid Entra account can never complete SSO (it stays pending); a deactivated owner cannot be the last active owner (block); re-activating restores access without re-binding identity.
 
 ## Requirements
 
@@ -25,17 +27,20 @@ Every row carries tenant_id and is isolated by Postgres row-level security (ADR-
 
 ## UI designs / screenshots
 
-- Surfaces as the clinic switcher (sidebar) and Settings; staff invitation/management is an admin screen.
-- Owner provisions the clinic, sets locations, and invites staff by email; they complete Entra SSO to join.
+- Non-clinical setup surface (admin) — not one of the captured prototype clinical screens. Provisioning + locations + the staff invite/manage list live in Settings.
+- Surfaces operationally as the sidebar clinic context (top-left 'The Lounge — Brisbane' with the location switcher) and the header user chip once a staff member has joined.
+- Staff-management list: per-member row with name, work email, assigned role, and status (pending / accepted / revoked) plus resend-invite and deactivate/reactivate actions; every change writes an audit event.
 
 ## Suggested data model
 
-- **Tenant** — id, name, status, created_at, settings(json)
-  - _Root of isolation; everything FKs an owning tenant_id._
-- **Location** — id, tenant_id, name, address, timezone
-  - _A tenant has 1+ locations (Brisbane, Gold Coast in the proto)._
-- **StaffInvite** — id, tenant_id, email, role, status(pending|accepted|revoked), invited_at
-  - _Invite -> Entra SSO bind -> StaffProfile._
+- **Tenant** — id, name, status(active|suspended), created_at, settings(json)
+  - _Root of isolation; every other table FKs an owning tenant_id with an RLS policy keyed off SET app.tenant_id._
+- **Location** — id, tenant_id, name, address, timezone, status
+  - _A tenant has 1+ locations (Brisbane, Gold Coast, locum in the proto). Scopes data + audit + reporting (see CLINIC-SWITCH)._
+- **StaffProfile** — id, tenant_id, entra_object_id, display_name, work_email, role_id, status(active|deactivated)
+  - _Bound to an Entra identity on first SSO; never holds a staff password. Extended by CREDENTIALS._
+- **StaffInvite** — id, tenant_id, email, role_id, status(pending|accepted|revoked), invited_by, invited_at, accepted_at
+  - _Invite -> Entra SSO bind -> StaffProfile; idempotent resend; revoke ends pending + live access._
 
 ## Technical notes (high level)
 
@@ -47,17 +52,7 @@ Every row carries tenant_id and is isolated by Postgres row-level security (ADR-
 
 ## Tasks (dev pickup)
 
-- [ ] **Data model & migrations**
-  Model + migrate (EF Core; every table carries tenant_id with an RLS policy):
-  - Tenant — id, name, status, created_at, settings(json) (Root of isolation; everything FKs an owning tenant_id.)
-  - Location — id, tenant_id, name, address, timezone (A tenant has 1+ locations (Brisbane, Gold Coast in the proto).)
-  - StaffInvite — id, tenant_id, email, role, status(pending|accepted|revoked), invited_at (Invite -> Entra SSO bind -> StaffProfile.)
-  - Add the FKs/relationships above; index the columns this story filters or looks up on; make records append-only/immutable where the story requires it.
-- [ ] **Backend: domain logic, rules & API endpoint(s)**
-  Domain logic + the API the web/Flutter clients call; enforce every rule server-side (never trust the UI):
-  - Endpoints: the commands + queries for the entities above and each action in the acceptance criteria.
-  - Rule: Provisioning creates a tenant with locations and an owner account.
-  - Rule: Invited staff complete Entra SSO and are bound to the tenant.
-  - Rule: All records created carry tenant_id and are RLS-isolated.
-  - Emit domain events for read-models / notifications / follow-up jobs where relevant.
-  - Publish the OpenAPI contract so the generated clients update.
+- [ ] **Tenancy data model, RLS & tenant-context middleware**
+  Model Tenant, Location, StaffProfile and StaffInvite with tenant_id on every table and an RLS policy that filters on the per-request session tenant (SET app.tenant_id). Provide request-scoped middleware that resolves the caller's tenant from the auth token, sets the DB session variable for the connection, and asserts it server-side as defence-in-depth so a missing/incorrect tenant context fails closed (never returns rows). Prove AC2: a cross-tenant id resolves to not-found, not a leak. Provisioning command creates Tenant + first Location + owner StaffProfile atomically; guard against deactivating the last active owner.
+- [ ] **Staff invitation & lifecycle (invite -> Entra SSO bind -> activate/deactivate)**
+  Owner-facing invite flow: create a StaffInvite (email + role) and dispatch it; on the invitee's first successful Entra SSO, consume the invite and bind the Entra object id to a tenant-scoped StaffProfile (no local password). Support idempotent resend for pending invites, revoke (cancels a pending invite), and deactivate/reactivate of an active member (deactivate ends live sessions immediately and hides them from bookable/roster surfaces but preserves audited history). Every invite/bind/deactivate/reactivate writes an AuditEvent. Settings list UI: per-member row with status chip + resend/deactivate actions.

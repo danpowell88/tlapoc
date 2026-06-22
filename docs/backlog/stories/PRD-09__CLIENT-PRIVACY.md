@@ -11,8 +11,8 @@ The Account area exposes profile, balances, card-on-file and a 'Your data & priv
 
 ## How it works
 
-The Account area exposes profile, balances, card-on-file and a 'Your data & privacy' surface: the residency note ('your data stays in Australia'), request a copy, request correction, and request account deletion — tracked to resolution and audited (APP 12/13, PRD-01).
-Puts the client in control of their information.
+The Account tab exposes profile, the client's own balances and card-on-file, and a 'Your data & privacy' surface: a residency trust note ('your data stays in Australia', APP 8) plus self-service request-a-copy (access), request-correction and request-deletion. Each raises a PRD-01 PrivacyRequest with a ≤30-day DSAR clock, tracked to resolution and audited; staff resolve via Governance.
+Puts the client in control of their information (C21, APP 12/13).
 
 ## Requirements
 
@@ -30,14 +30,16 @@ Puts the client in control of their information.
 
 _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.html._
 
-- Prototype: client app Account (client-app.png) — 'Edit profile', 'Update card on file', 'Request account deletion', privacy/access-correction; residency trust note.
+- Prototype: client-app Account — 'Edit profile', 'Update card on file', 'Request account deletion', and 'Your data & privacy' (residency note + request-a-copy / request-correction).
 
 ![client-app — prototype screen](../screens/client-app.png)
 
 ## Suggested data model
 
-- **(reuses)** — PrivacyRequest (PRD-01) — access/correction/deletion with DSAR clock
+- **(reuses) PrivacyRequest** — PRD-01 — kind(access|correction|deletion), status, DSAR clock, resolution
   - _Self-service entry point; staff resolve via Governance._
+- **(reuses) AuditEvent** — PRD-01 — actor, time, outcome of each privacy action
+  - _Evidences APP 12/13._
 
 ## Other
 
@@ -45,11 +47,7 @@ _Prototype screen: client-app.html, treatment-room.html, checkin.html, backroom.
 
 ## Tasks (dev pickup)
 
-- [ ] **Enforce compliance gate + audit events**
-  Enforce C21 as a server-side invariant that cannot be bypassed via the API:
-  - Block the action when prerequisites are missing; return a clear reason for the blocked-action banner (what's blocked / which rule / how to resolve / who can resolve).
-  - Write an immutable AuditEvent for the attempt and its outcome.
-- [ ] **Client app UI (Flutter)**
-  Build on the Flutter client app: the client-app per the UI spec. Wire to the API with loading/empty/error states; capability-gate controls; responsive; show the blocked-action banner / gate chips where gated; respect owner-only .fin gating for money figures.
-  Key elements (from the prototype):
-  - Prototype: client app Account (client-app.png) — 'Edit profile', 'Update card on file', 'Request account deletion', privacy/access-correction; residency trust note.
+- [ ] **Client app: Account tab (profile, balances, card-on-file)**
+  Account screen surfacing profile (Edit profile), the client's own balance and the card-on-file (Update card on file → Square tokenisation). Read-only money: the client sees only their own balances/perks, never clinic revenue. Lay out the 'Your data & privacy' entry point beneath the account actions.
+- [ ] **Client app: 'Your data & privacy' — access/correction/deletion + residency note**
+  Build the privacy surface: static residency trust note ('your data stays in Australia', backed by the APP 8 AU-residency posture) plus three actions that each POST a PRD-01 PrivacyRequest (access/correction/deletion) with the ≤30-day DSAR clock. Show request status tracked to resolution; deliver any export through the secure channel, not client-built. Audit every action (actor/time/outcome). Staff resolve via the Governance DSAR workflow.
